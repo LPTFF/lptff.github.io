@@ -7,16 +7,16 @@
 
     
 
-    <title>无人驾驶麻省理工01讲 | </title>
+    <title>无人驾驶麻省理工02讲 | </title>
     <meta name="author" content="John Doe">
     
-    <meta name="description" content="PDF链接: 麻省理工自动驾驶 MIT 6.S094第一讲bilibili: 麻省理工自动驾驶 MIT 6.S094第一讲
-写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，">
+    <meta name="description" content="相关资料打包链接: 麻省理工自动驾驶 MIT 6.S094第二讲bilibili: 麻省理工自动驾驶 MIT 6.S094第二讲
+写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。不同的自主驾驶方法P8、P9、P10、P11，两种人工智能策略以人为中心的自动驾驶">
     
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <meta property="og:title" content="无人驾驶麻省理工01讲">
+    <meta property="og:title" content="无人驾驶麻省理工02讲">
     <meta property="og:site_name" content="Hexo">
 
     
@@ -198,12 +198,12 @@
             <div class="article-title">
                 
     
-        <h1>无人驾驶麻省理工01讲</h1>
+        <h1>无人驾驶麻省理工02讲</h1>
     
 
 
             </div>
-            <time class="pink-link-context" datetime="2018-11-29T12:32:36.000Z"><a href="/2018/11/29/无人驾驶麻省理工/">2018-11-29</a></time>
+            <time class="pink-link-context" datetime="2018-12-09T02:28:05.000Z"><a href="/2018/12/09/无人驾驶麻省理工02讲/">2018-12-09</a></time>
 
             <span id="busuanzi_container_page_pv" class="read-times-container">
     <i class="fa fa-eye"></i>
@@ -213,33 +213,32 @@
             
 
             <div class="toc pink-link-context hide-on-med-and-down">
-    <ol class="section table-of-contents"><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"><span class="section table-of-contents-text">写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"><span class="section table-of-contents-text">（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（2）P22卷积计算的表达"><span class="section table-of-contents-text">（2）P22卷积计算的表达</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（3）P24神经网络的演示"><span class="section table-of-contents-text">（3）P24神经网络的演示</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（4）P30深度增强学习的演示"><span class="section table-of-contents-text">（4）P30深度增强学习的演示</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（5）P38、P39、P40梯度典型问题"><span class="section table-of-contents-text">（5）P38、P39、P40梯度典型问题</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（6）P44正则化防止过拟合的一种方法dropout"><span class="section table-of-contents-text">（6）P44正则化防止过拟合的一种方法dropout</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（7）P46网站推荐"><span class="section table-of-contents-text">（7）P46网站推荐</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（8）P57图片分割分类"><span class="section table-of-contents-text">（8）P57图片分割分类</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（9）P61背景移除"><span class="section table-of-contents-text">（9）P61背景移除</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（10）P71AlphaGo-Zero"><span class="section table-of-contents-text">（10）P71AlphaGo Zero</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（11）P73奖励游戏"><span class="section table-of-contents-text">（11）P73奖励游戏</span></a></li></ol></li><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#写在最后"><span class="section table-of-contents-text">写在最后</span></a></li></ol>
+    <ol class="section table-of-contents"><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。"><span class="section table-of-contents-text">写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#不同的自主驾驶方法"><span class="section table-of-contents-text">不同的自主驾驶方法</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P8、P9、P10、P11，两种人工智能策略"><span class="section table-of-contents-text">P8、P9、P10、P11，两种人工智能策略</span></a></li><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P14无人驾驶的社会期望"><span class="section table-of-contents-text">P14无人驾驶的社会期望</span></a></li><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P17软件系统框架图"><span class="section table-of-contents-text">P17软件系统框架图</span></a></li><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P29不同场景的驾驶策略"><span class="section table-of-contents-text">P29不同场景的驾驶策略</span></a></li></ol></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#传感器"><span class="section table-of-contents-text">传感器</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#无人驾驶商业公司产品"><span class="section table-of-contents-text">无人驾驶商业公司产品</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#人工智能和深度学习的应用场景"><span class="section table-of-contents-text">人工智能和深度学习的应用场景</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P54动态识别"><span class="section table-of-contents-text">P54动态识别</span></a></li><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P57DeepVO演示"><span class="section table-of-contents-text">P57DeepVO演示</span></a></li><li class="section table-of-contents-item section table-of-contents-level-3"><a class="section table-of-contents-link" href="#P73、P74、P75极端交通情况的决策"><span class="section table-of-contents-text">P73、P74、P75极端交通情况的决策</span></a></li></ol></li></ol></li></ol>
 </div>
 
 
             <div class="entry pink-link-context">
-                <p>PDF链接: <a href="https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/EUUMsVDo9yJAg9bWfz40jQsBuXFY13DTisylqQDg1nwyUQ?e=EGdbDD" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第一讲</a><br>bilibili: <a href="https://www.bilibili.com/video/av23594594" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第一讲</a></p>
-<h1 id="写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"><a href="#写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。" class="headerlink" title="写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"></a>写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。</h1><h2 id="（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"><a href="#（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达" class="headerlink" title="（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"></a>（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达</h2><p>我觉得这一页写的非常好，在具体分析问题时，我们都是尽可能的把复杂问题简单化，视频中老师演示了日心说和地心说的例子，同时也展示了笛卡尔坐标系的平面变换。<br><a href="https://www.bilibili.com/video/av23594594" target="_blank" rel="noopener">日心说和地心说</a>      <a href="https://www.bilibili.com/video/av23594594" target="_blank" rel="noopener">笛卡尔坐标系的平面变换</a></p>
-<h2 id="（2）P22卷积计算的表达"><a href="#（2）P22卷积计算的表达" class="headerlink" title="（2）P22卷积计算的表达"></a>（2）P22卷积计算的表达</h2><p>在实际神经网络中，我们面临的往往是一个“黑匣子”，即当下流行的各种训练框架，如TensorFlow、Pytorch、Keras等，都是基于封装好的接口。因此我每次和别人讲解卷积计算感觉特费劲，这个是我见过目前最好的例子了。<br><a href="https://whuteducn-my.sharepoint.com/:v:/g/personal/220077_whut_edu_cn/EYEfyVSzGc9Bohh8Ae_PuxwBQ5I-fXDkGFdq3TWS-kKRig?e=fVA32f" target="_blank" rel="noopener">3D视频演示</a></p>
-<h2 id="（3）P24神经网络的演示"><a href="#（3）P24神经网络的演示" class="headerlink" title="（3）P24神经网络的演示"></a>（3）P24神经网络的演示</h2><p>这个可以作为童鞋们写PPT的一大利器啊，我是不会网页的动画扣取。<br><a href="https://appliedgo.net/perceptron/" target="_blank" rel="noopener">神经网络激活</a></p>
-<h2 id="（4）P30深度增强学习的演示"><a href="#（4）P30深度增强学习的演示" class="headerlink" title="（4）P30深度增强学习的演示"></a>（4）P30深度增强学习的演示</h2><p>其实增强学习当下已经研究的非常火热，这个实例其实也一般。<br><a href="https://whuteducn-my.sharepoint.com/:v:/g/personal/220077_whut_edu_cn/EfrKJVKp_PhChsCxW0J_m54BCf7IMHQPBsQb15g1MGCTVg?e=qwDErf" target="_blank" rel="noopener">增强学习</a></p>
-<h2 id="（5）P38、P39、P40梯度典型问题"><a href="#（5）P38、P39、P40梯度典型问题" class="headerlink" title="（5）P38、P39、P40梯度典型问题"></a>（5）P38、P39、P40梯度典型问题</h2><p>如上所说，目前流行的深度学习框架只提供了很少的训练评估参数，但是对于研究神经网络具体的训练问题时，如梯度消失或者梯度死亡等常见的现象，我们只能是尽可能的调取其中可提供的参数进行观察，这几页很好的解决了我对梯度问题难以理解的痛点。<br><a href="https://whuteducn-my.sharepoint.com/:i:/g/personal/220077_whut_edu_cn/EZ5BTk5N6chOj1dG-jy8ppABo2VTOYpjanq_B32iqF-aig?e=eTUC98" target="_blank" rel="noopener">梯度问题</a></p>
-<h2 id="（6）P44正则化防止过拟合的一种方法dropout"><a href="#（6）P44正则化防止过拟合的一种方法dropout" class="headerlink" title="（6）P44正则化防止过拟合的一种方法dropout"></a>（6）P44正则化防止过拟合的一种方法dropout</h2><p>这个方法我目前还没有接触，可能是我撸的代码不够多吧，先Mark一下。<br><a href="https://whuteducn-my.sharepoint.com/:i:/g/personal/220077_whut_edu_cn/Eeq6K3Vd3EBCo1LftdwIdq8BxX1eeUL9y1NeW2X-syQx-g?e=9Sa7la" target="_blank" rel="noopener">正则化dropout</a></p>
-<h2 id="（7）P46网站推荐"><a href="#（7）P46网站推荐" class="headerlink" title="（7）P46网站推荐"></a>（7）P46网站推荐</h2><p>很有趣的一个网站，可以帮助大家直观理解神经网络的操作流程。<br><a href="http://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.23279&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false" target="_blank" rel="noopener">神经网络的演示</a></p>
-<h2 id="（8）P57图片分割分类"><a href="#（8）P57图片分割分类" class="headerlink" title="（8）P57图片分割分类"></a>（8）P57图片分割分类</h2><p>这个感觉有点像U-net网络啊，不过又有点区别，这个侧重于提取更多的特征，很不错的思路。<br><a href="https://adeshpande3.github.io/adeshpande3.github.io/A-Beginner&#39;s-Guide-To-Understanding-Convolutional-Neural-Networks/" target="_blank" rel="noopener">图片分类</a></p>
-<h2 id="（9）P61背景移除"><a href="#（9）P61背景移除" class="headerlink" title="（9）P61背景移除"></a>（9）P61背景移除</h2><p>没试过这个操作，先放出链接吧。<br><a href="https://towardsdatascience.com/background-removal-with-deep-learning-c4f2104b3157" target="_blank" rel="noopener">背景移除</a></p>
-<h2 id="（10）P71AlphaGo-Zero"><a href="#（10）P71AlphaGo-Zero" class="headerlink" title="（10）P71AlphaGo Zero"></a>（10）P71AlphaGo Zero</h2><p>大名鼎鼎的AlphaGo 啊，不过这个应该是变种版，增强学习现在都脱离经验的学习了，厉害。<br><a href="https://whuteducn-my.sharepoint.com/:i:/g/personal/220077_whut_edu_cn/ETQ_3gKZCeZFguE15vJqSyoB7-2Vi4YlqoKWZ6hiitZNTg?e=Cwe4M8" target="_blank" rel="noopener">AlphaGo Zero</a></p>
-<h2 id="（11）P73奖励游戏"><a href="#（11）P73奖励游戏" class="headerlink" title="（11）P73奖励游戏"></a>（11）P73奖励游戏</h2><p>坦白的说，这个游戏没看懂，不知道讲课老师怎么会迷恋上这种游戏。<br><a href="https://whuteducn-my.sharepoint.com/:v:/g/personal/220077_whut_edu_cn/EffUCQRvQLxMlwJYBQRb7KwBhFsh_4G3EISsdncbpE_Rxw?e=jIlne9" target="_blank" rel="noopener">奖励游戏</a></p>
-<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p>可能本文有很多童鞋会访问不了其中的一些网页，那么我就放出福利吧<br><a href="https://github.com/Alvin9999/new-pac/wiki/ss%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7" target="_blank" rel="noopener">GitHub福利链接</a><br><a href="https://doub.io/sszhfx/" target="_blank" rel="noopener">免费ssr账号</a></p>
+                <p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/ErQbTLrw69xLr7uSGoyKLfcB0wnatT99IWidnrhy7elCHA?e=JuGaNq" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第二讲</a><br>bilibili: <a href="https://www.bilibili.com/video/av23594594/?p=2" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第二讲</a></p>
+<h1 id="写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。"><a href="#写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。" class="headerlink" title="写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。"></a>写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。</h1><h2 id="不同的自主驾驶方法"><a href="#不同的自主驾驶方法" class="headerlink" title="不同的自主驾驶方法"></a>不同的自主驾驶方法</h2><h3 id="P8、P9、P10、P11，两种人工智能策略"><a href="#P8、P9、P10、P11，两种人工智能策略" class="headerlink" title="P8、P9、P10、P11，两种人工智能策略"></a>P8、P9、P10、P11，两种人工智能策略</h3><p>以人为中心的自动驾驶和以AI系统为中心的自动驾驶，简单点就是说谁对驾驶主要负责。</p>
+<h3 id="P14无人驾驶的社会期望"><a href="#P14无人驾驶的社会期望" class="headerlink" title="P14无人驾驶的社会期望"></a>P14无人驾驶的社会期望</h3><p>这个视频没有找到，但是我感觉这种有点科幻了。。。</p>
+<h3 id="P17软件系统框架图"><a href="#P17软件系统框架图" class="headerlink" title="P17软件系统框架图"></a>P17软件系统框架图</h3><p><img src="/2018/12/09/无人驾驶麻省理工02讲/图片01.jpg" alt=""></p>
+<p>很好的一个软件系统解说图。</p>
+<h3 id="P29不同场景的驾驶策略"><a href="#P29不同场景的驾驶策略" class="headerlink" title="P29不同场景的驾驶策略"></a>P29不同场景的驾驶策略</h3><p>第一种我理解的是那种AI辅助决策的，无人驾驶系统提供决方案供驾驶人员选择，是以驾驶人员的判断为决策中心；第二种AI则是完全AI决策，这个时候的AI系统不仅仅能够找到解决方案，还能够自主的解决问题。但是对也这两套系统，我觉得还是从安全的角度划分一下决策权限好一点，明显经验丰富的驾驶人员应该为最高权限，我还是不太愿意把自己的生命完全托付给AI。比较有意思的是，AI的决策时间远远小于人类的判断时间，或者说在做出理性决策的时间上，人类需要的时间会大于AI的决策时间，这个感觉可以给予AI系统一些比较确定或者通用的高级权限（如碰到行人或安全栏紧急刹车），从而达到及时保护驾驶人员的安全。另外，无人驾驶准确率不需要达到100%，在极端情况下将控制权转交给驾驶人员。</p>
+<h2 id="传感器"><a href="#传感器" class="headerlink" title="传感器"></a>传感器</h2><p>普通雷达传感器便宜稳定，但是成像效果差；激光雷达成本高，但是成像效果好；照相机局限于光源良好的环境。</p>
+<h2 id="无人驾驶商业公司产品"><a href="#无人驾驶商业公司产品" class="headerlink" title="无人驾驶商业公司产品"></a>无人驾驶商业公司产品</h2><p>Waymo、Uber、Tesla、Audi A8</p>
+<h2 id="人工智能和深度学习的应用场景"><a href="#人工智能和深度学习的应用场景" class="headerlink" title="人工智能和深度学习的应用场景"></a>人工智能和深度学习的应用场景</h2><h3 id="P54动态识别"><a href="#P54动态识别" class="headerlink" title="P54动态识别"></a>P54动态识别</h3><p>此处应献上GitHub代码链接，嗯，找个时间复现一下。</p>
+<p><a href="https://github.com/raulmur/ORB_SLAM2" target="_blank" rel="noopener">GitHub直达链接</a></p>
+<h3 id="P57DeepVO演示"><a href="#P57DeepVO演示" class="headerlink" title="P57DeepVO演示"></a>P57DeepVO演示</h3><p>这个感兴趣的小伙伴可以在资料包里找到，我已经从国外搬运过来了。</p>
+<h3 id="P73、P74、P75极端交通情况的决策"><a href="#P73、P74、P75极端交通情况的决策" class="headerlink" title="P73、P74、P75极端交通情况的决策"></a>P73、P74、P75极端交通情况的决策</h3><p>这个选取了三个典型的交通状况，主要是考验AI系统对于安全策略的一个度量，如何规避危险交通行为、危险交通行为发生时应该采取何种策略、如何取得最佳行为策略等。</p>
 
                 
+
+
 <p class="pink-link-context">
     <a href="/2018/12/09/水下机器人研究01/" rel="next" title="水下机器人研究01">
-    Prev: 水下机器人研究01
+    Next: 水下机器人研究01
   </a>
 </p>
-
-
 
 
             </div>
