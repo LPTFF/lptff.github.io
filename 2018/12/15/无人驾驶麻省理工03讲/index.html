@@ -7,16 +7,16 @@
 
     
 
-    <title>无人驾驶麻省理工01讲 | </title>
+    <title>无人驾驶麻省理工03讲 | </title>
     <meta name="author" content="John Doe">
     
-    <meta name="description" content="PDF链接: 麻省理工自动驾驶 MIT 6.S094第一讲bilibili: 麻省理工自动驾驶 MIT 6.S094第一讲
-写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，">
+    <meta name="description" content="相关资料打包链接: 麻省理工自动驾驶 MIT 6.S094第三讲bilibili: 麻省理工自动驾驶 MIT 6.S094第三讲
+深度增强学习先放出无人驾驶的框架图从图上可以看出，深度增强学习是通过动作、反馈的奖励机制来进行网络模型的建立，在某种意义上，传感器的好坏直接决定了后面的工作质量，但是这一">
     
     
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
-    <meta property="og:title" content="无人驾驶麻省理工01讲">
+    <meta property="og:title" content="无人驾驶麻省理工03讲">
     <meta property="og:site_name" content="Hexo">
 
     
@@ -198,12 +198,12 @@
             <div class="article-title">
                 
     
-        <h1>无人驾驶麻省理工01讲</h1>
+        <h1>无人驾驶麻省理工03讲</h1>
     
 
 
             </div>
-            <time class="pink-link-context" datetime="2018-12-09T06:37:20.000Z"><a href="/2018/12/09/无人驾驶麻省理工01讲/">2018-12-09</a></time>
+            <time class="pink-link-context" datetime="2018-12-15T11:58:45.000Z"><a href="/2018/12/15/无人驾驶麻省理工03讲/">2018-12-15</a></time>
 
             <span id="busuanzi_container_page_pv" class="read-times-container">
     <i class="fa fa-eye"></i>
@@ -213,37 +213,26 @@
             
 
             <div class="toc pink-link-context hide-on-med-and-down">
-    <ol class="section table-of-contents"><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"><span class="section table-of-contents-text">写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"><span class="section table-of-contents-text">（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（2）P22卷积计算的表达"><span class="section table-of-contents-text">（2）P22卷积计算的表达</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（3）P24神经网络的演示"><span class="section table-of-contents-text">（3）P24神经网络的演示</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（4）P30深度增强学习的演示"><span class="section table-of-contents-text">（4）P30深度增强学习的演示</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（5）P38、P39、P40梯度典型问题"><span class="section table-of-contents-text">（5）P38、P39、P40梯度典型问题</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（6）P44正则化防止过拟合的一种方法dropout"><span class="section table-of-contents-text">（6）P44正则化防止过拟合的一种方法dropout</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（7）P46网站推荐"><span class="section table-of-contents-text">（7）P46网站推荐</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（8）P57图片分割分类"><span class="section table-of-contents-text">（8）P57图片分割分类</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（9）P61背景移除"><span class="section table-of-contents-text">（9）P61背景移除</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（10）P71AlphaGo-Zero"><span class="section table-of-contents-text">（10）P71AlphaGo Zero</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#（11）P73奖励游戏"><span class="section table-of-contents-text">（11）P73奖励游戏</span></a></li></ol></li><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#写在最后"><span class="section table-of-contents-text">写在最后</span></a></li></ol>
+    <ol class="section table-of-contents"><li class="section table-of-contents-item section table-of-contents-level-1"><a class="section table-of-contents-link" href="#深度增强学习"><span class="section table-of-contents-text">深度增强学习</span></a><ol class="section table-of-contents-child"><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#深度增强学习案例解说"><span class="section table-of-contents-text">深度增强学习案例解说</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#DeepTraffic仿真交通模型"><span class="section table-of-contents-text">DeepTraffic仿真交通模型</span></a></li><li class="section table-of-contents-item section table-of-contents-level-2"><a class="section table-of-contents-link" href="#网络模型理论部分"><span class="section table-of-contents-text">网络模型理论部分</span></a></li></ol></li></ol>
 </div>
 
 
             <div class="entry pink-link-context">
-                <p>PDF链接: <a href="https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/EUUMsVDo9yJAg9bWfz40jQsBuXFY13DTisylqQDg1nwyUQ?e=EGdbDD" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第一讲</a><br>bilibili: <a href="https://www.bilibili.com/video/av23594594" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第一讲</a></p>
-<h1 id="写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"><a href="#写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。" class="headerlink" title="写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。"></a>写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。</h1><h2 id="（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"><a href="#（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达" class="headerlink" title="（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达"></a>（1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达</h2><p>我觉得这一页写的非常好，在具体分析问题时，我们都是尽可能的把复杂问题简单化，视频中老师演示了日心说和地心说的例子，同时也展示了笛卡尔坐标系的平面变换。<br><img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209134754.jpg" alt=""><br><a href="http://www.365yg.com/i6632871765829747203/#mid=1619346472494083" target="_blank" rel="noopener">日心说和地心说</a><br><img src="/2018/12/09/无人驾驶麻省理工01讲/Draw a line to separate the green triangles and blue circles.png" alt=""><br>笛卡尔坐标系的平面变换</p>
-<h2 id="（2）P22卷积计算的表达"><a href="#（2）P22卷积计算的表达" class="headerlink" title="（2）P22卷积计算的表达"></a>（2）P22卷积计算的表达</h2><p>在实际神经网络中，我们面临的往往是一个“黑匣子”，即当下流行的各种训练框架，如TensorFlow、Pytorch、Keras等，都是基于封装好的接口。因此我每次和别人讲解卷积计算感觉特费劲，这个是我见过目前最好的例子了。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209134955.jpg" alt=""><br><a href="http://www.365yg.com/i6632863431642841613/#mid=1619346472494083" target="_blank" rel="noopener">3D视频演示</a></p>
-<h2 id="（3）P24神经网络的演示"><a href="#（3）P24神经网络的演示" class="headerlink" title="（3）P24神经网络的演示"></a>（3）P24神经网络的演示</h2><p>这个可以作为童鞋们写PPT的一大利器啊，我是不会网页的动画扣取。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135406.jpg" alt=""><br><a href="https://appliedgo.net/perceptron/" target="_blank" rel="noopener">神经网络激活</a></p>
-<h2 id="（4）P30深度增强学习的演示"><a href="#（4）P30深度增强学习的演示" class="headerlink" title="（4）P30深度增强学习的演示"></a>（4）P30深度增强学习的演示</h2><p>其实增强学习当下已经研究的非常火热，这个实例其实也一般。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135136.jpg" alt=""><br><a href="http://www.365yg.com/i6632863436051055118/#mid=1619346472494083" target="_blank" rel="noopener">增强学习</a></p>
-<h2 id="（5）P38、P39、P40梯度典型问题"><a href="#（5）P38、P39、P40梯度典型问题" class="headerlink" title="（5）P38、P39、P40梯度典型问题"></a>（5）P38、P39、P40梯度典型问题</h2><p>如上所说，目前流行的深度学习框架只提供了很少的训练评估参数，但是对于研究神经网络具体的训练问题时，如梯度消失或者梯度死亡等常见的现象，我们只能是尽可能的调取其中可提供的参数进行观察，这几页很好的解决了我对梯度问题难以理解的痛点。<br><img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209141147.jpg" alt=""><br><a href="http://www.365yg.com/i6632871778764997134/#mid=1619346472494083" target="_blank" rel="noopener">梯度问题01</a><br><a href="http://www.365yg.com/i6632871782967689735/#mid=1619346472494083" target="_blank" rel="noopener">梯度问题02</a><br><img src="/2018/12/09/无人驾驶麻省理工01讲/Dying ReLUs.png" alt=""></p>
-<h2 id="（6）P44正则化防止过拟合的一种方法dropout"><a href="#（6）P44正则化防止过拟合的一种方法dropout" class="headerlink" title="（6）P44正则化防止过拟合的一种方法dropout"></a>（6）P44正则化防止过拟合的一种方法dropout</h2><p>这个方法我目前还没有接触，可能是我撸的代码不够多吧，先Mark一下。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135303.jpg" alt=""><br><a href="http://www.365yg.com/i6632871774423876109/#mid=1619346472494083" target="_blank" rel="noopener">正则化dropout</a></p>
-<h2 id="（7）P46网站推荐"><a href="#（7）P46网站推荐" class="headerlink" title="（7）P46网站推荐"></a>（7）P46网站推荐</h2><p>很有趣的一个网站，可以帮助大家直观理解神经网络的操作流程。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135406.jpg" alt=""><br><a href="http://playground.tensorflow.org/#activation=tanh&amp;batchSize=10&amp;dataset=circle&amp;regDataset=reg-plane&amp;learningRate=0.03&amp;regularizationRate=0&amp;noise=0&amp;networkShape=4,2&amp;seed=0.23279&amp;showTestData=false&amp;discretize=false&amp;percTrainData=50&amp;x=true&amp;y=true&amp;xTimesY=false&amp;xSquared=false&amp;ySquared=false&amp;cosX=false&amp;sinX=false&amp;cosY=false&amp;sinY=false&amp;collectStats=false&amp;problem=classification&amp;initZero=false&amp;hideText=false" target="_blank" rel="noopener">神经网络的演示</a></p>
-<h2 id="（8）P57图片分割分类"><a href="#（8）P57图片分割分类" class="headerlink" title="（8）P57图片分割分类"></a>（8）P57图片分割分类</h2><p>这个感觉有点像U-net网络啊，不过又有点区别，这个侧重于提取更多的特征，很不错的思路。<img src="/2018/12/09/无人驾驶麻省理工01讲/Cover.png" alt=""><br><a href="https://adeshpande3.github.io/adeshpande3.github.io/A-Beginner&#39;s-Guide-To-Understanding-Convolutional-Neural-Networks/" target="_blank" rel="noopener">图片分类</a></p>
-<h2 id="（9）P61背景移除"><a href="#（9）P61背景移除" class="headerlink" title="（9）P61背景移除"></a>（9）P61背景移除</h2><p>没试过这个操作，先放出链接吧。<img src="/2018/12/09/无人驾驶麻省理工01讲/0_33XKEatpsF875NCc.jpg" alt=""><br><a href="https://towardsdatascience.com/background-removal-with-deep-learning-c4f2104b3157" target="_blank" rel="noopener">背景移除</a></p>
-<h2 id="（10）P71AlphaGo-Zero"><a href="#（10）P71AlphaGo-Zero" class="headerlink" title="（10）P71AlphaGo Zero"></a>（10）P71AlphaGo Zero</h2><p>大名鼎鼎的AlphaGo 啊，不过这个应该是变种版，增强学习现在都脱离经验的学习了，厉害。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135646.jpg" alt=""><br><a href="http://www.365yg.com/i6632871770376372743/#mid=1619346472494083" target="_blank" rel="noopener">AlphaGo Zero</a></p>
-<h2 id="（11）P73奖励游戏"><a href="#（11）P73奖励游戏" class="headerlink" title="（11）P73奖励游戏"></a>（11）P73奖励游戏</h2><p>坦白的说，这个游戏没看懂，不知道讲课老师怎么会迷恋上这种游戏。<img src="/2018/12/09/无人驾驶麻省理工01讲/TIM截图20181209135737.jpg" alt=""><br><a href="http://www.365yg.com/i6632863427394011652/#mid=1619346472494083" target="_blank" rel="noopener">奖励游戏</a></p>
-<h1 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h1><p>可能本文有很多童鞋会访问不了其中的一些网页，那么我就放出福利吧<br><a href="https://github.com/Alvin9999/new-pac/wiki/ss%E5%85%8D%E8%B4%B9%E8%B4%A6%E5%8F%B7" target="_blank" rel="noopener">GitHub福利链接</a><br><a href="https://doub.io/sszhfx/" target="_blank" rel="noopener">免费ssr账号</a></p>
+                <p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/Es2eM_taTLZFkwlT-hbnkXABGafyJ10B19kd1Ltqijg9xA?e=dFowgK" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第三讲</a><br>bilibili: <a href="https://www.bilibili.com/video/av23594594?p=3" target="_blank" rel="noopener">麻省理工自动驾驶 MIT 6.S094第三讲</a></p>
+<h1 id="深度增强学习"><a href="#深度增强学习" class="headerlink" title="深度增强学习"></a>深度增强学习</h1><p>先放出无人驾驶的框架图<br><img src="/2018/12/15/无人驾驶麻省理工03讲/TIM截图20181215201122.png" alt=""><br>从图上可以看出，深度增强学习是通过动作、反馈的奖励机制来进行网络模型的建立，在某种意义上，传感器的好坏直接决定了后面的工作质量，但是这一讲假定传感器是理想的，重点研究深度增强在模型中的运用。</p>
+<h2 id="深度增强学习案例解说"><a href="#深度增强学习案例解说" class="headerlink" title="深度增强学习案例解说"></a>深度增强学习案例解说</h2><p>P7主要是对图像、声音、行为的识别进行分析对比。以鸭子为例，提取鸭子的图像特征（边缘检测）和声音特征（共振峰）是容易的，因为只需要考察简单的行为特征，但是对于复杂的行为特征提取就困难了，因为会游泳的不仅仅是鸭子。P8机器人的增强学习，通过训练搬箱子的过程，让机器人更加熟练的搬运箱子，这个方法的主要优点就是利用机器人具有不知疲倦的功能，能够很好的解决一些单调重复性的工作。</p>
+<p>P20有一个实例没见过，我画出了其示意图。<br><img src="/2018/12/15/无人驾驶麻省理工03讲/TIM图片20181215203428.jpg" alt=""></p>
+<p>P23老师还是挺贴心的，给出了马尔科夫随机分布的一个应用例子。<br><img src="/2018/12/15/无人驾驶麻省理工03讲/TIM截图20181215203743.png" alt=""></p>
+<p>总结一下，对于深度学习也好，增强学习也罢，都是基于贝叶斯先验分布的统计思想，同时还利用马尔科夫随机分布的原理，很好解决状态随着时间的变化而改变的问题（不懂的同学可以参考一下《随机过程》、《数理统计》的相关章节）</p>
+<h2 id="DeepTraffic仿真交通模型"><a href="#DeepTraffic仿真交通模型" class="headerlink" title="DeepTraffic仿真交通模型"></a>DeepTraffic仿真交通模型</h2><p>这个是本节的重点。P15交通仿真模型，P16给了相关的链接，code亲测挂了，大家可以搜一下老师的GitHub用户名：lexfridman。P57至P83给出了该仿真交通模型的详细操作介绍，值得注意的是，部分功能只开放给MIT 学生使用。下面放出paper阅读笔记（食用方法：下载电子版论文后，直接翻译你感兴趣的段落即可）<br><img src="/2018/12/15/无人驾驶麻省理工03讲/DeepTraffic解读.png" alt=""><br><a href="https://selfdrivingcars.mit.edu/deeptraffic" target="_blank" rel="noopener">DeepTraffic链接</a></p>
+<h2 id="网络模型理论部分"><a href="#网络模型理论部分" class="headerlink" title="网络模型理论部分"></a>网络模型理论部分</h2><p>这一部分偏向学术了，从简单理想模型开始分析（P25至P32机器人在房间里移动），然后进行数学推导（P36数值迭代，P45DQN算法），到仿真环境工作讲解，以及其中的细节部分讨论（P53蒙特卡罗）。整个过程主要是解决计划和动作的问题，采取奖赏的机制，即要求最大化奖赏，每一步的移动都会影响奖赏，然后通过深度学习去实现这个最佳策略。</p>
 
                 
-<p class="pink-link-context">
-    <a href="/2018/12/15/无人驾驶麻省理工03讲/" rel="next" title="无人驾驶麻省理工03讲">
-    Prev: 无人驾驶麻省理工03讲
-  </a>
-</p>
-
 
 
 <p class="pink-link-context">
-    <a href="/2018/12/09/无人驾驶麻省理工02讲/" rel="next" title="无人驾驶麻省理工02讲">
-    Next: 无人驾驶麻省理工02讲
+    <a href="/2018/12/09/无人驾驶麻省理工01讲/" rel="next" title="无人驾驶麻省理工01讲">
+    Next: 无人驾驶麻省理工01讲
   </a>
 </p>
 
