@@ -2,16 +2,18 @@
   <div class="wrapper" @click="routePush">job</div>
 </template>
 
-<script >
+<script  lang="ts">
 import { useRouter } from "vue-router";
-export default {
+import { defineComponent } from "vue";
+
+export default defineComponent({
   data() {
     return {};
   },
   setup() {
     const route = useRouter();
     console.log("route", route);
-    const goToOtherPage = (pageName, value) => {
+    const goToOtherPage = (pageName: string, value: string) => {
       console.log("233");
       route.push({
         name: pageName,
@@ -20,14 +22,14 @@ export default {
         },
       });
     };
-    function routePush() {
+    function routePush(this: any) {
       let pageName = "Life";
       let value = "0";
       this.goToOtherPage(pageName, value);
     }
     return { route, routePush, goToOtherPage };
   },
-};
+});
 </script>
 <style scoped>
 .wrapper {

@@ -2,12 +2,7 @@
   <router-view />
 </template>
 
-<script>
-export default {
-  name: "App",
-  components: {},
-};
-</script>
+<script  lang="ts"></script>
 
 <style scoped>
 .logo-type {

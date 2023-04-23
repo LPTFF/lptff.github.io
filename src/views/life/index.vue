@@ -1,7 +1,7 @@
 <template>
   <div class="wrapper" @click="routePush">life</div>
 </template>
-<script >
+<script  lang="ts" >
 import { useRouter } from "vue-router";
 export default {
   data() {
@@ -10,7 +10,7 @@ export default {
   setup() {
     const route = useRouter();
     console.log("route", route);
-    const goToOtherPage = (pageName, value) => {
+    const goToOtherPage = (pageName: string, value: string) => {
       console.log("233");
       route.push({
         name: pageName,
@@ -19,7 +19,7 @@ export default {
         },
       });
     };
-    function routePush() {
+    function routePush(this: any) {
       let pageName = "Job";
       let value = "0";
       this.goToOtherPage(pageName, value);
