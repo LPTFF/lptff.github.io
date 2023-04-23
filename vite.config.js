@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue';
 function pathResolve(dir) {
   return resolve(__dirname, ".", dir);
 }
+import externalGlobals from 'rollup-plugin-external-globals'
 
 export default defineConfig({
   base: "",
@@ -17,6 +18,15 @@ export default defineConfig({
     include: ['axios'],
   },
   build: {
+    rollupOptions: {
+      //重新打包配置
+      external: ['vue'],
+      plugins: [
+        externalGlobals({
+          vue: 'Vue'
+        })
+      ]
+    },
     target: 'modules',
     outDir: 'dist',
     assetsDir: 'assets',
