@@ -7,7 +7,7 @@ function pathResolve(dir) {
 import externalGlobals from 'rollup-plugin-external-globals'
 
 export default defineConfig({
-  base: "",
+  base: process.env.NODE_ENV === 'production' ? '/lptff.github.io/' : './',
   plugins: [vue()],
   resolve: {
     alias: {
