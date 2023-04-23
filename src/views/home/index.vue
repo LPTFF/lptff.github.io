@@ -30,6 +30,7 @@ export default {
 </script>
 <style scoped>
 .wrapper {
+  margin-top: 100px;
   font-size: 50px;
 }
 </style>
