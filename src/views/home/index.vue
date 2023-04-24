@@ -1,14 +1,31 @@
 <template>
-  <div class="wrapper" @click="routePush('Life')">life</div>
+  <!-- <div class="wrapper" @click="routePush('Life')">life</div>
   <div class="wrapper" @click="routePush('Job')">job</div>
-  <el-button type="primary"> Element UI </el-button>
+  <el-button type="primary"> Element UI </el-button> -->
+  <el-container>
+    <el-header class="header-bg">不惧过往，不畏将来</el-header>
+    <el-container>
+      <el-aside class="aside-div">
+        <div v-for="(site, index) in sites" :key="index" class="aside-list">
+          <Edit class="icon-div" />
+          <div class="aside-des">{{ site.text }}</div>
+        </div>
+      </el-aside>
+      <el-container>
+        <el-main>Main</el-main>
+        <el-footer>Footer</el-footer>
+      </el-container>
+    </el-container>
+  </el-container>
 </template>
 <script lang="ts" >
 import { useRouter } from "vue-router";
 
 export default {
   data() {
-    return {};
+    return {
+      sites: [{ text: "Google" }, { text: "Runoob" }, { text: "Taobao" }],
+    };
   },
   components: {},
   setup() {
@@ -32,8 +49,60 @@ export default {
 };
 </script>
 <style scoped>
-.wrapper {
-  margin-top: 100px;
-  font-size: 50px;
+.header-bg {
+  background: linear-gradient(
+    to right,
+    rgb(83, 168, 255),
+    rgb(217, 236, 255)
+  ) !important;
+  font-family: PingFang SC;
+  color: #fff !important;
+  font-size: 3vw;
+}
+.icon-div {
+  width: 20px;
+  height: 20px;
+  margin: auto;
+}
+.aside-list {
+  display: flex;
+  justify-content: space-between;
+}
+.aside-div {
+  width: 100px !important;
+}
+.aside-des {
+  margin: 0px 10px;
+}
+</style>
+<style scoped>
+.el-header,
+.el-footer {
+  background-color: #b3c0d1;
+  color: #333;
+  text-align: center;
+  line-height: 60px;
+}
+.el-aside {
+  background-color: #d3dce6;
+  color: #333;
+  text-align: center;
+  line-height: 200px;
+}
+.el-main {
+  background-color: #e9eef3;
+  color: #333;
+  text-align: center;
+  line-height: 160px;
+}
+body > .el-container {
+  margin-bottom: 40px;
+}
+.el-container:nth-child(5) .el-aside,
+.el-container:nth-child(6) .el-aside {
+  line-height: 260px;
+}
+.el-container:nth-child(7) .el-aside {
+  line-height: 320px;
 }
 </style>
