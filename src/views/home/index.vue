@@ -1,13 +1,16 @@
 <template>
   <div class="wrapper" @click="routePush('Life')">life</div>
   <div class="wrapper" @click="routePush('Job')">job</div>
+  <el-button type="primary"> Element UI </el-button>
 </template>
-<script  lang="ts" >
+<script lang="ts" >
 import { useRouter } from "vue-router";
+
 export default {
   data() {
     return {};
   },
+  components: {},
   setup() {
     const route = useRouter();
     console.log("route", route);
