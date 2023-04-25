@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     cors: true,
     open: true,
-    port: 8080,
+    port: 9000,
     proxy: {
       '/api': {
         target: 'http://192.168.99.223:3000',   //代理接口
