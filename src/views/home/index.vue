@@ -2,7 +2,7 @@
   <!-- <div class="wrapper" @click="routePush('Life')">life</div>
   <div class="wrapper" @click="routePush('Job')">job</div>
   <el-button type="primary"> Element UI </el-button> -->
-  <el-container>
+  <!-- <el-container>
     <el-header class="header-bg">不惧过往，不畏将来</el-header>
     <el-container>
       <el-aside class="aside-div">
@@ -16,18 +16,30 @@
         <el-footer>Footer</el-footer>
       </el-container>
     </el-container>
-  </el-container>
+  </el-container> -->
+  <div class="theme-container">
+    <slot name="navbar">
+      <Navbar >
+        <template #before>
+          <slot name="navbar-before" />
+        </template>
+        <template #after>
+          <slot name="navbar-after" />
+        </template>
+      </Navbar>
+    </slot>
+  </div>
 </template>
 <script lang="ts" >
 import { useRouter } from "vue-router";
-
+import Navbar from '../blobTheme/Navbar.vue'
 export default {
   data() {
     return {
       sites: [{ text: "Google" }, { text: "Runoob" }, { text: "Taobao" }],
     };
   },
-  components: {},
+  components: {Navbar},
   setup() {
     const route = useRouter();
     console.log("route", route);
