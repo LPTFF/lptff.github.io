@@ -1,22 +1,4 @@
 <template>
-  <!-- <div class="wrapper" @click="routePush('Life')">life</div>
-  <div class="wrapper" @click="routePush('Job')">job</div>
-  <el-button type="primary"> Element UI </el-button> -->
-  <!-- <el-container>
-    <el-header class="header-bg">不惧过往，不畏将来</el-header>
-    <el-container>
-      <el-aside class="aside-div">
-        <div v-for="(site, index) in sites" :key="index" class="aside-list">
-          <Edit class="icon-div" />
-          <div class="aside-des">{{ site.text }}</div>
-        </div>
-      </el-aside>
-      <el-container>
-        <el-main>Main</el-main>
-        <el-footer>Footer</el-footer>
-      </el-container>
-    </el-container>
-  </el-container> -->
   <div class="theme-container">
     <slot name="navbar">
       <Navbar >
