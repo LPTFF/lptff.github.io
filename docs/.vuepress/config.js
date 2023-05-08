@@ -1,21 +1,32 @@
-import { defineComponent } from "vue";
-export default defineComponent({
-    // 站点配置
+import { defineUserConfig } from '@vuepress/cli'
+import { defaultTheme } from '@vuepress/theme-default'
+import {
+    head,
+    navbarEn,
+    sidebarEn
+} from './config/index.js'
+export default defineUserConfig({
+    base: '/',
     lang: 'zh-CN',
     title: '随风而逝',
     description: 'Just do it!',
-    head: [ // 注入到当前页面的 HTML <head> 中的标签
-        ['link', {
-            rel: 'icon',
-            href: '/img/vue.svg'
-        }], // 增加一个自定义的 favicon(网页标签的图标)
-    ],
-    // 主题和它的配置
-    // theme: '@vuepress/theme-default',
-    themeConfig: {
-        nav: [
-            { text: 'External', link: 'https://google.com', target: '_self', rel: '' },
-            { text: 'Guide', link: '/guide/', target: '_blank' }
-        ]
-    }
+    // head: [['link', { rel: 'icon', href: '/img/vue.svg' }]],
+    head,
+    theme: defaultTheme({
+        // set config here
+        locales: {
+            '/': {
+                navbar: navbarEn,
+                sidebar: sidebarEn,
+                editLinkText: 'Edit this page on GitHub',
+                notFound: [
+                    '这里什么都没有',
+                    '我们怎么到这来了？',
+                    '这是一个 404 页面',
+                    '看起来我们进入了错误的链接',
+                ],
+                backToHome: '返回首页'
+            },
+        }
+    }),
 })
