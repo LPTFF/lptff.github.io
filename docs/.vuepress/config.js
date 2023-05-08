@@ -17,7 +17,14 @@ export default defineUserConfig({
         locales: {
             '/': {
                 navbar: navbarEn,
-                sidebar: sidebarEn,
+                // sidebar: sidebarEn,
+                sidebar: [
+                    // SidebarItem
+                    {
+                        text: 'Foo',
+                        link: '/foo/',
+                    }
+                ],
                 editLinkText: 'Edit this page on GitHub',
                 notFound: [
                     '这里什么都没有',
@@ -25,7 +32,11 @@ export default defineUserConfig({
                     '这是一个 404 页面',
                     '看起来我们进入了错误的链接',
                 ],
-                backToHome: '返回首页'
+                backToHome: '返回首页',
+                lastUpdatedText: '上次更新',
+                contributorsText: '贡献者',
+                toggleColorMode: '切换颜色模式',
+                toggleSidebar: '切换侧边栏',
             },
         }
     }),

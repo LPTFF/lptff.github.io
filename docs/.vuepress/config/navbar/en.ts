@@ -24,6 +24,6 @@ export const navbarEn: NavbarConfig = [
     },
     {
         text: 'Github',
-        link: 'https://github.com/LPTFF',
+        link: 'https://github.com/LPTFF/lptff.github.io',
     },
 ]
