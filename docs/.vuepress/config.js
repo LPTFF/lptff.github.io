@@ -9,22 +9,14 @@ export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
     title: '随风而逝',
-    description: 'Just do it!',
-    // head: [['link', { rel: 'icon', href: '/img/vue.svg' }]],
+    description: '期待改变!',
     head,
     theme: defaultTheme({
         // set config here
         locales: {
             '/': {
                 navbar: navbarEn,
-                // sidebar: sidebarEn,
-                sidebar: [
-                    // SidebarItem
-                    {
-                        text: 'Foo',
-                        link: '/foo/',
-                    }
-                ],
+                sidebar: sidebarEn,
                 editLinkText: 'Edit this page on GitHub',
                 notFound: [
                     '这里什么都没有',

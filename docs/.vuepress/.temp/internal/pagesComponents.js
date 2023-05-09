@@ -5,6 +5,10 @@ export const pagesComponents = {
   "v-8daa1a0e": defineAsyncComponent(() => import(/* webpackChunkName: "v-8daa1a0e" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/index.html.vue")),
   // path: /components/
   "v-1020f180": defineAsyncComponent(() => import(/* webpackChunkName: "v-1020f180" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/components/index.html.vue")),
+  // path: /guide/1.html
+  "v-6e0d8f34": defineAsyncComponent(() => import(/* webpackChunkName: "v-6e0d8f34" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/1.html.vue")),
+  // path: /guide/2.html
+  "v-6fc267d3": defineAsyncComponent(() => import(/* webpackChunkName: "v-6fc267d3" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/2.html.vue")),
   // path: /guide/
   "v-fffb8e28": defineAsyncComponent(() => import(/* webpackChunkName: "v-fffb8e28" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/index.html.vue")),
   // path: /components/pages/Button.html

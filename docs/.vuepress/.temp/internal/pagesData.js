@@ -3,6 +3,10 @@ export const pagesData = {
   "v-8daa1a0e": () => import(/* webpackChunkName: "v-8daa1a0e" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/index.html.js").then(({ data }) => data),
   // path: /components/
   "v-1020f180": () => import(/* webpackChunkName: "v-1020f180" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/components/index.html.js").then(({ data }) => data),
+  // path: /guide/1.html
+  "v-6e0d8f34": () => import(/* webpackChunkName: "v-6e0d8f34" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/1.html.js").then(({ data }) => data),
+  // path: /guide/2.html
+  "v-6fc267d3": () => import(/* webpackChunkName: "v-6fc267d3" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/2.html.js").then(({ data }) => data),
   // path: /guide/
   "v-fffb8e28": () => import(/* webpackChunkName: "v-fffb8e28" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/index.html.js").then(({ data }) => data),
   // path: /components/pages/Button.html

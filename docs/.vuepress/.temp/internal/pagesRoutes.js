@@ -1,6 +1,8 @@
 export const pagesRoutes = [
   ["v-8daa1a0e","/",{"title":""},["/index.html","/README.md"]],
   ["v-1020f180","/components/",{"title":"components"},["/components/index.html","/components/README.md"]],
+  ["v-6e0d8f34","/guide/1.html",{"title":""},["/guide/1","/guide/1.md"]],
+  ["v-6fc267d3","/guide/2.html",{"title":""},["/guide/2","/guide/2.md"]],
   ["v-fffb8e28","/guide/",{"title":""},["/guide/index.html","/guide/README.md"]],
   ["v-b959d088","/components/pages/Button.html",{"title":""},["/components/pages/Button","/components/pages/Button.md"]],
   ["v-5d612751","/components/pages/InputNumber.html",{"title":""},["/components/pages/InputNumber","/components/pages/InputNumber.md"]],
