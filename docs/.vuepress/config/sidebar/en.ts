@@ -6,15 +6,44 @@ export const sidebarEn: SidebarConfig = [
         link: '/document/introduction',
     },
     {
-        text: 'guide',
+        text: '求学笔记',
+        collapsible: true,
         children: [
             {
-                text: 'guide1',
-                link: '/guide/1.md',
+                text: '2018',
+                collapsible: true,
+                children: [
+                    {
+                        text: '水下机器人研究01',
+                        link: '/study/notebook/2018/水下机器人研究01.md'
+                    },
+                    {
+                        text: '无人驾驶麻省理工01讲',
+                        link: '/study/notebook/2018/无人驾驶麻省理工01讲.md'
+                    },
+                    {
+                        text: '无人驾驶麻省理工02讲',
+                        link: '/study/notebook/2018/无人驾驶麻省理工02讲.md'
+                    },
+                    {
+                        text: '无人驾驶麻省理工03讲',
+                        link: '/study/notebook/2018/无人驾驶麻省理工03讲.md'
+                    }
+                ],
             },
             {
-                text: 'guide2',
-                link: '/guide/2.md',
+                text: '2019',
+                collapsible: true,
+                children: [
+                    {
+                        text: 'AI应用之水下机器人02',
+                        link: '/study/notebook/2019/AI应用之水下机器人02.md'
+                    },
+                    {
+                        text: '无人驾驶麻省理工04讲',
+                        link: '/study/notebook/2019/无人驾驶麻省理工04讲.md'
+                    },
+                ],
             },
         ]
     },

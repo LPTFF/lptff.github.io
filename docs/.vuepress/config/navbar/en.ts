@@ -14,11 +14,11 @@ export const navbarEn: NavbarConfig = [
         children: [
             {
                 text: '2018',
-                link: '/document/tips/1.md',
+                link: '/study/notebook/2018/水下机器人研究01.md',
             },
             {
                 text: '2019',
-                link: '/document/tips/2.md',
+                link: '/study/notebook/2019/AI应用之水下机器人02.md',
             }
         ]
     },
