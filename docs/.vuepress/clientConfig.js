@@ -5,8 +5,8 @@ export default defineClientConfig({
         app.component('MyComponent', MyComponent)
     },
     setup() {
-        let flag = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        console.log('flag', flag);
+        // let flag = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // console.log('flag', flag);
     },
     layouts: {},
     rootComponents: [],
