@@ -48,6 +48,24 @@ export const sidebarEn: SidebarConfig = [
         ]
     },
     {
+        text: '短视频',
+        link: '/job/shortVideo/readme.md',
+    },
+    {
+        text: '工具区',
+        children: [
+            {
+                text: '介绍',
+                link: '/job/tools/readme.md',
+            },
+            {
+                text: '测试',
+                link: '/job/tools/test.md',
+            }
+        ]
+
+    },
+    {
         text: '12tall博客',
         link: 'https://12tall.cn/intro.html',
     }

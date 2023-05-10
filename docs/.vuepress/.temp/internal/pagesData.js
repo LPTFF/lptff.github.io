@@ -9,6 +9,12 @@ export const pagesData = {
   "v-fffb8e28": () => import(/* webpackChunkName: "v-fffb8e28" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/index.html.js").then(({ data }) => data),
   // path: /document/introduction/
   "v-7d85779a": () => import(/* webpackChunkName: "v-7d85779a" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/introduction/index.html.js").then(({ data }) => data),
+  // path: /job/shortVideo/
+  "v-1ce70176": () => import(/* webpackChunkName: "v-1ce70176" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/shortVideo/index.html.js").then(({ data }) => data),
+  // path: /job/tools/
+  "v-f2347002": () => import(/* webpackChunkName: "v-f2347002" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/index.html.js").then(({ data }) => data),
+  // path: /job/tools/test.html
+  "v-e47a6330": () => import(/* webpackChunkName: "v-e47a6330" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/test.html.js").then(({ data }) => data),
   // path: /document/tips/1.html
   "v-2a92cf84": () => import(/* webpackChunkName: "v-2a92cf84" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/tips/1.html.js").then(({ data }) => data),
   // path: /document/tips/2.html

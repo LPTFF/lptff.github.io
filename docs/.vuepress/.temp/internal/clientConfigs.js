@@ -5,6 +5,7 @@ import clientConfig3 from 'C:/Users/TFF001/Desktop/GitHub/lptff.github.io/node_m
 import clientConfig4 from 'C:/Users/TFF001/Desktop/GitHub/lptff.github.io/node_modules/@vuepress/plugin-nprogress/lib/client/config.js'
 import clientConfig5 from 'C:/Users/TFF001/Desktop/GitHub/lptff.github.io/node_modules/@vuepress/plugin-theme-data/lib/client/config.js'
 import clientConfig6 from 'C:/Users/TFF001/Desktop/GitHub/lptff.github.io/node_modules/@vuepress/theme-default/lib/client/config.js'
+import clientConfig7 from 'C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/clientConfig.js'
 
 export const clientConfigs = [
   clientConfig0,
@@ -14,4 +15,5 @@ export const clientConfigs = [
   clientConfig4,
   clientConfig5,
   clientConfig6,
+  clientConfig7,
 ]

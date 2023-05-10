@@ -1,10 +1,13 @@
 import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
+import { getDirname, path } from '@vuepress/utils'
+const __dirname = getDirname(import.meta.url)
 import {
     head,
     navbarEn,
     sidebarEn
 } from './config/index.js'
+console.log('config');
 export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
@@ -16,9 +19,9 @@ export default defineUserConfig({
         logo: '/img/vue.svg',
         locales: {
             '/': {
-                navbar: navbarEn,
+                navbar: true ? navbarEn : [],
                 sidebar: sidebarEn,
-                editLinkText: 'Edit this page on GitHub',
+                editLinkText: '在 GitHub 上编辑此页',
                 notFound: [
                     '这里什么都没有',
                     '我们怎么到这来了？',
@@ -33,4 +36,8 @@ export default defineUserConfig({
             },
         }
     }),
+    clientConfigFile: path.resolve(
+        __dirname,
+        './clientConfig.js'
+    ),
 })
