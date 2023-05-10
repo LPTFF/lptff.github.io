@@ -12,7 +12,7 @@ export const navbarEn: NavbarConfig = [
         children: [
             {
                 text: '2018',
-                link: '/study/notebook/2018/水下机器人研究01.md',
+                link: '/study/notebook/2018/underwaterRobots01.md',
             },
             {
                 text: '2019',

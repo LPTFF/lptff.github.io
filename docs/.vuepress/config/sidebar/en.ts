@@ -11,19 +11,19 @@ export const sidebarEn: SidebarConfig = [
                 children: [
                     {
                         text: '水下机器人研究01',
-                        link: '/study/notebook/2018/水下机器人研究01.md'
+                        link: '/study/notebook/2018/underwaterRobots01.md'
                     },
                     {
                         text: '无人驾驶麻省理工01讲',
-                        link: '/study/notebook/2018/无人驾驶麻省理工01讲.md'
+                        link: '/study/notebook/2018/autoDriveForMIT01.md'
                     },
                     {
                         text: '无人驾驶麻省理工02讲',
-                        link: '/study/notebook/2018/无人驾驶麻省理工02讲.md'
+                        link: '/study/notebook/2018/autoDriveForMIT02.md'
                     },
                     {
                         text: '无人驾驶麻省理工03讲',
-                        link: '/study/notebook/2018/无人驾驶麻省理工03讲.md'
+                        link: '/study/notebook/2018/autoDriveForMIT03.md'
                     }
                 ],
             },
@@ -33,11 +33,11 @@ export const sidebarEn: SidebarConfig = [
                 children: [
                     {
                         text: 'AI应用之水下机器人02',
-                        link: '/study/notebook/2019/AI应用之水下机器人02.md'
+                        link: '/study/notebook/2019/underwaterRobots02.md'
                     },
                     {
                         text: '无人驾驶麻省理工04讲',
-                        link: '/study/notebook/2019/无人驾驶麻省理工04讲.md'
+                        link: '/study/notebook/2019/autoDriveForMIT04.md'
                     },
                 ],
             },
