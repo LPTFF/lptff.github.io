@@ -7,9 +7,7 @@ export const pagesRoutes = [
   ["v-2409ecfc","/study/notebook/2018/autoDriveForMIT02.html",{"title":"无人驾驶麻省理工02讲"},["/study/notebook/2018/autoDriveForMIT02","/study/notebook/2018/autoDriveForMIT02.md"]],
   ["v-20a03bbe","/study/notebook/2018/autoDriveForMIT03.html",{"title":"无人驾驶麻省理工03讲"},["/study/notebook/2018/autoDriveForMIT03","/study/notebook/2018/autoDriveForMIT03.md"]],
   ["v-1d34113b","/study/notebook/2018/underwaterRobots01.html",{"title":"水下机器人的运动分析与建模"},["/study/notebook/2018/underwaterRobots01","/study/notebook/2018/underwaterRobots01.md"]],
-  ["v-6d396e3b","/study/notebook/2019/AI%E5%BA%94%E7%94%A8%E4%B9%8B%E6%B0%B4%E4%B8%8B%E6%9C%BA%E5%99%A8%E4%BA%BA02.html",{"title":""},["/study/notebook/2019/AI应用之水下机器人02.html","/study/notebook/2019/AI%E5%BA%94%E7%94%A8%E4%B9%8B%E6%B0%B4%E4%B8%8B%E6%9C%BA%E5%99%A8%E4%BA%BA02","/study/notebook/2019/AI应用之水下机器人02.md","/study/notebook/2019/AI%E5%BA%94%E7%94%A8%E4%B9%8B%E6%B0%B4%E4%B8%8B%E6%9C%BA%E5%99%A8%E4%BA%BA02.md"]],
   ["v-25336cc2","/study/notebook/2019/autoDriveForMIT04.html",{"title":"无人驾驶麻省理工04讲"},["/study/notebook/2019/autoDriveForMIT04","/study/notebook/2019/autoDriveForMIT04.md"]],
   ["v-b9cd924a","/study/notebook/2019/underwaterRobots02.html",{"title":"AI应用之水下机器人02"},["/study/notebook/2019/underwaterRobots02","/study/notebook/2019/underwaterRobots02.md"]],
-  ["v-04297ced","/study/notebook/2019/%E6%97%A0%E4%BA%BA%E9%A9%BE%E9%A9%B6%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A504%E8%AE%B2.html",{"title":""},["/study/notebook/2019/无人驾驶麻省理工04讲.html","/study/notebook/2019/%E6%97%A0%E4%BA%BA%E9%A9%BE%E9%A9%B6%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A504%E8%AE%B2","/study/notebook/2019/无人驾驶麻省理工04讲.md","/study/notebook/2019/%E6%97%A0%E4%BA%BA%E9%A9%BE%E9%A9%B6%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A504%E8%AE%B2.md"]],
   ["v-3706649a","/404.html",{"title":""},["/404"]],
 ]
