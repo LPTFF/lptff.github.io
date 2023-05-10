@@ -5,7 +5,8 @@ const __dirname = getDirname(import.meta.url)
 import {
     head,
     navbarEn,
-    sidebarEn
+    sidebarEn,
+    sidebarZh
 } from './config/index.js'
 console.log('config');
 export default defineUserConfig({
@@ -20,7 +21,7 @@ export default defineUserConfig({
         locales: {
             '/': {
                 navbar: true ? navbarEn : [],
-                sidebar: sidebarEn,
+                sidebar: false ? sidebarEn : sidebarZh,
                 editLinkText: '在 GitHub 上编辑此页',
                 notFound: [
                     '这里什么都没有',

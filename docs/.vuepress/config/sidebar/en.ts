@@ -65,13 +65,13 @@ export const sidebarEn: SidebarConfig = [
         text: '12tall博客',
         link: 'https://12tall.cn/intro.html',
     },
-    // {
-    //     text: 'vuepress',
-    //     link: 'https://v2.vuepress.vuejs.org/zh/',
-    // },
-    // {
-    //     text: '线上网址',
-    //     link: 'https://lptff.github.io/',
-    // }
+    {
+        text: 'vuepress',
+        link: 'https://v2.vuepress.vuejs.org/zh/',
+    },
+    {
+        text: '线上网址',
+        link: 'https://lptff.github.io/',
+    }
 ]
 

@@ -12,6 +12,10 @@ export const navbarEn: NavbarConfig = [
         link: '/job/video/shortVideo.md',
     },
     {
+        text: '工具区',
+        link: '/job/tools/products.md',
+    },
+    {
         text: '求学笔记',
         children: [
             {
@@ -20,13 +24,9 @@ export const navbarEn: NavbarConfig = [
             },
             {
                 text: '2019',
-                link: '/study/notebook/2019/AI应用之水下机器人02.md',
+                link: '/study/notebook/2019/underwaterRobots02.md',
             }
         ]
-    },
-    {
-        text: '工具区',
-        link: '/job/tools/products.md',
     },
     {
         text: 'Github',
