@@ -1,26 +1,12 @@
 export const pagesData = {
   // path: /
   "v-8daa1a0e": () => import(/* webpackChunkName: "v-8daa1a0e" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/index.html.js").then(({ data }) => data),
-  // path: /guide/1.html
-  "v-6e0d8f34": () => import(/* webpackChunkName: "v-6e0d8f34" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/1.html.js").then(({ data }) => data),
-  // path: /guide/2.html
-  "v-6fc267d3": () => import(/* webpackChunkName: "v-6fc267d3" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/2.html.js").then(({ data }) => data),
-  // path: /guide/
-  "v-fffb8e28": () => import(/* webpackChunkName: "v-fffb8e28" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/guide/index.html.js").then(({ data }) => data),
-  // path: /document/introduction/
-  "v-7d85779a": () => import(/* webpackChunkName: "v-7d85779a" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/introduction/index.html.js").then(({ data }) => data),
-  // path: /job/shortVideo/
-  "v-1ce70176": () => import(/* webpackChunkName: "v-1ce70176" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/shortVideo/index.html.js").then(({ data }) => data),
-  // path: /job/tools/
-  "v-f2347002": () => import(/* webpackChunkName: "v-f2347002" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/index.html.js").then(({ data }) => data),
+  // path: /job/video/shortVideo.html
+  "v-08dbc8ca": () => import(/* webpackChunkName: "v-08dbc8ca" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/video/shortVideo.html.js").then(({ data }) => data),
+  // path: /job/tools/products.html
+  "v-69ce1c56": () => import(/* webpackChunkName: "v-69ce1c56" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/products.html.js").then(({ data }) => data),
   // path: /job/tools/test.html
   "v-e47a6330": () => import(/* webpackChunkName: "v-e47a6330" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/test.html.js").then(({ data }) => data),
-  // path: /document/tips/1.html
-  "v-2a92cf84": () => import(/* webpackChunkName: "v-2a92cf84" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/tips/1.html.js").then(({ data }) => data),
-  // path: /document/tips/2.html
-  "v-2c47a823": () => import(/* webpackChunkName: "v-2c47a823" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/tips/2.html.js").then(({ data }) => data),
-  // path: /document/tips/
-  "v-5851f53c": () => import(/* webpackChunkName: "v-5851f53c" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/document/tips/index.html.js").then(({ data }) => data),
   // path: /study/notebook/2018/%E6%97%A0%E4%BA%BA%E9%A9%BE%E9%A9%B6%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A501%E8%AE%B2.html
   "v-82b339ea": () => import(/* webpackChunkName: "v-82b339ea" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/study/notebook/2018/无人驾驶麻省理工01讲.html.js").then(({ data }) => data),
   // path: /study/notebook/2018/%E6%97%A0%E4%BA%BA%E9%A9%BE%E9%A9%B6%E9%BA%BB%E7%9C%81%E7%90%86%E5%B7%A502%E8%AE%B2.html

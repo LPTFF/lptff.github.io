@@ -2,10 +2,6 @@ import type { SidebarConfig } from '@vuepress/theme-default'
 
 export const sidebarEn: SidebarConfig = [
     {
-        text: '介绍',
-        link: '/document/introduction',
-    },
-    {
         text: '求学笔记',
         collapsible: true,
         children: [
@@ -49,14 +45,14 @@ export const sidebarEn: SidebarConfig = [
     },
     {
         text: '短视频',
-        link: '/job/shortVideo/readme.md',
+        link: '/job/video/shortVideo.md',
     },
     {
         text: '工具区',
         children: [
             {
-                text: '介绍',
-                link: '/job/tools/readme.md',
+                text: '产品',
+                link: '/job/tools/products.md',
             },
             {
                 text: '测试',

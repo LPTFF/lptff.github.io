@@ -4,16 +4,8 @@ console.log('navbar');
 
 export const navbarEn: NavbarConfig = [
     {
-        text: '介绍',
-        link: '/document/introduction',
-    },
-    // {
-    //     text: '短视频',
-    //     link: '../src/life/index.vue',
-    // },
-    {
         text: '短视频',
-        link: '/job/shortVideo/readme.md',
+        link: '/job/video/shortVideo.md',
     },
     {
         text: '求学笔记',
@@ -30,7 +22,7 @@ export const navbarEn: NavbarConfig = [
     },
     {
         text: '工具区',
-        link: '/job/tools/readme.md',
+        link: '/job/tools/products.md',
     },
     {
         text: 'Github',
