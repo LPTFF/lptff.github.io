@@ -1,5 +1,6 @@
 <template><div><h1 id="ai应用之水下机器人02" tabindex="-1"><a class="header-anchor" href="#ai应用之水下机器人02" aria-hidden="true">#</a> AI应用之水下机器人02</h1>
-<font color=red>2019-04-26</font><p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/EkoOUW1B3C9PgiqVEJ25sM4BI1AFSso1CblshRNbYsQ4Hg?e=dV5Ht7" target="_blank" rel="noopener noreferrer">AI应用之水下机器人<ExternalLinkIcon/></a></p>
+<div style='color:red'>2019-04-26</div>
+<p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/EkoOUW1B3C9PgiqVEJ25sM4BI1AFSso1CblshRNbYsQ4Hg?e=dV5Ht7" target="_blank" rel="noopener noreferrer">AI应用之水下机器人<ExternalLinkIcon/></a></p>
 <h1 id="数据集采样" tabindex="-1"><a class="header-anchor" href="#数据集采样" aria-hidden="true">#</a> 数据集采样</h1>
 <p>诈尸更新，另外声明一下，水下机器人技术研究更名为AI应用之水下机器人</p>
 <h2 id="视频图像" tabindex="-1"><a class="header-anchor" href="#视频图像" aria-hidden="true">#</a> 视频图像</h2>

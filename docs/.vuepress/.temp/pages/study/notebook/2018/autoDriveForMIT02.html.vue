@@ -1,5 +1,6 @@
 <template><div><h1 id="无人驾驶麻省理工02讲" tabindex="-1"><a class="header-anchor" href="#无人驾驶麻省理工02讲" aria-hidden="true">#</a> 无人驾驶麻省理工02讲</h1>
-<font color=red>2018-12-09 </font><p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/ErQbTLrw69xLr7uSGoyKLfcB0wnatT99IWidnrhy7elCHA?e=JuGaNq" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第二讲<ExternalLinkIcon/></a></p>
+<div style='color:red'>2018-12-09 </div>
+<p>相关资料打包链接: <a href="https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/ErQbTLrw69xLr7uSGoyKLfcB0wnatT99IWidnrhy7elCHA?e=JuGaNq" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第二讲<ExternalLinkIcon/></a></p>
 <p>bilibili: <a href="https://www.bilibili.com/video/av23594594/?p=2" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第二讲<ExternalLinkIcon/></a></p>
 <p><strong>写在前言：上一篇介绍了无人驾驶和深度学习的心得，这一篇我想和大家分享一下自动驾驶的心得。</strong></p>
 <h2 id="不同的自主驾驶方法" tabindex="-1"><a class="header-anchor" href="#不同的自主驾驶方法" aria-hidden="true">#</a> 不同的自主驾驶方法</h2>

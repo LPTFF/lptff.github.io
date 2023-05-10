@@ -1,6 +1,6 @@
 # 水下机器人的运动分析与建模
 
-<font color=red>2018-12-09 </font>
+<div style='color:red'>2018-12-09 </div>
 
 先放出框架图
 

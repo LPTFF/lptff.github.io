@@ -1,6 +1,6 @@
 # AI应用之水下机器人02
 
-<font color=red>2019-04-26</font>
+<div style='color:red'>2019-04-26</div>
 
 相关资料打包链接: [AI应用之水下机器人](https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/EkoOUW1B3C9PgiqVEJ25sM4BI1AFSso1CblshRNbYsQ4Hg?e=dV5Ht7)
 

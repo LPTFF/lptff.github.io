@@ -1,6 +1,6 @@
 # 无人驾驶麻省理工02讲
 
-<font color=red>2018-12-09 </font>
+<div style='color:red'>2018-12-09 </div>
 
 相关资料打包链接: [麻省理工自动驾驶 MIT 6.S094第二讲](https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/ErQbTLrw69xLr7uSGoyKLfcB0wnatT99IWidnrhy7elCHA?e=JuGaNq)
 

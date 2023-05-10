@@ -34,7 +34,11 @@ export default defineUserConfig({
                 toggleColorMode: '切换颜色模式',
                 toggleSidebar: '切换侧边栏',
             },
-        }
+        },
+        docsRepo: 'https://github.com/LPTFF/lptff.github.io',
+        docsBranch: 'master',
+        docsDir: 'docs',
+        editLinkPattern: ':repo/edit/:branch/:path',
     }),
     clientConfigFile: path.resolve(
         __dirname,

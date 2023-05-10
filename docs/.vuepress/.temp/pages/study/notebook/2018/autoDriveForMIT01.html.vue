@@ -1,5 +1,6 @@
 <template><div><h1 id="无人驾驶麻省理工01讲" tabindex="-1"><a class="header-anchor" href="#无人驾驶麻省理工01讲" aria-hidden="true">#</a> 无人驾驶麻省理工01讲</h1>
-<font color=red>2018-12-09 </font><p>PDF链接: <a href="https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/EUUMsVDo9yJAg9bWfz40jQsBuXFY13DTisylqQDg1nwyUQ?e=EGdbDD" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第一讲<ExternalLinkIcon/></a></p>
+<div style='color:red'>2018-12-09 </div>
+<p>PDF链接: <a href="https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/EUUMsVDo9yJAg9bWfz40jQsBuXFY13DTisylqQDg1nwyUQ?e=EGdbDD" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第一讲<ExternalLinkIcon/></a></p>
 <p>bilibili: <a href="https://www.bilibili.com/video/av23594594" target="_blank" rel="noopener noreferrer">麻省理工自动驾驶 MIT 6.S094第一讲<ExternalLinkIcon/></a></p>
 <p><strong>写在前言：最近在学习麻省理工自动驾驶课程，本人在学习视频的同时写了一点学习笔记，有需要的童鞋可以参考一下。</strong></p>
 <h2 id="_1-p15对于同一个问题的简单表达-如p16对于笛卡尔坐标系的分类-可以通过坐标变换在极坐标系中表达" tabindex="-1"><a class="header-anchor" href="#_1-p15对于同一个问题的简单表达-如p16对于笛卡尔坐标系的分类-可以通过坐标变换在极坐标系中表达" aria-hidden="true">#</a> （1）P15对于同一个问题的简单表达，如P16对于笛卡尔坐标系的分类，可以通过坐标变换在极坐标系中表达</h2>

@@ -1,5 +1,6 @@
 <template><div><h1 id="水下机器人的运动分析与建模" tabindex="-1"><a class="header-anchor" href="#水下机器人的运动分析与建模" aria-hidden="true">#</a> 水下机器人的运动分析与建模</h1>
-<font color=red>2018-12-09 </font><p>先放出框架图</p>
+<div style='color:red'>2018-12-09 </div>
+<p>先放出框架图</p>
 <p><img src="/image/underwaterRobots01/1683700534763.png" alt="1683700534763"></p>
 <p>对于水下机器人，一定要建立一个静止的坐标系（定系）和运动的坐标系（动系），这个是分析水下机器人的运动基础。</p>
 <p>定系：越简单越好，一般建议起始点为静系，且水平面+重力坐标系为宜。</p>
