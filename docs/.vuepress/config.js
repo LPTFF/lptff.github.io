@@ -16,7 +16,7 @@ export default defineUserConfig({
     head,
     theme: defaultTheme({
         // set config here
-        logo: '/img/vue.svg',
+        logo: '/img/myLogo.jpg',
         locales: {
             '/': {
                 navbar: true ? navbarEn : [],

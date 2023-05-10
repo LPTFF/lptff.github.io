@@ -1,8 +1,16 @@
 ---
 home: true
-heroImage: /img/vue.svg
-actionText: 快速上手weqw
-actionLink: /zh/`guide/
+heroImage: /img/bg.jpg
+actions:
+  - text: 求学笔记
+    link: /study/notebook/2018/underwaterRobots01.md
+    type: primary
+  - text: 短视频
+    link: /job/video/shortVideo.md
+    type: secondary
+  - text: 开发专区
+    link: /job/tools/test.md
+    type: secondary
 features:
 - title: 短视频
   details: 这里将是投放短视频的栏目。

@@ -4,6 +4,10 @@ console.log('navbar');
 
 export const navbarEn: NavbarConfig = [
     {
+        text: '首页',
+        link: '/',
+    },
+    {
         text: '短视频',
         link: '/job/video/shortVideo.md',
     },
