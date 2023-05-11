@@ -72,8 +72,7 @@ export default defineUserConfig({
         //     }
         // },
         viteOptions: {
-            // base: './',
-            base: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages',
+            base: './',
             server: {
                 cors: true,
                 open: false,
