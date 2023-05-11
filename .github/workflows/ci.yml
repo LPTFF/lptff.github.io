@@ -69,7 +69,7 @@ jobs:
       #     build_dir: './docs/.vuepress/dist'
       - name: Deploy to GitHub Pages
         run: |
-          cd ./src/.vuepress/dist/
+          cd ./docs/.vuepress/dist/
           echo tff.cn > CNAME  
           echo > .nojekyll
           git config --global user.name "${GITHUB_ACTOR}"
