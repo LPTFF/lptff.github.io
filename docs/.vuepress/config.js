@@ -19,7 +19,7 @@ export default defineUserConfig({
     head,
     theme: defaultTheme({
         // set config here
-        logo: '/img/myLogo.jpg',
+        logo: '/img/logo.jpg',
         locales: {
             '/': {
                 navbar: true ? navbarEn : [],
@@ -94,8 +94,15 @@ export default defineUserConfig({
                         chunkFileNames: `static/js/[name]-[hash].js`, // chunk 块
                         entryFileNames: `static/js/[name]-[hash].js` // 入口文件块
                     }
+                },
+                minify: 'terser'
+            },
+            experimental: {
+                renderBuiltUrl(filename) {
+                    return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages' + filename
                 }
             }
+
         },
         vuePluginOptions: {},
     }),
