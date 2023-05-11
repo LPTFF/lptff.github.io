@@ -2,7 +2,6 @@ import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
-import process from 'node:process'
 const __dirname = getDirname(import.meta.url)
 import {
     head,
@@ -10,7 +9,6 @@ import {
     sidebarEn,
     sidebarZh
 } from './config/index.js'
-const NODE_ENV = process.env.NODE_ENV
 export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
@@ -48,31 +46,9 @@ export default defineUserConfig({
         './clientConfig.js'
     ),
     bundler: viteBundler({
-        // viteOptions: () => {
-        //     const NODE_ENV = process.env.NODE_ENV
-        //     if (NODE_ENV === 'production') {
-        //         return {
-        //             output: {
-        //                 publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages'
-        //             },
-        //             resolve: {
-        //                 alias: {
-        //                     'public': path.resolve(__dirname, './dist')
-        //                 }
-        //             }
-        //         }
-        //     } else {
-        //         return {
-        //             resolve: {
-        //                 alias: {
-        //                     'public': path.resolve(__dirname, './dist')
-        //                 }
-        //             }
-        //         }
-        //     }
-        // },
         viteOptions: {
-            base: NODE_ENV === 'production' ? 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' : './',
+            base: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/',
+            // base:  './',
             server: {
                 cors: true,
                 open: false,
