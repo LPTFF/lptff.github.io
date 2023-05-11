@@ -2,6 +2,7 @@ import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
+import process from 'node:process'
 const __dirname = getDirname(import.meta.url)
 import {
     head,
