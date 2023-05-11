@@ -72,10 +72,10 @@ export default defineUserConfig({
         //     }
         // },
         viteOptions: {
-            base: './',
+            base: NODE_ENV === 'production' ? 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages' : './',
             server: {
                 cors: true,
-                open: true,
+                open: false,
                 port: 9000,
                 proxy: {
                     '/api': {
@@ -83,7 +83,20 @@ export default defineUserConfig({
                         changeOrigin: true
                     }
                 }
-            }
+            },
+            // publicPath: '/web',
+            // build: {
+            //     target: 'es2015',
+            //     emptyOutDir: false,
+            //     assetsDir: `./static/assets/`, // 无法被output识别的其他资源打包路径
+            //     rollupOptions: {
+            //         output: {
+            //             assetFileNames: `static/[ext]/[name]-[hash].[ext]`, // 静态资源块
+            //             chunkFileNames: `static/js/[name]-[hash].js`, // chunk 块
+            //             entryFileNames: `static/js/[name]-[hash].js` // 入口文件块
+            //         }
+            //     }
+            // }
         },
         vuePluginOptions: {},
     }),
