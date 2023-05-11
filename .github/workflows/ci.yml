@@ -64,7 +64,8 @@ jobs:
           cd ./docs/.vuepress/dist/
           echo tff.cn > CNAME  
           echo > .nojekyll
-          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.name "LPTFF"
+          git config --global user.email lptffhh@gmail.com
           git config --global init.defaultBranch master
           git init
           git add -A
