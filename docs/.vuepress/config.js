@@ -47,8 +47,7 @@ export default defineUserConfig({
     ),
     bundler: viteBundler({
         viteOptions: {
-            base: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/',
-            // base:  './',
+            base: './',
             server: {
                 cors: true,
                 open: false,
@@ -70,15 +69,13 @@ export default defineUserConfig({
                         chunkFileNames: `static/js/[name]-[hash].js`, // chunk 块
                         entryFileNames: `static/js/[name]-[hash].js` // 入口文件块
                     }
-                },
-                minify: 'terser'
+                }
             },
             experimental: {
                 renderBuiltUrl(filename) {
                     return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
                 }
             }
-
         },
         vuePluginOptions: {},
     }),
