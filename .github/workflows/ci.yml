@@ -63,8 +63,7 @@ jobs:
         run: |
           cd ./docs/.vuepress/dist/
           echo tff.cn > CNAME  
-          githubUrl= git@github.com:LPTFF/lptff.github.io.git
           git init
           git add -A
           git commit -m "Auto Deploy"
-          git push -f $githubUrl master:gh-pages
+          git push -f "https://git@github.com:LPTFF/lptff.github.io.git" master:gh-pages
