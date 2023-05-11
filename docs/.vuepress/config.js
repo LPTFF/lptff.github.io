@@ -52,7 +52,7 @@ export default defineUserConfig({
             if (NODE_ENV === 'production') {
                 return {
                     output: {
-                        publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io/docs/.vuepress/dist'
+                        publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/docs/.vuepress/dist'
                     },
                     resolve: {
                         alias: {
