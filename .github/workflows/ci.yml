@@ -60,14 +60,11 @@ jobs:
       #   id: deployment
       #   uses: actions/deploy-pages@v1
       - name: Deploy to GitHub Pages
-        run: |
-          cd ./docs/.vuepress/dist/
-          echo tff.cn > CNAME 
-          echo > .nojekyll
-          git config --global user.email "lptffhh@gmail.com"
-          git config --global user.name "LPTFF"
-          git config --global init.defaultBranch master 
-          git init
-          git add -A
-          git commit -m "Auto Deploy"
-          git push -f "https://${GITHUB_ACTOR}:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
+        uses: JamesIves/github-pages-deploy-action@releases/v3
+        with:
+          # 这里的 ACCESS_TOKEN 名字需要和下文中的相对应
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          # 打包后的文件部署到哪个分支上
+          BRANCH: gh-pages
+          # 打包后的文件在哪里
+          FOLDER: ./docs/.vuepress/dist
