@@ -72,7 +72,7 @@ export default defineUserConfig({
         //     }
         // },
         viteOptions: {
-            base: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages',
+            base: NODE_ENV === 'production' ? 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' : './',
             server: {
                 cors: true,
                 open: false,
@@ -99,7 +99,7 @@ export default defineUserConfig({
             },
             experimental: {
                 renderBuiltUrl(filename) {
-                    return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages' + filename
+                    return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
                 }
             }
 
