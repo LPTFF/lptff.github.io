@@ -3,12 +3,12 @@ import { defineAsyncComponent } from 'vue'
 export const pagesComponents = {
   // path: /
   "v-8daa1a0e": defineAsyncComponent(() => import(/* webpackChunkName: "v-8daa1a0e" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/index.html.vue")),
+  // path: /job/video/shortVideo.html
+  "v-08dbc8ca": defineAsyncComponent(() => import(/* webpackChunkName: "v-08dbc8ca" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/video/shortVideo.html.vue")),
   // path: /job/tools/products.html
   "v-69ce1c56": defineAsyncComponent(() => import(/* webpackChunkName: "v-69ce1c56" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/products.html.vue")),
   // path: /job/tools/test.html
   "v-e47a6330": defineAsyncComponent(() => import(/* webpackChunkName: "v-e47a6330" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/tools/test.html.vue")),
-  // path: /job/video/shortVideo.html
-  "v-08dbc8ca": defineAsyncComponent(() => import(/* webpackChunkName: "v-08dbc8ca" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/job/video/shortVideo.html.vue")),
   // path: /study/notebook/2018/autoDriveForMIT01.html
   "v-27739e3a": defineAsyncComponent(() => import(/* webpackChunkName: "v-27739e3a" */"C:/Users/TFF001/Desktop/GitHub/lptff.github.io/docs/.vuepress/.temp/pages/study/notebook/2018/autoDriveForMIT01.html.vue")),
   // path: /study/notebook/2018/autoDriveForMIT02.html

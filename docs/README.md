@@ -8,7 +8,7 @@ actions:
   - text: 短视频
     link: /job/video/shortVideo.md
     type: secondary
-  - text: 开发专区
+  - text: 实验室
     link: /job/tools/test.md
     type: secondary
 features:

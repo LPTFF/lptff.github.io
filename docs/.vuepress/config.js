@@ -1,6 +1,7 @@
 import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
+import { viteBundler } from '@vuepress/bundler-vite'
 const __dirname = getDirname(import.meta.url)
 import {
     head,
@@ -8,7 +9,6 @@ import {
     sidebarEn,
     sidebarZh
 } from './config/index.js'
-console.log('config');
 export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
@@ -45,4 +45,30 @@ export default defineUserConfig({
         __dirname,
         './clientConfig.js'
     ),
+    bundler: viteBundler({
+        viteOptions: () => {
+            const NODE_ENV = process.env.NODE_ENV
+            if (NODE_ENV === 'production') {
+                return {
+                    output: {
+                        publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io/docs/.vuepress/dist'
+                    },
+                    resolve: {
+                        alias: {
+                            'public': path.resolve(__dirname, './dist')
+                        }
+                    }
+                }
+            } else {
+                return {
+                    resolve: {
+                        alias: {
+                            'public': path.resolve(__dirname, './dist')
+                        }
+                    }
+                }
+            }
+        },
+        vuePluginOptions: {},
+    }),
 })

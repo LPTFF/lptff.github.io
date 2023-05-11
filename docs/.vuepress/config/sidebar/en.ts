@@ -48,7 +48,7 @@ export const sidebarEn: SidebarConfig = [
         link: '/job/video/shortVideo.md',
     },
     {
-        text: '工具区',
+        text: '实验室',
         children: [
             {
                 text: '产品',

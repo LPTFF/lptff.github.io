@@ -29,13 +29,13 @@ export const sidebarZh: SidebarConfig = {
     ],
     '/job/': [
         {
-            text: '短视频',
+            text: '工具区',
             children: [
                 '/job/video/shortVideo.md',
             ]
         },
         {
-            text: '工具区',
+            text: '实验室',
             children: [
                 '/job/tools/products.md',
                 '/job/tools/test.md'

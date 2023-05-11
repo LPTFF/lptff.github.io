@@ -8,11 +8,11 @@ export const navbarEn: NavbarConfig = [
         link: '/',
     },
     {
-        text: '短视频',
+        text: '工具区',
         link: '/job/video/shortVideo.md',
     },
     {
-        text: '工具区',
+        text: '实验室',
         link: '/job/tools/products.md',
     },
     {
