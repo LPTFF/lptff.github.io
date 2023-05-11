@@ -70,4 +70,6 @@ jobs:
           git init
           git add -A
           git commit -m "Auto Deploy"
-          git push -f "https://git@github.com:LPTFF/lptff.github.io.git" master:gh-pages
+          git remote add origin git@github.com:LPTFF/lptff.github.io.git
+          git branch -M master
+          git push -f git@github.com:LPTFF/lptff.github.io.git master:gh-pages
