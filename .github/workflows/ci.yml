@@ -63,11 +63,8 @@ jobs:
         run: |
           cd ./docs/.vuepress/dist/
           echo tff.cn > CNAME  
-          echo > .nojekyll
-          git config --global user.name "LPTFF"
-          git config --global user.email lptffhh@gmail.com
-          git config --global init.defaultBranch master
+          githubUrl= git@github.com:LPTFF/lptff.github.io.git
           git init
           git add -A
           git commit -m "Auto Deploy"
-          git push -f "https://${GITHUB_ACTOR}:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
+          git push -f $githubUrl master:gh-pages
