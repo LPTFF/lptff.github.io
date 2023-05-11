@@ -60,16 +60,10 @@ jobs:
       #   id: deployment
       #   uses: actions/deploy-pages@v1
       - name: Deploy to GitHub Pages
-        run: |
-          cd ./docs/.vuepress/dist/
-          echo tff.cn > CNAME 
-          echo > .nojekyll
-          git config --global user.email "lptffhh@gmail.com"
-          git config --global user.name "LPTFF"
-          git config --global init.defaultBranch master 
-          git init
-          git add -A
-          git commit -m "Auto Deploy"
-          git remote add origin git@github.com:LPTFF/lptff.github.io.git
-          git branch -M master
-          git push -f git@github.com:LPTFF/lptff.github.io.git master:gh-pages
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          # 部署到 gh-pages 分支
+          BRANCH: gh-pages
+          # 部署目录为 VuePress 的默认输出目录
+          FOLDER: ./docs/.vuepress/dist
