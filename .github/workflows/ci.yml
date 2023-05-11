@@ -55,18 +55,10 @@ jobs:
       # - name: Upload artifact
       #   uses: actions/upload-pages-artifact@v1
       #   with:
-          # Upload dist repository 
-          # path: './dist'
           # path: './docs/.vuepress/dist'
       # - name: Deploy to GitHub Pages
       #   id: deployment
       #   uses: actions/deploy-pages@v1
-      #   with:
-      #     repo: vuepress/vuepress.github.io
-      #     target_branch: master
-      #     publish_branch: gh-pages
-      #     cname: tff.cn
-      #     build_dir: './docs/.vuepress/dist'
       - name: Deploy to GitHub Pages
         run: |
           cd ./docs/.vuepress/dist/
