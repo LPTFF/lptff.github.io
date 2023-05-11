@@ -38,7 +38,8 @@ export const sidebarZh: SidebarConfig = {
             text: '实验室',
             children: [
                 '/job/tools/products.md',
-                '/job/tools/test.md'
+                '/job/tools/test.md',
+                '/job/tools/chatGPT.md'
             ]
         }
     ]
