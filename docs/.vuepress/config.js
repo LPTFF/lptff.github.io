@@ -10,6 +10,7 @@ import {
     sidebarEn,
     sidebarZh
 } from './config/index.js'
+const NODE_ENV = process.env.NODE_ENV
 export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
@@ -47,25 +48,39 @@ export default defineUserConfig({
         './clientConfig.js'
     ),
     bundler: viteBundler({
-        viteOptions: () => {
-            const NODE_ENV = process.env.NODE_ENV
-            if (NODE_ENV === 'production') {
-                return {
-                    output: {
-                        publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages'
-                    },
-                    resolve: {
-                        alias: {
-                            'public': path.resolve(__dirname, './dist')
-                        }
-                    }
-                }
-            } else {
-                return {
-                    resolve: {
-                        alias: {
-                            'public': path.resolve(__dirname, './dist')
-                        }
+        // viteOptions: () => {
+        //     const NODE_ENV = process.env.NODE_ENV
+        //     if (NODE_ENV === 'production') {
+        //         return {
+        //             output: {
+        //                 publicPath: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages'
+        //             },
+        //             resolve: {
+        //                 alias: {
+        //                     'public': path.resolve(__dirname, './dist')
+        //                 }
+        //             }
+        //         }
+        //     } else {
+        //         return {
+        //             resolve: {
+        //                 alias: {
+        //                     'public': path.resolve(__dirname, './dist')
+        //                 }
+        //             }
+        //         }
+        //     }
+        // },
+        viteOptions: {
+            base: './',
+            server: {
+                cors: true,
+                open: true,
+                port: 9000,
+                proxy: {
+                    '/api': {
+                        target: 'http://192.168.99.223:3000',   //代理接口
+                        changeOrigin: true
                     }
                 }
             }
