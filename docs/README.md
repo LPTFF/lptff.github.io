@@ -1,6 +1,6 @@
 ---
 home: true
-heroImage: /img/bg.jpg
+heroImage: https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/bg.jpg
 actions:
   - text: 求学笔记
     link: /study/notebook/2018/underwaterRobots01.md

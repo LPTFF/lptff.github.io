@@ -17,7 +17,7 @@ export default defineUserConfig({
     head,
     theme: defaultTheme({
         // set config here
-        logo: '/img/logo.jpg',
+        logo: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg',
         locales: {
             '/': {
                 navbar: true ? navbarEn : [],
