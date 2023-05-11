@@ -62,7 +62,11 @@ jobs:
       - name: Deploy to GitHub Pages
         run: |
           cd ./docs/.vuepress/dist/
-          echo tff.cn > CNAME  
+          echo tff.cn > CNAME 
+          echo > .nojekyll
+          git config --global user.email "lptffhh@gmail.com"
+          git config --global user.name "LPTFF"
+          git config --global init.defaultBranch master 
           git init
           git add -A
           git commit -m "Auto Deploy"
