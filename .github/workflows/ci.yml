@@ -57,6 +57,8 @@ jobs:
         with:
           # Upload dist repository 
           # path: './dist'
+          publish_branch: gh-pages
+          cname: tff.cn
           path: './docs/.vuepress/dist'
       - name: Deploy to GitHub Pages
         id: deployment
