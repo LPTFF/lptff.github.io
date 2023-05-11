@@ -70,7 +70,6 @@ jobs:
           git init
           git add -A
           git commit -m "Auto Deploy"
-          git remote set-url origin git@github.com:eurydyce/MDANSE.git
           git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
