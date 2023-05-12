@@ -2,8 +2,8 @@ import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
-import { resolve } from 'path'
 import viteCompression from 'vite-plugin-compression'
+import process from 'node:process'
 // import { visualizer } from 'rollup-plugin-visualizer'
 const __dirname = getDirname(import.meta.url)
 import {
@@ -13,7 +13,7 @@ import {
     sidebarZh
 } from './config/index.js'
 export default defineUserConfig({
-    base: '/',
+    base: process.env.NODE_ENV === 'production' ? 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' : '/',
     lang: 'zh-CN',
     title: '随风而逝',
     description: '期待改变!',
@@ -84,11 +84,7 @@ export default defineUserConfig({
                 }
             },
             resolve: {
-                alias: {
-                    '@': resolve(__dirname, 'src'),
-                    mitt: 'https://cdn.jsdelivr.net/npm/mitt@3.0.0/+esm',
-                    axios: 'https://esm.sh/axios@0.21.4',
-                }
+                alias: {}
             },
             // plugins: [viteCompression(), visualizer()]
             plugins: [viteCompression()]
