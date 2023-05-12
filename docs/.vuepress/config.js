@@ -2,6 +2,9 @@ import { defineUserConfig } from '@vuepress/cli'
 import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
+import { resolve } from 'path'
+import viteCompression from 'vite-plugin-compression'
+// import { visualizer } from 'rollup-plugin-visualizer'
 const __dirname = getDirname(import.meta.url)
 import {
     head,
@@ -62,20 +65,33 @@ export default defineUserConfig({
             build: {
                 target: 'es2015',
                 emptyOutDir: false,
-                assetsDir: `./static/assets/`, // 无法被output识别的其他资源打包路径
                 rollupOptions: {
                     output: {
-                        assetFileNames: `static/[ext]/[name]-[hash].[ext]`, // 静态资源块
-                        chunkFileNames: `static/js/[name]-[hash].js`, // chunk 块
-                        entryFileNames: `static/js/[name]-[hash].js` // 入口文件块
-                    }
+                        ...({
+                            manualChunks(id) {
+                                if (id.includes('node_modules')) {
+                                    return 'framework'
+                                }
+                                return undefined
+                            },
+                        }),
+                    },
                 }
             },
             experimental: {
                 renderBuiltUrl(filename) {
                     return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
                 }
-            }
+            },
+            resolve: {
+                alias: {
+                    '@': resolve(__dirname, 'src'),
+                    mitt: 'https://cdn.jsdelivr.net/npm/mitt@3.0.0/+esm',
+                    axios: 'https://esm.sh/axios@0.21.4',
+                }
+            },
+            // plugins: [viteCompression(), visualizer()]
+            plugins: [viteCompression()]
         },
         vuePluginOptions: {},
     }),
