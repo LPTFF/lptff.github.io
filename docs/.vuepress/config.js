@@ -13,7 +13,7 @@ import {
     sidebarZh
 } from './config/index.js'
 export default defineUserConfig({
-    base: process.env.NODE_ENV === 'production' ? 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' : '/',
+    base: '/',
     lang: 'zh-CN',
     title: '随风而逝',
     description: '期待改变!',
