@@ -3,7 +3,7 @@ import { defaultTheme } from '@vuepress/theme-default'
 import { getDirname, path } from '@vuepress/utils'
 import { viteBundler } from '@vuepress/bundler-vite'
 import viteCompression from 'vite-plugin-compression'
-import process from 'node:process'
+// import process from 'node:process'
 // import { visualizer } from 'rollup-plugin-visualizer'
 const __dirname = getDirname(import.meta.url)
 import {
@@ -67,6 +67,12 @@ export default defineUserConfig({
                 emptyOutDir: false,
                 rollupOptions: {
                     output: {
+                        // entryFileNames: `assets/[name].${timestamp}.js`,
+                        // chunkFileNames: `assets/[name].${timestamp}.js`,
+                        // assetFileNames: `assets/[name].${timestamp}.[ext]`
+                        entryFileNames: `assets/[name].js`,
+                        chunkFileNames: `assets/[name].js`,
+                        assetFileNames: `assets/[name].[ext]`,
                         ...({
                             manualChunks(id) {
                                 if (id.includes('node_modules')) {
@@ -76,10 +82,21 @@ export default defineUserConfig({
                             },
                         }),
                     },
+                },
+                chunkSizeWarningLimit: 200,
+                modulePreload: {
+                    // resolveDependencies: (filename, deps, { hostId, hostType }) => {
+                    //     console.log('resolveDependencies filename', filename);
+                    //     console.log('resolveDependencies deps', deps, typeof deps);
+                    //     console.log('resolveDependencies hostId', hostId);
+                    //     console.log('resolveDependencies hostType', hostType);
+                    //     return ['https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/']
+                    // }
                 }
             },
             experimental: {
                 renderBuiltUrl(filename) {
+                    // 对项目docs/.vuepress/public文件下资源进行加载
                     return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
                 }
             },
@@ -87,7 +104,13 @@ export default defineUserConfig({
                 alias: {}
             },
             // plugins: [viteCompression(), visualizer()]
-            plugins: [viteCompression()]
+            plugins: [viteCompression({
+                verbose: true,   // 是否在控制台输出压缩结果
+                disable: false,   // 是否禁用
+                threshold: 1024 * 10,   // 压缩的门槛大小
+                algorithm: 'gzip',   // 压缩的算法
+                ext: '.gz'  // 压缩后的文件扩展名
+            })]
         },
         vuePluginOptions: {},
     }),
