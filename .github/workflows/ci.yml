@@ -64,12 +64,13 @@ jobs:
           cd ./docs/.vuepress/dist/
           echo tangff.life > CNAME  
           echo > .nojekyll
-          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global user.email "lptffhh@gmail.com"
+          git config --global user.name "LPTFF"
           git config --global init.defaultBranch master
           git init
           git add -A
           git commit -m "Auto Deploy"
-          git push -f "https://${GITHUB_ACTOR}:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
+          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
       # - name: Deploy to GitHub Pages
       #   uses: crazy-max/ghaction-github-pages@v2.2.0
       #   with:
