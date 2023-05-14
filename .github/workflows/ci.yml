@@ -47,9 +47,9 @@ jobs:
       # - name: 404
       #   run: 
       #     cp dist/index.html dist/404.html
-      # - name: Build
-      #   run: 
-      #     npm run docs:build
+      - name: Build
+        run: 
+          npm run docs:build
       # - name: Setup Pages
       #   uses: actions/configure-pages@v3
       # - name: Upload artifact
@@ -59,6 +59,17 @@ jobs:
       # - name: Deploy to GitHub Pages
       #   id: deployment
       #   uses: actions/deploy-pages@v1
+      - name: Deploy  
+        run: |
+          cd ./docs/.vuepress/dist/
+          echo tangff.life > CNAME  
+          echo > .nojekyll
+          git config --global user.name "${GITHUB_ACTOR}"
+          git config --global init.defaultBranch master
+          git init
+          git add -A
+          git commit -m "Auto Deploy"
+          git push -f "https://${GITHUB_ACTOR}:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
       # - name: Deploy to GitHub Pages
       #   uses: crazy-max/ghaction-github-pages@v2.2.0
       #   with:
@@ -68,12 +79,3 @@ jobs:
       #     build_dir: docs/.vuepress/dist
       #   env:
       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build and Deploy
-        uses: jenkey2011/vuepress-deploy@master
-        env:
-          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-          TARGET_REPO: LPTFF/lptff.github.io
-          TARGET_BRANCH: gh_pages
-          BUILD_SCRIPT: yarn && yarn build
-          BUILD_DIR: docs/.vuepress/dist
-          CNAME: https://tangff.life
