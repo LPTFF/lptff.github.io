@@ -105,13 +105,7 @@ export default defineUserConfig({
                 alias: {}
             },
             // plugins: [viteCompression(), visualizer()]
-            plugins: [viteCompression({
-                verbose: true,   // 是否在控制台输出压缩结果
-                disable: false,   // 是否禁用
-                threshold: 1024 * 10,   // 压缩的门槛大小
-                algorithm: 'gzip',   // 压缩的算法
-                ext: '.gz'  // 压缩后的文件扩展名
-            })]
+            plugins: [viteCompression()]
         },
         vuePluginOptions: {},
     }),
