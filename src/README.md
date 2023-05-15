@@ -9,7 +9,7 @@ actions:
     link: /job/develop/README.md
     type: secondary
   - text: 实验室
-    link: /job/tools/test.md
+    link: /job/video/shortVideo.md
     type: secondary
 features:
 - title: 短视频
