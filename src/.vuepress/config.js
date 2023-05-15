@@ -50,7 +50,7 @@ export default defineUserConfig({
         __dirname,
         './clientConfig.js'
     ),
-    shouldPrefetch: false,
+    shouldPrefetch: true,
     bundler: viteBundler({
         viteOptions: {
             base: './',
