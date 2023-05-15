@@ -65,7 +65,7 @@ export const navbarZh: NavbarConfig = [
             },
             {
                 text: '标标的博客',
-                link: 'https://github.com/12Tall/12tall.github.io/tree/master',
+                link: 'https://12tall.cn/',
             }
         ]
     }

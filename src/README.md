@@ -1,6 +1,8 @@
 ---
 home: true
 heroImage: https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/bg.jpg
+heroText: 随风而逝
+tagline: 期待改变！
 actions:
   - text: 求学笔记
     link: /study/notebook/2018/underwaterRobots01.md

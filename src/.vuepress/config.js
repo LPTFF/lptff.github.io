@@ -17,7 +17,7 @@ import {
 export default defineUserConfig({
     base: '/',
     lang: 'zh-CN',
-    title: '随风而逝',
+    title: 'tangff',
     description: '期待改变!',
     head,
     theme: defaultTheme({
