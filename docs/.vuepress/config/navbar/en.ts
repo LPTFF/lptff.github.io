@@ -1,11 +1,13 @@
 import type { NavbarConfig } from '@vuepress/theme-default'
 
-console.log('navbar');
-
 export const navbarEn: NavbarConfig = [
     {
         text: '首页',
         link: '/',
+    },
+    {
+        text: '开发者',
+        link: '/job/video/shortVideo.md',
     },
     {
         text: '工具区',

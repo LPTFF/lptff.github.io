@@ -1,14 +1,10 @@
 <template>
   <div class="theme-container">
-    这是vue全局组件
     <div class="my-button">
       <el-button type="primary" >饿了么组件按钮</el-button>
     </div>
     <div class="my-button">
       <el-button type="primary" @click="goToOtherPage">切换到产品页面</el-button>
-    </div>
-    <div class="my-button">
-      <el-button type="primary" @click="goToHomePage">切换到添加页面</el-button>
     </div>
   </div>
 </template>

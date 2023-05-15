@@ -1,4 +1,4 @@
-export const data = JSON.parse("{\"key\":\"v-1891b76b\",\"path\":\"/develop/\",\"title\":\"\",\"lang\":\"zh-CN\",\"frontmatter\":{\"layout\":\"Layout\",\"navbar\":false,\"sidebar\":false,\"editLink\":false,\"lastUpdated\":false,\"contributors\":false},\"headers\":[],\"git\":{\"updatedTime\":1684138198000,\"contributors\":[{\"name\":\"LPTFF\",\"email\":\"lptffhh@gmail.com\",\"commits\":1}]},\"filePathRelative\":\".vuepress/views/develop.md\"}")
+export const data = JSON.parse("{\"key\":\"v-1891b76b\",\"path\":\"/develop/\",\"title\":\"\",\"lang\":\"zh-CN\",\"frontmatter\":{\"layout\":\"Layout\",\"navbar\":true,\"sidebar\":true,\"editLink\":false,\"lastUpdated\":false,\"contributors\":false},\"headers\":[],\"git\":{\"updatedTime\":1684143366000,\"contributors\":[{\"name\":\"LPTFF\",\"email\":\"lptffhh@gmail.com\",\"commits\":2}]},\"filePathRelative\":\".vuepress/views/develop.md\"}")
 
 if (import.meta.webpackHot) {
   import.meta.webpackHot.accept()

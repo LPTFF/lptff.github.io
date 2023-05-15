@@ -10,6 +10,7 @@ import { createPage } from '@vuepress/core'
 import {
     head,
     navbarEn,
+    navbarZh,
     sidebarEn,
     sidebarZh
 } from './config/index.js'
@@ -24,7 +25,7 @@ export default defineUserConfig({
         logo: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg',
         locales: {
             '/': {
-                navbar: true ? navbarEn : [],
+                navbar: false ? navbarEn : navbarZh,
                 sidebar: false ? sidebarEn : sidebarZh,
                 editLinkText: '在 GitHub 上编辑此页',
                 notFound: [
@@ -118,8 +119,8 @@ export default defineUserConfig({
             // 设置 frontmatter
             frontmatter: {
                 layout: 'Layout',
-                navbar: false,//关闭导航
-                sidebar: false,//关闭侧边栏
+                navbar: true,//关闭导航
+                sidebar: true,//关闭侧边栏
                 editLink: false,//关闭GitHub链接
                 lastUpdated: false,//关闭最后提交时间
                 contributors: false,//关闭贡献者
