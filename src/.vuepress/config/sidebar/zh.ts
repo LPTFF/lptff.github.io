@@ -31,21 +31,21 @@ export const sidebarZh: SidebarConfig = {
         {
             text: '工具区',
             children: [
-                '/job/video/shortVideo.md',
+                '/job/tools/linkList.md',
             ]
         },
         {
             text: '开发者',
             children: [
-                '/job/develop/README.md',
+                '/job/develop/feature.md',
             ]
         },
         {
             text: 'idea',
             children: [
-                '/job/tools/products.md',
-                '/job/tools/test.md',
-                '/job/tools/chatGPT.md'
+                '/job/idea/products.md',
+                '/job/idea/test.md',
+                '/job/idea/chatGPT.md'
             ]
         }
     ]

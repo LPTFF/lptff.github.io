@@ -10,11 +10,11 @@ export const navbarZh: NavbarConfig = [
         children: [
             {
                 text: '工具区',
-                link: '/job/video/shortVideo.md',
+                link: '/job/tools/linkList.md',
             },
             {
                 text: '开发者',
-                link: '/job/develop/README.md',
+                link: '/job/develop/feature.md',
             }
         ]
     },

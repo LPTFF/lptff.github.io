@@ -7,11 +7,11 @@ export const navbarEn: NavbarConfig = [
     },
     {
         text: '开发者',
-        link: '/job/video/shortVideo.md',
+        link: '/job/tools/linkList.md',
     },
     {
         text: '工具区',
-        link: '/job/video/shortVideo.md',
+        link: '/job/tools/linkList.md',
     },
     {
         text: '实验室',

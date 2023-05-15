@@ -16,7 +16,7 @@ export default{
     const route = useRouter();
     const goToOtherPage = () => {
       route.push({
-        path: '/job/tools/products'+routeSuffix,
+        path: '/job/idea/products'+routeSuffix,
         query: {
           value: '233',
         },

@@ -8,10 +8,10 @@ actions:
     link: /study/notebook/2018/underwaterRobots01.md
     type: primary
   - text: 实验室
-    link: /job/video/shortVideo.md
+    link: /job/tools/linkList.md
     type: secondary
   - text: 开发者
-    link: /job/develop/README.md
+    link: /job/develop/feature.md
     type: secondary
 features:
 - title: 求学笔记

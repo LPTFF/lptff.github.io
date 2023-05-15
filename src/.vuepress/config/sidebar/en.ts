@@ -45,7 +45,7 @@ export const sidebarEn: SidebarConfig = [
     },
     {
         text: '短视频',
-        link: '/job/video/shortVideo.md',
+        link: '/job/tools/linkList.md',
     },
     {
         text: '实验室',
