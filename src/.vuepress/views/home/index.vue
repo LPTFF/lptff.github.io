@@ -1,9 +1,6 @@
 <template>
   <div class="theme-container">
     <div class="my-button">
-      <el-button type="primary"  @click="$router.go(-1)">返回</el-button>
-    </div>
-    <div class="my-button">
       <el-button type="primary" @click="goToOtherPage">去往生活页面</el-button>
     </div>
     <div class="my-button">

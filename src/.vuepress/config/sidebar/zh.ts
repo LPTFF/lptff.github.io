@@ -35,7 +35,13 @@ export const sidebarZh: SidebarConfig = {
             ]
         },
         {
-            text: '实验室',
+            text: '开发者',
+            children: [
+                '/job/develop/README.md',
+            ]
+        },
+        {
+            text: 'idea',
             children: [
                 '/job/tools/products.md',
                 '/job/tools/test.md',

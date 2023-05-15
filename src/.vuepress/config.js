@@ -6,7 +6,7 @@ import viteCompression from 'vite-plugin-compression'
 // import process from 'node:process'
 // import { visualizer } from 'rollup-plugin-visualizer'
 const __dirname = getDirname(import.meta.url)
-import { createPage } from '@vuepress/core'
+// import { createPage } from '@vuepress/core'
 import {
     head,
     navbarEn,
@@ -111,22 +111,22 @@ export default defineUserConfig({
         },
         vuePluginOptions: {},
     }),
-    async onInitialized(app) {
-        // 创建开发主页
-        const homepage = await createPage(app, {
-            path: '/develop',
-            filePath: path.resolve(__dirname, './views/develop.md'),
-            // 设置 frontmatter
-            frontmatter: {
-                layout: 'Layout',
-                navbar: true,//关闭导航
-                sidebar: true,//关闭侧边栏
-                editLink: false,//关闭GitHub链接
-                lastUpdated: false,//关闭最后提交时间
-                contributors: false,//关闭贡献者
-            },
-        })
-        // 把它添加到 `app.pages`
-        app.pages.push(homepage)
-    },
+    // async onInitialized(app) {
+    //     // 创建开发主页
+    //     const homepage = await createPage(app, {
+    //         path: '/develop',
+    //         filePath: path.resolve(__dirname, './views/develop.md'),
+    //         // 设置 frontmatter
+    //         frontmatter: {
+    //             layout: 'Layout',
+    //             navbar: true,//关闭导航
+    //             sidebar: true,//关闭侧边栏
+    //             editLink: false,//关闭GitHub链接
+    //             lastUpdated: false,//关闭最后提交时间
+    //             contributors: false,//关闭贡献者
+    //         },
+    //     })
+    //     // 把它添加到 `app.pages`
+    //     app.pages.push(homepage)
+    // },
 })
