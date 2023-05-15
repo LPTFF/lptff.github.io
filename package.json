@@ -4,12 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "serve": "vite",
-    "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "serve": "vuepress dev src",
+    "build": "vuepress build src"
   },
   "dependencies": {
     "element-plus": "2.3.4",
