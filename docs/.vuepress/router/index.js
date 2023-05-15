@@ -1,4 +1,3 @@
-import { createRouter, createWebHistory } from 'vue-router'
 const NotFoundComponent = { template: '<p>Page not found</p>' }
 
 // 创建一个Vue 应用
@@ -9,9 +8,4 @@ const routes = [
     { path: '/Life', name: 'Life', component: () => import('../views/life/index.vue') }
 ]
 
-const routerExternal = createRouter({
-    history: createWebHistory(import.meta.env.BASE_URL),
-    routes: routes
-})
-
-export default routerExternal
+export default routes

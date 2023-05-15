@@ -118,6 +118,11 @@ export default defineUserConfig({
             // 设置 frontmatter
             frontmatter: {
                 layout: 'Layout',
+                navbar: false,//关闭导航
+                sidebar: false,//关闭侧边栏
+                editLink: false,//关闭GitHub链接
+                lastUpdated: false,//关闭最后提交时间
+                contributors: false,//关闭贡献者
             },
         })
         // 把它添加到 `app.pages`
