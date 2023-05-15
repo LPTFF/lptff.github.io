@@ -9,9 +9,9 @@ const routes = [
     { path: '/Life', name: 'Life', component: () => import('../views/life/index.vue') }
 ]
 
-const router = createRouter({
+const routerExternal = createRouter({
     history: createWebHistory(import.meta.env.BASE_URL),
     routes: routes
 })
 
-export default router
+export default routerExternal

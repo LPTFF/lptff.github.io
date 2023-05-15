@@ -1,5 +1,5 @@
 <template>
-    <div >
-      home
+    <div>
+      job
     </div>
   </template>

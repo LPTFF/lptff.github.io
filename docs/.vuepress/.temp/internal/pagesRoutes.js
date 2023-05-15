@@ -11,4 +11,5 @@ export const pagesRoutes = [
   ["v-25336cc2","/study/notebook/2019/autoDriveForMIT04.html",{"title":"无人驾驶麻省理工04讲"},["/study/notebook/2019/autoDriveForMIT04","/study/notebook/2019/autoDriveForMIT04.md"]],
   ["v-b9cd924a","/study/notebook/2019/underwaterRobots02.html",{"title":"AI应用之水下机器人02"},["/study/notebook/2019/underwaterRobots02","/study/notebook/2019/underwaterRobots02.md"]],
   ["v-3706649a","/404.html",{"title":""},["/404"]],
+  ["v-1891b76b","/develop/",{"title":""},["/develop/index.html","/.vuepress/views/develop.html","/.vuepress/views/develop.md"]],
 ]

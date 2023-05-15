@@ -3,6 +3,7 @@ import {
   now,
   setupDevtoolsPlugin
 } from "./chunk-RFQTXRIF.js";
+import "./chunk-DFKQJ226.js";
 export {
   isPerformanceSupported,
   now,

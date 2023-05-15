@@ -1,3 +1,3 @@
 # 测试
 
-cdn6666
+<MyComponent></MyComponent>

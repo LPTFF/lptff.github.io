@@ -6,6 +6,7 @@ import viteCompression from 'vite-plugin-compression'
 // import process from 'node:process'
 // import { visualizer } from 'rollup-plugin-visualizer'
 const __dirname = getDirname(import.meta.url)
+import { createPage } from '@vuepress/core'
 import {
     head,
     navbarEn,
@@ -109,4 +110,17 @@ export default defineUserConfig({
         },
         vuePluginOptions: {},
     }),
+    async onInitialized(app) {
+        // 创建开发主页
+        const homepage = await createPage(app, {
+            path: '/develop',
+            filePath: path.resolve(__dirname, './views/develop.md'),
+            // 设置 frontmatter
+            frontmatter: {
+                layout: 'Layout',
+            },
+        })
+        // 把它添加到 `app.pages`
+        app.pages.push(homepage)
+    },
 })
