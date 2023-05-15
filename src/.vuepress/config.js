@@ -70,12 +70,9 @@ export default defineUserConfig({
                 emptyOutDir: false,
                 rollupOptions: {
                     output: {
-                        // entryFileNames: `assets/[name].${timestamp}.js`,
-                        // chunkFileNames: `assets/[name].${timestamp}.js`,
-                        // assetFileNames: `assets/[name].${timestamp}.[ext]`
-                        entryFileNames: `assets/[name].js`,
-                        chunkFileNames: `assets/[name].js`,
-                        assetFileNames: `assets/[name].[ext]`,
+                        // entryFileNames: `assets/[name].js`,
+                        // chunkFileNames: `assets/[name].js`,
+                        // assetFileNames: `assets/[name].[ext]`,
                         ...({
                             manualChunks(id) {
                                 if (id.includes('node_modules')) {
