@@ -13,7 +13,7 @@ npm run build
 cd src/.vuepress/dist
 
 # 如果是发布到自定义域名
-echo 'tangff.life' > CNAME
+echo 'love-tff.gitee.io' > CNAME
 
 git init
 git add -A
@@ -21,4 +21,4 @@ git add -A
 git commit -m $(date +%F日%H时%M分%S秒)
 
 # 发布
-git push -f "https://gitee.com/love-tff/lptff.github.io.git" HEAD:gitee-pages
+git push -f "https://gitee.com/love-tff/love-tff.git" HEAD:gitee-pages
