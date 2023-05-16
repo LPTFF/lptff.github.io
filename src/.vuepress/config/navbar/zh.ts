@@ -52,8 +52,12 @@ export const navbarZh: NavbarConfig = [
         text: '相关链接',
         children: [
             {
-                text: '我的Github',
+                text: 'Github',
                 link: 'https://github.com/LPTFF/lptff.github.io',
+            },
+            {
+                text: 'gitee',
+                link: 'https://gitee.com/love-tff/love-tff',
             },
             {
                 text: 'vuepress中文',
