@@ -17,7 +17,8 @@ echo 'tangff.life' > CNAME
 
 git init
 git add -A
-git commit -m 'deploy'
+# 时间戳2023-05-16日15时02分13秒格式提交
+git commit -m $(date +%F日%H时%M分%S秒)
 
 # 发布
-git push -f "https://gitee.com/love-tff/love-tff.git" HEAD:gitee-pages
+git push -f "https://gitee.com/love-tff/lptff.github.io.git" HEAD:gitee-pages
