@@ -13,7 +13,7 @@ npm run build
 cd src/.vuepress/dist
 
 # 如果是发布到自定义域名
-# echo 'blog.goodluckweb.top' > CNAME
+echo 'tangff.life' > CNAME
 
 git init
 git add -A
