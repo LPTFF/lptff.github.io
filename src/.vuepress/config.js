@@ -43,7 +43,7 @@ export default defineUserConfig({
         },
         docsRepo: 'https://github.com/LPTFF/lptff.github.io',
         docsBranch: 'master',
-        docsDir: 'docs',
+        docsDir: 'src',
         editLinkPattern: ':repo/edit/:branch/:path',
     }),
     clientConfigFile: path.resolve(
