@@ -20,5 +20,5 @@ features:
   details: 开发首选项。
 - title: 常用链接
   details: 常用的网站链接。
-footer: MIT Licensed | Copyright © 2023 LPTFF
+footer: MIT Licensed | Copyright © 2023 tangff
 ---
