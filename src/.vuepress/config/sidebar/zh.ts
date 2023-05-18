@@ -45,7 +45,8 @@ export const sidebarZh: SidebarConfig = {
             children: [
                 '/job/idea/products.md',
                 '/job/idea/test.md',
-                '/job/idea/chatGPT.md'
+                '/job/idea/chatGPT.md',
+                '/job/idea/todoList.md'
             ]
         }
     ]
