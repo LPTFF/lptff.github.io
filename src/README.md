@@ -2,7 +2,7 @@
 home: true
 heroImage: https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/bg.jpg
 heroText: 随风而逝
-tagline: 期待改变！
+tagline: 不积跬步，无以至千里；不积小流，无以成江海
 actions:
   - text: 待办事项
     link: /job/idea/todoList.md
