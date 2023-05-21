@@ -4,7 +4,6 @@
 
 ## ChatGPT版本一
 
-
 To scrape news from websites of interest using Vue, you can use a combination of Vue.js, Node.js, and web scraping libraries. One popular web scraping library for Node.js is Cheerio.
 
 Here's a general outline of how you can achieve this:
@@ -20,7 +19,6 @@ It's important to note that web scraping can be a legally and ethically complex 
 
 ## ChatGPT版本二
 
-
 As an AI language model, I cannot provide you with the exact code to crawl news from websites. However, I can give you some guidance on how to approach this task using Vue.
 
 1. Identify the websites you want to crawl news from and understand their structure and content.
@@ -33,3 +31,15 @@ As an AI language model, I cannot provide you with the exact code to crawl news 
 8. Implement error handling and logging mechanisms to ensure that your application runs smoothly even when there are issues with fetching data from the websites.
 
 Remember that web scraping can be illegal in some cases, so make sure you have permission from website owners before scraping their content.
+
+## 后记
+
+ChatGPT已经通过教程注册上去了，花了2刀。另外，后续可以考虑使用ChatGPT+Google搜索来解决开发的问题了
+
+## 今日待办事项20230521
+
+1、主业新闻聚合开发
+
+2、添加全局页面页脚
+
+3、找工作面试准备
