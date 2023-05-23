@@ -1,47 +1,49 @@
 <template>
-  <div class="news-aggregator">
-    <el-header>
-      <div class="header-div" @click="goBack">
-        <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"/>
-        <div class="logo-title">tangff</div>
-      </div>
-      <el-menu class="navigation" mode="horizontal" :collapse="isCollapsed">
-        <el-menu-item index="1">首页</el-menu-item>
-        <el-menu-item index="2">豆瓣电影</el-menu-item>
-        <el-menu-item index="3">其他</el-menu-item>
-        <!-- 添加其他菜单项 -->
-      </el-menu>
-    </el-header>
-    <el-main>
-      <div class="main-content">
-        <div class="news-list">
-          <el-card class="news-card" v-for="news in newsList" :key="news.id">
-            <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
-            <div class="news-details">
-              <h3 class="news-title">{{ news.title }}</h3>
-              <p class="news-summary">{{ news.summary }}</p>
-              <span class="news-date">{{ news.date }}</span>
-            </div>
-          </el-card>
+  <div >
+    <div class="news-aggregator">
+      <el-header>
+        <div class="header-div" @click="goBack">
+          <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"/>
+          <div class="logo-title">tangff</div>
         </div>
-        <!-- <el-aside class="sidebar">
-          <el-menu class="sidebar-menu" default-active="1" :collapse="isCollapsed">
-            <el-submenu index="1">
-              <el-menu-item index="1-1">科技</el-menu-item>
-              <el-menu-item index="1-2">娱乐</el-menu-item>
-              <el-menu-item index="1-3">体育</el-menu-item>
-            </el-submenu>
-          </el-menu>
-        </el-aside> -->
-      </div>
-    </el-main>
-    <el-footer class="footer">
-      <div class="footer-text">版权信息 © 2023 </div>
-      <!-- <div class="footer-links">
-        <a href="#">关于我们</a>
-        <a href="#">联系我们</a>
-      </div> -->
-    </el-footer>
+        <el-menu class="navigation" mode="horizontal" :collapse="isCollapsed">
+          <el-menu-item index="1">首页</el-menu-item>
+          <el-menu-item index="2">豆瓣电影</el-menu-item>
+          <el-menu-item index="3">其他</el-menu-item>
+          <!-- 添加其他菜单项 -->
+        </el-menu>
+      </el-header>
+      <el-main>
+        <div class="main-content">
+          <div class="news-list">
+            <el-card class="news-card" v-for="news in newsList" :key="news.id">
+              <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
+              <div class="news-details">
+                <h3 class="news-title">{{ news.title }}</h3>
+                <p class="news-summary">{{ news.summary }}</p>
+                <span class="news-date">{{ news.date }}</span>
+              </div>
+            </el-card>
+          </div>
+          <!-- <el-aside class="sidebar">
+            <el-menu class="sidebar-menu" default-active="1" :collapse="isCollapsed">
+              <el-submenu index="1">
+                <el-menu-item index="1-1">科技</el-menu-item>
+                <el-menu-item index="1-2">娱乐</el-menu-item>
+                <el-menu-item index="1-3">体育</el-menu-item>
+              </el-submenu>
+            </el-menu>
+          </el-aside> -->
+        </div>
+      </el-main>
+      <el-footer class="footer">
+        <div class="footer-text">版权信息 © 2023 </div>
+        <!-- <div class="footer-links">
+          <a href="#">关于我们</a>
+          <a href="#">联系我们</a>
+        </div> -->
+      </el-footer>
+    </div>
   </div>
 </template>
 
