@@ -12,8 +12,8 @@
           <el-menu-item index="3">其他</el-menu-item>
         </el-menu>
       </el-header>
-      <el-main>
-        <div class="main-content">
+      <el-main class="main-content">
+        <div>
           <div class="news-list" v-if="selectIndex == '1'">
             <el-card class="news-card" v-for="news in newsList" :key="news.id">
               <div class="news-details">
@@ -25,7 +25,7 @@
           </div>
           <div class="movie-list" v-if="selectIndex == '2'">
             <el-row>
-              <el-col :span="24" :md="12" :lg="8" v-for="(item, index) in movies" :key="index">
+              <el-col :span="24" :md="8" :lg="6" v-for="(item, index) in movies" :key="index">
                 <el-card class="movie-item" shadow="hover" @click="handleJump(item)">
                   <img :src="`https://images.weserv.nl/?url=` + item.cover" alt="电影封面" class="movie-image" />
                   <div class="movie-content">
@@ -51,8 +51,8 @@
           </div>
         </div>
       </el-main>
-      <el-footer class="footer">
-        <div class="footer-text">版权信息 © 2023 </div>
+      <el-footer class="footer" @click="gotoIssue">
+        <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023 </div>
         <!-- <div class="footer-links">
           <a href="#">关于我们</a>
           <a href="#">联系我们</a>
@@ -161,12 +161,25 @@ export default {
       let data = isPC();
       console.log(data);
       item.url ? gotoOutPage(item.url) : '';
+    },
+    gotoIssue() {
+      let pageUrl = window.location.origin;
+      console.log('pageUrl', pageUrl);
+      if (pageUrl.startsWith('https://love-tff.gitee.io/')) {
+        gotoOutPage('https://gitee.com/love-tff/love-tff/issues')
+      } else {
+        gotoOutPage('https://github.com/LPTFF/lptff.github.io/issues')
+      }
     }
   },
 };
 </script>
 
 <style scoped>
+.header-el {
+  height: fit-content;
+}
+
 .logo-title {
   margin: auto 0;
   color: rgb(44, 62, 80);
@@ -196,14 +209,9 @@ export default {
   line-height: 80px;
 }
 
-.main-content {
-  display: flex;
-}
-
 .news-list {
-  flex: 2;
   margin-right: 20px;
-  margin-top: 50px;
+  margin-top: 10px;
 }
 
 .news-card {
@@ -233,7 +241,13 @@ export default {
 .footer {
   padding: 20px;
   text-align: center;
-  background-color: #f5f5f5;
+  background-color: rgb(255, 255, 255);
+  ;
+  position: fixed;
+  bottom: 0px;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 1200px;
 }
 
 .footer-text {
@@ -243,16 +257,18 @@ export default {
 
 .movie-list {
   max-width: 1200px;
-  margin: 30px auto;
-  padding: 20px;
+  margin: 0 auto;
+  /* padding: 20px; */
+  padding-top: 10px;
+  margin-bottom: 40px;
 }
 
 .movie-item {
   text-align: center;
   background-color: #f5f7fa;
   border-radius: 4px;
-  padding: 20px;
   margin-bottom: 20px;
+  margin-right: 20px;
 }
 
 .title-div {
@@ -261,8 +277,8 @@ export default {
 }
 
 .movie-image {
-  width: 100%;
-  height: auto;
+  width: 109px;
+  height: 154px;
   margin-bottom: 12px;
 }
 
@@ -274,6 +290,10 @@ export default {
 
 .title-movie {
   color: rgb(51, 119, 170);
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .rate-movie {
@@ -299,11 +319,12 @@ export default {
   }
 
   .movie-list {
-    margin-top: 95px;
+    margin-top: 0px;
   }
 
-  .news-list {
-    margin-top: 115px;
+
+  .main-content {
+    padding-top: 115px;
   }
 }
 </style>
