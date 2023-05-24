@@ -72,6 +72,12 @@ export default defineUserConfig({
                         secure: true,
                         changeOrigin: true,             //是否跨域
                         rewrite: (path) => path.replace(/^\/Jue/, ''),
+                    },
+                    '/douban': {
+                        target: 'https://movie.douban.com', //接口域名
+                        secure: true,
+                        changeOrigin: true,             //是否跨域
+                        rewrite: (path) => path.replace(/^\/douban/, ''),
                     }
                 }
             },

@@ -15,7 +15,34 @@
       </el-header>
       <el-main>
         <div class="main-content">
-          <div class="news-list">
+          <div class="news-list" v-if="selectIndex == '1'">
+            <el-card class="news-card" v-for="news in newsList" :key="news.id">
+              <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
+              <div class="news-details">
+                <h3 class="news-title">{{ news.title }}</h3>
+                <p class="news-summary">{{ news.summary }}</p>
+                <span class="news-date">{{ news.date }}</span>
+              </div>
+            </el-card>
+          </div>
+          <div class="movie-list" v-if="selectIndex == '2'">
+            <el-row>
+              <el-col :span="24" :md="12" :lg="8" v-for="(item, index) in movies" :key="index">
+                <el-card class="movie-item" shadow="hover" @click="handleJump(item)">
+                  <img :src="`https://images.weserv.nl/?url=` + item.cover" alt="电影封面" class="movie-image" />
+                  <div class="movie-content">
+                    <div class="title-div">
+                      <img v-if="item.is_new" class="is-new"
+                        src="https://images.weserv.nl/?url=https://img1.doubanio.com/f/movie/caa8f80abecee1fc6f9d31924cef8dd9a24c7227/pics/movie/ic_new.png" />
+                      <h3 class="title-movie">{{ item.title }}</h3>
+                    </div>
+                    <p class="rate-movie">{{ item.rate }}</p>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+          <div class="news-list" v-if="selectIndex == '3'">
             <el-card class="news-card" v-for="news in newsList" :key="news.id">
               <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
               <div class="news-details">
@@ -49,7 +76,10 @@
 
 <script lang="ts">
 import { onMounted } from 'vue'
-import { getRequestGet, getRequestPost, getRequestHead } from '../../utils/utils';
+import { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage } from '../../utils/utils';
+import data from '../../public/data/movie.json';
+import localMovie from './data.json';
+// import { saveAs } from 'file-saver';
 export default {
   data() {
     return {
@@ -69,20 +99,28 @@ export default {
           date: "2023-05-21",
         }
       ],
-      logoFor: '../../public/img/logo.jpg'
+      movies: [
+        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
+        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
+        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
+        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' }
+      ],
+      selectIndex: '1',
+      categories: data.categories,
+      localData: localMovie
     };
   },
   setup() {
     onMounted(async () => {
-      let data = await getRequestGet('/Run/try/ajax/json_demo.json');
-      console.log('1', data);
-      //https://api.juejin.cn/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20
-      let url1 = '/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20'
-      let data2 = await getRequestGet(url1);
-      console.log('2', data2);
+      // let data = await getRequestGet('/Run/try/ajax/json_demo.json');
+      // console.log('1', data);
+      // //https://api.juejin.cn/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20
+      // let url1 = '/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20'
+      // let data2 = await getRequestGet(url1);
+      // console.log('2', data2);
       // let getTokenUrl='https://api.juejin.cn/user_api/v1/sys/token';
       // getRequestHead(getTokenUrl);
-      // let params={
+      // let params = {
       //   cate_id: "6809637767543259144",
       //   cursor: "0",
       //   id_type: 2,
@@ -91,35 +129,29 @@ export default {
       //   tag_id: "6809640398105870343"
       // }
       // //https://api.juejin.cn/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0
-      // let url='/Jue/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0';
-      // let data3= await getRequestPost(url,params);
-      // console.log('3',data3);
+      // let url = '/Jue/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0';
+      // let data3 = await getRequestPost(url, params);
+      // console.log('3', data3);
     })
   },
   methods: {
     goBack() {
       this.$router.back(); // 返回上一个路由
     },
-    handleSelect(key, keyPath) {
+    async handleSelect(key, keyPath) {
       console.log(key, keyPath);
+      console.log('localData', this.localData);
+      this.selectIndex = key;
       if (key == '2') {
-        this.newsList = [
-          {
-            id: 1,
-            title: "豆瓣电影标题 1",
-            summary: "新闻摘要",
-            thumbnail: "https://source.unsplash.com/1280x720/?news1",
-            date: "2023-05-22",
-          },
-          {
-            id: 2,
-            title: "豆瓣电影标题 2",
-            summary: "新闻摘要",
-            thumbnail: "https://source.unsplash.com/1280x720/?news2",
-            date: "2023-05-21",
-          },
-          // 添加更多新闻项
-        ];
+        //https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0
+        this.movies = this.localData.subjects;
+        // let url = '/douban/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0';
+        // let data = await getRequestGet(url);
+        // console.log('1', data.subjects);
+        // this.movies = data.subjects;
+        // const jsonData = JSON.stringify(data);
+        // const blob = new Blob([jsonData], { type: 'application/json' });
+        // saveAs(blob, 'data.json');
       } else if (key == '3') {
         this.newsList = [
           {
@@ -156,6 +188,12 @@ export default {
           }
         ];
       }
+    },
+    handleJump(item) {
+      console.log(item);
+      let data = isPC();
+      console.log(data);
+      item.url ? gotoOutPage(item.url) : '';
     }
   },
 };
@@ -271,6 +309,80 @@ export default {
   color: #666;
 }
 
+.movie-list {
+  max-width: 1200px;
+  margin: 30px auto;
+  padding: 20px;
+}
+
+.title {
+  font-size: 24px;
+  margin-bottom: 16px;
+}
+
+.movie-item {
+  text-align: center;
+  background-color: #f5f7fa;
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.title-div {
+  display: flex;
+  justify-content: center;
+}
+
+.movie-image {
+  width: 100%;
+  height: auto;
+  margin-bottom: 12px;
+}
+
+.is-new {
+  margin: auto 5px;
+  width: 16px;
+  height: 16px;
+}
+
+.title-movie {
+  color: rgb(51, 119, 170);
+}
+
+.rate-movie {
+  color: rgb(224, 144, 21);
+}
+
+.movie-content {
+  font-size: 14px;
+  color: #909399;
+}
+
+/* 响应式布局 */
+@media (orientation: landscape) {
+  .el-row {
+    /* display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto; */
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .el-col {
+    flex: 0 0 auto;
+    margin-right: 20px;
+  }
+
+  .el-card {
+    width: 300px;
+  }
+}
+
+@media (max-width: 767px) {
+  .el-col {
+    margin-bottom: 20px;
+  }
+}
+
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
   .logo {
@@ -296,4 +408,5 @@ export default {
   .sidebar {
     display: none;
   }
-}</style>
+}
+</style>
