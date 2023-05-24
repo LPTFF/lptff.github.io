@@ -33,8 +33,8 @@
                       <img v-if="item.is_new" class="is-new"
                         src="https://images.weserv.nl/?url=https://img1.doubanio.com/f/movie/caa8f80abecee1fc6f9d31924cef8dd9a24c7227/pics/movie/ic_new.png" />
                       <h3 class="title-movie">{{ item.title }}</h3>
+                      <p class="rate-movie">{{ item.rate }}</p>
                     </div>
-                    <p class="rate-movie">{{ item.rate }}</p>
                   </div>
                 </el-card>
               </el-col>
@@ -277,13 +277,13 @@ export default {
 }
 
 .movie-image {
-  width: 109px;
-  height: 154px;
+  width: 218px;
+  height: 308px;
   margin-bottom: 12px;
 }
 
 .is-new {
-  margin: auto 5px;
+  margin: 5px 5px;
   width: 16px;
   height: 16px;
 }
@@ -294,10 +294,16 @@ export default {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  margin-top: -2px;
+  margin-bottom: 10px;
 }
 
 .rate-movie {
   color: rgb(224, 144, 21);
+  margin-top: -5px;
+  font-size: 20px;
+  margin-bottom: 0px;
+  margin-left: 10px;
 }
 
 .movie-content {
