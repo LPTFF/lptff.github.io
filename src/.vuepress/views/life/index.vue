@@ -1,23 +1,21 @@
 <template>
   <div>
     <div class="news-aggregator">
-      <el-header>
+      <el-header class="header-el">
         <div class="header-div" @click="goBack">
           <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg" />
           <div class="logo-title">tangff</div>
         </div>
-        <el-menu class="navigation" mode="horizontal" default-active="1" @select="handleSelect">
+        <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
           <el-menu-item index="1">首页</el-menu-item>
           <el-menu-item index="2">豆瓣电影</el-menu-item>
           <el-menu-item index="3">其他</el-menu-item>
-          <!-- 添加其他菜单项 -->
         </el-menu>
       </el-header>
       <el-main>
         <div class="main-content">
           <div class="news-list" v-if="selectIndex == '1'">
             <el-card class="news-card" v-for="news in newsList" :key="news.id">
-              <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
               <div class="news-details">
                 <h3 class="news-title">{{ news.title }}</h3>
                 <p class="news-summary">{{ news.summary }}</p>
@@ -44,7 +42,6 @@
           </div>
           <div class="news-list" v-if="selectIndex == '3'">
             <el-card class="news-card" v-for="news in newsList" :key="news.id">
-              <!-- <img :src="news.thumbnail" alt="News Thumbnail" class="news-thumbnail" /> -->
               <div class="news-details">
                 <h3 class="news-title">{{ news.title }}</h3>
                 <p class="news-summary">{{ news.summary }}</p>
@@ -52,15 +49,6 @@
               </div>
             </el-card>
           </div>
-          <!-- <el-aside class="sidebar">
-            <el-menu class="sidebar-menu" default-active="1" >
-              <el-submenu index="1">
-                <el-menu-item index="1-1">科技</el-menu-item>
-                <el-menu-item index="1-2">娱乐</el-menu-item>
-                <el-menu-item index="1-3">体育</el-menu-item>
-              </el-submenu>
-            </el-menu>
-          </el-aside> -->
         </div>
       </el-main>
       <el-footer class="footer">
@@ -75,76 +63,55 @@
 </template>
 
 <script lang="ts">
-import { onMounted } from 'vue'
+import { ref, onMounted, toRefs } from 'vue';
 import { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage } from '../../utils/utils';
-import data from '../../public/data/movie.json';
 import localMovie from './data.json';
 // import { saveAs } from 'file-saver';
 export default {
   data() {
-    return {
-      newsList: [
-        {
-          id: 1,
-          title: "新闻标题 1",
-          summary: "新闻摘要",
-          thumbnail: "https://source.unsplash.com/1280x720/?news1",
-          date: "2023-05-22",
-        },
-        {
-          id: 2,
-          title: "新闻标题 2",
-          summary: "新闻摘要",
-          thumbnail: "https://source.unsplash.com/1280x720/?news2",
-          date: "2023-05-21",
-        }
-      ],
-      movies: [
-        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
-        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
-        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' },
-        { title: '电影', rate: 8.5, is_new: false, cover: 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg' }
-      ],
-      selectIndex: '1',
-      categories: data.categories,
-      localData: localMovie
-    };
+    return {};
   },
   setup() {
+    let selectIndex = ref('2');
+    let movies = ref(localMovie.subjects);
+    let newsList = ref([
+      {
+        id: 1,
+        title: "新闻标题 1",
+        summary: "新闻摘要",
+        thumbnail: "https://source.unsplash.com/1280x720/?news1",
+        date: "2023-05-22",
+      },
+      {
+        id: 2,
+        title: "新闻标题 2",
+        summary: "新闻摘要",
+        thumbnail: "https://source.unsplash.com/1280x720/?news2",
+        date: "2023-05-21",
+      }
+    ]);
+    let isPCRes = ref(isPC());
+    const callMethod = () => {
+      console.log('233');
+
+    };
     onMounted(async () => {
-      // let data = await getRequestGet('/Run/try/ajax/json_demo.json');
-      // console.log('1', data);
-      // //https://api.juejin.cn/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20
-      // let url1 = '/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20'
-      // let data2 = await getRequestGet(url1);
-      // console.log('2', data2);
-      // let getTokenUrl='https://api.juejin.cn/user_api/v1/sys/token';
-      // getRequestHead(getTokenUrl);
-      // let params = {
-      //   cate_id: "6809637767543259144",
-      //   cursor: "0",
-      //   id_type: 2,
-      //   limit: 20,
-      //   sort_type: 200,
-      //   tag_id: "6809640398105870343"
-      // }
-      // //https://api.juejin.cn/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0
-      // let url = '/Jue/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0';
-      // let data3 = await getRequestPost(url, params);
-      // console.log('3', data3);
-    })
+      callMethod(); // 在组件挂载后调用方法
+    });
+    return {
+      callMethod, selectIndex, movies, newsList, isPCRes
+    };
   },
   methods: {
     goBack() {
       this.$router.back(); // 返回上一个路由
     },
-    async handleSelect(key, keyPath) {
-      console.log(key, keyPath);
-      console.log('localData', this.localData);
+    async handleSelect(key) {
+      console.log(key);
       this.selectIndex = key;
       if (key == '2') {
         //https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0
-        this.movies = this.localData.subjects;
+        this.movies = localMovie.subjects;
         // let url = '/douban/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0';
         // let data = await getRequestGet(url);
         // console.log('1', data.subjects);
@@ -224,24 +191,9 @@ export default {
   margin: 0 auto;
 }
 
-.logo {
-  font-size: 24px;
-  font-weight: bold;
-  color: #333;
-  margin-right: 20px;
-}
 
 .navigation {
   line-height: 80px;
-}
-
-.search-input {
-  width: 200px;
-  margin-left: 20px;
-}
-
-.collapse-button {
-  margin-left: 20px;
 }
 
 .main-content {
@@ -251,15 +203,13 @@ export default {
 .news-list {
   flex: 2;
   margin-right: 20px;
+  margin-top: 50px;
 }
 
 .news-card {
   margin-bottom: 20px;
 }
 
-.news-thumbnail {
-  width: 100%;
-}
 
 .news-details {
   padding: 20px;
@@ -280,14 +230,6 @@ export default {
   color: #999;
 }
 
-.sidebar {
-  flex: 1;
-}
-
-.sidebar-menu {
-  width: 200px;
-}
-
 .footer {
   padding: 20px;
   text-align: center;
@@ -299,25 +241,10 @@ export default {
   color: #666;
 }
 
-.footer-links {
-  display: flex;
-  justify-content: center;
-}
-
-.footer-links a {
-  margin: 0 10px;
-  color: #666;
-}
-
 .movie-list {
   max-width: 1200px;
   margin: 30px auto;
   padding: 20px;
-}
-
-.title {
-  font-size: 24px;
-  margin-bottom: 16px;
 }
 
 .movie-item {
@@ -359,54 +286,24 @@ export default {
 }
 
 /* 响应式布局 */
-@media (orientation: landscape) {
-  .el-row {
-    /* display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto; */
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .el-col {
-    flex: 0 0 auto;
-    margin-right: 20px;
-  }
-
-  .el-card {
-    width: 300px;
-  }
-}
-
-@media (max-width: 767px) {
-  .el-col {
-    margin-bottom: 20px;
-  }
-}
-
-/* 响应式布局 */
 @media screen and (max-width: 768px) {
-  .logo {
-    font-size: 20px;
-  }
-
-  .navigation {
-    display: none;
-  }
-
-  .search-input {
-    width: 150px;
-  }
-
-  .collapse-button {
-    display: inline-block;
+  .header-el {
+    position: fixed;
+    z-index: 9999;
+    width: 100%;
+    background-color: var(--el-menu-bg-color);
   }
 
   .news-list {
     margin-right: 0;
   }
 
-  .sidebar {
-    display: none;
+  .movie-list {
+    margin-top: 95px;
+  }
+
+  .news-list {
+    margin-top: 115px;
   }
 }
 </style>
