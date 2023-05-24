@@ -1,12 +1,12 @@
 <template>
-  <div >
+  <div>
     <div class="news-aggregator">
       <el-header>
         <div class="header-div" @click="goBack">
-          <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"/>
+          <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg" />
           <div class="logo-title">tangff</div>
         </div>
-        <el-menu class="navigation" mode="horizontal" :collapse="isCollapsed">
+        <el-menu class="navigation" mode="horizontal" default-active="1" @select="handleSelect">
           <el-menu-item index="1">首页</el-menu-item>
           <el-menu-item index="2">豆瓣电影</el-menu-item>
           <el-menu-item index="3">其他</el-menu-item>
@@ -26,7 +26,7 @@
             </el-card>
           </div>
           <!-- <el-aside class="sidebar">
-            <el-menu class="sidebar-menu" default-active="1" :collapse="isCollapsed">
+            <el-menu class="sidebar-menu" default-active="1" >
               <el-submenu index="1">
                 <el-menu-item index="1-1">科技</el-menu-item>
                 <el-menu-item index="1-2">娱乐</el-menu-item>
@@ -48,6 +48,8 @@
 </template>
 
 <script lang="ts">
+import { onMounted } from 'vue'
+import { getRequestGet, getRequestPost, getRequestHead } from '../../utils/utils';
 export default {
   data() {
     return {
@@ -65,39 +67,119 @@ export default {
           summary: "新闻摘要",
           thumbnail: "https://source.unsplash.com/1280x720/?news2",
           date: "2023-05-21",
-        },
-        // 添加更多新闻项
+        }
       ],
-      isCollapsed: false,
-      logoFor:'../../public/img/logo.jpg'
+      logoFor: '../../public/img/logo.jpg'
     };
   },
+  setup() {
+    onMounted(async () => {
+      let data = await getRequestGet('/Run/try/ajax/json_demo.json');
+      console.log('1', data);
+      //https://api.juejin.cn/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20
+      let url1 = '/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20'
+      let data2 = await getRequestGet(url1);
+      console.log('2', data2);
+      // let getTokenUrl='https://api.juejin.cn/user_api/v1/sys/token';
+      // getRequestHead(getTokenUrl);
+      // let params={
+      //   cate_id: "6809637767543259144",
+      //   cursor: "0",
+      //   id_type: 2,
+      //   limit: 20,
+      //   sort_type: 200,
+      //   tag_id: "6809640398105870343"
+      // }
+      // //https://api.juejin.cn/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0
+      // let url='/Jue/recommend_api/v1/article/recommend_cate_tag_feed?aid=2608&uuid=7233584988409611833&spider=0';
+      // let data3= await getRequestPost(url,params);
+      // console.log('3',data3);
+    })
+  },
   methods: {
-    toggleCollapse() {
-      this.isCollapsed = !this.isCollapsed;
-    },
-    goBack(){
+    goBack() {
       this.$router.back(); // 返回上一个路由
+    },
+    handleSelect(key, keyPath) {
+      console.log(key, keyPath);
+      if (key == '2') {
+        this.newsList = [
+          {
+            id: 1,
+            title: "豆瓣电影标题 1",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news1",
+            date: "2023-05-22",
+          },
+          {
+            id: 2,
+            title: "豆瓣电影标题 2",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news2",
+            date: "2023-05-21",
+          },
+          // 添加更多新闻项
+        ];
+      } else if (key == '3') {
+        this.newsList = [
+          {
+            id: 1,
+            title: "其他标题 1",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news1",
+            date: "2023-05-22",
+          },
+          {
+            id: 2,
+            title: "其他标题 2",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news2",
+            date: "2023-05-21",
+          },
+          // 添加更多新闻项
+        ];
+      } else {
+        this.newsList = [
+          {
+            id: 1,
+            title: "新闻标题 1",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news1",
+            date: "2023-05-22",
+          },
+          {
+            id: 2,
+            title: "新闻标题 2",
+            summary: "新闻摘要",
+            thumbnail: "https://source.unsplash.com/1280x720/?news2",
+            date: "2023-05-21",
+          }
+        ];
+      }
     }
   },
 };
 </script>
 
 <style scoped>
-.logo-title{
+.logo-title {
   margin: auto 0;
   color: rgb(44, 62, 80);
   font-weight: 600;
+  font-size: 21px;
 }
-.header-div{
+
+.header-div {
   padding: 11px 0px;
   display: flex;
 }
-.logo-img{
- width: 30px;
- height: 30px;
- margin-right: 10px;
+
+.logo-img {
+  width: 35px;
+  height: 35px;
+  margin-right: 10px;
 }
+
 .news-aggregator {
   width: 100%;
   max-width: 1200px;
@@ -194,20 +276,24 @@ export default {
   .logo {
     font-size: 20px;
   }
+
   .navigation {
     display: none;
   }
+
   .search-input {
     width: 150px;
   }
+
   .collapse-button {
     display: inline-block;
   }
+
   .news-list {
     margin-right: 0;
   }
+
   .sidebar {
     display: none;
   }
-}
-</style>
+}</style>
