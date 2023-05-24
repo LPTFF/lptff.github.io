@@ -92,19 +92,21 @@ export default {
     ]);
     let isPCRes = ref(isPC());
     const callMethod = () => {
-      console.log('233');
-
+      // console.log('233');
     };
+    const previousRoute = ref('');
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
+      previousRoute.value = window.history.state ? window.history.state.back : '';
+      console.log('233', previousRoute);
     });
     return {
-      callMethod, selectIndex, movies, newsList, isPCRes
+      callMethod, selectIndex, movies, newsList, isPCRes, previousRoute
     };
   },
   methods: {
     goBack() {
-      this.$router.back(); // 返回上一个路由
+      this.previousRoute ? this.$router.back() : this.$router.push('/');; // 返回上一个路由，兜底返回主页
     },
     async handleSelect(key) {
       console.log(key);
