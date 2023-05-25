@@ -3,6 +3,7 @@
 # 确保脚本抛出遇到的错误
 set -e
 # 检查当前操作系统
+echo "OSTYPE  $OSTYPE"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux 系统
     echo "Detected Linux OS"
@@ -20,10 +21,19 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     # 在此处添加适用于 macOS 系统的安装命令
     brew update
     brew install python@3
-
+elif [[ "$OSTYPE" == "msys"* ]]; then
+    # win 系统
+    echo "Unsupported Windows"
+    # 在此处添加适用于 macOS 系统的安装命令
+    exit 1
 else
     # 其他操作系统
-    echo "Unsupported OS"
+    echo "Detected deafault OS"
+    echo "Installing Python..."
+
+    # 在此处添加适用于 Linux 系统的安装命令
+    sudo apt-get update
+    sudo apt-get install python3
     # exit 1
 
 fi
