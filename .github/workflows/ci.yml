@@ -48,7 +48,10 @@ jobs:
       #   run: 
       #     cp dist/index.html dist/404.html
       - name: Build
-        run: 
+        run:
+          ls -l build.sh
+          chmod +x build.sh
+          ls -l build.sh
           ./build.sh
           # npm run build
       # - name: Setup Pages
