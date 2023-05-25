@@ -53,27 +53,22 @@
       </el-main>
       <el-footer class="footer" @click="gotoIssue">
         <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023 </div>
-        <!-- <div class="footer-links">
-          <a href="#">关于我们</a>
-          <a href="#">联系我们</a>
-        </div> -->
       </el-footer>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, toRefs } from 'vue';
-import { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage } from '../../utils/utils';
-import localMovie from './data.json';
-// import { saveAs } from 'file-saver';
+import { ref, onMounted } from 'vue';
+import { isPC, gotoOutPage } from '../../utils/utils';
+import crawlMovie from '../../public/data/movie.json';
 export default {
   data() {
     return {};
   },
   setup() {
     let selectIndex = ref('2');
-    let movies = ref(localMovie.subjects);
+    let movies = ref(crawlMovie.subjects);
     let newsList = ref([
       {
         id: 1,
@@ -97,8 +92,7 @@ export default {
     const previousRoute = ref('');
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state ? window.history.state.back : '';
-      console.log('233', previousRoute);
+      previousRoute.value = window.history.state ? window.history.state.back : '';//获取路由路径
     });
     return {
       callMethod, selectIndex, movies, newsList, isPCRes, previousRoute
@@ -112,15 +106,7 @@ export default {
       console.log(key);
       this.selectIndex = key;
       if (key == '2') {
-        //https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0
-        this.movies = localMovie.subjects;
-        // let url = '/douban/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&page_limit=50&page_start=0';
-        // let data = await getRequestGet(url);
-        // console.log('1', data.subjects);
-        // this.movies = data.subjects;
-        // const jsonData = JSON.stringify(data);
-        // const blob = new Blob([jsonData], { type: 'application/json' });
-        // saveAs(blob, 'data.json');
+        this.movies ? '' : this.movies = crawlMovie.subjects;
       } else if (key == '3') {
         this.newsList = [
           {
@@ -167,7 +153,7 @@ export default {
     gotoIssue() {
       let pageUrl = window.location.origin;
       console.log('pageUrl', pageUrl);
-      if (pageUrl.startsWith('https://love-tff.gitee.io/')) {
+      if (pageUrl.includes('love-tff.gitee.io')) {
         gotoOutPage('https://gitee.com/love-tff/love-tff/issues')
       } else {
         gotoOutPage('https://github.com/LPTFF/lptff.github.io/issues')

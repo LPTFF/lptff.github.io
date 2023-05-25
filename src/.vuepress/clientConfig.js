@@ -5,6 +5,8 @@ import 'element-plus/theme-chalk/index.css';
 import * as ElIcons from '@element-plus/icons-vue';
 import routesAdd from './router/index'
 import Develop from './views/home/index.vue'
+import { isPC } from './utils/utils';
+import eruda from 'eruda'
 export default defineClientConfig({
     enhance({ app, router, siteData }) {
         app.component('MyComponent', MyComponent)
@@ -23,6 +25,10 @@ export default defineClientConfig({
         for (let index = 0; index < routesAdd.length; index++) {
             const routeTmp = routesAdd[index];
             router.addRoute(routeTmp)
+        }
+        let isPCRes = isPC();
+        if (!isPCRes) {
+            eruda.init()
         }
     },
     setup() { },
