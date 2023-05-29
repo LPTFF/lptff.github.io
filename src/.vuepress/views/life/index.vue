@@ -15,11 +15,19 @@
       <el-main class="main-content">
         <div>
           <div class="news-list" v-if="selectIndex == '1'">
-            <el-card class="news-card" v-for="news in newsList" :key="news.id">
-              <div class="news-details">
-                <h3 class="news-title">{{ news.title }}</h3>
-                <p class="news-summary">{{ news.summary }}</p>
-                <span class="news-date">{{ news.date }}</span>
+            <el-card class="news-card" v-for="(item, index) in newsList" :key="index">
+              <div class="news-content" @click="gotoNewsWebsite(item)">
+                <div class="news-details">
+                  <h3 class="news-title">{{ item.title }}</h3>
+                  <p class="news-summary">{{ item.desc ? item.desc : item.title }}</p>
+                  <div class="news-bottom">
+                    <img class="is-new" :src="newsWebsiteLogo" />
+                    <div v-if="isPCRes" class="website-name">南方周末</div>
+                    <span class="news-date">{{ item.time }}</span>
+                  </div>
+                </div>
+                <div class="news-div-img"><img class="img-news" :src="item.image ? item.image : newsWebsiteLogo" />
+                </div>
               </div>
             </el-card>
           </div>
@@ -41,7 +49,7 @@
             </el-row>
           </div>
           <div class="news-list" v-if="selectIndex == '3'">
-            <el-card class="news-card" v-for="news in newsList" :key="news.id">
+            <el-card class="news-card" v-for="news in otherList" :key="news.id">
               <div class="news-details">
                 <h3 class="news-title">{{ news.title }}</h3>
                 <p class="news-summary">{{ news.summary }}</p>
@@ -59,37 +67,38 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { isPC, gotoOutPage } from '../../utils/utils';
 import crawlMovie from '../../public/data/movie.json';
+import crawlNews from '../../public/data/newsHandle.json';
 export default {
   data() {
-    return {};
+    return {
+      otherList: [
+        {
+          id: 1,
+          title: "其他标题 1",
+          summary: "新闻摘要111111111111111111111111111111111111111111111111111111111",
+          thumbnail: "https://source.unsplash.com/1280x720/?news1",
+          date: "2023-05-22",
+        }
+      ],
+      newsWebsiteLogo: 'http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170'
+    };
   },
   setup() {
-    let selectIndex = ref('2');
+    let selectIndex = ref('1');
     let movies = ref(crawlMovie.subjects);
-    let newsList = ref([
-      {
-        id: 1,
-        title: "新闻标题 1",
-        summary: "新闻摘要",
-        thumbnail: "https://source.unsplash.com/1280x720/?news1",
-        date: "2023-05-22",
-      },
-      {
-        id: 2,
-        title: "新闻标题 2",
-        summary: "新闻摘要",
-        thumbnail: "https://source.unsplash.com/1280x720/?news2",
-        date: "2023-05-21",
-      }
-    ]);
-    let isPCRes = ref(isPC());
+    let newsList = ref(crawlNews);
     const callMethod = () => {
       // console.log('233');
     };
     const previousRoute = ref('');
+
+    // 创建计算属性
+    const isPCRes = computed(() => {
+      return isPC();
+    });
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state ? window.history.state.back : '';//获取路由路径
@@ -108,46 +117,29 @@ export default {
       if (key == '2') {
         this.movies ? '' : this.movies = crawlMovie.subjects;
       } else if (key == '3') {
-        this.newsList = [
+        this.otherList = [
           {
             id: 1,
             title: "其他标题 1",
-            summary: "新闻摘要",
+            summary: "新闻摘要111111111111111111111111111111111111111111111111111111111",
             thumbnail: "https://source.unsplash.com/1280x720/?news1",
             date: "2023-05-22",
           },
           {
             id: 2,
             title: "其他标题 2",
-            summary: "新闻摘要",
+            summary: "新闻摘要22222222222222222222222222222222222222222222222222222222222",
             thumbnail: "https://source.unsplash.com/1280x720/?news2",
             date: "2023-05-21",
           },
           // 添加更多新闻项
         ];
       } else {
-        this.newsList = [
-          {
-            id: 1,
-            title: "新闻标题 1",
-            summary: "新闻摘要",
-            thumbnail: "https://source.unsplash.com/1280x720/?news1",
-            date: "2023-05-22",
-          },
-          {
-            id: 2,
-            title: "新闻标题 2",
-            summary: "新闻摘要",
-            thumbnail: "https://source.unsplash.com/1280x720/?news2",
-            date: "2023-05-21",
-          }
-        ];
+        this.newsList ? '' : this.newsList = crawlNews;
       }
     },
     handleJump(item) {
       console.log(item);
-      let data = isPC();
-      console.log(data);
       item.url ? gotoOutPage(item.url) : '';
     },
     gotoIssue() {
@@ -158,7 +150,25 @@ export default {
       } else {
         gotoOutPage('https://github.com/LPTFF/lptff.github.io/issues')
       }
-    }
+    },
+    gotoNewsWebsite(item) {
+      console.log(item);
+      let data = isPC();
+      console.log(data);
+      if (item.website == 'infzm') {
+        // https://www.infzm.com/contents/249870
+        // https://www.infzm.com/wap/#/content/249908?source=133&source_1=1
+        let handleUrl = '';
+        if (item.url) {
+          data ? handleUrl = `https://www.infzm.com/contents/${item.url}` : handleUrl = `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
+          gotoOutPage(handleUrl)
+        } else {
+          console.log('1');
+        }
+      } else {
+        console.log('233')
+      }
+    },
   },
 };
 </script>
@@ -206,9 +216,27 @@ export default {
   margin-bottom: 20px;
 }
 
+.news-content {
+  display: flex;
+  justify-content: space-between;
+}
+
+.news-div-img {
+  margin: auto;
+}
+
+.img-news {
+  width: 200px;
+  height: 200px;
+}
 
 .news-details {
   padding: 20px;
+  width: 900px;
+  display: flex;
+  flex-direction: column;
+  align-self: stretch;
+  height: 100%;
 }
 
 .news-title {
@@ -220,10 +248,19 @@ export default {
 .news-summary {
   color: #666;
   margin-bottom: 10px;
+  height: 100px;
 }
 
 .news-date {
   color: #999;
+}
+
+.website-name {
+  margin: 0 10px 0 5px;
+}
+
+.news-bottom {
+  display: flex;
 }
 
 .footer {
@@ -319,6 +356,50 @@ export default {
 
   .main-content {
     padding-top: 115px;
+  }
+
+  .news-summary {
+    color: #666;
+    margin-bottom: 10px;
+    max-width: 150px;
+    white-space: nowrap;
+    /* 防止换行 */
+    overflow: hidden;
+    /* 超出部分隐藏 */
+    text-overflow: ellipsis;
+    /* 超出部分省略号显示 */
+    height: 100%;
+  }
+
+  .img-news {
+    width: 100px;
+    height: 100px;
+  }
+
+  .news-title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 0px;
+    max-width: 150px;
+    white-space: nowrap;
+    /* 防止换行 */
+    overflow: hidden;
+    /* 超出部分隐藏 */
+    text-overflow: ellipsis;
+    /* 超出部分省略号显示 */
+    height: 100%;
+  }
+
+  .news-bottom {
+    display: flex;
+    max-width: 150px;
+    white-space: nowrap;
+    /* 防止换行 */
+    overflow: hidden;
+    /* 超出部分隐藏 */
+    text-overflow: ellipsis;
+    /* 超出部分省略号显示 */
+    height: 100%;
   }
 }
 </style>
