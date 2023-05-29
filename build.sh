@@ -40,6 +40,7 @@ fi
 
 # 验证安装是否成功
 python_version=$(python --version 2>&1)
+echo "python_version  $python_version"
 if [[ "$python_version" == *"Python"* ]]; then
     echo "Python installation successful"
 else
