@@ -34,7 +34,7 @@ if response.status_code == 200:
         date_string = item['publish_time']
         datetime_obj = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
         # 将datetime对象转换为时间戳
-        timestamp = int(datetime_obj.timestamp())
+        timestamp = int(datetime_obj.timestamp())*1000
         img='' 
         if len(item['covers']) == 0 :
             img='' 

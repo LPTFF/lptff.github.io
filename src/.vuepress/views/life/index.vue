@@ -15,26 +15,26 @@
       <el-main class="main-content">
         <div>
           <div class="news-list" v-if="selectIndex == '1'">
-            <el-card class="news-card" v-for="(item, index) in newsList" :key="index">
+            <el-card class="news-card" v-for="(item, index) in newsAll" :key="index">
               <div class="news-content" @click="gotoNewsWebsite(item)">
                 <div class="news-details">
                   <h3 class="news-title">{{ item.title }}</h3>
                   <p class="news-summary">{{ item.desc ? item.desc : item.title }}</p>
                   <div class="news-bottom">
-                    <img class="is-new" :src="newsWebsiteLogo" />
-                    <div v-if="isPCRes" class="website-name">南方周末</div>
+                    <img class="is-new" :src="getWebsiteLogo(item)" />
+                    <div v-if="isPCRes" class="website-name">{{ getWebsiteName(item) }}</div>
                     <span class="news-date">{{ item.time }}</span>
                   </div>
                 </div>
-                <div class="news-div-img"><img class="img-news" :src="item.image ? item.image : newsWebsiteLogo" />
+                <div class="news-div-img"><img class="img-news" :src="item.image ? item.image : getWebsiteLogo(item)" />
                 </div>
               </div>
             </el-card>
           </div>
           <div class="movie-list" v-if="selectIndex == '2'">
             <el-row>
-              <el-col :span="24" :md="8" :lg="6" v-for="(item, index) in movies" :key="index">
-                <el-card class="movie-item" shadow="hover" @click="handleJump(item)">
+              <el-col :span="24" :md="8" :lg="6" v-for="(item, index) in moviesAll" :key="index">
+                <el-card class="movie-item" shadow="hover" @click="gotoMovieWebsite(item)">
                   <img :src="`https://images.weserv.nl/?url=` + item.cover" alt="电影封面" class="movie-image" />
                   <div class="movie-content">
                     <div class="title-div">
@@ -70,7 +70,8 @@
 import { ref, onMounted, computed } from 'vue';
 import { isPC, gotoOutPage } from '../../utils/utils';
 import crawlMovie from '../../public/data/movie.json';
-import crawlNews from '../../public/data/newsHandle.json';
+import infzmNews from '../../public/data/newsHandle.json';
+import juejinNews from '../../public/data/juejin.json'
 export default {
   data() {
     return {
@@ -82,14 +83,23 @@ export default {
           thumbnail: "https://source.unsplash.com/1280x720/?news1",
           date: "2023-05-22",
         }
-      ],
-      newsWebsiteLogo: 'http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170'
+      ]
     };
   },
   setup() {
     let selectIndex = ref('1');
-    let movies = ref(crawlMovie.subjects);
-    let newsList = ref(crawlNews);
+    let moviesData = ref(crawlMovie.subjects);
+    let moviesValue = moviesData.value;
+    const newMovie = moviesValue.filter(item => item.is_new === true);
+    newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
+    const oldMovie = moviesValue.filter(item => item.is_new === false);
+    oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
+    let moviesAll= [...newMovie, ...oldMovie];
+    let infzmList = ref(infzmNews);
+    let juejinList = ref(juejinNews);
+    let newsAll: any[]=[];
+    newsAll = [...infzmList.value, ...juejinList.value];
+    newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
     const callMethod = () => {
       // console.log('233');
     };
@@ -99,12 +109,43 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
+    const getWebsiteLogo = (item) => {
+      // 根据 item 的属性动态计算图片的 src 值
+      let websiteLogo='';
+      switch (String(item.website)) {
+        case 'juejin':
+          websiteLogo='https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg';
+          break;
+        case 'infzm':
+          websiteLogo='http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170';
+          break;
+        default:
+          // 当 expression 的值与所有的 case 不匹配时执行的代码块
+          websiteLogo='https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg';
+      }
+      return websiteLogo;
+    };
+    const getWebsiteName = (item) => {
+      // 根据 item 的属性动态计算图片的 src 值
+      let websiteName='';
+      switch (String(item.website)) {
+        case 'juejin':
+          websiteName='掘金';
+          break;
+        case 'infzm':
+          websiteName='南方周末';
+          break;
+        default:
+          websiteName='随风而逝';
+      }
+      return websiteName;
+    };
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state ? window.history.state.back : '';//获取路由路径
     });
     return {
-      callMethod, selectIndex, movies, newsList, isPCRes, previousRoute
+      callMethod, selectIndex, isPCRes, previousRoute,newsAll,getWebsiteLogo,getWebsiteName,moviesAll
     };
   },
   methods: {
@@ -114,8 +155,16 @@ export default {
     async handleSelect(key) {
       console.log(key);
       this.selectIndex = key;
-      if (key == '2') {
-        this.movies ? '' : this.movies = crawlMovie.subjects;
+      if (key == '1' && !this.newsAll) {
+        this.newsAll = [...infzmNews, ...juejinNews];
+        this.newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
+      } else if (key == '2' && !this.moviesAll) {
+        let moviesData = crawlMovie.subjects;
+        const newMovie = moviesData.filter(item => item.is_new === true);
+        newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
+        const oldMovie = moviesData.filter(item => item.is_new === false);
+        oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
+        this.moviesAll= [...newMovie, ...oldMovie];
       } else if (key == '3') {
         this.otherList = [
           {
@@ -135,10 +184,10 @@ export default {
           // 添加更多新闻项
         ];
       } else {
-        this.newsList ? '' : this.newsList = crawlNews;
+        console.log('handleSelect 233');  
       }
     },
-    handleJump(item) {
+    gotoMovieWebsite(item) {
       console.log(item);
       item.url ? gotoOutPage(item.url) : '';
     },
@@ -163,8 +212,10 @@ export default {
           data ? handleUrl = `https://www.infzm.com/contents/${item.url}` : handleUrl = `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
           gotoOutPage(handleUrl)
         } else {
-          console.log('1');
+          console.log('infzm 233');
         }
+      } else if(item.website == 'juejin'){
+        item.url?gotoOutPage(item.url):console.log('juejin 233');
       } else {
         console.log('233')
       }
@@ -210,6 +261,7 @@ export default {
 .news-list {
   margin-right: 20px;
   margin-top: 10px;
+  margin-bottom: 70px;
 }
 
 .news-card {
@@ -249,6 +301,10 @@ export default {
   color: #666;
   margin-bottom: 10px;
   height: 100px;
+  width: 800px;
+  white-space: nowrap; /* 防止内容换行 */
+  overflow: hidden; /* 隐藏超出容器宽度的内容 */
+  text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
 }
 
 .news-date {
