@@ -72,6 +72,7 @@ import { isPC, gotoOutPage } from '../../utils/utils';
 import crawlMovie from '../../public/data/movie.json';
 import infzmNews from '../../public/data/newsHandle.json';
 import juejinNews from '../../public/data/juejin.json'
+import v2exNews from '../../public/data/v2ex.json'
 export default {
   data() {
     return {
@@ -97,8 +98,9 @@ export default {
     let moviesAll= [...newMovie, ...oldMovie];
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
+    let v2exList = ref(v2exNews);
     let newsAll: any[]=[];
-    newsAll = [...infzmList.value, ...juejinList.value];
+    newsAll = [...infzmList.value, ...juejinList.value, ...v2exList.value];
     newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
     const callMethod = () => {
       // console.log('233');
@@ -119,6 +121,9 @@ export default {
         case 'infzm':
           websiteLogo='http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170';
           break;
+        case 'v2ex':
+          websiteLogo='https://www.v2ex.com/static/icon-192.png';
+          break;
         default:
           // 当 expression 的值与所有的 case 不匹配时执行的代码块
           websiteLogo='https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg';
@@ -134,6 +139,9 @@ export default {
           break;
         case 'infzm':
           websiteName='南方周末';
+          break;
+        case 'v2ex':
+          websiteName='V2EX';
           break;
         default:
           websiteName='随风而逝';
@@ -156,7 +164,7 @@ export default {
       console.log(key);
       this.selectIndex = key;
       if (key == '1' && !this.newsAll) {
-        this.newsAll = [...infzmNews, ...juejinNews];
+        this.newsAll = [...infzmNews, ...juejinNews,...v2exNews];
         this.newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
       } else if (key == '2' && !this.moviesAll) {
         let moviesData = crawlMovie.subjects;
@@ -216,6 +224,8 @@ export default {
         }
       } else if(item.website == 'juejin'){
         item.url?gotoOutPage(item.url):console.log('juejin 233');
+      } else if(item.website == 'v2ex'){
+        item.url?gotoOutPage(item.url):console.log('v2ex 233');
       } else {
         console.log('233')
       }

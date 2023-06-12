@@ -48,8 +48,9 @@ else
 fi
 # python 环境集成
 pip install requests
-# 运行Python脚本
+# 运行爬虫脚本
 python crawlData.py
 node crawlData.js
+node v2exData.js
 # 打包生成静态文件
 npm run build

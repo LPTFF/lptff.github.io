@@ -29,6 +29,10 @@ async function crawlPage(url, keyDom) {
                 if (element.tagName.toLowerCase() === 'img') {
                     data.imgSrc = element.src;
                 }
+                // 提取 span 属性值
+                if (element.tagName.toLowerCase() === 'span') {
+                    data.span = element.title ? element.title : '';
+                }
                 // 提取文本内容
                 data.text = element.textContent.trim();
                 data.text = extractText(data.text);
@@ -56,16 +60,21 @@ async function crawlPage(url, keyDom) {
     await browser.close();
     return domData
 }
-
 //处理数据第一次过滤方法
 function extractTextAndHref(data) {
     let result = [];
     if (typeof data === "object" && data !== null) {
-        if ("text" in data && data["text"].length == 1 && !data["text"][0].includes("margin") && !(/^[0-9]+$/.test(data["text"][0]))) {
+        if ("text" in data) {
             result.push({ text: data["text"] });
         }
-        if ("href" in data && data["href"].includes("https://juejin.cn/post")) {
+        if ("href" in data) {
             result.push({ href: data["href"] });
+        }
+        if ("imgSrc" in data) {
+            result.push({ imgSrc: data["imgSrc"] });
+        }
+        if ("span" in data) {
+            result.push({ span: data["span"] });
         }
         for (let key in data) {
             result = result.concat(extractTextAndHref(data[key]));
@@ -80,63 +89,52 @@ function extractTextAndHref(data) {
 }
 async function run() {
 
-    const url = "https://juejin.cn/frontend/JavaScript";
-    const keyDom = ['li[data-growing-container]']//根据页面标签属性获取内容
-    const liData = (await crawlPage(url, keyDom))[0]
-    console.log('第一次请求列表页面');
+    const url = "https://www.v2ex.com/";
+    const keyDom = ['#TopicsHot']//根据页面id获取内容
+    const liData = (await crawlPage(url, keyDom))[0][0]
     // 第一次过滤
     const filterFirst = []
-    for (let index = 0; index < liData.length; index++) {
-        const element = extractTextAndHref(liData[index]);
+    for (let index = 0; index < liData.children.length; index++) {
+        const element = extractTextAndHref(liData.children[index]);
         filterFirst.push(element)
     }
-    // 第二次过滤
+    filterFirst.shift();
+    console.log('第一次过滤', filterFirst.length);
     const filterSecond = []
     for (let index = 0; index < filterFirst.length; index++) {
         console.log('第二次过滤', index);
-        //掘金网站需要先获取第一个列表页面的url和desc
-        let hrefLastIndex = '';
-        for (let i = filterFirst[index].length - 1; i >= 0; i--) {
-            if (filterFirst[index][i].hasOwnProperty('href')) {
-                hrefLastIndex = i;
-                break;
+        //v2ex网站需要先获取第一个列表页面的url
+        const length = filterFirst[index].length
+        const href = filterFirst[index][length - 1].href
+        console.log('第二次过滤href', href);
+        const keyDomSecond = ['.header', '.topic_content']//根据页面class类选择器获取内容
+        const secondPageData = (await crawlPage(href, keyDomSecond));
+        // 第三次过滤
+        const filterThird = []
+        for (let index = 0; index < secondPageData[0][0].children.length; index++) {
+            const element = extractTextAndHref(secondPageData[0][0].children[index]);
+            filterThird.push(element)
+        }
+        const filterThirdExternal = []
+        if (secondPageData[1][0].children) {
+            for (let index = 0; index < secondPageData[1][0].children.length; index++) {
+                const element = extractTextAndHref(secondPageData[1][0].children[index]);
+                filterThirdExternal.push(element)
             }
         }
-        let urlWeb = filterFirst[index][hrefLastIndex].href;
-        let descWeb = filterFirst[index][hrefLastIndex + 1].text[0];
-        //获取time、timestamp、title、image字段
-        const keyDomTitle = ['.article-title', '.author-info-block', '.article-hero']//根据页面class类选择器获取内容
-        const secondPageTitle = await crawlPage(urlWeb, keyDomTitle);
-        // console.log('secondPageTitle[0]', secondPageTitle[0]);
-        // console.log('secondPageTitle[1]', secondPageTitle[1]);
-        // console.log('secondPageTitle[2]', secondPageTitle[2]);
-        const title = secondPageTitle[0][0].text[0];
-        const timeOrigin = secondPageTitle[1][0].text[1];
-        //转换为时间戳
-        const datePattern = /(\d{4})年(\d{2})月(\d{2})日 (\d{2}):(\d{2})/;
-        const [, year, month, day, hours, minutes] = datePattern.exec(timeOrigin);
-        const date = new Date(year, parseInt(month) - 1, day, hours, minutes);// 构建日期对象
-        const timestamp = date.getTime();
-        const dateShow = new Date(timestamp);
-        const yearShow = dateShow.getFullYear();
-        let monthShow = dateShow.getMonth() + 1; // 月份从 0 到 11
-        monthShow > 9 ? monthShow = monthShow : monthShow = '0' + monthShow;
-        let dayShow = dateShow.getDate();
-        dayShow > 9 ? dayShow = dayShow : dayShow = '0' + dayShow;
-        let hourShow = dateShow.getHours();
-        hourShow > 9 ? hourShow = hourShow : hourShow = '0' + hourShow;
-        let minuteShow = dateShow.getMinutes();
-        minuteShow > 9 ? minuteShow = minuteShow : minuteShow = '0' + minuteShow;
-        let secondShow = dateShow.getSeconds();
-        secondShow > 9 ? secondShow = secondShow : secondShow = '0' + secondShow;
-        const timeShow = `${yearShow}-${monthShow}-${dayShow} ${hourShow}:${minuteShow}:${secondShow}`;
-        const image = secondPageTitle[2][0] ? secondPageTitle[2][0].imgSrc : '';
-        filterSecond.push({ url: urlWeb, desc: descWeb, time: timeShow, timestamp: timestamp, image: image, website: 'juejin', title: title })
+        //获取time、timestamp、title、desc、image字段
+        const title = filterThird[filterThird.length - 3][0].text[0];
+        const image = filterThird[0][filterThird[0].length - 1].imgSrc;
+        const timeOrigin = filterThird[filterThird.length - 1][filterThird[filterThird.length - 1].length - 1].span;
+        const timeShow = timeOrigin.slice(0, 19);
+        const timestamp = Date.parse(timeOrigin);
+        const desc = secondPageData[1][0].children ? filterThirdExternal[0][0].text[0] : secondPageData[1][0].text[0];
+        filterSecond.push({ url: href, desc: desc, time: timeShow, timestamp: timestamp, image: image, website: 'v2ex', title: title })
+
     }
-    console.log('filterSecond', filterSecond);
     if (filterSecond.length > 0) {
         const jsonData = JSON.stringify(filterSecond, null, 2);
-        fs.writeFile('./src/.vuepress/public/data/juejin.json', jsonData, (err) => {
+        fs.writeFile('./src/.vuepress/public/data/v2ex.json', jsonData, (err) => {
             if (err) {
                 console.error('保存JSON文件时出错：', err);
             } else {
