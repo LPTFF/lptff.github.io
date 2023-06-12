@@ -50,5 +50,6 @@ fi
 pip install requests
 # 运行Python脚本
 python crawlData.py
+node crawlData.js
 # 打包生成静态文件
 npm run build
