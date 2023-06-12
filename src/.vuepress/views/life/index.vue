@@ -3,43 +3,80 @@
     <div class="news-aggregator">
       <el-header class="header-el">
         <div class="header-div" @click="goBack">
-          <img class="logo-img" src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg" />
+          <img
+            class="logo-img"
+            src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
+          />
           <div class="logo-title">tangff</div>
         </div>
-        <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
+        <el-menu
+          class="navigation"
+          mode="horizontal"
+          :default-active="selectIndex"
+          @select="handleSelect"
+        >
           <el-menu-item index="1">首页</el-menu-item>
           <el-menu-item index="2">豆瓣电影</el-menu-item>
-          <el-menu-item index="3">其他</el-menu-item>
+          <el-menu-item index="3">LeetCode</el-menu-item>
         </el-menu>
       </el-header>
       <el-main class="main-content">
         <div>
           <div class="news-list" v-if="selectIndex == '1'">
-            <el-card class="news-card" v-for="(item, index) in newsAll" :key="index">
+            <el-card
+              class="news-card"
+              v-for="(item, index) in newsAll"
+              :key="index"
+            >
               <div class="news-content" @click="gotoNewsWebsite(item)">
                 <div class="news-details">
                   <h3 class="news-title">{{ item.title }}</h3>
-                  <p class="news-summary">{{ item.desc ? item.desc : item.title }}</p>
+                  <p class="news-summary">
+                    {{ item.desc ? item.desc : item.title }}
+                  </p>
                   <div class="news-bottom">
                     <img class="is-new" :src="getWebsiteLogo(item)" />
-                    <div v-if="isPCRes" class="website-name">{{ getWebsiteName(item) }}</div>
+                    <div v-if="isPCRes" class="website-name">
+                      {{ getWebsiteName(item) }}
+                    </div>
                     <span class="news-date">{{ item.time }}</span>
                   </div>
                 </div>
-                <div class="news-div-img"><img class="img-news" :src="item.image ? item.image : getWebsiteLogo(item)" />
+                <div class="news-div-img">
+                  <img
+                    class="img-news"
+                    :src="item.image ? item.image : getWebsiteLogo(item)"
+                  />
                 </div>
               </div>
             </el-card>
           </div>
           <div class="movie-list" v-if="selectIndex == '2'">
             <el-row>
-              <el-col :span="24" :md="8" :lg="6" v-for="(item, index) in moviesAll" :key="index">
-                <el-card class="movie-item" shadow="hover" @click="gotoMovieWebsite(item)">
-                  <img :src="`https://images.weserv.nl/?url=` + item.cover" alt="电影封面" class="movie-image" />
+              <el-col
+                :span="24"
+                :md="8"
+                :lg="6"
+                v-for="(item, index) in moviesAll"
+                :key="index"
+              >
+                <el-card
+                  class="movie-item"
+                  shadow="hover"
+                  @click="gotoMovieWebsite(item)"
+                >
+                  <img
+                    :src="`https://images.weserv.nl/?url=` + item.cover"
+                    alt="电影封面"
+                    class="movie-image"
+                  />
                   <div class="movie-content">
                     <div class="title-div">
-                      <img v-if="item.is_new" class="is-new"
-                        src="https://images.weserv.nl/?url=https://img1.doubanio.com/f/movie/caa8f80abecee1fc6f9d31924cef8dd9a24c7227/pics/movie/ic_new.png" />
+                      <img
+                        v-if="item.is_new"
+                        class="is-new"
+                        src="https://images.weserv.nl/?url=https://img1.doubanio.com/f/movie/caa8f80abecee1fc6f9d31924cef8dd9a24c7227/pics/movie/ic_new.png"
+                      />
                       <h3 class="title-movie">{{ item.title }}</h3>
                       <p class="rate-movie">{{ item.rate }}</p>
                     </div>
@@ -48,31 +85,47 @@
               </el-col>
             </el-row>
           </div>
-          <div class="news-list" v-if="selectIndex == '3'">
-            <el-card class="news-card" v-for="news in otherList" :key="news.id">
-              <div class="news-details">
-                <h3 class="news-title">{{ news.title }}</h3>
-                <p class="news-summary">{{ news.summary }}</p>
-                <span class="news-date">{{ news.date }}</span>
+          <div class="leet-code" v-if="selectIndex == '3'">
+            <el-card
+              v-for="question in questions"
+              :key="question.id"
+              class="question-card"
+            >
+              <div class="card-header">
+                <span class="question-title">{{ question.title }}</span>
+                <span class="question-difficulty">{{
+                  question.difficulty
+                }}</span>
+              </div>
+              <div class="card-body">
+                <!-- 题目内容 -->
+                <p>{{ question.description }}</p>
+              </div>
+              <div class="card-footer">
+                <el-button type="primary" class="card-action-button"
+                  >开始答题</el-button
+                >
               </div>
             </el-card>
           </div>
         </div>
       </el-main>
       <el-footer class="footer" @click="gotoIssue">
-        <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023 </div>
+        <div class="footer-text">
+          评论功能暂不支持，如有问题请提issue © 2023
+        </div>
       </el-footer>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed } from 'vue';
-import { isPC, gotoOutPage } from '../../utils/utils';
-import crawlMovie from '../../public/data/movie.json';
-import infzmNews from '../../public/data/newsHandle.json';
-import juejinNews from '../../public/data/juejin.json'
-import v2exNews from '../../public/data/v2ex.json'
+import { ref, onMounted, computed } from "vue";
+import { isPC, gotoOutPage } from "../../utils/utils";
+import crawlMovie from "../../public/data/movie.json";
+import infzmNews from "../../public/data/newsHandle.json";
+import juejinNews from "../../public/data/juejin.json";
+import v2exNews from "../../public/data/v2ex.json";
 export default {
   data() {
     return {
@@ -80,32 +133,33 @@ export default {
         {
           id: 1,
           title: "其他标题 1",
-          summary: "新闻摘要111111111111111111111111111111111111111111111111111111111",
+          summary:
+            "新闻摘要111111111111111111111111111111111111111111111111111111111",
           thumbnail: "https://source.unsplash.com/1280x720/?news1",
           date: "2023-05-22",
-        }
-      ]
+        },
+      ],
     };
   },
   setup() {
-    let selectIndex = ref('1');
+    let selectIndex = ref("1");
     let moviesData = ref(crawlMovie.subjects);
     let moviesValue = moviesData.value;
-    const newMovie = moviesValue.filter(item => item.is_new === true);
-    newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
-    const oldMovie = moviesValue.filter(item => item.is_new === false);
-    oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
-    let moviesAll= [...newMovie, ...oldMovie];
+    const newMovie = moviesValue.filter((item) => item.is_new === true);
+    newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
+    const oldMovie = moviesValue.filter((item) => item.is_new === false);
+    oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
+    let moviesAll = [...newMovie, ...oldMovie];
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
-    let newsAll: any[]=[];
+    let newsAll: any[] = [];
     newsAll = [...infzmList.value, ...juejinList.value, ...v2exList.value];
-    newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
+    newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const callMethod = () => {
       // console.log('233');
     };
-    const previousRoute = ref('');
+    const previousRoute = ref("");
 
     // 创建计算属性
     const isPCRes = computed(() => {
@@ -113,121 +167,161 @@ export default {
     });
     const getWebsiteLogo = (item) => {
       // 根据 item 的属性动态计算图片的 src 值
-      let websiteLogo='';
+      let websiteLogo = "";
       switch (String(item.website)) {
-        case 'juejin':
-          websiteLogo='https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg';
+        case "juejin":
+          websiteLogo =
+            "https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg";
           break;
-        case 'infzm':
-          websiteLogo='http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170';
+        case "infzm":
+          websiteLogo =
+            "http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170";
           break;
-        case 'v2ex':
-          websiteLogo='https://www.v2ex.com/static/icon-192.png';
+        case "v2ex":
+          websiteLogo = "https://www.v2ex.com/static/icon-192.png";
           break;
         default:
           // 当 expression 的值与所有的 case 不匹配时执行的代码块
-          websiteLogo='https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg';
+          websiteLogo =
+            "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg";
       }
       return websiteLogo;
     };
     const getWebsiteName = (item) => {
       // 根据 item 的属性动态计算图片的 src 值
-      let websiteName='';
+      let websiteName = "";
       switch (String(item.website)) {
-        case 'juejin':
-          websiteName='掘金';
+        case "juejin":
+          websiteName = "掘金";
           break;
-        case 'infzm':
-          websiteName='南方周末';
+        case "infzm":
+          websiteName = "南方周末";
           break;
-        case 'v2ex':
-          websiteName='V2EX';
+        case "v2ex":
+          websiteName = "V2EX";
           break;
         default:
-          websiteName='随风而逝';
+          websiteName = "随风而逝";
       }
       return websiteName;
     };
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state ? window.history.state.back : '';//获取路由路径
+      previousRoute.value = window.history.state
+        ? window.history.state.back
+        : ""; //获取路由路径
     });
+    const questions = ref([
+      {
+        id: 1,
+        title: "Two Sum",
+        difficulty: "Easy",
+        description:
+          "Given an array of integers, find two numbers such that they add up to a specific target number.",
+      },
+      {
+        id: 1,
+        title: "Two Sum",
+        difficulty: "Easy",
+        description:
+          "Given an array of integers, find two numbers such that they add up to a specific target number.",
+      },
+      {
+        id: 1,
+        title: "Two Sum",
+        difficulty: "Easy",
+        description:
+          "Given an array of integers, find two numbers such that they add up to a specific target number.",
+      },
+    ]);
     return {
-      callMethod, selectIndex, isPCRes, previousRoute,newsAll,getWebsiteLogo,getWebsiteName,moviesAll
+      callMethod,
+      selectIndex,
+      isPCRes,
+      previousRoute,
+      newsAll,
+      getWebsiteLogo,
+      getWebsiteName,
+      moviesAll,
+      questions,
     };
   },
   methods: {
     goBack() {
-      this.previousRoute ? this.$router.back() : this.$router.push('/');; // 返回上一个路由，兜底返回主页
+      this.previousRoute ? this.$router.back() : this.$router.push("/"); // 返回上一个路由，兜底返回主页
     },
     async handleSelect(key) {
       console.log(key);
       this.selectIndex = key;
-      if (key == '1' && !this.newsAll) {
-        this.newsAll = [...infzmNews, ...juejinNews,...v2exNews];
-        this.newsAll.sort((a, b) => b.timestamp - a.timestamp);//按时间最新的靠前排序
-      } else if (key == '2' && !this.moviesAll) {
+      if (key == "1" && !this.newsAll) {
+        this.newsAll = [...infzmNews, ...juejinNews, ...v2exNews];
+        this.newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+      } else if (key == "2" && !this.moviesAll) {
         let moviesData = crawlMovie.subjects;
-        const newMovie = moviesData.filter(item => item.is_new === true);
-        newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
-        const oldMovie = moviesData.filter(item => item.is_new === false);
-        oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate));//按评分高分排序
-        this.moviesAll= [...newMovie, ...oldMovie];
-      } else if (key == '3') {
+        const newMovie = moviesData.filter((item) => item.is_new === true);
+        newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
+        const oldMovie = moviesData.filter((item) => item.is_new === false);
+        oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
+        this.moviesAll = [...newMovie, ...oldMovie];
+      } else if (key == "3") {
         this.otherList = [
           {
             id: 1,
             title: "其他标题 1",
-            summary: "新闻摘要111111111111111111111111111111111111111111111111111111111",
+            summary:
+              "新闻摘要111111111111111111111111111111111111111111111111111111111",
             thumbnail: "https://source.unsplash.com/1280x720/?news1",
             date: "2023-05-22",
           },
           {
             id: 2,
             title: "其他标题 2",
-            summary: "新闻摘要22222222222222222222222222222222222222222222222222222222222",
+            summary:
+              "新闻摘要22222222222222222222222222222222222222222222222222222222222",
             thumbnail: "https://source.unsplash.com/1280x720/?news2",
             date: "2023-05-21",
           },
           // 添加更多新闻项
         ];
       } else {
-        console.log('handleSelect 233');  
+        console.log("handleSelect 233");
       }
     },
     gotoMovieWebsite(item) {
       console.log(item);
-      item.url ? gotoOutPage(item.url) : '';
+      item.url ? gotoOutPage(item.url) : "";
     },
     gotoIssue() {
       let pageUrl = window.location.origin;
-      console.log('pageUrl', pageUrl);
-      if (pageUrl.includes('love-tff.gitee.io')) {
-        gotoOutPage('https://gitee.com/love-tff/love-tff/issues')
+      console.log("pageUrl", pageUrl);
+      if (pageUrl.includes("love-tff.gitee.io")) {
+        gotoOutPage("https://gitee.com/love-tff/love-tff/issues");
       } else {
-        gotoOutPage('https://github.com/LPTFF/lptff.github.io/issues')
+        gotoOutPage("https://github.com/LPTFF/lptff.github.io/issues");
       }
     },
     gotoNewsWebsite(item) {
       console.log(item);
       let data = isPC();
       console.log(data);
-      if (item.website == 'infzm') {
+      if (item.website == "infzm") {
         // https://www.infzm.com/contents/249870
         // https://www.infzm.com/wap/#/content/249908?source=133&source_1=1
-        let handleUrl = '';
+        let handleUrl = "";
         if (item.url) {
-          data ? handleUrl = `https://www.infzm.com/contents/${item.url}` : handleUrl = `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
-          gotoOutPage(handleUrl)
+          data
+            ? (handleUrl = `https://www.infzm.com/contents/${item.url}`)
+            : (handleUrl = `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`);
+          gotoOutPage(handleUrl);
         } else {
-          console.log('infzm 233');
+          console.log("infzm 233");
         }
-      } else if(item.website == 'juejin'){
-        item.url?gotoOutPage(item.url):console.log('juejin 233');
-      } else if(item.website == 'v2ex'){
-        item.url?gotoOutPage(item.url):console.log('v2ex 233');
+      } else if (item.website == "juejin") {
+        item.url ? gotoOutPage(item.url) : console.log("juejin 233");
+      } else if (item.website == "v2ex") {
+        item.url ? gotoOutPage(item.url) : console.log("v2ex 233");
       } else {
-        console.log('233')
+        console.log("233");
       }
     },
   },
@@ -262,7 +356,6 @@ export default {
   max-width: 1200px;
   margin: 0 auto;
 }
-
 
 .navigation {
   line-height: 80px;
@@ -333,7 +426,6 @@ export default {
   padding: 20px;
   text-align: center;
   background-color: rgb(255, 255, 255);
-  ;
   position: fixed;
   bottom: 0px;
   margin: 0 auto;
@@ -352,6 +444,9 @@ export default {
   /* padding: 20px; */
   padding-top: 10px;
   margin-bottom: 40px;
+}
+.leet-code {
+  padding-top: 10px;
 }
 
 .movie-item {
@@ -401,7 +496,41 @@ export default {
   font-size: 14px;
   color: #909399;
 }
+.title {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.question-card {
+  margin-bottom: 20px;
+}
 
+.card-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.question-title {
+  font-size: 18px;
+}
+
+.question-difficulty {
+  font-size: 14px;
+  color: #888;
+}
+
+.card-body {
+  margin-top: 10px;
+}
+
+.card-footer {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.card-action-button {
+  margin-right: 10px;
+}
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
   .header-el {
@@ -418,7 +547,6 @@ export default {
   .movie-list {
     margin-top: 0px;
   }
-
 
   .main-content {
     padding-top: 115px;
