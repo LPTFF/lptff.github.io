@@ -9,7 +9,7 @@ async function crawlPage(url, keyDom) {
     });
     const page = await browser.newPage();
     // 导航到目标网页
-    await page.goto(url, { waitUntil: 'networkidle2', timeout: 60000 });
+    await page.goto(url, { waitUntil: 'networkidle2', timeout: 600000 });
     const domData = [];
     for (let index = 0; index < keyDom.length; index++) {
         const element = await page.$$eval(keyDom[index], liElements => {
@@ -104,6 +104,7 @@ async function run() {
         }
         let urlWeb = filterFirst[index][hrefLastIndex].href;
         let descWeb = filterFirst[index][hrefLastIndex + 1].text[0];
+        console.log('第二次过滤href', urlWeb);
         //获取time、timestamp、title、image字段
         const keyDomTitle = ['.article-title', '.author-info-block', '.article-hero']//根据页面class类选择器获取内容
         const secondPageTitle = await crawlPage(urlWeb, keyDomTitle);
