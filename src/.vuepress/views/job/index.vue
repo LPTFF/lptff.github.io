@@ -4,19 +4,25 @@
       <el-button type="primary" @click="goBack">返回</el-button>
     </div>
     <div class="main-content">
-      <el-button type="primary" v-if="isDevelopment" @click="getRunHtml">菜鸟操作按钮</el-button>
-      <el-button type="primary" v-if="isDevelopment" @click="getJueHtml">掘金操作按钮</el-button>
-      <el-button type="primary" @click="getJsonHtml">新方法测试操作按钮</el-button>
+      <el-button type="primary" v-if="isDevelopment" @click="getRunHtml"
+        >菜鸟操作按钮</el-button
+      >
+      <el-button type="primary" v-if="isDevelopment" @click="getJueHtml"
+        >掘金操作按钮</el-button
+      >
+      <el-button type="primary" @click="getJsonHtml"
+        >新方法测试操作按钮</el-button
+      >
     </div>
   </div>
 </template>
 <script lang="ts">
-import axios from 'axios';
+import axios from "axios";
 export default {
-  setup() { },
+  setup() {},
   data() {
     return {
-      isDevelopment: false
+      isDevelopment: false,
       // isDevelopment: true, //开发模式
     };
   },
@@ -28,25 +34,30 @@ export default {
       try {
         const response = await axios.get(url); // 发起 GET 请求
         const data = response.data; // 获取响应数据
-        console.log('data', data);
+        console.log("data", data);
         // 在这里可以对获取到的数据进行处理或使用
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching data:", error);
       }
     },
     getRunHtml() {
       //https://www.runoob.com/try/ajax/json_demo.json
-      this.getRequest('/Run/try/ajax/json_demo.json');
+      this.getRequest("/Run/try/ajax/json_demo.json");
     },
     getJueHtml() {
       //https://api.juejin.cn/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20
-      this.getRequest('/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20');
+      this.getRequest(
+        "/Jue/user_api/v1/author/recommend?aid=2608&uuid=7233584988409611833&spider=0&category_id=&cursor=0&limit=20"
+      );
     },
     async getJsonHtml() {
-      console.log('this.isDevelopment', this.isDevelopment);
-    }
-  }
-}
+      console.log("this.isDevelopment", this.isDevelopment);
+      this.$router.push({
+        path: "/Blog",
+      });
+    },
+  },
+};
 </script>
 <style scoped>
 .my-button {
