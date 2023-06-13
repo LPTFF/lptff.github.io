@@ -111,9 +111,13 @@ async function run() {
         const secondPageData = (await crawlPage(href, keyDomSecond));
         // 第三次过滤
         const filterThird = []
-        for (let index = 0; index < secondPageData[0][0].children.length; index++) {
-            const element = extractTextAndHref(secondPageData[0][0].children[index]);
-            filterThird.push(element)
+        if (secondPageData[0][0]) {
+            for (let index = 0; index < secondPageData[0][0].children.length; index++) {
+                const element = extractTextAndHref(secondPageData[0][0].children[index]);
+                filterThird.push(element)
+            }
+        } else {
+            continue
         }
         const filterThirdExternal = []
         if (secondPageData[1][0].children) {
@@ -132,6 +136,7 @@ async function run() {
         filterSecond.push({ url: href, desc: desc, time: timeShow, timestamp: timestamp, image: image, website: 'v2ex', title: title })
 
     }
+    console.log('filterSecond', filterSecond);
     if (filterSecond.length > 0) {
         const jsonData = JSON.stringify(filterSecond, null, 2);
         fs.writeFile('./src/.vuepress/public/data/v2ex.json', jsonData, (err) => {
