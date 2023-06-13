@@ -111,7 +111,7 @@ async function run() {
         const secondPageData = (await crawlPage(href, keyDomSecond));
         // 第三次过滤
         const filterThird = []
-        if (secondPageData[0][0]) {
+        if (secondPageData[0][0] && secondPageData[0][0].children) {
             for (let index = 0; index < secondPageData[0][0].children.length; index++) {
                 const element = extractTextAndHref(secondPageData[0][0].children[index]);
                 filterThird.push(element)
@@ -120,11 +120,13 @@ async function run() {
             continue
         }
         const filterThirdExternal = []
-        if (secondPageData[1][0].children) {
+        if (secondPageData[1][0] && secondPageData[1][0].children) {
             for (let index = 0; index < secondPageData[1][0].children.length; index++) {
                 const element = extractTextAndHref(secondPageData[1][0].children[index]);
                 filterThirdExternal.push(element)
             }
+        } else {
+            continue
         }
         //获取time、timestamp、title、desc、image字段
         const title = filterThird[filterThird.length - 3][0].text[0];
