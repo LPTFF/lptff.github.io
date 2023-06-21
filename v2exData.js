@@ -99,14 +99,14 @@ async function run() {
         filterFirst.push(element)
     }
     filterFirst.shift();
-    console.log('第一次过滤', filterFirst.length);
+    console.log('v2ex第一次过滤', filterFirst.length);
     const filterSecond = []
     for (let index = 0; index < filterFirst.length; index++) {
-        console.log('第二次过滤', index);
+        console.log('v2ex第二次过滤', index);
         //v2ex网站需要先获取第一个列表页面的url
         const length = filterFirst[index].length
         const href = filterFirst[index][length - 1].href
-        console.log('第二次过滤href', href);
+        console.log('v2ex第二次过滤href', href);
         const keyDomSecond = ['.header', '.topic_content']//根据页面class类选择器获取内容
         const secondPageData = (await crawlPage(href, keyDomSecond));
         // 第三次过滤
@@ -138,14 +138,13 @@ async function run() {
         filterSecond.push({ url: href, desc: desc, time: timeShow, timestamp: timestamp, image: image, website: 'v2ex', title: title })
 
     }
-    console.log('filterSecond', filterSecond);
     if (filterSecond.length > 0) {
         const jsonData = JSON.stringify(filterSecond, null, 2);
         fs.writeFile('./src/.vuepress/public/data/v2ex.json', jsonData, (err) => {
             if (err) {
-                console.error('保存JSON文件时出错：', err);
+                console.error('v2ex保存JSON文件时出错：', err);
             } else {
-                console.log('提取的数据已保存成功。');
+                console.log('v2ex提取的数据已保存成功。');
             }
         });
     }

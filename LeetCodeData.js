@@ -108,7 +108,7 @@ async function forEachGetPage() {
     while (true) {
         const url = baseUrl + currentPage;
         const liData = (await crawlPage(url, keyDom))[0];
-        console.log('请求列表页面:', url);
+        console.log('LeetCode请求列表页面:', url);
 
         // 第一次过滤
         const filterFirst = [];
@@ -116,9 +116,9 @@ async function forEachGetPage() {
             const element = extractTextAndHref(liData[index]);
             filterFirst.push(element);
         }
-        console.log('循环网页爬取:', currentPage);//调试可以控制该参数，一般建议调试改为currentPage == 4
+        console.log('LeetCode循环网页爬取:', currentPage);//调试可以控制该参数，一般建议调试改为currentPage == 4
         if ((prevResult && JSON.stringify(prevResult) === JSON.stringify(filterFirst)) || currentPage == 400) {
-            console.log('循环请求结束');
+            console.log('LeetCode循环请求结束');
             break;
         }
         //函数去重
@@ -128,12 +128,12 @@ async function forEachGetPage() {
         currentPage++;
 
     }
-    console.log('循环网页爬取结果:', allSolutions.length);
+    console.log('LeetCode循环网页爬取结果:', allSolutions.length);
     return allSolutions
 }
 async function run() {
     const originData = await forEachGetPage();
-    console.log('初始结果', originData.length);
+    console.log('LeetCode初始结果', originData.length);
     // const jsonData = JSON.stringify(originData, null, 2);
     // fs.writeFile('test1.json', jsonData, (err) => {
     //     if (err) {
@@ -186,18 +186,18 @@ async function run() {
             }
         }
     }
-    console.log("solutionFilter:", solutionFilter.length);
+    console.log("LeetCode的solutionFilter:", solutionFilter.length);
     if (foundIndices.length > 0) {
         const jsonData = JSON.stringify(solutionFilter, null, 2);
         fs.writeFile('./src/.vuepress/public/data/leetCode.json', jsonData, (err) => {
             if (err) {
-                console.error('保存JSON文件时出错：', err);
+                console.error('LeetCode保存JSON文件时出错：', err);
             } else {
-                console.log('提取的数据已保存成功。');
+                console.log('LeetCode提取的数据已保存成功。');
             }
         });
     } else {
-        console.log("未找到符合条件的对象");
+        console.log("LeetCode未找到符合条件的对象");
     }
     // 读取本地JSON文件
     // fs.readFile('test1.json', 'utf8', (err, data) => {
