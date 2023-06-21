@@ -48,9 +48,12 @@ else
 fi
 # python 环境集成
 pip install requests
+pip install cryptography
+pip install pyOpenSSL
+pip install certifi
 # 运行爬虫脚本
 python crawlData.py
-node crawlData.js
+python juejinData.py
 node v2exData.js
 # 打包生成静态文件
 npm run build
