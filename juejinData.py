@@ -21,7 +21,7 @@ data_json = {
 try:
     response = requests.post(url, headers=headers, json=data_json)
     response.raise_for_status()  # 检查请求是否成功
-    print('response', response)
+    print('掘金response', response)
     if response.status_code == 200:
         # 解析响应数据
         data = response.json()
@@ -56,7 +56,7 @@ try:
         dataHandle.sort(key=lambda x: x['timestamp'],reverse=True)
         with open('./src/.vuepress/public/data/juejin.json', 'w', encoding='utf-8') as file:
             json.dump(dataHandle, file, ensure_ascii=False, indent=4)
-            print('分析数据导出成功')
+            print('掘金分析数据导出成功')
     else:
         print('请求失败')
 except requests.exceptions.RequestException as e:

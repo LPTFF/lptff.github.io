@@ -98,36 +98,96 @@ function deepUniqueArray(array) {
         }
     });
 }
-async function run() {
-    const url = "https://leetcode.cn/problemset/all/";
-    const keyDom = ['div[role]']//根据页面标签属性获取内容
-    const liData = (await crawlPage(url, keyDom))[0]
-    console.log('第一次请求列表页面');
-    // 第一次过滤
-    const filterFirst = []
-    for (let index = 0; index < liData.length; index++) {
-        const element = extractTextAndHref(liData[index]);
-        filterFirst.push(element)
+// 循环网页爬取数据
+async function forEachGetPage() {
+    const baseUrl = 'https://leetcode.cn/problemset/all/?page=';
+    const keyDom = ['div[role]']; //根据页面标签属性获取内容
+    let currentPage = 1;
+    let prevResult = null;
+    const allSolutions = [];
+    while (true) {
+        const url = baseUrl + currentPage;
+        const liData = (await crawlPage(url, keyDom))[0];
+        console.log('请求列表页面:', url);
+
+        // 第一次过滤
+        const filterFirst = [];
+        for (let index = 0; index < liData.length; index++) {
+            const element = extractTextAndHref(liData[index]);
+            filterFirst.push(element);
+        }
+        console.log('循环网页爬取:', currentPage);//调试可以控制该参数，一般建议调试改为currentPage == 4
+        if ((prevResult && JSON.stringify(prevResult) === JSON.stringify(filterFirst)) || currentPage == 400) {
+            console.log('循环请求结束');
+            break;
+        }
+        //函数去重
+        const uniqueArray = deepUniqueArray(filterFirst[0]);
+        prevResult = filterFirst;
+        allSolutions.push(...uniqueArray);
+        currentPage++;
+
     }
-    //函数去重
-    const uniqueArray = deepUniqueArray(filterFirst[0]);
-    let array = uniqueArray.slice(17);
-    const solutionFilter = [];
-    for (let i = 0; i < array.length; i++) {
-        if (array[i].href && array[i].href.includes("/solution")) {
-            const lastIndex = array[i - 4].text[0].lastIndexOf("%");
-            const hardRate = array[i - 4].text[0].substring(lastIndex + 1);
-            solutionFilter.push({
-                passRate: array[i + 1].text[0],//通过率
-                problemsName: array[i - 3].text[0],//题目
-                problemsUrl: array[i - 2].href,//题目链接
-                solutionsUrl: array[i].href,//题解答案链接
-                hardRate: hardRate//题目难度
-            });
+    console.log('循环网页爬取结果:', allSolutions.length);
+    return allSolutions
+}
+async function run() {
+    const originData = await forEachGetPage();
+    console.log('初始结果', originData.length);
+    // const jsonData = JSON.stringify(originData, null, 2);
+    // fs.writeFile('test1.json', jsonData, (err) => {
+    //     if (err) {
+    //         console.error('保存JSON文件时出错：', err);
+    //     } else {
+    //         console.log('提取的数据已保存成功。');
+    //     }
+    // });
+    // 处理JSON数据
+    //舍弃第一个问题，保持数组的完整性
+    const targetString = "/solution";
+    let foundIndex = null;
+    for (let i = 0; i < originData.length; i++) {
+        const obj = originData[i];
+        if ("href" in obj && obj.href.includes(targetString)) {
+            foundIndex = i;
+            break;
         }
     }
-    console.log('新数组', solutionFilter);
-    if (solutionFilter.length > 0) {
+    const handleData = originData.slice(foundIndex + 2);
+    const foundIndices = [];
+    const solutionFilter = [];//定位href中包含字符串solution
+    for (let i = 0; i < handleData.length; i++) {
+        const obj = handleData[i];
+        if (typeof obj === 'object') {
+            for (const key in obj) {
+                if (obj.hasOwnProperty("href") && obj[key].includes('/solution')) {
+                    foundIndices.push(i);
+                    let problemsName, problemsUrl, allInfo
+                    for (let urlIndex = 1; urlIndex < 4; urlIndex++) {
+                        if (handleData[i - urlIndex].href) {
+                            problemsUrl = handleData[i - urlIndex].href;
+                            problemsName = handleData[i - urlIndex - 1].text[0];
+                            allInfo = handleData[i - urlIndex - 2].text[0];
+                        }
+                    }
+                    const lastIndex = allInfo.lastIndexOf("%");
+                    const hardRate = allInfo.substring(lastIndex + 1);
+                    const passRateIndex = allInfo.lastIndexOf(".");
+                    const passRate = allInfo.substring(passRateIndex - 2, lastIndex + 1);
+                    solutionFilter.push({
+                        passRate: passRate,//通过率
+                        problemsName: problemsName,//题目
+                        problemsUrl: problemsUrl,//题目链接
+                        solutionsUrl: handleData[i].href,//题解答案链接
+                        hardRate: hardRate//题目难度
+                    });
+                    break;
+                }
+            }
+        }
+    }
+    console.log("solutionFilter:", solutionFilter.length);
+    if (foundIndices.length > 0) {
         const jsonData = JSON.stringify(solutionFilter, null, 2);
         fs.writeFile('./src/.vuepress/public/data/leetCode.json', jsonData, (err) => {
             if (err) {
@@ -136,8 +196,20 @@ async function run() {
                 console.log('提取的数据已保存成功。');
             }
         });
+    } else {
+        console.log("未找到符合条件的对象");
     }
+    // 读取本地JSON文件
+    // fs.readFile('test1.json', 'utf8', (err, data) => {
+    //     if (err) {
+    //         console.error('读取文件时发生错误:', err);
+    //         return;
+    //     }
+    //     try {
 
+    //     } catch (err) {
+    //         console.error('解析JSON时发生错误:', err);
+    //     }
+    // });
 }
-
 run();
