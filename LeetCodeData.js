@@ -135,7 +135,7 @@ async function run() {
     const originData = await forEachGetPage();
     console.log('LeetCode初始结果', originData.length);
     // const jsonData = JSON.stringify(originData, null, 2);
-    // fs.writeFile('test1.json', jsonData, (err) => {
+    // fs.writeFile('test.json', jsonData, (err) => {
     //     if (err) {
     //         console.error('保存JSON文件时出错：', err);
     //     } else {
