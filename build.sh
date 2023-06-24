@@ -56,6 +56,6 @@ python crawlData.py
 python juejinData.py
 python kuaishouData.py
 node v2exData.js
-node LeetCodeData.js
+# node LeetCodeData.js
 # 打包生成静态文件
 npm run build
