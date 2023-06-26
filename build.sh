@@ -55,6 +55,7 @@ pip install certifi
 python crawlData.py
 python juejinData.py
 python kuaishouData.py
+python LeetCodeData.py
 node v2exData.js
 # node LeetCodeData.js
 # 打包生成静态文件
