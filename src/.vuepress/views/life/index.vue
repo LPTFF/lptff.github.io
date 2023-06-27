@@ -28,9 +28,11 @@
               v-for="(item, index) in newsAll"
               :key="index"
             >
-              <div class="news-content" @click="gotoNewsWebsite(item)">
+              <div class="news-content">
                 <div class="news-details">
-                  <h3 class="news-title">{{ item.title }}</h3>
+                  <a class="news-title" href="#" @click="gotoNewsWebsite(item)">
+                    {{ item.title }}
+                  </a>
                   <p class="news-summary">
                     {{ item.desc ? item.desc : item.title }}
                   </p>
@@ -398,6 +400,7 @@ export default {
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
+  color: rgb(48, 49, 51) !important;
 }
 
 .news-summary {

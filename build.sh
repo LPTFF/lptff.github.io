@@ -51,12 +51,13 @@ pip install requests
 pip install cryptography
 pip install pyOpenSSL
 pip install certifi
+pip install beautifulsoup4
+pip install pytz
 # 运行爬虫脚本
 python crawlData.py
 python juejinData.py
 python kuaishouData.py
 python LeetCodeData.py
-node v2exData.js
-# node LeetCodeData.js
+python v2exData.py
 # 打包生成静态文件
 npm run build
