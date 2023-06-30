@@ -6,30 +6,45 @@
   >
     <div class="card-header">
       <span class="question-title">{{ question.problemsName }}</span>
-      <span :class="[getDifficultyStyle(question), 'question-difficulty']">{{
-        getProblemHard(question)
-      }}</span>
+      <span :class="[getDifficultyStyle(question), 'question-difficulty']"
+        >{{ getProblemHard(question)
+        }}<span class="pass-header-rate" v-if="isPCRes"
+          >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;通过率{{
+            question.passRate
+          }}</span
+        ></span
+      >
     </div>
     <div class="card-body">
       <!-- 题目内容 -->
-      <p>
-        Given an array of integers, find two numbers such that they add up to a
-        specific target number.
-      </p>
+      <div
+        v-if="question.problemsDesc"
+        v-html="question.problemsDesc"
+        class="problems-card-desc"
+      ></div>
+      <div v-else class="problems-card-desc">啊哦，数据丢失了</div>
     </div>
     <div class="card-footer">
-      <el-button @click="gotoLeetCode(question)" type="primary"
+      <el-button @click="gotoLeetCode(question, '1')" type="primary"
         >开始答题</el-button
+      >
+      <el-button @click="gotoLeetCode(question, '2')" type="primary"
+        >查看答案</el-button
       >
     </div>
   </el-card>
-  <div class="update-question" @click="getRandomQuestion">
+  <div class="update-question">
     <div class="update-icon-question">
       <el-icon><Refresh /></el-icon>
     </div>
     <div>
-      <el-button type="success">不满意？随机换一下</el-button>
+      <el-button type="success" @click="getRandomQuestion"
+        >不满意？随机换一下</el-button
+      >
     </div>
+  </div>
+  <div v-if="false">
+    <draggingAndHoveringButtons></draggingAndHoveringButtons>
   </div>
 </template>
 
@@ -37,15 +52,13 @@
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import leetCodeList from "../../../public/data/leetCode.json";
-
+import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
 const getRandomProblems = (array, num) => {
   const result = [] as any[];
   const length = array.length;
-
   if (num >= length) {
     return array;
   }
-
   while (result.length < num) {
     const randomIndex = Math.floor(Math.random() * length);
     const randomProblem = array[randomIndex];
@@ -53,12 +66,15 @@ const getRandomProblems = (array, num) => {
       result.push(randomProblem);
     }
   }
-
   return result;
 };
 export default {
   data() {
-    return {};
+    return {
+      dialogVisible: true,
+      dialogTop: "100px",
+      dialogLeft: "100px",
+    };
   },
   setup() {
     const callMethod = () => {
@@ -111,7 +127,7 @@ export default {
     });
     let questionsList = ref(leetCodeList);
     console.log("questionsList", questionsList);
-    let questions = ref(getRandomProblems(questionsList.value, 3));
+    let questions = ref(getRandomProblems(questionsList.value, 2));
     console.log("questions", questions);
     return {
       callMethod,
@@ -122,16 +138,19 @@ export default {
       questions,
     };
   },
-  components: {},
+  components: { draggingAndHoveringButtons },
   methods: {
-    gotoLeetCode(question) {
-      console.log("question", question.problemsUrl);
-      question.problemsUrl ? gotoOutPage(question.problemsUrl) : "";
+    gotoLeetCode(question, type) {
+      let url = type == "2" ? question.solutionsUrl : question.problemsUrl;
+      question.problemsUrl ? gotoOutPage(url) : "";
     },
     getRandomQuestion() {
-      // console.log("233", leetCodeList);
-      this.questions = getRandomProblems(leetCodeList, 3);
-      console.log("this.questions", this.questions);
+      this.questions = getRandomProblems(leetCodeList, 2);
+    },
+    handleDialogDrag(event) {
+      // 更新悬浮窗的位置
+      this.dialogTop = event.clientY + "px";
+      this.dialogLeft = event.clientX + "px";
     },
   },
 };
@@ -161,10 +180,17 @@ export default {
 
 .question-title {
   font-size: 18px;
+  color: rgb(44, 62, 80);
+  font-weight: 600;
+}
+.pass-header-rate {
+  color: rgb(48, 49, 51);
 }
 
 .question-difficulty {
   font-size: 14px;
+  align-items: center;
+  margin-top: 3px;
 }
 .question-easy {
   color: rgb(0, 175, 155);
@@ -178,10 +204,21 @@ export default {
 .card-body {
   margin-top: 10px;
 }
-
+.problems-card-desc {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-overflow: ellipsis;
+  height: 40px;
+  overflow: hidden;
+}
 .card-footer {
   margin-top: 20px;
   text-align: right;
+}
+.float-button {
+  position: fixed;
+  top: 20px;
+  right: 20px;
 }
 
 /* 响应式布局 */
@@ -193,53 +230,11 @@ export default {
     background-color: var(--el-menu-bg-color);
   }
 
-  .news-list {
-    margin-right: 0;
-  }
-
-  .movie-list {
-    margin-top: 0px;
-  }
-
   .main-content {
     padding-top: 115px;
   }
-
-  .news-summary {
-    color: #666;
-    margin-bottom: 10px;
-    max-width: 150px;
-    white-space: nowrap;
-    /* 防止换行 */
-    overflow: hidden;
-    /* 超出部分隐藏 */
-    text-overflow: ellipsis;
-    /* 超出部分省略号显示 */
-    height: 100%;
-  }
-
-  .img-news {
-    width: 100px;
-    height: 100px;
-  }
-
-  .news-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 0px;
-    max-width: 150px;
-    white-space: nowrap;
-    /* 防止换行 */
-    overflow: hidden;
-    /* 超出部分隐藏 */
-    text-overflow: ellipsis;
-    /* 超出部分省略号显示 */
-    height: 100%;
-  }
-
-  .news-bottom {
-    display: flex;
-    max-width: 150px;
+  .question-title {
+    max-width: 200px;
     white-space: nowrap;
     /* 防止换行 */
     overflow: hidden;
