@@ -88,27 +88,7 @@
             </el-row>
           </div>
           <div class="leet-code" v-if="selectIndex == '3'">
-            <el-card
-              v-for="question in questions"
-              :key="question.id"
-              class="question-card"
-            >
-              <div class="card-header">
-                <span class="question-title">{{ question.title }}</span>
-                <span class="question-difficulty">{{
-                  question.difficulty
-                }}</span>
-              </div>
-              <div class="card-body">
-                <!-- 题目内容 -->
-                <p>{{ question.description }}</p>
-              </div>
-              <div class="card-footer">
-                <el-button type="primary" class="card-action-button"
-                  >开始答题</el-button
-                >
-              </div>
-            </el-card>
+            <leetCodeComponent></leetCodeComponent>
           </div>
         </div>
       </el-main>
@@ -128,6 +108,7 @@ import crawlMovie from "../../public/data/movie.json";
 import infzmNews from "../../public/data/newsHandle.json";
 import juejinNews from "../../public/data/juejin.json";
 import v2exNews from "../../public/data/v2ex.json";
+import leetCodeComponent from "./leetCode/index.vue";
 export default {
   data() {
     return {
@@ -144,7 +125,7 @@ export default {
     };
   },
   setup() {
-    let selectIndex = ref("1");
+    let selectIndex = ref("3");
     let moviesData = ref(crawlMovie.subjects);
     let moviesValue = moviesData.value;
     const newMovie = moviesValue.filter((item) => item.is_new === true);
@@ -213,29 +194,6 @@ export default {
         ? window.history.state.back
         : ""; //获取路由路径
     });
-    const questions = ref([
-      {
-        id: 1,
-        title: "Two Sum",
-        difficulty: "Easy",
-        description:
-          "Given an array of integers, find two numbers such that they add up to a specific target number.",
-      },
-      {
-        id: 1,
-        title: "Two Sum",
-        difficulty: "Easy",
-        description:
-          "Given an array of integers, find two numbers such that they add up to a specific target number.",
-      },
-      {
-        id: 1,
-        title: "Two Sum",
-        difficulty: "Easy",
-        description:
-          "Given an array of integers, find two numbers such that they add up to a specific target number.",
-      },
-    ]);
     return {
       callMethod,
       selectIndex,
@@ -245,8 +203,10 @@ export default {
       getWebsiteLogo,
       getWebsiteName,
       moviesAll,
-      questions,
     };
+  },
+  components: {
+    leetCodeComponent,
   },
   methods: {
     goBack() {
@@ -450,6 +410,7 @@ export default {
 }
 .leet-code {
   padding-top: 10px;
+  margin-bottom: 40px;
 }
 
 .movie-item {
@@ -519,9 +480,7 @@ export default {
 
 .question-difficulty {
   font-size: 14px;
-  color: #888;
 }
-
 .card-body {
   margin-top: 10px;
 }
@@ -531,9 +490,6 @@ export default {
   text-align: right;
 }
 
-.card-action-button {
-  margin-right: 10px;
-}
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
   .header-el {
