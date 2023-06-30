@@ -57,7 +57,17 @@ pip install pytz
 python crawlData.py
 python juejinData.py
 python kuaishouData.py
-python LeetCodeData.py
+# 获取当前时间的小时和时区
+current_hour=$(TZ='Asia/Shanghai' date +"%H")
+current_timezone=$(date +"%Z")
+
+# 判断当前时间是否在指定的时间范围内（晚上10点至第二日凌晨4点）
+if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
+  echo "北京时间$current_hour，满足条件执行更新LeetCode命令"
+  python LeetCodeData.py
+else
+  echo "北京时间$current_hour，不满足条件执行更新LeetCode命令"
+fi
 python v2exData.py
 # 打包生成静态文件
 npm run build
