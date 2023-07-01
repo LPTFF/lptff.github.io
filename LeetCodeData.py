@@ -72,7 +72,7 @@ while True:
     new_question_list.extend(question_list)
     # print('当前数据长度:', len(new_question_list))
     # print('当前数据skip:', skip)
-    if len(question_list) < 50 or skip > 10000:
+    if len(question_list) < 50 or skip > 500000:
         print('获取题目列表结束')
         break
     skip += 50
@@ -85,14 +85,16 @@ for index, question in enumerate(new_question_list):
     passRate = "{:.2%}".format(question['acRate'])
     problemsUrl = 'https://leetcode.cn/problems/'+question['titleSlug']+'/'
     solutionsUrl = 'https://leetcode.cn/problems/'+question['titleSlug']+'/solution'
-    problemsDesc=fetch_leetcode_desc(question['titleSlug'],index)
+    problemsDesc = fetch_leetcode_desc(question['titleSlug'],index)
+    paidOnly = question['paidOnly']#是否付费 true表示付费 false表示不付费
     newEntry = {
         "problemsName": problemsName,
         "hardRate": hardRate,
         "passRate": passRate,
         "problemsUrl": problemsUrl,
         "solutionsUrl": solutionsUrl,
-        "problemsDesc": problemsDesc
+        "problemsDesc": problemsDesc,
+        "isPlus": paidOnly
     }
     questionHandle.append(newEntry)
 # 导出数据

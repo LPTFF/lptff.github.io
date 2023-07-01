@@ -18,11 +18,15 @@
     <div class="card-body">
       <!-- 题目内容 -->
       <div
-        v-if="question.problemsDesc"
+        v-if="!question.isPlus"
         v-html="question.problemsDesc"
         class="problems-card-desc"
       ></div>
-      <div v-else class="problems-card-desc">啊哦，数据丢失了</div>
+      <div v-else class="problems-card-desc">
+        <div class="problems-plus-desc">
+          <el-button type="warning">该题目是 Plus 会员专享题</el-button>
+        </div>
+      </div>
     </div>
     <div class="card-footer">
       <el-button @click="gotoLeetCode(question, '1')" type="primary"
@@ -127,7 +131,8 @@ export default {
     });
     let questionsList = ref(leetCodeList);
     console.log("questionsList", questionsList);
-    let questions = ref(getRandomProblems(questionsList.value, 2));
+    let questions = ref(getRandomProblems(questionsList.value, 1));
+    // let questions = ref(questionsList.value.slice(155, 156));
     console.log("questions", questions);
     return {
       callMethod,
@@ -145,7 +150,7 @@ export default {
       question.problemsUrl ? gotoOutPage(url) : "";
     },
     getRandomQuestion() {
-      this.questions = getRandomProblems(leetCodeList, 2);
+      this.questions = getRandomProblems(leetCodeList, 1);
     },
     handleDialogDrag(event) {
       // 更新悬浮窗的位置
@@ -208,8 +213,20 @@ export default {
   word-wrap: break-word;
   overflow-wrap: break-word;
   text-overflow: ellipsis;
-  height: 40px;
   overflow: hidden;
+}
+.problems-card-desc >>> img {
+  max-width: 100%;
+  height: auto !important;
+}
+.problems-card-desc >>> pre {
+  text-wrap: wrap !important;
+}
+.problems-plus-desc {
+  height: 400px;
+  display: flex;
+  justify-content: center; /* 水平居中 */
+  align-items: center; /* 垂直居中 */
 }
 .card-footer {
   margin-top: 20px;
@@ -242,6 +259,12 @@ export default {
     text-overflow: ellipsis;
     /* 超出部分省略号显示 */
     height: 100%;
+  }
+  .problems-plus-desc {
+    height: 200px;
+    display: flex;
+    justify-content: center; /* 水平居中 */
+    align-items: center; /* 垂直居中 */
   }
 }
 </style>
