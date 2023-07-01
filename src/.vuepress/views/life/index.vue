@@ -24,13 +24,13 @@
         </el-menu>
       </el-header>
       <el-main class="main-content">
-        <div class="leet-code" v-show="selectIndex === '1'">
+        <div class="component-div" v-show="selectIndex === '1'">
           <newsComponent></newsComponent>
         </div>
-        <div class="leet-code" v-show="selectIndex === '2'">
+        <div class="component-div" v-show="selectIndex === '2'">
           <doubanComponent></doubanComponent>
         </div>
-        <div class="leet-code" v-show="selectIndex === '3'">
+        <div class="component-div" v-show="selectIndex === '3'">
           <leetCodeComponent></leetCodeComponent>
         </div>
       </el-main>
@@ -157,7 +157,7 @@ export default {
   margin-bottom: 10px;
   color: #666;
 }
-.leet-code {
+.component-div {
   /* padding-top: 10px; */
   margin-bottom: 40px;
 }
