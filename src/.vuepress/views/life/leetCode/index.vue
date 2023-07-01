@@ -130,10 +130,8 @@ export default {
         : ""; //获取路由路径
     });
     let questionsList = ref(leetCodeList);
-    console.log("questionsList", questionsList);
     let questions = ref(getRandomProblems(questionsList.value, 1));
     // let questions = ref(questionsList.value.slice(1, 2));
-    console.log("questions", questions);
     return {
       callMethod,
       isPCRes,

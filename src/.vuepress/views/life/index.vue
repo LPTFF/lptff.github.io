@@ -24,8 +24,14 @@
         </el-menu>
       </el-header>
       <el-main class="main-content">
-        <div class="leet-code">
-          <component :is="selectedComponent"></component>
+        <div class="leet-code" v-show="selectIndex === '1'">
+          <newsComponent></newsComponent>
+        </div>
+        <div class="leet-code" v-show="selectIndex === '2'">
+          <doubanComponent></doubanComponent>
+        </div>
+        <div class="leet-code" v-show="selectIndex === '3'">
+          <leetCodeComponent></leetCodeComponent>
         </div>
       </el-main>
       <el-footer class="footer" @click="gotoIssue">
@@ -63,18 +69,6 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
-    const selectedComponent = computed(() => {
-      switch (selectIndex.value) {
-        case "1":
-          return newsComponent;
-        case "2":
-          return doubanComponent;
-        case "3":
-          return leetCodeComponent;
-        default:
-          return null;
-      }
-    });
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state
@@ -87,7 +81,6 @@ export default {
       isPCRes,
       previousRoute,
       menuItems,
-      selectedComponent,
     };
   },
   components: {
