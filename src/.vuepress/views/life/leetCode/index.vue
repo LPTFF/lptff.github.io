@@ -132,7 +132,7 @@ export default {
     let questionsList = ref(leetCodeList);
     console.log("questionsList", questionsList);
     let questions = ref(getRandomProblems(questionsList.value, 1));
-    // let questions = ref(questionsList.value.slice(155, 156));
+    // let questions = ref(questionsList.value.slice(1, 2));
     console.log("questions", questions);
     return {
       callMethod,
@@ -215,11 +215,11 @@ export default {
   text-overflow: ellipsis;
   overflow: hidden;
 }
-.problems-card-desc >>> img {
+.problems-card-desc :deep(img) {
   max-width: 100%;
   height: auto !important;
 }
-.problems-card-desc >>> pre {
+.problems-card-desc :deep(pre) {
   text-wrap: wrap !important;
 }
 .problems-plus-desc {
