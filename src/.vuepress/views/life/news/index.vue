@@ -2,7 +2,11 @@
   <el-card class="news-card" v-for="(item, index) in newsAll" :key="index">
     <div class="news-content">
       <div class="news-details">
-        <a class="news-title" href="#" @click.prevent="gotoNewsWebsite(item)">
+        <a
+          class="news-title"
+          :href="handleNewsUrl(item)"
+          @click.prevent="gotoNewsWebsite(item)"
+        >
           {{ item.title }}
         </a>
         <p class="news-summary">
@@ -97,6 +101,31 @@ export default {
         ? window.history.state.back
         : ""; //获取路由路径
     });
+    const handleNewsUrl = (item) => {
+      let data = isPC();
+      let handleUrl = "";
+      switch (item.website) {
+        case "infzm":
+          handleUrl = data
+            ? `https://www.infzm.com/contents/${item.url}`
+            : `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
+          break;
+        case "juejin":
+        case "v2ex":
+          handleUrl = item.url;
+          break;
+        default:
+          break;
+      }
+      return handleUrl || ""; // 返回空字符串表示无效的URL
+    };
+    const gotoNewsWebsite = (item) => {
+      console.log(item);
+      const url = handleNewsUrl(item);
+      if (url) {
+        gotoOutPage(url);
+      }
+    };
     return {
       callMethod,
       isPCRes,
@@ -104,35 +133,11 @@ export default {
       newsAll,
       getWebsiteLogo,
       getWebsiteName,
+      handleNewsUrl,
+      gotoNewsWebsite,
     };
   },
-  components: {},
-  methods: {
-    gotoNewsWebsite(item) {
-      console.log(item);
-      let data = isPC();
-      console.log(data);
-      if (item.website == "infzm") {
-        // https://www.infzm.com/contents/249870
-        // https://www.infzm.com/wap/#/content/249908?source=133&source_1=1
-        let handleUrl = "";
-        if (item.url) {
-          data
-            ? (handleUrl = `https://www.infzm.com/contents/${item.url}`)
-            : (handleUrl = `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`);
-          gotoOutPage(handleUrl);
-        } else {
-          console.log("infzm 233");
-        }
-      } else if (item.website == "juejin") {
-        item.url ? gotoOutPage(item.url) : console.log("juejin 233");
-      } else if (item.website == "v2ex") {
-        item.url ? gotoOutPage(item.url) : console.log("v2ex 233");
-      } else {
-        console.log("233");
-      }
-    },
-  },
+  methods: {},
 };
 </script>
 
