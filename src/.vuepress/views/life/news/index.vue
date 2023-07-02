@@ -2,7 +2,7 @@
   <el-card class="news-card" v-for="(item, index) in newsAll" :key="index">
     <div class="news-content">
       <div class="news-details">
-        <a class="news-title" href="#" @click="gotoNewsWebsite(item)">
+        <a class="news-title" href="#" @click.prevent="gotoNewsWebsite(item)">
           {{ item.title }}
         </a>
         <p class="news-summary">
