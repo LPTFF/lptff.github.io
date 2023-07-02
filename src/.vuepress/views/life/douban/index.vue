@@ -20,7 +20,11 @@
               class="is-new"
               src="https://images.weserv.nl/?url=https://img1.doubanio.com/f/movie/caa8f80abecee1fc6f9d31924cef8dd9a24c7227/pics/movie/ic_new.png"
             />
-            <a class="title-movie" @click="gotoMovieWebsite(item)" href="#">
+            <a
+              class="title-movie"
+              @click.prevent="gotoMovieWebsite(item)"
+              :href="item.url"
+            >
               {{ item.title }}
             </a>
             <p class="rate-movie">{{ item.rate }}</p>
