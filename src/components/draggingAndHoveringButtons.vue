@@ -12,57 +12,68 @@
     >
   </div>
 </template>
+
 <script lang="ts">
-import { ref, onMounted, computed, reactive, toRefs } from "vue";
-import { isPC, gotoOutPage } from "../utils/utils";
+import { ref, onMounted, computed } from "vue";
+import { isPC } from "../utils/utils.js";
+
 export default {
-  data() {
-    return {
-      buttonPosition: { x: 0, y: 0 },
-      dragOffset: { x: 0, y: 0 },
-      isDragging: false,
-    };
-  },
   setup() {
+    const buttonPosition = ref({ x: 0, y: 0 });
+    const dragOffset = ref({ x: 0, y: 0 });
+    const isDragging = ref(false);
+
     const callMethod = () => {
       // console.log('233');
     };
+
     const previousRoute = ref("");
+
     // 创建计算属性
     const isPCRes = computed(() => {
       return isPC();
     });
+
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
     });
+
+    const handleDialogDrag = () => {
+      // 更新悬浮窗的位置
+      console.log("handleDialogDrag 22333");
+    };
+
+    const startDrag = (event: MouseEvent) => {
+      isDragging.value = true;
+      console.log("startDrag event", event);
+    };
+
+    const drag = (event: MouseEvent) => {
+      if (isDragging.value) {
+        console.log("drag event", event);
+      }
+    };
+
+    const endDrag = (event: MouseEvent) => {
+      isDragging.value = false;
+      console.log("endDrag event", event);
+    };
+
     return {
       callMethod,
       isPCRes,
       previousRoute,
+      buttonPosition,
+      dragOffset,
+      isDragging,
+      handleDialogDrag,
+      startDrag,
+      drag,
+      endDrag,
     };
-  },
-  components: {},
-  methods: {
-    handleDialogDrag() {
-      // 更新悬浮窗的位置
-      console.log("handleDialogDrag 22333");
-    },
-    startDrag(event) {
-      this.isDragging = true;
-      console.log("startDrag event", event);
-    },
-    drag(event) {
-      if (this.isDragging) {
-        console.log("drag event", event);
-      }
-    },
-    endDrag(event) {
-      this.isDragging = false;
-      console.log("endDrag event", event);
-    },
   },
 };
 </script>

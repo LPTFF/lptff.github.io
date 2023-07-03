@@ -46,9 +46,9 @@ export default {
   setup() {
     let moviesData = ref(crawlMovie.subjects);
     let moviesValue = moviesData.value;
-    const newMovie = moviesValue.filter((item) => item.is_new === true);
+    const newMovie = moviesValue.filter((item: any) => item.is_new === true);
     newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
-    const oldMovie = moviesValue.filter((item) => item.is_new === false);
+    const oldMovie = moviesValue.filter((item: any) => item.is_new === false);
     oldMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
     let moviesAll = [...newMovie, ...oldMovie];
     const callMethod = () => {
@@ -74,7 +74,7 @@ export default {
   },
   components: {},
   methods: {
-    gotoMovieWebsite(item) {
+    gotoMovieWebsite(item: any) {
       console.log(item);
       item.url ? gotoOutPage(item.url) : "";
     },

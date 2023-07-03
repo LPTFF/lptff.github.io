@@ -49,62 +49,62 @@ import { isPC, gotoOutPage } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
+import { useRouter } from "vue-router";
 export default {
-  data() {
-    return {};
-  },
   setup() {
-    let selectIndex = ref("1");
+    const selectIndex = ref("1");
     const menuItems = [
       { index: "1", text: "首页" },
       { index: "2", text: "豆瓣电影" },
       { index: "3", text: "LeetCode" },
     ];
+    const previousRoute = ref("");
+    const isPCRes = computed(() => isPC());
+    const router = useRouter();
+
     const callMethod = () => {
       // console.log('233');
     };
-    const previousRoute = ref("");
 
-    // 创建计算属性
-    const isPCRes = computed(() => {
-      return isPC();
-    });
+    const goBack = () => {
+      previousRoute.value ? router.back() : router.push("/");
+    };
+
+    const handleSelect = (key: any) => {
+      console.log(key);
+      selectIndex.value = key;
+    };
+
+    const gotoIssue = () => {
+      const pageUrl = window.location.origin;
+      console.log("pageUrl", pageUrl);
+      const issueUrl = pageUrl.includes("love-tff.gitee.io")
+        ? "https://gitee.com/love-tff/love-tff/issues"
+        : "https://github.com/LPTFF/lptff.github.io/issues";
+      gotoOutPage(issueUrl);
+    };
+
     onMounted(async () => {
-      callMethod(); // 在组件挂载后调用方法
+      callMethod();
       previousRoute.value = window.history.state
         ? window.history.state.back
-        : ""; //获取路由路径
+        : "";
     });
+
     return {
-      callMethod,
       selectIndex,
-      isPCRes,
-      previousRoute,
       menuItems,
+      previousRoute,
+      isPCRes,
+      goBack,
+      handleSelect,
+      gotoIssue,
     };
   },
   components: {
     leetCodeComponent,
     doubanComponent,
     newsComponent,
-  },
-  methods: {
-    goBack() {
-      this.previousRoute ? this.$router.back() : this.$router.push("/"); // 返回上一个路由，兜底返回主页
-    },
-    async handleSelect(key) {
-      console.log(key);
-      this.selectIndex = key;
-    },
-    gotoIssue() {
-      let pageUrl = window.location.origin;
-      console.log("pageUrl", pageUrl);
-      if (pageUrl.includes("love-tff.gitee.io")) {
-        gotoOutPage("https://gitee.com/love-tff/love-tff/issues");
-      } else {
-        gotoOutPage("https://github.com/LPTFF/lptff.github.io/issues");
-      }
-    },
   },
 };
 </script>

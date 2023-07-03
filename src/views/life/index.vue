@@ -49,21 +49,22 @@ import { isPC, gotoOutPage } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
+import { useRouter } from "vue-router";
 export default {
-  data() {
-    return {};
-  },
   setup() {
-    let selectIndex = ref("1");
+    const selectIndex = ref("1");
     const menuItems = [
       { index: "1", text: "首页" },
       { index: "2", text: "豆瓣电影" },
       { index: "3", text: "LeetCode" },
     ];
+
     const callMethod = () => {
       // console.log('233');
     };
+
     const previousRoute = ref("");
+    const route = useRouter();
 
     // 创建计算属性
     const isPCRes = computed(() => {
@@ -75,28 +76,16 @@ export default {
         ? window.history.state.back
         : ""; //获取路由路径
     });
-    return {
-      callMethod,
-      selectIndex,
-      isPCRes,
-      previousRoute,
-      menuItems,
+    const goBack = () => {
+      previousRoute.value ? route.back() : route.push("/"); // 返回上一个路由，兜底返回主页
     };
-  },
-  components: {
-    leetCodeComponent,
-    doubanComponent,
-    newsComponent,
-  },
-  methods: {
-    goBack() {
-      this.previousRoute ? this.$router.back() : this.$router.push("/"); // 返回上一个路由，兜底返回主页
-    },
-    async handleSelect(key) {
+
+    const handleSelect = async (key: any) => {
       console.log(key);
-      this.selectIndex = key;
-    },
-    gotoIssue() {
+      selectIndex.value = key;
+    };
+
+    const gotoIssue = () => {
       let pageUrl = window.location.origin;
       console.log("pageUrl", pageUrl);
       if (pageUrl.includes("love-tff.gitee.io")) {
@@ -104,7 +93,23 @@ export default {
       } else {
         gotoOutPage("https://github.com/LPTFF/lptff.github.io/issues");
       }
-    },
+    };
+
+    return {
+      callMethod,
+      selectIndex,
+      isPCRes,
+      previousRoute,
+      menuItems,
+      goBack,
+      handleSelect,
+      gotoIssue,
+    };
+  },
+  components: {
+    leetCodeComponent,
+    doubanComponent,
+    newsComponent,
   },
 };
 </script>

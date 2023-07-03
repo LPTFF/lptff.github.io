@@ -88,6 +88,9 @@ export default {
     const handleCommand = (command: string | number | object) => {
       ElMessage(`click on item ${command}`);
     };
+    const handleClick = (type: any) => {
+      selectIndex.value = type;
+    };
     return {
       handleCommand,
       selectIndex,
@@ -95,14 +98,10 @@ export default {
       Search,
       input1,
       activeName,
+      handleClick,
     };
   },
   components: {},
-  methods: {
-    handleClick(type) {
-      this.selectIndex = type;
-    },
-  },
 };
 </script>
 

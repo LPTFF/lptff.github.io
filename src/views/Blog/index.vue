@@ -62,7 +62,7 @@
   
   <script lang="ts">
 import { reactive } from "vue";
-
+import { useRouter } from "vue-router";
 export default {
   name: "Blog",
   components: {},
@@ -118,27 +118,28 @@ export default {
       selectedArticle: null,
     });
 
-    const handleMenuSelect = (index) => {
+    const handleMenuSelect = (index: any) => {
       state.activeMenu = index;
     };
 
-    const handleCategorySelect = (index) => {
+    const handleCategorySelect = (index: any) => {
       state.activeCategory = index;
       state.selectedArticle = null;
+    };
+    const router = useRouter();
+    const gotoHome = () => {
+      console.log("gotoHome");
+      router.back(); // 使用获取到的 $router 对象返回上一个路由
     };
 
     return {
       ...state,
       handleMenuSelect,
       handleCategorySelect,
+      gotoHome,
     };
   },
-  methods: {
-    gotoHome() {
-      console.log("gotoHome");
-      this.$router.back(); // 返回上一个路由
-    },
-  },
+  methods: {},
 };
 </script>
   

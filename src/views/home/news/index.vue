@@ -37,9 +37,6 @@ import infzmNews from "../../../public/data/newsHandle.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 export default {
-  data() {
-    return {};
-  },
   setup() {
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
@@ -55,7 +52,7 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
-    const getWebsiteLogo = (item) => {
+    const getWebsiteLogo = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
       let websiteLogo = "";
       switch (String(item.website)) {
@@ -77,7 +74,7 @@ export default {
       }
       return websiteLogo;
     };
-    const getWebsiteName = (item) => {
+    const getWebsiteName = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
       let websiteName = "";
       switch (String(item.website)) {
@@ -101,7 +98,7 @@ export default {
         ? window.history.state.back
         : ""; //获取路由路径
     });
-    const handleNewsUrl = (item) => {
+    const handleNewsUrl = (item: any) => {
       let data = isPC();
       let handleUrl = "";
       switch (item.website) {
@@ -119,7 +116,7 @@ export default {
       }
       return handleUrl || ""; // 返回空字符串表示无效的URL
     };
-    const gotoNewsWebsite = (item) => {
+    const gotoNewsWebsite = (item: any) => {
       console.log(item);
       const url = handleNewsUrl(item);
       if (url) {

@@ -74,7 +74,7 @@ export default {
   },
   components: {},
   methods: {
-    gotoMovieWebsite(item) {
+    gotoMovieWebsite(item: any) {
       console.log(item);
       item.url ? gotoOutPage(item.url) : "";
     },

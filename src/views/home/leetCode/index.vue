@@ -57,7 +57,7 @@ import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import leetCodeList from "../../../public/data/leetCode.json";
 import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
-const getRandomProblems = (array, num) => {
+const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
   const length = array.length;
   if (num >= length) {
@@ -76,8 +76,6 @@ export default {
   data() {
     return {
       dialogVisible: true,
-      dialogTop: "100px",
-      dialogLeft: "100px",
     };
   },
   setup() {
@@ -89,7 +87,7 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
-    const getProblemHard = (question) => {
+    const getProblemHard = (question: any) => {
       let hardRateName = "";
       switch (String(question.hardRate)) {
         case "EASY":
@@ -106,7 +104,7 @@ export default {
       }
       return hardRateName;
     };
-    const getDifficultyStyle = (question) => {
+    const getDifficultyStyle = (question: any) => {
       let questionStyle = "";
       switch (String(question.hardRate)) {
         case "EASY":
@@ -132,6 +130,16 @@ export default {
     let questionsList = ref(leetCodeList);
     let questions = ref(getRandomProblems(questionsList.value, 1));
     // let questions = ref(questionsList.value.slice(1, 2));
+    let dialogTop = ref("100px");
+    let dialogLeft = ref("100px");
+    const handleDialogDrag = (event: MouseEvent) => {
+      // 更新悬浮窗的位置
+      dialogTop.value = event.clientY + "px";
+      dialogLeft.value = event.clientX + "px";
+    };
+    const getRandomQuestion = () => {
+      questions.value = getRandomProblems(questionsList.value, 1);
+    };
     return {
       callMethod,
       isPCRes,
@@ -139,21 +147,17 @@ export default {
       getProblemHard,
       getDifficultyStyle,
       questions,
+      dialogTop,
+      dialogLeft,
+      handleDialogDrag,
+      getRandomQuestion,
     };
   },
   components: { draggingAndHoveringButtons },
   methods: {
-    gotoLeetCode(question, type) {
+    gotoLeetCode(question: any, type: any) {
       let url = type == "2" ? question.solutionsUrl : question.problemsUrl;
       question.problemsUrl ? gotoOutPage(url) : "";
-    },
-    getRandomQuestion() {
-      this.questions = getRandomProblems(leetCodeList, 1);
-    },
-    handleDialogDrag(event) {
-      // 更新悬浮窗的位置
-      this.dialogTop = event.clientY + "px";
-      this.dialogLeft = event.clientX + "px";
     },
   },
 };
