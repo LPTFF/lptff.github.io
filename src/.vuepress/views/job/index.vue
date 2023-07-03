@@ -1,7 +1,7 @@
 <template>
   <div class="home-head common-flex">
     <div class="common-evenly">
-      <div class="title">随风而逝</div>
+      <div class="title">tangff</div>
       <div class="options">
         <el-dropdown @command="handleCommand" @visible-change="handleClick">
           <span class="three-span-select">
@@ -47,7 +47,7 @@
     </div>
     <div class="common-flex">
       <div class="el-div-button">
-        <el-button type="success" round :icon="Plus">Create Article</el-button>
+        <el-button type="success" round>博客</el-button>
       </div>
       <div class="el-div-avatar">
         <el-avatar
@@ -58,17 +58,14 @@
     </div>
   </div>
   <div class="body-content">
-    <el-tabs class="demo-tabs">
+    <el-tabs v-model="activeName" class="demo-tabs">
       <el-tab-pane label="首页" name="first">
-        <div class="el-div-card">
-          <div v-for="index in 2" :key="index">
-            <el-card
-              class="box-card"
-              :class="index !== 3 ? 'el-right-card' : ''"
-            >
-              {{ "List item " + index }}
-            </el-card>
-          </div>
+        <div>
+          <el-row>
+            <el-col :span="24" :md="8" :lg="8" v-for="index in 13" :key="index">
+              <el-card class="box-card" shadow="hover"> </el-card>
+            </el-col>
+          </el-row>
         </div>
       </el-tab-pane>
       <el-tab-pane label="电影" name="second">Config</el-tab-pane>
@@ -87,6 +84,7 @@ export default {
   setup() {
     let selectIndex = ref(true);
     let input1 = ref("");
+    const activeName = ref("first");
     const handleCommand = (command: string | number | object) => {
       ElMessage(`click on item ${command}`);
     };
@@ -96,6 +94,7 @@ export default {
       Plus,
       Search,
       input1,
+      activeName,
     };
   },
   components: {},
@@ -115,8 +114,11 @@ export default {
   display: flex;
 }
 .box-card {
-  width: 433px;
+  /* width: 433px; */
   height: 482px;
+  margin-bottom: 66px;
+  border-radius: 4px;
+  margin-right: 20px;
 }
 .home-head {
   height: 155px;
@@ -132,7 +134,7 @@ export default {
 .title {
   color: rgb(174, 209, 125);
   margin: 58px 0px 0px 247px;
-  font-size: 20px;
+  font-size: 30px;
   font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
     "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
   font-weight: 400;
@@ -140,7 +142,7 @@ export default {
 }
 .body-content {
   background: #f7f8fa;
-  height: 800px;
+  min-height: 800px;
 }
 .demo-tabs {
   padding: 77px 247px;
@@ -174,7 +176,7 @@ export default {
   margin: 53px 0px 0px 0px;
 }
 .el-div-avatar {
-  margin: 40px 247px 0px 50px;
+  margin: 40px 247px 0px 20px;
 }
 :deep(.el-input__wrapper) {
   border-radius: 30px;
