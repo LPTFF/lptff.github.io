@@ -169,6 +169,7 @@ export default {
     z-index: 9999;
     width: 100%;
     background-color: var(--el-menu-bg-color);
+    top: 0;
   }
   .main-content {
     padding-top: 115px;
