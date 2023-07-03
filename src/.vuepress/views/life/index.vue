@@ -44,7 +44,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed, Teleport } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";

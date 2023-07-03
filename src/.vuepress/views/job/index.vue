@@ -1,350 +1,200 @@
 <template>
-  <div class="page">
-    <div class="group">
-      <div class="block">
-        <img class="vertical-line" src="./images/img_0.png" />
-        <div class="container">
-          <span class="works">WORKS</span>
-          <div class="wrapper">
-            <div class="empty"></div>
-            <div class="group-1">
-              <img class="vertical-line-1" src="./images/img_1.png" />
-              <span class="about">ABOUT</span>
-            </div>
-          </div>
-        </div>
-        <div class="container-item-0">
-          <img class="vertical-line-2" src="./images/img_2.png" />
-        </div>
-        <div class="container-item-1">
-          <img class="vertical-line-3" src="./images/img_3.png" />
-        </div>
-        <div class="container-1">
-          <img class="vertical-line-4" src="./images/img_4.png" />
-          <div class="wrapper-1">
-            <div class="group-2">
-              <div class="view">
-                <img class="icon" src="./images/img_5.png" />
+  <div class="home-head common-flex">
+    <div class="common-evenly">
+      <div class="title">随风而逝</div>
+      <div class="options">
+        <el-dropdown @command="handleCommand" @visible-change="handleClick">
+          <span class="three-span-select">
+            <div class="three-div-select">
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
+              </div>
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
+              </div>
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
               </div>
             </div>
-            <span class="title">ce</span>
-          </div>
-        </div>
-        <div class="container-item-2">
-          <img class="vertical-line-5" src="./images/img_6.png" />
-        </div>
-        <span class="info">Personal web design exercises</span>
-        <div class="container-item-3">
-          <img class="vertical-line-6" src="./images/img_7.png" />
-        </div>
-        <span class="caption">设计师个人博客</span>
-        <div class="container-2">
-          <img class="vertical-line-7" src="./images/img_8.png" />
-          <span class="web">WEB</span>
-        </div>
-        <span class="info-1">for your referen</span>
-        <div class="container-3">
-          <img class="vertical-line-8" src="./images/img_9.png" />
-          <div class="wrapper-2">
-            <span class="desig">DESIG</span>
-            <span class="tag">N</span>
-          </div>
-        </div>
+            <el-icon v-if="!selectIndex" color="#cccccc" class="caret-bottom"
+              ><CaretRight
+            /></el-icon>
+            <el-icon v-if="selectIndex" color="#cccccc" class="caret-bottom"
+              ><CaretBottom
+            /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="a">求学笔记</el-dropdown-item>
+              <el-dropdown-item command="b">学术网站</el-dropdown-item>
+              <el-dropdown-item command="c">常用链接</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
       </div>
-      <img class="vertical-line-9" src="./images/img_10.png" />
-      <div class="long-banner">
-        <!-- <components></components> -->
+      <div class="vertical-line">
+        <el-divider direction="vertical" color="#cccccc" />
+      </div>
+      <div class="el-search">
+        <el-input
+          v-model="input1"
+          class="el-input-search"
+          size="large"
+          placeholder="Search article here..."
+          :prefix-icon="Search"
+        />
+      </div>
+    </div>
+    <div class="common-flex">
+      <div class="el-div-button">
+        <el-button type="success" round :icon="Plus">Create Article</el-button>
+      </div>
+      <div class="el-div-avatar">
+        <el-avatar
+          :size="50"
+          src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
+        />
       </div>
     </div>
   </div>
+  <div class="body-content">
+    <el-tabs class="demo-tabs">
+      <el-tab-pane label="首页" name="first">
+        <div class="el-div-card">
+          <div v-for="index in 2" :key="index">
+            <el-card
+              class="box-card"
+              :class="index !== 3 ? 'el-right-card' : ''"
+            >
+              {{ "List item " + index }}
+            </el-card>
+          </div>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="电影" name="second">Config</el-tab-pane>
+      <el-tab-pane label="题库" name="third">Role</el-tab-pane>
+    </el-tabs>
+  </div>
 </template>
 <script lang="ts">
-import components from "./components/index.vue";
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { Plus, Search } from "@element-plus/icons-vue";
 export default {
   data() {
     return {};
   },
-  setup() {},
-  components: {
-    components,
+  setup() {
+    let selectIndex = ref(true);
+    let input1 = ref("");
+    const handleCommand = (command: string | number | object) => {
+      ElMessage(`click on item ${command}`);
+    };
+    return {
+      handleCommand,
+      selectIndex,
+      Plus,
+      Search,
+      input1,
+    };
   },
-  methods: {},
+  components: {},
+  methods: {
+    handleClick(type) {
+      this.selectIndex = type;
+    },
+  },
 };
 </script>
 
 <style scoped>
-.page {
-  width: 1120px;
-  height: 760px;
-  font-family: HarmonyOS_Sans_SC_Bold;
+.el-right-card {
+  margin-right: 64px;
 }
-.page .group {
+.el-div-card {
   display: flex;
-  position: relative;
-  align-items: center;
-  background-color: #f5f5f5;
-  width: 1120px;
-  height: 760px;
 }
-.page .block {
+.box-card {
+  width: 433px;
+  height: 482px;
+}
+.home-head {
+  height: 155px;
+}
+.common-flex {
   display: flex;
-  position: absolute;
-  top: -10px;
-  left: 59px;
-  align-items: center;
+  justify-content: space-between;
 }
-.page .vertical-line {
-  position: absolute;
-  top: 0px;
-  left: 0px;
-  width: 1px;
-  height: 781px;
-}
-.page .container {
+.common-evenly {
   display: flex;
-  position: relative;
-  align-items: flex-start;
-  justify-content: center;
-  margin-right: 1px;
-  width: 225px;
+  justify-content: space-evenly;
 }
-.page .works {
-  margin-top: 63px;
-  margin-right: 23px;
-  letter-spacing: 3px;
-  white-space: nowrap;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 16px;
+.title {
+  color: rgb(174, 209, 125);
+  margin: 58px 0px 0px 247px;
+  font-size: 20px;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 21px;
 }
-.page .wrapper {
+.body-content {
+  background: #f7f8fa;
+  height: 800px;
+}
+.demo-tabs {
+  padding: 77px 247px;
+}
+.options {
+  margin: 60px 0px 0px 10px;
+}
+.three-select {
+  height: 5px;
+}
+.three-span-select {
   display: flex;
-  align-items: center;
 }
-.page .empty {
-  margin-right: 1px;
-  width: 0px;
-  height: 781px;
+.three-div-select {
+  margin-top: -4px;
 }
-.page .group-1 {
-  display: flex;
-  align-items: flex-start;
+.caret-bottom {
+  margin-left: 2px;
 }
-.page .vertical-line-1 {
-  margin-right: 17px;
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
+.vertical-line {
+  margin: 50px 0 0 30px;
 }
-.page .about {
-  margin-top: 63px;
-  line-height: 20px;
-  letter-spacing: 3px;
-  white-space: nowrap;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 16px;
+.el-search {
+  margin: 49px 0px 0px 40px;
 }
-.page .container-item-0 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
+.el-input-search {
+  width: 434px;
+  height: 45px;
 }
-.page .vertical-line-2 {
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
+.el-div-button {
+  margin: 53px 0px 0px 0px;
 }
-.page .container-item-1 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
+.el-div-avatar {
+  margin: 40px 247px 0px 50px;
 }
-.page .vertical-line-3 {
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
+:deep(.el-input__wrapper) {
+  border-radius: 30px;
 }
-.page .container-1 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
+:deep(.el-divider--vertical) {
+  height: 3em;
 }
-.page .vertical-line-4 {
-  margin-right: 21px;
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
+:deep(.el-tabs__item) {
+  color: #c8c9ca;
+  font-size: 30px;
+  margin-bottom: 20px;
+  margin-right: 40px;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
 }
-.page .wrapper-1 {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 73px;
+:deep(.el-tabs__item.is-active) {
+  color: #454545;
 }
-.page .group-2 {
-  display: flex;
-  position: relative;
-  align-items: center;
-  justify-content: center;
-  border-radius: 16.64px;
-  background-color: #1a1919;
-  width: 64px;
-  height: 64px;
-}
-.page .view {
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  margin-top: -1px;
-  width: 32px;
-}
-.page .icon {
-  margin-top: 1px;
-  width: 31px;
-  height: 26px;
-}
-.page .title {
-  position: relative;
-  margin-top: 181px;
-  max-width: 52px;
-  height: 33px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 33px;
-  white-space: nowrap;
-  color: rgba(0, 0, 0, 0.5);
-  font-family: HarmonyOS_Sans_SC;
-  font-size: 28px;
-}
-.page .container-item-2 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
-}
-.page .vertical-line-5 {
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
-}
-.page .info {
-  position: absolute;
-  top: 285px;
-  left: 193px;
-  line-height: 33px;
-  white-space: pre;
-  color: rgba(0, 0, 0, 0.5);
-  font-family: HarmonyOS_Sans_SC;
-  font-size: 28px;
-}
-.page .container-item-3 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
-}
-.page .vertical-line-6 {
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
-}
-.page .caption {
-  position: absolute;
-  top: 153px;
-  left: 221px;
-  line-height: 116px;
-  white-space: nowrap;
-  color: #000000;
-  font-family: SourceHanSansCN-Heavy;
-  font-size: 80px;
-}
-.page .container-2 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  margin-right: 1px;
-  width: 110px;
-}
-.page .vertical-line-7 {
-  margin-right: 34px;
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
-}
-.page .web {
-  margin-top: 63px;
-  line-height: 20px;
-  letter-spacing: 3px;
-  white-space: nowrap;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 16px;
-}
-.page .info-1 {
-  position: absolute;
-  top: 285px;
-  right: 193px;
-  line-height: 33px;
-  white-space: pre;
-  color: rgba(0, 0, 0, 0.5);
-  font-family: HarmonyOS_Sans_SC;
-  font-size: 28px;
-}
-.page .container-3 {
-  display: flex;
-  position: relative;
-  align-items: flex-start;
-  width: 110px;
-}
-.page .vertical-line-8 {
-  margin-right: 23px;
-  margin-left: -1px;
-  width: 1px;
-  height: 781px;
-}
-.page .wrapper-2 {
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  margin-top: 63px;
-  line-height: 20px;
-  white-space: nowrap;
-}
-.page .desig {
-  position: relative;
-  letter-spacing: 3px;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 16px;
-}
-.page .tag {
-  position: relative;
-  max-width: 49px;
-  height: 19px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  letter-spacing: 3px;
-  color: rgba(0, 0, 0, 0.5);
-  font-size: 16px;
-}
-.page .vertical-line-9 {
-  position: absolute;
-  top: -10px;
-  right: 58px;
-  width: 1px;
-  height: 782px;
-}
-.page .long-banner {
-  position: absolute;
-  top: 364px;
-  left: 70px;
-  width: 980px;
-  height: 2357px;
+:deep(.el-tabs__active-bar) {
+  background-color: rgb(103, 194, 58);
 }
 </style>
 ;
