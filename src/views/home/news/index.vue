@@ -171,6 +171,7 @@ export default {
   font-weight: bold;
   margin-bottom: 10px;
   color: rgb(48, 49, 51) !important;
+  text-decoration: none;
 }
 
 .news-summary {

@@ -118,6 +118,7 @@ export default {
   margin-bottom: 10px;
   font-size: 21.6px;
   font-weight: 600;
+  text-decoration: none;
 }
 
 .rate-movie {
