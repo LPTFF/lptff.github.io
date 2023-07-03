@@ -68,7 +68,7 @@ jobs:
       #   uses: actions/deploy-pages@v1 
       - name: Deploy  
         run: |
-          cd ./src/.vuepress/dist/
+          cd ./dist/
           echo lptff.github.io > CNAME  
           echo > .nojekyll
           git config --global user.email "lptffhh@gmail.com"
