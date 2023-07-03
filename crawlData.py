@@ -14,7 +14,7 @@ if response.status_code == 200:
     # 解析响应数据
     data = response.json()
     # 导出为 JSON 文件
-    with open('./src/.vuepress/public/data/movie.json', 'w', encoding='utf-8') as file:
+    with open('./src/public/data/movie.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
         print('豆瓣数据导出成功')
 else:
@@ -43,11 +43,11 @@ if response.status_code == 200:
         person = {'time':item['publish_time'],'timestamp':timestamp,'title': item['subject'],'desc':item['introtext'],'image':img,'url':item['id'],'website':'infzm'}
         handleData.append(person)
     handleData.sort(key=lambda x: x['timestamp'],reverse=True)
-    with open('./src/.vuepress/public/data/news.json', 'w', encoding='utf-8') as file:
+    with open('./src/public/data/news.json', 'w', encoding='utf-8') as file:
         json.dump(data, file, ensure_ascii=False, indent=4)
         # json.dump(data, file)
         print('南方周末源头数据导出成功')
-    with open('./src/.vuepress/public/data/newsHandle.json', 'w', encoding='utf-8') as file:
+    with open('./src/public/data/newsHandle.json', 'w', encoding='utf-8') as file:
         json.dump(handleData, file, ensure_ascii=False, indent=4)
         # json.dump(data, file)
         print('南方周末过滤数据导出成功')

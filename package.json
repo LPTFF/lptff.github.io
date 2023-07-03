@@ -6,14 +6,13 @@
   "scripts": {
     "preview": "vite preview",
     "deploy": "bash deploy.sh",
-    "serve": "vuepress dev src",
-    "build": "vuepress build src"
+    "serve": "vite",
+    "build": "vue-tsc --noEmit && vite build"
   },
   "dependencies": {
     "axios": "1.4.0",
     "element-plus": "2.3.6",
     "gh-pages": "5.0.0",
-    "puppeteer": "20.5.0",
     "vue": "3.2.47",
     "vue-router": "4.1.6"
   },
@@ -24,7 +23,6 @@
     "typescript": "4.6.4",
     "vite": "3.1.0",
     "vite-plugin-compression": "0.5.1",
-    "vue-tsc": "0.40.4",
-    "vuepress": "2.0.0-beta.61"
+    "vue-tsc": "0.40.4"
   }
 }

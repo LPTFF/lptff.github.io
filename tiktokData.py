@@ -92,7 +92,7 @@ try:
                 print(f"第{index}次发生异常：{e}")
         except Exception as e:
             print(f"第{index}次提取 URL 时发生错误：{str(e)}")
-    with open('./src/.vuepress/public/data/tiktok.json', 'w', encoding='utf-8') as file:
+    with open('./src/public/data/tiktok.json', 'w', encoding='utf-8') as file:
         json.dump(video_handle, file, ensure_ascii=False, indent=4)
         print('Tik Tok分析数据导出成功')
 except Exception as e:

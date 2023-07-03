@@ -87,7 +87,7 @@ try:
         # 转化为JSON格式
         json_data = json.dumps(results, ensure_ascii=False, indent=4)
         # 保存为JSON文件
-        with open('./src/.vuepress/public/data/v2ex.json', 'w', encoding='utf-8') as file:
+        with open('./src/public/data/v2ex.json', 'w', encoding='utf-8') as file:
             file.write(json_data)
             print('v2ex分析数据导出成功')
     else:

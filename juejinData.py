@@ -54,7 +54,7 @@ try:
                 }
             dataHandle.append(newEntry)
         dataHandle.sort(key=lambda x: x['timestamp'],reverse=True)
-        with open('./src/.vuepress/public/data/juejin.json', 'w', encoding='utf-8') as file:
+        with open('./src/public/data/juejin.json', 'w', encoding='utf-8') as file:
             json.dump(dataHandle, file, ensure_ascii=False, indent=4)
             print('掘金分析数据导出成功')
     else:

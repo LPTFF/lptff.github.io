@@ -1,6 +1,6 @@
-# 博客技术栈支持
+# 项目技术栈支持
 
-vue3+ts/js+vite+vuepress
+vue3+ts/js+vite
 
 ## 导入的三方组件
 

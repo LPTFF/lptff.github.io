@@ -58,6 +58,6 @@ for index, user_id in enumerate(user_ids):
 
 # 保存数据到文件
 video_handle.sort(key=lambda x: x['timestamp'],reverse=True)
-with open('./src/.vuepress/public/data/kuaishouData.json', 'w', encoding='utf-8') as file:
+with open('./src/public/data/kuaishouData.json', 'w', encoding='utf-8') as file:
     json.dump(video_handle, file, ensure_ascii=False, indent=4)
     print('快手分析数据导出成功')
