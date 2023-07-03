@@ -1,9 +1,11 @@
 import { defineConfig } from 'vite';
 import vue from '@vitejs/plugin-vue';
+// import { visualizer } from 'rollup-plugin-visualizer';
 
 // https://vitejs.dev/config/
 export default defineConfig({
   base: './',
+  // plugins: [vue(), visualizer()],
   plugins: [vue()],
   server: {
     cors: true,
@@ -31,5 +33,31 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/douban/, ''),
       }
     }
-  }
+  },
+  build: {
+    target: 'es2015',
+    emptyOutDir: false,
+    rollupOptions: {
+      output: {
+        // entryFileNames: `assets/[name].js`,
+        // chunkFileNames: `assets/[name].js`,
+        // assetFileNames: `assets/[name].[ext]`,
+        ...({
+          manualChunks(id) {
+            if (id.includes('node_modules')) {
+              return 'framework'
+            }
+            return undefined
+          },
+        }),
+      },
+    },
+    chunkSizeWarningLimit: 200,
+  },
+  experimental: {
+    renderBuiltUrl(filename) {
+      // 对项目docs/.vuepress/public文件下资源进行加载
+      return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
+    }
+  },
 });
