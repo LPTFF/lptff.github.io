@@ -8,31 +8,84 @@
       :key="index"
     >
       <el-card class="news-card" shadow="hover">
-        <a
-          class="news-title"
-          :href="handleNewsUrl(item)"
-          @click.prevent="gotoNewsWebsite(item)"
-        >
-          {{ item.title }}
-        </a>
-        <div class="news-source">
-          <el-avatar
-            :size="50"
-            class="img-news"
-            :src="item.image ? item.image : logoUrl"
-          />
-          <div class="news-date">{{ item.time }}</div>
+        <div v-if="handleDescType(item) == '1'">
+          <a
+            class="news-title"
+            :href="handleNewsUrl(item)"
+            @click.prevent="gotoNewsWebsite(item)"
+          >
+            {{ item.title }}
+          </a>
+          <div
+            class="news-plus-summary hight-news"
+            :style="`background-image: url(${
+              item.image ? item.image : bgUrl
+            }); background-size: cover;`"
+          >
+            <div class="news-inner-summary">
+              {{
+                handleNewsDesc(
+                  item.desc ? item.desc : item.title,
+                  isPCRes ? 30 : 20
+                )
+              }}
+            </div>
+          </div>
+          <div class="line-split"></div>
+          <div class="news-bottom common-flex">
+            <div class="news-bottom">
+              <el-avatar
+                :size="50"
+                class="is-new"
+                :src="getWebsiteLogo(item)"
+              />
+              <span class="website-name">
+                {{ getWebsiteName(item) }}
+              </span>
+            </div>
+            <div class="news-source">
+              <div class="news-date">
+                {{ isPCRes ? item.time : item.time.substring(0, 10) }}
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="news-summary">
-          {{ item.desc ? item.desc : item.title }}
-        </div>
-        <div class="line-split"></div>
-        <div class="news-bottom common-flex">
-          <div class="news-bottom">
-            <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
-            <span class="website-name">
-              {{ getWebsiteName(item) }}
-            </span>
+        <div v-else>
+          <a
+            class="news-title"
+            :href="handleNewsUrl(item)"
+            @click.prevent="gotoNewsWebsite(item)"
+          >
+            {{ item.title }}
+          </a>
+          <div class="news-source">
+            <el-avatar
+              :size="50"
+              class="img-news"
+              :src="item.image ? item.image : logoUrl"
+            />
+            <div class="news-date">{{ item.time }}</div>
+          </div>
+          <div class="news-summary">
+            {{
+              handleNewsDesc(
+                item.desc ? item.desc : item.title,
+                isPCRes ? 240 : 180
+              )
+            }}
+          </div>
+          <div class="line-split"></div>
+          <div class="news-bottom common-flex">
+            <div class="news-bottom">
+              <el-avatar
+                :size="50"
+                class="is-new"
+                :src="getWebsiteLogo(item)"
+              />
+              <span class="website-name">
+                {{ getWebsiteName(item) }}
+              </span>
+            </div>
           </div>
         </div>
       </el-card>
@@ -47,6 +100,7 @@ import infzmNews from "../../../public/data/newsHandle.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
+import bgImageUrl from "../../../public/img/bg.jpg";
 export default {
   setup() {
     let infzmList = ref(infzmNews);
@@ -134,7 +188,14 @@ export default {
         gotoOutPage(url);
       }
     };
+    const handleDescType = (item: any) => {
+      return item.desc.length < 130 ? "1" : "2";
+    };
+    const handleNewsDesc = (item: any, length: any) => {
+      return item.substring(0, length) + "...";
+    };
     const logoUrl = ref(logoImageUrl); // 图片路径变量
+    const bgUrl = ref(bgImageUrl); // 图片路径变量
     return {
       callMethod,
       isPCRes,
@@ -145,6 +206,9 @@ export default {
       handleNewsUrl,
       gotoNewsWebsite,
       logoUrl,
+      handleDescType,
+      bgUrl,
+      handleNewsDesc,
     };
   },
   methods: {},
@@ -193,6 +257,10 @@ export default {
   text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
   max-width: 300px;
 }
+.news-plus-title {
+  margin-left: 10px;
+  margin-bottom: 0px !important;
+}
 
 .news-summary {
   display: block;
@@ -203,7 +271,21 @@ export default {
   overflow: hidden; /* 隐藏溢出部分 */
   text-overflow: ellipsis; /* 显示省略号 */
 }
-
+.news-plus-summary {
+  display: block;
+  height: 320px;
+  font-size: 18px;
+  font-family: Arial;
+  padding-top: 20px;
+  padding-bottom: 30px;
+}
+.news-inner-summary {
+  margin-left: 10px;
+  margin-top: 290px;
+}
+.hight-news {
+  color: #f9f9f9 !important;
+}
 .news-date {
   color: #999;
   margin: auto 10px;
@@ -225,8 +307,6 @@ export default {
 .news-bottom {
   display: flex;
 }
-.el-div-icon {
-}
 .common-flex {
   justify-content: space-between;
 }
@@ -238,6 +318,10 @@ export default {
 .news-source {
   display: flex;
   margin: 10px 0px;
+  height: 40px;
+}
+.news-plus-source {
+  margin: 0 !important;
 }
 
 /* 响应式布局 */
