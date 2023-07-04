@@ -4,7 +4,7 @@
       <el-header class="header-el">
         <div class="common-flex">
           <div class="header-div" @click="goBack">
-            <el-avatar :size="50" class="logo-img" :src="logoImage" />
+            <el-avatar :size="50" class="logo-img" :src="logoUrl" />
             <div class="logo-title">tangff</div>
           </div>
           <div v-if="false">
@@ -75,7 +75,8 @@ export default {
     };
     const gotoJob = () => {
       console.log("233");
-      router.push("/job");
+      let url = window.location.origin + "/job";
+      window.open(url, "_blank");
       // previousRoute.value ? router.back() : router.push("/");
     };
 
@@ -99,7 +100,7 @@ export default {
         ? window.history.state.back
         : "";
     });
-    const logoImage = ref(logoImageUrl); // 图片路径变量
+    const logoUrl = ref(logoImageUrl); // 图片路径变量
     return {
       selectIndex,
       menuItems,
@@ -109,7 +110,7 @@ export default {
       handleSelect,
       gotoIssue,
       gotoJob,
-      logoImage,
+      logoUrl,
     };
   },
   components: {

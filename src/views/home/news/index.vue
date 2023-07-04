@@ -1,7 +1,13 @@
 <template>
-  <el-card class="news-card" v-for="(item, index) in newsAll" :key="index">
-    <div class="news-content">
-      <div class="news-details">
+  <el-row>
+    <el-col
+      :span="24"
+      :md="8"
+      :lg="8"
+      v-for="(item, index) in newsAll"
+      :key="index"
+    >
+      <el-card class="news-card" shadow="hover">
         <a
           class="news-title"
           :href="handleNewsUrl(item)"
@@ -9,25 +15,29 @@
         >
           {{ item.title }}
         </a>
-        <p class="news-summary">
-          {{ item.desc ? item.desc : item.title }}
-        </p>
-        <div class="news-bottom">
-          <img class="is-new" :src="getWebsiteLogo(item)" />
-          <div v-if="isPCRes" class="website-name">
-            {{ getWebsiteName(item) }}
-          </div>
-          <span class="news-date">{{ item.time }}</span>
+        <div class="news-source">
+          <el-avatar
+            :size="50"
+            class="img-news"
+            :src="item.image ? item.image : logoUrl"
+          />
+          <div class="news-date">{{ item.time }}</div>
         </div>
-      </div>
-      <div class="news-div-img">
-        <img
-          class="img-news"
-          :src="item.image ? item.image : getWebsiteLogo(item)"
-        />
-      </div>
-    </div>
-  </el-card>
+        <div class="news-summary">
+          {{ item.desc ? item.desc : item.title }}
+        </div>
+        <div class="line-split"></div>
+        <div class="news-bottom common-flex">
+          <div class="news-bottom">
+            <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
+            <span class="website-name">
+              {{ getWebsiteName(item) }}
+            </span>
+          </div>
+        </div>
+      </el-card>
+    </el-col>
+  </el-row>
 </template>
 
 <script lang="ts">
@@ -36,6 +46,7 @@ import { isPC, gotoOutPage } from "../../../utils/utils";
 import infzmNews from "../../../public/data/newsHandle.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
+import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
   setup() {
     let infzmList = ref(infzmNews);
@@ -123,6 +134,7 @@ export default {
         gotoOutPage(url);
       }
     };
+    const logoUrl = ref(logoImageUrl); // 图片路径变量
     return {
       callMethod,
       isPCRes,
@@ -132,6 +144,7 @@ export default {
       getWebsiteName,
       handleNewsUrl,
       gotoNewsWebsite,
+      logoUrl,
     };
   },
   methods: {},
@@ -141,6 +154,8 @@ export default {
 <style scoped>
 .news-card {
   margin-bottom: 20px;
+  height: 482px;
+  margin-right: 20px;
 }
 
 .news-content {
@@ -153,8 +168,8 @@ export default {
 }
 
 .img-news {
-  width: 200px;
-  height: 200px;
+  width: 40px;
+  height: 40px;
 }
 
 .news-details {
@@ -167,85 +182,65 @@ export default {
 }
 
 .news-title {
+  display: block;
   font-size: 18px;
   font-weight: bold;
   margin-bottom: 10px;
   color: rgb(48, 49, 51) !important;
   text-decoration: none;
-}
-
-.news-summary {
-  color: #666;
-  margin-bottom: 10px;
-  height: 100px;
-  width: 800px;
   white-space: nowrap; /* 防止内容换行 */
   overflow: hidden; /* 隐藏超出容器宽度的内容 */
   text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
+  max-width: 300px;
+}
+
+.news-summary {
+  display: block;
+  margin: 0;
+  height: 320px;
+  font-size: 18px;
+  font-family: Arial;
+  overflow: hidden; /* 隐藏溢出部分 */
+  text-overflow: ellipsis; /* 显示省略号 */
 }
 
 .news-date {
   color: #999;
+  margin: auto 10px;
 }
 
 .website-name {
-  margin: 0 10px 0 5px;
+  margin: auto 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #459cd8;
 }
 
+.line-split {
+  width: 100%;
+  height: 1px;
+  background-color: #f9f9f9;
+  margin-bottom: 5px;
+}
 .news-bottom {
   display: flex;
 }
-
+.el-div-icon {
+}
+.common-flex {
+  justify-content: space-between;
+}
 .is-new {
   margin: 5px 5px;
-  width: 16px;
-  height: 16px;
+  width: 40px;
+  height: 40px;
+}
+.news-source {
+  display: flex;
+  margin: 10px 0px;
 }
 
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
-  .news-summary {
-    color: #666;
-    margin-bottom: 10px;
-    max-width: 150px;
-    white-space: nowrap;
-    /* 防止换行 */
-    overflow: hidden;
-    /* 超出部分隐藏 */
-    text-overflow: ellipsis;
-    /* 超出部分省略号显示 */
-    height: 100%;
-  }
-
-  .img-news {
-    width: 100px;
-    height: 100px;
-  }
-
-  .news-title {
-    font-size: 18px;
-    font-weight: bold;
-    margin-bottom: 0px;
-    max-width: 150px;
-    white-space: nowrap;
-    /* 防止换行 */
-    overflow: hidden;
-    /* 超出部分隐藏 */
-    text-overflow: ellipsis;
-    /* 超出部分省略号显示 */
-    height: 100%;
-  }
-
-  .news-bottom {
-    display: flex;
-    max-width: 150px;
-    white-space: nowrap;
-    /* 防止换行 */
-    overflow: hidden;
-    /* 超出部分隐藏 */
-    text-overflow: ellipsis;
-    /* 超出部分省略号显示 */
-    height: 100%;
-  }
 }
 </style>
