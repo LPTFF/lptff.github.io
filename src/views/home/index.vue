@@ -3,10 +3,7 @@
     <div class="news-aggregator">
       <el-header class="header-el">
         <div class="header-div" @click="goBack">
-          <img
-            class="logo-img"
-            src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
-          />
+          <img class="logo-img" src="../../public/img/logo.jpg" />
           <div class="logo-title">tangff</div>
         </div>
         <el-menu

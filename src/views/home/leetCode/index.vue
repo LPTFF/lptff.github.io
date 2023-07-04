@@ -126,7 +126,7 @@ export default {
         hardRate: "EASY",
         isPlus: false,
         passRate: "71.27%",
-        problemsDesc: "<p>输入一个正整数 /p>",
+        problemsDesc: "<p>输入一个正整数 </p>",
         problemsUrl: "",
         solutionsUrl: "",
         problemsName: "",
