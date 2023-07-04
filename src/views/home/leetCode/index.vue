@@ -62,7 +62,11 @@ import leetCode_3 from "../../../public/data/leetCode/leetCode_4.json";
 import leetCode_4 from "../../../public/data/leetCode/leetCode_4.json";
 import leetCode_5 from "../../../public/data/leetCode/leetCode_5.json";
 import leetCode_6 from "../../../public/data/leetCode/leetCode_6.json";
+import leetCode_7 from "../../../public/data/leetCode/leetCode_7.json";
 import leetCode_8 from "../../../public/data/leetCode/leetCode_8.json";
+import leetCode_9 from "../../../public/data/leetCode/leetCode_9.json";
+import leetCode_10 from "../../../public/data/leetCode/leetCode_10.json";
+import leetCode_11 from "../../../public/data/leetCode/leetCode_11.json";
 const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
   const length = array.length;
@@ -146,10 +150,13 @@ export default {
       leetCode_4,
       leetCode_5,
       leetCode_6,
+      leetCode_7,
       leetCode_8,
+      leetCode_9,
+      leetCode_10,
+      leetCode_11,
     ];
-    const randomIndex = Math.floor(Math.random() * jsonFiles.length);
-    const randomJson = jsonFiles[randomIndex];
+    const randomJson = jsonFiles.reduce((acc, cur) => acc.concat(cur), []);
     const questionsList = ref(randomJson);
     questions.value = getRandomProblems(questionsList.value, 1);
     console.log("questionsList", questionsList);

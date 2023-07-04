@@ -105,13 +105,13 @@ for index, question in enumerate(new_question_list):
         "isPlus": paidOnly
     }
     questionHandle.append(newEntry)
-    if (index+1) % 500 == 0 and index>0:
-        save_response_to_file(index//500,questionHandle)
+    if (index+1) % 300 == 0 and index>0:
+        save_response_to_file(index//300,questionHandle)
         questionHandle = []
-        print(f"保存文件第{index//500+1}次，整个数据长度{len(new_question_list)}")
+        print(f"保存文件第{index//300+1}次，整个数据长度{len(new_question_list)}")
         continue
     elif index  == len(new_question_list)-1 or index > 30050:
-        save_response_to_file((index + 500) // 500,questionHandle)
+        save_response_to_file(index // 300,questionHandle)
         print('循环结束')
         break
     else:
