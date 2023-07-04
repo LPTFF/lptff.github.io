@@ -56,6 +56,13 @@
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
+import leetCode_1 from "../../../public/data/leetCode/leetCode_1.json";
+import leetCode_2 from "../../../public/data/leetCode/leetCode_2.json";
+import leetCode_3 from "../../../public/data/leetCode/leetCode_4.json";
+import leetCode_4 from "../../../public/data/leetCode/leetCode_4.json";
+import leetCode_5 from "../../../public/data/leetCode/leetCode_5.json";
+import leetCode_6 from "../../../public/data/leetCode/leetCode_6.json";
+import leetCode_8 from "../../../public/data/leetCode/leetCode_8.json";
 const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
   const length = array.length;
@@ -71,16 +78,6 @@ const getRandomProblems = (array: any, num: any) => {
   }
   return result;
 };
-const module = import.meta.glob("../../../public/data/leetCode/*.json", {
-  import: "setup",
-});
-const moduleArray = Object.values(module); //获取文件名
-const randomIndex = Math.floor(Math.random() * moduleArray.length);
-const randomModuleKey = Object.keys(module)[randomIndex];
-console.log("randomModuleKey", randomModuleKey);
-const modulePath = `../../../public/data/leetCode/${randomModuleKey}`;
-const jsonModule = await import(modulePath);
-console.log("jsonModule", jsonModule.default);
 
 export default {
   data() {
@@ -131,7 +128,6 @@ export default {
       }
       return questionStyle;
     };
-    const questionsList = ref([]);
     const questions = ref([
       {
         hardRate: "EASY",
@@ -143,15 +139,26 @@ export default {
         problemsName: "",
       },
     ]);
+    const jsonFiles = [
+      leetCode_1,
+      leetCode_2,
+      leetCode_3,
+      leetCode_4,
+      leetCode_5,
+      leetCode_6,
+      leetCode_8,
+    ];
+    const randomIndex = Math.floor(Math.random() * jsonFiles.length);
+    const randomJson = jsonFiles[randomIndex];
+    const questionsList = ref(randomJson);
+    questions.value = getRandomProblems(questionsList.value, 1);
+    console.log("questionsList", questionsList);
+    console.log("questions", questions);
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
-      questionsList.value = jsonModule.default; // 将 JSON 数据赋值给 questionsList
-      questions.value = getRandomProblems(questionsList.value, 1);
-      console.log("questionsList", questionsList);
-      console.log("questions", questions);
     });
     let dialogTop = ref("100px");
     let dialogLeft = ref("100px");
