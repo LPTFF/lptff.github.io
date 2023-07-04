@@ -159,8 +159,6 @@ export default {
     const randomJson = jsonFiles.reduce((acc, cur) => acc.concat(cur), []);
     const questionsList = ref(randomJson);
     questions.value = getRandomProblems(questionsList.value, 1);
-    console.log("questionsList", questionsList);
-    console.log("questions", questions);
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state

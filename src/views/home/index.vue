@@ -2,9 +2,15 @@
   <div>
     <div class="news-aggregator">
       <el-header class="header-el">
-        <div class="header-div" @click="goBack">
-          <img class="logo-img" src="../../public/img/logo.jpg" />
-          <div class="logo-title">tangff</div>
+        <div class="common-flex">
+          <div class="header-div" @click="goBack">
+            <el-avatar :size="50" class="logo-img" :src="logoImage" />
+            <div class="logo-title">tangff</div>
+          </div>
+          <div v-if="false">
+            <el-button type="success" round @click="gotoJob">工作</el-button>
+            <el-button type="success" round>博客</el-button>
+          </div>
         </div>
         <el-menu
           class="navigation"
@@ -47,6 +53,7 @@ import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import { useRouter } from "vue-router";
+import logoImageUrl from "../../public/img/logo.jpg";
 export default {
   setup() {
     const selectIndex = ref("1");
@@ -65,6 +72,11 @@ export default {
 
     const goBack = () => {
       previousRoute.value ? router.back() : router.push("/");
+    };
+    const gotoJob = () => {
+      console.log("233");
+      router.push("/job");
+      // previousRoute.value ? router.back() : router.push("/");
     };
 
     const handleSelect = (key: any) => {
@@ -87,7 +99,7 @@ export default {
         ? window.history.state.back
         : "";
     });
-
+    const logoImage = ref(logoImageUrl); // 图片路径变量
     return {
       selectIndex,
       menuItems,
@@ -96,6 +108,8 @@ export default {
       goBack,
       handleSelect,
       gotoIssue,
+      gotoJob,
+      logoImage,
     };
   },
   components: {
@@ -122,7 +136,10 @@ export default {
   padding: 11px 0px;
   display: flex;
 }
-
+.common-flex {
+  display: flex;
+  justify-content: space-between;
+}
 .logo-img {
   width: 35px;
   height: 35px;
