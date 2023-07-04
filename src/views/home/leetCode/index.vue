@@ -146,6 +146,9 @@ export default {
       const jsonModule = await import(randomModuleKey); //导入数据
       questionsList.value = jsonModule.default; // 将 JSON 数据赋值给 questionsList
       questions.value = getRandomProblems(questionsList.value, 1);
+      console.log("randomModuleKey", randomModuleKey);
+      console.log("questionsList", questionsList);
+      console.log("questions", questions);
     });
     let dialogTop = ref("100px");
     let dialogLeft = ref("100px");
