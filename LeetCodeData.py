@@ -1,5 +1,12 @@
 import requests
 import json
+
+def save_response_to_file(index, response):
+    file_path = f'./src/public/data/leetCode/leetCode_{index+1}.json'
+    with open(file_path, 'w', encoding='utf-8') as file:
+        json.dump(questionHandle, file, ensure_ascii=False, indent=4)
+        print('LeetCode分析数据导出成功')
+
 # 获取题目列表
 def fetch_leetcode_data(skip):
     url = 'https://leetcode.cn/graphql/'
@@ -64,6 +71,7 @@ def fetch_leetcode_desc(titleSlug,index):
     except Exception as e:
         print(f"LeetCode获取具体题目描述第{index}次 请求异常: {e}")
 
+
 # 爬取数据
 skip = 0
 new_question_list = []
@@ -80,13 +88,13 @@ while True:
 # 数据提取逻辑
 questionHandle = []
 for index, question in enumerate(new_question_list):
-    problemsName = question['titleCn']
+    problemsName = f' {index+1}.'+ question['titleCn']
     hardRate = question['difficulty']
+    paidOnly = question['paidOnly']#是否付费 true表示付费 false表示不付费
     passRate = "{:.2%}".format(question['acRate'])
     problemsUrl = 'https://leetcode.cn/problems/'+question['titleSlug']+'/'
     solutionsUrl = 'https://leetcode.cn/problems/'+question['titleSlug']+'/solution'
     problemsDesc = fetch_leetcode_desc(question['titleSlug'],index)
-    paidOnly = question['paidOnly']#是否付费 true表示付费 false表示不付费
     newEntry = {
         "problemsName": problemsName,
         "hardRate": hardRate,
@@ -97,7 +105,15 @@ for index, question in enumerate(new_question_list):
         "isPlus": paidOnly
     }
     questionHandle.append(newEntry)
-# 导出数据
-with open('./src/public/data/leetCode.json', 'w', encoding='utf-8') as file:
-    json.dump(questionHandle, file, ensure_ascii=False, indent=4)
-    print('LeetCode分析数据导出成功')
+    if (index+1) % 500 == 0 and index>0:
+        save_response_to_file(index//500,questionHandle)
+        questionHandle = []
+        print(f"保存文件第{index//500+1}次，整个数据长度{len(new_question_list)}")
+        continue
+    elif index  == len(new_question_list)-1 or index > 30050:
+        save_response_to_file((index + 500) // 500,questionHandle)
+        print('循环结束')
+        break
+    else:
+        continue
+

@@ -55,7 +55,6 @@
 <script lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
-import leetCodeList from "../../../public/data/leetCode.json";
 import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
 const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
@@ -121,15 +120,33 @@ export default {
       }
       return questionStyle;
     };
+    const questionsList = ref([]);
+    const questions = ref([
+      {
+        hardRate: "EASY",
+        isPlus: false,
+        passRate: "71.27%",
+        problemsDesc: "<p>输入一个正整数 /p>",
+        problemsUrl: "",
+        solutionsUrl: "",
+        problemsName: "",
+      },
+    ]);
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
+      const module3 = import.meta.glob("../../../public/data/leetCode/*.json", {
+        import: "setup",
+      });
+      const moduleArray = Object.values(module3); //获取文件名
+      const randomIndex = Math.floor(Math.random() * moduleArray.length);
+      const randomModuleKey = Object.keys(module3)[randomIndex]; //随机获取的文件名
+      const jsonModule = await import(randomModuleKey); //导入数据
+      questionsList.value = jsonModule.default; // 将 JSON 数据赋值给 questionsList
+      questions.value = getRandomProblems(questionsList.value, 1);
     });
-    let questionsList = ref(leetCodeList);
-    let questions = ref(getRandomProblems(questionsList.value, 1));
-    // let questions = ref(questionsList.value.slice(1, 2));
     let dialogTop = ref("100px");
     let dialogLeft = ref("100px");
     const handleDialogDrag = (event: MouseEvent) => {
