@@ -71,6 +71,17 @@ const getRandomProblems = (array: any, num: any) => {
   }
   return result;
 };
+const module = import.meta.glob("../../../public/data/leetCode/*.json", {
+  import: "setup",
+});
+const moduleArray = Object.values(module); //获取文件名
+const randomIndex = Math.floor(Math.random() * moduleArray.length);
+const randomModuleKey = Object.keys(module)[randomIndex];
+console.log("randomModuleKey", randomModuleKey);
+const modulePath = `../../../public/data/leetCode/${randomModuleKey}`;
+const jsonModule = await import(modulePath);
+console.log("jsonModule", jsonModule.default);
+
 export default {
   data() {
     return {
@@ -137,16 +148,8 @@ export default {
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
-      const module3 = import.meta.glob("../../../public/data/leetCode/*.json", {
-        import: "setup",
-      });
-      const moduleArray = Object.values(module3); //获取文件名
-      const randomIndex = Math.floor(Math.random() * moduleArray.length);
-      const randomModuleKey = Object.keys(module3)[randomIndex]; //随机获取的文件名
-      const jsonModule = await import(randomModuleKey); //导入数据
       questionsList.value = jsonModule.default; // 将 JSON 数据赋值给 questionsList
       questions.value = getRandomProblems(questionsList.value, 1);
-      console.log("randomModuleKey", randomModuleKey);
       console.log("questionsList", questionsList);
       console.log("questions", questions);
     });
