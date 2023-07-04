@@ -56,8 +56,9 @@ export default defineConfig({
   },
   experimental: {
     renderBuiltUrl(filename) {
-      // 对项目docs/.vuepress/public文件下资源进行加载
-      return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
+      // 对项目public文件下资源进行加载
+      return filename
+      // return 'https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
     }
   },
 });
