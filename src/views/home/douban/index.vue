@@ -85,7 +85,7 @@ export default {
 <style scoped>
 .movie-item {
   text-align: center;
-  background-color: #f5f7fa;
+  /* background-color: #f5f7fa; */
   border-radius: 4px;
   margin-bottom: 20px;
   margin-right: 20px;
@@ -123,7 +123,7 @@ export default {
 
 .rate-movie {
   color: rgb(224, 144, 21);
-  margin-top: -5px;
+  margin-top: 0px;
   font-size: 20px;
   margin-bottom: 0px;
   margin-left: 10px;
