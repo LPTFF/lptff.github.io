@@ -48,7 +48,7 @@ export default {
   data() {
     return {};
   },
-  setup(props) {
+  setup(props: any) {
     let moviesData = ref(crawlMovie.subjects);
     let moviesValue = moviesData.value;
     const newMovie = moviesValue.filter((item) => item.is_new === true);

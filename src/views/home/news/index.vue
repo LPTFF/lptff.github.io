@@ -105,7 +105,7 @@ export default {
   props: {
     newsLocation: [String, Number],
   },
-  setup(props) {
+  setup(props: any) {
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
