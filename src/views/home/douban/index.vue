@@ -4,7 +4,7 @@
       :span="24"
       :md="8"
       :lg="6"
-      v-for="(item, index) in moviesAll"
+      v-for="(item, index) in moviesAllLimited"
       :key="index"
     >
       <el-card class="movie-item" shadow="hover">
@@ -27,7 +27,9 @@
             >
               {{ item.title }}
             </a>
-            <p class="rate-movie">{{ item.rate }}</p>
+            <p class="rate-movie">
+              {{ item.rate }}movies{{ moviesAllLimited.length }}
+            </p>
           </div>
         </div>
       </el-card>
@@ -40,10 +42,13 @@ import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import crawlMovie from "../../../public/data/movie.json";
 export default {
+  props: {
+    doubanLocation: [String, Number],
+  },
   data() {
     return {};
   },
-  setup() {
+  setup(props) {
     let moviesData = ref(crawlMovie.subjects);
     let moviesValue = moviesData.value;
     const newMovie = moviesValue.filter((item) => item.is_new === true);
@@ -65,11 +70,27 @@ export default {
         ? window.history.state.back
         : ""; //获取路由路径
     });
+    let maxLength = 0;
+    const moviesAllLimited = computed(() => {
+      const length: number = Number(props.doubanLocation); // 切割长度
+      let initData = isPCRes.value ? 9 : 2;
+      let moviesTmpAll;
+      maxLength < length ? (maxLength = length) : maxLength;
+      let rate = isPCRes.value ? 2 : 1;
+      moviesTmpAll = moviesAll.slice(
+        0,
+        maxLength * rate + initData < moviesAll.length
+          ? maxLength * rate + initData
+          : moviesAll.length
+      );
+      return moviesTmpAll;
+    });
     return {
       callMethod,
       isPCRes,
       previousRoute,
       moviesAll,
+      moviesAllLimited,
     };
   },
   components: {},

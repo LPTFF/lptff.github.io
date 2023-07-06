@@ -204,11 +204,12 @@ export default {
       const length: number = Number(props.newsLocation); // 切割长度
       let initData = isPCRes.value ? 6 : 2;
       let newsTmpAll;
+      let rate = isPCRes.value ? 2 : 1;
       maxLength < length ? (maxLength = length) : maxLength;
       newsTmpAll = newsAll.slice(
         0,
-        maxLength * 2 + initData < newsAll.length
-          ? maxLength * 2 + initData
+        maxLength * rate + initData < newsAll.length
+          ? maxLength * rate + initData
           : newsAll.length
       );
       return newsTmpAll;

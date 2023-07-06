@@ -35,7 +35,7 @@
           <newsComponent :newsLocation="contentLocation"></newsComponent>
         </div>
         <div class="component-div" v-show="selectIndex === '2'">
-          <doubanComponent></doubanComponent>
+          <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
         </div>
         <div class="component-div" v-show="selectIndex === '3'">
           <leetCodeComponent></leetCodeComponent>
@@ -60,7 +60,7 @@ import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 export default {
   setup() {
-    const selectIndex = ref("1");
+    const selectIndex = ref("1"); //默认首页
     const menuItems = [
       { index: "1", text: "首页" },
       { index: "2", text: "豆瓣电影" },
