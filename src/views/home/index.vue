@@ -1,51 +1,55 @@
 <template>
-  <div
-    @scroll="handleScroll"
-    class="scroll-home-container"
-    :style="containerStyle"
-  >
-    <div class="news-aggregator">
-      <el-header class="header-el">
-        <div class="common-flex">
-          <div class="header-div" @click="goBack">
-            <el-avatar :size="50" class="logo-img" :src="logoUrl" />
-            <div class="logo-title">tangff</div>
+  <div :class="isPCRes ? '' : 'outer-container'">
+    <div
+      @scroll="handleScroll"
+      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
+      :style="containerStyle"
+    >
+      <div class="news-aggregator">
+        <el-header class="header-el">
+          <div class="common-flex">
+            <div class="header-div" @click="goBack">
+              <el-avatar :size="50" class="logo-img" :src="logoUrl" />
+              <div class="logo-title">tangff</div>
+            </div>
+            <div v-if="false">
+              <el-button type="success" round @click="gotoJob">工作</el-button>
+              <el-button type="success" round @click="gotoBlog">博客</el-button>
+            </div>
           </div>
-          <div v-if="false">
-            <el-button type="success" round @click="gotoJob">工作</el-button>
-            <el-button type="success" round @click="gotoBlog">博客</el-button>
-          </div>
-        </div>
-        <el-menu
-          class="navigation"
-          mode="horizontal"
-          :default-active="selectIndex"
-          @select="handleSelect"
-        >
-          <el-menu-item
-            v-for="item in menuItems"
-            :key="item.index"
-            :index="item.index"
-            >{{ item.text }}</el-menu-item
+          <el-menu
+            class="navigation"
+            mode="horizontal"
+            :default-active="selectIndex"
+            @select="handleSelect"
           >
-        </el-menu>
-      </el-header>
-      <el-main class="main-content">
-        <div class="component-div" v-show="selectIndex === '1'">
-          <newsComponent :newsLocation="contentLocation"></newsComponent>
-        </div>
-        <div class="component-div" v-show="selectIndex === '2'">
-          <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
-        </div>
-        <div class="component-div" v-show="selectIndex === '3'">
-          <leetCodeComponent></leetCodeComponent>
-        </div>
-      </el-main>
-      <el-footer class="footer" @click="gotoIssue">
-        <div class="footer-text">
-          评论功能暂不支持，如有问题请提issue © 2023
-        </div>
-      </el-footer>
+            <el-menu-item
+              v-for="item in menuItems"
+              :key="item.index"
+              :index="item.index"
+              >{{ item.text }}</el-menu-item
+            >
+          </el-menu>
+        </el-header>
+        <el-main class="main-content">
+          <div class="component-div" v-if="selectIndex === '1'">
+            <newsComponent :newsLocation="contentLocation"></newsComponent>
+          </div>
+          <div class="component-div" v-if="selectIndex === '2'">
+            <doubanComponent
+              :doubanLocation="contentLocation"
+            ></doubanComponent>
+          </div>
+          <div class="component-div" v-if="selectIndex === '3'">
+            <leetCodeComponent></leetCodeComponent>
+          </div>
+        </el-main>
+        <el-footer class="footer" @click="gotoIssue">
+          <div class="footer-text">
+            评论功能暂不支持，如有问题请提issue © 2023
+          </div>
+        </el-footer>
+      </div>
     </div>
   </div>
 </template>
@@ -151,6 +155,21 @@ export default {
 </script>
 
 <style scoped>
+.outer-container {
+  width: 97vw;
+  height: 97vh;
+  position: relative;
+  overflow: hidden;
+}
+.inner-container {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: -17px;
+  bottom: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
 .scroll-home-container {
   height: 921px;
   overflow: auto;
