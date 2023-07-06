@@ -1,5 +1,9 @@
 <template>
-  <div>
+  <div
+    @scroll="handleScroll"
+    class="scroll-home-container"
+    :style="containerStyle"
+  >
     <div class="news-aggregator">
       <el-header class="header-el">
         <div class="common-flex">
@@ -9,7 +13,7 @@
           </div>
           <div v-if="false">
             <el-button type="success" round @click="gotoJob">工作</el-button>
-            <el-button type="success" round>博客</el-button>
+            <el-button type="success" round @click="gotoBlog">博客</el-button>
           </div>
         </div>
         <el-menu
@@ -28,7 +32,7 @@
       </el-header>
       <el-main class="main-content">
         <div class="component-div" v-show="selectIndex === '1'">
-          <newsComponent></newsComponent>
+          <newsComponent :newsLocation="contentLocation"></newsComponent>
         </div>
         <div class="component-div" v-show="selectIndex === '2'">
           <doubanComponent></doubanComponent>
@@ -74,14 +78,15 @@ export default {
       previousRoute.value ? router.back() : router.push("/");
     };
     const gotoJob = () => {
-      console.log("233");
       let url = window.location.origin + "/job";
       window.open(url, "_blank");
-      // previousRoute.value ? router.back() : router.push("/");
+    };
+    const gotoBlog = () => {
+      let url = window.location.origin + "/blog";
+      window.open(url, "_blank");
     };
 
     const handleSelect = (key: any) => {
-      console.log(key);
       selectIndex.value = key;
     };
 
@@ -101,6 +106,26 @@ export default {
         : "";
     });
     const logoUrl = ref(logoImageUrl); // 图片路径变量
+    let contentLocation = ref(0);
+    let currentScroll = 0;
+    let previousScroll = 0;
+    const handleScroll = (event: any) => {
+      currentScroll = event.target.scrollHeight - event.target.scrollTop;
+      if (currentScroll - previousScroll < 0) {
+        //向下滚动
+        contentLocation.value = Math.floor(
+          isPCRes.value
+            ? event.target.scrollTop / 200
+            : event.target.scrollTop / 100
+        );
+      }
+      previousScroll = currentScroll;
+    };
+    const containerStyle = computed(() => {
+      return {
+        height: `${window.innerHeight - 16}px`,
+      };
+    });
     return {
       selectIndex,
       menuItems,
@@ -111,6 +136,10 @@ export default {
       gotoIssue,
       gotoJob,
       logoUrl,
+      gotoBlog,
+      handleScroll,
+      containerStyle,
+      contentLocation,
     };
   },
   components: {
@@ -122,6 +151,10 @@ export default {
 </script>
 
 <style scoped>
+.scroll-home-container {
+  height: 921px;
+  overflow: auto;
+}
 .header-el {
   height: fit-content;
 }

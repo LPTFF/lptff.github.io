@@ -1,266 +1,202 @@
 <template>
-  <div class="blog">
-    <header class="blog-header">
-      <el-row class="header-row">
-        <el-col :span="6">
-          <div class="logo" @click="gotoHome">
-            <img
-              src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
-              alt="Logo"
-              class="logo-image"
-            />
-            <span class="logo-text">tangff</span>
-          </div>
-        </el-col>
-        <el-col :span="12">
-          <el-menu class="nav-menu" mode="horizontal">
-            <el-menu-item v-for="category in categories" :key="category.id">
-              {{ category.id }}
-              <!-- <router-link :to="`/category/${category.id}`">{{ category.name }}</router-link> -->
-            </el-menu-item>
-          </el-menu>
-        </el-col>
-        <el-col :span="6">
-          <div class="tag-cloud">
-            <span class="tag-label">Tags:</span>
-            <div class="tags">
-              <!-- <router-link v-for="tag in tags" :key="tag.id" :to="`/tag/${tag.id}`" class="tag">{{ tag.name }}</router-link> -->
+  <div class="home-head common-flex">
+    <div class="common-evenly">
+      <div class="title">tangff</div>
+      <div class="options">
+        <el-dropdown @command="handleCommand" @visible-change="handleClick">
+          <span class="three-span-select">
+            <div class="three-div-select">
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
+              </div>
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
+              </div>
+              <div class="three-select">
+                <el-icon color="#cccccc"><SemiSelect /></el-icon>
+              </div>
             </div>
-          </div>
-        </el-col>
-      </el-row>
-    </header>
-
-    <div class="main-content">
-      <el-main class="content">
-        <div v-if="!selectedArticle">
-          <h2>Recent Articles</h2>
-          <ul class="article-list">
-            <li
-              v-for="article in articles"
-              :key="article.id"
-              class="article-item"
-            >
-              <h3>{{ article.title }}</h3>
-              <p>{{ article.summary }}</p>
-              <!-- <router-link
-                  :to="{ name: 'article', params: { id: article.id } }"
-                  class="read-more"
-                  >Read More</router-link
-                > -->
-            </li>
-          </ul>
-        </div>
-      </el-main>
+            <el-icon v-if="!selectIndex" color="#cccccc" class="caret-bottom"
+              ><CaretRight
+            /></el-icon>
+            <el-icon v-if="selectIndex" color="#cccccc" class="caret-bottom"
+              ><CaretBottom
+            /></el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="a">求学笔记</el-dropdown-item>
+              <el-dropdown-item command="b">学术网站</el-dropdown-item>
+              <el-dropdown-item command="c">常用链接</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
+      <div class="vertical-line">
+        <el-divider direction="vertical" color="#cccccc" />
+      </div>
+      <div class="el-search">
+        <el-input
+          v-model="input1"
+          class="el-input-search"
+          size="large"
+          placeholder="Search article here..."
+          :prefix-icon="Search"
+        />
+      </div>
     </div>
-
-    <el-footer class="footer">
-      <p>MIT Licensed | Copyright © 2023 tangff</p>
-    </el-footer>
+    <div class="common-flex">
+      <div class="el-div-button">
+        <el-button type="success" round>博客</el-button>
+      </div>
+      <div class="el-div-avatar">
+        <el-avatar
+          :size="50"
+          src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="body-content">
+    <el-tabs v-model="activeName" class="demo-tabs">
+      <el-tab-pane label="首页" name="first">
+        <div>
+          <el-row>
+            <el-col :span="24" :md="8" :lg="8" v-for="index in 13" :key="index">
+              <el-card class="box-card" shadow="hover"> </el-card>
+            </el-col>
+          </el-row>
+        </div>
+      </el-tab-pane>
+      <el-tab-pane label="电影" name="second">Config</el-tab-pane>
+      <el-tab-pane label="题库" name="third">Role</el-tab-pane>
+    </el-tabs>
   </div>
 </template>
-  
-  <script lang="ts">
-import { reactive } from "vue";
-import { useRouter } from "vue-router";
+<script lang="ts">
+import { ref } from "vue";
+import { ElMessage } from "element-plus";
+import { Plus, Search } from "@element-plus/icons-vue";
 export default {
-  name: "Blog",
-  components: {},
   data() {
-    return {
-      categories: [
-        { id: 1, name: "Technology" },
-        { id: 2, name: "Lifestyle" },
-        { id: 3, name: "Travel" },
-      ],
-      tags: [
-        { id: 1, name: "JavaScript" },
-        { id: 2, name: "Vue.js" },
-        { id: 3, name: "CSS" },
-        { id: 4, name: "Responsive Design" },
-      ],
-    };
+    return {};
   },
   setup() {
-    const state = reactive({
-      activeMenu: "home",
-      activeCategory: "",
-      categories: [
-        { id: "1", name: "Technology" },
-        { id: "2", name: "Programming" },
-        { id: "3", name: "Design" },
-        { id: "4", name: "Lifestyle" },
-      ],
-      articles: [
-        {
-          id: "1",
-          title: "Introduction to Vue.js",
-          summary: "Learn the basics of Vue.js and its features.",
-          content: "This is the content of the article.",
-          categoryId: "1",
-        },
-        {
-          id: "2",
-          title: "Getting Started with Vite",
-          summary: "Explore the Vite development server and its benefits.",
-          content: "This is the content of the article.",
-          categoryId: "1",
-        },
-        {
-          id: "3",
-          title: "Mastering CSS Grid Layout",
-          summary:
-            "Learn advanced techniques for working with CSS Grid Layout.",
-          content: "This is the content of the article.",
-          categoryId: "3",
-        },
-      ],
-      selectedArticle: null,
-    });
-
-    const handleMenuSelect = (index: any) => {
-      state.activeMenu = index;
+    let selectIndex = ref(true);
+    let input1 = ref("");
+    const activeName = ref("first");
+    const handleCommand = (command: string | number | object) => {
+      ElMessage(`click on item ${command}`);
     };
-
-    const handleCategorySelect = (index: any) => {
-      state.activeCategory = index;
-      state.selectedArticle = null;
+    const handleClick = (type: any) => {
+      selectIndex.value = type;
     };
-    const router = useRouter();
-    const gotoHome = () => {
-      console.log("gotoHome");
-      router.back(); // 使用获取到的 $router 对象返回上一个路由
-    };
-
     return {
-      ...state,
-      handleMenuSelect,
-      handleCategorySelect,
-      gotoHome,
+      handleCommand,
+      selectIndex,
+      Plus,
+      Search,
+      input1,
+      activeName,
+      handleClick,
     };
   },
+  components: {},
   methods: {},
 };
 </script>
-  
-  <style scoped>
-.blog {
+
+<style scoped>
+.el-right-card {
+  margin-right: 64px;
+}
+.el-div-card {
   display: flex;
-  flex-direction: column;
-  min-height: 100vh;
 }
-
-.header {
-  background-color: #fff;
-  padding: 0 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  height: 90px;
-}
-
-.logo {
-  font-size: 24px;
-  color: #000;
+.box-card {
+  /* width: 433px; */
+  height: 482px;
+  margin-bottom: 66px;
+  border-radius: 4px;
   margin-right: 20px;
 }
-
-.nav {
-  line-height: 64px;
+.home-head {
+  height: 155px;
 }
-
-.main-content {
-  flex-grow: 1;
+.common-flex {
   display: flex;
-  margin: 20px;
-}
-
-.sidebar {
-  width: 20%;
-  background-color: #f0f0f0;
-  padding: 20px;
-}
-
-.sidebar-header {
-  font-size: 16px;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.category-menu {
-  margin-top: 10px;
-}
-
-.content {
-  flex-grow: 1;
-  padding: 20px;
-  background-color: #fff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.article-list {
-  list-style-type: none;
-  padding: 0;
-}
-
-.article-item {
-  margin-bottom: 20px;
-}
-
-.article-item h3 {
-  font-size: 18px;
-  font-weight: bold;
-}
-
-.article-content {
-  margin-top: 20px;
-}
-
-.footer {
-  /* background-color: #f0f0f0; */
-  padding: 10px;
-  text-align: center;
-}
-.blog-header {
-  /* background-color: #f5f5f5; */
-  padding: 20px;
-}
-
-.header-row {
-  display: flex;
-  align-items: center;
   justify-content: space-between;
 }
-
-.logo {
+.common-evenly {
   display: flex;
-  align-items: center;
+  justify-content: space-evenly;
 }
-
-.logo-image {
-  width: 40px;
-  height: 40px;
-  margin-right: 10px;
+.title {
+  color: rgb(174, 209, 125);
+  margin: 58px 0px 0px 247px;
+  font-size: 30px;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+  font-weight: 400;
+  line-height: 21px;
 }
-
-.nav-menu {
+.body-content {
+  background: #f7f8fa;
+  min-height: 800px;
+}
+.demo-tabs {
+  padding: 77px 247px;
+}
+.options {
+  margin: 60px 0px 0px 10px;
+}
+.three-select {
+  height: 5px;
+}
+.three-span-select {
   display: flex;
-  justify-content: flex-end;
 }
-
-.tag-cloud {
-  display: flex;
-  align-items: center;
+.three-div-select {
+  margin-top: -4px;
 }
-
-.tag-label {
-  margin-right: 5px;
+.caret-bottom {
+  margin-left: 2px;
 }
-
-.tags {
-  display: flex;
+.vertical-line {
+  margin: 50px 0 0 30px;
 }
-
-.tag {
-  margin-right: 10px;
+.el-search {
+  margin: 49px 0px 0px 40px;
+}
+.el-input-search {
+  width: 434px;
+  height: 45px;
+}
+.el-div-button {
+  margin: 53px 0px 0px 0px;
+}
+.el-div-avatar {
+  margin: 40px 247px 0px 20px;
+}
+:deep(.el-input__wrapper) {
+  border-radius: 30px;
+}
+:deep(.el-divider--vertical) {
+  height: 3em;
+}
+:deep(.el-tabs__item) {
+  color: #c8c9ca;
+  font-size: 30px;
+  margin-bottom: 20px;
+  margin-right: 40px;
+  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
+    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+:deep(.el-tabs__item.is-active) {
+  color: #454545;
+}
+:deep(.el-tabs__active-bar) {
+  background-color: rgb(103, 194, 58);
 }
 </style>
-  
+;

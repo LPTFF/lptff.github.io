@@ -6,7 +6,8 @@ const routes = [
     { path: '/:catchAll(.*)', name: 'Home', component: () => import('../views/home/index.vue') },
     { path: '/foo', component: NotFoundComponent },
     { path: '/job', name: 'job', component: () => import('../views/job/index.vue') },
-    { path: '/life', name: 'life', component: () => import('../views/life/index.vue') }
+    { path: '/life', name: 'life', component: () => import('../views/life/index.vue') },
+    { path: '/blog', name: 'blog', component: () => import('../views/Blog/index.vue') }
 ]
 
 const router = createRouter({

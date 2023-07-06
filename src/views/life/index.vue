@@ -2,12 +2,15 @@
   <div>
     <div class="news-aggregator">
       <el-header class="header-el">
-        <div class="header-div" @click="goBack">
-          <img
-            class="logo-img"
-            src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
-          />
-          <div class="logo-title">tangff</div>
+        <div class="common-flex">
+          <div class="header-div" @click="goBack">
+            <el-avatar :size="50" class="logo-img" :src="logoUrl" />
+            <div class="logo-title">tangff</div>
+          </div>
+          <div v-if="false">
+            <el-button type="success" round @click="gotoJob">工作</el-button>
+            <el-button type="success" round>博客</el-button>
+          </div>
         </div>
         <el-menu
           class="navigation"
@@ -50,6 +53,7 @@ import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import { useRouter } from "vue-router";
+import logoImageUrl from "../../public/img/logo.jpg";
 export default {
   setup() {
     const selectIndex = ref("1");
@@ -58,52 +62,55 @@ export default {
       { index: "2", text: "豆瓣电影" },
       { index: "3", text: "LeetCode" },
     ];
+    const previousRoute = ref("");
+    const isPCRes = computed(() => isPC());
+    const router = useRouter();
 
     const callMethod = () => {
       // console.log('233');
     };
 
-    const previousRoute = ref("");
-    const route = useRouter();
-
-    // 创建计算属性
-    const isPCRes = computed(() => {
-      return isPC();
-    });
-    onMounted(async () => {
-      callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state
-        ? window.history.state.back
-        : ""; //获取路由路径
-    });
     const goBack = () => {
-      previousRoute.value ? route.back() : route.push("/"); // 返回上一个路由，兜底返回主页
+      previousRoute.value ? router.back() : router.push("/");
+    };
+    const gotoJob = () => {
+      console.log("233");
+      let url = window.location.origin + "/job";
+      window.open(url, "_blank");
+      // previousRoute.value ? router.back() : router.push("/");
     };
 
-    const handleSelect = async (key: any) => {
+    const handleSelect = (key: any) => {
       console.log(key);
       selectIndex.value = key;
     };
 
     const gotoIssue = () => {
-      let pageUrl = window.location.origin;
+      const pageUrl = window.location.origin;
       console.log("pageUrl", pageUrl);
-      if (pageUrl.includes("love-tff.gitee.io")) {
-        gotoOutPage("https://gitee.com/love-tff/love-tff/issues");
-      } else {
-        gotoOutPage("https://github.com/LPTFF/lptff.github.io/issues");
-      }
+      const issueUrl = pageUrl.includes("love-tff.gitee.io")
+        ? "https://gitee.com/love-tff/love-tff/issues"
+        : "https://github.com/LPTFF/lptff.github.io/issues";
+      gotoOutPage(issueUrl);
     };
 
+    onMounted(async () => {
+      callMethod();
+      previousRoute.value = window.history.state
+        ? window.history.state.back
+        : "";
+    });
+    const logoUrl = ref(logoImageUrl); // 图片路径变量
     return {
-      callMethod,
       selectIndex,
-      isPCRes,
-      previousRoute,
       menuItems,
+      previousRoute,
+      isPCRes,
       goBack,
       handleSelect,
       gotoIssue,
+      gotoJob,
+      logoUrl,
     };
   },
   components: {
@@ -130,7 +137,10 @@ export default {
   padding: 11px 0px;
   display: flex;
 }
-
+.common-flex {
+  display: flex;
+  justify-content: space-between;
+}
 .logo-img {
   width: 35px;
   height: 35px;
@@ -174,6 +184,7 @@ export default {
     z-index: 9999;
     width: 100%;
     background-color: var(--el-menu-bg-color);
+    top: 0;
   }
   .main-content {
     padding-top: 115px;

@@ -4,7 +4,7 @@
       :span="24"
       :md="8"
       :lg="8"
-      v-for="(item, index) in newsAll"
+      v-for="(item, index) in newsAllLimited"
       :key="index"
     >
       <el-card class="news-card" shadow="hover">
@@ -102,7 +102,10 @@ import v2exNews from "../../../public/data/v2ex.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import bgImageUrl from "../../../public/img/bg.jpg";
 export default {
-  setup() {
+  props: {
+    newsLocation: [String, Number],
+  },
+  setup(props) {
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
@@ -196,6 +199,20 @@ export default {
     };
     const logoUrl = ref(logoImageUrl); // 图片路径变量
     const bgUrl = ref(bgImageUrl); // 图片路径变量
+    let maxLength = 0;
+    const newsAllLimited = computed(() => {
+      const length: number = Number(props.newsLocation); // 切割长度
+      let initData = isPCRes.value ? 6 : 2;
+      let newsTmpAll;
+      maxLength < length ? (maxLength = length) : maxLength;
+      newsTmpAll = newsAll.slice(
+        0,
+        maxLength * 2 + initData < newsAll.length
+          ? maxLength * 2 + initData
+          : newsAll.length
+      );
+      return newsTmpAll;
+    });
     return {
       callMethod,
       isPCRes,
@@ -209,6 +226,7 @@ export default {
       handleDescType,
       bgUrl,
       handleNewsDesc,
+      newsAllLimited,
     };
   },
   methods: {},
