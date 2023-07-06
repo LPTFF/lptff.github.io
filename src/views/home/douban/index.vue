@@ -28,7 +28,7 @@
               {{ item.title }}
             </a>
             <p class="rate-movie">
-              {{ item.rate }}movies{{ moviesAllLimited.length }}
+              {{ item.rate }}
             </p>
           </div>
         </div>
