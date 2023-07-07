@@ -50,10 +50,7 @@
         <el-button type="success" round>博客</el-button>
       </div>
       <div class="el-div-avatar">
-        <el-avatar
-          :size="50"
-          src="https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg"
-        />
+        <el-avatar :size="50" :src="logoUrl" />
       </div>
     </div>
   </div>
@@ -77,10 +74,8 @@
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus, Search } from "@element-plus/icons-vue";
+import logoImageUrl from "../../public/img/logo.jpg";
 export default {
-  data() {
-    return {};
-  },
   setup() {
     let selectIndex = ref(true);
     let input1 = ref("");
@@ -91,6 +86,7 @@ export default {
     const handleClick = (type: any) => {
       selectIndex.value = type;
     };
+    const logoUrl = ref(logoImageUrl); // 图片路径变量
     return {
       handleCommand,
       selectIndex,
@@ -99,6 +95,7 @@ export default {
       input1,
       activeName,
       handleClick,
+      logoUrl,
     };
   },
   components: {},

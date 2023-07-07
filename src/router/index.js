@@ -7,7 +7,8 @@ const routes = [
     { path: '/foo', component: NotFoundComponent },
     { path: '/job', name: 'job', component: () => import('../views/job/index.vue') },
     { path: '/life', name: 'life', component: () => import('../views/life/index.vue') },
-    { path: '/blog', name: 'blog', component: () => import('../views/Blog/index.vue') }
+    { path: '/blog', name: 'blog', component: () => import('../views/Blog/index.vue') },
+    { path: '/home', name: 'home', component: () => import('../views/home/index.vue') },
 ]
 
 const router = createRouter({
