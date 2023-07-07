@@ -32,15 +32,15 @@
           </el-menu>
         </el-header>
         <el-main class="main-content">
-          <div class="component-div" v-if="selectIndex === '1'">
+          <div class="component-div" v-show="selectIndex === '1'">
             <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
-          <div class="component-div" v-if="selectIndex === '2'">
+          <div class="component-div" v-show="selectIndex === '2'">
             <doubanComponent
               :doubanLocation="contentLocation"
             ></doubanComponent>
           </div>
-          <div class="component-div" v-if="selectIndex === '3'">
+          <div class="component-div" v-show="selectIndex === '3'">
             <leetCodeComponent></leetCodeComponent>
           </div>
         </el-main>
@@ -92,6 +92,19 @@ export default {
 
     const handleSelect = (key: any) => {
       selectIndex.value = key;
+      let locationInfoInit = sessionStorage.getItem(`scrollInfoLocation${key}`);
+      locationInfoInit = locationInfoInit
+        ? JSON.parse(locationInfoInit)
+        : locationInfoInit;
+      const container = document.querySelector(
+        isPCRes.value ? ".scroll-home-container" : ".inner-container"
+      );
+      if (container) {
+        container.scrollTo({
+          top: locationInfoInit ? Number(locationInfoInit) : 0,
+          behavior: "auto",
+        });
+      }
     };
 
     const gotoIssue = () => {
@@ -114,6 +127,11 @@ export default {
     let currentScroll = 0;
     let previousScroll = 0;
     const handleScroll = (event: any) => {
+      let scrollLocation = event.target.scrollTop;
+      sessionStorage.setItem(
+        `scrollInfoLocation${selectIndex.value}`,
+        JSON.stringify(scrollLocation)
+      );
       currentScroll = event.target.scrollHeight - event.target.scrollTop;
       if (currentScroll - previousScroll < 0) {
         //向下滚动
