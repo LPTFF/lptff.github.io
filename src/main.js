@@ -12,7 +12,6 @@ import router from './router';
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
     // 通过调用next()来继续导航
-    console.log('to', to.path);
     if (to.path === '/home' || to.path === '/job' || to.path === '/blog' || to.path === '/life' || to.path === '/') {
         next()
     } else {
