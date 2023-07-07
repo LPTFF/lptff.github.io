@@ -13,10 +13,10 @@ import router from './router';
 router.beforeEach((to, from, next) => {
     // 通过调用next()来继续导航
     console.log('to', to.path);
-    if (to.path === '/home' || to.path === '/job' || to.path === '/blog' || to.path === '/life') {
+    if (to.path === '/home' || to.path === '/job' || to.path === '/blog' || to.path === '/life' || to.path === '/') {
         next()
     } else {
-        next('/home') // 否则重定向到"/home"
+        next('/') // 否则重定向到"/home"
     }
 })
 myApp.use(router);//全局注册路由
