@@ -48,4 +48,12 @@ function gotoOutPage(url) {
         window.location.href = url;
     }
 }
-export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage } 
+import eruda from 'eruda';
+function initEruda() {
+    try {
+        eruda.init();
+    } catch (error) {
+        console.log('initEruda', error);
+    }
+}
+export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage, initEruda } 

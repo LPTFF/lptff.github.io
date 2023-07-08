@@ -7,8 +7,8 @@
     >
       <div class="news-aggregator">
         <el-header class="header-el">
-          <div class="common-flex">
-            <div class="header-div" @click="goBack">
+          <div class="common-flex" @dblclick="handleDoubleClick">
+            <div class="header-div" @click.stop="goBack">
               <el-avatar :size="50" class="logo-img" :src="logoUrl" />
               <div class="logo-title">tangff</div>
             </div>
@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import { ref, onMounted, computed } from "vue";
-import { isPC, gotoOutPage } from "../../utils/utils";
+import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
@@ -77,9 +77,19 @@ export default {
     const callMethod = () => {
       // console.log('233');
     };
-
+    const time = 300;
+    let timeOut: any = null;
     const goBack = () => {
-      previousRoute.value ? router.back() : router.push("/");
+      clearTimeout(timeOut); // 清除第一个单击事件
+      timeOut = setTimeout(function () {
+        console.log("goBack");
+        previousRoute.value ? router.back() : router.push("/");
+      }, time);
+    };
+    const handleDoubleClick = () => {
+      clearTimeout(timeOut); // 清除第二个单击事件
+      console.log("handleDoubleClick");
+      initEruda();
     };
     const gotoJob = () => {
       let url = window.location.origin + "/job";
@@ -162,6 +172,7 @@ export default {
       handleScroll,
       containerStyle,
       contentLocation,
+      handleDoubleClick,
     };
   },
   components: {
