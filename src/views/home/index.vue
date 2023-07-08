@@ -7,8 +7,8 @@
     >
       <div class="news-aggregator">
         <el-header class="header-el">
-          <div class="common-flex" @dblclick="handleDoubleClick">
-            <div class="header-div" @click.stop="goBack">
+          <div class="common-flex">
+            <div class="header-div" @click="goBack">
               <el-avatar :size="50" class="logo-img" :src="logoUrl" />
               <div class="logo-title">tangff</div>
             </div>
@@ -55,7 +55,7 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, Ref } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
@@ -77,19 +77,29 @@ export default {
     const callMethod = () => {
       // console.log('233');
     };
-    const time = 300;
-    let timeOut: any = null;
+    const lastClickTime: Ref<number> = ref(0);
+    let clickTimer: ReturnType<typeof setTimeout>;
+    const erudaInitialized = ref(false);
     const goBack = () => {
-      clearTimeout(timeOut); // 清除第一个单击事件
-      timeOut = setTimeout(function () {
-        console.log("goBack");
-        previousRoute.value ? router.back() : router.push("/");
-      }, time);
-    };
-    const handleDoubleClick = () => {
-      clearTimeout(timeOut); // 清除第二个单击事件
-      console.log("handleDoubleClick");
-      initEruda();
+      const nowTime = new Date().getTime();
+      if (nowTime - lastClickTime.value < 300) {
+        /**/
+        lastClickTime.value = 0;
+        clickTimer && clearTimeout(clickTimer);
+        console.log("双击1");
+        if (!erudaInitialized.value) {
+          console.log("双击2");
+          initEruda();
+          erudaInitialized.value = true;
+        }
+      } else {
+        /**/
+        lastClickTime.value = nowTime;
+        clickTimer = setTimeout(() => {
+          console.log("单击");
+          previousRoute.value ? router.back() : router.push("/");
+        }, 400);
+      }
     };
     const gotoJob = () => {
       let url = window.location.origin + "/job";
@@ -172,7 +182,6 @@ export default {
       handleScroll,
       containerStyle,
       contentLocation,
-      handleDoubleClick,
     };
   },
   components: {
