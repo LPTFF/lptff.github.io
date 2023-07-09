@@ -29,6 +29,7 @@
               :index="item.index"
               >{{ item.text }}</el-menu-item
             >
+            <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -42,6 +43,9 @@
           </div>
           <div class="component-div" v-show="selectIndex === '3'">
             <leetCodeComponent></leetCodeComponent>
+          </div>
+          <div class="component-div" v-if="selectIndex === '4'">
+            <toolsComponent></toolsComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
@@ -60,6 +64,7 @@ import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
+import toolsComponent from "./tools/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 export default {
@@ -188,6 +193,7 @@ export default {
     leetCodeComponent,
     doubanComponent,
     newsComponent,
+    toolsComponent,
   },
 };
 </script>
