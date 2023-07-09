@@ -1,9 +1,11 @@
 <template>
   <div>
     <div v-for="(websites, parentIndex) in websiteSource" :key="parentIndex">
-      <el-tag class="website-type" :type="websites.type">{{
-        websites.category
-      }}</el-tag>
+      <el-tag
+        class="website-type"
+        :type="websiteTransformType(websites.type)"
+        >{{ websites.category }}</el-tag
+      >
       <el-row>
         <el-col
           :span="24"
@@ -40,7 +42,13 @@
 import { defineComponent } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
-
+enum WebsiteType {
+  Success = "success",
+  Warning = "warning",
+  Danger = "danger",
+  Info = "info",
+  Default = "",
+}
 export default defineComponent({
   name: "App",
   setup() {
@@ -50,9 +58,24 @@ export default defineComponent({
         gotoOutPage(website.url);
       }
     };
+    const websiteTransformType = (type: any) => {
+      switch (type) {
+        case "success":
+          return WebsiteType.Success;
+        case "warning":
+          return WebsiteType.Warning;
+        case "danger":
+          return WebsiteType.Danger;
+        case "info":
+          return WebsiteType.Info;
+        default:
+          return WebsiteType.Default; // 默认类型
+      }
+    };
     return {
       websiteSource,
       gotoNewsWebsite,
+      websiteTransformType,
     };
   },
 });
