@@ -1,0 +1,115 @@
+import requests
+import json
+from datetime import datetime
+from bs4 import BeautifulSoup
+
+headers = {
+    'Cookie': '__51vcke__JE7Z5d3HJavxuk1B=4473940b-0044-5073-9e5c-d7a7b1cc897c; __51vuft__JE7Z5d3HJavxuk1B=1686366558310; __51uvsct__JE7Z5d3HJavxuk1B=3; __51vcke__3F2LJ5KVIPove8YV=fe88d030-e814-5dec-a3e1-39ca0fffe6bd; __51vuft__3F2LJ5KVIPove8YV=1687786304381; __vtins__3F2LJ5KVIPove8YV=%7B%22sid%22%3A%20%22c3ea8f2a-9888-5b54-a7ae-f6c971aab8a1%22%2C%20%22vd%22%3A%201%2C%20%22stt%22%3A%200%2C%20%22dr%22%3A%200%2C%20%22expires%22%3A%201688970464783%2C%20%22ct%22%3A%201688968664783%7D; __51uvsct__3F2LJ5KVIPove8YV=6',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+}
+
+def extract_data_from_hxm5(url):
+    extracted_data = []
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # 检查请求是否成功
+        print('线报引擎', response)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            box_div = soup.find('ul', class_='rk_ulist')
+            if box_div:
+                for li in box_div.find_all('li'):
+                    a_element = li.find('a', class_='title_name')
+                    if a_element:
+                        link = 'https://www.hxm5.com' + a_element['href']
+                        title = a_element['title']
+                        
+                        img_element = li.find('img', class_='lazyli user_head')
+                        img_src = 'https:' + img_element['data-original'] if img_element else ''
+                        
+                        span_element = li.find('span', id='rktime')
+                        if span_element:
+                            data_value = span_element.get('data')
+                            timestamp = int(data_value) * 1000
+                            time = span_element.text.strip()
+                        else:
+                            timestamp = None
+                            time = None
+                        
+                        extracted_data.append({
+                            'link': link,
+                            'title': title,
+                            'img_src': img_src,
+                            'time': time,
+                            'timestamp': timestamp,
+                            'website': 'hxm5'
+                        })
+        else:
+            print('线报引擎请求失败')
+    except requests.exceptions.RequestException as e:
+        print('线报引擎请求异常:', e)
+    except Exception as e:
+        print('线报引擎发生异常:', e)
+    
+    return extracted_data
+
+def extract_data_from_mutouxb(url):
+    extracted_data = []
+    try:
+        response = requests.get(url, headers=headers)
+        response.raise_for_status()  # 检查请求是否成功
+        print('86收线报', response)
+        if response.status_code == 200:
+            soup = BeautifulSoup(response.text, 'html.parser')
+            box_div = soup.find('main', class_='site-main', id='main')
+            if box_div:
+                for article in box_div.find_all('article'):
+                    header = article.find('header')
+                    entry_meta = article.find('div', class_='entry-meta')
+                    a_element = header.find('a', class_='u-url url')
+                    if a_element:
+                        href = a_element['href']
+                        text = a_element.text.strip()                 
+                        time_element = entry_meta.find('time', class_='entry-date published dt-published')
+                        if time_element:
+                            datetime_str = time_element['datetime']
+                            timestamp, formatted_time_str = format_datetime(datetime_str)
+                        else:
+                            timestamp = None
+                            formatted_time_str = None
+
+                        extracted_data.append({
+                            'link': href,
+                            'title': text,
+                            'img_src': '',
+                            'timestamp': timestamp,
+                            'time': formatted_time_str,
+                            'website': 'mutouxb'
+                        })
+        else:
+            print('86收线报请求失败')
+    except requests.exceptions.RequestException as e:
+        print('86收线报请求异常:', e)
+    except Exception as e:
+        print('86收线报发生异常:', e)
+    return extracted_data
+
+
+def format_datetime(datetime_str):
+    datetime_obj = datetime.strptime(datetime_str, '%Y-%m-%dT%H:%M:%S%z')
+    timestamp_ms = int(datetime_obj.timestamp() * 1000)
+    formatted_time_str = datetime_obj.strftime('%Y-%m-%d %H:%M:%S')
+    return timestamp_ms, formatted_time_str
+
+
+url1 = 'https://www.hxm5.com/'
+extracted_data1 = extract_data_from_hxm5(url1)
+url2 = 'http://www.mutouxb.com/'
+extracted_data2 = extract_data_from_mutouxb(url2)
+extracted_data = extracted_data1 + extracted_data2
+sorted_data = sorted(extracted_data, key=lambda x: -x['timestamp'])
+json_data = json.dumps(sorted_data, ensure_ascii=False, indent=4)
+with open('./src/public/data/welfare.json', 'w', encoding='utf-8') as file:
+    file.write(json_data)
+
+print('羊毛分析数据导出成功')

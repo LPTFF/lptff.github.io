@@ -12,6 +12,7 @@
           :src="`https://images.weserv.nl/?url=` + item.cover"
           alt="电影封面"
           class="movie-image"
+          @error="handleImageError"
         />
         <div class="movie-content">
           <div class="title-div">
@@ -41,6 +42,7 @@
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import crawlMovie from "../../../public/data/movie.json";
+import bgImageUrl from "../../../public/img/bg.jpg";
 export default {
   props: {
     doubanLocation: [String, Number],
@@ -85,12 +87,17 @@ export default {
       );
       return moviesTmpAll;
     });
+    const bgUrl = ref(bgImageUrl); // 图片路径变量
+    const handleImageError = (event: any) => {
+      event.target.src = bgUrl.value;
+    };
     return {
       callMethod,
       isPCRes,
       previousRoute,
       moviesAll,
       moviesAllLimited,
+      handleImageError,
     };
   },
   components: {},
