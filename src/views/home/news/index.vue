@@ -70,7 +70,7 @@
             {{
               handleNewsDesc(
                 item.desc ? item.desc : item.title,
-                isPCRes ? 240 : 180
+                isPCRes ? 230 : 180
               )
             }}
           </div>

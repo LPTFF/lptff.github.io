@@ -70,6 +70,6 @@ if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
 else
   echo "北京时间$current_hour，不满足条件执行更新LeetCode命令"
 fi
-python v2exData.py
+python ./src/crawl/v2ex.py
 # 打包生成静态文件
 npm run build

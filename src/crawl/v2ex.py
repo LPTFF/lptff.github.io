@@ -7,7 +7,7 @@ import pytz
 # 发起 get 请求
 url = 'https://www.v2ex.com/'
 headers = {
-    'Cookie':'_ga=GA1.2.76386796.1560325128; PB3_SESSION="2|1:0|10:1687756453|11:PB3_SESSION|36:djJleDozNy4xMjguMjQ2LjY0OjcyNjY3MDU2|2f77a26aa4f0eccaea6c5ca4034f6b0c376e7eb87bf76a0590acd4700eb4db32"; _gid=GA1.2.1994471857.1687756456; V2EX_LANG=zhcn; _gat=1',
+    'Cookie':'_ga=GA1.2.76386796.1560325128; V2EX_REFERRER="2|1:0|10:1688803282|13:V2EX_REFERRER|12:aWxvdmV5b3U=|be53695fd0925e76a68242e7d87d6590ad51464f0ba26998c88b2c76b6cd6e16"; PB3_SESSION="2|1:0|10:1688803282|11:PB3_SESSION|36:djJleDoxLjE2Mi45Mi4yNDY6MzczNDk2NDY=|8453216a399d986d703c128870bb69c522b5ec25c9201ca3f4fa7d41dd1b7890"; _gid=GA1.2.1868043241.1688910338; V2EX_LANG=zhcn; A2="2|1:0|10:1688975957|2:A2|48:OWJkNGM5YTUtNzM0MS00MmRhLWFhODgtYWNlZWRlYTJlMmFk|ea2f32107861922040ba3b154ce4d12f3519ec729cca79d4549f91a6b1294ef1"; V2EX_TAB="2|1:0|10:1688975962|8:V2EX_TAB|8:dGVjaA==|dabb7c4cfeb6eb936efa01271fecbc55b77d92bd64f2e3f94c8a23062b1bcab6"',
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
 }
 try:
@@ -52,9 +52,15 @@ try:
                 soup = BeautifulSoup(dataItem, 'html.parser')
                 # 查找目标元素
                 markdown_body_div = soup.find('div', class_='markdown_body')
-                if markdown_body_div:
+                topic_content_div = soup.find('div', class_='topic_content')
+                if markdown_body_div :
                     # 提取内容
                     desc = markdown_body_div.get_text(strip=True)
+                    print('找到目标元素',urlItem,index)
+                elif topic_content_div :
+                    # 提取内容
+                    desc = topic_content_div.get_text(strip=True)
+                    print('找到目标元素',urlItem,index)
                 else:
                     print('未找到目标元素',urlItem,index)
                 # 查找<small class="gray"></small>标签
