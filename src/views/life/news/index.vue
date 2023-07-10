@@ -33,7 +33,7 @@
 <script lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
-import infzmNews from "../../../public/data/newsHandle.json";
+import infzmNews from "../../../public/data/infzm.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 export default {
