@@ -45,7 +45,18 @@ export default defineConfig({
         ...({
           manualChunks(id) {
             if (id.includes('node_modules')) {
-              return 'framework'
+              const arr = id.toString().split('node_modules/')[1].split('/')
+              switch (arr[0]) {
+                case '@vue':
+                case 'element-plus': // UI 库
+                case '@element-plus': // 图标
+                case 'eruda': // 图标
+                  return arr[0]
+                  break
+                default:
+                  return 'framework'
+                  break
+              }
             }
             return undefined
           },

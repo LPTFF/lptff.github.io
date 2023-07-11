@@ -105,7 +105,7 @@ for index, question in enumerate(new_question_list):
         "isPlus": paidOnly
     }
     questionHandle.append(newEntry)
-    pageNum = 75 # 题目数量
+    pageNum = 150 # 题目数量
     if (index+1) % pageNum == 0 and index>0:
         save_response_to_file(index//pageNum,questionHandle)
         questionHandle = []
