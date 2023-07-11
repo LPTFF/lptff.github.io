@@ -3,7 +3,7 @@
     <el-row>
       <el-col
         :span="24"
-        :md="8"
+        :md="24"
         :lg="24"
         v-for="(item, sonIndex) in welfareData"
         :key="sonIndex"
