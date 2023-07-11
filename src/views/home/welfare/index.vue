@@ -62,15 +62,13 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed } from "vue";
-import { isPC, gotoOutPage } from "../../../utils/utils";
+import { ref } from "vue";
+import { gotoOutPage } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
-import bgImageUrl from "../../../public/img/bg.jpg";
 export default {
   setup() {
-    const logoUrl = ref(logoImageUrl); // 图片路径变量
-    const bgUrl = ref(bgImageUrl); // 图片路径变量
+    const logoUrl = ref(logoImageUrl);
     let welfareData = ref(welfareSource);
     console.log("moviesData", welfareData.value);
     const handleWeek = (item: any) => {
@@ -149,7 +147,6 @@ export default {
       handleDay,
       handleHour,
       gotoWelfareWebsite,
-      bgUrl,
       handleWebsiteName,
       handleWebsiteImg,
     };
