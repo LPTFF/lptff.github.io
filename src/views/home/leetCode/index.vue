@@ -56,17 +56,19 @@
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
-import leetCode_1 from "../../../public/data/leetCode/leetCode_1.json";
-import leetCode_2 from "../../../public/data/leetCode/leetCode_2.json";
-import leetCode_3 from "../../../public/data/leetCode/leetCode_4.json";
-import leetCode_4 from "../../../public/data/leetCode/leetCode_4.json";
-import leetCode_5 from "../../../public/data/leetCode/leetCode_5.json";
-import leetCode_6 from "../../../public/data/leetCode/leetCode_6.json";
-import leetCode_7 from "../../../public/data/leetCode/leetCode_7.json";
-import leetCode_8 from "../../../public/data/leetCode/leetCode_8.json";
-import leetCode_9 from "../../../public/data/leetCode/leetCode_9.json";
-import leetCode_10 from "../../../public/data/leetCode/leetCode_10.json";
-import leetCode_11 from "../../../public/data/leetCode/leetCode_11.json";
+let leetCodeData = [] as any[];
+const importLeetCodeData = async () => {
+  const files = import.meta.glob(
+    "../../../public/data/leetCode/leetCode_*.json"
+  );
+  for (const path in files) {
+    if (Object.hasOwnProperty.call(files, path)) {
+      const module: any = await files[path]();
+      leetCodeData.push(module.default);
+    }
+  }
+};
+
 const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
   const length = array.length;
@@ -143,27 +145,16 @@ export default {
         problemsName: "",
       },
     ]);
-    const jsonFiles = [
-      leetCode_1,
-      leetCode_2,
-      leetCode_3,
-      leetCode_4,
-      leetCode_5,
-      leetCode_6,
-      leetCode_7,
-      leetCode_8,
-      leetCode_9,
-      leetCode_10,
-      leetCode_11,
-    ];
-    const randomJson = jsonFiles.reduce((acc, cur) => acc.concat(cur), []);
-    const questionsList = ref(randomJson);
-    questions.value = getRandomProblems(questionsList.value, 1);
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
+      await importLeetCodeData();
+      let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
+      let randomFileContent = leetCodeData[randomDataIndex];
+      let questionsList = ref(randomFileContent);
+      questions.value = getRandomProblems(questionsList.value, 1);
     });
     let dialogTop = ref("100px");
     let dialogLeft = ref("100px");
@@ -173,6 +164,9 @@ export default {
       dialogLeft.value = event.clientX + "px";
     };
     const getRandomQuestion = () => {
+      let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
+      let randomFileContent = leetCodeData[randomDataIndex];
+      let questionsList = ref(randomFileContent);
       questions.value = getRandomProblems(questionsList.value, 1);
     };
     return {

@@ -1,0 +1,92 @@
+[
+    {
+        "problemsName": " 3151.多次搜索",
+        "hardRate": "MEDIUM",
+        "passRate": "44.75%",
+        "problemsUrl": "https://leetcode.cn/problems/multi-search-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/multi-search-lcci/solution",
+        "problemsDesc": "<p>给定一个较长字符串<code>big</code>和一个包含较短字符串的数组<code>smalls</code>，设计一个方法，根据<code>smalls</code>中的每一个较短字符串，对<code>big</code>进行搜索。输出<code>smalls</code>中的字符串在<code>big</code>里出现的所有位置<code>positions</code>，其中<code>positions[i]</code>为<code>smalls[i]</code>出现的所有位置。</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：</strong>\nbig = &quot;mississippi&quot;\nsmalls = [&quot;is&quot;,&quot;ppi&quot;,&quot;hi&quot;,&quot;sis&quot;,&quot;i&quot;,&quot;ssippi&quot;]\n<strong>输出：</strong> [[1,4],[8],[],[3],[1,4,7,10],[5]]\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= len(big) &lt;= 1000</code></li>\n\t<li><code>0 &lt;= len(smalls[i]) &lt;= 1000</code></li>\n\t<li><code>smalls</code>的总字符数不会超过 100000。</li>\n\t<li>你可以认为<code>smalls</code>中没有重复字符串。</li>\n\t<li>所有出现的字符均为英文小写字母。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3152.最短超串",
+        "hardRate": "MEDIUM",
+        "passRate": "44.32%",
+        "problemsUrl": "https://leetcode.cn/problems/shortest-supersequence-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/shortest-supersequence-lcci/solution",
+        "problemsDesc": "<p>假设你有两个数组，一个长一个短，短的元素均不相同。找到长数组中包含短数组所有的元素的最短子数组，其出现顺序无关紧要。</p>\n\n<p>返回最短子数组的左端点和右端点，如有多个满足条件的子数组，返回左端点最小的一个。若不存在，返回空数组。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong>\nbig = <code>[7,5,9,0,2,1,3,<strong>5,7,9,1</strong>,1,5,8,8,9,7]\nsmall = [1,5,9]</code>\n<strong>输出: </strong>[7,10]</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong>\nbig = <code>[1,2,3]\nsmall = [4]</code>\n<strong>输出: </strong>[]</pre>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>big.length&nbsp;&lt;= 100000</code></li>\n\t<li><code>1 &lt;= small.length&nbsp;&lt;= 100000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3153.消失的两个数字",
+        "hardRate": "HARD",
+        "passRate": "60.57%",
+        "problemsUrl": "https://leetcode.cn/problems/missing-two-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/missing-two-lcci/solution",
+        "problemsDesc": "<p>给定一个数组，包含从 1 到 N 所有的整数，但其中缺了两个数字。你能在 O(N) 时间内只用 O(1) 的空间找到它们吗？</p>\n\n<p>以任意顺序返回这两个数字均可。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> <code>[1]</code>\n<strong>输出: </strong>[2,3]</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> <code>[2,3]</code>\n<strong>输出: </strong>[1,4]</pre>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>nums.length &lt;=&nbsp;30000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3154.连续中值",
+        "hardRate": "HARD",
+        "passRate": "58.38%",
+        "problemsUrl": "https://leetcode.cn/problems/continuous-median-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/continuous-median-lcci/solution",
+        "problemsDesc": "<p>随机产生数字并传递给一个方法。你能否完成这个方法，在每次产生新值时，寻找当前所有值的中间值（中位数）并保存。</p>\n\n<p>中位数是有序列表中间的数。如果列表长度是偶数，中位数则是中间两个数的平均值。</p>\n\n<p>例如，</p>\n\n<p>[2,3,4]&nbsp;的中位数是 3</p>\n\n<p>[2,3] 的中位数是 (2 + 3) / 2 = 2.5</p>\n\n<p>设计一个支持以下两种操作的数据结构：</p>\n\n<ul>\n\t<li>void addNum(int num) - 从数据流中添加一个整数到数据结构中。</li>\n\t<li>double findMedian() - 返回目前所有元素的中位数。</li>\n</ul>\n\n<p><strong>示例：</strong></p>\n\n<pre>addNum(1)\naddNum(2)\nfindMedian() -&gt; 1.5\naddNum(3) \nfindMedian() -&gt; 2\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3155.直方图的水量",
+        "hardRate": "HARD",
+        "passRate": "63.74%",
+        "problemsUrl": "https://leetcode.cn/problems/volume-of-histogram-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/volume-of-histogram-lcci/solution",
+        "problemsDesc": "<p>给定一个直方图(也称柱状图)，假设有人从上面源源不断地倒水，最后直方图能存多少水量?直方图的宽度为 1。</p>\n\n<p><img src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/10/22/rainwatertrap.png\" style=\"height: 161px; width: 412px;\"></p>\n\n<p><small>上面是由数组 [0,1,0,2,1,0,1,3,2,1,2,1] 表示的直方图，在这种情况下，可以接 6 个单位的水（蓝色部分表示水）。&nbsp;<strong>感谢 Marcos</strong> 贡献此图。</small></p>\n\n<p><strong>示例:</strong></p>\n\n<pre><strong>输入:</strong> [0,1,0,2,1,0,1,3,2,1,2,1]\n<strong>输出:</strong> 6</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3156.单词转换",
+        "hardRate": "MEDIUM",
+        "passRate": "40.30%",
+        "problemsUrl": "https://leetcode.cn/problems/word-transformer-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/word-transformer-lcci/solution",
+        "problemsDesc": "<p>给定字典中的两个词，长度相等。写一个方法，把一个词转换成另一个词， 但是一次只能改变一个字符。每一步得到的新词都必须能在字典中找到。</p>\n\n<p>编写一个程序，返回一个可能的转换序列。如有多个可能的转换序列，你可以返回任何一个。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong>\nbeginWord = &quot;hit&quot;,\nendWord = &quot;cog&quot;,\nwordList = [&quot;hot&quot;,&quot;dot&quot;,&quot;dog&quot;,&quot;lot&quot;,&quot;log&quot;,&quot;cog&quot;]\n\n<strong>输出:</strong>\n[&quot;hit&quot;,&quot;hot&quot;,&quot;dot&quot;,&quot;lot&quot;,&quot;log&quot;,&quot;cog&quot;]\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong>\nbeginWord = &quot;hit&quot;\nendWord = &quot;cog&quot;\nwordList = [&quot;hot&quot;,&quot;dot&quot;,&quot;dog&quot;,&quot;lot&quot;,&quot;log&quot;]\n\n<strong>输出: </strong>[]\n\n<strong>解释:</strong>&nbsp;<em>endWord</em> &quot;cog&quot; 不在字典中，所以不存在符合要求的转换序列。</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3157.最大黑方阵",
+        "hardRate": "MEDIUM",
+        "passRate": "37.83%",
+        "problemsUrl": "https://leetcode.cn/problems/max-black-square-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/max-black-square-lcci/solution",
+        "problemsDesc": "<p>给定一个方阵，其中每个单元(像素)非黑即白。设计一个算法，找出 4 条边皆为黑色像素的最大子方阵。</p>\n\n<p>返回一个数组 <code>[r, c, size]</code> ，其中&nbsp;<code>r</code>,&nbsp;<code>c</code>&nbsp;分别代表子方阵左上角的行号和列号，<code>size</code> 是子方阵的边长。若有多个满足条件的子方阵，返回 <code>r</code> 最小的，若 <code>r</code> 相同，返回 <code>c</code> 最小的子方阵。若无满足条件的子方阵，返回空数组。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:\n</strong>[\n&nbsp;  [1,0,1],\n&nbsp;  [<strong>0,0</strong>,1],\n&nbsp;  [<strong>0,0</strong>,1]\n]\n<strong>输出: </strong>[1,0,2]\n<strong>解释: </strong>输入中 0 代表黑色，1 代表白色，标粗的元素即为满足条件的最大子方阵\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:\n</strong>[\n&nbsp;  [<strong>0</strong>,1,1],\n&nbsp;  [1,0,1],\n&nbsp;  [1,1,0]\n]\n<strong>输出: </strong>[0,0,1]\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>matrix.length == matrix[0].length &lt;= 200</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3158.最大子矩阵",
+        "hardRate": "HARD",
+        "passRate": "53.59%",
+        "problemsUrl": "https://leetcode.cn/problems/max-submatrix-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/max-submatrix-lcci/solution",
+        "problemsDesc": "<p>给定一个正整数、负整数和 0 组成的 N &times; M&nbsp;矩阵，编写代码找出元素总和最大的子矩阵。</p>\n\n<p>返回一个数组 <code>[r1, c1, r2, c2]</code>，其中 <code>r1</code>, <code>c1</code> 分别代表子矩阵左上角的行号和列号，<code>r2</code>, <code>c2</code> 分别代表右下角的行号和列号。若有多个满足条件的子矩阵，返回任意一个均可。</p>\n\n<p><strong>注意：</strong>本题相对书上原题稍作改动</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：\n</strong><code>[\n&nbsp;  [-1,<strong>0</strong>],\n&nbsp;  [0,-1]\n]</code>\n<strong>输出：</strong>[0,1,0,1]\n<strong>解释：</strong>输入中标粗的元素即为输出所表示的矩阵</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>说明：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= matrix.length, matrix[0].length &lt;= 200</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3159.单词矩阵",
+        "hardRate": "HARD",
+        "passRate": "50.84%",
+        "problemsUrl": "https://leetcode.cn/problems/word-rectangle-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/word-rectangle-lcci/solution",
+        "problemsDesc": "<p>给定一份单词的清单，设计一个算法，创建由字母组成的面积最大的矩形，其中每一行组成一个单词(自左向右)，每一列也组成一个单词(自上而下)。不要求这些单词在清单里连续出现，但要求所有行等长，所有列等高。</p>\n\n<p>如果有多个面积最大的矩形，输出任意一个均可。一个单词可以重复使用。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> <code>[&quot;this&quot;, &quot;real&quot;, &quot;hard&quot;, &quot;trh&quot;, &quot;hea&quot;, &quot;iar&quot;, &quot;sld&quot;]</code>\n<strong>输出:\n</strong><code>[\n&nbsp;  &quot;this&quot;,\n&nbsp;  &quot;real&quot;,\n&nbsp;  &quot;hard&quot;</code>\n]</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> <code>[&quot;aa&quot;]</code>\n<strong>输出: </strong>[&quot;aa&quot;,&quot;aa&quot;]</pre>\n\n<p><strong>说明：</strong></p>\n\n<ul>\n\t<li><code>words.length &lt;= 1000</code></li>\n\t<li><code>words[i].length &lt;= 100</code></li>\n\t<li>数据保证单词足够随机</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3160.稀疏相似度",
+        "hardRate": "HARD",
+        "passRate": "35.26%",
+        "problemsUrl": "https://leetcode.cn/problems/sparse-similarity-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/sparse-similarity-lcci/solution",
+        "problemsDesc": "<p>两个(具有不同单词的)文档的交集(intersection)中元素的个数除以并集(union)中元素的个数，就是这两个文档的相似度。例如，{1, 5, 3} 和 {1, 7, 2, 3} 的相似度是 0.4，其中，交集的元素有 2 个，并集的元素有 5 个。给定一系列的长篇文档，每个文档元素各不相同，并与一个 ID 相关联。它们的相似度非常&ldquo;稀疏&rdquo;，也就是说任选 2 个文档，相似度都很接近 0。请设计一个算法返回每对文档的 ID 及其相似度。只需输出相似度大于 0 的组合。请忽略空文档。为简单起见，可以假定每个文档由一个含有不同整数的数组表示。</p>\n\n<p>输入为一个二维数组 <code>docs</code>，<code>docs[i]</code>&nbsp;表示&nbsp;id 为 <code>i</code> 的文档。返回一个数组，其中每个元素是一个字符串，代表每对相似度大于 0 的文档，其格式为 <code>{id1},{id2}: {similarity}</code>，其中 <code>id1</code> 为两个文档中较小的 id，<code>similarity</code> 为相似度，精确到小数点后 4 位。以任意顺序返回数组均可。</p>\n\n<p><strong>示例:</strong></p>\n\n<pre><strong>输入:</strong> \n<code>[\n&nbsp; [14, 15, 100, 9, 3],\n&nbsp; [32, 1, 9, 3, 5],\n&nbsp; [15, 29, 2, 6, 8, 7],\n&nbsp; [7, 10]\n]</code>\n<strong>输出:</strong>\n[\n&nbsp; &quot;0,1: 0.2500&quot;,\n&nbsp; &quot;0,2: 0.1000&quot;,\n&nbsp; &quot;2,3: 0.1429&quot;\n]</pre>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>docs.length &lt;= 500</code></li>\n\t<li><code>docs[i].length &lt;= 500</code></li>\n</ul>\n",
+        "isPlus": false
+    }
+]
