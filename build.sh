@@ -54,12 +54,12 @@ pip install certifi
 pip install beautifulsoup4
 pip install pytz
 # 运行爬虫脚本
-python juejinData.py
-python kuaishouData.py
 python ./src/crawl/welfare.py
 python ./src/crawl/douban.py
 python ./src/crawl/infzm.py
 python ./src/crawl/zhipin.py
+python ./src/crawl/juejin.py
+python ./src/crawl/kuaishou.py
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")
