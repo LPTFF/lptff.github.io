@@ -68,8 +68,9 @@ def common_and_extract_data(url, options,page):
     navigate_and_extract_driver = webdriver.Chrome(options=options)
     jobList_handle = []
     navigate_and_extract_driver.get(url)# 导航到网页
+    navigate_and_extract_driver.implicitly_wait(30)
     # 使用显式等待等待页面加载完成
-    WebDriverWait(navigate_and_extract_driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.job-card-wrapper')))        
+    WebDriverWait(navigate_and_extract_driver, 60).until(EC.visibility_of_element_located((By.CSS_SELECTOR, '.job-card-wrapper')))       
     # 模拟滚动到底部
     simulate_scroll_to_bottom(navigate_and_extract_driver)
     
