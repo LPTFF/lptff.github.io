@@ -23,9 +23,9 @@ def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
             jobDesc=common_to_job_detail(job_detail, options)
             return jobDesc
         except Exception as e:
-            print(f"导航到具体网页时发生错误")
-            print(f"等待 {wait_time} 秒后重新尝试导航")
-            time.sleep(wait_time)
+            sleepTime=wait_time*(retry_count+1)
+            print(f"导航到具体网页时发生错误,等待 {sleepTime} 秒后重新尝试导航")
+            time.sleep(sleepTime)
     
     print(f"无法成功导航到具体网页")
     return None
@@ -39,8 +39,9 @@ def navigate_to_job_detail(job_detail, options):
     except Exception as e:
         print(f"导航到具体网页时发生错误")
         # 出现异常时重新尝试导航
-        jobDesc = retry_to_job_detail(job_detail, options)
-        return jobDesc
+        # jobDesc = retry_to_job_detail(job_detail, options)
+        # return jobDesc
+        return None
     finally:
         print(f"导航到具体网页结束")
 
@@ -87,13 +88,13 @@ def common_and_extract_data(url, options,page):
         skills = [item.text for item in tagList]
         job_detail = li.find_element(By.CSS_SELECTOR, '.job-card-left').get_attribute('href')
         jobDesc = ''
-        if index < 100:
-            print(f'第{index+page*30}次导航到具体网页')
-            wait_time = random.randint(5, 10)  # 生成随机的等待时间
-            time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
-            jobDesc = navigate_to_job_detail(job_detail, options)
+        jobNum=index+page*30+1
+        print(f'第{jobNum}次导航到具体网页')
+        wait_time = random.randint(5, 10)  # 生成随机的等待时间
+        time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
+        jobDesc = navigate_to_job_detail(job_detail, options)     
         new_entry = {
-            "jobNum": index+page*30+1,
+            "jobNum":jobNum ,
             "brandLogo": brandLogo,
             "brandName": brandName,
             "bossTitle": bossTitle,
@@ -113,10 +114,10 @@ def retry_to_extract_data(url, options,page, retry_count=3, wait_time=20):
             jobList_handle=common_and_extract_data(url, options,page)
             return jobList_handle
         except Exception as e:
-            print(f"导航到具体网页时发生错误")
-            print(f"等待 {wait_time} 秒后重新尝试导航")
-            time.sleep(wait_time)
-    print(f"无法成功导航到具体网页")
+            sleepTime=wait_time*(retry_count+1)
+            print(f"导航到列表网页时发生错误,等待 {sleepTime} 秒后重新尝试导航")
+            time.sleep(sleepTime)
+    print(f"无法成功导航到列表网页")
     return None
 
 def navigate_and_extract_data(url, options,page):
@@ -126,12 +127,23 @@ def navigate_and_extract_data(url, options,page):
     except Exception as e:
         print(f"导航到网页时发生错误")
         # 出现异常时关闭网页并等待20秒后重新访问
-        jobList_handle = retry_to_extract_data(url, options,page)
-        return jobList_handle
+        # jobList_handle = retry_to_extract_data(url, options,page)
+        # return jobList_handle
+        return None
 
+# proxy_list = [
+#     'http://36.134.91.82',
+#     'http://183.247.221.119',
+#     'http://61.216.156.222',
+#     'http://112.14.47.6'
+# ]
+# proxy = random.choice(proxy_list)
+# print(f"Boss直聘选中的代理IP{proxy}")
 options = webdriver.ChromeOptions()
 options.add_argument('--ignore-ssl-errors=yes')
 options.add_argument('--ignore-certificate-errors')
+options.add_argument("--headless")  # 启用无头模式
+# options.add_argument('--proxy-server=' + proxy)   # 使用选中的代理IP
 # 设置自定义请求头
 options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
 
@@ -146,7 +158,7 @@ query_params = {
     'salary': '406'
 }
 page = 0
-max_pages = 30
+max_pages = 400
 jobAllList = []
 print(f"Boss直聘访问列表开始")
 jobTmpAll = []  # 添加此行定义 jobTmpAll 变量
@@ -168,6 +180,6 @@ while page < max_pages:
     page += 1
 
 
-with open('test6.json', 'w', encoding='utf-8') as file:
+with open('./src/public/data/zhipin.json', 'w', encoding='utf-8') as file:
     json.dump(jobAllList, file, ensure_ascii=False, indent=4)
     print('Boss直聘分析数据导出成功')
