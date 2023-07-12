@@ -53,6 +53,7 @@ pip install pyOpenSSL
 pip install certifi
 pip install beautifulsoup4
 pip install pytz
+pip install selenium
 # 运行爬虫脚本
 python ./src/crawl/welfare.py
 python ./src/crawl/douban.py
