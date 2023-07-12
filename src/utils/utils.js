@@ -56,4 +56,27 @@ function initEruda() {
         console.log('initEruda', error);
     }
 }
-export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage, initEruda } 
+
+import { Configuration, OpenAIApi } from "openai";
+async function generateText(prompt) {
+    console.log('js', prompt);
+    const messages = [
+        { role: "system", content: "You are a helpful assistant" },
+        { role: "user", content: `${prompt}` }
+    ];
+    let openaiKey = "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";
+    const configuration = new Configuration({
+        apiKey: openaiKey,
+    });
+    configuration.baseOptions.headers = {
+        Authorization: "Bearer " + `${openaiKey}`,
+    };
+    const openai = new OpenAIApi(configuration);
+    const response = await openai.createChatCompletion({
+        messages,
+        model: "gpt-3.5-turbo",
+    });
+    console.log(response.data.choices[0].message.content);
+    return response.data.choices[0].message.content
+}
+export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage, initEruda, generateText } 

@@ -1,199 +1,154 @@
 <template>
-  <div class="home-head common-flex">
-    <div class="common-evenly">
-      <div class="title">tangff</div>
-      <div class="options">
-        <el-dropdown @command="handleCommand" @visible-change="handleClick">
-          <span class="three-span-select">
-            <div class="three-div-select">
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-            </div>
-            <el-icon v-if="!selectIndex" color="#cccccc" class="caret-bottom"
-              ><CaretRight
-            /></el-icon>
-            <el-icon v-if="selectIndex" color="#cccccc" class="caret-bottom"
-              ><CaretBottom
-            /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="a">求学笔记</el-dropdown-item>
-              <el-dropdown-item command="b">学术网站</el-dropdown-item>
-              <el-dropdown-item command="c">常用链接</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-      <div class="vertical-line">
-        <el-divider direction="vertical" color="#cccccc" />
-      </div>
-      <div class="el-search">
-        <el-input
-          v-model="input1"
-          class="el-input-search"
-          size="large"
-          placeholder="Search article here..."
-          :prefix-icon="Search"
-        />
-      </div>
-    </div>
-    <div class="common-flex">
-      <div class="el-div-button">
-        <el-button type="success" round>博客</el-button>
-      </div>
-      <div class="el-div-avatar">
-        <el-avatar :size="50" :src="logoUrl" />
-      </div>
-    </div>
-  </div>
-  <div class="body-content">
-    <el-tabs v-model="activeName" class="demo-tabs">
-      <el-tab-pane label="首页" name="first">
-        <div>
-          <el-row>
-            <el-col :span="24" :md="8" :lg="8" v-for="index in 13" :key="index">
-              <el-card class="box-card" shadow="hover"> </el-card>
-            </el-col>
-          </el-row>
+  <div class="chat-container">
+    <div class="chat-messages">
+      <div v-for="message in sortedMessages" :key="message.id" class="message">
+        <div
+          class="message-content"
+          :class="{ sent: message.sent }"
+          v-if="message.sent"
+        >
+          我：{{ message.text }}
         </div>
-      </el-tab-pane>
-      <el-tab-pane label="电影" name="second">Config</el-tab-pane>
-      <el-tab-pane label="题库" name="third">Role</el-tab-pane>
-    </el-tabs>
+        <div class="message-content chat-gpt" v-if="!message.sent">
+          <div>ChatGPT：</div>
+          <div>{{ message.text }}</div>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input">
+      <el-input
+        v-model="inputText"
+        placeholder="Type your message"
+        :disabled="loading"
+        @keyup.enter="sendMessage"
+      />
+      <el-button
+        type="primary"
+        @click="sendMessage"
+        :disabled="loading || inputText.trim() === ''"
+        >Send</el-button
+      >
+    </div>
   </div>
 </template>
+
 <script lang="ts">
-import { ref } from "vue";
-import { ElMessage } from "element-plus";
-import { Plus, Search } from "@element-plus/icons-vue";
-import logoImageUrl from "../../public/img/logo.jpg";
+import { ref, computed, nextTick } from "vue";
+import { generateText } from "../../utils/utils";
+import { ElNotification } from "element-plus";
+
+interface Message {
+  id: number;
+  text: string;
+  sent: boolean;
+  timestamp: number;
+}
 export default {
+  name: "Chat",
   setup() {
-    let selectIndex = ref(true);
-    let input1 = ref("");
-    const activeName = ref("first");
-    const handleCommand = (command: string | number | object) => {
-      ElMessage(`click on item ${command}`);
+    const inputText = ref("");
+    const messages = ref<Message[]>([]);
+    const loading = ref(false);
+    const scrollToBottom = async () => {
+      await nextTick();
+      console.log("scrollToBottom1");
+      const chatContainer: any = document.querySelector(".chat-container");
+      console.log("scrollToBottom2", chatContainer);
+      const chatMessages = chatContainer.querySelector(".chat-messages");
+      console.log("scrollToBottom3", chatMessages);
+      const lastMessage = chatMessages.lastElementChild;
+      console.log("scrollToBottom4", lastMessage);
+      lastMessage?.scrollIntoView({ behavior: "smooth" });
+      console.log("scrollToBottom5");
     };
-    const handleClick = (type: any) => {
-      selectIndex.value = type;
+
+    const sendMessage = async () => {
+      const text = inputText.value.trim();
+      console.log("text", text);
+      if (text !== "") {
+        const timestamp = Date.now();
+        messages.value.push({
+          id: messages.value.length + 1,
+          text: text,
+          sent: true,
+          timestamp: timestamp,
+        });
+        inputText.value = "";
+        try {
+          loading.value = true; // 显示等待动画
+          console.log("messages.value", messages.value);
+          const conversation = messages.value
+            .filter((message) => message.sent)
+            .map((message) => message.text)
+            .join("\n");
+          console.log("conversation", conversation);
+
+          const chatResult: any = await generateText(conversation);
+          console.log("chatResult ", chatResult);
+          messages.value.push({
+            id: messages.value.length + 1,
+            text: chatResult,
+            sent: false,
+            timestamp: timestamp + 1,
+          });
+          scrollToBottom();
+        } catch (error) {
+          ElNotification.error({
+            title: "Error",
+            message: "Failed to generate text. Please try again.",
+          });
+        } finally {
+          loading.value = false; // 隐藏等待动画
+        }
+        console.log("sortedMessages", sortedMessages.value);
+      }
     };
-    const logoUrl = ref(logoImageUrl); // 图片路径变量
+    const sortedMessages = computed(() =>
+      messages.value.sort((a, b) => a.timestamp - b.timestamp)
+    );
     return {
-      handleCommand,
-      selectIndex,
-      Plus,
-      Search,
-      input1,
-      activeName,
-      handleClick,
-      logoUrl,
+      inputText,
+      messages,
+      sendMessage,
+      sortedMessages,
+      loading,
     };
   },
-  components: {},
-  methods: {},
 };
 </script>
-
 <style scoped>
-.el-right-card {
-  margin-right: 64px;
-}
-.el-div-card {
+.chat-container {
   display: flex;
+  flex-direction: column;
+  height: 94vh;
+  padding: 20px;
 }
-.box-card {
-  /* width: 433px; */
-  height: 482px;
-  margin-bottom: 66px;
-  border-radius: 4px;
-  margin-right: 20px;
+
+.chat-messages {
+  flex: 1;
+  overflow-y: scroll;
 }
-.home-head {
-  height: 155px;
+
+.message {
+  margin-bottom: 10px;
 }
-.common-flex {
+
+.message-content {
+  padding: 10px;
+  border-radius: 5px;
+}
+.chat-gpt {
   display: flex;
-  justify-content: space-between;
+  white-space: pre-line;
 }
-.common-evenly {
+.message-content.sent {
+  background-color: #efefef;
+  align-self: flex-end;
+}
+
+.chat-input {
   display: flex;
-  justify-content: space-evenly;
-}
-.title {
-  color: rgb(174, 209, 125);
-  margin: 58px 0px 0px 247px;
-  font-size: 30px;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-  font-weight: 400;
-  line-height: 21px;
-}
-.body-content {
-  background: #f7f8fa;
-  min-height: 800px;
-}
-.demo-tabs {
-  padding: 77px 247px;
-}
-.options {
-  margin: 60px 0px 0px 10px;
-}
-.three-select {
-  height: 5px;
-}
-.three-span-select {
-  display: flex;
-}
-.three-div-select {
-  margin-top: -4px;
-}
-.caret-bottom {
-  margin-left: 2px;
-}
-.vertical-line {
-  margin: 50px 0 0 30px;
-}
-.el-search {
-  margin: 49px 0px 0px 40px;
-}
-.el-input-search {
-  width: 434px;
-  height: 45px;
-}
-.el-div-button {
-  margin: 53px 0px 0px 0px;
-}
-.el-div-avatar {
-  margin: 40px 247px 0px 20px;
-}
-:deep(.el-input__wrapper) {
-  border-radius: 30px;
-}
-:deep(.el-divider--vertical) {
-  height: 3em;
-}
-:deep(.el-tabs__item) {
-  color: #c8c9ca;
-  font-size: 30px;
-  margin-bottom: 20px;
-  margin-right: 40px;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-}
-:deep(.el-tabs__item.is-active) {
-  color: #454545;
-}
-:deep(.el-tabs__active-bar) {
-  background-color: rgb(103, 194, 58);
+  align-items: center;
+  margin-top: 10px;
 }
 </style>
-;
