@@ -59,6 +59,7 @@ python kuaishouData.py
 python ./src/crawl/welfare.py
 python ./src/crawl/douban.py
 python ./src/crawl/infzm.py
+python ./src/crawl/zhipin.py
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")

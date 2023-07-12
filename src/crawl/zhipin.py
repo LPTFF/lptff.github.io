@@ -13,7 +13,6 @@ def common_to_job_detail(job_detail, options):
     catchDescCss = '.job-sec-text'
     WebDriverWait(navigate_to_job_driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, catchDescCss)))
     jobDesc = navigate_to_job_driver.find_elements(By.CSS_SELECTOR, catchDescCss)[0].text
-    print(f"导航到具体网页成功")
     navigate_to_job_driver.quit()
     return jobDesc
 
@@ -33,7 +32,6 @@ def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
 
 def navigate_to_job_detail(job_detail, options):
     try:
-        print(f"导航到具体网页开始")
         jobDesc = common_to_job_detail(job_detail, options)
         return jobDesc
     except Exception as e:
@@ -42,8 +40,7 @@ def navigate_to_job_detail(job_detail, options):
         # jobDesc = retry_to_job_detail(job_detail, options)
         # return jobDesc
         return None
-    finally:
-        print(f"导航到具体网页结束")
+
 
 
 def simulate_scroll_to_bottom(driver):
@@ -89,7 +86,8 @@ def common_and_extract_data(url, options,page):
         job_detail = li.find_element(By.CSS_SELECTOR, '.job-card-left').get_attribute('href')
         jobDesc = ''
         jobNum=index+page*30+1
-        print(f'第{jobNum}次导航到具体网页')
+        if jobNum % 20 == 0:
+            print(f'第{jobNum}次导航到具体网页')
         wait_time = random.randint(5, 10)  # 生成随机的等待时间
         time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
         jobDesc = navigate_to_job_detail(job_detail, options)     
