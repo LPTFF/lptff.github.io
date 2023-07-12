@@ -23,7 +23,7 @@ def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
             return jobDesc
         except Exception as e:
             sleepTime=wait_time*(retry_count+1)
-            print(f"导航到具体网页时发生错误,等待 {sleepTime} 秒后重新尝试导航")
+            print(f"导航到具体网页时发生错误{str(e)},等待 {sleepTime} 秒后重新尝试导航")
             time.sleep(sleepTime)
     
     print(f"无法成功导航到具体网页")
@@ -35,7 +35,7 @@ def navigate_to_job_detail(job_detail, options):
         jobDesc = common_to_job_detail(job_detail, options)
         return jobDesc
     except Exception as e:
-        print(f"导航到具体网页时发生错误")
+        print(f"导航到具体网页时发生错误{str(e)}")
         # 出现异常时重新尝试导航
         # jobDesc = retry_to_job_detail(job_detail, options)
         # return jobDesc
@@ -113,7 +113,7 @@ def retry_to_extract_data(url, options,page, retry_count=3, wait_time=20):
             return jobList_handle
         except Exception as e:
             sleepTime=wait_time*(retry_count+1)
-            print(f"导航到列表网页时发生错误,等待 {sleepTime} 秒后重新尝试导航")
+            print(f"导航到列表网页时发生错误{str(e)},等待 {sleepTime} 秒后重新尝试导航")
             time.sleep(sleepTime)
     print(f"无法成功导航到列表网页")
     return []
@@ -123,7 +123,7 @@ def navigate_and_extract_data(url, options,page):
         jobList_handle=common_and_extract_data(url, options,page)
         return jobList_handle
     except Exception as e:
-        print(f"导航到网页时发生错误")
+        print(f"导航到网页时发生错误{str(e)}")
         # 出现异常时关闭网页并等待20秒后重新访问
         # jobList_handle = retry_to_extract_data(url, options,page)
         # return jobList_handle
