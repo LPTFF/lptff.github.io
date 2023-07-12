@@ -125,9 +125,9 @@ def navigate_and_extract_data(url, options,page):
     except Exception as e:
         print(f"导航到网页时发生错误")
         # 出现异常时关闭网页并等待20秒后重新访问
-        jobList_handle = retry_to_extract_data(url, options,page)
-        return jobList_handle
-        # return []
+        # jobList_handle = retry_to_extract_data(url, options,page)
+        # return jobList_handle
+        return []
 
 # proxy_list = [
 #     'http://36.134.91.82',
