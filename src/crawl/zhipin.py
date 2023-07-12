@@ -27,7 +27,7 @@ def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
             time.sleep(sleepTime)
     
     print(f"无法成功导航到具体网页")
-    return None
+    return []
 
 
 def navigate_to_job_detail(job_detail, options):
@@ -39,7 +39,7 @@ def navigate_to_job_detail(job_detail, options):
         # 出现异常时重新尝试导航
         # jobDesc = retry_to_job_detail(job_detail, options)
         # return jobDesc
-        return None
+        return []
 
 
 
@@ -116,7 +116,7 @@ def retry_to_extract_data(url, options,page, retry_count=3, wait_time=20):
             print(f"导航到列表网页时发生错误,等待 {sleepTime} 秒后重新尝试导航")
             time.sleep(sleepTime)
     print(f"无法成功导航到列表网页")
-    return None
+    return []
 
 def navigate_and_extract_data(url, options,page):
     try:
@@ -127,7 +127,7 @@ def navigate_and_extract_data(url, options,page):
         # 出现异常时关闭网页并等待20秒后重新访问
         # jobList_handle = retry_to_extract_data(url, options,page)
         # return jobList_handle
-        return None
+        return []
 
 # proxy_list = [
 #     'http://36.134.91.82',
