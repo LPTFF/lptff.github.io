@@ -1,88 +1,173 @@
-import requests
-import json
-import datetime
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import time
-from bs4 import BeautifulSoup
-# 发起 GET 请求
-url='https://www.zhipin.com/wapi/zpgeek/search/joblist.json?scene=1&query=&city=101020100&experience=104,105&payType=&partTime=&degree=204,203&industry=&scale=&stage=&position=100901,100208&jobType=1901&salary=406&multiBusinessDistrict=&multiSubway=&page=1&pageSize=30'
-headers = {
-    'Cookie': 'lastCity=101020100; wd_guid=6f0da0ea-af8d-4809-bb26-45b0dc5fa1b3; historyState=state; _bl_uid=kLl7hjvRljs1gvnFjsmqjtar3jXb; __g=-; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1688278838,1688616661,1689072844; boss_login_mode=wechat; wt2=DGVEpP7_MF9_HJRd-wie1FWbs9SrNN9L9q9ad1PUqWUUB56rCH4QOCSSYMoUIQXL29Ep_jHmYBRnjcnKMZBUjdA~~; wbg=0; __l=l=%2Fwww.zhipin.com%2Fjob_detail%2F0e9b6a64fac4eb3b03x809-9F1U~.html%3Flid%3D3tmTuFSWnOs.search.2%26securityId%3DLtIf-54WU6rQC-U1BQzAwJRbOEFX80Il87xDZXdp9votRFd05woZIKGV96ZzBBccv0BMnA-3qjIpDqf92rzjMb-oknV6CTnQ9qRE_lTBYHFtRmU~%26sessionId%3D&r=&g=&s=3&friend_source=0&s=3&friend_source=0; Hm_lpvt_194df3105ad7148dcf2b98a91b5e727a=1689084143; __zp_stoken__=771deAB4VcFwCdBBJVmt6YFJhQ0wxE0N%2BDipmfXpkfF5fZBdtLkZzcnxEXFd5bU5lfiZ0HHF3HCtML3csADt8RmNlEF87ax0EKzwgYzhfazNeQTBwWhsuDholfgAjDjAuPB9GZ3V9bFxaYQc%3D; __c=1689072843; __a=28995859.1688278840.1688616662.1689072843.31.3.22.31; geek_zp_token=V1RN8hEuL43ltiVtRvxxQYIS-25D_SwiQ~; SERVERID=669c12b6205dadc4b25f7f10ddc9cc19|1689084147|1689083873',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-}
-try: 
-    requests.adapters.DEFAULT_RETRIES = 5 # 增加重连次数
-    s = requests.session()
-    s.keep_alive = False # 关闭多余连接
-    response = s.get(url, headers=headers) # 你需要的网址
-    print('Boss直聘response',response)
-    if response.status_code == 200:
-        # 解析响应数据
-        data = response.json()
-        print('Boss直聘 data',data['code'])
-        if data['code']==0:
-            jobList = data['zpData']['jobList']
-            # 数据提取逻辑
-            jobListHandle = []
-            for index, item in enumerate(jobList):
-                brandLogo = item['brandLogo']
-                brandName = item['brandName']
-                bossTitle = item['bossTitle']
-                brandIndustry = item['brandIndustry']
-                salaryDesc = item['salaryDesc']
-                skills = item['skills']
-                job_detail='https://www.zhipin.com/job_detail/'+item['encryptJobId']+'.html?lid='+item['lid']+'&securityId='+item['securityId']+'&sessionId='
-                headers1 = {
-                    'Cookie': 'lastCity=101020100; wd_guid=6f0da0ea-af8d-4809-bb26-45b0dc5fa1b3; historyState=state; _bl_uid=kLl7hjvRljs1gvnFjsmqjtar3jXb; __g=-; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1688278838,1688616661,1689072844; boss_login_mode=wechat; wt2=DGVEpP7_MF9_HJRd-wie1FWbs9SrNN9L9q9ad1PUqWUUB56rCH4QOCSSYMoUIQXL29Ep_jHmYBRnjcnKMZBUjdA~~; wbg=0; __c=1689072843; __l=l=%2Fwww.zhipin.com%2Fjob_detail%2F0e9b6a64fac4eb3b03x809-9F1U~.html%3Flid%3D3tmTuFSWnOs.search.2%26securityId%3DLtIf-54WU6rQC-U1BQzAwJRbOEFX80Il87xDZXdp9votRFd05woZIKGV96ZzBBccv0BMnA-3qjIpDqf92rzjMb-oknV6CTnQ9qRE_lTBYHFtRmU~%26sessionId%3D&r=&g=&s=3&friend_source=0&s=3&friend_source=0; __a=28995859.1688278840.1688616662.1689072843.28.3.19.28; Hm_lpvt_194df3105ad7148dcf2b98a91b5e727a=1689080447; __zp_stoken__=771deADxwYi1nTHN1cjt%2FQCUqfG0wWRFBRCNiUAEof1xSdxBYMWN7ZF05BWNbIBxlfiZ0HHF3HFlEewksAjQtYjM6RS8ceBElJgElYzhfazNeQTAiFzkaV2cEaAgGETAuPB9GZ3V9bFxaYQc%3D; geek_zp_token=V1RN8hEuL43ltiVtRvxxQYISi06D3RwSU~',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-                }
-                jobDesc=''
-                if index==0:
-                    try: 
-                        requests.adapters.DEFAULT_RETRIES = 5 # 增加重连次数
-                        s = requests.session()
-                        s.keep_alive = False # 关闭多余连接
-                        response = s.get(job_detail, headers=headers1) # 你需要的网址
-                        print('Boss直聘详情response',response)
-                        if response.status_code == 200:
-                            # 解析响应数据
-                            data = response.text
-                            # 解析HTML
-                            soup = BeautifulSoup(data, 'html.parser')
-                            # print('Boss直聘数据导出成功 soup',soup)
-                            # 打开文件并写入HTML内容
-                            with open('output.html', 'w', encoding='utf-8') as file:
-                                file.write(html)
-                            print(f"HTML已保存为 {filename}")
-                            # 查找目标元素
-                            box_div = soup.find('div', class_='job-sec-text')
-                            jobDesc = box_div.text.strip() if box_div else None
-                            print('Boss直聘详情数据导出成功 jobDesc',jobDesc)
-                        else:
-                            print('Boss直聘详情请求失败')
-                    except requests.exceptions.RequestException as e:
-                        print('Boss直聘详情请求异常:', e)
-                    except Exception as e:
-                        print('Boss直聘详情发生异常:', e)
-                newEntry = {
-                    "brandLogo": brandLogo,
-                    "brandName": brandName,
-                    "bossTitle": bossTitle,
-                    "brandIndustry": brandIndustry,
-                    "salaryDesc": salaryDesc,
-                    "skills": skills,
-                    "job_detail": job_detail,
-                    "jobDesc": jobDesc
-                }
-                jobListHandle.append(newEntry)
-            # 导出为 JSON 文件
-            with open('test1.json', 'w', encoding='utf-8') as file:
-                json.dump(jobListHandle, file, ensure_ascii=False, indent=4)
-                print('Boss直聘数据导出成功')
+import json
+import random
+
+def common_to_job_detail(job_detail, options):
+    navigate_to_job_driver = webdriver.Chrome(options=options)
+    navigate_to_job_driver.get(job_detail)
+    catchDescCss = '.job-sec-text'
+    WebDriverWait(navigate_to_job_driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, catchDescCss)))
+    jobDesc = navigate_to_job_driver.find_elements(By.CSS_SELECTOR, catchDescCss)[0].text
+    print(f"导航到具体网页成功")
+    navigate_to_job_driver.quit()
+    return jobDesc
+
+def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
+    for _ in range(retry_count):
+        try:
+            jobDesc=common_to_job_detail(job_detail, options)
+            return jobDesc
+        except Exception as e:
+            print(f"导航到具体网页时发生错误")
+            print(f"等待 {wait_time} 秒后重新尝试导航")
+            time.sleep(wait_time)
+    
+    print(f"无法成功导航到具体网页")
+    return None
+
+
+def navigate_to_job_detail(job_detail, options):
+    try:
+        print(f"导航到具体网页开始")
+        jobDesc = common_to_job_detail(job_detail, options)
+        return jobDesc
+    except Exception as e:
+        print(f"导航到具体网页时发生错误")
+        # 出现异常时重新尝试导航
+        jobDesc = retry_to_job_detail(job_detail, options)
+        return jobDesc
+    finally:
+        print(f"导航到具体网页结束")
+
+
+def simulate_scroll_to_bottom(driver):
+    scroll_pause_time = 5  # 滚动间隔时间
+    last_height = driver.execute_script("return document.documentElement.scrollHeight")  # 获取初始页面高度
+    max_iterations = 100  # 最大循环次数
+    iteration = 0  # 当前循环次数
+
+    while True:
+        print(f"Boss直聘第{iteration}次滚动")
+        driver.execute_script("window.scrollTo(0, document.documentElement.scrollHeight);") # 模拟向下滚动到底部
+        time.sleep(scroll_pause_time) # 等待页面加载
+        new_height = driver.execute_script("return document.documentElement.scrollHeight") # 获取新的页面高度并与上次高度进行比较
+        if new_height == last_height or iteration > max_iterations:
+            # 页面高度未发生变化，已经滚动到底部
+            print(f"Boss直聘滚动结束")
+            break
         else:
-            print('Boss直聘请求数据异常')  
-    else:
-        print('Boss直聘请求失败')
-except requests.exceptions.RequestException as e:
-    print('Boss直聘请求异常:', e)
-except Exception as e:
-    print('Boss直聘发生异常:', e)
+            last_height = new_height
+        # 更新循环计数器
+        iteration += 1
+
+def common_and_extract_data(url, options,page):
+    navigate_and_extract_driver = webdriver.Chrome(options=options)
+    jobList_handle = []
+    navigate_and_extract_driver.get(url)# 导航到网页
+    # 使用显式等待等待页面加载完成
+    WebDriverWait(navigate_and_extract_driver, 40).until(EC.presence_of_element_located((By.CSS_SELECTOR, '.job-card-wrapper')))        
+    # 模拟滚动到底部
+    simulate_scroll_to_bottom(navigate_and_extract_driver)
+    
+    lis = navigate_and_extract_driver.find_elements(By.CSS_SELECTOR, '.job-card-wrapper')
+    for index, li in enumerate(lis):
+        brandUrlLogo = li.find_element(By.CSS_SELECTOR, '.company-logo')
+        brandLogo = brandUrlLogo.find_elements(By.TAG_NAME, 'img')[0].get_attribute('src')
+        brandName = li.find_element(By.CSS_SELECTOR, '.company-name').text
+        bossTitle = li.find_element(By.CSS_SELECTOR, '.info-public em').text
+        brandIndustry = li.find_element(By.CSS_SELECTOR, '.company-tag-list li').text
+        salaryDesc = li.find_element(By.CSS_SELECTOR, '.job-info.clearfix span').text
+        tagTmpList = li.find_element(By.CSS_SELECTOR, '.job-card-footer.clearfix ul')
+        tagList = tagTmpList.find_elements(By.TAG_NAME, 'li')
+        skills = [item.text for item in tagList]
+        job_detail = li.find_element(By.CSS_SELECTOR, '.job-card-left').get_attribute('href')
+        jobDesc = ''
+        if index < 100:
+            print(f'第{index+page*30}次导航到具体网页')
+            wait_time = random.randint(5, 10)  # 生成随机的等待时间
+            time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
+            jobDesc = navigate_to_job_detail(job_detail, options)
+        new_entry = {
+            "jobNum": index+page*30+1,
+            "brandLogo": brandLogo,
+            "brandName": brandName,
+            "bossTitle": bossTitle,
+            "brandIndustry": brandIndustry,
+            "salaryDesc": salaryDesc,
+            "skills": skills,
+            "job_detail": job_detail,
+            "jobDesc": jobDesc
+        }
+        jobList_handle.append(new_entry)
+    navigate_and_extract_driver.quit()
+    return jobList_handle
+
+def retry_to_extract_data(url, options,page, retry_count=3, wait_time=20):
+    for _ in range(retry_count):
+        try:
+            jobList_handle=common_and_extract_data(url, options,page)
+            return jobList_handle
+        except Exception as e:
+            print(f"导航到具体网页时发生错误")
+            print(f"等待 {wait_time} 秒后重新尝试导航")
+            time.sleep(wait_time)
+    print(f"无法成功导航到具体网页")
+    return None
+
+def navigate_and_extract_data(url, options,page):
+    try:
+        jobList_handle=common_and_extract_data(url, options,page)
+        return jobList_handle
+    except Exception as e:
+        print(f"导航到网页时发生错误")
+        # 出现异常时关闭网页并等待20秒后重新访问
+        jobList_handle = retry_to_extract_data(url, options,page)
+        return jobList_handle
+
+options = webdriver.ChromeOptions()
+options.add_argument('--ignore-ssl-errors=yes')
+options.add_argument('--ignore-certificate-errors')
+# 设置自定义请求头
+options.add_argument("user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36")
+
+# 调用 navigate_and_extract_data 函数，传入导航的网页链接
+base_url = 'https://www.zhipin.com/web/geek/job'
+query_params = {
+    'city': '101020100',
+    'experience': '104,105',
+    'degree': '204,203',
+    'position': '100901,100208',
+    'jobType': '1901',
+    'salary': '406'
+}
+page = 0
+max_pages = 30
+jobAllList = []
+print(f"Boss直聘访问列表开始")
+jobTmpAll = []  # 添加此行定义 jobTmpAll 变量
+while page < max_pages: 
+    prev_jobList_len = len(jobTmpAll)  # 添加此行定义 prev_jobList_len 变量
+    wait_time = random.randint(5, 20)  # 生成随机的等待时间
+    time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
+    query_params['page'] = str(page)
+    url = base_url + '?' + '&'.join([f"{k}={v}" for k, v in query_params.items()])
+    print(f"Boss直聘第{page}次访问列表")
+    
+    jobTmpAll = navigate_and_extract_data(url, options,page)
+    jobAllList.extend(jobTmpAll)
+    
+    if len(jobTmpAll) == 0 or len(jobTmpAll) == prev_jobList_len:
+        break
+    
+    prev_jobList_len = len(jobTmpAll)
+    page += 1
+
+
+with open('test6.json', 'w', encoding='utf-8') as file:
+    json.dump(jobAllList, file, ensure_ascii=False, indent=4)
+    print('Boss直聘分析数据导出成功')

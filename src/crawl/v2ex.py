@@ -56,11 +56,9 @@ try:
                 if markdown_body_div :
                     # 提取内容
                     desc = markdown_body_div.get_text(strip=True)
-                    print('找到目标元素',urlItem,index)
                 elif topic_content_div :
                     # 提取内容
                     desc = topic_content_div.get_text(strip=True)
-                    print('找到目标元素',urlItem,index)
                 else:
                     print('未找到目标元素',urlItem,index)
                 # 查找<small class="gray"></small>标签
