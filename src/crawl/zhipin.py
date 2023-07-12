@@ -6,6 +6,7 @@ from selenium.webdriver.support import expected_conditions as EC
 import time
 import json
 import random
+import traceback
 
 def common_to_job_detail(job_detail, options):
     navigate_to_job_driver = webdriver.Chrome(options=options)
@@ -124,6 +125,7 @@ def navigate_and_extract_data(url, options,page):
         return jobList_handle
     except Exception as e:
         print(f"导航到网页时发生错误{str(e)}")
+        traceback.print_exc()
         # 出现异常时关闭网页并等待20秒后重新访问
         # jobList_handle = retry_to_extract_data(url, options,page)
         # return jobList_handle
