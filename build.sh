@@ -58,7 +58,7 @@ pip install selenium
 python ./src/crawl/welfare.py
 python ./src/crawl/douban.py
 python ./src/crawl/infzm.py
-# python ./src/crawl/zhipin.py
+python ./src/crawl/zhipin.py
 python ./src/crawl/juejin.py
 python ./src/crawl/kuaishou.py
 # 获取当前时间的小时和时区

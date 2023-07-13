@@ -181,6 +181,9 @@ while page < max_pages:
     page += 1
 
 
-with open('./src/public/data/zhipin.json', 'w', encoding='utf-8') as file:
-    json.dump(jobAllList, file, ensure_ascii=False, indent=4)
+if jobAllList:
+    with open('./src/public/data/zhipin.json', 'w', encoding='utf-8') as file:
+        json.dump(jobAllList, file, ensure_ascii=False, indent=4)
     print('Boss直聘分析数据导出成功')
+else:
+    print('jobAllList为空，不写入文件')
