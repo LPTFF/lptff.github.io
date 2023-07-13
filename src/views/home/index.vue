@@ -76,7 +76,7 @@ import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 export default {
   setup() {
-    const selectIndex = ref("6"); //默认首页
+    const selectIndex = ref("1"); //默认首页
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
