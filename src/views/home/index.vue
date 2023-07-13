@@ -23,14 +23,12 @@
             :default-active="selectIndex"
             @select="handleSelect"
           >
-            <el-menu-item
-              v-for="item in menuItems"
-              :key="item.index"
-              :index="item.index"
-              >{{ item.text }}</el-menu-item
-            >
+            <el-menu-item index="1">首页</el-menu-item>
+            <el-menu-item index="2">豆瓣电影</el-menu-item>
+            <el-menu-item index="3">LeetCode</el-menu-item>
             <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
             <el-menu-item index="5" v-if="isPCRes">薅羊毛</el-menu-item>
+            <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -51,6 +49,9 @@
           <div class="component-div" v-if="selectIndex === '5'">
             <welfareComponent></welfareComponent>
           </div>
+          <div class="component-div" v-if="selectIndex === '6'">
+            <bossZhipinComponent></bossZhipinComponent>
+          </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
           <div class="footer-text">
@@ -70,16 +71,12 @@ import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import toolsComponent from "./tools/index.vue";
 import welfareComponent from "./welfare/index.vue";
+import bossZhipinComponent from "./bossZhipin/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 export default {
   setup() {
-    const selectIndex = ref("1"); //默认首页
-    const menuItems = [
-      { index: "1", text: "首页" },
-      { index: "2", text: "豆瓣电影" },
-      { index: "3", text: "LeetCode" },
-    ];
+    const selectIndex = ref("6"); //默认首页
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
@@ -180,7 +177,6 @@ export default {
     });
     return {
       selectIndex,
-      menuItems,
       previousRoute,
       isPCRes,
       goBack,
@@ -200,6 +196,7 @@ export default {
     newsComponent,
     toolsComponent,
     welfareComponent,
+    bossZhipinComponent,
   },
 };
 </script>
