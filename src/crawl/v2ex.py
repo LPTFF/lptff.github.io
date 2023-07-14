@@ -4,6 +4,7 @@ from datetime import datetime
 import re
 from bs4 import BeautifulSoup
 import pytz
+import base64
 # 发起 get 请求
 url = 'https://www.v2ex.com/'
 headers = {
@@ -31,6 +32,12 @@ try:
                 break
             avatar_img = item.find('img', class_='avatar')
             avatar_src = avatar_img['src'] if avatar_img else None
+            image_base64 = None  # 默认设为 None
+            if avatar_src:
+                response = requests.get(avatar_src)
+                if response.status_code == 200:
+                    image_content = response.content
+                    image_base64 = base64.b64encode(image_content).decode('utf-8')
             topic_title_elem = item.find('span', class_='item_hot_topic_title')
             topic_title = topic_title_elem.text.strip() if topic_title_elem else None
             # 过滤空的 topic_title
@@ -83,7 +90,7 @@ try:
                 'desc': desc,
                 'time': originTime[:19],
                 'timestamp': timestamp,
-                'image': avatar_src,
+                'image': 'data:image/png;base64,'+image_base64,
                 'website': 'v2ex',
                 'title': topic_title,
             }
