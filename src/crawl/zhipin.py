@@ -17,28 +17,28 @@ def common_to_job_detail(job_detail, options):
     navigate_to_job_driver.quit()
     return jobDesc
 
-def retry_to_job_detail(job_detail, options, retry_count=3, wait_time=20):
+def retry_to_job_detail(job_detail, options, jobNum, retry_count=3, wait_time=20):
     for _ in range(retry_count):
         try:
             jobDesc=common_to_job_detail(job_detail, options)
             return jobDesc
         except Exception as e:
             sleepTime=wait_time*(retry_count+1)
-            print(f"导航到具体网页时发生错误{str(e)},等待 {sleepTime} 秒后重新尝试导航")
+            print(f"第{jobNum}次导航到具体网页时发生错误{str(job_detail)},等待 {sleepTime} 秒后重新尝试导航")
             time.sleep(sleepTime)
     
     print(f"无法成功导航到具体网页")
     return []
 
 
-def navigate_to_job_detail(job_detail, options):
+def navigate_to_job_detail(job_detail, options, jobNum): 
     try:
         jobDesc = common_to_job_detail(job_detail, options)
         return jobDesc
     except Exception as e:
-        print(f"导航到具体网页时发生错误{str(e)}")
+        print(f"第{jobNum}次导航到具体网页时发生错误{str(job_detail)}")
         # 出现异常时重新尝试导航
-        # jobDesc = retry_to_job_detail(job_detail, options)
+        # jobDesc = retry_to_job_detail(job_detail, options, jobNum)
         # return jobDesc
         return []
 
@@ -92,7 +92,7 @@ def common_and_extract_data(url, options,page):
             print(f'第{jobNum}次导航到具体网页')
         wait_time = random.randint(5, 10)  # 生成随机的等待时间
         time.sleep(wait_time)    # 访问网站后随机时间内不再访问，不得低于5秒，最大不得超过20秒
-        jobDesc = navigate_to_job_detail(job_detail, options)     
+        jobDesc = navigate_to_job_detail(job_detail, options,jobNum)     
         new_entry = {
             "jobNum":jobNum ,
             "brandLogo": brandLogo,
@@ -115,7 +115,7 @@ def retry_to_extract_data(url, options,page, retry_count=3, wait_time=20):
             return jobList_handle
         except Exception as e:
             sleepTime=wait_time*(retry_count+1)
-            print(f"导航到列表网页时发生错误{str(e)},等待 {sleepTime} 秒后重新尝试导航")
+            print(f"导航到列表网页时发生错误{str(url)},等待 {sleepTime} 秒后重新尝试导航")
             time.sleep(sleepTime)
     print(f"无法成功导航到列表网页")
     return []
@@ -125,8 +125,7 @@ def navigate_and_extract_data(url, options,page):
         jobList_handle=common_and_extract_data(url, options,page)
         return jobList_handle
     except Exception as e:
-        print(f"导航到网页时发生错误{str(e)}")
-        traceback.print_exc()
+        print(f"导航到网页时发生错误{str(url)}")
         # 出现异常时关闭网页并等待20秒后重新访问
         # jobList_handle = retry_to_extract_data(url, options,page)
         # return jobList_handle
