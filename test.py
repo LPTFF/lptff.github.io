@@ -23,8 +23,9 @@ query_params = {
     'pageSize': '30'
 }
 
+Cookie='lastCity=101020100; wd_guid=6f0da0ea-af8d-4809-bb26-45b0dc5fa1b3; historyState=state; _bl_uid=kLl7hjvRljs1gvnFjsmqjtar3jXb; wt2=DGVEpP7_MF9_HJRd-wie1FWbs9SrNN9L9q9ad1PUqWUUB56rCH4QOCSSYMoUIQXL29Ep_jHmYBRnjcnKMZBUjdA~~; wbg=0; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1688616661,1689072844,1689127283,1689231854; __zp_seo_uuid__=f7359817-0e6f-4d34-bcc7-2bf1d5c4c60f; __g=-; __l=r=https%3A%2F%2Flptff.github.io%2F&l=%2Fwww.zhipin.com%2Fweb%2Fgeek%2Fjob%3Fcity%3D101020100%26experience%3D104%2C105%26degree%3D204%2C203%26position%3D100901%2C100208%26jobType%3D1901%26salary%3D406&s=3&g=&friend_source=0&s=3&friend_source=0; Hm_lpvt_194df3105ad7148dcf2b98a91b5e727a=1689254467; __c=1689231851; __a=28995859.1688278840.1689127280.1689231851.65.5.14.65; __zp_stoken__=4f4fePHdXVSklQXEQBjVhAUt7B1Yba39aVyEzY2o9dH8uRQ0qE1wkN18xERR1VVBED381IH9FPTBEQB1VEUhZIG0URyZHV3ELdFR%2FGjJsWF9NGGN%2BcCMwNFgxTAoNIRwdTUYHW3tDSE0JBWE%3D; geek_zp_token=V1RN8hEuL43ltiVtRvxxQaLC237D_WzCU~'
 headers = {
-    'Cookie': 'lastCity=101020100; wd_guid=6f0da0ea-af8d-4809-bb26-45b0dc5fa1b3; historyState=state; _bl_uid=kLl7hjvRljs1gvnFjsmqjtar3jXb; wt2=DGVEpP7_MF9_HJRd-wie1FWbs9SrNN9L9q9ad1PUqWUUB56rCH4QOCSSYMoUIQXL29Ep_jHmYBRnjcnKMZBUjdA~~; wbg=0; __g=-; Hm_lvt_194df3105ad7148dcf2b98a91b5e727a=1688278838,1688616661,1689072844,1689127283; __l=l=%2Fwww.zhipin.com%2Fweb%2Fgeek%2Fjob%3Fcity%3D101020100%26experience%3D104%2C105%26degree%3D204%2C203%26position%3D100901%2C100208%26jobType%3D1901%26salary%3D406%26page%3D0&r=&g=&s=3&friend_source=0&s=3&friend_source=0; SERVERID=606144fb348bc19e48aededaa626f54e|1689153294|1689152811; Hm_lpvt_194df3105ad7148dcf2b98a91b5e727a=1689165082; __c=1689127280; __a=28995859.1688278840.1689072843.1689127280.49.4.17.49; __zp_stoken__=7398eZ3hbLwxidyE%2BcFEuLlJ7Hy8IEEhQXQZtBUgEUnEIFwwsTEtCegtndzwNBmA8fkx0exgcXxJmBn5bEk9vehQbfG9rQRlCExdmFCMjJwldKzARJDUDax90OHd0eRh3PHVGABw8XW9aR3o%3D; geek_zp_token=V1RN8hEuL43ltiVtRvxxQZLy625DnXwSk~',
+    'Cookie': Cookie,
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
 }
 
@@ -57,7 +58,7 @@ while True :
                     job_detail='https://www.zhipin.com/job_detail/'+item['encryptBrandId']+'.html?lid='+item['lid']+'&securityId='+item['securityId']+'&sessionId='
                     jobDesc=''
                     new_entry = {
-                        "jobNum":index+1 ,
+                        "jobNum":pageCount*30+index+1 ,
                         "brandLogo": brandLogo,
                         "brandName": brandName,
                         "bossTitle": bossTitle,
@@ -90,8 +91,12 @@ while True :
         pageCount += 1
 
 
-# 将数据保存到文件
-output_file = 'test2.json'
-with open(output_file, 'w', encoding='utf-8') as file:
-    json.dump(jobAllList, file, ensure_ascii=False, indent=4)
-    print('Boss直聘数据导出成功')
+if jobAllList:
+    # 将数据保存到文件
+    output_file = 'test1.json'
+    with open(output_file, 'w', encoding='utf-8') as file:
+        json.dump(jobAllList, file, ensure_ascii=False, indent=4)
+        print('Boss直聘数据导出成功')
+else:
+    print('jobAllList为空，不写入文件')
+
