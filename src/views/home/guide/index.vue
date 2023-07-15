@@ -53,6 +53,8 @@
                   :src="handleAuthorImg(item)"
                   alt="作者"
                   class="welfare-img-link"
+                  @error="handleImageError"
+                  referrerPolicy="no-referrer"
                 />
               </div>
             </div>
@@ -96,7 +98,6 @@ export default {
       ...welfareData.value,
     ];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
-    console.log("newsGuide", newsGuide.length);
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -213,6 +214,9 @@ export default {
       const month = date.getMonth() + 1;
       return month + "月";
     };
+    const handleImageError = (event: any) => {
+      event.target.src = logoUrl.value;
+    };
     const handleYearColor = (item: any) => {
       const date = new Date(item.timestamp);
       // 获取对应的年份
@@ -234,6 +238,7 @@ export default {
       handleLinkUrl,
       handleMonth,
       handleYearColor,
+      handleImageError,
     };
   },
   methods: {},

@@ -61,6 +61,7 @@ python ./src/crawl/infzm.py
 python ./src/crawl/juejin.py
 python ./src/crawl/kuaishou.py
 python ./src/crawl/weibo.py
+python ./src/crawl/v2ex.py
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")
@@ -73,6 +74,5 @@ if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
 else
   echo "北京时间$current_hour，不满足条件执行更新特殊脚本"
 fi
-python ./src/crawl/v2ex.py
 # 打包生成静态文件
 npm run build
