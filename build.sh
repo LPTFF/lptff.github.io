@@ -58,8 +58,7 @@ pip install selenium
 python ./src/crawl/welfare.py
 python ./src/crawl/douban.py
 python ./src/crawl/infzm.py
-python ./src/crawl/zhipin.py
-
+python ./src/crawl/juejin.py
 python ./src/crawl/kuaishou.py
 python ./src/crawl/weibo.py
 # 获取当前时间的小时和时区
@@ -70,7 +69,7 @@ current_timezone=$(date +"%Z")
 if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
   echo "北京时间$current_hour，满足条件执行更新特殊脚本"
   python ./src/crawl/leetCode.py
-  python ./src/crawl/juejin.py
+  python ./src/crawl/zhipin.py
 else
   echo "北京时间$current_hour，不满足条件执行更新特殊脚本"
 fi
