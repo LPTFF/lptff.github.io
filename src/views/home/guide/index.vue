@@ -11,8 +11,21 @@
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
             <div class="day-week-welfare">
-              <div class="welfare-week">{{ handleWeek(item) }}</div>
-              <div class="welfare-day">{{ handleDay(item) }}</div>
+              <div
+                class="welfare-month"
+                :style="`color:${handleYearColor(item)}`"
+              >
+                <div class="welfare-icon-hour">
+                  <el-icon :size="15"><Calendar /></el-icon>
+                </div>
+                {{ handleMonth(item) }}
+              </div>
+              <div
+                class="welfare-day"
+                :style="`color:${handleYearColor(item)}`"
+              >
+                {{ handleDay(item) }}
+              </div>
             </div>
             <div>
               <el-divider
@@ -23,7 +36,7 @@
             </div>
             <div class="welfare-hour">
               <div class="welfare-icon-hour">
-                <el-icon><Timer /></el-icon>
+                <el-icon :size="16"><Timer /></el-icon>
               </div>
               <div>{{ handleHour(item) }}</div>
             </div>
@@ -84,21 +97,6 @@ export default {
     ];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     console.log("newsGuide", newsGuide.length);
-    const handleWeek = (item: any) => {
-      const date = new Date(item.timestamp);
-      const dayOfWeek = date.getDay();
-      const weekdays = [
-        "星期日",
-        "星期一",
-        "星期二",
-        "星期三",
-        "星期四",
-        "星期五",
-        "星期六",
-      ];
-      const dayName = weekdays[dayOfWeek];
-      return dayName;
-    };
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -210,10 +208,22 @@ export default {
       }
       return websiteImg;
     };
+    const handleMonth = (item: any) => {
+      const date = new Date(item.timestamp);
+      const month = date.getMonth() + 1;
+      return month + "月";
+    };
+    const handleYearColor = (item: any) => {
+      const date = new Date(item.timestamp);
+      // 获取对应的年份
+      const year = date.getFullYear();
+      // 获取当前系统时间的年份
+      const currentYear = new Date().getFullYear();
+      return year < currentYear ? `#e96a43` : "";
+    };
     return {
       logoUrl,
       welfareData,
-      handleWeek,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -222,12 +232,22 @@ export default {
       newsGuide,
       handleAuthorImg,
       handleLinkUrl,
+      handleMonth,
+      handleYearColor,
     };
   },
   methods: {},
 };
 </script>
   <style scoped>
+.welfare-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #797979;
+  font-weight: 600;
+  font-size: 16px;
+}
 .welfare-div-website {
   display: flex;
   margin: auto 0;
@@ -266,12 +286,17 @@ export default {
   color: #737373;
   font-weight: 600;
   font-size: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .welfare-week {
   color: #797979;
   font-weight: 600;
-  font-size: 16px;
-  margin-left: 5px;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .welfare-icon-hour {
   margin-right: 8px;
