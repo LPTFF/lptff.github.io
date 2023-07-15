@@ -1,5 +1,5 @@
 <template>
-  <div class="">
+  <div>
     <el-row>
       <el-col
         :span="24"
@@ -69,14 +69,76 @@
               {{ handleWebsiteName(item) }}
             </div>
           </div>
+          <div class="mobile-div">
+            <div class="mobile-div-news">
+              <div class="mobile-link-title" @click="gotoMobileWebsite(item)">
+                {{ handleMobileTitle(item) }}
+              </div>
+              <img
+                :src="handleAuthorImg(item)"
+                alt="作者"
+                class="welfare-img-link mobile-img-link"
+                @error="handleImageError"
+                referrerPolicy="no-referrer"
+              />
+            </div>
+            <div class="mobile-click-show">
+              <div>
+                <div
+                  class="welfare-day"
+                  :style="`color:${handleYearColor(item)}`"
+                >
+                  {{ handleDay(item) }}
+                </div>
+                <div class="welfare-month">
+                  <div class="welfare-icon-hour">
+                    <el-icon :size="15"><Calendar /></el-icon>
+                  </div>
+                  {{ handleMonth(item) }}
+                </div>
+              </div>
+
+              <div class="welfare-hour welfare-mobile-hour">
+                <div class="welfare-icon-hour">
+                  <el-icon :size="16"><Timer /></el-icon>
+                </div>
+                <div>{{ handleHour(item) }}</div>
+              </div>
+              <div class="mobile-bt-detail">
+                <img
+                  :src="handleWebsiteImg(item)"
+                  alt="网站"
+                  class="welfare-img-link mobile-welfare-img"
+                />
+                <div>{{ handleWebsiteName(item) }}</div>
+              </div>
+            </div>
+          </div>
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog
+      v-model="dialogGuideVisible"
+      :title="dialogTitle"
+      center
+      :style="`margin-top:${dialogMarginTop}px`"
+      id="dialogEl"
+    >
+      <div class="dialog-content">{{ handleDialogContent(dialogContent) }}</div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleDialogCancel">不感兴趣</el-button>
+          <el-button type="primary" @click="handleDialogConfirm">
+            前去看看
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
   
-  <script lang="ts">
-import { ref } from "vue";
+<script lang="ts">
+import { ref, nextTick, watch } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import infzmNews from "../../../public/data/infzm.json";
@@ -86,6 +148,10 @@ import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
+    let dialogGuideVisible = ref(false);
+    let dialogTitle = ref("");
+    let dialogContent = ref("");
+    let dialogParam = ref("");
     let welfareData = ref(welfareSource);
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
@@ -225,6 +291,60 @@ export default {
       const currentYear = new Date().getFullYear();
       return year < currentYear ? `#e96a43` : "";
     };
+    const handleMobileTitle = (item: any) => {
+      const lengthControl = 40;
+      return item.title.length < lengthControl
+        ? item.title
+        : item.title.slice(0, lengthControl) + "...";
+    };
+    const gotoMobileWebsite = (item: any) => {
+      if (
+        item.website === "juejin" ||
+        item.website === "infzm" ||
+        item.website === "v2ex"
+      ) {
+        dialogGuideVisible.value = true;
+        dialogTitle.value = item.title;
+        dialogContent.value = item.desc;
+        dialogParam.value = item;
+      } else {
+        console.log("item.url", item.url);
+        let websiteUrl = handleLinkUrl(item);
+        if (websiteUrl) {
+          gotoOutPage(websiteUrl);
+        }
+      }
+    };
+    const handleDialogContent = (item: any) => {
+      const lengthControl = 400;
+      return item.length < lengthControl
+        ? item
+        : item.slice(0, lengthControl) + "...";
+    };
+    const dialogMarginTop = ref();
+    watch(dialogGuideVisible, async (newValue) => {
+      if (newValue) {
+        await nextTick(); // 等待元素渲染完成
+        const dialogData = document.getElementById("dialogEl");
+        if (dialogData) {
+          let dialogHeight = dialogData.clientHeight;
+          let windowHeight = window.innerHeight;
+          dialogMarginTop.value =
+            (Number(windowHeight) - dialogHeight) / 2 + 58;
+        }
+      }
+    });
+    const handleDialogCancel = () => {
+      dialogGuideVisible.value = false;
+    };
+    const handleDialogConfirm = () => {
+      dialogGuideVisible.value = false;
+      console.log("dialogParam.value", dialogParam.value);
+      let websiteUrl = handleLinkUrl(dialogParam.value);
+      if (websiteUrl) {
+        gotoOutPage(websiteUrl);
+      }
+    };
     return {
       logoUrl,
       welfareData,
@@ -239,12 +359,28 @@ export default {
       handleMonth,
       handleYearColor,
       handleImageError,
+      handleMobileTitle,
+      gotoMobileWebsite,
+      dialogGuideVisible,
+      dialogTitle,
+      dialogContent,
+      handleDialogContent,
+      dialogMarginTop,
+      handleDialogCancel,
+      handleDialogConfirm,
     };
   },
-  methods: {},
 };
 </script>
-  <style scoped>
+
+<style scoped>
+.dialog-content {
+  padding: 0;
+}
+.dialog-footer {
+  display: flex;
+  justify-content: space-evenly;
+}
 .welfare-month {
   display: flex;
   align-items: center;
@@ -295,14 +431,6 @@ export default {
   align-items: center;
   justify-content: center;
 }
-.welfare-week {
-  color: #797979;
-  font-weight: 600;
-  font-size: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
 .welfare-icon-hour {
   margin-right: 8px;
   margin-top: 2px;
@@ -327,19 +455,80 @@ export default {
   margin-right: 20px;
   display: flex;
 }
-.welfare-title {
-  height: 30px;
-  width: 55px;
-  margin-bottom: 10px;
-  color: #5b5d5c;
-  font-weight: 600;
-  font-size: 21px;
-}
+
 .welfare-card {
   margin: 0px 0px 10px 0px;
 }
+
 :deep(.el-card__body) {
   justify-content: space-between;
   display: flex;
+}
+.mobile-div {
+  display: none;
+}
+
+.el-card.is-hover-shadow:focus,
+.el-card.is-hover-shadow:hover {
+  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
+    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+  background-size: 100% 100px;
+  background-repeat: repeat-y;
+}
+/* 响应式布局 */
+@media screen and (max-width: 768px) {
+  .welfare-div-website {
+    display: none;
+  }
+  .welfare-date {
+    display: none;
+  }
+  .welfare-card {
+    margin: 0px 20px 10px 0px;
+  }
+  .mobile-div {
+    display: block;
+    width: 100%;
+  }
+  .mobile-div-news {
+    display: flex;
+    justify-content: space-between;
+  }
+  :deep(.el-card__body) {
+    padding: 0;
+  }
+  .mobile-link-title {
+    color: #797979;
+    height: 80px;
+    font-size: 18px;
+    font-weight: 600;
+    max-width: 250px;
+    margin: 27px 0px 0px 18px;
+  }
+  .mobile-img-link {
+    margin: 27px 18px 0px 0px;
+  }
+  .mobile-click-show {
+    display: flex;
+    justify-content: space-between;
+    margin: 30px 18px 23px 18px;
+  }
+  .welfare-mobile-hour {
+    margin: 0;
+  }
+  .mobile-bt-detail {
+    margin: auto 0;
+    display: flex;
+  }
+  .mobile-welfare-img {
+    height: 20px !important;
+    width: 20px !important;
+  }
+
+  :deep(.el-dialog) {
+    --el-dialog-width: 86%;
+    margin: auto;
+  }
 }
 </style>

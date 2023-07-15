@@ -29,19 +29,19 @@
             <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
             <el-menu-item index="5" v-if="isPCRes">薅羊毛</el-menu-item>
             <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7" v-if="isPCRes">首页测试版</el-menu-item>
+            <el-menu-item index="7">首页测试版</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
-          <div class="component-div" v-show="selectIndex === '1'">
+          <div class="component-div" v-if="selectIndex === '1'">
             <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
-          <div class="component-div" v-show="selectIndex === '2'">
+          <div class="component-div" v-if="selectIndex === '2'">
             <doubanComponent
               :doubanLocation="contentLocation"
             ></doubanComponent>
           </div>
-          <div class="component-div" v-show="selectIndex === '3'">
+          <div class="component-div" v-if="selectIndex === '3'">
             <leetCodeComponent></leetCodeComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '4'">
@@ -177,7 +177,9 @@ export default {
     };
     const containerStyle = computed(() => {
       return {
-        height: `${window.innerHeight - 16}px`,
+        height: isPCRes.value
+          ? `${window.innerHeight - 16}px`
+          : `${window.innerHeight - 16}px`,
       };
     });
     return {
@@ -290,6 +292,7 @@ export default {
     width: 100%;
     background-color: var(--el-menu-bg-color);
     top: 0;
+    left: 0;
   }
   .main-content {
     padding-top: 115px;
