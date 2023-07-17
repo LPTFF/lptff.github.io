@@ -30,7 +30,7 @@ try:
                 'url': urlItem,
                 'desc': '',
                 'time': originTime,
-                'timestamp': timestamp,
+                'timestamp': timestamp*1000,
                 'image': image,
                 'website': 'weibo',
                 'title': topic_title,

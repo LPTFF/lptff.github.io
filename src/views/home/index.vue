@@ -29,12 +29,12 @@
             <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
             <el-menu-item index="5" v-if="isPCRes">薅羊毛</el-menu-item>
             <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7">首页测试版</el-menu-item>
+            <el-menu-item index="7" v-if="isPCRes">首页测试版</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
           <div class="component-div" v-if="selectIndex === '1'">
-            <newsComponent :newsLocation="contentLocation"></newsComponent>
+            <guideComponent></guideComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
             <doubanComponent
@@ -54,7 +54,7 @@
             <bossZhipinComponent></bossZhipinComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '7'">
-            <guideComponent></guideComponent>
+            <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">

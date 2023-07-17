@@ -49,12 +49,20 @@
                 {{ item.title }}
               </a>
               <div class="welfare-div-link">
+                <div
+                  v-if="item.website == 'weibo'"
+                  class="weibo-img-link"
+                  :style="`background:${item.image.small_icon_desc_color}`"
+                >
+                  {{ item.image.small_icon_desc }}
+                </div>
                 <img
                   :src="handleAuthorImg(item)"
                   alt="作者"
                   class="welfare-img-link"
                   @error="handleImageError"
                   referrerPolicy="no-referrer"
+                  v-else
                 />
               </div>
             </div>
@@ -74,12 +82,20 @@
               <div class="mobile-link-title" @click="gotoMobileWebsite(item)">
                 {{ handleMobileTitle(item) }}
               </div>
+              <div
+                v-if="item.website == 'weibo'"
+                class="weibo-img-link mobile-weibo-img"
+                :style="`background:${item.image.small_icon_desc_color}`"
+              >
+                {{ item.image.small_icon_desc }}
+              </div>
               <img
                 :src="handleAuthorImg(item)"
                 alt="作者"
                 class="welfare-img-link mobile-img-link"
                 @error="handleImageError"
                 referrerPolicy="no-referrer"
+                v-else
               />
             </div>
             <div class="mobile-click-show">
@@ -144,6 +160,7 @@ import welfareSource from "../../../public/data/welfare.json";
 import infzmNews from "../../../public/data/infzm.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
+import weiboNews from "../../../public/data/weibo.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
   setup() {
@@ -156,12 +173,14 @@ export default {
     let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
+    let weiboList = ref(weiboNews);
     let newsGuide: any[] = [];
     newsGuide = [
       ...infzmList.value,
       ...juejinList.value,
       ...v2exList.value,
       ...welfareData.value,
+      ...weiboList.value,
     ];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const handleDay = (item: any) => {
@@ -206,6 +225,12 @@ export default {
             ? `https://www.infzm.com/contents/${item.url}`
             : `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
           break;
+        case "weibo":
+          let originUrl = `https://m.weibo.cn/search?containerid=100103type=1&q=${decodeURI(
+            item.title
+          )}`;
+          websiteUrl = data ? item.url : originUrl;
+          break;
         case "juejin":
         case "v2ex":
           websiteUrl = item.url;
@@ -242,6 +267,9 @@ export default {
         case "v2ex":
           websiteName = "V2EX";
           break;
+        case "weibo":
+          websiteName = "微博热搜";
+          break;
         default:
           websiteName = "随风而逝";
       }
@@ -269,6 +297,10 @@ export default {
         case "v2ex":
           websiteImg =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADg0lEQVR4AWKAgf///7NeuXJl47Fjx77t2bPn37Zt2/5t2bIF0HsZtcIWRmF4fgoREodSiogIIEq59lP8D3fuKeeOcTfDDSFNSSKKCwAAA77Tc/HsOs03xpGOenrX7LW+9a6997d3dvgJ6EVPeuOBV2LM3/b29q/l5eU8xf+DpaWlPJ7JmXOARDqdDkdHR+Hx8TG8v7+Hj48PAY+hxuqnvL290ZPeeCRD4J3ikmh+e3v7ZcNIXj6tx8Mh8E5xX/hxeHhIAdOG19dXMEaN1Sil6onxwAtPvFNsDn48PDwkxS8vL2CMRjEXr4/n8cALT7xT7naTFkM+n1eN1W/BWj18OlIEQAI0g+fnZ9VY/Tb66Jsy8ApoABMTE6G8vDxAWVmZapwo1NTUhKmpKdbHBjb2NscHgKenp4TKyspQUVEBxOqnTE9Puz6GeyI+AAmKeGahqqoqVFdXRyGnisdmZ2ftoxrjEb8CJIAd6oLa2tpvUV9fH+bn5+lhP9GncADvEwuERnV1dWCMRjFnfVNTU8hms/YSn4biA9zf3yc0NjYmNDQ0qMZqFHKtra1hdXWVXoJHfAB3KUV3d3dgcUkODg7C0NAQZ11AV1dXyOVy9i06AObAu9oBSr4HjNH9/f3Q29sbmpubC2C4q6sretsrPgC7lKKbmxswRo2jeYblKgwODoaWlpYCRkZGSg6AOdDwn9nZ2QljY2Ohra0tob29HeXsw9bWFnXh+vpan+IDUCQdHR2hs7MTjNEv09/fHzY3N7n/9iw9AJfK4u7ubjYRGKPGapS+vr6wsrLCo0dP8cVUOAAH4fLyMqGnp+fLsAFVzjyTyWhuP9AnPgALKLq4uAhAo4GBATBGjaN5WFhYoBc97GfM8fgAJFwkbKDh4WEwRqOYm5ubKzgROT8/16f4ABTJ5ORk4BGC0dFR1ThRGB8fDzMzM2w4zaIUHYCFJM7OzgqKv4rm9LCPamydvsm/ZLxMSJyenorHxMXFzDVxfRTqeCck/5ItLi4yQGByDGlycnICLFCN1Sil6umNB1544p3KZrOP/Njb2wskmY6zYMHx8bFqrEbzEqunp69tvPDEO7WxscGHCY8Oxb73o7BY/Q6sxQMvPNfX13+n+DzKZDJ5h9jd3XVaFvwIvFXpSW/N8Uw+UnO53C+H+B/ghWfKPz9SuSTcl3Q6/eOf52w4eq+trf31ef4H8lDJyDc4UgoAAAAASUVORK5CYII=";
+          break;
+        case "weibo":
+          websiteImg =
+            "data:image/png;base64,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";
           break;
         default:
           websiteImg = "羊毛";
@@ -407,6 +439,17 @@ export default {
   border-top-left-radius: 50%;
   border-top-right-radius: 50%;
   margin-right: 10px;
+}
+.weibo-img-link {
+  color: rgb(255, 255, 255);
+  height: 20px;
+  width: 20px;
+  border-radius: 4px;
+  padding-left: 3px;
+  padding-bottom: 3px;
+}
+.mobile-weibo-img {
+  margin: 27px 18px 0px 0px;
 }
 .welfare-link-title {
   display: block;
