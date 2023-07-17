@@ -530,6 +530,14 @@ export default {
   display: none;
 }
 
+.el-card.is-hover-shadow:focus,
+.el-card.is-hover-shadow:hover {
+  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
+    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+  background-size: 100% 100px;
+  background-repeat: repeat-y;
+}
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
   .welfare-div-website {
@@ -539,26 +547,13 @@ export default {
     display: none;
   }
   .welfare-card {
-    margin: 0px 20px 10px 0px;
+    margin: 0px 0px 10px 0px;
   }
   .mobile-div {
     display: block;
     width: 100%;
   }
-  .mobile-div:focus,
-  .mobile-div:hover {
-    background: linear-gradient(
-        45deg,
-        #f1f1f1,
-        #f1f1f1 50%,
-        #e8e8e8 50%,
-        #e8e8e8
-      ),
-      linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
-      linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
-    background-size: 100% 100px;
-    background-repeat: repeat-y;
-  }
+
   .mobile-div-news {
     display: flex;
     justify-content: space-between;
