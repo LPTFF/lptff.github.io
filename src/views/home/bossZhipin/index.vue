@@ -16,7 +16,6 @@
               ? `background-image: url(${bossLogo}); background-size: cover;`
               : ''
           "
-          @click="gotoBossWebsite(parentIndex)"
         >
           <div
             class="boss-head-div"
@@ -39,7 +38,10 @@
                 <div class="boss-title-info">前端开发工程师</div>
               </div>
             </div>
-            <div class="boss-more-info">
+            <div
+              class="boss-more-info"
+              @click="gotoBossWebsite(parentIndex, parentItem)"
+            >
               <el-icon :size="30" color="#4d4a4d"><MoreFilled /></el-icon>
             </div>
           </div>
@@ -75,12 +77,29 @@
         </el-card>
       </el-col>
     </el-row>
+    <el-dialog
+      v-model="dialogGuideVisible"
+      :title="dialogTitle"
+      center
+      :style="`margin-top:${dialogMarginTop}px`"
+      id="dialogEl"
+    >
+      <div class="dialog-content">{{ handleDialogContent(dialogContent) }}</div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleDialogCancel">不感兴趣</el-button>
+          <el-button type="primary" @click="handleDialogConfirm">
+            前去看看
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
-import { gotoOutPage } from "../../../utils/utils";
+import { ref, nextTick, watch, computed } from "vue";
+import { gotoOutPage, isPC } from "../../../utils/utils";
 import zhipinSource from "../../../public/data/zhipin.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
@@ -112,12 +131,46 @@ export default {
       result = result.slice(0, result.length - 3);
       return result;
     };
-    const gotoBossWebsite = (index: any) => {
+    const isPCRes = computed(() => isPC());
+    const gotoBossWebsite = (index: any, item: any) => {
       console.log(index);
-      let url =
-        "https://www.zhipin.com/web/geek/job?city=101020100&experience=104,105&degree=204,203&position=100901,100208&jobType=1901&salary=406";
-      if (index == zhipinData.value.length - 1) {
-        gotoOutPage(url);
+      console.log("item", item);
+      dialogGuideVisible.value = true;
+      dialogTitle.value = item.brandName;
+      dialogContent.value = item.jobDesc;
+      websiteUrl = item.job_detail;
+    };
+    let dialogGuideVisible = ref(false);
+    let dialogTitle = ref("");
+    let dialogContent = ref("");
+    let websiteUrl = ref("");
+    const handleDialogContent = (item: any) => {
+      const lengthControl = 400;
+      return item.length < lengthControl || isPCRes.value
+        ? item
+        : item.slice(0, lengthControl) + "...";
+    };
+    const dialogMarginTop = ref();
+    watch(dialogGuideVisible, async (newValue) => {
+      if (newValue) {
+        await nextTick(); // 等待元素渲染完成
+        const dialogData = document.getElementById("dialogEl");
+        if (dialogData) {
+          let dialogHeight = dialogData.clientHeight;
+          let windowHeight = window.innerHeight;
+          let initMargin = isPCRes.value ? 0 : 58;
+          dialogMarginTop.value =
+            (Number(windowHeight) - dialogHeight) / 2 + initMargin;
+        }
+      }
+    });
+    const handleDialogCancel = () => {
+      dialogGuideVisible.value = false;
+    };
+    const handleDialogConfirm = () => {
+      dialogGuideVisible.value = false;
+      if (websiteUrl) {
+        gotoOutPage(websiteUrl);
       }
     };
     return {
@@ -127,12 +180,26 @@ export default {
       handleJobSkills,
       bossLogo,
       gotoBossWebsite,
+      dialogGuideVisible,
+      dialogTitle,
+      dialogContent,
+      handleDialogContent,
+      dialogMarginTop,
+      handleDialogCancel,
+      handleDialogConfirm,
     };
   },
   methods: {},
 };
 </script>
 <style scoped>
+.dialog-content {
+  padding: 0;
+}
+.dialog-footer {
+  display: flex;
+  justify-content: space-evenly;
+}
 .boss-logo-title {
   margin: 10px 10px 0px 0px;
 }
