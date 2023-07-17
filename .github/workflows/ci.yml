@@ -49,11 +49,21 @@ jobs:
       # - name: Build
       #   run: 
       #     npm run build
-      - name: Build
+      - name: crawl
         run: |
           chmod +x build.sh
           ./build.sh
-          # npm run build
+          cd ./src/public/data/
+          git config --global user.email "lptffhh@gmail.com"
+          git config --global user.name "LPTFF"
+          git config --global init.defaultBranch master
+          git init
+          git add -A
+          git commit -m $(date +%F日%H时%M分%S秒)
+          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:python-crawl
+      - name: Build
+        run: |
+          npm run build
       - name: 404
         run: 
           cp dist/index.html dist/404.html
@@ -68,6 +78,8 @@ jobs:
       #   uses: actions/deploy-pages@v1 
       - name: Deploy  
         run: |
+          cd ../../../
+          pwd
           cd ./dist/
           echo lptff.github.io > CNAME  
           echo > .nojekyll
