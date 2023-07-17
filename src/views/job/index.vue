@@ -1,46 +1,37 @@
 <template>
   <div>
-    <div v-if="dataFromApi">
-      <!-- Display the interface data here -->
-      <pre>{{ dataFromApi }}</pre>
-    </div>
-    <div v-else>
-      <!-- Loading message -->
-      <p>Loading...</p>
+    <div class="test">
+      <el-button @click="handleDialogCancel">点击我测试</el-button>
     </div>
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref, onMounted } from "vue";
+<script lang="ts">
+import { ref } from "vue";
 import axios from "axios";
+export default {
+  setup() {
+    const handleDialogCancel = async () => {
+      console.log(233);
+      try {
+        const response = await axios.get(
+          "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/data/infzm.json"
+        );
+        console.log("response.data;", response.data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
+    };
 
-// Interface to define the data structure
-interface DataFromApi {
-  // Define your data structure here
-  // Example:
-  // name: string;
-  // age: number;
-}
-
-const dataFromApi = ref<DataFromApi | null>(null);
-
-async function fetchData() {
-  try {
-    const response = await axios.get<DataFromApi>(
-      "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/data/infzm.json"
-    );
-    dataFromApi.value = response.data;
-    console.log("2333", response.data);
-  } catch (error) {
-    console.log("2333");
-
-    console.error("Error fetching data:", error);
-  }
-}
-
-// Fetch data when the component is mounted
-onMounted(() => {
-  fetchData();
-});
+    return {
+      handleDialogCancel,
+    };
+  },
+};
 </script>
+<style scoped>
+.test {
+  text-align: center;
+  margin-top: 200px;
+}
+</style>
