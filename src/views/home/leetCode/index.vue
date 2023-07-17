@@ -47,15 +47,14 @@
       >
     </div>
   </div>
-  <div v-if="false">
-    <draggingAndHoveringButtons></draggingAndHoveringButtons>
-  </div>
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, nextTick } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
-import draggingAndHoveringButtons from "../../../components/draggingAndHoveringButtons.vue";
+import leetCodeList from "../../../public/data/leetCode/leetCode_1.json";
+import axios from "axios";
+import { ElLoading } from "element-plus";
 let leetCodeData = [] as any[];
 const importLeetCodeData = async () => {
   const files = import.meta.glob(
@@ -84,7 +83,24 @@ const getRandomProblems = (array: any, num: any) => {
   }
   return result;
 };
-
+const getLeetCodeList = async () => {
+  const loadingInstance = ElLoading.service({ fullscreen: true });
+  try {
+    let pageSize = Math.floor(Math.random() * 64) + 1;
+    const cdnWebsite = "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@";
+    const basUrl = `python-crawl/leetCode/leetCode_${pageSize}.json`;
+    const response = await axios.get(cdnWebsite + basUrl);
+    return getRandomProblems(response.data, 1);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+    return getRandomProblems(leetCodeList, 1);
+  } finally {
+    nextTick(() => {
+      loadingInstance.close();
+    });
+  }
+};
+let questionsPre = "";
 export default {
   data() {
     return {
@@ -150,11 +166,16 @@ export default {
       previousRoute.value = window.history.state
         ? window.history.state.back
         : ""; //获取路由路径
-      await importLeetCodeData();
-      let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
-      let randomFileContent = leetCodeData[randomDataIndex];
-      let questionsList = ref(randomFileContent);
-      questions.value = getRandomProblems(questionsList.value, 1);
+      // await importLeetCodeData();
+      // let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
+      // let randomFileContent = leetCodeData[randomDataIndex];
+      // let questionsList = ref(randomFileContent);
+      // questions.value = getRandomProblems(questionsList.value, 1);
+      questionsPre =
+        questionsPre.length == 0 ? await getLeetCodeList() : questionsPre;
+      questions.value = questionsPre
+        ? JSON.parse(JSON.stringify(questionsPre))
+        : questionsPre;
     });
     let dialogTop = ref("100px");
     let dialogLeft = ref("100px");
@@ -163,11 +184,15 @@ export default {
       dialogTop.value = event.clientY + "px";
       dialogLeft.value = event.clientX + "px";
     };
-    const getRandomQuestion = () => {
-      let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
-      let randomFileContent = leetCodeData[randomDataIndex];
-      let questionsList = ref(randomFileContent);
-      questions.value = getRandomProblems(questionsList.value, 1);
+    const getRandomQuestion = async () => {
+      // let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
+      // let randomFileContent = leetCodeData[randomDataIndex];
+      // let questionsList = ref(randomFileContent);
+      // questions.value = getRandomProblems(questionsList.value, 1);
+      questionsPre = await getLeetCodeList();
+      questions.value = questionsPre
+        ? JSON.parse(JSON.stringify(questionsPre))
+        : questionsPre;
     };
     return {
       callMethod,
@@ -182,7 +207,7 @@ export default {
       getRandomQuestion,
     };
   },
-  components: { draggingAndHoveringButtons },
+  components: {},
   methods: {
     gotoLeetCode(question: any, type: any) {
       let url = type == "2" ? question.solutionsUrl : question.problemsUrl;
