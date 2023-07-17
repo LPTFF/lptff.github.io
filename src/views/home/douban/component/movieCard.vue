@@ -145,7 +145,7 @@ export default {
 }
 
 .movie-image {
-  width: 218px;
+  width: 100%;
   height: 308px;
   margin-bottom: 12px;
 }

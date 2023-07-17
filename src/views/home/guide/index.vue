@@ -79,8 +79,10 @@
           </div>
           <div class="mobile-div">
             <div class="mobile-div-news">
-              <div class="mobile-link-title" @click="gotoMobileWebsite(item)">
-                {{ handleMobileTitle(item) }}
+              <div class="mobile-link-title">
+                <div @click="gotoMobileWebsite(item)">
+                  {{ handleMobileTitle(item) }}
+                </div>
               </div>
               <div
                 v-if="item.website == 'weibo'"
@@ -377,6 +379,21 @@ export default {
         gotoOutPage(websiteUrl);
       }
     };
+    const divColor = ref(""); // 用于存储随机颜色的响应式变量
+
+    // 生成随机颜色的方法
+    const generateRandomColor = () => {
+      const randomColor = () => {
+        const letters = "0123456789ABCDEF";
+        let color = "#";
+        for (let i = 0; i < 6; i++) {
+          color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+      };
+
+      divColor.value = randomColor(); // 将随机颜色赋值给divColor
+    };
     return {
       logoUrl,
       welfareData,
@@ -400,6 +417,8 @@ export default {
       dialogMarginTop,
       handleDialogCancel,
       handleDialogConfirm,
+      divColor,
+      generateRandomColor,
     };
   },
 };
@@ -511,14 +530,6 @@ export default {
   display: none;
 }
 
-.el-card.is-hover-shadow:focus,
-.el-card.is-hover-shadow:hover {
-  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
-    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
-    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
-  background-size: 100% 100px;
-  background-repeat: repeat-y;
-}
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
   .welfare-div-website {
@@ -533,6 +544,20 @@ export default {
   .mobile-div {
     display: block;
     width: 100%;
+  }
+  .mobile-div:focus,
+  .mobile-div:hover {
+    background: linear-gradient(
+        45deg,
+        #f1f1f1,
+        #f1f1f1 50%,
+        #e8e8e8 50%,
+        #e8e8e8
+      ),
+      linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+      linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+    background-size: 100% 100px;
+    background-repeat: repeat-y;
   }
   .mobile-div-news {
     display: flex;
