@@ -34,7 +34,7 @@
         </el-header>
         <el-main class="main-content">
           <div class="component-div" v-if="selectIndex === '1'">
-            <guideComponent></guideComponent>
+            <guideComponent :guideLocation="contentLocation"></guideComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
             <doubanComponent

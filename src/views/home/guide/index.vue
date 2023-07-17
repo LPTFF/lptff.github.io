@@ -5,7 +5,7 @@
         :span="24"
         :md="24"
         :lg="24"
-        v-for="(item, sonIndex) in newsGuide"
+        v-for="(item, sonIndex) in guideNewsLimited"
         :key="sonIndex"
       >
         <el-card shadow="hover" class="welfare-card">
@@ -156,7 +156,7 @@
 </template>
   
 <script lang="ts">
-import { ref, nextTick, watch } from "vue";
+import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import infzmNews from "../../../public/data/infzm.json";
@@ -165,7 +165,10 @@ import v2exNews from "../../../public/data/v2ex.json";
 import weiboNews from "../../../public/data/weibo.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
-  setup() {
+  props: {
+    guideLocation: [String, Number],
+  },
+  setup(props: any) {
     const logoUrl = ref(logoImageUrl);
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
@@ -394,6 +397,22 @@ export default {
 
       divColor.value = randomColor(); // 将随机颜色赋值给divColor
     };
+    const isPCRes = computed(() => isPC());
+    let maxLength = 0;
+    const guideNewsLimited = computed(() => {
+      const length: number = Number(props.guideLocation); // 切割长度
+      let initData = isPCRes.value ? 9 : 3;
+      let guideTmpAll;
+      maxLength < length ? (maxLength = length) : maxLength;
+      let rate = isPCRes.value ? 2 : 1;
+      guideTmpAll = newsGuide.slice(
+        0,
+        maxLength * rate + initData < newsGuide.length
+          ? maxLength * rate + initData
+          : newsGuide.length
+      );
+      return guideTmpAll;
+    });
     return {
       logoUrl,
       welfareData,
@@ -419,6 +438,7 @@ export default {
       handleDialogConfirm,
       divColor,
       generateRandomColor,
+      guideNewsLimited,
     };
   },
 };
