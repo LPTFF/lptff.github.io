@@ -90,8 +90,6 @@ export default {
       "https://img.bosszhipin.com/static/file/2022/wf8r5vlj1y1653961013785.png"
     );
     let zhipinData = ref(zhipinSource);
-
-    console.log("zhipinData", zhipinData.value);
     const handleImageError = (event: any) => {
       event.target.src = logoUrl.value;
     };

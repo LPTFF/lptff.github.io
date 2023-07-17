@@ -70,7 +70,6 @@ export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
     let welfareData = ref(welfareSource);
-    console.log("moviesData", welfareData.value);
     const handleWeek = (item: any) => {
       const date = new Date(item.timestamp);
       const dayOfWeek = date.getDay();
@@ -238,5 +237,13 @@ export default {
 :deep(.el-card__body) {
   justify-content: space-between;
   display: flex;
+}
+.el-card.is-hover-shadow:focus,
+.el-card.is-hover-shadow:hover {
+  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
+    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+  background-size: 100% 100px;
+  background-repeat: repeat-y;
 }
 </style>
