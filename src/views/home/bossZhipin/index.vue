@@ -22,6 +22,7 @@
             :style="
               parentIndex == zhipinData.length - 1 ? `visibility: hidden` : ''
             "
+            @click="gotoBossWebsite(parentIndex, parentItem)"
           >
             <div class="boss-info">
               <img
@@ -38,10 +39,7 @@
                 <div class="boss-title-info">前端开发工程师</div>
               </div>
             </div>
-            <div
-              class="boss-more-info"
-              @click="gotoBossWebsite(parentIndex, parentItem)"
-            >
+            <div class="boss-more-info">
               <el-icon :size="30" color="#4d4a4d"><MoreFilled /></el-icon>
             </div>
           </div>
