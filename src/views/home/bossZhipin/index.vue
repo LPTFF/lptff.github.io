@@ -16,13 +16,13 @@
               ? `background-image: url(${bossLogo}); background-size: cover;`
               : ''
           "
+          @click="gotoBossWebsite(parentIndex, parentItem)"
         >
           <div
             class="boss-head-div"
             :style="
               parentIndex == zhipinData.length - 1 ? `visibility: hidden` : ''
             "
-            @click="gotoBossWebsite(parentIndex, parentItem)"
           >
             <div class="boss-info">
               <img
@@ -82,7 +82,16 @@
       :style="`margin-top:${dialogMarginTop}px`"
       id="dialogEl"
     >
-      <div class="dialog-content">{{ handleDialogContent(dialogContent) }}</div>
+      <div
+        class="dialog-content"
+        :style="dialogContent ? '' : 'text-align: center;'"
+      >
+        {{
+          handleDialogContent(dialogContent)
+            ? handleDialogContent(dialogContent)
+            : "这里什么都没有"
+        }}
+      </div>
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="handleDialogCancel">不感兴趣</el-button>
@@ -133,10 +142,16 @@ export default {
     const gotoBossWebsite = (index: any, item: any) => {
       console.log(index);
       console.log("item", item);
-      dialogGuideVisible.value = true;
-      dialogTitle.value = item.brandName;
-      dialogContent.value = item.jobDesc;
-      websiteUrl = item.job_detail;
+      let url =
+        "https://www.zhipin.com/web/geek/job?city=101020100&experience=104,105&degree=204,203&position=100901,100208&jobType=1901&salary=406";
+      if (index == zhipinSource.length - 1) {
+        gotoOutPage(url);
+      } else {
+        dialogGuideVisible.value = true;
+        dialogTitle.value = item.brandName;
+        dialogContent.value = item.jobDesc ? item.jobDesc : "";
+        websiteUrl = item.job_detail;
+      }
     };
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
