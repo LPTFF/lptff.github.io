@@ -83,6 +83,7 @@ const getRandomProblems = (array: any, num: any) => {
   }
   return result;
 };
+let getLeetCodeCount = 0;
 const getLeetCodeList = async () => {
   const loadingInstance = ElLoading.service({ fullscreen: true });
   try {
@@ -90,10 +91,10 @@ const getLeetCodeList = async () => {
     const cdnWebsite = "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@";
     const basUrl = `python-crawl/leetCode/leetCode_${pageSize}.json`;
     const response = await axios.get(cdnWebsite + basUrl);
-    return getRandomProblems(response.data, 1);
+    return response.data;
   } catch (error) {
     console.error("Error fetching data:", error);
-    return getRandomProblems(leetCodeList, 1);
+    return leetCodeList;
   } finally {
     nextTick(() => {
       loadingInstance.close();
@@ -101,6 +102,7 @@ const getLeetCodeList = async () => {
   }
 };
 let questionsPre = "";
+let questionsList = [] as any[];
 export default {
   data() {
     return {
@@ -171,8 +173,9 @@ export default {
       // let randomFileContent = leetCodeData[randomDataIndex];
       // let questionsList = ref(randomFileContent);
       // questions.value = getRandomProblems(questionsList.value, 1);
-      questionsPre =
+      questionsList =
         questionsPre.length == 0 ? await getLeetCodeList() : questionsPre;
+      questionsPre = getRandomProblems(questionsList, 1);
       questions.value = questionsPre
         ? JSON.parse(JSON.stringify(questionsPre))
         : questionsPre;
@@ -189,7 +192,14 @@ export default {
       // let randomFileContent = leetCodeData[randomDataIndex];
       // let questionsList = ref(randomFileContent);
       // questions.value = getRandomProblems(questionsList.value, 1);
-      questionsPre = await getLeetCodeList();
+      getLeetCodeCount++;
+
+      if (getLeetCodeCount % 3 == 0) {
+        questionsList = await getLeetCodeList();
+        questionsPre = getRandomProblems(questionsList, 1);
+      } else {
+        questionsPre = getRandomProblems(questionsList, 1);
+      }
       questions.value = questionsPre
         ? JSON.parse(JSON.stringify(questionsPre))
         : questionsPre;
