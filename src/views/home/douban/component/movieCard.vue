@@ -81,7 +81,9 @@ export default {
         if (postData.cover) {
           posterMovie.value = postData.cover;
         } else if (postData) {
-          posterMovie.value = "data:image/png;base64," + postData;
+          posterMovie.value = postData.startsWith("data:image/png;base64,")
+            ? postData
+            : "data:image/png;base64," + postData;
         }
       }
     });
