@@ -16,7 +16,6 @@
 import { ref, onMounted, computed } from "vue";
 import { isPC } from "../../../utils/utils";
 import crawlMovie from "../../../public/data/movie.json";
-import bgImageUrl from "../../../public/img/bg.jpg";
 import movieCard from "./component/movieCard.vue";
 export default {
   props: {
@@ -59,17 +58,12 @@ export default {
       );
       return moviesTmpAll;
     });
-    const bgUrl = ref(bgImageUrl); // 图片路径变量
-    const handleImageError = (event: any) => {
-      event.target.src = bgUrl.value;
-    };
     return {
       callMethod,
       isPCRes,
       previousRoute,
       moviesAll,
       moviesAllLimited,
-      handleImageError,
     };
   },
   components: {
