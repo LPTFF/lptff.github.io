@@ -96,7 +96,6 @@
 <script lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
-import infzmNews from "../../../public/data/infzm.json";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
@@ -106,11 +105,10 @@ export default {
     newsLocation: [String, Number],
   },
   setup(props: any) {
-    let infzmList = ref(infzmNews);
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
     let newsAll: any[] = [];
-    newsAll = [...infzmList.value, ...juejinList.value, ...v2exList.value];
+    newsAll = [...juejinList.value, ...v2exList.value];
     newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const callMethod = () => {
       // console.log('233');

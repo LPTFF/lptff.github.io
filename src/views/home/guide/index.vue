@@ -158,10 +158,7 @@
 <script lang="ts">
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
-import welfareSource from "../../../public/data/welfare.json";
 import infzmNews from "../../../public/data/infzm.json";
-import juejinNews from "../../../public/data/juejin.json";
-import v2exNews from "../../../public/data/v2ex.json";
 import weiboNews from "../../../public/data/weibo.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 export default {
@@ -174,19 +171,10 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    let welfareData = ref(welfareSource);
     let infzmList = ref(infzmNews);
-    let juejinList = ref(juejinNews);
-    let v2exList = ref(v2exNews);
     let weiboList = ref(weiboNews);
     let newsGuide: any[] = [];
-    newsGuide = [
-      ...infzmList.value,
-      ...juejinList.value,
-      ...v2exList.value,
-      ...welfareData.value,
-      ...weiboList.value,
-    ];
+    newsGuide = [...infzmList.value, ...weiboList.value];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
@@ -415,7 +403,6 @@ export default {
     });
     return {
       logoUrl,
-      welfareData,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
