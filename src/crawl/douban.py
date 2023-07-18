@@ -31,7 +31,7 @@ try:
                     if responseForCover.status_code == 200:
                         # 获取图片数据并转换为Base64编码
                         base64ForCover = base64.b64encode(responseForCover.content).decode('utf-8')
-                        if index % 1 == 0:
+                        if index % 10 == 0:
                             print(f"豆瓣数据第{index}次 获取海报图片成功,{item['cover']}")
                     else:
                         print(f"豆瓣数据第{index}次 获取海报图片失败,{item['cover']}")
@@ -46,6 +46,8 @@ try:
                 'cover': item['cover'],
             }
             img_entry = {
+                'url': item['url'],
+                'title': item['title'],
                 'cover': 'data:image/png;base64,'+base64ForCover,
                 'index': index
             }
