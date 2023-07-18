@@ -389,7 +389,7 @@ export default {
     let maxLength = 0;
     const guideNewsLimited = computed(() => {
       const length: number = Number(props.guideLocation); // 切割长度
-      let initData = isPCRes.value ? 9 : 3;
+      let initData = isPCRes.value ? 9 : 5;
       let guideTmpAll;
       maxLength < length ? (maxLength = length) : maxLength;
       let rate = isPCRes.value ? 2 : 1;
@@ -559,6 +559,21 @@ export default {
   .mobile-div {
     display: block;
     width: 100%;
+    background: linear-gradient(
+        45deg,
+        #f1f1f1,
+        #f1f1f1 50%,
+        #e8e8e8 50%,
+        #e8e8e8
+      ),
+      linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+      linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+    background-size: 100% 100px;
+    background-repeat: repeat-y;
+  }
+  .mobile-div:focus,
+  .mobile-div:hover {
+    background: #ffffff;
   }
 
   .mobile-div-news {
