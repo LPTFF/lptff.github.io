@@ -5,7 +5,7 @@
         <img
           :src="
             posterMovie.length > 0
-              ? 'data:image/png;base64,' + posterMovie
+              ? posterMovie
               : `https://images.weserv.nl/?url=` + moviesData.cover
           "
           alt="电影封面"
@@ -76,10 +76,12 @@ export default {
     onMounted(async () => {
       if (Number(index.value) < 1000) {
         const basUrl = `/doubanImg/moviePoster_${moviesData.value.id}.json`;
-        let test = await getMoviePost(basUrl);
-        console.log("test,index", test, index);
-        if (test.cover) {
-          posterMovie.value = test.cover;
+        let postData = await getMoviePost(basUrl);
+        console.log("postData,index", postData, index.value);
+        if (postData.cover) {
+          posterMovie.value = postData.cover;
+        } else if (postData) {
+          posterMovie.value = "data:image/png;base64," + postData;
         }
       }
     });
