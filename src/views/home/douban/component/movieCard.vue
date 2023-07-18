@@ -5,7 +5,7 @@
         <img
           :src="
             posterMovie.length > 0
-              ? posterMovie
+              ? 'data:image/png;base64,' + posterMovie
               : `https://images.weserv.nl/?url=` + moviesData.cover
           "
           alt="电影封面"
