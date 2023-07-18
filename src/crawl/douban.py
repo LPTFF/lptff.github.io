@@ -46,17 +46,18 @@ try:
                 'cover': item['cover'],
                 'id': item['id'],
             }
-            img_entry = {
-                'url': item['url'],
-                'title': item['title'],
-                'cover': 'data:image/png;base64,'+base64ForCover,
-                'index': index,
-                'id': item['id'],
-            }
+            # img_entry = {
+            #     'url': item['url'],
+            #     'title': item['title'],
+            #     'cover': ,
+            #     'index': index,
+            #     'id': item['id'],
+            # }
+            cover='data:image/png;base64,'+base64ForCover
             handleList.append(new_entry)
             file_path = f"./src/public/data/doubanImg/moviePoster_{item['id']}.json"
             with open(file_path, 'w', encoding='utf-8') as file:
-                json.dump(img_entry, file, ensure_ascii=False, indent=4)
+                json.dump(cover, file, ensure_ascii=False, indent=4)
                 # print(f"豆瓣海报图片第{index}次导出成功,{new_entry['cover']}")  
             
         # 导出为 JSON 文件
