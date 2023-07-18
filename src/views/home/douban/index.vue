@@ -23,7 +23,7 @@ export default {
     doubanLocation: [String, Number],
   },
   setup(props: any) {
-    let moviesData = ref(crawlMovie.subjects);
+    let moviesData = ref(crawlMovie);
     let moviesValue = moviesData.value;
     const newMovie = moviesValue.filter((item) => item.is_new === true);
     newMovie.sort((a, b) => parseFloat(b.rate) - parseFloat(a.rate)); //按评分高分排序
