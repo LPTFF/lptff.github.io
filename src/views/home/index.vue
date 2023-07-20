@@ -9,7 +9,7 @@
         <el-header class="header-el">
           <div class="common-flex">
             <div class="header-div" @click="goBack">
-              <el-avatar :size="50" class="logo-img" :src="logoUrl" />
+              <img :src="logoUrl" alt="作者" class="logo-img" />
               <div class="logo-title">tangff</div>
             </div>
             <div v-if="false">
@@ -252,6 +252,10 @@ export default {
   width: 35px;
   height: 35px;
   margin-right: 10px;
+  border-bottom-left-radius: 50%;
+  border-bottom-right-radius: 50%;
+  border-top-left-radius: 50%;
+  border-top-right-radius: 50%;
 }
 
 .news-aggregator {
