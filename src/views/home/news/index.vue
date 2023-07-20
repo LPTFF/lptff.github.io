@@ -16,22 +16,16 @@
           >
             {{ item.title }}
           </a>
-          <div
-            class="news-plus-summary hight-news"
-            :style="`background-image: url(${
-              item.image ? item.image : bgUrl
-            }); background-size: cover;`"
-          >
-            <div class="news-inner-summary">
-              {{
-                handleNewsDesc(
-                  item.desc ? item.desc : item.title,
-                  isPCRes ? 30 : 20
-                )
-              }}
-            </div>
+          <div class="background-container">
+            <img
+              class="news-img-inner"
+              :src="handleCoverImg(item)"
+              @error="handleImageError"
+              referrerPolicy="no-referrer"
+              alt="网站"
+            />
           </div>
-          <div class="line-split"></div>
+          <div class="line-split line-add-split"></div>
           <div class="news-bottom common-flex">
             <div class="news-bottom">
               <el-avatar
@@ -213,6 +207,15 @@ export default {
       );
       return newsTmpAll;
     });
+    const handleCoverImg = (item: any) => {
+      if (!item.image) {
+        console.log("item", item);
+      }
+      return item.image ? item.image : bgUrl.value;
+    };
+    const handleImageError = (event: any) => {
+      event.target.src = bgUrl.value;
+    };
     return {
       callMethod,
       isPCRes,
@@ -227,40 +230,35 @@ export default {
       bgUrl,
       handleNewsDesc,
       newsAllLimited,
+      handleCoverImg,
+      handleImageError,
     };
   },
-  methods: {},
 };
 </script>
 
 <style scoped>
+.news-img-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 370px;
+  object-fit: cover;
+}
+.background-container {
+  position: relative;
+}
+
 .news-card {
   margin-bottom: 20px;
   height: 482px;
   margin-right: 20px;
 }
 
-.news-content {
-  display: flex;
-  justify-content: space-between;
-}
-
-.news-div-img {
-  margin: auto;
-}
-
 .img-news {
   width: 40px;
   height: 40px;
-}
-
-.news-details {
-  padding: 20px;
-  width: 900px;
-  display: flex;
-  flex-direction: column;
-  align-self: stretch;
-  height: 100%;
 }
 
 .news-title {
@@ -275,10 +273,6 @@ export default {
   text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
   max-width: 300px;
 }
-.news-plus-title {
-  margin-left: 10px;
-  margin-bottom: 0px !important;
-}
 
 .news-summary {
   display: block;
@@ -288,21 +282,6 @@ export default {
   font-family: Arial;
   overflow: hidden; /* 隐藏溢出部分 */
   text-overflow: ellipsis; /* 显示省略号 */
-}
-.news-plus-summary {
-  display: block;
-  height: 320px;
-  font-size: 18px;
-  font-family: Arial;
-  padding-top: 20px;
-  padding-bottom: 30px;
-}
-.news-inner-summary {
-  margin-left: 10px;
-  margin-top: 290px;
-}
-.hight-news {
-  color: #f9f9f9 !important;
 }
 .news-date {
   color: #999;
@@ -322,6 +301,9 @@ export default {
   background-color: #f9f9f9;
   margin-bottom: 5px;
 }
+.line-add-split {
+  margin-top: 380px;
+}
 .news-bottom {
   display: flex;
 }
@@ -337,9 +319,6 @@ export default {
   display: flex;
   margin: 10px 0px;
   height: 40px;
-}
-.news-plus-source {
-  margin: 0 !important;
 }
 
 /* 响应式布局 */

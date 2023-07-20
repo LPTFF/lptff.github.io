@@ -1,6 +1,7 @@
 import requests
 import json
 import datetime
+import base64
 # 发起 post 请求
 url = 'https://api.juejin.cn/recommend_api/v1/article/recommend_cate_feed?aid=2608&uuid=6898684445210232328&spider=0'
 headers = {
@@ -50,8 +51,29 @@ try:
                     "timestamp": int(item['article_info']['mtime']+ '000'),
                     "image": item['article_info']['cover_image'],
                     "title": item['article_info']['title'],
+                    "articleId": item['article_info']['article_id'],
                     "website": "juejin"
                 }
+                base64ForCover=""
+                if item['article_info']['cover_image']:
+                    try:
+                        headersForCover = {
+                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
+                        }
+                        responseForCover = requests.get(item['article_info']['cover_image'], headers=headersForCover)
+                        if responseForCover.status_code == 200 or responseForCover.status_code == 304:
+                            # 获取图片数据并转换为Base64编码
+                            base64ForCover = base64.b64encode(responseForCover.content).decode('utf-8')
+                            if index % 10 == 0:
+                                print(f"掘金数据第{index}次 获取图片成功,{item['article_info']['cover_image']}")
+                        else:
+                            print(f"掘金数据第{index}次 获取图片失败,{item['article_info']['cover_image']}")
+                    except Exception as e:
+                        print('responseForCover.content',e)
+                        print(f"掘金数据第{index}次请求失败,{item['article_info']['cover_image']}")  
+                file_path = f"./src/public/data/juejinImg/articlePoster_{item['article_info']['article_id']}.json"
+                with open(file_path, 'w', encoding='utf-8') as file:
+                    json.dump(base64ForCover, file, ensure_ascii=False, indent=4)
             dataHandle.append(newEntry)
         dataHandle.sort(key=lambda x: x['timestamp'],reverse=True)
         with open('./src/public/data/juejin.json', 'w', encoding='utf-8') as file:
