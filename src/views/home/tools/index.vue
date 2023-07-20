@@ -15,10 +15,8 @@
           :key="sonIndex"
         >
           <el-card
-            :class="[
-              'website-common-card',
-              `website-background${parentIndex + 1}-card`,
-            ]"
+            class="website-common-card"
+            :style="`background-color:${websites.color}`"
             shadow="hover"
           >
             <el-link
@@ -38,8 +36,8 @@
   </div>
 </template>
   
-  <script lang="ts">
-import { defineComponent } from "vue";
+<script lang="ts">
+import { defineComponent, ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
 enum WebsiteType {
@@ -52,7 +50,7 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
-    const websiteSource = websiteGroups;
+    const websiteSource = ref(websiteGroups);
     const gotoNewsWebsite = (website: any) => {
       if (website.url) {
         gotoOutPage(website.url);
@@ -84,21 +82,7 @@ export default defineComponent({
 .website-common-card {
   margin: 10px 20px 10px 0px;
 }
-.website-background1-card {
-  background: rgb(217, 236, 255);
-}
-.website-background2-card {
-  background: rgb(225, 243, 216);
-}
-.website-background3-card {
-  background: rgb(250, 236, 216);
-}
-.website-background4-card {
-  background: rgb(253, 226, 226);
-}
-.website-background5-card {
-  background: rgb(233, 233, 235);
-}
+
 .log-website {
   width: 40px;
   height: 40px;

@@ -173,8 +173,8 @@ export default {
       // let randomFileContent = leetCodeData[randomDataIndex];
       // let questionsList = ref(randomFileContent);
       // questions.value = getRandomProblems(questionsList.value, 1);
-      questionsList =
-        questionsPre.length == 0 ? await getLeetCodeList() : questionsPre;
+      let questionsList =
+        questionsPre.length == 0 ? leetCodeList : questionsPre;
       questionsPre = getRandomProblems(questionsList, 1);
       questions.value = questionsPre
         ? JSON.parse(JSON.stringify(questionsPre))
@@ -198,7 +198,7 @@ export default {
         questionsList = await getLeetCodeList();
         questionsPre = getRandomProblems(questionsList, 1);
       } else {
-        questionsPre = getRandomProblems(questionsList, 1);
+        questionsPre = getRandomProblems(leetCodeList, 1);
       }
       questions.value = questionsPre
         ? JSON.parse(JSON.stringify(questionsPre))
