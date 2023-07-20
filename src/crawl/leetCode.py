@@ -5,7 +5,6 @@ def save_response_to_file(index, response):
     file_path = f'./src/public/data/leetCode/leetCode_{index+1}.json'
     with open(file_path, 'w', encoding='utf-8') as file:
         json.dump(questionHandle, file, ensure_ascii=False, indent=4)
-        print('LeetCode分析数据导出成功')
 
 # 获取题目列表
 def fetch_leetcode_data(skip):
@@ -109,7 +108,8 @@ for index, question in enumerate(new_question_list):
     if (index+1) % pageNum == 0 and index>0:
         save_response_to_file(index//pageNum,questionHandle)
         questionHandle = []
-        print(f"保存文件第{index//pageNum+1}次，整个数据长度{len(new_question_list)}")
+        if (index//pageNum+1) % 10 == 0:
+            print(f"保存文件第{index//pageNum+1}次，整个数据长度{len(new_question_list)}")
         continue
     elif index  == len(new_question_list)-1 or index > 30050:
         save_response_to_file(index // pageNum,questionHandle)

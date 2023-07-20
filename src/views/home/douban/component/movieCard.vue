@@ -77,7 +77,6 @@ export default {
       if (Number(index.value) < 1000) {
         const basUrl = `/doubanImg/moviePoster_${moviesData.value.id}.json`;
         let postData = await getMoviePost(basUrl);
-        console.log("postData,index", postData, index.value);
         if (postData.cover) {
           posterMovie.value = postData.cover;
         } else if (postData) {
