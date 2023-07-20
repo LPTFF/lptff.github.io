@@ -8,10 +8,11 @@ import path from 'path'
 export default defineConfig({
   base: './',
   // plugins: [vue(), visualizer()],
-  plugins: [vue(), vitePrerender({
-    staticDir: path.join(__dirname, 'dist'),
-    routes: ['/', '/home'],
-  }),],
+  // plugins: [vue(), vitePrerender({
+  //   staticDir: path.join(__dirname, 'dist'),
+  //   routes: ['/', '/home'],
+  // }),],
+  plugins: [vue()],
   server: {
     cors: true,
     open: false,
