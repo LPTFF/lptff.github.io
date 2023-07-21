@@ -105,6 +105,7 @@ export default {
     let newsAll: any[] = [];
     newsAll = [...juejinList.value, ...v2exList.value];
     newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+    console.log("newsAll", newsAll);
     const callMethod = () => {
       // console.log('233');
     };
@@ -179,7 +180,6 @@ export default {
       return handleUrl || ""; // 返回空字符串表示无效的URL
     };
     const gotoNewsWebsite = (item: any) => {
-      console.log(item);
       const url = handleNewsUrl(item);
       if (url) {
         gotoOutPage(url);
@@ -209,9 +209,6 @@ export default {
       return newsTmpAll;
     });
     const handleCoverImg = (item: any) => {
-      if (!item.image) {
-        console.log("item", item);
-      }
       return item.image ? item.image : bgUrl.value;
     };
     const handleImageError = (event: any) => {
