@@ -109,6 +109,7 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import zhipinSource from "../../../public/data/zhipin.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
+import { ElRow, ElCol, ElCard, ElIcon, ElDialog, ElButton } from "element-plus";
 export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
@@ -202,7 +203,14 @@ export default {
       handleDialogConfirm,
     };
   },
-  methods: {},
+  components: {
+    ElRow,
+    ElCol,
+    ElCard,
+    ElIcon,
+    ElDialog,
+    ElButton,
+  },
 };
 </script>
 <style scoped>

@@ -54,7 +54,7 @@ import { ref, onMounted, computed, nextTick } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import leetCodeList from "../../../public/data/leetCode/leetCode_1.json";
 import axios from "axios";
-import { ElLoading } from "element-plus";
+import { ElLoading, ElCard, ElButton, ElIcon } from "element-plus";
 let leetCodeData = [] as any[];
 const importLeetCodeData = async () => {
   const files = import.meta.glob(
@@ -204,6 +204,10 @@ export default {
         ? JSON.parse(JSON.stringify(questionsPre))
         : questionsPre;
     };
+    const gotoLeetCode = (question: any, type: any) => {
+      let url = type == "2" ? question.solutionsUrl : question.problemsUrl;
+      question.problemsUrl ? gotoOutPage(url) : "";
+    };
     return {
       callMethod,
       isPCRes,
@@ -215,14 +219,13 @@ export default {
       dialogLeft,
       handleDialogDrag,
       getRandomQuestion,
+      gotoLeetCode,
     };
   },
-  components: {},
-  methods: {
-    gotoLeetCode(question: any, type: any) {
-      let url = type == "2" ? question.solutionsUrl : question.problemsUrl;
-      question.problemsUrl ? gotoOutPage(url) : "";
-    },
+  components: {
+    ElCard,
+    ElButton,
+    ElIcon,
   },
 };
 </script>

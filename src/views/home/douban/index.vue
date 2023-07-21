@@ -17,6 +17,7 @@ import { ref, onMounted, computed } from "vue";
 import { isPC } from "../../../utils/utils";
 import crawlMovie from "../../../public/data/movie.json";
 import movieCard from "./component/movieCard.vue";
+import { ElCol, ElRow } from "element-plus";
 export default {
   props: {
     doubanLocation: [String, Number],
@@ -68,6 +69,8 @@ export default {
   },
   components: {
     movieCard,
+    ElCol,
+    ElRow,
   },
 };
 </script>

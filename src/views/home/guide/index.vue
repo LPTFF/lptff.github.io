@@ -161,9 +161,18 @@ import { gotoOutPage, isPC } from "../../../utils/utils";
 import infzmNews from "../../../public/data/infzm.json";
 import weiboNews from "../../../public/data/weibo.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
+import { ElCol, ElRow, ElDialog, ElCard, ElButton, ElIcon } from "element-plus";
 export default {
   props: {
     guideLocation: [String, Number],
+  },
+  components: {
+    ElCol,
+    ElRow,
+    ElDialog,
+    ElCard,
+    ElButton,
+    ElIcon,
   },
   setup(props: any) {
     const logoUrl = ref(logoImageUrl);

@@ -94,6 +94,7 @@ import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import bgImageUrl from "../../../public/img/bg.jpg";
+import { ElRow, ElCol, ElCard, ElAvatar } from "element-plus";
 export default {
   props: {
     newsLocation: [String, Number],
@@ -233,6 +234,12 @@ export default {
       handleCoverImg,
       handleImageError,
     };
+  },
+  components: {
+    ElRow,
+    ElCol,
+    ElCard,
+    ElAvatar,
   },
 };
 </script>

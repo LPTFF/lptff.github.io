@@ -66,6 +66,7 @@ import { ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
+import { ElRow, ElCol, ElCard, ElIcon } from "element-plus";
 export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
@@ -150,7 +151,12 @@ export default {
       handleWebsiteImg,
     };
   },
-  methods: {},
+  components: {
+    ElRow,
+    ElCol,
+    ElCard,
+    ElIcon,
+  },
 };
 </script>
 <style scoped>

@@ -79,6 +79,15 @@ import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
+import "element-plus/theme-chalk/index.css";
+import {
+  ElCol,
+  ElMenu,
+  ElMenuItem,
+  ElHeader,
+  ElFooter,
+  ElMain,
+} from "element-plus";
 export default {
   setup() {
     const selectIndex = ref("1"); //默认首页
@@ -205,6 +214,12 @@ export default {
     welfareComponent,
     bossZhipinComponent,
     guideComponent,
+    ElCol,
+    ElMenu,
+    ElMenuItem,
+    ElHeader,
+    ElFooter,
+    ElMain,
   },
 };
 </script>

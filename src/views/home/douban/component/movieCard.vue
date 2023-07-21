@@ -37,7 +37,7 @@ import { toRefs, ref, onMounted } from "vue";
 import bgImageUrl from "../../../../public/img/bg.jpg";
 import { gotoOutPage } from "../../../../utils/utils";
 import axios from "axios";
-
+import { ElCard } from "element-plus";
 interface CacheDict {
   [key: string]: any;
 }
@@ -102,6 +102,9 @@ export default {
       index,
       posterMovie,
     };
+  },
+  components: {
+    ElCard,
   },
 };
 </script>
