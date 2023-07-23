@@ -9,12 +9,6 @@ export default defineConfig({
   base: './',
   plugins: [
     vue(),
-    // AutoImport({
-    //   resolvers: [ElementPlusResolver()],
-    // }),
-    // Components({
-    //   resolvers: [ElementPlusResolver()],
-    // }),
     // visualizer(),
     // vitePrerender({
     //     staticDir: path.join(__dirname, 'dist'),
