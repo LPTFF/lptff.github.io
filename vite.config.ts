@@ -64,13 +64,21 @@ export default defineConfig({
                 case '@vue':
                 case 'element-plus': // UI 库
                 case '@element-plus': // 图标
-                case 'eruda': // 图标
+                case 'eruda':
+                case 'openai':
+                case 'axios':
                   return arr[0]
                   break
                 default:
                   return 'framework'
                   break
               }
+            }
+            if (id.includes('zhipin.json')) {
+              return 'zhipin.json';
+            }
+            if (id.includes('leetCode_1.json')) {
+              return 'leetCode_1.json';
             }
             return undefined
           },
