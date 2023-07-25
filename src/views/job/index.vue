@@ -2,7 +2,11 @@
   <div>
     <div class="test">
       <el-button @click="handleDialogCancel">点击我测试</el-button>
+      <div v-for="i in 100" :key="i">
+        <li>2333</li>
+      </div>
     </div>
+    <backTop></backTop>
   </div>
 </template>
 
@@ -10,6 +14,7 @@
 import { ref } from "vue";
 import axios from "axios";
 import { ElButton } from "element-plus";
+import backTop from "../../components/backTop.vue";
 export default {
   setup() {
     const handleDialogCancel = async () => {
@@ -30,6 +35,7 @@ export default {
   },
   components: {
     ElButton,
+    backTop,
   },
 };
 </script>
