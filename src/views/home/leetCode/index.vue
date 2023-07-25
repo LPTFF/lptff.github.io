@@ -88,7 +88,7 @@ const getLeetCodeList = async () => {
   const loadingInstance = ElLoading.service({ fullscreen: true });
   try {
     let pageSize = Math.floor(Math.random() * 64) + 1;
-    const cdnWebsite = "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@";
+    const cdnWebsite = "https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@";
     const basUrl = `python-crawl/leetCode/leetCode_${pageSize}.json`;
     const response = await axios.get(cdnWebsite + basUrl);
     return response.data;

@@ -51,7 +51,7 @@ const getMoviePost = async (baseUrl: string): Promise<any> => {
   }
   try {
     const cdnWebsite =
-      "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl";
+      "https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl";
     const response = await axios.get(cdnWebsite + baseUrl);
     const data = response.data;
     // 将获取到的数据缓存起来

@@ -6,6 +6,7 @@ for (const name in ElIcons) {
     myApp.component(name, ElIcons[name])
 };//全局注册element-icon图标
 import router from './router';
+import "element-plus/theme-chalk/index.css";
 // 全局前置守卫
 router.beforeEach((to, from, next) => {
     // 通过调用next()来继续导航

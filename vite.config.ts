@@ -83,9 +83,9 @@ export default defineConfig({
   },
   experimental: {
     renderBuiltUrl(filename) {
-      // 对项目public文件下资源进行加载  fastly.jsdelivr.net|cdn.jsdelivr.net
+      // 对项目public文件下资源进行加载  gcore.jsdelivr.net|cdn.jsdelivr.net
       return filename
-      // return 'https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
+      // return 'https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/' + filename
     }
   },
 });

@@ -9,13 +9,14 @@
 <script lang="ts">
 import { ref } from "vue";
 import axios from "axios";
+import { ElButton } from "element-plus";
 export default {
   setup() {
     const handleDialogCancel = async () => {
       console.log(233);
       try {
         const response = await axios.get(
-          "https://fastly.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/data/infzm.json"
+          "https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl/v2ex.json"
         );
         console.log("response.data;", response.data);
       } catch (error) {
@@ -26,6 +27,9 @@ export default {
     return {
       handleDialogCancel,
     };
+  },
+  components: {
+    ElButton,
   },
 };
 </script>
