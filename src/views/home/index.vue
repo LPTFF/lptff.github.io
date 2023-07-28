@@ -24,12 +24,12 @@
             @select="handleSelect"
           >
             <el-menu-item index="1">热门资讯</el-menu-item>
-            <el-menu-item index="2">豆瓣电影</el-menu-item>
-            <el-menu-item index="3">LeetCode</el-menu-item>
+            <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
+            <el-menu-item index="3">豆瓣电影</el-menu-item>
             <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
-            <el-menu-item index="5" v-if="isPCRes">薅羊毛</el-menu-item>
+            <el-menu-item index="5">技术论坛</el-menu-item>
             <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7" v-if="isPCRes">技术论坛</el-menu-item>
+            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -37,24 +37,24 @@
             <guideComponent :guideLocation="contentLocation"></guideComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
+            <welfareComponent></welfareComponent>
+          </div>
+          <div class="component-div" v-if="selectIndex === '3'">
             <doubanComponent
               :doubanLocation="contentLocation"
             ></doubanComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '3'">
-            <leetCodeComponent></leetCodeComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '4'">
             <toolsComponent></toolsComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '5'">
-            <welfareComponent></welfareComponent>
+            <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '6'">
             <bossZhipinComponent></bossZhipinComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '7'">
-            <newsComponent :newsLocation="contentLocation"></newsComponent>
+            <leetCodeComponent></leetCodeComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
@@ -90,10 +90,10 @@ import {
 } from "element-plus";
 export default {
   setup() {
-    const selectIndex = ref("4"); //默认首页
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
+    const selectIndex = isPCRes.value ? ref("4") : ref("1"); //默认首页
 
     const callMethod = () => {
       // console.log('233');
@@ -246,6 +246,11 @@ export default {
 }
 .header-el {
   height: fit-content;
+  position: fixed;
+  z-index: 9;
+  background-color: var(--el-menu-bg-color);
+  width: 100%;
+  max-width: 1200px;
 }
 
 .logo-title {
@@ -301,6 +306,9 @@ export default {
 .component-div {
   /* padding-top: 10px; */
   margin-bottom: 40px;
+}
+.main-content {
+  padding-top: 135px;
 }
 
 /* 响应式布局 */
