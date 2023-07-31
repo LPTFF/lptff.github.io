@@ -74,6 +74,9 @@ export default defineConfig({
             if (id.includes('leetCode_1.json')) {
               return 'leetCode_1.json';
             }
+            if (id.includes('websiteGroups.json')) {
+              return 'websiteGroups.json';
+            }
             return undefined
           },
         }),
