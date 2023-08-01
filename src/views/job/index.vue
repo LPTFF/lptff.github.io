@@ -21,7 +21,7 @@ export default {
       console.log(233);
       try {
         const response = await axios.get(
-          "https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl/v2ex.json"
+          "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl/v2ex.json"
         );
         console.log("response.data;", response.data);
       } catch (error) {

@@ -15,7 +15,7 @@ export default {
       console.log(233);
       try {
         const response = await axios.get(
-          "https://gcore.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/data/infzm.json"
+          "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/data/infzm.json"
         );
         console.log("response.data;", response.data);
       } catch (error) {
