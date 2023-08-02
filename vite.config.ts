@@ -77,6 +77,9 @@ export default defineConfig({
             if (id.includes('websiteGroups.json')) {
               return 'websiteGroups.json';
             }
+            if (id.includes('src')) {
+              return 'src';
+            }
             return undefined
           },
         }),
