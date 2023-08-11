@@ -150,7 +150,6 @@ export default {
 
     const gotoIssue = () => {
       const pageUrl = window.location.origin;
-      console.log("pageUrl", pageUrl);
       const issueUrl = pageUrl.includes("love-tff.gitee.io")
         ? "https://gitee.com/love-tff/love-tff/issues"
         : "https://github.com/LPTFF/lptff.github.io/issues";
