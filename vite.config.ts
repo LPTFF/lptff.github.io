@@ -18,7 +18,7 @@ export default defineConfig({
   server: {
     cors: true,
     open: false,
-    port: 9000,
+    port: 8080,
     proxy: {
       //https://www.runoob.com/try/ajax/json_demo.json
       '/Run': {
