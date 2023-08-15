@@ -16,6 +16,7 @@
 <script lang="ts">
 import { ref, onMounted, computed } from "vue";
 import { isPC } from "../utils/utils.js";
+import { ElButton } from "element-plus";
 
 export default {
   setup() {
@@ -36,9 +37,7 @@ export default {
 
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state
-        ? window.history.state.back
-        : ""; //获取路由路径
+      previousRoute.value = window.history.state ? window.history.state.back : ""; //获取路由路径
     });
 
     const handleDialogDrag = () => {
@@ -74,6 +73,9 @@ export default {
       drag,
       endDrag,
     };
+  },
+  components: {
+    ElButton,
   },
 };
 </script>

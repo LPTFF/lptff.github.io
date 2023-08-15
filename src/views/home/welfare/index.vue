@@ -66,7 +66,7 @@ import { ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
-import { ElRow, ElCol, ElCard, ElIcon } from "element-plus";
+import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
 export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
@@ -97,8 +97,7 @@ export default {
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const formattedHours = hours < 10 ? "0" + hours : hours.toString();
-      const formattedMinutes =
-        minutes < 10 ? "0" + minutes : minutes.toString();
+      const formattedMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
       const timeString = `${formattedHours}:${formattedMinutes}`;
       return timeString;
     };
@@ -156,6 +155,7 @@ export default {
     ElCol,
     ElCard,
     ElIcon,
+    ElDivider,
   },
 };
 </script>

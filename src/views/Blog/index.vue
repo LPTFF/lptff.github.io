@@ -75,6 +75,7 @@ import { ref } from "vue";
 import { ElMessage } from "element-plus";
 import { Plus, Search } from "@element-plus/icons-vue";
 import logoImageUrl from "../../public/img/logo.jpg";
+import { ElButton } from "element-plus";
 export default {
   setup() {
     let selectIndex = ref(true);
@@ -98,8 +99,9 @@ export default {
       logoUrl,
     };
   },
-  components: {},
-  methods: {},
+  components: {
+    ElButton,
+  },
 };
 </script>
 

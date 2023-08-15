@@ -1,6 +1,10 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
+    <div
+      @scroll="handleScroll"
+      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
+      :style="containerStyle"
+    >
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -13,7 +17,12 @@
               <el-button type="success" round @click="gotoBlog">博客</el-button>
             </div>
           </div>
-          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
+          <el-menu
+            class="navigation"
+            mode="horizontal"
+            :default-active="selectIndex"
+            @select="handleSelect"
+          >
             <el-menu-item index="1">热门资讯</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
             <el-menu-item index="3">豆瓣电影</el-menu-item>
@@ -21,6 +30,7 @@
             <el-menu-item index="5">技术论坛</el-menu-item>
             <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
             <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item>
+            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -45,11 +55,12 @@
           <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
           </div>
+          <div class="component-div" v-if="selectIndex === '8'">
+            <findJobComponent></findJobComponent>
+          </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
-          <div class="footer-text">
-            评论功能暂不支持，如有问题请提issue © 2023
-          </div>
+          <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023</div>
         </el-footer>
       </div>
     </div>
@@ -66,6 +77,7 @@ import toolsComponent from "./tools/index.vue";
 import welfareComponent from "./welfare/index.vue";
 import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
+import findJobComponent from "./findJob/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 // import "element-plus/theme-chalk/index.css";
@@ -76,13 +88,14 @@ import {
   ElHeader,
   ElFooter,
   ElMain,
+  ElButton,
 } from "element-plus";
 export default {
   setup() {
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
-    const selectIndex = isPCRes.value ? ref("4") : ref("1"); //默认首页
+    const selectIndex = isPCRes.value ? ref("8") : ref("1"); //默认首页
 
     const callMethod = () => {
       // console.log('233');
@@ -147,9 +160,7 @@ export default {
 
     onMounted(async () => {
       callMethod();
-      previousRoute.value = window.history.state
-        ? window.history.state.back
-        : "";
+      previousRoute.value = window.history.state ? window.history.state.back : "";
     });
     const logoUrl = ref(logoImageUrl); // 图片路径变量
     let contentLocation = ref(0);
@@ -165,9 +176,7 @@ export default {
       if (currentScroll - previousScroll < 0) {
         //向下滚动
         contentLocation.value = Math.floor(
-          isPCRes.value
-            ? event.target.scrollTop / 200
-            : event.target.scrollTop / 100
+          isPCRes.value ? event.target.scrollTop / 200 : event.target.scrollTop / 100
         );
       }
       previousScroll = currentScroll;
@@ -208,6 +217,8 @@ export default {
     ElHeader,
     ElFooter,
     ElMain,
+    findJobComponent,
+    ElButton,
   },
 };
 </script>

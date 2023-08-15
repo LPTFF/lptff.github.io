@@ -1,7 +1,7 @@
 <template>
   <div class="theme-container">
     <div class="my-button">
-      <el-button type="primary" >饿了么组件按钮</el-button>
+      <el-button type="primary">饿了么组件按钮</el-button>
     </div>
     <div class="my-button">
       <el-button type="primary" @click="goToOtherPage">切换到产品页面</el-button>
@@ -10,23 +10,24 @@
 </template>
 <script lang="ts">
 import { useRouter } from "vue-router";
-const routeSuffix = '.html';
-export default{
+const routeSuffix = ".html";
+import { ElButton } from "element-plus";
+export default {
   setup() {
     const route = useRouter();
     const goToOtherPage = () => {
       route.push({
-        path: '/job/idea/products'+routeSuffix,
+        path: "/job/idea/products" + routeSuffix,
         query: {
-          value: '233',
+          value: "233",
         },
       });
     };
     const goToHomePage = () => {
       route.push({
-        path: '/develop',
+        path: "/develop",
         query: {
-          value: '233',
+          value: "233",
         },
       });
     };
@@ -34,12 +35,15 @@ export default{
       let value = "0";
       this.goToOtherPage(pageName, value);
     }
-    return { route, routePush, goToOtherPage,goToHomePage };
-  }
-}
+    return { route, routePush, goToOtherPage, goToHomePage };
+  },
+  components: {
+    ElButton,
+  },
+};
 </script>
 <style scoped>
-.my-button{
- margin-top: 40px;
+.my-button {
+  margin-top: 40px;
 }
 </style>
