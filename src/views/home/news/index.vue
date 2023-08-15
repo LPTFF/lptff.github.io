@@ -28,11 +28,7 @@
           <div class="line-split line-add-split"></div>
           <div class="news-bottom common-flex">
             <div class="news-bottom">
-              <el-avatar
-                :size="50"
-                class="is-new"
-                :src="getWebsiteLogo(item)"
-              />
+              <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
               <span class="website-name">
                 {{ getWebsiteName(item) }}
               </span>
@@ -61,21 +57,12 @@
             <div class="news-date">{{ item.time }}</div>
           </div>
           <div class="news-summary">
-            {{
-              handleNewsDesc(
-                item.desc ? item.desc : item.title,
-                isPCRes ? 230 : 180
-              )
-            }}
+            {{ handleNewsDesc(item.desc ? item.desc : item.title, isPCRes ? 230 : 180) }}
           </div>
           <div class="line-split"></div>
           <div class="news-bottom common-flex">
             <div class="news-bottom">
-              <el-avatar
-                :size="50"
-                class="is-new"
-                :src="getWebsiteLogo(item)"
-              />
+              <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
               <span class="website-name">
                 {{ getWebsiteName(item) }}
               </span>
@@ -105,7 +92,6 @@ export default {
     let newsAll: any[] = [];
     newsAll = [...juejinList.value, ...v2exList.value];
     newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
-    console.log("newsAll", newsAll);
     const callMethod = () => {
       // console.log('233');
     };
@@ -157,9 +143,7 @@ export default {
     };
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state
-        ? window.history.state.back
-        : ""; //获取路由路径
+      previousRoute.value = window.history.state ? window.history.state.back : ""; //获取路由路径
     });
     const handleNewsUrl = (item: any) => {
       let data = isPC();

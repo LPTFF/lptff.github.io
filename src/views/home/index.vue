@@ -95,7 +95,7 @@ export default {
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
-    const selectIndex = isPCRes.value ? ref("8") : ref("1"); //默认首页
+    const selectIndex = isPCRes.value ? ref("4") : ref("1"); //默认首页
 
     const callMethod = () => {
       // console.log('233');
