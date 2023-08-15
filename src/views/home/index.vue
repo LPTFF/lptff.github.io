@@ -1,10 +1,6 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div
-      @scroll="handleScroll"
-      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
-      :style="containerStyle"
-    >
+    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -17,12 +13,7 @@
               <el-button type="success" round @click="gotoBlog">博客</el-button>
             </div>
           </div>
-          <el-menu
-            class="navigation"
-            mode="horizontal"
-            :default-active="selectIndex"
-            @select="handleSelect"
-          >
+          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
             <el-menu-item index="1">热门资讯</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
             <el-menu-item index="3">豆瓣电影</el-menu-item>
@@ -40,9 +31,7 @@
             <welfareComponent></welfareComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '3'">
-            <doubanComponent
-              :doubanLocation="contentLocation"
-            ></doubanComponent>
+            <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '4'">
             <toolsComponent></toolsComponent>
@@ -230,6 +219,7 @@ export default {
   position: relative;
   overflow: hidden;
 }
+
 .inner-container {
   position: absolute;
   left: 0;
@@ -239,10 +229,12 @@ export default {
   overflow-x: hidden;
   overflow-y: scroll;
 }
+
 .scroll-home-container {
   height: 921px;
   overflow: auto;
 }
+
 .header-el {
   height: fit-content;
   position: fixed;
@@ -263,10 +255,12 @@ export default {
   padding: 11px 0px;
   display: flex;
 }
+
 .common-flex {
   display: flex;
   justify-content: space-between;
 }
+
 .logo-img {
   width: 35px;
   height: 35px;
@@ -302,10 +296,12 @@ export default {
   margin-bottom: 10px;
   color: #666;
 }
+
 .component-div {
   /* padding-top: 10px; */
   margin-bottom: 40px;
 }
+
 .main-content {
   padding-top: 135px;
 }
@@ -320,6 +316,7 @@ export default {
     top: 0;
     left: 0;
   }
+
   .main-content {
     padding-top: 115px;
   }
