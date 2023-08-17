@@ -38,10 +38,9 @@
               <div>{{ handleHour(question) }}</div>
             </div>
             <div>
-              <div class="welfare-link-title">
-                {{ item.desc }}
-              </div>
-              <div class="welfare-div-link">{{ item.answer }}</div>
+              <div v-html="formatRichText(item.desc)" class="welfare-link-title"></div>
+              <div v-html="formatRichText(item.answer)" class="welfare-div-link"></div>
+              <!-- <div class="welfare-div-link">{{ item.answer }}</div> -->
             </div>
           </div>
           <div class="welfare-div-website">
@@ -76,6 +75,9 @@ export default defineComponent({
           break;
         case "2":
           questionType = "项目经验";
+          break;
+        case "3":
+          questionType = "在线编程";
           break;
         default:
           questionType = "八股文";
@@ -112,6 +114,9 @@ export default defineComponent({
       const timeString = `${formattedHours}:${formattedMinutes}`;
       return timeString;
     };
+    const formatRichText = (item: any) => {
+      return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
+    };
     return {
       logoUrl,
       questionList,
@@ -119,6 +124,7 @@ export default defineComponent({
       handleWeek,
       handleDay,
       handleHour,
+      formatRichText,
     };
   },
   components: {
@@ -157,17 +163,21 @@ export default defineComponent({
 .welfare-link-title {
   display: block;
   color: #797979;
-  height: 50px;
   font-size: 18px;
   font-weight: 600;
   text-decoration: none;
-  white-space: nowrap; /* 防止内容换行 */
-  overflow: hidden; /* 隐藏超出容器宽度的内容 */
-  text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
+  margin-bottom: 40px;
   max-width: 700px;
+}
+.welfare-link-title :deep(p) {
+  margin: 0px;
 }
 .day-week-welfare {
   margin: 0px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 水平居中对齐 */
+  align-items: center; /* 垂直居中对齐 */
 }
 .welfare-day {
   color: #737373;
@@ -194,9 +204,10 @@ export default defineComponent({
   font-size: 14px;
 }
 .welfare-div-link {
-  display: flex;
   max-width: 700px;
-  /* margin-top: 27px; */
+}
+.welfare-div-link :deep(p) {
+  margin: 0px;
 }
 .el-welfare-divider {
   height: 100%;
