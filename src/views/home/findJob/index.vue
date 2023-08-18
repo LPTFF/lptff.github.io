@@ -1,57 +1,60 @@
 <template>
-  <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
-    <el-tag
-      class="website-type"
-      type="info"
-      :style="`background-color:${question.color}`"
-      >{{ question.companyName }}</el-tag
-    >
-    <el-row>
-      <el-col
-        :span="24"
-        :md="24"
-        :lg="24"
-        v-for="(item, sonIndex) in question.list"
-        :key="sonIndex"
+  <div>
+    <div>这是一个markdown测试</div>
+    <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
+      <el-tag
+        class="website-type"
+        type="info"
+        :style="`background-color:${question.color}`"
+        >{{ question.companyName }}</el-tag
       >
-        <el-card
-          shadow="hover"
-          class="welfare-card"
-          :style="`background-color:${question.color}`"
+      <el-row>
+        <el-col
+          :span="24"
+          :md="24"
+          :lg="24"
+          v-for="(item, sonIndex) in question.list"
+          :key="sonIndex"
         >
-          <div class="welfare-date">
-            <div class="day-week-welfare">
-              <div class="welfare-week">{{ handleWeek(question) }}</div>
-              <div class="welfare-day">{{ handleDay(question) }}</div>
-            </div>
-            <div>
-              <el-divider
-                direction="vertical"
-                color="#cccccc"
-                class="el-welfare-divider"
-              />
-            </div>
-            <div class="welfare-hour">
-              <div class="welfare-icon-hour">
-                <el-icon><Timer /></el-icon>
+          <el-card
+            shadow="hover"
+            class="welfare-card"
+            :style="`background-color:${question.color}`"
+          >
+            <div class="welfare-date">
+              <div class="day-week-welfare">
+                <div class="welfare-week">{{ handleWeek(question) }}</div>
+                <div class="welfare-day">{{ handleDay(question) }}</div>
               </div>
-              <div>{{ handleHour(question) }}</div>
+              <div>
+                <el-divider
+                  direction="vertical"
+                  color="#cccccc"
+                  class="el-welfare-divider"
+                />
+              </div>
+              <div class="welfare-hour">
+                <div class="welfare-icon-hour">
+                  <el-icon><Timer /></el-icon>
+                </div>
+                <div>{{ handleHour(question) }}</div>
+              </div>
+              <div>
+                <div v-html="formatRichText(item.desc)" class="welfare-link-title"></div>
+                <div v-html="formatRichText(item.answer)" class="welfare-div-link"></div>
+                <!-- <div class="welfare-div-link">{{ item.answer }}</div> -->
+              </div>
             </div>
-            <div>
-              <div v-html="formatRichText(item.desc)" class="welfare-link-title"></div>
-              <div v-html="formatRichText(item.answer)" class="welfare-div-link"></div>
-              <!-- <div class="welfare-div-link">{{ item.answer }}</div> -->
+            <div class="welfare-div-website">
+              <img :src="question.companyLogo" alt="网站" class="welfare-img-link" />
+              <div class="welfare-name-link">
+                {{ handleQuestionType(item) }}
+              </div>
             </div>
-          </div>
-          <div class="welfare-div-website">
-            <img :src="question.companyLogo" alt="网站" class="welfare-img-link" />
-            <div class="welfare-name-link">
-              {{ handleQuestionType(item) }}
-            </div>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
   </div>
 </template>
 

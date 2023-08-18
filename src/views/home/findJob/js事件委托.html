@@ -1,0 +1,42 @@
+<style>
+  .p {
+    padding: 20px;
+    border: 1px solid yellow;
+  }
+
+  .c {
+    margin: 5px;
+    height: 40px;
+    border: 1px solid red;
+  }
+</style>
+
+<div class="p">
+  <div class="c">0</div>
+  <div class="c">1</div>
+  <div class="c">2</div>
+  <div class="c">3</div>
+  <div class="c">4</div>
+  <div class="c">5</div>
+  <div class="c">6</div>
+  <div class="c">7</div>
+  <div class="c">8</div>
+  <div class="c">9</div>
+</div>
+
+<script>
+  // 点击事件
+  const onClick = (e) => {
+    console.log("[ 点击 ]", e);
+  };
+
+  // 绑定事件
+  const bindEvent = () => {
+    const dom = document.getElementsByClassName("p")[0];
+    dom.addEventListener("click", onClick);
+  };
+
+  window.onload = () => {
+    bindEvent();
+  };
+</script>

@@ -1,0 +1,51 @@
+<style>
+  .first {
+    width: 200px;
+    height: 200px;
+    background-color: #0000cc;
+  }
+
+  .second {
+    width: 100px;
+    height: 100px;
+    background-color: yellow;
+  }
+</style>
+
+<div class="first">
+  <div class="second">
+    <input type="button" value="click" class="btn" />
+  </div>
+</div>
+<script type="text/javascript">
+  window.onload = function () {
+    register();
+  };
+
+  function register() {
+    // 获取div以及button
+    let div1 = document.getElementsByClassName("first")[0];
+    let div2 = document.getElementsByClassName("second")[0];
+    let btn = document.getElementsByClassName("btn")[0];
+
+    // 为三个目标标签注册点击事件 冒泡
+    div1.addEventListener("click", func);
+    div2.addEventListener("click", func);
+    btn.addEventListener("click", func);
+
+    // 为三个目标标签注册点击事件 捕获
+    div1.addEventListener("click", func, true);
+    div2.addEventListener("click", func, true);
+    btn.addEventListener("click", func, true);
+  }
+
+  function func() {
+    let dict = { 1: "捕获阶段", 2: "处于目标阶段", 3: "冒泡阶段" };
+    console.log(
+      "[ 事件流 ]",
+      `${this.className.toLowerCase()} 的事件在 ${
+        dict[event.eventPhase]
+      } 被触发`
+    );
+  }
+</script>
