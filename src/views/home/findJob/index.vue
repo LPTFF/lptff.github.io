@@ -1,19 +1,33 @@
 <template>
   <div>
     <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
-      <el-tag class="website-type" :type="websiteTransformType(knowledge.type)"> {{ knowledge.knowledgeType }}
+      <el-tag class="website-type" :type="websiteTransformType(knowledge.type)">
+        {{ knowledge.knowledgeType }}
       </el-tag>
       <el-row>
-        <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in knowledge.list" :key="sonIndex">
-          <el-card shadow="hover" class="welfare-card" @click="getMarkDown(item)"
-            :style="`background-color:${knowledge.color}`">
+        <el-col
+          :span="24"
+          :md="24"
+          :lg="24"
+          v-for="(item, sonIndex) in knowledge.list"
+          :key="sonIndex"
+        >
+          <el-card
+            shadow="hover"
+            class="welfare-card"
+            :style="`background-color:${knowledge.color}`"
+          >
             <div class="welfare-date">
               <div class="day-week-welfare">
                 <div class="welfare-week">{{ handleWeek(item) }}</div>
                 <div class="welfare-day">{{ handleDay(item) }}</div>
               </div>
               <div>
-                <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
+                <el-divider
+                  direction="vertical"
+                  color="#cccccc"
+                  class="el-welfare-divider"
+                />
               </div>
               <div class="welfare-hour">
                 <div class="welfare-icon-hour">
@@ -24,7 +38,12 @@
                 <div>{{ handleHour(item) }}</div>
               </div>
               <div>
-                <div class="welfare-div-link">{{ item.desc }} </div>
+                <div class="welfare-link-title">{{ handleTitle(item, sonIndex) }}</div>
+                <div class="welfare-div-link">
+                  <el-button @click="getMarkDown(item)" type="primary">
+                    记不住？点我一下
+                  </el-button>
+                </div>
               </div>
             </div>
             <div class="welfare-div-website">
@@ -38,18 +57,36 @@
       </el-row>
     </div>
     <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
-      <el-tag class="website-type" type="info" :style="`background-color:${question.color}`">{{ question.companyName
-      }}</el-tag>
+      <el-tag
+        class="website-type"
+        type="info"
+        :style="`background-color:${question.color}`"
+        >{{ question.companyName }}</el-tag
+      >
       <el-row>
-        <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in question.list" :key="sonIndex">
-          <el-card shadow="hover" class="welfare-card" :style="`background-color:${question.color}`">
+        <el-col
+          :span="24"
+          :md="24"
+          :lg="24"
+          v-for="(item, sonIndex) in question.list"
+          :key="sonIndex"
+        >
+          <el-card
+            shadow="hover"
+            class="welfare-card"
+            :style="`background-color:${question.color}`"
+          >
             <div class="welfare-date">
               <div class="day-week-welfare">
                 <div class="welfare-week">{{ handleWeek(question) }}</div>
                 <div class="welfare-day">{{ handleDay(question) }}</div>
               </div>
               <div>
-                <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
+                <el-divider
+                  direction="vertical"
+                  color="#cccccc"
+                  class="el-welfare-divider"
+                />
               </div>
               <div class="welfare-hour">
                 <div class="welfare-icon-hour">
@@ -62,7 +99,6 @@
               <div>
                 <div v-html="formatRichText(item.desc)" class="welfare-link-title"></div>
                 <div v-html="formatRichText(item.answer)" class="welfare-div-link"></div>
-                <!-- <div class="welfare-div-link">{{ item.answer }}</div> -->
               </div>
             </div>
             <div class="welfare-div-website">
@@ -77,15 +113,12 @@
     </div>
     <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
       <div class="dialog-content">
-        <!-- <div v-html="dialogContent"></div> -->
-        <HelloWorld class="language-html" />
+        <component :is="dynamicComponent" v-if="dynamicComponent" />
       </div>
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="handleDialogCancel">不感兴趣</el-button>
-          <el-button type="primary" @click="handleDialogConfirm">
-            尝试一下
-          </el-button>
+          <el-button type="primary" @click="handleDialogConfirm"> 尝试一下 </el-button>
         </div>
       </template>
     </el-dialog>
@@ -93,12 +126,20 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, defineAsyncComponent, shallowRef } from "vue";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import sourceList from "./questionList.json";
 import knowList from "./knowledgeExperience.json";
-import { ElRow, ElCol, ElCard, ElIcon, ElTag, ElDivider, ElDialog, ElButton } from "element-plus";
-import HelloWorld from '../../../public/data/findJobMarkDown/javaScript/js事件委托.md';
+import {
+  ElRow,
+  ElCol,
+  ElCard,
+  ElIcon,
+  ElTag,
+  ElDivider,
+  ElDialog,
+  ElButton,
+} from "element-plus";
 enum WebsiteType {
   Success = "success",
   Warning = "warning",
@@ -111,7 +152,6 @@ export default defineComponent({
     const logoUrl = ref(logoImageUrl);
     const questionList = ref(sourceList);
     const knowledgeList = ref(knowList);
-    console.log("knowledgeList", knowledgeList.value);
     const handleQuestionType = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
       let questionType = "";
@@ -164,11 +204,23 @@ export default defineComponent({
       return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
     };
     let dialogGuideVisible = ref(false);
-    let dialogTitle = ref("原型、原型链");
-    let dialogContent = ref('html');
+    let dialogTitle = ref(null);
+    const dynamicComponent = shallowRef(null);
     const getMarkDown = (item: any) => {
-      console.log('88888', item);
-      dialogGuideVisible.value = true;
+      console.log("88888", item);
+      try {
+        let basePath = "../../../public/data/findJobMarkDown";
+        let dynamicPath = basePath + item.markdownPath;
+        console.log("dynamicPath", dynamicPath);
+        const dynamicComponentDefinition = defineAsyncComponent(
+          () => import(dynamicPath)
+        );
+        dynamicComponent.value = dynamicComponentDefinition;
+        dialogTitle.value = item.title;
+        dialogGuideVisible.value = true;
+      } catch (error) {
+        console.error("加载并注册动态组件失败：", error);
+      }
     };
     const handleDialogCancel = () => {
       dialogGuideVisible.value = false;
@@ -190,6 +242,9 @@ export default defineComponent({
           return WebsiteType.Default; // 默认类型
       }
     };
+    const handleTitle = (item: any, index: any) => {
+      return index + 1 + "、" + item.desc;
+    };
     return {
       logoUrl,
       questionList,
@@ -203,9 +258,10 @@ export default defineComponent({
       handleDialogCancel,
       handleDialogConfirm,
       dialogTitle,
-      dialogContent,
       knowledgeList,
-      websiteTransformType
+      websiteTransformType,
+      dynamicComponent,
+      handleTitle,
     };
   },
   components: {
@@ -217,7 +273,6 @@ export default defineComponent({
     ElDivider,
     ElDialog,
     ElButton,
-    HelloWorld
   },
 });
 </script>
@@ -228,7 +283,7 @@ export default defineComponent({
 }
 
 .dialog-content {
-  padding: 0;
+  padding: 0px 10px 0px 0px;
   height: 400px;
   overflow: auto;
 }
@@ -237,7 +292,6 @@ export default defineComponent({
   background: rgb(205, 214, 231);
   padding: 10px 0px 10px 5px !important;
 }
-
 
 .website-type {
   margin-bottom: 10px;

@@ -1,41 +1,33 @@
 /**
- * @param {number[][]} intervals
- * @return {number[][]}
+ * @param {number[]} nums
+ * @param {number} k
+ * @return {number}
  */
-var merge = function (intervals) {
-  let result = [];
-  let newArr = [];
-  //先给数组排序
-  newArr = intervals.sort((a, b) => a[0] - b[0]);
-  //对于新的数组，取第一个start和最后一个end，置于新的result
-  let start = "";
-  let end = "";
-  for (let i = 0; i < newArr.length; i++) {
-    if (i == 0) {
-      start = newArr[i][0];
-      end = newArr[i][1];
-    }
-    if (newArr[i][0] > end) {
-      result.push([start, end]);
-      start = newArr[i][0];
-      end = newArr[i][1];
-      if (i == newArr.length - 1) {
-        result.push(newArr[i]);
+var subarraySum = function (nums, k) {
+  //找出所有连续子数组
+  //判断对应子数组的元素和是否满足k
+  let result = 0;
+  for (let m = 0; m <= nums.length; m++) {
+    //m即为子数组的长度
+    for (let n = 0; n <= nums.length - m; n++) {
+      //起始索引为n,结束索引为
+      console.log("n", n);
+      console.log("m", m);
+      let newArr = nums.slice(n, n + m);
+      console.log("newArr", newArr);
+      let sum = null;
+      for (let i = 0; i < newArr.length; i++) {
+        sum = sum + newArr[i];
       }
-    } else {
-      start = start < newArr[i][0] ? start : newArr[i][0];
-      end = end > newArr[i][1] ? end : newArr[i][1];
-      if (i == newArr.length - 1) {
-        result.push([start, end]);
+      if (sum == k) {
+        result++;
       }
     }
   }
   return result;
 };
 
-let intervals = [
-  [1, 4],
-  [4, 5],
-];
-let permutations = merge(intervals);
+let nums = [1];
+let k = 0;
+let permutations = subarraySum(nums, k);
 console.log("permutations", permutations);
