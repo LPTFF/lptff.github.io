@@ -3,12 +3,16 @@ import vue from '@vitejs/plugin-vue';
 // import vitePrerender from 'vite-plugin-prerender'
 // import path from 'path'
 // import { visualizer } from 'rollup-plugin-visualizer';
+import Markdown from 'unplugin-vue-markdown/vite'
 
 
 export default defineConfig({
   base: './',
   plugins: [
-    vue(),
+    vue({
+      include: [/\.vue$/, /\.md$/], // <-- allows Vue to compile Markdown files
+    }),
+    Markdown({}),
     // visualizer(),
     // vitePrerender({
     //     staticDir: path.join(__dirname, 'dist'),

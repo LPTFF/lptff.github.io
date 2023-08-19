@@ -1,41 +1,25 @@
 <template>
   <div>
-    <div>这是一个markdown测试</div>
+    <div @click="getMarkDown">这是一个markdown测试</div>
     <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
-      <el-tag
-        class="website-type"
-        type="info"
-        :style="`background-color:${question.color}`"
-        >{{ question.companyName }}</el-tag
-      >
+      <el-tag class="website-type" type="info" :style="`background-color:${question.color}`">{{ question.companyName
+      }}</el-tag>
       <el-row>
-        <el-col
-          :span="24"
-          :md="24"
-          :lg="24"
-          v-for="(item, sonIndex) in question.list"
-          :key="sonIndex"
-        >
-          <el-card
-            shadow="hover"
-            class="welfare-card"
-            :style="`background-color:${question.color}`"
-          >
+        <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in question.list" :key="sonIndex">
+          <el-card shadow="hover" class="welfare-card" :style="`background-color:${question.color}`">
             <div class="welfare-date">
               <div class="day-week-welfare">
                 <div class="welfare-week">{{ handleWeek(question) }}</div>
                 <div class="welfare-day">{{ handleDay(question) }}</div>
               </div>
               <div>
-                <el-divider
-                  direction="vertical"
-                  color="#cccccc"
-                  class="el-welfare-divider"
-                />
+                <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
               </div>
               <div class="welfare-hour">
                 <div class="welfare-icon-hour">
-                  <el-icon><Timer /></el-icon>
+                  <el-icon>
+                    <Timer />
+                  </el-icon>
                 </div>
                 <div>{{ handleHour(question) }}</div>
               </div>
@@ -55,6 +39,20 @@
         </el-col>
       </el-row>
     </div>
+    <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
+      <div class="dialog-content">
+        <!-- <div v-html="dialogContent"></div> -->
+        <HelloWorld class="language-html" />
+      </div>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="handleDialogCancel">不感兴趣</el-button>
+          <el-button type="primary" @click="handleDialogConfirm">
+            尝试一下
+          </el-button>
+        </div>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -62,8 +60,10 @@
 import { defineComponent, ref } from "vue";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import sourceList from "./questionList.json";
-import { ElRow, ElCol, ElCard, ElIcon, ElTag, ElDivider } from "element-plus";
-
+import { ElRow, ElCol, ElCard, ElIcon, ElTag, ElDivider, ElDialog, ElButton } from "element-plus";
+import HelloWorld from './原型、原型链.md';
+// import html from './原型、原型链.md?raw'
+// console.log(html)
 export default defineComponent({
   setup() {
     const logoUrl = ref(logoImageUrl);
@@ -120,6 +120,19 @@ export default defineComponent({
     const formatRichText = (item: any) => {
       return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
     };
+    let dialogGuideVisible = ref(false);
+    let dialogTitle = ref("原型、原型链");
+    let dialogContent = ref('html');
+    const getMarkDown = () => {
+      console.log('88888');
+      dialogGuideVisible.value = true;
+    };
+    const handleDialogCancel = () => {
+      dialogGuideVisible.value = false;
+    };
+    const handleDialogConfirm = () => {
+      dialogGuideVisible.value = false;
+    };
     return {
       logoUrl,
       questionList,
@@ -128,6 +141,12 @@ export default defineComponent({
       handleDay,
       handleHour,
       formatRichText,
+      getMarkDown,
+      dialogGuideVisible,
+      handleDialogCancel,
+      handleDialogConfirm,
+      dialogTitle,
+      dialogContent,
     };
   },
   components: {
@@ -137,23 +156,46 @@ export default defineComponent({
     ElIcon,
     ElTag,
     ElDivider,
+    ElDialog,
+    ElButton,
+    HelloWorld
   },
 });
 </script>
 <style scoped>
+.dialog-footer {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.dialog-content {
+  padding: 0;
+  height: 400px;
+  overflow: auto;
+}
+
+.dialog-content :deep(pre) {
+  background: rgb(205, 214, 231);
+  padding: 10px 0px 10px 5px !important;
+}
+
+
 .website-type {
   margin-bottom: 10px;
 }
+
 .welfare-div-website {
   display: flex;
   margin: auto 0;
 }
+
 .welfare-name-link {
   margin-top: 4px;
   color: #797979;
   font-weight: 600;
   font-size: 14px;
 }
+
 .welfare-img-link {
   height: 30px;
   width: 30px;
@@ -163,6 +205,7 @@ export default defineComponent({
   border-top-right-radius: 50%;
   margin-right: 10px;
 }
+
 .welfare-link-title {
   display: block;
   color: #797979;
@@ -172,31 +215,39 @@ export default defineComponent({
   margin-bottom: 40px;
   max-width: 700px;
 }
+
 .welfare-link-title :deep(p) {
   margin: 0px;
 }
+
 .day-week-welfare {
   margin: 0px 20px;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 水平居中对齐 */
-  align-items: center; /* 垂直居中对齐 */
+  justify-content: center;
+  /* 水平居中对齐 */
+  align-items: center;
+  /* 垂直居中对齐 */
 }
+
 .welfare-day {
   color: #737373;
   font-weight: 600;
   font-size: 46px;
 }
+
 .welfare-week {
   color: #797979;
   font-weight: 600;
   font-size: 16px;
   margin-left: 5px;
 }
+
 .welfare-icon-hour {
   margin-right: 8px;
   margin-top: 2px;
 }
+
 .welfare-hour {
   margin: 0px 40px 0px 20px;
   display: flex;
@@ -206,19 +257,24 @@ export default defineComponent({
   font-weight: 600;
   font-size: 14px;
 }
+
 .welfare-div-link {
   max-width: 700px;
 }
+
 .welfare-div-link :deep(p) {
   margin: 0px;
 }
+
 .el-welfare-divider {
   height: 100%;
 }
+
 .welfare-date {
   margin-right: 20px;
   display: flex;
 }
+
 .welfare-title {
   height: 30px;
   width: 55px;
@@ -227,14 +283,17 @@ export default defineComponent({
   font-weight: 600;
   font-size: 21px;
 }
+
 .welfare-card {
   margin: 0px 0px 10px 0px;
   background-color: rgb(253, 226, 226);
 }
+
 :deep(.el-card__body) {
   justify-content: space-between;
   display: flex;
 }
+
 /* .el-card.is-hover-shadow:focus,
 .el-card.is-hover-shadow:hover {
   background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),

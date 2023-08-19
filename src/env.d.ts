@@ -3,4 +3,5 @@ declare module '*.vue' {
     const Component: ReturnType<typeof defineComponent>;
     export default Component;
 }
-declare module '*.jpg' 
+declare module '*.jpg'
+declare module '*.md' 
