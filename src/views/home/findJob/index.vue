@@ -207,19 +207,88 @@ export default defineComponent({
     let dialogTitle = ref("");
     const dynamicComponent = shallowRef(null);
     const getMarkDown = (item: any) => {
-      let basePath = "../../../public/data/findJobMarkDown";
-      let dynamicPath = basePath + item.markdownPath;
+      const files = import.meta.glob(
+        "../../../public/data/findJobMarkDown/javaScript/*.md"
+      );
+      console.log("files", files);
       try {
-        const dynamicComponentDefinition = defineAsyncComponent(
-          () => import(/* @vite-ignore */ dynamicPath)
-        );
+        let dynamicComponentDefinition = null;
+        if (item.markdownPath == "/javaScript/New 运算符做了哪些事情.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/New 运算符做了哪些事情.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/js事件委托.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () => import(`../../../public/data/findJobMarkDown/javaScript/js事件委托.md`)
+          );
+        } else if (item.markdownPath == "/javaScript/js事件流.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () => import(`../../../public/data/findJobMarkDown/javaScript/js事件流.md`)
+          );
+        } else if (item.markdownPath == "/javaScript/js常见的数据类型.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/js常见的数据类型.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/undefined 和 null.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/undefined 和 null.md`
+              )
+          );
+        } else if (
+          item.markdownPath == "/javaScript/为什么 Symbol 和 bigInt 不支持 new.md"
+        ) {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/为什么 Symbol 和 bigInt 不支持 new.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/事件循环、宏任务、微任务.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/事件循环、宏任务、微任务.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/原型、原型链.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(`../../../public/data/findJobMarkDown/javaScript/原型、原型链.md`)
+          );
+        } else if (
+          item.markdownPath == "/javaScript/变量提升、暂时性死区、var、let、const.md"
+        ) {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/变量提升、暂时性死区、var、let、const.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/常用继承方案.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(`../../../public/data/findJobMarkDown/javaScript/常用继承方案.md`)
+          );
+        } else {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(`../../../public/data/findJobMarkDown/javaScript/原型、原型链.md`)
+          );
+        }
         dynamicComponent.value = dynamicComponentDefinition;
         dialogTitle.value = item.title;
         dialogGuideVisible.value = true;
       } catch (error) {
         console.error("加载并注册动态组件失败：", error);
         console.log("88888", item);
-        console.log("dynamicPath", dynamicPath);
       }
     };
     const handleDialogCancel = () => {
