@@ -117,7 +117,7 @@
       </div>
       <template #footer>
         <div class="dialog-footer">
-          <el-button @click="handleDialogCancel">不感兴趣</el-button>
+          <el-button @click="handleDialogCancel">知道了</el-button>
           <el-button type="primary" @click="handleDialogConfirm"> 尝试一下 </el-button>
         </div>
       </template>
@@ -204,14 +204,14 @@ export default defineComponent({
       return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
     };
     let dialogGuideVisible = ref(false);
-    let dialogTitle = ref(null);
+    let dialogTitle = ref("");
     const dynamicComponent = shallowRef(null);
     const getMarkDown = (item: any) => {
       let basePath = "../../../public/data/findJobMarkDown";
       let dynamicPath = basePath + item.markdownPath;
       try {
         const dynamicComponentDefinition = defineAsyncComponent(
-          () => import(dynamicPath)
+          () => import(/* @vite-ignore */ dynamicPath)
         );
         dynamicComponent.value = dynamicComponentDefinition;
         dialogTitle.value = item.title;
