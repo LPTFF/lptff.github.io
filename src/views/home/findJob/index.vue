@@ -1,6 +1,42 @@
 <template>
   <div>
-    <div @click="getMarkDown">这是一个markdown测试</div>
+    <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
+      <el-tag class="website-type" :type="websiteTransformType(knowledge.type)"> {{ knowledge.knowledgeType }}
+      </el-tag>
+      <el-row>
+        <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in knowledge.list" :key="sonIndex">
+          <el-card shadow="hover" class="welfare-card" @click="getMarkDown(item)"
+            :style="`background-color:${knowledge.color}`">
+            <div class="welfare-date">
+              <div class="day-week-welfare">
+                <div class="welfare-week">{{ handleWeek(item) }}</div>
+                <div class="welfare-day">{{ handleDay(item) }}</div>
+              </div>
+              <div>
+                <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
+              </div>
+              <div class="welfare-hour">
+                <div class="welfare-icon-hour">
+                  <el-icon>
+                    <Timer />
+                  </el-icon>
+                </div>
+                <div>{{ handleHour(item) }}</div>
+              </div>
+              <div>
+                <div class="welfare-div-link">{{ item.desc }} </div>
+              </div>
+            </div>
+            <div class="welfare-div-website">
+              <img :src="logoUrl" alt="网站" class="welfare-img-link" />
+              <div class="welfare-name-link">
+                {{ handleQuestionType(item) }}
+              </div>
+            </div>
+          </el-card>
+        </el-col>
+      </el-row>
+    </div>
     <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
       <el-tag class="website-type" type="info" :style="`background-color:${question.color}`">{{ question.companyName
       }}</el-tag>
@@ -60,15 +96,22 @@
 import { defineComponent, ref } from "vue";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import sourceList from "./questionList.json";
+import knowList from "./knowledgeExperience.json";
 import { ElRow, ElCol, ElCard, ElIcon, ElTag, ElDivider, ElDialog, ElButton } from "element-plus";
-import HelloWorld from './原型、原型链.md';
-// import html from './原型、原型链.md?raw'
-// console.log(html)
+import HelloWorld from '../../../public/data/findJobMarkDown/javaScript/js事件委托.md';
+enum WebsiteType {
+  Success = "success",
+  Warning = "warning",
+  Danger = "danger",
+  Info = "info",
+  Default = "",
+}
 export default defineComponent({
   setup() {
     const logoUrl = ref(logoImageUrl);
     const questionList = ref(sourceList);
-    console.log("questionList", questionList.value);
+    const knowledgeList = ref(knowList);
+    console.log("knowledgeList", knowledgeList.value);
     const handleQuestionType = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
       let questionType = "";
@@ -123,8 +166,8 @@ export default defineComponent({
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("原型、原型链");
     let dialogContent = ref('html');
-    const getMarkDown = () => {
-      console.log('88888');
+    const getMarkDown = (item: any) => {
+      console.log('88888', item);
       dialogGuideVisible.value = true;
     };
     const handleDialogCancel = () => {
@@ -132,6 +175,20 @@ export default defineComponent({
     };
     const handleDialogConfirm = () => {
       dialogGuideVisible.value = false;
+    };
+    const websiteTransformType = (type: any) => {
+      switch (type) {
+        case "success":
+          return WebsiteType.Success;
+        case "warning":
+          return WebsiteType.Warning;
+        case "danger":
+          return WebsiteType.Danger;
+        case "info":
+          return WebsiteType.Info;
+        default:
+          return WebsiteType.Default; // 默认类型
+      }
     };
     return {
       logoUrl,
@@ -147,6 +204,8 @@ export default defineComponent({
       handleDialogConfirm,
       dialogTitle,
       dialogContent,
+      knowledgeList,
+      websiteTransformType
     };
   },
   components: {
