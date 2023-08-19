@@ -207,11 +207,9 @@ export default defineComponent({
     let dialogTitle = ref(null);
     const dynamicComponent = shallowRef(null);
     const getMarkDown = (item: any) => {
-      console.log("88888", item);
+      let basePath = "../../../public/data/findJobMarkDown";
+      let dynamicPath = basePath + item.markdownPath;
       try {
-        let basePath = "../../../public/data/findJobMarkDown";
-        let dynamicPath = basePath + item.markdownPath;
-        console.log("dynamicPath", dynamicPath);
         const dynamicComponentDefinition = defineAsyncComponent(
           () => import(dynamicPath)
         );
@@ -220,6 +218,8 @@ export default defineComponent({
         dialogGuideVisible.value = true;
       } catch (error) {
         console.error("加载并注册动态组件失败：", error);
+        console.log("88888", item);
+        console.log("dynamicPath", dynamicPath);
       }
     };
     const handleDialogCancel = () => {
