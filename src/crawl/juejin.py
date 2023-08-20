@@ -64,8 +64,13 @@ try:
                         if responseForCover.status_code == 200 or responseForCover.status_code == 304:
                             # 获取图片数据并转换为Base64编码
                             base64ForCover = base64.b64encode(responseForCover.content).decode('utf-8')
-                            if index % 10 == 0:
-                                print(f"掘金数据第{index}次 获取图片成功,{item['article_info']['cover_image']}")
+                            # 检查base64编码后的数据是否超过100MB
+                            if len(base64ForCover) >= 100 * 1024 * 1024:
+                                print(f"掘金数据第{index}次 获取图片成功，但超过了100MB大小限制")
+                                base64ForCover = ""  # 清空base64编码，以避免文件写入
+                            else:
+                                if index % 10 == 0:
+                                    print(f"掘金数据第{index}次 获取图片成功,{item['article_info']['cover_image']}")
                         else:
                             print(f"掘金数据第{index}次 获取图片失败,{item['article_info']['cover_image']}")
                     except Exception as e:

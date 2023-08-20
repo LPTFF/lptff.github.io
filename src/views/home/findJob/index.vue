@@ -277,6 +277,65 @@ export default defineComponent({
             () =>
               import(`../../../public/data/findJobMarkDown/javaScript/常用继承方案.md`)
           );
+        } else if (item.markdownPath == "/javaScript/js事件循环执行循序.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/js事件循环执行循序.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/js宏任务包含哪些.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/js宏任务包含哪些.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/js宏微任务包含哪些.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/js宏微任务包含哪些.md`
+              )
+          );
+        } else if (
+          item.markdownPath == "/javaScript/async 和 await 是如何处理异步任务.md"
+        ) {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/async 和 await 是如何处理异步任务.md`
+              )
+          );
+        } else if (
+          item.markdownPath ==
+          "/javaScript/requestAnimationFrame 既不是宏任务也不是微任务.md"
+        ) {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/requestAnimationFrame 既不是宏任务也不是微任务.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/this 指向问题.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(`../../../public/data/findJobMarkDown/javaScript/this 指向问题.md`)
+          );
+        } else if (item.markdownPath == "/javaScript/箭头函数和普通函数的区别.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/箭头函数和普通函数的区别.md`
+              )
+          );
+        } else if (item.markdownPath == "/javaScript/call、apply、bind的区别.md") {
+          dynamicComponentDefinition = defineAsyncComponent(
+            () =>
+              import(
+                `../../../public/data/findJobMarkDown/javaScript/call、apply、bind的区别.md`
+              )
+          );
         } else {
           dynamicComponentDefinition = defineAsyncComponent(
             () =>

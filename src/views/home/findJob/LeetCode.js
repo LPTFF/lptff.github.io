@@ -1,15 +1,9 @@
-function createChild(parent, name) {
-  var child = createObject(parent);
-  child.name = name;
-  return child;
+function greet(message) {
+  console.log(`${message}, ${this.name}`);
 }
 
-var parent = {
-  name: "Parent",
-  sayHello: function () {
-    console.log(`Hello, I'm ${this.name}.`);
-  },
-};
+const person = { name: "Charlie" };
 
-var child = createChild(parent, "Child");
-child.sayHello();
+const greetPerson = greet.bind(person);
+
+greetPerson("Hey"); // 输出：Hey, Charlie
