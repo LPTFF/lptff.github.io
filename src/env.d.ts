@@ -5,3 +5,4 @@ declare module '*.vue' {
 }
 declare module '*.jpg'
 declare module '*.md' 
+declare module '*.js' 
