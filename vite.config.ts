@@ -81,6 +81,12 @@ export default defineConfig({
             if (id.includes('websiteGroups.json')) {
               return 'websiteGroups.json';
             }
+            if (id.includes('src/public/data/findJobMarkDown/vue')) {
+              return 'vueMarkDown';
+            }
+            if (id.includes('findJobUtils.js')) {
+              return 'findJobUtils';
+            }
             if (id.includes('src/public/data/findJobMarkDown')) {
               return 'findJobMarkDown';
             }
