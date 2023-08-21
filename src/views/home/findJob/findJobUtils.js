@@ -110,44 +110,20 @@ async function getComponents(markdownPath) {
     console.log("markdownPath", markdownPath);
     const markdownPrefix = markdownPath.split("/")[1];
     console.log("markdownPrefix", markdownPrefix);
+    const markdownPathPrefixMap = {
+      javaScript: "javaScript",
+      vue: "vue",
+      vue3: "vue3",
+      ES6: "ES6",
+    };
     if (
       markdownPathMap[markdownPath] &&
-      markdownPath.startsWith("/javaScript/")
+      markdownPathPrefixMap[markdownPrefix]
     ) {
       dynamicComponentDefinition = defineAsyncComponent(() =>
         import(
           /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/javaScript/${markdownPathMap[markdownPath]}.md`
-        )
-      );
-    } else if (
-      markdownPathMap[markdownPath] &&
-      markdownPath.startsWith("/vue/")
-    ) {
-      dynamicComponentDefinition = defineAsyncComponent(() =>
-        import(
-          /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/vue/${markdownPathMap[markdownPath]}.md`
-        )
-      );
-    } else if (
-      markdownPathMap[markdownPath] &&
-      markdownPath.startsWith("/vue3/")
-    ) {
-      dynamicComponentDefinition = defineAsyncComponent(() =>
-        import(
-          /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/vue3/${markdownPathMap[markdownPath]}.md`
-        )
-      );
-    } else if (
-      markdownPathMap[markdownPath] &&
-      markdownPath.startsWith("/ES6/")
-    ) {
-      dynamicComponentDefinition = defineAsyncComponent(() =>
-        import(
-          /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/ES6/${markdownPathMap[markdownPath]}.md`
+          `../../../public/data/findJobMarkDown/${markdownPathPrefixMap[markdownPrefix]}/${markdownPathMap[markdownPath]}.md`
         )
       );
     } else {
