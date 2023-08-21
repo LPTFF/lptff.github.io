@@ -1,9 +1,14 @@
-function greet(message) {
-  console.log(`${message}, ${this.name}`);
-}
+console.log("Sync 1");
 
-const person = { name: "Charlie" };
+setTimeout(() => {
+  console.log("Timeout 1");
+}, 0);
 
-const greetPerson = greet.bind(person);
+setTimeout(() => {
+  console.log("Timeout 2");
+}, 0);
+Promise.resolve().then(() => {
+  console.log("Promise Microtask 1");
+});
 
-greetPerson("Hey"); // 输出：Hey, Charlie
+console.log("Sync 2");
