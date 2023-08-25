@@ -55,13 +55,31 @@ pip install beautifulsoup4
 pip install pytz
 pip install selenium
 # 运行爬虫脚本
-python ./src/crawl/welfare.py
-python ./src/crawl/douban.py
-python ./src/crawl/infzm.py
-python ./src/crawl/juejin.py
-python ./src/crawl/kuaishou.py
-python ./src/crawl/weibo.py
-python ./src/crawl/v2ex.py
+# Function to display formatted time
+display_time() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1"
+}
+
+# Function to run and time the script
+run_script() {
+    display_time "Running $1"
+    start_time=$(date +%s)
+
+    python "./src/crawl/$1"
+
+    end_time=$(date +%s)
+    elapsed_time=$((end_time - start_time))
+    display_time "$1 finished in $elapsed_time seconds"
+}
+
+# Run the main scripts
+run_script "welfare.py"
+run_script "douban.py"
+run_script "infzm.py"
+run_script "juejin.py"
+run_script "kuaishou.py"
+run_script "weibo.py"
+run_script "v2ex.py"
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")
@@ -69,8 +87,8 @@ current_timezone=$(date +"%Z")
 # 判断当前时间是否在指定的时间范围内（晚上10点至第二日凌晨4点）
 if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
   echo "北京时间$current_hour，满足条件执行更新特殊脚本"
-  python ./src/crawl/leetCode.py
-  python ./src/crawl/zhipin.py
+  run_script "leetCode.py"
+  run_script "zhipin.py"
 else
   echo "北京时间$current_hour，不满足条件执行更新特殊脚本"
 fi
