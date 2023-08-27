@@ -106,6 +106,30 @@ async function getComponents(markdownPath) {
         "你是怎么理解ES6中Module以及它的使用场景",
       "/ES6/你是怎么理解ES6中Decorator以及它的使用场景.md":
         "你是怎么理解ES6中Decorator以及它的使用场景",
+      "/typescript/说说你对 typescript 的理解以及与 javascript 的区别.md":
+        "说说你对 typescript 的理解以及与 javascript 的区别",
+      "/typescript/说说 typescript 的数据类型有哪些.md":
+        "说说 typescript 的数据类型有哪些",
+      "/typescript/说说你对 TypeScript 中枚举类型的理解及其应用场景.md":
+        "说说你对 TypeScript 中枚举类型的理解及其应用场景",
+      "/typescript/说说你对 TypeScript 中接口的理解及其应用场景.md":
+        "说说你对 TypeScript 中接口的理解及其应用场景",
+      "/typescript/说说你对 TypeScript 中类的理解及其应用场景.md":
+        "说说你对 TypeScript 中类的理解及其应用场景",
+      "/typescript/说说你对 TypeScript 中函数的理解及其与 JavaScript 函数的区别.md":
+        "说说你对 TypeScript 中函数的理解及其与 JavaScript 函数的区别",
+      "/typescript/说说你对 TypeScript 中泛型的理解及其应用场景.md":
+        "说说你对 TypeScript 中泛型的理解及其应用场景",
+      "/typescript/说说你对 TypeScript 中高级类型的理解？有哪些？.md":
+        "说说你对 TypeScript 中高级类型的理解？有哪些？",
+      "/typescript/说说你对 TypeScript 中装饰器的理解及其应用场景.md":
+        "说说你对 TypeScript 中装饰器的理解及其应用场景",
+      "/typescript/说说对 TypeScript 中命名空间与模块的理解及其区别.md":
+        "说说对 TypeScript 中命名空间与模块的理解及其区别",
+      "/typescript/说说如何在React项目中应用TypeScript.md":
+        "说说如何在React项目中应用TypeScript",
+      "/typescript/说说如何在Vue项目中应用TypeScript.md":
+        "说说如何在Vue项目中应用TypeScript",
     };
     console.log("markdownPath", markdownPath);
     const markdownPrefix = markdownPath.split("/")[1];
@@ -115,6 +139,7 @@ async function getComponents(markdownPath) {
       vue: "vue",
       vue3: "vue3",
       ES6: "ES6",
+      typescript: "typescript",
     };
     if (
       markdownPathMap[markdownPath] &&
