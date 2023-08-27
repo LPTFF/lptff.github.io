@@ -2,7 +2,7 @@
   <div>
     <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
       <el-collapse v-model="activeKnowName" accordion>
-        <el-collapse-item :title="knowledge.knowledgeType" :name="parentIndex">
+        <el-collapse-item :title="knowledge.knowledgeType" :name="String(parentIndex)">
           <el-row>
             <el-col
               :span="24"
@@ -61,7 +61,7 @@
     </div>
     <div>
       <el-collapse v-model="activeKnowName" accordion>
-        <el-collapse-item title="公司面试" name="1">
+        <el-collapse-item title="公司面试" name="100">
           <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
             <el-tag
               class="website-type"

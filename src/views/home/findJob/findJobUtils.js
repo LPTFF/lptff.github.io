@@ -130,6 +130,39 @@ async function getComponents(markdownPath) {
         "说说如何在React项目中应用TypeScript",
       "/typescript/说说如何在Vue项目中应用TypeScript.md":
         "说说如何在Vue项目中应用TypeScript",
+      "/CSS/说说你对盒子模型的理解.md": "说说你对盒子模型的理解",
+      "/CSS/css选择器有哪些？优先级？哪些属性可以继承.md":
+        "css选择器有哪些？优先级？哪些属性可以继承",
+      "/CSS/说说em、px、rem、vh、vw区别.md": "说说em、px、rem、vh、vw区别",
+      "/CSS/说说设备像素、css像素、设备独立像素、dpr、ppi 之间的区别.md":
+        "说说设备像素、css像素、设备独立像素、dpr、ppi 之间的区别",
+      "/CSS/css中有哪些方式可以隐藏页面元素及其区别.md":
+        "css中有哪些方式可以隐藏页面元素及其区别",
+      "/CSS/谈谈你对BFC的理解.md": "谈谈你对BFC的理解",
+      "/CSS/元素水平垂直居中的方法有哪些，如果元素不定宽高又该怎么实现.md":
+        "元素水平垂直居中的方法有哪些，如果元素不定宽高又该怎么实现",
+      "/CSS/如何实现两栏布局，右侧自适应？三栏布局中间自适应呢.md":
+        "如何实现两栏布局，右侧自适应？三栏布局中间自适应呢",
+      "/CSS/说说flexbox（弹性盒布局模型）以及适用场景.md":
+        "说说flexbox（弹性盒布局模型）以及适用场景",
+      "/CSS/介绍一下grid网格布局.md": "介绍一下grid网格布局",
+      "/CSS/CSS3新增了哪些新特性.md": "CSS3新增了哪些新特性",
+      "/CSS/css3动画有哪些.md": "css3动画有哪些",
+      "/CSS/怎么理解回流跟重绘，什么场景下会触发.md":
+        "怎么理解回流跟重绘，什么场景下会触发",
+      "/CSS/什么是响应式设计，响应式设计的基本原理是什么.md":
+        "什么是响应式设计，响应式设计的基本原理是什么",
+      "/CSS/如果要做优化，CSS提高性能的方法有哪些.md":
+        "如果要做优化，CSS提高性能的方法有哪些",
+      "/CSS/如何实现单行以及多行文本溢出的省略样式.md":
+        "如何实现单行以及多行文本溢出的省略样式",
+      "/CSS/如何使用css完成视差滚动效果.md": "如何使用css完成视差滚动效果",
+      "/CSS/CSS如何画一个三角形，原理是什么.md":
+        "CSS如何画一个三角形，原理是什么",
+      "/CSS/让Chrome支持小于12px的文字方式有哪些及其区别.md":
+        "让Chrome支持小于12px的文字方式有哪些及其区别",
+      "/CSS/说说对Css预编语言的理解及其有哪些区别.md":
+        "说说对Css预编语言的理解及其有哪些区别",
     };
     console.log("markdownPath", markdownPath);
     const markdownPrefix = markdownPath.split("/")[1];
@@ -140,6 +173,7 @@ async function getComponents(markdownPath) {
       vue3: "vue3",
       ES6: "ES6",
       typescript: "typescript",
+      CSS: "CSS",
     };
     if (
       markdownPathMap[markdownPath] &&
