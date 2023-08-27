@@ -60,7 +60,7 @@
       </el-collapse>
     </div>
     <div>
-      <el-collapse v-model="activeCompanyName" accordion>
+      <el-collapse v-model="activeKnowName" accordion>
         <el-collapse-item title="公司面试" :name="parentIndex">
           <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
             <el-tag
@@ -268,7 +268,6 @@ export default defineComponent({
       return index + 1 + "、" + item.desc;
     };
     const activeKnowName = ref("");
-    const activeCompanyName = ref("");
     return {
       logoUrl,
       questionList,
@@ -287,7 +286,6 @@ export default defineComponent({
       dynamicComponent,
       handleTitle,
       activeKnowName,
-      activeCompanyName,
     };
   },
   components: {
