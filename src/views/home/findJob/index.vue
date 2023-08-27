@@ -1,60 +1,67 @@
 <template>
   <div>
-    <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
-      <el-tag class="website-type" :type="websiteTransformType(knowledge.type)">
-        {{ knowledge.knowledgeType }}
-      </el-tag>
-      <el-row>
-        <el-col
-          :span="24"
-          :md="24"
-          :lg="24"
-          v-for="(item, sonIndex) in knowledge.list"
-          :key="sonIndex"
-        >
-          <el-card
-            shadow="hover"
-            class="welfare-card"
-            :style="`background-color:${knowledge.color}`"
-          >
-            <div class="welfare-date">
-              <div class="day-week-welfare">
-                <div class="welfare-week">{{ handleWeek(item) }}</div>
-                <div class="welfare-day">{{ handleDay(item) }}</div>
-              </div>
-              <div>
-                <el-divider
-                  direction="vertical"
-                  color="#cccccc"
-                  class="el-welfare-divider"
-                />
-              </div>
-              <div class="welfare-hour">
-                <div class="welfare-icon-hour">
-                  <el-icon>
-                    <Timer />
-                  </el-icon>
+    <div
+      v-for="(knowledge, parentIndex) in knowledgeList"
+      :key="parentIndex"
+      :class="parentIndex == knowledgeList.length - 1 ? 'accompany-list' : ''"
+    >
+      <el-collapse v-model="activeName" accordion>
+        <el-collapse-item :title="knowledge.knowledgeType" :name="parentIndex">
+          <el-row>
+            <el-col
+              :span="24"
+              :md="24"
+              :lg="24"
+              v-for="(item, sonIndex) in knowledge.list"
+              :key="sonIndex"
+            >
+              <el-card
+                shadow="hover"
+                class="welfare-card"
+                :style="`background-color:${knowledge.color}`"
+              >
+                <div class="welfare-date">
+                  <div class="day-week-welfare">
+                    <div class="welfare-week">{{ handleWeek(item) }}</div>
+                    <div class="welfare-day">{{ handleDay(item) }}</div>
+                  </div>
+                  <div>
+                    <el-divider
+                      direction="vertical"
+                      color="#cccccc"
+                      class="el-welfare-divider"
+                    />
+                  </div>
+                  <div class="welfare-hour">
+                    <div class="welfare-icon-hour">
+                      <el-icon>
+                        <Timer />
+                      </el-icon>
+                    </div>
+                    <div>{{ handleHour(item) }}</div>
+                  </div>
+                  <div>
+                    <div class="welfare-link-title">
+                      {{ handleTitle(item, sonIndex) }}
+                    </div>
+                    <div class="welfare-div-link">
+                      <el-button @click="getMarkDown(item)" type="primary">
+                        记不住？点我一下
+                      </el-button>
+                    </div>
+                  </div>
                 </div>
-                <div>{{ handleHour(item) }}</div>
-              </div>
-              <div>
-                <div class="welfare-link-title">{{ handleTitle(item, sonIndex) }}</div>
-                <div class="welfare-div-link">
-                  <el-button @click="getMarkDown(item)" type="primary">
-                    记不住？点我一下
-                  </el-button>
+                <div class="welfare-div-website">
+                  <img :src="logoUrl" alt="网站" class="welfare-img-link" />
+                  <div class="welfare-name-link">
+                    {{ handleQuestionType(item) }}
+                  </div>
                 </div>
-              </div>
-            </div>
-            <div class="welfare-div-website">
-              <img :src="logoUrl" alt="网站" class="welfare-img-link" />
-              <div class="welfare-name-link">
-                {{ handleQuestionType(item) }}
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+              </el-card>
+            </el-col>
+          </el-row>
+        </el-collapse-item>
+      </el-collapse>
     </div>
     <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
       <el-tag
@@ -140,6 +147,8 @@ import {
   ElDivider,
   ElDialog,
   ElButton,
+  ElCollapse,
+  ElCollapseItem,
 } from "element-plus";
 enum WebsiteType {
   Success = "success",
@@ -245,6 +254,7 @@ export default defineComponent({
     const handleTitle = (item: any, index: any) => {
       return index + 1 + "、" + item.desc;
     };
+    const activeName = ref("");
     return {
       logoUrl,
       questionList,
@@ -262,6 +272,7 @@ export default defineComponent({
       websiteTransformType,
       dynamicComponent,
       handleTitle,
+      activeName,
     };
   },
   components: {
@@ -273,10 +284,15 @@ export default defineComponent({
     ElDivider,
     ElDialog,
     ElButton,
+    ElCollapse,
+    ElCollapseItem,
   },
 });
 </script>
 <style scoped>
+.accompany-list {
+  margin-bottom: 10px;
+}
 .dialog-footer {
   display: flex;
   justify-content: space-evenly;
