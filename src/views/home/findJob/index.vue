@@ -1,11 +1,7 @@
 <template>
   <div>
-    <div
-      v-for="(knowledge, parentIndex) in knowledgeList"
-      :key="parentIndex"
-      :class="parentIndex == knowledgeList.length - 1 ? 'accompany-list' : ''"
-    >
-      <el-collapse v-model="activeName" accordion>
+    <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
+      <el-collapse v-model="activeKnowName" accordion>
         <el-collapse-item :title="knowledge.knowledgeType" :name="parentIndex">
           <el-row>
             <el-col
@@ -63,61 +59,78 @@
         </el-collapse-item>
       </el-collapse>
     </div>
-    <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
-      <el-tag
-        class="website-type"
-        type="info"
-        :style="`background-color:${question.color}`"
-        >{{ question.companyName }}</el-tag
-      >
-      <el-row>
-        <el-col
-          :span="24"
-          :md="24"
-          :lg="24"
-          v-for="(item, sonIndex) in question.list"
-          :key="sonIndex"
-        >
-          <el-card
-            shadow="hover"
-            class="welfare-card"
-            :style="`background-color:${question.color}`"
-          >
-            <div class="welfare-date">
-              <div class="day-week-welfare">
-                <div class="welfare-week">{{ handleWeek(question) }}</div>
-                <div class="welfare-day">{{ handleDay(question) }}</div>
-              </div>
-              <div>
-                <el-divider
-                  direction="vertical"
-                  color="#cccccc"
-                  class="el-welfare-divider"
-                />
-              </div>
-              <div class="welfare-hour">
-                <div class="welfare-icon-hour">
-                  <el-icon>
-                    <Timer />
-                  </el-icon>
-                </div>
-                <div>{{ handleHour(question) }}</div>
-              </div>
-              <div>
-                <div v-html="formatRichText(item.desc)" class="welfare-link-title"></div>
-                <div v-html="formatRichText(item.answer)" class="welfare-div-link"></div>
-              </div>
-            </div>
-            <div class="welfare-div-website">
-              <img :src="question.companyLogo" alt="网站" class="welfare-img-link" />
-              <div class="welfare-name-link">
-                {{ handleQuestionType(item) }}
-              </div>
-            </div>
-          </el-card>
-        </el-col>
-      </el-row>
+    <div>
+      <el-collapse v-model="activeCompanyName" accordion>
+        <el-collapse-item title="公司面试" :name="parentIndex">
+          <div v-for="(question, parentIndex) in questionList" :key="parentIndex">
+            <el-tag
+              class="website-type"
+              type="info"
+              :style="`background-color:${question.color}`"
+              >{{ question.companyName }}</el-tag
+            >
+            <el-row>
+              <el-col
+                :span="24"
+                :md="24"
+                :lg="24"
+                v-for="(item, sonIndex) in question.list"
+                :key="sonIndex"
+              >
+                <el-card
+                  shadow="hover"
+                  class="welfare-card"
+                  :style="`background-color:${question.color}`"
+                >
+                  <div class="welfare-date">
+                    <div class="day-week-welfare">
+                      <div class="welfare-week">{{ handleWeek(question) }}</div>
+                      <div class="welfare-day">{{ handleDay(question) }}</div>
+                    </div>
+                    <div>
+                      <el-divider
+                        direction="vertical"
+                        color="#cccccc"
+                        class="el-welfare-divider"
+                      />
+                    </div>
+                    <div class="welfare-hour">
+                      <div class="welfare-icon-hour">
+                        <el-icon>
+                          <Timer />
+                        </el-icon>
+                      </div>
+                      <div>{{ handleHour(question) }}</div>
+                    </div>
+                    <div>
+                      <div
+                        v-html="formatRichText(item.desc)"
+                        class="welfare-link-title"
+                      ></div>
+                      <div
+                        v-html="formatRichText(item.answer)"
+                        class="welfare-div-link"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="welfare-div-website">
+                    <img
+                      :src="question.companyLogo"
+                      alt="网站"
+                      class="welfare-img-link"
+                    />
+                    <div class="welfare-name-link">
+                      {{ handleQuestionType(item) }}
+                    </div>
+                  </div>
+                </el-card>
+              </el-col>
+            </el-row>
+          </div>
+        </el-collapse-item>
+      </el-collapse>
     </div>
+
     <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
       <div class="dialog-content">
         <component :is="dynamicComponent" v-if="dynamicComponent" />
@@ -254,7 +267,8 @@ export default defineComponent({
     const handleTitle = (item: any, index: any) => {
       return index + 1 + "、" + item.desc;
     };
-    const activeName = ref("");
+    const activeKnowName = ref("");
+    const activeCompanyName = ref("");
     return {
       logoUrl,
       questionList,
@@ -272,7 +286,8 @@ export default defineComponent({
       websiteTransformType,
       dynamicComponent,
       handleTitle,
-      activeName,
+      activeKnowName,
+      activeCompanyName,
     };
   },
   components: {
@@ -290,9 +305,6 @@ export default defineComponent({
 });
 </script>
 <style scoped>
-.accompany-list {
-  margin-bottom: 10px;
-}
 .dialog-footer {
   display: flex;
   justify-content: space-evenly;
