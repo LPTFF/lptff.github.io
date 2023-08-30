@@ -17,7 +17,7 @@ async function getComponents(markdownPath) {
       "/javaScript/常用继承方案.md": "常用继承方案",
       "/javaScript/js事件循环执行循序.md": "js事件循环执行循序",
       "/javaScript/js宏任务包含哪些.md": "js宏任务包含哪些",
-      "/javaScript/js宏微任务包含哪些.md": "js宏微任务包含哪些",
+      "/javaScript/js微任务包含哪些.md": "js微任务包含哪些",
       "/javaScript/async 和 await 是如何处理异步任务.md":
         "async 和 await 是如何处理异步任务",
       "/javaScript/requestAnimationFrame 既不是宏任务也不是微任务.md":
