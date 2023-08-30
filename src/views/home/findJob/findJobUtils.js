@@ -163,6 +163,29 @@ async function getComponents(markdownPath) {
         "让Chrome支持小于12px的文字方式有哪些及其区别",
       "/CSS/说说对Css预编语言的理解及其有哪些区别.md":
         "说说对Css预编语言的理解及其有哪些区别",
+      "/HTTP/什么是HTTP，HTTP 和 HTTPS 的区别.md":
+        "什么是HTTP，HTTP 和 HTTPS 的区别",
+      "/HTTP/为什么说HTTPS比HTTP安全，HTTPS是如何保证安全的.md":
+        "为什么说HTTPS比HTTP安全，HTTPS是如何保证安全的",
+      "/HTTP/如何理解UDP和TCP区别及其应用场景.md":
+        "如何理解UDP和TCP区别及其应用场景",
+      "/HTTP/如何理解OSI七层模型.md": "如何理解OSI七层模型",
+      "/HTTP/如何理解TCP、IP协议.md": "如何理解TCP、IP协议",
+      "/HTTP/DNS协议是什么？说说DNS完整的查询过程.md":
+        "DNS协议是什么？说说DNS完整的查询过程",
+      "/HTTP/如何理解CDN？说说实现原理.md": "如何理解CDN？说说实现原理",
+      "/HTTP/说说HTTP1.0、1.1、2.0的区别.md": "说说HTTP1.0、1.1、2.0的区别",
+      "/HTTP/说说HTTP常见的状态码有哪些及其适用场景.md":
+        "说说HTTP常见的状态码有哪些及其适用场景",
+      "/HTTP/说一下GET和POST的区别.md": "说一下GET和POST的区别",
+      "/HTTP/说说HTTP常见的请求头有哪些及其作用.md":
+        "说说HTTP常见的请求头有哪些及其作用",
+      "/HTTP/说说地址栏输入URL敲下回车后发生了什么.md":
+        "说说地址栏输入URL敲下回车后发生了什么",
+      "/HTTP/说说TCP为什么需要三次握手和四次挥手.md":
+        "说说TCP为什么需要三次握手和四次挥手",
+      "/HTTP/说说对WebSocket的理解及其应用场景.md":
+        "说说对WebSocket的理解及其应用场景",
     };
     console.log("markdownPath", markdownPath);
     const markdownPrefix = markdownPath.split("/")[1];
@@ -174,6 +197,7 @@ async function getComponents(markdownPath) {
       ES6: "ES6",
       typescript: "typescript",
       CSS: "CSS",
+      HTTP: "HTTP",
     };
     if (
       markdownPathMap[markdownPath] &&
