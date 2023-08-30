@@ -16,41 +16,14 @@
                 class="welfare-card"
                 :style="`background-color:${knowledge.color}`"
               >
-                <div class="welfare-date">
-                  <div class="day-week-welfare">
-                    <div class="welfare-week">{{ handleWeek(item) }}</div>
-                    <div class="welfare-day">{{ handleDay(item) }}</div>
+                <div class="welfare-date know-welfare">
+                  <div class="welfare-link-title know-title">
+                    {{ handleTitle(item, sonIndex) }}
                   </div>
-                  <div>
-                    <el-divider
-                      direction="vertical"
-                      color="#cccccc"
-                      class="el-welfare-divider"
-                    />
-                  </div>
-                  <div class="welfare-hour">
-                    <div class="welfare-icon-hour">
-                      <el-icon>
-                        <Timer />
-                      </el-icon>
-                    </div>
-                    <div>{{ handleHour(item) }}</div>
-                  </div>
-                  <div>
-                    <div class="welfare-link-title">
-                      {{ handleTitle(item, sonIndex) }}
-                    </div>
-                    <div class="welfare-div-link">
-                      <el-button @click="getMarkDown(item)" type="primary">
-                        记不住？点我一下
-                      </el-button>
-                    </div>
-                  </div>
-                </div>
-                <div class="welfare-div-website">
-                  <img :src="logoUrl" alt="网站" class="welfare-img-link" />
-                  <div class="welfare-name-link">
-                    {{ handleQuestionType(item) }}
+                  <div class="welfare-div-link">
+                    <el-button @click="getMarkDown(item)" type="primary">
+                      记不住？点我一下
+                    </el-button>
                   </div>
                 </div>
               </el-card>
@@ -82,45 +55,47 @@
                   class="welfare-card"
                   :style="`background-color:${question.color}`"
                 >
-                  <div class="welfare-date">
-                    <div class="day-week-welfare">
-                      <div class="welfare-week">{{ handleWeek(question) }}</div>
-                      <div class="welfare-day">{{ handleDay(question) }}</div>
-                    </div>
-                    <div>
-                      <el-divider
-                        direction="vertical"
-                        color="#cccccc"
-                        class="el-welfare-divider"
-                      />
-                    </div>
-                    <div class="welfare-hour">
-                      <div class="welfare-icon-hour">
-                        <el-icon>
-                          <Timer />
-                        </el-icon>
+                  <div class="welfare-div-date">
+                    <div class="welfare-date">
+                      <div class="day-week-welfare">
+                        <div class="welfare-week">{{ handleWeek(question) }}</div>
+                        <div class="welfare-day">{{ handleDay(question) }}</div>
                       </div>
-                      <div>{{ handleHour(question) }}</div>
+                      <div>
+                        <el-divider
+                          direction="vertical"
+                          color="#cccccc"
+                          class="el-welfare-divider"
+                        />
+                      </div>
+                      <div class="welfare-hour">
+                        <div class="welfare-icon-hour">
+                          <el-icon>
+                            <Timer />
+                          </el-icon>
+                        </div>
+                        <div>{{ handleHour(question) }}</div>
+                      </div>
+                      <div>
+                        <div
+                          v-html="formatRichText(item.desc)"
+                          class="welfare-link-title"
+                        ></div>
+                        <div
+                          v-html="formatRichText(item.answer)"
+                          class="welfare-div-link"
+                        ></div>
+                      </div>
                     </div>
-                    <div>
-                      <div
-                        v-html="formatRichText(item.desc)"
-                        class="welfare-link-title"
-                      ></div>
-                      <div
-                        v-html="formatRichText(item.answer)"
-                        class="welfare-div-link"
-                      ></div>
-                    </div>
-                  </div>
-                  <div class="welfare-div-website">
-                    <img
-                      :src="question.companyLogo"
-                      alt="网站"
-                      class="welfare-img-link"
-                    />
-                    <div class="welfare-name-link">
-                      {{ handleQuestionType(item) }}
+                    <div class="welfare-div-website">
+                      <img
+                        :src="question.companyLogo"
+                        alt="网站"
+                        class="welfare-img-link"
+                      />
+                      <div class="welfare-name-link">
+                        {{ handleQuestionType(item) }}
+                      </div>
                     </div>
                   </div>
                 </el-card>
@@ -354,6 +329,10 @@ export default defineComponent({
   margin-bottom: 40px;
   max-width: 700px;
 }
+.know-title {
+  margin-bottom: 0px;
+  max-width: 800px;
+}
 
 .welfare-link-title :deep(p) {
   margin: 0px;
@@ -413,6 +392,15 @@ export default defineComponent({
   margin-right: 20px;
   display: flex;
 }
+.welfare-div-date {
+  display: flex;
+  justify-content: space-between;
+}
+.know-welfare {
+  margin-right: 0px;
+  display: flex;
+  justify-content: space-between;
+}
 
 .welfare-title {
   height: 30px;
@@ -427,18 +415,4 @@ export default defineComponent({
   margin: 0px 0px 10px 0px;
   background-color: rgb(253, 226, 226);
 }
-
-:deep(.el-card__body) {
-  justify-content: space-between;
-  display: flex;
-}
-
-/* .el-card.is-hover-shadow:focus,
-.el-card.is-hover-shadow:hover {
-  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
-    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
-    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
-  background-size: 100% 100px;
-  background-repeat: repeat-y;
-} */
 </style>

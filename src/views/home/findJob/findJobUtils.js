@@ -186,6 +186,24 @@ async function getComponents(markdownPath) {
         "说说TCP为什么需要三次握手和四次挥手",
       "/HTTP/说说对WebSocket的理解及其应用场景.md":
         "说说对WebSocket的理解及其应用场景",
+      "/Webpack/说说你对webpack的理解及其解决了什么问题.md":
+        "说说你对webpack的理解及其解决了什么问题",
+      "/Webpack/说说webpack的构建流程.md": "说说webpack的构建流程",
+      "/Webpack/说说webpack中常见的Loader及其解决了什么问题.md":
+        "说说webpack中常见的Loader及其解决了什么问题",
+      "/Webpack/说说webpack中常见的Plugin及其解决了什么问题.md":
+        "说说webpack中常见的Plugin及其解决了什么问题",
+      "/Webpack/说说Loader和Plugin的区别及其编写Loader、Plugin的思路.md":
+        "说说Loader和Plugin的区别及其编写Loader、Plugin的思路",
+      "/Webpack/说说webpack的热更新是如何做到的及其原理是什么.md":
+        "说说webpack的热更新是如何做到的及其原理是什么",
+      "/Webpack/说说webpackProxy工作原理及其为什么能解决跨域.md":
+        "说说webpackProxy工作原理及其为什么能解决跨域",
+      "/Webpack/说说如何借助webpack来优化前端性能.md":
+        "说说如何借助webpack来优化前端性能",
+      "/Webpack/如何提高webpack的构建速度.md": "如何提高webpack的构建速度",
+      "/Webpack/与webpack类似的工具还有哪些及其相互区别.md":
+        "与webpack类似的工具还有哪些及其相互区别",
     };
     console.log("markdownPath", markdownPath);
     const markdownPrefix = markdownPath.split("/")[1];
@@ -198,6 +216,7 @@ async function getComponents(markdownPath) {
       typescript: "typescript",
       CSS: "CSS",
       HTTP: "HTTP",
+      Webpack: "Webpack",
     };
     if (
       markdownPathMap[markdownPath] &&
