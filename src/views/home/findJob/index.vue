@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
+    <!-- <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
       <el-collapse v-model="activeKnowName" accordion>
         <el-collapse-item :title="knowledge.knowledgeType" :name="String(parentIndex)">
           <el-row>
@@ -104,9 +104,12 @@
           </div>
         </el-collapse-item>
       </el-collapse>
+    </div> -->
+    <div class="all-content">
+      <AllQuestion></AllQuestion>
     </div>
 
-    <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
+    <!-- <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
       <div class="dialog-content">
         <component :is="dynamicComponent" v-if="dynamicComponent" />
       </div>
@@ -116,168 +119,173 @@
           <el-button type="primary" @click="handleDialogConfirm"> 尝试一下 </el-button>
         </div>
       </template>
-    </el-dialog>
+    </el-dialog> -->
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, defineAsyncComponent, shallowRef } from "vue";
 import logoImageUrl from "../../../public/img/logo.jpg";
-import sourceList from "./questionList.json";
-import knowList from "./knowledgeExperience.json";
-import { getComponents } from "./findJobUtils.js";
-import {
-  ElRow,
-  ElCol,
-  ElCard,
-  ElIcon,
-  ElTag,
-  ElDivider,
-  ElDialog,
-  ElButton,
-  ElCollapse,
-  ElCollapseItem,
-} from "element-plus";
-enum WebsiteType {
-  Success = "success",
-  Warning = "warning",
-  Danger = "danger",
-  Info = "info",
-  Default = "",
-}
+// import sourceList from "./questionList.json";
+// import knowList from "./knowledgeExperience.json";
+// import { getComponents } from "./findJobUtils.js";
+import AllQuestion from "./前端八股文汇总背诵版.md";
+// import {
+//   ElRow,
+//   ElCol,
+//   ElCard,
+//   ElIcon,
+//   ElTag,
+//   ElDivider,
+//   ElDialog,
+//   ElButton,
+//   ElCollapse,
+//   ElCollapseItem,
+// } from "element-plus";
+// enum WebsiteType {
+//   Success = "success",
+//   Warning = "warning",
+//   Danger = "danger",
+//   Info = "info",
+//   Default = "",
+// }
 export default defineComponent({
   setup() {
-    const logoUrl = ref(logoImageUrl);
-    const questionList = ref(sourceList);
-    const knowledgeList = ref(knowList);
-    const handleQuestionType = (item: any) => {
-      // 根据 item 的属性动态计算图片的 src 值
-      let questionType = "";
-      switch (String(item.questionType)) {
-        case "1":
-          questionType = "八股文";
-          break;
-        case "2":
-          questionType = "项目经验";
-          break;
-        case "3":
-          questionType = "在线编程";
-          break;
-        default:
-          questionType = "八股文";
-      }
-      return questionType;
-    };
-    const handleWeek = (item: any) => {
-      const date = new Date(item.timestamp);
-      const dayOfWeek = date.getDay();
-      const weekdays = [
-        "星期日",
-        "星期一",
-        "星期二",
-        "星期三",
-        "星期四",
-        "星期五",
-        "星期六",
-      ];
-      const dayName = weekdays[dayOfWeek];
-      return dayName;
-    };
-    const handleDay = (item: any) => {
-      const date = new Date(item.timestamp);
-      const day = date.getDate();
-      const formattedDay = day < 10 ? "0" + day : day.toString();
-      return formattedDay;
-    };
-    const handleHour = (item: any) => {
-      const date = new Date(item.timestamp);
-      const hours = date.getHours();
-      const minutes = date.getMinutes();
-      const formattedHours = hours < 10 ? "0" + hours : hours.toString();
-      const formattedMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
-      const timeString = `${formattedHours}:${formattedMinutes}`;
-      return timeString;
-    };
-    const formatRichText = (item: any) => {
-      return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
-    };
-    let dialogGuideVisible = ref(false);
-    let dialogTitle = ref("");
-    const dynamicComponent = shallowRef(null);
-    const getMarkDown = async (item: any) => {
-      // const files = import.meta.glob(
-      //   "../../../public/data/findJobMarkDown/javaScript/*.md"
-      // );
-      // console.log("files", files);
-      try {
-        let dynamicComponentDefinition = await getComponents(item.markdownPath);
-        dynamicComponent.value = dynamicComponentDefinition;
-        dialogTitle.value = item.title;
-        dialogGuideVisible.value = true;
-      } catch (error) {
-        console.error("加载并注册动态组件失败：", error);
-        console.log("88888", item);
-      }
-    };
-    const handleDialogCancel = () => {
-      dialogGuideVisible.value = false;
-    };
-    const handleDialogConfirm = () => {
-      dialogGuideVisible.value = false;
-    };
-    const websiteTransformType = (type: any) => {
-      switch (type) {
-        case "success":
-          return WebsiteType.Success;
-        case "warning":
-          return WebsiteType.Warning;
-        case "danger":
-          return WebsiteType.Danger;
-        case "info":
-          return WebsiteType.Info;
-        default:
-          return WebsiteType.Default; // 默认类型
-      }
-    };
-    const handleTitle = (item: any, index: any) => {
-      return index + 1 + "、" + item.desc;
-    };
-    const activeKnowName = ref("");
-    return {
-      logoUrl,
-      questionList,
-      handleQuestionType,
-      handleWeek,
-      handleDay,
-      handleHour,
-      formatRichText,
-      getMarkDown,
-      dialogGuideVisible,
-      handleDialogCancel,
-      handleDialogConfirm,
-      dialogTitle,
-      knowledgeList,
-      websiteTransformType,
-      dynamicComponent,
-      handleTitle,
-      activeKnowName,
-    };
+    // const logoUrl = ref(logoImageUrl);
+    // const questionList = ref(sourceList);
+    // const knowledgeList = ref(knowList);
+    // const handleQuestionType = (item: any) => {
+    //   // 根据 item 的属性动态计算图片的 src 值
+    //   let questionType = "";
+    //   switch (String(item.questionType)) {
+    //     case "1":
+    //       questionType = "八股文";
+    //       break;
+    //     case "2":
+    //       questionType = "项目经验";
+    //       break;
+    //     case "3":
+    //       questionType = "在线编程";
+    //       break;
+    //     default:
+    //       questionType = "八股文";
+    //   }
+    //   return questionType;
+    // };
+    // const handleWeek = (item: any) => {
+    //   const date = new Date(item.timestamp);
+    //   const dayOfWeek = date.getDay();
+    //   const weekdays = [
+    //     "星期日",
+    //     "星期一",
+    //     "星期二",
+    //     "星期三",
+    //     "星期四",
+    //     "星期五",
+    //     "星期六",
+    //   ];
+    //   const dayName = weekdays[dayOfWeek];
+    //   return dayName;
+    // };
+    // const handleDay = (item: any) => {
+    //   const date = new Date(item.timestamp);
+    //   const day = date.getDate();
+    //   const formattedDay = day < 10 ? "0" + day : day.toString();
+    //   return formattedDay;
+    // };
+    // const handleHour = (item: any) => {
+    //   const date = new Date(item.timestamp);
+    //   const hours = date.getHours();
+    //   const minutes = date.getMinutes();
+    //   const formattedHours = hours < 10 ? "0" + hours : hours.toString();
+    //   const formattedMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
+    //   const timeString = `${formattedHours}:${formattedMinutes}`;
+    //   return timeString;
+    // };
+    // const formatRichText = (item: any) => {
+    //   return item.replace(/\n/g, "<br>").replace(/ /g, "&nbsp;");
+    // };
+    // let dialogGuideVisible = ref(false);
+    // let dialogTitle = ref("");
+    // const dynamicComponent = shallowRef(null);
+    // const getMarkDown = async (item: any) => {
+    //   // const files = import.meta.glob(
+    //   //   "../../../public/data/findJobMarkDown/javaScript/*.md"
+    //   // );
+    //   // console.log("files", files);
+    //   try {
+    //     let dynamicComponentDefinition = await getComponents(item.markdownPath);
+    //     dynamicComponent.value = dynamicComponentDefinition;
+    //     dialogTitle.value = item.title;
+    //     dialogGuideVisible.value = true;
+    //   } catch (error) {
+    //     console.error("加载并注册动态组件失败：", error);
+    //     console.log("88888", item);
+    //   }
+    // };
+    // const handleDialogCancel = () => {
+    //   dialogGuideVisible.value = false;
+    // };
+    // const handleDialogConfirm = () => {
+    //   dialogGuideVisible.value = false;
+    // };
+    // const websiteTransformType = (type: any) => {
+    //   switch (type) {
+    //     case "success":
+    //       return WebsiteType.Success;
+    //     case "warning":
+    //       return WebsiteType.Warning;
+    //     case "danger":
+    //       return WebsiteType.Danger;
+    //     case "info":
+    //       return WebsiteType.Info;
+    //     default:
+    //       return WebsiteType.Default; // 默认类型
+    //   }
+    // };
+    // const handleTitle = (item: any, index: any) => {
+    //   return index + 1 + "、" + item.desc;
+    // };
+    // const activeKnowName = ref("");
+    // return {
+    //   logoUrl,
+    //   questionList,
+    //   handleQuestionType,
+    //   handleWeek,
+    //   handleDay,
+    //   handleHour,
+    //   formatRichText,
+    //   getMarkDown,
+    //   dialogGuideVisible,
+    //   handleDialogCancel,
+    //   handleDialogConfirm,
+    //   dialogTitle,
+    //   knowledgeList,
+    //   websiteTransformType,
+    //   dynamicComponent,
+    //   handleTitle,
+    //   activeKnowName,
+    // };
   },
   components: {
-    ElRow,
-    ElCol,
-    ElCard,
-    ElIcon,
-    ElTag,
-    ElDivider,
-    ElDialog,
-    ElButton,
-    ElCollapse,
-    ElCollapseItem,
+    // ElRow,
+    // ElCol,
+    // ElCard,
+    // ElIcon,
+    // ElTag,
+    // ElDivider,
+    // ElDialog,
+    // ElButton,
+    // ElCollapse,
+    // ElCollapseItem,
+    AllQuestion,
   },
 });
 </script>
 <style scoped>
+.all-content {
+  margin-bottom: 40px;
+}
 .dialog-footer {
   display: flex;
   justify-content: space-evenly;

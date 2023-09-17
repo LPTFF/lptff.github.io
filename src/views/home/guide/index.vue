@@ -11,19 +11,13 @@
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
             <div class="day-week-welfare">
-              <div
-                class="welfare-month"
-                :style="`color:${handleYearColor(item)}`"
-              >
+              <div class="welfare-month" :style="`color:${handleYearColor(item)}`">
                 <div class="welfare-icon-hour">
                   <el-icon :size="15"><Calendar /></el-icon>
                 </div>
                 {{ handleMonth(item) }}
               </div>
-              <div
-                class="welfare-day"
-                :style="`color:${handleYearColor(item)}`"
-              >
+              <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
                 {{ handleDay(item) }}
               </div>
             </div>
@@ -68,11 +62,7 @@
             </div>
           </div>
           <div class="welfare-div-website">
-            <img
-              :src="handleWebsiteImg(item)"
-              alt="网站"
-              class="welfare-img-link"
-            />
+            <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
             <div class="welfare-name-link">
               {{ handleWebsiteName(item) }}
             </div>
@@ -102,10 +92,7 @@
             </div>
             <div class="mobile-click-show">
               <div>
-                <div
-                  class="welfare-day"
-                  :style="`color:${handleYearColor(item)}`"
-                >
+                <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
                   {{ handleDay(item) }}
                 </div>
                 <div class="welfare-month">
@@ -146,15 +133,13 @@
       <template #footer>
         <div class="dialog-footer">
           <el-button @click="handleDialogCancel">不感兴趣</el-button>
-          <el-button type="primary" @click="handleDialogConfirm">
-            前去看看
-          </el-button>
+          <el-button type="primary" @click="handleDialogConfirm"> 前去看看 </el-button>
         </div>
       </template>
     </el-dialog>
   </div>
 </template>
-  
+
 <script lang="ts">
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
@@ -183,7 +168,7 @@ export default {
     let infzmList = ref(infzmNews);
     let weiboList = ref(weiboNews);
     let newsGuide: any[] = [];
-    newsGuide = [...infzmList.value, ...weiboList.value];
+    newsGuide = [...infzmList.value];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
@@ -196,8 +181,7 @@ export default {
       const hours = date.getHours();
       const minutes = date.getMinutes();
       const formattedHours = hours < 10 ? "0" + hours : hours.toString();
-      const formattedMinutes =
-        minutes < 10 ? "0" + minutes : minutes.toString();
+      const formattedMinutes = minutes < 10 ? "0" + minutes : minutes.toString();
       const timeString = `${formattedHours}:${formattedMinutes}`;
       return timeString;
     };
@@ -351,9 +335,7 @@ export default {
     };
     const handleDialogContent = (item: any) => {
       const lengthControl = 400;
-      return item.length < lengthControl
-        ? item
-        : item.slice(0, lengthControl) + "...";
+      return item.length < lengthControl ? item : item.slice(0, lengthControl) + "...";
     };
     const dialogMarginTop = ref();
     watch(dialogGuideVisible, async (newValue) => {
@@ -363,8 +345,7 @@ export default {
         if (dialogData) {
           let dialogHeight = dialogData.clientHeight;
           let windowHeight = window.innerHeight;
-          dialogMarginTop.value =
-            (Number(windowHeight) - dialogHeight) / 2 + 58;
+          dialogMarginTop.value = (Number(windowHeight) - dialogHeight) / 2 + 58;
         }
       }
     });
@@ -568,13 +549,7 @@ export default {
   .mobile-div {
     display: block;
     width: 100%;
-    background: linear-gradient(
-        45deg,
-        #f1f1f1,
-        #f1f1f1 50%,
-        #e8e8e8 50%,
-        #e8e8e8
-      ),
+    background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
       linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
       linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
     background-size: 100% 100px;

@@ -1,27 +1,39 @@
-var maxSubArray = function (nums) {
-  let result = null;
-  console.log("nums", nums);
-  for (let i = 0; i < nums.length; i++) {
-    for (let m = 0; m < nums.length - i; m++) {
-      //start m end m+i
-      let sum = null;
-      console.log("start", m);
-      console.log("end", m + i);
-      for (let n = m; n <= m + i; n++) {
-        sum = sum + nums[n];
+const fetch = require("node-fetch");
+
+function fetchWithRetry(input, max = 3) {
+  return new Promise((resolve, reject) => {
+    let count = 0;
+
+    async function doFetch() {
+      try {
+        const response = await fetch(input); // 使用 node-fetch 发起请求
+        if (response.ok) {
+          const data = await response.json(); // 获取响应数据
+          resolve(data);
+        } else {
+          throw new Error("Request failed");
+        }
+      } catch (error) {
+        if (count < max) {
+          console.log(`Retry ${count + 1} time(s)`);
+          count++;
+          await new Promise((resolve) => setTimeout(resolve, 1000)); // 等待一段时间后重试
+          await doFetch(); // 递归重试
+        } else {
+          reject(error); // 超过最大重试次数后，将错误传递给外部
+        }
       }
-      console.log("sum", sum);
-      console.log("result1", result);
-      if (m == 0 && i == 0) {
-        result = sum;
-      } else {
-        result = sum > result ? sum : result;
-      }
-      console.log("result2", result);
     }
-  }
-  return result;
-};
-let nums = [-1, 0, -2];
-let test = maxSubArray(nums);
-console.log("test", test);
+
+    doFetch();
+  });
+}
+
+// 使用示例
+fetchWithRetry("https://example.com/api/data")
+  .then((data) => {
+    console.log("Data:", data);
+  })
+  .catch((error) => {
+    console.error("Failed:", error);
+  });
