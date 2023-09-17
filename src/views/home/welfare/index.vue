@@ -117,6 +117,9 @@ export default {
         case "mutouxb":
           websiteName = "86收线报网";
           break;
+        case "yqhd8":
+          websiteName = "实时线报";
+          break;
         default:
           websiteName = "羊毛";
       }
@@ -133,6 +136,10 @@ export default {
         case "mutouxb":
           websiteImg =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEVHcEz/UwD/VAD/VAD/UwD+UwD/UwD/UwD/UwD+UwD+UwD+UwD9UgD+UwD/VAAEMvkGAAAADnRSTlMAQOHzw5TW6zEhfFoQp2Bl2BQAAADGSURBVDiNzZPZDsQgCEVRXOpS//9zp1ZR0DbzNMnch8bIYSsIwHWYqhNepUqV/iPg+AKE4sIKHAzI/jqqcfkm28l3XSHMNyAWbJqhPJIMLzEM4KHBKjcA3PqrSiyzewJEN2a3n7L6LQZL4O5YLgt75s4N9mrvIN5fDdhIO+3tbyYaFuXTFOTsDmPcVnZjKeDcB81mAXEknEBgQPOPIABaE6T8CRagn1WrX/fhiJ1UeNcYeb9yqzOW6hj9nP7yLnJaB/KTp/cBnJYXiHf+EHYAAAAASUVORK5CYII=";
+          break;
+        case "yqhd8":
+          websiteImg =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAY1BMVEX/eH7/dHr/cHf/d33/c3n/b3X/jpP/0tT/zM7/k5j/a3L/wcP/2tv/3+D/oKT/////naH/srX/io//7/D/+vr/6er/vcD/gIb/19n/anH/XWX/hov/pan/Y2r/d37/eH3/5ufLMu3HAAABhUlEQVR4Ad3OV7ajMBAE0FYXIjQPFxmcJO9/lSMZJqf/R0Z1dbrkUx1O9f1WpAcKr+p+yn1ZVUV+1w1gZfvRVRfD99xaduydFAO9jhPrtp656DehK/uamxOb9mvPqp97u+7c/ZkDnG6crnB3PjynJxkAI7d4FmzY9mwV2tJfOAzcPcTvHIoDSLG0FUuH67RcNw4LGwdozfpbC3tyvpltXM35kfMVET4Bj0NgqzhPy+vFfS10Za0R0X9w1RN4MoFpIbsS9p4QcZ3ZuxPgTj7NruyeDpImBIErScUJXJ97Fw+2imJg5RHEqvyOB9CaDye+4sUhje4LwG3kBuAAaZxCbKbEaKSGgOvCVaMAZ4XOIwp5hWvYGcK1YncNSCKDNHYocrT4oC1Xr7anPCKcHXSnBMl7vfgXm20g1ysgSbyBsVUJUaeXD+5Bcm5FIYfIANAgSVjqGJxBLf2HQ7yBxBCzkIgkBEDAKU4gcgocQn4Q8k+Rwf+E/E/IrwJZAN97/CyQs+OBLIAvhrEgMiyP4ssAAAAASUVORK5CYII=";
           break;
         default:
           websiteImg = "羊毛";
