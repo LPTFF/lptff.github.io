@@ -28,8 +28,8 @@
             <el-menu-item index="3">豆瓣电影</el-menu-item>
             <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
             <el-menu-item index="5">技术论坛</el-menu-item>
-            <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item>
+            <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
+            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
             <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
           </el-menu>
         </el-header>
@@ -49,12 +49,12 @@
           <div class="component-div" v-if="selectIndex === '5'">
             <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
-          <div class="component-div" v-if="selectIndex === '6'">
+          <!-- <div class="component-div" v-if="selectIndex === '6'">
             <bossZhipinComponent></bossZhipinComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
-          </div>
+          </div> -->
           <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
           </div>
@@ -70,12 +70,12 @@
 <script lang="ts">
 import { ref, onMounted, computed, Ref } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
-import leetCodeComponent from "./leetCode/index.vue";
+// import leetCodeComponent from "./leetCode/index.vue";
 import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import toolsComponent from "./tools/index.vue";
 import welfareComponent from "./welfare/index.vue";
-import bossZhipinComponent from "./bossZhipin/index.vue";
+// import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
 import { useRouter } from "vue-router";
@@ -204,12 +204,12 @@ export default {
     };
   },
   components: {
-    leetCodeComponent,
+    // leetCodeComponent,
     doubanComponent,
     newsComponent,
     toolsComponent,
     welfareComponent,
-    bossZhipinComponent,
+    // bossZhipinComponent,
     guideComponent,
     ElCol,
     ElMenu,
