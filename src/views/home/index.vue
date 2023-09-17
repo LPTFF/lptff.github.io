@@ -26,7 +26,7 @@
             <el-menu-item index="1">热门资讯</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
             <el-menu-item index="3">豆瓣电影</el-menu-item>
-            <el-menu-item index="4" v-if="isPCRes">常用工具</el-menu-item>
+            <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
             <el-menu-item index="5">技术论坛</el-menu-item>
             <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
             <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
