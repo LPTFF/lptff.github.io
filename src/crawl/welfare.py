@@ -121,12 +121,22 @@ def extract_data_from_yqhd8(url):
                         # time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
                         # # 获取当前日期
                         # today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
-                        time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
-                        today = datetime.today().strftime('%Y-%m-%d')
-                        dt = datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S')
-                        # print("dt",dt)
-                        timestamp = int(dt.timestamp()*1000)
+                        # time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
+                        # today = datetime.today().strftime('%Y-%m-%d')
+                        # dt = datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S')
+                        # # print("dt",dt)
+                        # timestamp = int(dt.timestamp()*1000)
                         # print("timestamp",timestamp)
+                        # 创建北京时区对象
+                        beijing_tz = pytz.timezone('Asia/Shanghai')
+                        # 获取当前日期
+                        today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
+                        # 假设time_desc是您要处理的时间字符串
+                        time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
+                        # 创建带有北京时区信息的日期时间对象
+                        dt = beijing_tz.localize(datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S'))
+                        # 转换为时间戳（毫秒）
+                        timestamp = int(dt.timestamp() * 1000)
                         extracted_data.append({
                             'link': href,
                             'title': title,
