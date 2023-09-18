@@ -116,11 +116,13 @@ def extract_data_from_yqhd8(url):
                     if a_element:
                         href = 'https://www.yqhd8.com'+a_element['href']
                         title = a_element.find('p', class_='today-tittle').get_text().strip()
-                        # 创建北京时区对象
-                        beijing_tz = pytz.timezone('Asia/Shanghai')
+                        # # 创建北京时区对象
+                        # beijing_tz = pytz.timezone('Asia/Shanghai')
+                        # time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
+                        # # 获取当前日期
+                        # today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
                         time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
-                        # 获取当前日期
-                        today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
+                        today = datetime.today().strftime('%Y-%m-%d')
                         dt = datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S')
                         # print("dt",dt)
                         timestamp = int(dt.timestamp()*1000)
