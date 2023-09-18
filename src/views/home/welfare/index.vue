@@ -71,6 +71,7 @@ export default {
   setup() {
     const logoUrl = ref(logoImageUrl);
     let welfareData = ref(welfareSource);
+    console.log("welfareSource", welfareSource);
     const handleWeek = (item: any) => {
       const date = new Date(item.timestamp);
       const dayOfWeek = date.getDay();
