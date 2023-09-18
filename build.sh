@@ -79,6 +79,7 @@ run_script "juejin.py"
 run_script "kuaishou.py"
 run_script "weibo.py"
 run_script "v2ex.py"
+run_script "githubTrending.py"
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")

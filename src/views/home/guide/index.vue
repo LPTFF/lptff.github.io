@@ -145,6 +145,7 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import infzmNews from "../../../public/data/infzm.json";
 import weiboNews from "../../../public/data/weibo.json";
+import githubNews from "../../../public/data/githubTrending.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import { ElCol, ElRow, ElDialog, ElCard, ElButton, ElIcon } from "element-plus";
 export default {
@@ -167,8 +168,9 @@ export default {
     let dialogParam = ref("");
     let infzmList = ref(infzmNews);
     let weiboList = ref(weiboNews);
+    let githubList = ref(githubNews);
     let newsGuide: any[] = [];
-    newsGuide = [...infzmList.value];
+    newsGuide = [...infzmList.value, ...githubList.value];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
@@ -191,6 +193,7 @@ export default {
         case "juejin":
         case "infzm":
         case "v2ex":
+        case "githubTrending":
           websiteLogo = item.image ? item.image : logoUrl.value;
           break;
         case "hxm5":
@@ -219,6 +222,7 @@ export default {
           break;
         case "juejin":
         case "v2ex":
+        case "githubTrending":
           websiteUrl = item.url;
           break;
         case "hxm5":
@@ -256,6 +260,9 @@ export default {
         case "weibo":
           websiteName = "微博热搜";
           break;
+        case "githubTrending":
+          websiteName = "githubTrending";
+          break;
         default:
           websiteName = "随风而逝";
       }
@@ -287,6 +294,10 @@ export default {
         case "weibo":
           websiteImg =
             "data:image/png;base64,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";
+          break;
+        case "githubTrending":
+          websiteImg =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAb1BMVEX////4+Pi3ubtvcnZNUVU+Q0cpLjLr6+x3en0sMTYkKS59gIORk5aUl5n8/Pzw8PFTV1tbX2Pc3d5DSEzn5+g3PECLjpFKTlKFh4qxs7XCxMUwNTq/wcLh4uPV1tZzd3o/Q0jOz9CmqKpjZ2qfoaSrd37mAAABPUlEQVR4AW3TBZKEMBAF0B8GCHzcnbW5/xm30qEyknklcU/DgQpuYRTHUXgLFHw6SemkmcYrlcd8kRYlnlQ1PU0Fp434Qde75Qd+1FUQKiRZjyGfTGNjKhWMmSQXYO3Ibao3MlqBnSRzADhk/ycAdcqclSSHnEUD+KLt8KalMQMqpl3izU5jKxHQGCq8Ud80fq4VfuFZaIyQO4wVPEre5g+RrIAPJrkQSL8OPjv3htQmH8guU5uwgseeP7ITMYBnpdFgvlJPcx0zoLjjzS/FDrVRvH6xsqDYlLx29huRUaFx6YuI1mhKMbddf9trEzca7rmRk/FxpiRXiJO8FDBURyb4yfO7glC8TOpacmAc4ElMEWlc2oGckjwvYVFEB5wjouE6uLBwquypQym/scKrM4njElYaJy182q15aDj/oQMZkS8JH3IAAAAASUVORK5CYII=";
           break;
         default:
           websiteImg = "羊毛";
