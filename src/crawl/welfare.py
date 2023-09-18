@@ -4,6 +4,7 @@ import json
 from datetime import datetime
 from bs4 import BeautifulSoup
 import time
+import pytz
 
 headers = {
     'Cookie': '__51vcke__JE7Z5d3HJavxuk1B=4473940b-0044-5073-9e5c-d7a7b1cc897c; __51vuft__JE7Z5d3HJavxuk1B=1686366558310; __51uvsct__JE7Z5d3HJavxuk1B=3; __51vcke__3F2LJ5KVIPove8YV=fe88d030-e814-5dec-a3e1-39ca0fffe6bd; __51vuft__3F2LJ5KVIPove8YV=1687786304381; __vtins__3F2LJ5KVIPove8YV=%7B%22sid%22%3A%20%22c3ea8f2a-9888-5b54-a7ae-f6c971aab8a1%22%2C%20%22vd%22%3A%201%2C%20%22stt%22%3A%200%2C%20%22dr%22%3A%200%2C%20%22expires%22%3A%201688970464783%2C%20%22ct%22%3A%201688968664783%7D; __51uvsct__3F2LJ5KVIPove8YV=6',
@@ -115,8 +116,11 @@ def extract_data_from_yqhd8(url):
                     if a_element:
                         href = 'https://www.yqhd8.com'+a_element['href']
                         title = a_element.find('p', class_='today-tittle').get_text().strip()
+                        # 创建北京时区对象
+                        beijing_tz = pytz.timezone('Asia/Shanghai')
                         time_desc = str(a_element.find('p', class_='today-time').get_text().strip())
-                        today = datetime.today().strftime('%Y-%m-%d')
+                        # 获取当前日期
+                        today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
                         dt = datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S')
                         # print("dt",dt)
                         timestamp = int(dt.timestamp()*1000)
