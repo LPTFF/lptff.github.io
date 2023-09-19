@@ -153,13 +153,7 @@ export default {
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
     const welfareLimited = computed(() => {
-      let historyLocation: any = sessionStorage.getItem("scrollInfoLocation2");
-      historyLocation = Number(JSON.parse(historyLocation));
-      historyLocation = Math.floor(
-        isPCRes.value ? historyLocation / 200 : historyLocation / 100
-      );
-      const length: number =
-        historyLocation > 0 ? historyLocation : Number(props.welfareLocation); // 切割长度
+      const length: number = Number(props.welfareLocation); // 切割长度
       let initData = isPCRes.value ? 9 : 5;
       let welfareTmpAll;
       maxLength < length ? (maxLength = length) : maxLength;
