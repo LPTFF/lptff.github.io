@@ -153,7 +153,7 @@ export default {
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
     const welfareLimited = computed(() => {
-      let historyLocation = sessionStorage.getItem("scrollInfoLocation2");
+      let historyLocation: any = sessionStorage.getItem("scrollInfoLocation2");
       historyLocation = Number(JSON.parse(historyLocation));
       historyLocation = Math.floor(
         isPCRes.value ? historyLocation / 200 : historyLocation / 100
