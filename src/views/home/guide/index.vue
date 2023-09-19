@@ -147,7 +147,15 @@ import infzmNews from "../../../public/data/infzm.json";
 import weiboNews from "../../../public/data/weibo.json";
 import githubNews from "../../../public/data/githubTrending.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
-import { ElCol, ElRow, ElDialog, ElCard, ElButton, ElIcon } from "element-plus";
+import {
+  ElCol,
+  ElRow,
+  ElDialog,
+  ElCard,
+  ElButton,
+  ElIcon,
+  ElDivider,
+} from "element-plus";
 export default {
   props: {
     guideLocation: [String, Number],
@@ -159,6 +167,7 @@ export default {
     ElCard,
     ElButton,
     ElIcon,
+    ElDivider,
   },
   setup(props: any) {
     const logoUrl = ref(logoImageUrl);

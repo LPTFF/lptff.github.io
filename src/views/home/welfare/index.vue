@@ -5,7 +5,7 @@
         :span="24"
         :md="24"
         :lg="24"
-        v-for="(item, sonIndex) in welfareData"
+        v-for="(item, sonIndex) in welfareLimited"
         :key="sonIndex"
       >
         <!-- <div class="welfare-title" v-if="sonIndex == 0">7号</div> -->
@@ -62,16 +62,19 @@
 </template>
 
 <script lang="ts">
-import { ref } from "vue";
-import { gotoOutPage } from "../../../utils/utils";
+import { ref, computed } from "vue";
+import { gotoOutPage, isPC } from "../../../utils/utils";
 import welfareSource from "../../../public/data/welfare.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
 export default {
-  setup() {
+  props: {
+    welfareLocation: [String, Number],
+  },
+  setup(props: any) {
     const logoUrl = ref(logoImageUrl);
-    let welfareData = ref(welfareSource);
-    console.log("welfareSource", welfareSource);
+    // let welfareData = ref(welfareSource);
+    // console.log("welfareSource", welfareSource);
     const handleWeek = (item: any) => {
       const date = new Date(item.timestamp);
       const dayOfWeek = date.getDay();
@@ -147,15 +150,37 @@ export default {
       }
       return websiteImg;
     };
+    const isPCRes = computed(() => isPC());
+    let maxLength = 0;
+    const welfareLimited = computed(() => {
+      let historyLocation = sessionStorage.getItem("scrollInfoLocation2");
+      historyLocation = Number(JSON.parse(historyLocation));
+      historyLocation = Math.floor(
+        isPCRes.value ? historyLocation / 200 : historyLocation / 100
+      );
+      const length: number =
+        historyLocation > 0 ? historyLocation : Number(props.welfareLocation); // 切割长度
+      let initData = isPCRes.value ? 9 : 5;
+      let welfareTmpAll;
+      maxLength < length ? (maxLength = length) : maxLength;
+      let rate = isPCRes.value ? 2 : 1;
+      welfareTmpAll = welfareSource.slice(
+        0,
+        maxLength * rate + initData < welfareSource.length
+          ? maxLength * rate + initData
+          : welfareSource.length
+      );
+      return welfareTmpAll;
+    });
     return {
       logoUrl,
-      welfareData,
       handleWeek,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
       handleWebsiteName,
       handleWebsiteImg,
+      welfareLimited,
     };
   },
   components: {

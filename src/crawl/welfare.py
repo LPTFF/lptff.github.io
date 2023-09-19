@@ -169,7 +169,20 @@ extracted_data2 = extract_data_from_mutouxb(url2)
 url3 = 'https://www.yqhd8.com/xb'
 extracted_data3 = extract_data_from_yqhd8(url3)
 extracted_data = extracted_data1 + extracted_data2+extracted_data3
-sorted_data = sorted(extracted_data, key=lambda x: -x['timestamp'])
+remove_duplicates_data = {}
+exist_item=None
+for item in extracted_data:
+    title = item['title']
+    if title not in remove_duplicates_data:
+        remove_duplicates_data[title] = item
+    else:
+        exist_item = remove_duplicates_data[title]
+        if item['website'] == 'hxm5':
+            remove_duplicates_data[title] = item 
+        elif item['website'] == 'mutouxb' and exist_item['website'] == 'yqhd8':
+            remove_duplicates_data[title] = item
+removed_data = list(remove_duplicates_data.values())
+sorted_data = sorted(removed_data, key=lambda x: -x['timestamp'])
 json_data = json.dumps(sorted_data, ensure_ascii=False, indent=4)
 with open('./src/public/data/welfare.json', 'w', encoding='utf-8') as file:
     file.write(json_data)

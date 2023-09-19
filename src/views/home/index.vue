@@ -38,7 +38,7 @@
             <guideComponent :guideLocation="contentLocation"></guideComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
-            <welfareComponent></welfareComponent>
+            <welfareComponent :welfareLocation="contentLocation"></welfareComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '3'">
             <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
