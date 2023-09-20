@@ -3,26 +3,27 @@ name: CI
 on:
   # 设置定时任务
   schedule:
-    - cron: '0 3 * * *'  # 每天的 UTC 03:00（北京时间上午11点）执行任务
-    - cron: '0 9 * * *'  # 每天的 UTC 09:00（北京时间下午5点）执行任务
-    - cron: '0 15 * * *' # 每天的 UTC 15:00（北京时间晚上11点）执行任务
+    - cron: "0 3 * * *" # 每天的 UTC 03:00（北京时间上午11点）执行任务
+    - cron: "0 9 * * *" # 每天的 UTC 09:00（北京时间下午5点）执行任务
+    - cron: "0 16 * * *" # 每天的 UTC 16:00（北京时间晚上12点）执行任务
+    - cron: "0 21 * * *" # 每天的 UTC 21:00（北京时间凌晨5点）执行任务
   # 仅在推送到默认分支时运行。
   push:
-    branches: 
+    branches:
       - master
 
   # 这个选项可以使你手动在 Action tab 页面触发工作流
-  workflow_dispatch:      
+  workflow_dispatch:
 
 # 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
-permissions: 
+permissions:
   contents: write
   pages: write
   id-token: write
 
 # 允许一个并发的部署
 concurrency:
-  group: 'pages'
+  group: "pages"
   cancel-in-progress: true
 
 jobs:
@@ -43,11 +44,11 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: "npm"
       - name: Install dependencies
         run: npm install
       # - name: Build
-      #   run: 
+      #   run:
       #     npm run build
       - name: crawl
         run: |
@@ -65,18 +66,17 @@ jobs:
         run: |
           npm run build
       - name: 404
-        run: 
-          cp dist/index.html dist/404.html
+        run: cp dist/index.html dist/404.html
       # - name: Setup Pages
       #   uses: actions/configure-pages@v3
       # - name: Upload artifact
       #   uses: actions/upload-pages-artifact@v1
       #   with:
-          # path: './docs/.vuepress/dist'
+      # path: './docs/.vuepress/dist'
       # - name: Deploy to GitHub Pages
       #   id: deployment
-      #   uses: actions/deploy-pages@v1 
-      - name: Deploy  
+      #   uses: actions/deploy-pages@v1
+      - name: Deploy
         run: |
           pwd
           cd ./dist/

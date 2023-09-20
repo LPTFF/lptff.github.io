@@ -84,8 +84,8 @@ run_script "githubTrending.py"
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")
 
-# 判断当前时间是否在指定的时间范围内（晚上10点至第二日凌晨4点）
-if [ "$current_hour" -ge 22 ] || [ "$current_hour" -lt 4 ]; then
+# 判断当前时间是否在指定的时间范围内（晚上11点至第二日凌晨4点）
+if [ "$current_hour" -ge 23 ] || [ "$current_hour" -lt 4 ]; then
   echo "北京时间$current_hour，满足条件执行更新特殊脚本"
   run_script "douban.py"
   run_script "leetCode.py"
