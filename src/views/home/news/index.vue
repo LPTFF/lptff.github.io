@@ -27,7 +27,7 @@
           </div>
           <div class="line-split line-add-split"></div>
           <div class="news-bottom common-flex">
-            <div class="news-bottom">
+            <div class="news-bottom" @click="gotoMainWebsite(item)">
               <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
               <span class="website-name">
                 {{ getWebsiteName(item) }}
@@ -49,11 +49,7 @@
             {{ item.title }}
           </a>
           <div class="news-source">
-            <el-avatar
-              :size="50"
-              class="img-news"
-              :src="item.image ? item.image : logoUrl"
-            />
+            <el-avatar :size="50" class="img-news" :src="getWebsiteLogo(item)" />
             <div class="news-date">{{ item.time }}</div>
           </div>
           <div class="news-summary">
@@ -61,7 +57,7 @@
           </div>
           <div class="line-split"></div>
           <div class="news-bottom common-flex">
-            <div class="news-bottom">
+            <div class="news-bottom" @click="gotoMainWebsite(item)">
               <el-avatar :size="50" class="is-new" :src="getWebsiteLogo(item)" />
               <span class="website-name">
                 {{ getWebsiteName(item) }}
@@ -79,6 +75,7 @@ import { ref, onMounted, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
+import meituanNews from "../../../public/data/techForum/meituanTech.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import bgImageUrl from "../../../public/img/bg.jpg";
 import { ElRow, ElCol, ElCard, ElAvatar } from "element-plus";
@@ -89,8 +86,9 @@ export default {
   setup(props: any) {
     let juejinList = ref(juejinNews);
     let v2exList = ref(v2exNews);
+    let meituanList = ref(meituanNews);
     let newsAll: any[] = [];
-    newsAll = [...juejinList.value, ...v2exList.value];
+    newsAll = [...juejinList.value, ...v2exList.value, ...meituanList.value];
     newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const callMethod = () => {
       // console.log('233');
@@ -116,10 +114,14 @@ export default {
           websiteLogo =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADg0lEQVR4AWKAgf///7NeuXJl47Fjx77t2bPn37Zt2/5t2bIF0HsZtcIWRmF4fgoREodSiogIIEq59lP8D3fuKeeOcTfDDSFNSSKKCwAAA77Tc/HsOs03xpGOenrX7LW+9a6997d3dvgJ6EVPeuOBV2LM3/b29q/l5eU8xf+DpaWlPJ7JmXOARDqdDkdHR+Hx8TG8v7+Hj48PAY+hxuqnvL290ZPeeCRD4J3ikmh+e3v7ZcNIXj6tx8Mh8E5xX/hxeHhIAdOG19dXMEaN1Sil6onxwAtPvFNsDn48PDwkxS8vL2CMRjEXr4/n8cALT7xT7naTFkM+n1eN1W/BWj18OlIEQAI0g+fnZ9VY/Tb66Jsy8ApoABMTE6G8vDxAWVmZapwo1NTUhKmpKdbHBjb2NscHgKenp4TKyspQUVEBxOqnTE9Puz6GeyI+AAmKeGahqqoqVFdXRyGnisdmZ2ftoxrjEb8CJIAd6oLa2tpvUV9fH+bn5+lhP9GncADvEwuERnV1dWCMRjFnfVNTU8hms/YSn4biA9zf3yc0NjYmNDQ0qMZqFHKtra1hdXWVXoJHfAB3KUV3d3dgcUkODg7C0NAQZ11AV1dXyOVy9i06AObAu9oBSr4HjNH9/f3Q29sbmpubC2C4q6sretsrPgC7lKKbmxswRo2jeYblKgwODoaWlpYCRkZGSg6AOdDwn9nZ2QljY2Ohra0tob29HeXsw9bWFnXh+vpan+IDUCQdHR2hs7MTjNEv09/fHzY3N7n/9iw9AJfK4u7ubjYRGKPGapS+vr6wsrLCo0dP8cVUOAAH4fLyMqGnp+fLsAFVzjyTyWhuP9AnPgALKLq4uAhAo4GBATBGjaN5WFhYoBc97GfM8fgAJFwkbKDh4WEwRqOYm5ubKzgROT8/16f4ABTJ5ORk4BGC0dFR1ThRGB8fDzMzM2w4zaIUHYCFJM7OzgqKv4rm9LCPamydvsm/ZLxMSJyenorHxMXFzDVxfRTqeCck/5ItLi4yQGByDGlycnICLFCN1Sil6umNB1544p3KZrOP/Njb2wskmY6zYMHx8bFqrEbzEqunp69tvPDEO7WxscGHCY8Oxb73o7BY/Q6sxQMvPNfX13+n+DzKZDJ5h9jd3XVaFvwIvFXpSW/N8Uw+UnO53C+H+B/ghWfKPz9SuSTcl3Q6/eOf52w4eq+trf31ef4H8lDJyDc4UgoAAAAASUVORK5CYII=";
           break;
+        case "meituan":
+          websiteLogo =
+            "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico";
+          break;
         default:
           // 当 expression 的值与所有的 case 不匹配时执行的代码块
           websiteLogo =
-            "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@gh-pages/img/logo.jpg";
+            "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/img/logo.jpg";
       }
       return websiteLogo;
     };
@@ -135,6 +137,9 @@ export default {
           break;
         case "v2ex":
           websiteName = "V2EX";
+          break;
+        case "meituan":
+          websiteName = "美团科技";
           break;
         default:
           websiteName = "随风而逝";
@@ -198,6 +203,28 @@ export default {
     const handleImageError = (event: any) => {
       event.target.src = bgUrl.value;
     };
+    const gotoMainWebsite = (item: any) => {
+      let mainWebsite = "";
+      switch (String(item.website)) {
+        case "juejin":
+          mainWebsite = "https://juejin.cn/";
+          break;
+        case "infzm":
+          mainWebsite = "https://www.infzm.com/";
+          break;
+        case "v2ex":
+          mainWebsite = "https://www.v2ex.com/";
+          break;
+        case "meituan":
+          mainWebsite = "https://tech.meituan.com/";
+          break;
+        default:
+          mainWebsite = "https://lptff.github.io/";
+      }
+      if (mainWebsite) {
+        gotoOutPage(mainWebsite);
+      }
+    };
     return {
       callMethod,
       isPCRes,
@@ -214,6 +241,7 @@ export default {
       newsAllLimited,
       handleCoverImg,
       handleImageError,
+      gotoMainWebsite,
     };
   },
   components: {
