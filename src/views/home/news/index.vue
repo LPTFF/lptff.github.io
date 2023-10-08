@@ -98,53 +98,60 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
-    const getWebsiteLogo = (item: any) => {
-      // 根据 item 的属性动态计算图片的 src 值
-      let websiteLogo = "";
+    const getWebsiteInfo = (item: any) => {
+      let websiteInfo = {};
       switch (String(item.website)) {
         case "juejin":
-          websiteLogo =
-            "https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg";
+          websiteInfo = {
+            name: "掘金",
+            mainWebsite: "https://juejin.cn/",
+            logo:
+              "https://lf3-cdn-tos.bytescm.com/obj/static/xitu_juejin_web/6c61ae65d1c41ae8221a670fa32d05aa.svg",
+          };
           break;
         case "infzm":
-          websiteLogo =
-            "http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170";
+          websiteInfo = {
+            name: "南方周末",
+            mainWebsite: "https://www.infzm.com/",
+            logo:
+              "http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170",
+          };
           break;
         case "v2ex":
-          websiteLogo =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADg0lEQVR4AWKAgf///7NeuXJl47Fjx77t2bPn37Zt2/5t2bIF0HsZtcIWRmF4fgoREodSiogIIEq59lP8D3fuKeeOcTfDDSFNSSKKCwAAA77Tc/HsOs03xpGOenrX7LW+9a6997d3dvgJ6EVPeuOBV2LM3/b29q/l5eU8xf+DpaWlPJ7JmXOARDqdDkdHR+Hx8TG8v7+Hj48PAY+hxuqnvL290ZPeeCRD4J3ikmh+e3v7ZcNIXj6tx8Mh8E5xX/hxeHhIAdOG19dXMEaN1Sil6onxwAtPvFNsDn48PDwkxS8vL2CMRjEXr4/n8cALT7xT7naTFkM+n1eN1W/BWj18OlIEQAI0g+fnZ9VY/Tb66Jsy8ApoABMTE6G8vDxAWVmZapwo1NTUhKmpKdbHBjb2NscHgKenp4TKyspQUVEBxOqnTE9Puz6GeyI+AAmKeGahqqoqVFdXRyGnisdmZ2ftoxrjEb8CJIAd6oLa2tpvUV9fH+bn5+lhP9GncADvEwuERnV1dWCMRjFnfVNTU8hms/YSn4biA9zf3yc0NjYmNDQ0qMZqFHKtra1hdXWVXoJHfAB3KUV3d3dgcUkODg7C0NAQZ11AV1dXyOVy9i06AObAu9oBSr4HjNH9/f3Q29sbmpubC2C4q6sretsrPgC7lKKbmxswRo2jeYblKgwODoaWlpYCRkZGSg6AOdDwn9nZ2QljY2Ohra0tob29HeXsw9bWFnXh+vpan+IDUCQdHR2hs7MTjNEv09/fHzY3N7n/9iw9AJfK4u7ubjYRGKPGapS+vr6wsrLCo0dP8cVUOAAH4fLyMqGnp+fLsAFVzjyTyWhuP9AnPgALKLq4uAhAo4GBATBGjaN5WFhYoBc97GfM8fgAJFwkbKDh4WEwRqOYm5ubKzgROT8/16f4ABTJ5ORk4BGC0dFR1ThRGB8fDzMzM2w4zaIUHYCFJM7OzgqKv4rm9LCPamydvsm/ZLxMSJyenorHxMXFzDVxfRTqeCck/5ItLi4yQGByDGlycnICLFCN1Sil6umNB1544p3KZrOP/Njb2wskmY6zYMHx8bFqrEbzEqunp69tvPDEO7WxscGHCY8Oxb73o7BY/Q6sxQMvPNfX13+n+DzKZDJ5h9jd3XVaFvwIvFXpSW/N8Uw+UnO53C+H+B/ghWfKPz9SuSTcl3Q6/eOf52w4eq+trf31ef4H8lDJyDc4UgoAAAAASUVORK5CYII=";
+          websiteInfo = {
+            name: "V2EX",
+            mainWebsite: "https://www.v2ex.com/",
+            logo:
+              "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAADg0lEQVR4AWKAgf///7NeuXJl47Fjx77t2bPn37Zt2/5t2bIF0HsZtcIWRmF4fgoREodSiogIIEq59lP8D3fuKeeOcTfDDSFNSSKKCwAAA77Tc/HsOs03xpGOenrX7LW+9a6997d3dvgJ6EVPeuOBV2LM3/b29q/l5eU8xf+DpaWlPJ7JmXOARDqdDkdHR+Hx8TG8v7+Hj48PAY+hxuqnvL290ZPeeCRD4J3ikmh+e3v7ZcNIXj6tx8Mh8E5xX/hxeHhIAdOG19dXMEaN1Sil6onxwAtPvFNsDn48PDwkxS8vL2CMRjEXr4/n8cALT7xT7naTFkM+n1eN1W/BWj18OlIEQAI0g+fnZ9VY/Tb66Jsy8ApoABMTTrEPCPrqR3YziyHVBJnibzUcQvxyeVaz7scHgKenp4TKyspQUVEBxOqnTE9Puz6GeyI+AAmKeGahqqoqVFdXRyGnisdmZ2ftoxrjEb8CJIAd6oLa2tpvUV9fH+bn5+lhP9GncADvEwuERnV1dWCMRjFnfVNTU8hms/YSn4biA9zf3yc0NjYmNDQ0qMZqFHKtra1hdXWVXoJHfAB3KUV3d3dgcUkODg7C0NAQZ11AV1dXyOVy9i06AObAu9oBSr4HjNH9/f3Q29sbmpubC2C4q6sretsrPgC7lKKbmxswRo2jeYblKgwODoaWlpYCRkZGSg6AOdDwn9nZ2QljY2Ohra0tob29HeXsw9bWFnXh+vpan+IDUCQdHR2hs7MTjNEv09/fHzY3N7n/9iw9AJfK4u7ubjYRGKPGapS+vr6wsrLCo0dP8cVUOAAH4fLyMqGnp+fLsAFVzjyTyWhuP9AnPgALKLq4uAhAo4GBATTrEPCPrqR3YziyHVBJnibzUcQvxyeVaz7wRqOYm5ubKzgROT8/16f4ABTTrEPCPrqR3YziyHVBJnibzUcQvxyeVaz7HYCFJM7OzgqKv4rm9LCPamydvsm/ZLxMSJyenorHxMXFzDVxfRTqeCck/5ItLi4yQGByDGlycnICLFCN1Sil6umNB1544p3KZrOP/Njb2wskmY6zYMHx8bFqrEbzEqunp69tvPDEO7WxscGHCY8Oxb73o7BY/Q6sxQMvPNfX13+n+DzKZDJ5h9jd3XVaFvwIvFXpSW/N8Uw+UnO53C+H+B/ghWfKPz9SuSTcl3Q6/eOf52w4eq+trf31ef4H8lDJyDc4UgoAAAAASUVORK5CYII=",
+          };
           break;
         case "meituan":
-          websiteLogo =
-            "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico";
+          websiteInfo = {
+            name: "美团科技",
+            mainWebsite: "https://tech.meituan.com/",
+            logo:
+              "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico",
+          };
           break;
         default:
-          // 当 expression 的值与所有的 case 不匹配时执行的代码块
-          websiteLogo =
-            "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/img/logo.jpg";
+          websiteInfo = {
+            name: "随风而逝",
+            mainWebsite: "https://lptff.github.io/",
+            logo:
+              "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/img/logo.jpg",
+          };
       }
-      return websiteLogo;
+      return websiteInfo;
+    };
+    const getWebsiteLogo = (item: any) => {
+      // 根据 item 的属性动态计算图片的 src 值
+      let websiteInfo = getWebsiteInfo(item);
+      return websiteInfo.logo;
     };
     const getWebsiteName = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
-      let websiteName = "";
-      switch (String(item.website)) {
-        case "juejin":
-          websiteName = "掘金";
-          break;
-        case "infzm":
-          websiteName = "南方周末";
-          break;
-        case "v2ex":
-          websiteName = "V2EX";
-          break;
-        case "meituan":
-          websiteName = "美团科技";
-          break;
-        default:
-          websiteName = "随风而逝";
-      }
-      return websiteName;
+      let websiteInfo = getWebsiteInfo(item);
+      return websiteInfo.name;
     };
     onMounted(async () => {
       callMethod(); // 在组件挂载后调用方法
@@ -204,25 +211,9 @@ export default {
       event.target.src = bgUrl.value;
     };
     const gotoMainWebsite = (item: any) => {
-      let mainWebsite = "";
-      switch (String(item.website)) {
-        case "juejin":
-          mainWebsite = "https://juejin.cn/";
-          break;
-        case "infzm":
-          mainWebsite = "https://www.infzm.com/";
-          break;
-        case "v2ex":
-          mainWebsite = "https://www.v2ex.com/";
-          break;
-        case "meituan":
-          mainWebsite = "https://tech.meituan.com/";
-          break;
-        default:
-          mainWebsite = "https://lptff.github.io/";
-      }
-      if (mainWebsite) {
-        gotoOutPage(mainWebsite);
+      let websiteInfo = getWebsiteInfo(item);
+      if (websiteInfo.mainWebsite) {
+        gotoOutPage(websiteInfo.mainWebsite);
       }
     };
     return {
