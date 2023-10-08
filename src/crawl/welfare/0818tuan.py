@@ -33,12 +33,12 @@ try:
                 title = article['title']
                 href = 'http://www.0818tuan.com' + article['href']
                 time_origin=article.find('span', class_='badge badge-success red').get_text().strip()
-                # 设置时区为北京时间
-                beijing_timezone = pytz.timezone('Asia/Shanghai')
-                # 获取当前日期和时间，并将其转换为北京时间
-                current_datetime = datetime.now(beijing_timezone)
+                # # 设置时区为北京时间
+                # beijing_timezone = pytz.timezone('Asia/Shanghai')
+                # # 获取当前日期和时间，并将其转换为北京时间
+                # current_datetime = datetime.now(beijing_timezone)
                 # 获取当前日期
-                current_date = current_datetime.strftime("%Y-%m-%d")
+                current_date = datetime.now().strftime("%Y-%m-%d")
                 # 将时间字符串和日期合并成一个完整的日期时间字符串
                 full_time_str = f"{current_date} {time_origin}:00"
                 # 将字符串转换为 datetime 对象
