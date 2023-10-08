@@ -168,6 +168,7 @@ export default {
           break;
         case "juejin":
         case "v2ex":
+        case "meituan":
           handleUrl = item.url;
           break;
         default:
