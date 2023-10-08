@@ -98,7 +98,7 @@ export default {
     const isPCRes = computed(() => {
       return isPC();
     });
-    const getWebsiteInfo = (item: any) => {
+    const getWebsiteInfo = (item: any): any => {
       let websiteInfo = {};
       switch (String(item.website)) {
         case "juejin":
