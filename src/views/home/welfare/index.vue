@@ -8,7 +8,6 @@
         v-for="(item, sonIndex) in welfareLimited"
         :key="sonIndex"
       >
-        <!-- <div class="welfare-title" v-if="sonIndex == 0">7号</div> -->
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
             <div class="day-week-welfare">
@@ -45,7 +44,7 @@
               </div>
             </div>
           </div>
-          <div class="welfare-div-website">
+          <div class="welfare-div-website" @click="gotoMainWebsite(item)">
             <img
               :src="handleWebsiteImg(item) ? handleWebsiteImg(item) : logoUrl"
               alt="网站"
@@ -64,17 +63,23 @@
 <script lang="ts">
 import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
-import welfareSource from "../../../public/data/welfare.json";
+import oldSource from "../../../public/data/welfare.json";
+import tuanSource from "../../../public/data/welfare/0818tuan.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
+import tuanImage from "./img/0818tuan.png";
+import mutouxbImage from "./img/mutouxb.png";
+import yqhd8Image from "./img/yqhd8.png";
+import hxm5Image from "./img/hxm5.png";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
+let welfareSource: any[] = [];
+welfareSource = [...oldSource, ...tuanSource];
+welfareSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 export default {
   props: {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
     const logoUrl = ref(logoImageUrl);
-    // let welfareData = ref(welfareSource);
-    // console.log("welfareSource", welfareSource);
     const handleWeek = (item: any) => {
       const date = new Date(item.timestamp);
       const dayOfWeek = date.getDay();
@@ -106,49 +111,59 @@ export default {
       return timeString;
     };
     const gotoWelfareWebsite = (item: any) => {
-      console.log(item);
       if (item.link) {
         gotoOutPage(item.link);
       }
     };
-    const handleWebsiteName = (item: any) => {
-      // 根据 item 的属性动态计算图片的 src 值
-      let websiteName = "";
+    const getWebsiteInfo = (item: any): any => {
+      let websiteInfo = {};
       switch (String(item.website)) {
         case "hxm5":
-          websiteName = "线报引擎";
+          websiteInfo = {
+            websiteName: "线报引擎",
+            mainWebsite: "https://www.hxm5.com/",
+            websiteImg: hxm5Image,
+          };
           break;
         case "mutouxb":
-          websiteName = "86收线报网";
+          websiteInfo = {
+            websiteName: "86收线报网",
+            mainWebsite: "http://www.mutouxb.com/",
+            websiteImg: mutouxbImage,
+          };
           break;
         case "yqhd8":
-          websiteName = "实时线报";
+          websiteInfo = {
+            websiteName: "实时线报",
+            mainWebsite: "https://www.yqhd8.com/",
+            websiteImg: yqhd8Image,
+          };
+          break;
+        case "0818tuan":
+          websiteInfo = {
+            websiteName: "0818团",
+            mainWebsite: "http://www.0818tuan.com/",
+            websiteImg: tuanImage,
+          };
           break;
         default:
-          websiteName = "羊毛";
+          websiteInfo = {
+            websiteName: "羊毛",
+            mainWebsite: "https://lptff.github.io/",
+            websiteImg: logoImageUrl,
+          };
       }
-      return websiteName;
+      return websiteInfo;
+    };
+    const handleWebsiteName = (item: any) => {
+      // 根据 item 的属性动态计算图片的 src 值
+      let websiteInfo = getWebsiteInfo(item);
+      return websiteInfo.websiteName;
     };
     const handleWebsiteImg = (item: any) => {
       // 根据 item 的属性动态计算图片的 src 值
-      let websiteImg = "";
-      switch (String(item.website)) {
-        case "hxm5":
-          websiteImg =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAACa0lEQVR4AXWTQ7gcQRSFe3qYL6vYts1NbJvreJVd1N2xbds2NrFt25mZdr/u4cmtZy7Kdf+LOsVB5IonBW4/BE6jhqTIISG6cjbBjaTgAuiM3Um7SzZky9FkLzvI3tjlxAwP4oKPRjcBeJAT5L7HbFkECvMaE3kYswrBXFob1u7eME6Nh3VpKlJOToC+rTuMeSUJxhPMlR0QZgAkqBnrG8H6eA6O/Rvmj3vQX+yDem89jEc74QQfwAw9RnDvaERFX3YAMgH22voInp+GuB1CcGVbRGd44UhexEUv5LkVoF6bj4j5BeqS2tnTSAOkpeCGPr8Kkk4I6v6BZOhBjLxFRD9iVIfQkqoU3V+YW7vkBaRFwUObXz0NsKcfGXpSoVHJg/C8qpTKbkSCT8hJuYIALhgrGhMgDGVVKziCH8qcYpD3DEPKjxtw/t1FeG17KqQ3f0CMANrOPkjo3/Fz72Aor4/DCb2H4yhQrq6EOq8SHErJkQIFRCBQDc5PhvP9JuR1LSBfmQ/jxkbEzR8wnhyEurguAfwFA+JUKOPBeqS8OMOeKlU8UcEDeUMX2D/vwpZfQ987HLZYmM68iNFZUnRlAZiR9eIYtOfHEJvJp0FFglAh5QXVYT3aTumoMB9toBepRXAvKzwBhIwaeGA9Xgfn9xNESZEZko6TpzhBbKkw9GOTEFW/UW1eIbx/OKKkEwbQUr1JPOSl1SDv6MYM8uiepE568ENeUhfa6bFM3pS2R+OSaZ+J5cw+DnkMsNxyA+icQ4QJi6lT8FFqPDmiz0QqLAqCkJy1mOQCrVnLA2ARMkiCwSROo/z3UopF/wMtJbFAANdXrAAAAABJRU5ErkJggg==";
-          break;
-        case "mutouxb":
-          websiteImg =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAALVBMVEVHcEz/UwD/VAD/VAD/UwD+UwD/UwD/UwD/UwD+UwD+UwD+UwD9UgD+UwD/VAAEMvkGAAAADnRSTlMAQOHzw5TW6zEhfFoQp2Bl2BQAAADGSURBVDiNzZPZDsQgCEVRXOpS//9zp1ZR0DbzNMnch8bIYSsIwHWYqhNepUqV/iPg+AKE4sIKHAzI/jqqcfkm28l3XSHMNyAWbJqhPJIMLzEM4KHBKjcA3PqrSiyzewJEN2a3n7L6LQZL4O5YLgt75s4N9mrvIN5fDdhIO+3tbyYaFuXTFOTsDmPcVnZjKeDcB81mAXEknEBgQPOPIABaE6T8CRagn1WrX/fhiJ1UeNcYeb9yqzOW6hj9nP7yLnJaB/KTp/cBnJYXiHf+EHYAAAAASUVORK5CYII=";
-          break;
-        case "yqhd8":
-          websiteImg =
-            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAY1BMVEX/eH7/dHr/cHf/d33/c3n/b3X/jpP/0tT/zM7/k5j/a3L/wcP/2tv/3+D/oKT/////naH/srX/io//7/D/+vr/6er/vcD/gIb/19n/anH/XWX/hov/pan/Y2r/d37/eH3/5ufLMu3HAAABhUlEQVR4Ad3OV7ajMBAE0FYXIjQPFxmcJO9/lSMZJqf/R0Z1dbrkUx1O9f1WpAcKr+p+yn1ZVUV+1w1gZfvRVRfD99xaduydFAO9jhPrtp656DehK/uamxOb9mvPqp97u+7c/ZkDnG6crnB3PjynJxkAI7d4FmzY9mwV2tJfOAzcPcTvHIoDSLG0FUuH67RcNw4LGwdozfpbC3tyvpltXM35kfMVET4Bj0NgqzhPy+vFfS10Za0R0X9w1RN4MoFpIbsS9p4QcZ3ZuxPgTj7NruyeDpImBIErScUJXJ97Fw+2imJg5RHEqvyOB9CaDye+4sUhje4LwG3kBuAAaZxCbKbEaKSGgOvCVaMAZ4XOIwp5hWvYGcK1YncNSCKDNHYocrT4oC1Xr7anPCKcHXSnBMl7vfgXm20g1ysgSbyBsVUJUaeXD+5Bcm5FIYfIANAgSVjqGJxBLf2HQ7yBxBCzkIgkBEDAKU4gcgocQn4Q8k+Rwf+E/E/IrwJZAN97/CyQs+OBLIAvhrEgMiyP4ssAAAAASUVORK5CYII=";
-          break;
-        default:
-          websiteImg = "羊毛";
-      }
-      return websiteImg;
+      let websiteInfo = getWebsiteInfo(item);
+      return websiteInfo.websiteImg;
     };
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
@@ -166,6 +181,12 @@ export default {
       );
       return welfareTmpAll;
     });
+    const gotoMainWebsite = (item: any) => {
+      let websiteInfo = getWebsiteInfo(item);
+      if (websiteInfo.mainWebsite) {
+        gotoOutPage(websiteInfo.mainWebsite);
+      }
+    };
     return {
       logoUrl,
       handleWeek,
@@ -175,6 +196,7 @@ export default {
       handleWebsiteName,
       handleWebsiteImg,
       welfareLimited,
+      gotoMainWebsite,
     };
   },
   components: {
