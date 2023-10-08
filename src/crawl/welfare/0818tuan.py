@@ -33,25 +33,21 @@ try:
                 title = article['title']
                 href = 'http://www.0818tuan.com' + article['href']
                 time_origin=article.find('span', class_='badge badge-success red').get_text().strip()
-                # # 设置时区为北京时间
-                # beijing_timezone = pytz.timezone('Asia/Shanghai')
-                # # 获取当前日期和时间，并将其转换为北京时间
-                # current_datetime = datetime.now(beijing_timezone)
+                # 创建北京时区对象
+                beijing_tz = pytz.timezone('Asia/Shanghai')
                 # 获取当前日期
-                current_date = datetime.now().strftime("%Y-%m-%d")
-                # 将时间字符串和日期合并成一个完整的日期时间字符串
-                full_time_str = f"{current_date} {time_origin}:00"
-                # 将字符串转换为 datetime 对象
-                formatted_time = datetime.strptime(full_time_str, "%Y-%m-%d %H:%M:%S")
-                # 将 datetime 对象格式化为您想要的字符串格式
-                result_str = formatted_time.strftime("%Y-%m-%d %H:%M:%S")
-                # 将 datetime 对象转换为时间戳并取整（毫秒）
-                timestamp = int(formatted_time.timestamp() * 1000)
+                today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
+                # 假设time_desc是您要处理的时间字符串
+                time_desc = str(time_origin)
+                # 创建带有北京时区信息的日期时间对象
+                dt = beijing_tz.localize(datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S'))
+                # 转换为时间戳（毫秒）
+                timestamp = int(dt.timestamp() * 1000)
                 extracted_data.append({
                     'link': href,
                     'title': title,
                     'img_src': '',
-                    'time': result_str,
+                    'time': str(dt),
                     'timestamp': timestamp,
                     'website': '0818tuan',
                 })
