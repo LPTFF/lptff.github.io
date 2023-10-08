@@ -180,7 +180,7 @@ export default {
     const handleNewsDesc = (item: any, length: any) => {
       return item.substring(0, length) + "...";
     };
-    const logoUrl = ref(logoImageUrl); //  图片路径变量
+    const logoUrl = ref(logoImageUrl); // 图片路径变量
     const bgUrl = ref(bgImageUrl); // 图片路径变量
     let maxLength = 0;
     const newsAllLimited = computed(() => {
