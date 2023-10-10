@@ -41,6 +41,12 @@
                   alt="作者"
                   class="welfare-img-link"
                 />
+                <el-icon
+                  :size="32"
+                  v-if="item.isTop && item.isTop == '1'"
+                  style="color: red"
+                  ><CircleCheck
+                /></el-icon>
               </div>
             </div>
           </div>
@@ -65,15 +71,21 @@ import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../public/data/welfare.json";
 import tuanSource from "../../../public/data/welfare/0818tuan.json";
+import tuanTopSource from "../../../public/data/welfare/0818tuanTop.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import tuanImage from "./img/0818tuan.png";
 import mutouxbImage from "./img/mutouxb.png";
 import yqhd8Image from "./img/yqhd8.png";
 import hxm5Image from "./img/hxm5.png";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
+let welfareInitSource: any[] = [];
+let welfareTopSource: any[] = [];
 let welfareSource: any[] = [];
-welfareSource = [...oldSource, ...tuanSource];
-welfareSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+welfareInitSource = [...oldSource, ...tuanSource];
+welfareTopSource = [...tuanTopSource];
+welfareTopSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+welfareInitSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+welfareSource = [...welfareTopSource, ...welfareInitSource];
 export default {
   props: {
     welfareLocation: [String, Number],
