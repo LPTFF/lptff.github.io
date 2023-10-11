@@ -30,27 +30,28 @@ try:
         #     f.write(box_div.prettify())
         if box_div:
             for article in box_div.find_all('a',class_="list-group-item"):
-                title = article['title']
-                href = 'http://www.0818tuan.com' + article['href']
-                time_origin=article.find('span', class_='badge badge-success red').get_text().strip()
-                # 创建北京时区对象
-                beijing_tz = pytz.timezone('Asia/Shanghai')
-                # 获取当前日期
-                today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
-                # 假设time_desc是您要处理的时间字符串
-                time_desc = str(time_origin)
-                # 创建带有北京时区信息的日期时间对象
-                dt = beijing_tz.localize(datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S'))
-                # 转换为时间戳（毫秒）
-                timestamp = int(dt.timestamp() * 1000)
-                extracted_data.append({
-                    'link': href,
-                    'title': title,
-                    'img_src': '',
-                    'time': str(dt),
-                    'timestamp': timestamp,
-                    'website': '0818tuan',
-                })
+                if article.find('span', class_='badge badge-success red'):
+                    title = article['title']
+                    href = 'http://www.0818tuan.com' + article['href']
+                    time_origin=article.find('span', class_='badge badge-success red').get_text().strip()
+                    # 创建北京时区对象
+                    beijing_tz = pytz.timezone('Asia/Shanghai')
+                    # 获取当前日期
+                    today = datetime.now(beijing_tz).strftime('%Y-%m-%d')
+                    # 假设time_desc是您要处理的时间字符串
+                    time_desc = str(time_origin)
+                    # 创建带有北京时区信息的日期时间对象
+                    dt = beijing_tz.localize(datetime.strptime(f'{today} {time_desc}:00', '%Y-%m-%d %H:%M:%S'))
+                    # 转换为时间戳（毫秒）
+                    timestamp = int(dt.timestamp() * 1000)
+                    extracted_data.append({
+                        'link': href,
+                        'title': title,
+                        'img_src': '',
+                        'time': str(dt),
+                        'timestamp': timestamp,
+                        'website': '0818tuan',
+                    })
         # 转化为JSON格式
         json_data = json.dumps(extracted_data, ensure_ascii=False, indent=4)
         # 保存为JSON文件
