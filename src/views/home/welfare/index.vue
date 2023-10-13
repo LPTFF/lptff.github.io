@@ -72,17 +72,20 @@ import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../public/data/welfare.json";
 import tuanSource from "../../../public/data/welfare/0818tuan.json";
 import tuanTopSource from "../../../public/data/welfare/0818tuanTop.json";
+import zhuanyesSource from "../../../public/data/welfare/zhuanyes.json";
+import zhuanyesTopSource from "../../../public/data/welfare/zhuanyesTop.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import tuanImage from "./img/0818tuan.png";
 import mutouxbImage from "./img/mutouxb.png";
 import yqhd8Image from "./img/yqhd8.png";
 import hxm5Image from "./img/hxm5.png";
+import zhuanyesImage from "./img/zhuanyes.png";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
 let welfareInitSource: any[] = [];
 let welfareTopSource: any[] = [];
 let welfareSource: any[] = [];
-welfareInitSource = [...oldSource, ...tuanSource];
-welfareTopSource = [...tuanTopSource];
+welfareInitSource = [...oldSource, ...tuanSource, ...zhuanyesSource];
+welfareTopSource = [...tuanTopSource, ...zhuanyesTopSource];
 welfareTopSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareInitSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareSource = [...welfareTopSource, ...welfareInitSource];
@@ -156,6 +159,13 @@ export default {
             websiteName: "0818团",
             mainWebsite: "http://www.0818tuan.com/",
             websiteImg: tuanImage,
+          };
+          break;
+        case "zhuanyes":
+          websiteInfo = {
+            websiteName: "好赚网",
+            mainWebsite: "https://www.zhuanyes.com/",
+            websiteImg: zhuanyesImage,
           };
           break;
         default:
