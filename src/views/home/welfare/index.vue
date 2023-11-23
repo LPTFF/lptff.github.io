@@ -75,6 +75,7 @@ import tuanTopSource from "../../../public/data/welfare/0818tuanTop.json";
 import zhuanyesSource from "../../../public/data/welfare/zhuanyes.json";
 import zhuanyesTopSource from "../../../public/data/welfare/zhuanyesTop.json";
 import daydayzhuanSource from "../../../public/data/welfare/daydayzhuan.json";
+import daydayzhuanTopSource from "../../../public/data/welfare/daydayzhuanTop.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import tuanImage from "./img/0818tuan.png";
 import mutouxbImage from "./img/mutouxb.png";
@@ -92,7 +93,7 @@ welfareInitSource = [
   ...zhuanyesSource,
   ...daydayzhuanSource,
 ];
-welfareTopSource = [...tuanTopSource, ...zhuanyesTopSource];
+welfareTopSource = [...tuanTopSource, ...zhuanyesTopSource, ...daydayzhuanTopSource];
 welfareTopSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareInitSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareSource = [...welfareTopSource, ...welfareInitSource];

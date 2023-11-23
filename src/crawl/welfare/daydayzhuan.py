@@ -25,10 +25,10 @@ try:
         # 解析HTML
         soup = BeautifulSoup(data, 'html.parser')
         box_div = soup.find('div', class_='layui-card-body')
-        with open('./soup.html', 'w', encoding='utf-8') as f:
-            f.write(soup.prettify())
-        with open('./box_div.html', 'w', encoding='utf-8') as f:
-            f.write(box_div.prettify())
+        # with open('./soup.html', 'w', encoding='utf-8') as f:
+        #     f.write(soup.prettify())
+        # with open('./box_div.html', 'w', encoding='utf-8') as f:
+        #     f.write(box_div.prettify())
         if box_div:
             for article in box_div.find_all('article',class_="layui-row title-li"):
                 if article.find('time', class_='date today'):

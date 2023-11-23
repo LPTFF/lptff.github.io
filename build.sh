@@ -86,6 +86,7 @@ python ./src/crawl/welfare/0818tuanTop.py
 python ./src/crawl/welfare/zhuanyes.py
 python ./src/crawl/welfare/zhuanyesTop.py
 python ./src/crawl/welfare/daydayzhuan.py
+python ./src/crawl/welfare/daydayzhuanTop.py
 # 获取当前时间的小时和时区
 current_hour=$(TZ='Asia/Shanghai' date +"%H")
 current_timezone=$(date +"%Z")
