@@ -31,6 +31,7 @@
             <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
             <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
             <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
+            <el-menu-item index="9">高级搜索</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -58,6 +59,11 @@
           <!-- <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
           </div> -->
+          <div class="component-div" v-if="selectIndex === '9'">
+            <advancedSearchComponent
+              :newsLocation="contentLocation"
+            ></advancedSearchComponent>
+          </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
           <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023</div>
@@ -78,6 +84,7 @@ import welfareComponent from "./welfare/index.vue";
 //import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
+import advancedSearchComponent from "./advancedSearch/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 // import "element-plus/theme-chalk/index.css";
@@ -219,6 +226,7 @@ export default {
     ElMain,
     findJobComponent,
     ElButton,
+    advancedSearchComponent,
   },
 };
 </script>
