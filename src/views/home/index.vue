@@ -25,12 +25,12 @@
           >
             <el-menu-item index="1">热门资讯</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
-            <el-menu-item index="3">豆瓣电影</el-menu-item>
+            <!-- <el-menu-item index="3">豆瓣电影</el-menu-item> -->
             <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
             <el-menu-item index="5">技术论坛</el-menu-item>
-            <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
-            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
+            <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
+            <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
+            <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -40,9 +40,9 @@
           <div class="component-div" v-if="selectIndex === '2'">
             <welfareComponent :welfareLocation="contentLocation"></welfareComponent>
           </div>
-          <div class="component-div" v-if="selectIndex === '3'">
+          <!-- <div class="component-div" v-if="selectIndex === '3'">
             <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
-          </div>
+          </div> -->
           <div class="component-div" v-if="selectIndex === '4'">
             <toolsComponent></toolsComponent>
           </div>
@@ -51,13 +51,13 @@
           </div>
           <!-- <div class="component-div" v-if="selectIndex === '6'">
             <bossZhipinComponent></bossZhipinComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '7'">
+          </div> -->
+          <!-- <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
           </div> -->
-          <div class="component-div" v-if="selectIndex === '8'">
+          <!-- <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
-          </div>
+          </div> -->
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
           <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023</div>
@@ -71,11 +71,11 @@
 import { ref, onMounted, computed, Ref } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 // import leetCodeComponent from "./leetCode/index.vue";
-import doubanComponent from "./douban/index.vue";
+// import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import toolsComponent from "./tools/index.vue";
 import welfareComponent from "./welfare/index.vue";
-// import bossZhipinComponent from "./bossZhipin/index.vue";
+//import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
 import { useRouter } from "vue-router";
@@ -205,7 +205,7 @@ export default {
   },
   components: {
     // leetCodeComponent,
-    doubanComponent,
+    // doubanComponent,
     newsComponent,
     toolsComponent,
     welfareComponent,
