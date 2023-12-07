@@ -10,9 +10,13 @@
     </div>
     <div class="tips-common">
       <span class="tips-title">提示词</span>
-      <el-tag v-for="(tag, index) in tags" :key="index" class="ml-2" :type="tag.type">{{
-        tag.text
-      }}</el-tag>
+      <el-tag
+        v-for="(tag, index) in tags"
+        :key="index"
+        class="ml-2"
+        :type="websiteTransformType(tag.type)"
+        >{{ tag.text }}</el-tag
+      >
     </div>
   </div>
 </template>
@@ -20,6 +24,13 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { ElInput, ElIcon, ElTag } from "element-plus";
+enum WebsiteType {
+  Success = "success",
+  Warning = "warning",
+  Danger = "danger",
+  Info = "info",
+  Default = "",
+}
 export default defineComponent({
   name: "App",
   setup() {
@@ -31,6 +42,20 @@ export default defineComponent({
       } else {
         console.log("Input is empty");
         input.value = "";
+      }
+    };
+    const websiteTransformType = (type: any) => {
+      switch (type) {
+        case "success":
+          return WebsiteType.Success;
+        case "warning":
+          return WebsiteType.Warning;
+        case "danger":
+          return WebsiteType.Danger;
+        case "info":
+          return WebsiteType.Info;
+        default:
+          return WebsiteType.Default; // 默认类型
       }
     };
     return {
@@ -46,6 +71,7 @@ export default defineComponent({
         { text: "抓包", type: "warning" },
         { text: "代理人抓包", type: "danger" },
       ],
+      websiteTransformType,
     };
   },
   components: {
