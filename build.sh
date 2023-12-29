@@ -80,6 +80,7 @@ run_script "kuaishou.py"
 run_script "weibo.py"
 run_script "v2ex.py"
 run_script "githubTrending.py"
+run_script "52pojie.py"
 run_script "meituanTech.py"
 python ./src/crawl/welfare/0818tuan.py
 python ./src/crawl/welfare/0818tuanTop.py

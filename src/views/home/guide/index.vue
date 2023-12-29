@@ -146,6 +146,7 @@ import { gotoOutPage, isPC } from "../../../utils/utils";
 import infzmNews from "../../../public/data/infzm.json";
 import weiboNews from "../../../public/data/weibo.json";
 import githubNews from "../../../public/data/githubTrending.json";
+import pojieNews from "../../../public/data/52pojie.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import {
   ElCol,
@@ -178,8 +179,9 @@ export default {
     let infzmList = ref(infzmNews);
     let weiboList = ref(weiboNews);
     let githubList = ref(githubNews);
+    let pojieList = ref(pojieNews);
     let newsGuide: any[] = [];
-    newsGuide = [...infzmList.value, ...githubList.value];
+    newsGuide = [...infzmList.value, ...githubList.value, ...pojieList.value];
     newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
@@ -232,6 +234,7 @@ export default {
         case "juejin":
         case "v2ex":
         case "githubTrending":
+        case "52pojie":
           websiteUrl = item.url;
           break;
         case "hxm5":
@@ -272,6 +275,9 @@ export default {
         case "githubTrending":
           websiteName = "githubTrending";
           break;
+        case "52pojie":
+          websiteName = "吾爱破解";
+          break;
         default:
           websiteName = "随风而逝";
       }
@@ -307,6 +313,10 @@ export default {
         case "githubTrending":
           websiteImg =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAb1BMVEX////4+Pi3ubtvcnZNUVU+Q0cpLjLr6+x3en0sMTYkKS59gIORk5aUl5n8/Pzw8PFTV1tbX2Pc3d5DSEzn5+g3PECLjpFKTlKFh4qxs7XCxMUwNTq/wcLh4uPV1tZzd3o/Q0jOz9CmqKpjZ2qfoaSrd37mAAABPUlEQVR4AW3TBZKEMBAF0B8GCHzcnbW5/xm30qEyknklcU/DgQpuYRTHUXgLFHw6SemkmcYrlcd8kRYlnlQ1PU0Fp434Qde75Qd+1FUQKiRZjyGfTGNjKhWMmSQXYO3Ibao3MlqBnSRzADhk/ycAdcqclSSHnEUD+KLt8KalMQMqpl3izU5jKxHQGCq8Ud80fq4VfuFZaIyQO4wVPEre5g+RrIAPJrkQSL8OPjv3htQmH8guU5uwgseeP7ITMYBnpdFgvlJPcx0zoLjjzS/FDrVRvH6xsqDYlLx29huRUaFx6YuI1mhKMbddf9trEzca7rmRk/FxpiRXiJO8FDBURyb4yfO7glC8TOpacmAc4ElMEWlc2oGckjwvYVFEB5wjouE6uLBwquypQym/scKrM4njElYaJy182q15aDj/oQMZkS8JH3IAAAAASUVORK5CYII=";
+          break;
+        case "52pojie":
+          websiteImg =
+            "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAkFBMVEX////87OzsYmL5zc3509P+9/fzoaH62tr1r6/3vLzylZXwgYHmMzPudHT99PTqUlL85+f1qqrtamr74uLznp7fAADhBwflJyfgAADpRETjFxfiDw/iCwvhAADkHBzmLi7rWVniEBDpSEjqT0/oPz/4xsbdAADyl5fvfHz3wsLjERHxjIzkICD2tbXtbW3wh4dkMKV5AAACuUlEQVR4ATWNBwKrKBRFr11jiUbBGwEV0zFl/7sbZub/A683IAijOEmzvDiUWVXnzbHtTuUxiOq+H8oWgJAjKenlPCltfCBmsQhvlCKBVSotJyW1nCGordbVdj5vl8vluPkSUBs9btfzNo8ndOmiLW/woG/blooRMLFOEKDxEgYFJz3rpT3d73dBZRkjphVpKsSjERCo5OwvjrhlCPy2yaR4Tj6+C9G9iLuUTjk2QPF4Rjm15Y6Con21OKfpESikmo3glNzFvXvotzIPBOIU4Fq2XdysFVapOwT4C82AfbmeIMYmugoxYZN6rJb3tFRhNY/LxAHPt7kmIoz7d384gcpppm0LTzBJRaClmvDAmswENjr1FujOM0kMRk3+IJW8flbiXcDvk7oSmIUhJXZa7uhpnTRmwfdlxVbzrPnBoS47JFbrLUdEO1n1nmtJraR0Wlle0lsxHKmtZYivVNZpX1PKqVE5j5okOemLdhPx3wn9fvuOiaT1daulJKmp/IYChVbaIBXc9u5VG+usdFX4LFpg1I4vnKQTPbrP8dXgi6d03IEcpV4LYZUABr6bOA+z5p797sONTmsJpuEVp8Wo+YSQaqeoIUfwHqVGuZq3Vwb0PX5yKtEuzHyI52ffAKctgSDCKIXwDaYEJPtleC64rtWF0jmz3+5FetfjikWbBwrLbI+xJs8uf82zsnJPf2gAJK1v6AHJ+BVHFwQJgFI6+vqhOtZ7SKkMEJF9npcjRvFL77TOcUKAtng0DzPJDbkRUdJjSNZv0WYdnRXxfn19hUq+0vKFWi5ZeKjXYEij6OiUkxWk2ACUYlZmwEUzewzlIRKiy4VyljgsAeL6hZ+ZmMMvNcZQamUNrXNWh24ONclldUrcAKklPcaLR9J4JbwlBUUHz+viJX90fRx8fnVWdN2KwykuGvQR8A+lNlPn0UGdyAAAAABJRU5ErkJggg==";
           break;
         default:
           websiteImg = "羊毛";
