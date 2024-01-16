@@ -28,7 +28,8 @@
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
             <!-- <el-menu-item index="3">豆瓣电影</el-menu-item> -->
             <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
-            <el-menu-item index="5">技术论坛</el-menu-item>
+            <el-menu-item index="10">GitHubTrending</el-menu-item>
+            <!-- <el-menu-item index="5">技术论坛</el-menu-item> -->
             <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
             <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
             <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
@@ -66,6 +67,11 @@
               :newsLocation="contentLocation"
             ></advancedSearchComponent>
           </div>
+          <div class="component-div" v-if="selectIndex === '10'">
+            <githubTrendingComponent
+              :githubTrendingLocation="contentLocation"
+            ></githubTrendingComponent>
+          </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
           <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023</div>
@@ -88,6 +94,7 @@ import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
 import advancedSearchComponent from "./advancedSearch/index.vue";
 import pojieComponent from "./52pojie/index.vue";
+import githubTrendingComponent from "./githubTrending/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 // import "element-plus/theme-chalk/index.css";
@@ -231,6 +238,7 @@ export default {
     ElButton,
     advancedSearchComponent,
     pojieComponent,
+    githubTrendingComponent,
   },
 };
 </script>
