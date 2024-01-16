@@ -23,7 +23,8 @@
             :default-active="selectIndex"
             @select="handleSelect"
           >
-            <el-menu-item index="1">热门资讯</el-menu-item>
+            <!-- <el-menu-item index="1">热门资讯</el-menu-item> -->
+            <el-menu-item index="1">吾爱破解</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
             <!-- <el-menu-item index="3">豆瓣电影</el-menu-item> -->
             <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
@@ -36,7 +37,8 @@
         </el-header>
         <el-main class="main-content">
           <div class="component-div" v-if="selectIndex === '1'">
-            <guideComponent :guideLocation="contentLocation"></guideComponent>
+            <!-- <guideComponent :guideLocation="contentLocation"></guideComponent> -->
+            <pojieComponent :pojieLocation="contentLocation"></pojieComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
             <welfareComponent :welfareLocation="contentLocation"></welfareComponent>
@@ -85,6 +87,7 @@ import welfareComponent from "./welfare/index.vue";
 import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
 import advancedSearchComponent from "./advancedSearch/index.vue";
+import pojieComponent from "./52pojie/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
 // import "element-plus/theme-chalk/index.css";
@@ -227,6 +230,7 @@ export default {
     findJobComponent,
     ElButton,
     advancedSearchComponent,
+    pojieComponent,
   },
 };
 </script>
