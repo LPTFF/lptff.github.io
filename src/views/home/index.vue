@@ -32,7 +32,7 @@
             <!-- <el-menu-item index="5">技术论坛</el-menu-item> -->
             <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
             <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
-            <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
+            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
             <el-menu-item index="9">高级搜索</el-menu-item>
           </el-menu>
         </el-header>
@@ -59,9 +59,9 @@
           <!-- <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
           </div> -->
-          <!-- <div class="component-div" v-if="selectIndex === '8'">
+          <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
-          </div> -->
+          </div>
           <div class="component-div" v-if="selectIndex === '9'">
             <advancedSearchComponent
               :newsLocation="contentLocation"
