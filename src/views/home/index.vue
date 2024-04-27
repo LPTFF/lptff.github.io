@@ -1,10 +1,6 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div
-      @scroll="handleScroll"
-      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
-      :style="containerStyle"
-    >
+    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -17,12 +13,7 @@
               <el-button type="success" round @click="gotoBlog">博客</el-button>
             </div>
           </div>
-          <el-menu
-            class="navigation"
-            mode="horizontal"
-            :default-active="selectIndex"
-            @select="handleSelect"
-          >
+          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
             <!-- <el-menu-item index="1">热门资讯</el-menu-item> -->
             <el-menu-item index="1">吾爱破解</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
@@ -32,7 +23,7 @@
             <!-- <el-menu-item index="5">技术论坛</el-menu-item> -->
             <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
             <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
-            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
+            <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
             <el-menu-item index="9">高级搜索</el-menu-item>
           </el-menu>
         </el-header>
@@ -59,18 +50,14 @@
           <!-- <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
           </div> -->
-          <div class="component-div" v-if="selectIndex === '8'">
+          <!-- <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
-          </div>
+          </div> -->
           <div class="component-div" v-if="selectIndex === '9'">
-            <advancedSearchComponent
-              :newsLocation="contentLocation"
-            ></advancedSearchComponent>
+            <advancedSearchComponent :newsLocation="contentLocation"></advancedSearchComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '10'">
-            <githubTrendingComponent
-              :githubTrendingLocation="contentLocation"
-            ></githubTrendingComponent>
+            <githubTrendingComponent :githubTrendingLocation="contentLocation"></githubTrendingComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
