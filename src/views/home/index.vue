@@ -14,45 +14,48 @@
             </div>
           </div>
           <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
-            <!-- <el-menu-item index="1">热门资讯</el-menu-item> -->
+            <el-menu-item index="0">热门资讯</el-menu-item>
             <el-menu-item index="1">吾爱破解</el-menu-item>
             <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
-            <!-- <el-menu-item index="3">豆瓣电影</el-menu-item> -->
-            <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
+            <el-menu-item index="3">豆瓣电影</el-menu-item>
+
             <el-menu-item index="10">GitHubTrending</el-menu-item>
-            <!-- <el-menu-item index="5">技术论坛</el-menu-item> -->
-            <!-- <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item> -->
-            <!-- <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item> -->
-            <!-- <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item> -->
+            <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
+            <el-menu-item index="5">技术论坛</el-menu-item>
+            <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
+            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item>
+            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
             <el-menu-item index="9">高级搜索</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
+          <div class="component-div" v-if="selectIndex === '0'">
+            <guideComponent :guideLocation="contentLocation"></guideComponent>
+          </div>
           <div class="component-div" v-if="selectIndex === '1'">
-            <!-- <guideComponent :guideLocation="contentLocation"></guideComponent> -->
             <pojieComponent :pojieLocation="contentLocation"></pojieComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '2'">
             <welfareComponent :welfareLocation="contentLocation"></welfareComponent>
           </div>
-          <!-- <div class="component-div" v-if="selectIndex === '3'">
+          <div class="component-div" v-if="selectIndex === '3'">
             <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
-          </div> -->
+          </div>
           <div class="component-div" v-if="selectIndex === '4'">
             <toolsComponent></toolsComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '5'">
             <newsComponent :newsLocation="contentLocation"></newsComponent>
           </div>
-          <!-- <div class="component-div" v-if="selectIndex === '6'">
+          <div class="component-div" v-if="selectIndex === '6'">
             <bossZhipinComponent></bossZhipinComponent>
-          </div> -->
-          <!-- <div class="component-div" v-if="selectIndex === '7'">
+          </div>
+          <div class="component-div" v-if="selectIndex === '7'">
             <leetCodeComponent></leetCodeComponent>
-          </div> -->
-          <!-- <div class="component-div" v-if="selectIndex === '8'">
+          </div>
+          <div class="component-div" v-if="selectIndex === '8'">
             <findJobComponent></findJobComponent>
-          </div> -->
+          </div>
           <div class="component-div" v-if="selectIndex === '9'">
             <advancedSearchComponent :newsLocation="contentLocation"></advancedSearchComponent>
           </div>
@@ -71,12 +74,12 @@
 <script lang="ts">
 import { ref, onMounted, computed, Ref } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
-// import leetCodeComponent from "./leetCode/index.vue";
-// import doubanComponent from "./douban/index.vue";
+import leetCodeComponent from "./leetCode/index.vue";
+import doubanComponent from "./douban/index.vue";
 import newsComponent from "./news/index.vue";
 import toolsComponent from "./tools/index.vue";
 import welfareComponent from "./welfare/index.vue";
-//import bossZhipinComponent from "./bossZhipin/index.vue";
+import bossZhipinComponent from "./bossZhipin/index.vue";
 import guideComponent from "./guide/index.vue";
 import findJobComponent from "./findJob/index.vue";
 import advancedSearchComponent from "./advancedSearch/index.vue";
@@ -208,12 +211,12 @@ export default {
     };
   },
   components: {
-    // leetCodeComponent,
-    // doubanComponent,
+    leetCodeComponent,
+    doubanComponent,
     newsComponent,
     toolsComponent,
     welfareComponent,
-    // bossZhipinComponent,
+    bossZhipinComponent,
     guideComponent,
     ElCol,
     ElMenu,
