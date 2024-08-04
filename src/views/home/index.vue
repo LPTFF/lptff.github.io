@@ -16,16 +16,15 @@
           <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
             <el-menu-item index="0">热门资讯</el-menu-item>
             <el-menu-item index="1">吾爱破解</el-menu-item>
-            <el-menu-item index="2" v-if="isPCRes">薅羊毛</el-menu-item>
+            <el-menu-item index="2">薅羊毛</el-menu-item>
             <el-menu-item index="3">豆瓣电影</el-menu-item>
-
-            <el-menu-item index="10">GitHubTrending</el-menu-item>
-            <el-menu-item index="4" v-if="isPCRes">导航专区</el-menu-item>
+            <el-menu-item index="4">导航专区</el-menu-item>
             <el-menu-item index="5">技术论坛</el-menu-item>
-            <el-menu-item index="6" v-if="isPCRes">Boss直聘</el-menu-item>
-            <el-menu-item index="7" v-if="isPCRes">LeetCode</el-menu-item>
-            <el-menu-item index="8" v-if="isPCRes">面试题</el-menu-item>
+            <el-menu-item index="6">Boss直聘</el-menu-item>
+            <el-menu-item index="7">LeetCode</el-menu-item>
+            <el-menu-item index="8">面试题</el-menu-item>
             <el-menu-item index="9">高级搜索</el-menu-item>
+            <el-menu-item index="10">GitHubTrending</el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -102,7 +101,7 @@ export default {
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
-    const selectIndex = isPCRes.value ? ref("4") : ref("1"); //默认首页
+    const selectIndex = isPCRes.value ? ref("4") : ref("0"); //默认首页
 
     const callMethod = () => {
       // console.log('233');
