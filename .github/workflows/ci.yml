@@ -67,6 +67,9 @@ jobs:
           git add -A
           git commit -m $(date +%F日%H时%M分%S秒)
           git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:python-crawl
+        env:
+          ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+          QYWX_KEY: ${{ secrets.QYWX_KEY }}
       - name: Build
         run: |
           npm run build

@@ -1,5 +1,6 @@
 import requests
 import argparse
+import os
 
 
 def send_post_request(key):
@@ -12,7 +13,6 @@ def send_post_request(key):
         }
     }
     try:
-        # 发送POST请求并接收响应
         response = requests.post(url, json=payload)
         print('消息推送提醒成功')
     except Exception as e:
@@ -20,6 +20,13 @@ def send_post_request(key):
 
 
 if __name__ == "__main__":
+    try:
+        ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
+        QYWX_KEY = os.getenv('QYWX_KEY')
+        print('ACCESS_TOKEN:', ACCESS_TOKEN)
+        print('QYWX_KEY:', QYWX_KEY)
+    except Exception as e:
+        print('os.getenv Exception:', e)
     parser = argparse.ArgumentParser()
     parser.add_argument('--key')
     args = parser.parse_args()
