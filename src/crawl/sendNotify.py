@@ -18,27 +18,18 @@ if __name__ == "__main__":
     try:
         ACCESS_TOKEN = os.getenv('ACCESS_TOKEN')
         QYWX_KEY = os.getenv('QYWX_KEY')
+        # QYWX_KEY = "" 此处填写测试变量
         msg = {
-            "msgtype": "template_card",
-            "template_card": {
-                "card_type": "text_notice",
-                "source": {
-                    "icon_url": "https://avatars.githubusercontent.com/u/31006738?v=4",
-                    "desc": "GitHub个人网站",
-                    "desc_color": 0
-                },
-                "jump_list": [
+            "msgtype": "news",
+            "news": {
+                "articles": [
                     {
-                        "type": 1,
+                        "title": "随风而逝",
+                        "description": "GitHub个人网站更新了",
                         "url": "https://lptff.github.io/",
-                        "title": "随风而逝"
-                    },
-                    {
-                        "type": 1,
-                        "url": "https://github.com/LPTFF",
-                        "title": "GitHub地址"
+                        "picurl": "https://avatars.githubusercontent.com/u/31006738?v=4"
                     }
-                ],
+                ]
             }
         }
         send_post_request(QYWX_KEY, msg)
