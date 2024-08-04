@@ -58,6 +58,7 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh
+          python  ./src/crawl/sendNotify.py --key ${{ secrets.QYWX_KEY }}
           cd ./src/public/data/
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"

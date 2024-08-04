@@ -54,6 +54,7 @@ pip install certifi
 pip install beautifulsoup4
 pip install pytz
 pip install selenium
+pip install argparse
 # 运行爬虫脚本
 # Function to display formatted time
 display_time() {
