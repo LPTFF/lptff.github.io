@@ -1,6 +1,10 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
+    <div
+      @scroll="handleScroll"
+      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
+      :style="containerStyle"
+    >
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -13,7 +17,12 @@
               <el-button type="success" round @click="gotoBlog">博客</el-button>
             </div>
           </div>
-          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
+          <el-menu
+            class="navigation"
+            mode="horizontal"
+            :default-active="selectIndex"
+            @select="handleSelect"
+          >
             <el-menu-item index="0">热门资讯</el-menu-item>
             <el-menu-item index="1">吾爱破解</el-menu-item>
             <el-menu-item index="2">薅羊毛</el-menu-item>
@@ -56,14 +65,20 @@
             <findJobComponent></findJobComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '9'">
-            <advancedSearchComponent :newsLocation="contentLocation"></advancedSearchComponent>
+            <advancedSearchComponent
+              :newsLocation="contentLocation"
+            ></advancedSearchComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '10'">
-            <githubTrendingComponent :githubTrendingLocation="contentLocation"></githubTrendingComponent>
+            <githubTrendingComponent
+              :githubTrendingLocation="contentLocation"
+            ></githubTrendingComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
-          <div class="footer-text">评论功能暂不支持，如有问题请提issue © 2023</div>
+          <div class="footer-text">
+            评论功能暂不支持，如有问题请提issue © {{ currentYear }}
+          </div>
         </el-footer>
       </div>
     </div>
@@ -194,6 +209,16 @@ export default {
           : `${window.innerHeight - 16}px`,
       };
     });
+    const getCurrentYear = () => {
+      const currentDate = new Date();
+      // 获取北京时间
+      const beijingOffset = 8 * 60; // 北京时间是 UTC+8
+      const currentBeijingTime = new Date(
+        currentDate.getTime() + (beijingOffset - currentDate.getTimezoneOffset()) * 60000
+      );
+      return currentBeijingTime.getFullYear();
+    };
+    const currentYear = ref(getCurrentYear());
     return {
       selectIndex,
       previousRoute,
@@ -207,6 +232,7 @@ export default {
       handleScroll,
       containerStyle,
       contentLocation,
+      currentYear,
     };
   },
   components: {
