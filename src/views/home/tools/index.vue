@@ -1,11 +1,9 @@
 <template>
   <div>
     <div v-for="(websites, parentIndex) in websiteSource" :key="parentIndex">
-      <el-tag
-        class="website-type"
-        :type="websiteTransformType(websites.type)"
-        >{{ websites.category }}</el-tag
-      >
+      <el-tag class="website-type" :type="websiteTransformType(parentIndex)">{{
+        websites.category
+      }}</el-tag>
       <el-row>
         <el-col
           :span="24"
@@ -16,7 +14,7 @@
         >
           <el-card
             class="website-common-card"
-            :style="`background-color:${websites.color}`"
+            :style="`background-color:${getBackgroundColor(parentIndex)}`"
             shadow="hover"
           >
             <el-link
@@ -35,7 +33,7 @@
     </div>
   </div>
 </template>
-  
+
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
@@ -57,24 +55,31 @@ export default defineComponent({
         gotoOutPage(website.url);
       }
     };
-    const websiteTransformType = (type: any) => {
-      switch (type) {
-        case "success":
-          return WebsiteType.Success;
-        case "warning":
-          return WebsiteType.Warning;
-        case "danger":
-          return WebsiteType.Danger;
-        case "info":
-          return WebsiteType.Info;
-        default:
-          return WebsiteType.Default; // 默认类型
-      }
+    const websiteTransformType = (parentIndex: number) => {
+      const types = [
+        WebsiteType.Primary,
+        WebsiteType.Success,
+        WebsiteType.Info,
+        WebsiteType.Warning,
+        WebsiteType.Danger,
+      ];
+      return types[parentIndex % 5]; // 循环使用 types 数组
+    };
+    const getBackgroundColor = (parentIndex: number) => {
+      const colors = [
+        "rgb(217, 236, 255)", // parentIndex 0
+        "rgb(225, 243, 216)", // parentIndex 1
+        "rgb(233, 233, 235)", // parentIndex 2
+        "rgb(250, 236, 216)", // parentIndex 3
+        "rgb(253, 226, 226)", // parentIndex 4
+      ];
+      return colors[parentIndex % 5]; // 每5次循环一次
     };
     return {
       websiteSource,
       gotoNewsWebsite,
       websiteTransformType,
+      getBackgroundColor,
     };
   },
   components: {
@@ -101,4 +106,3 @@ export default defineComponent({
   margin: 10px;
 }
 </style>
-  
