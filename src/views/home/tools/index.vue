@@ -57,7 +57,7 @@ export default defineComponent({
     };
     const websiteTransformType = (parentIndex: number) => {
       const types = [
-        WebsiteType.Primary,
+        WebsiteType.Default,
         WebsiteType.Success,
         WebsiteType.Info,
         WebsiteType.Warning,
