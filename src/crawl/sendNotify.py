@@ -11,7 +11,7 @@ def send_post_request(key, msg):
     payload = msg
     try:
         response = requests.post(url, json=payload)
-        print('消息推送提醒成功')
+        print(f'消息推送提醒成功:{response}')
     except Exception as e:
         print('消息推送提醒发生异常:', e)
 
