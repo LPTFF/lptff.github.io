@@ -1,6 +1,8 @@
 import requests
 import argparse
 import os
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 
 def send_post_request(key, msg):
