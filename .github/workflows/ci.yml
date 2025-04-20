@@ -53,7 +53,6 @@ jobs:
         run: |
           chmod +x build.sh
           ./build.sh
-          python  ./src/crawl/sendNotify.py 
           cd ./src/public/data/
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
@@ -92,6 +91,7 @@ jobs:
           git add -A
           git commit -m $(date +%F日%H时%M分%S秒)
           git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
+          python  ./src/crawl/sendNotify.py 
       # - name: Deploy to GitHub Pages
       #   uses: crazy-max/ghaction-github-pages@v2.2.0
       #   with:
