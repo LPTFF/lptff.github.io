@@ -83,6 +83,7 @@ jobs:
         run: |
           pwd
           ls -a
+          chmod +x sendNotify.sh
           ./sendNotify.sh 
           cd ./dist/
           echo lptff.github.io > CNAME  
