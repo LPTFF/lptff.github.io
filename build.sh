@@ -1,10 +1,10 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # 确保脚本抛出遇到的错误
 set -e
 # 检查当前操作系统
 echo "OSTYPE  $OSTYPE"
-if [ "$OSTYPE" == "linux-gnu"* ]; then
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Linux 系统
     echo "Detected Linux OS"
     echo "Installing Python..."
@@ -13,7 +13,7 @@ if [ "$OSTYPE" == "linux-gnu"* ]; then
     sudo apt-get update
     sudo apt-get install python3
 
-elif [ "$OSTYPE" == "darwin"* ]; then
+elif [[ "$OSTYPE" == "darwin"* ]]; then
     # macOS 系统
     echo "Detected macOS"
     echo "Installing Python..."
@@ -21,7 +21,7 @@ elif [ "$OSTYPE" == "darwin"* ]; then
     # 在此处添加适用于 macOS 系统的安装命令
     brew update
     brew install python@3
-elif [ "$OSTYPE" == "msys"* ]; then
+elif [[ "$OSTYPE" == "msys"* ]]; then
     # win 系统
     echo "Unsupported Windows"
     # 在此处添加适用于 macOS 系统的安装命令
@@ -41,7 +41,7 @@ fi
 # 验证安装是否成功
 python_version=$(python --version 2>&1)
 echo "python_version  $python_version"
-if [ "$python_version" == *"Python"* ]; then
+if [[ "$python_version" == *"Python"* ]]; then
     echo "Python installation successful"
 else
     echo "Python installation failed"
