@@ -81,6 +81,7 @@ jobs:
       - name: Deploy
         run: |
           pwd
+          python  ./src/crawl/sendNotify.py 
           cd ./dist/
           echo lptff.github.io > CNAME  
           echo > .nojekyll
@@ -90,8 +91,7 @@ jobs:
           git init
           git add -A
           git commit -m $(date +%F日%H时%M分%S秒)
-          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
-          python  ./src/crawl/sendNotify.py 
+          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages       
       # - name: Deploy to GitHub Pages
       #   uses: crazy-max/ghaction-github-pages@v2.2.0
       #   with:
