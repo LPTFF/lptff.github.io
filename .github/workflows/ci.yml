@@ -81,6 +81,7 @@ jobs:
       - name: Deploy
         run: |
           pwd
+          ls -a
           python  ./src/crawl/sendNotify.py 
           cd ./dist/
           echo lptff.github.io > CNAME  
