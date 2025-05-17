@@ -5,25 +5,11 @@
         websites.category
       }}</el-tag>
       <el-row>
-        <el-col
-          :span="24"
-          :md="8"
-          :lg="6"
-          v-for="(item, sonIndex) in websites.list"
-          :key="sonIndex"
-        >
-          <el-card
-            class="website-common-card"
-            :style="`background-color:${getBackgroundColor(parentIndex)}`"
-            shadow="hover"
-          >
-            <el-link
-              :href="item.url"
-              target="_blank"
-              class="website-link"
-              :underline="false"
-              @click.prevent="gotoNewsWebsite(item)"
-            >
+        <el-col :span="24" :md="8" :lg="6" v-for="(item, sonIndex) in websites.list" :key="sonIndex">
+          <el-card class="website-common-card" :style="`background-color:${getBackgroundColor(parentIndex)}`"
+            shadow="hover">
+            <el-link :href="item.url" target="_blank" class="website-link" :underline="false"
+              @click.prevent="gotoNewsWebsite(item)">
               <el-avatar :size="50" class="log-website" :src="item.icon" />
               {{ item.name }}
             </el-link>
@@ -49,9 +35,39 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
-    const websiteSource = ref(websiteGroups);
+    const loadFrequentWebsites = () => {
+      const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
+      const list = Object.values(clickData)
+        .sort((a: any, b: any) => b.count - a.count) // 按点击次数降序排序
+        .slice(0, 6); // 最多显示6个常用网站
+      if (list.length > 0) {
+        return [{
+          category: "常用",
+          list,
+        }];
+      }
+      return [];
+    };
+    // 加载缓存并打印
+    const frequentGroup = loadFrequentWebsites();
+    // 打印整理后的分组数据
+    console.info("frequentGroup for websiteSource:", frequentGroup);
+    console.info('websiteGroups', websiteGroups)
+    const websiteSource: any = ref([
+      ...loadFrequentWebsites(),
+      ...websiteGroups
+    ]);
     const gotoNewsWebsite = (website: any) => {
       if (website.url) {
+        const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
+        console.info('clickData', clickData)
+        const key = website.url;
+        if (!clickData[key]) {
+          clickData[key] = { ...website, count: 1 };
+        } else {
+          clickData[key].count += 1;
+        }
+        localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
         gotoOutPage(website.url);
       }
     };
@@ -102,6 +118,7 @@ export default defineComponent({
   height: 40px;
   margin-right: 10px;
 }
+
 .website-link {
   margin: 10px;
 }
