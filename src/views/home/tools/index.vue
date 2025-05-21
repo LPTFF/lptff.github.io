@@ -39,7 +39,7 @@ export default defineComponent({
       const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
       const list = Object.values(clickData)
         .sort((a: any, b: any) => b.count - a.count) // 按点击次数降序排序
-        .slice(0, 6); // 最多显示6个常用网站
+        .slice(0, 12); // 最多显示12个常用网站
       if (list.length > 0) {
         return [{
           category: "常用",
