@@ -10,10 +10,10 @@ const ZIP_NAME = `upload_${getTimeStamp()}.zip`;
 const TEMP_ZIP_PATH = path.join(__dirname, ZIP_NAME);
 
 const REMOTE_CONFIG = {
-    host: '106.15.131.89',
-    port: 60022,
-    username: 'root',
-    password: '1234',
+    host: '****',
+    port: 0,
+    username: '***',
+    password: '***',
     remotePath: '/root/Test' // ✅ 远程上传目录
 };
 
