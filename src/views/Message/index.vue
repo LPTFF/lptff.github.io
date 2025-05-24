@@ -36,7 +36,7 @@
     </div>
 </template>
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import fundData from "../../public/data/fundData.json";
 export default {
     name: 'FundSuggestionList',
@@ -46,10 +46,21 @@ export default {
         };
     },
     setup() {
-        let fundList = ref(fundData);
-        console.info('fundList', fundList.value)
+        const fundList = ref([]);
+
+        onMounted(async () => {
+            try {
+                const res = await fetch("/data/fundData.json");
+                if (!res.ok) throw new Error("加载失败");
+                const data = await res.json();
+                fundList.value = data;
+            } catch (error) {
+                console.error("读取 fundData.json 失败:", error);
+            }
+        });
+
         return {
-            fundList
+            fundList,
         };
     },
 };
