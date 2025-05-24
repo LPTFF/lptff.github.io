@@ -52,7 +52,7 @@ export default {
         const generatedAt = ref("");
         onMounted(async () => {
             try {
-                const res = await fetch("/data/fundData.json");
+                const res = await fetch("/data/fundData.json?t=" + Date.now());
                 if (!res.ok) throw new Error("加载失败");
                 const data = await res.json();
                 console.info('data', data)

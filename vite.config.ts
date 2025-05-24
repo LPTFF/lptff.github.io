@@ -43,6 +43,11 @@ export default defineConfig({
         changeOrigin: true, //是否跨域
         rewrite: (path) => path.replace(/^\/douban/, ""),
       },
+      '/data': {
+        target: 'http://106.15.131.89:60080',
+        changeOrigin: true,
+        rewrite: path => path.replace(/^\/data/, '/data')
+      }
     },
   },
   build: {
