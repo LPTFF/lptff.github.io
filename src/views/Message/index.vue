@@ -4,7 +4,8 @@
         <p v-if="generatedAt" style="text-align:center; color: #888; margin-bottom: 24px;">
             数据更新于：{{ generatedAt }}
         </p>
-        <div v-for="(fund, index) in fundList" :key="fund.fundCode" class="fund-card">
+
+        <div v-for="(fund, index) in visibleFunds" :key="fund.fundCode" class="fund-card">
             <h3>【{{ index + 1 }}. {{ fund.fundName }}】</h3>
 
             <p><strong>▶ DeepSeek策略：</strong><br />
@@ -16,6 +17,7 @@
                 买入时机：{{ fund.strategies['低吸买入计算策略'].buyTiming }}<br />
                 买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略'].purchaseAmount }}</span>
             </p>
+
             <div class="market-section">
                 <h4>📈 股市实时行情</h4>
                 <iframe :src="fund.marketUrl" width="100%" height="300" frameborder="0" scrolling="yes"
@@ -35,42 +37,63 @@
                 </a>
             </div>
         </div>
+
+        <!-- 滚动加载触发点 -->
+        <div ref="loadTrigger" class="load-trigger"></div>
     </div>
 </template>
-<script>
-import { ref, onMounted } from "vue";
-import fundData from "../../public/data/fundData.json";
-export default {
-    name: 'FundSuggestionList',
-    data() {
-        return {
-            fundList: []
-        };
-    },
-    setup() {
-        const fundList = ref([]);
-        const generatedAt = ref("");
-        onMounted(async () => {
-            try {
-                const res = await fetch("/data/fundData.json?t=" + Date.now());
-                if (!res.ok) throw new Error("加载失败");
-                const data = await res.json();
-                console.info('data', data)
-                fundList.value = data;
-                if (data.length > 0 && data[0].generatedAt) {
-                    generatedAt.value = new Date(data[0].generatedAt).toLocaleString(); // 格式化为本地时间
-                }
-            } catch (error) {
-                console.error("读取 fundData.json 失败:", error);
+
+<script setup>
+import { ref, onMounted, onBeforeUnmount } from "vue";
+
+const fundList = ref([]);
+const visibleFunds = ref([]);
+const generatedAt = ref("");
+const loadTrigger = ref(null);
+const LOAD_COUNT = 2;
+
+const loadMoreFunds = () => {
+    const nextFunds = fundList.value.slice(visibleFunds.value.length, visibleFunds.value.length + LOAD_COUNT);
+    visibleFunds.value.push(...nextFunds);
+};
+
+let observer = null;
+
+onMounted(async () => {
+    try {
+        const res = await fetch("/data/fundData.json?t=" + Date.now());
+        if (!res.ok) throw new Error("加载失败");
+        const data = await res.json();
+        fundList.value = data;
+
+        if (data.length > 0 && data[0].generatedAt) {
+            generatedAt.value = new Date(data[0].generatedAt).toLocaleString();
+        }
+
+        loadMoreFunds();
+
+        observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting) {
+                loadMoreFunds();
             }
+        }, {
+            root: null,
+            threshold: 0.1
         });
 
-        return {
-            fundList,
-            generatedAt
-        };
-    },
-};
+        if (loadTrigger.value) {
+            observer.observe(loadTrigger.value);
+        }
+    } catch (error) {
+        console.error("读取 fundData.json 失败:", error);
+    }
+});
+
+onBeforeUnmount(() => {
+    if (observer && loadTrigger.value) {
+        observer.unobserve(loadTrigger.value);
+    }
+});
 </script>
 
 <style scoped>
@@ -131,5 +154,9 @@ iframe {
     border: 1px solid #ccc;
     margin-top: 8px;
     border-radius: 6px;
+}
+
+.load-trigger {
+    height: 1px;
 }
 </style>
