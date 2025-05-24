@@ -59,6 +59,12 @@ const loadMoreFunds = () => {
 
 let observer = null;
 
+// 保存滚动和可见基金数量
+window.addEventListener("beforeunload", () => {
+    sessionStorage.setItem("scrollTop", window.scrollY.toString());
+    sessionStorage.setItem("visibleCount", visibleFunds.value.length.toString());
+});
+
 onMounted(async () => {
     try {
         const res = await fetch("/data/fundData.json?t=" + Date.now());
@@ -70,8 +76,20 @@ onMounted(async () => {
             generatedAt.value = new Date(data[0].generatedAt).toLocaleString();
         }
 
-        loadMoreFunds();
+        // 恢复加载的基金数量
+        const savedCount = parseInt(sessionStorage.getItem("visibleCount") || "0", 10);
+        const initialCount = isNaN(savedCount) || savedCount <= 0 ? LOAD_COUNT : savedCount;
+        visibleFunds.value.push(...fundList.value.slice(0, initialCount));
 
+        // 恢复滚动位置
+        setTimeout(() => {
+            const scrollTop = parseInt(sessionStorage.getItem("scrollTop") || "0", 10);
+            if (!isNaN(scrollTop)) {
+                window.scrollTo(0, scrollTop);
+            }
+        }, 100);
+
+        // 设置滚动观察器
         observer = new IntersectionObserver((entries) => {
             if (entries[0].isIntersecting) {
                 loadMoreFunds();
@@ -95,6 +113,7 @@ onBeforeUnmount(() => {
     }
 });
 </script>
+
 
 <style scoped>
 .fund-suggestion-list {
