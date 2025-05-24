@@ -1,7 +1,9 @@
 <template>
     <div class="fund-suggestion-list">
         <h2>【基金买入建议 - 多策略版】</h2>
-
+        <p v-if="generatedAt" style="text-align:center; color: #888; margin-bottom: 24px;">
+            数据更新于：{{ generatedAt }}
+        </p>
         <div v-for="(fund, index) in fundList" :key="fund.fundCode" class="fund-card">
             <h3>【{{ index + 1 }}. {{ fund.fundName }}】</h3>
 
@@ -47,13 +49,17 @@ export default {
     },
     setup() {
         const fundList = ref([]);
-
+        const generatedAt = ref("");
         onMounted(async () => {
             try {
                 const res = await fetch("/data/fundData.json");
                 if (!res.ok) throw new Error("加载失败");
                 const data = await res.json();
+                console.info('data', data)
                 fundList.value = data;
+                if (data.length > 0 && data[0].generatedAt) {
+                    generatedAt.value = new Date(data[0].generatedAt).toLocaleString(); // 格式化为本地时间
+                }
             } catch (error) {
                 console.error("读取 fundData.json 失败:", error);
             }
@@ -61,6 +67,7 @@ export default {
 
         return {
             fundList,
+            generatedAt
         };
     },
 };
