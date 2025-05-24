@@ -2,19 +2,18 @@
     <div class="fund-suggestion-list">
         <h2>【基金买入建议 - 多策略版】</h2>
 
-        <div v-for="(fund, index) in fundList" :key="fund.code" class="fund-card">
-            <h3>【{{ index + 1 }}. {{ fund.name }}】</h3>
+        <div v-for="(fund, index) in fundList" :key="fund.fundCode" class="fund-card">
+            <h3>【{{ index + 1 }}. {{ fund.fundName }}】</h3>
 
             <p><strong>▶ DeepSeek策略：</strong><br />
-                买入时机：{{ fund.deepSeek.strategy }}<br />
-                买入金额：<span class="amount">{{ fund.deepSeek.amount }}</span>
+                买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
+                买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].purchaseAmount }}</span>
             </p>
 
             <p><strong>▶ 低吸买入计算策略（参考）：</strong><br />
-                买入时机：{{ fund.lowBuy.strategy }}<br />
-                买入金额：<span class="amount">{{ fund.lowBuy.amount }}</span>
+                买入时机：{{ fund.strategies['低吸买入计算策略'].buyTiming }}<br />
+                买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略'].purchaseAmount }}</span>
             </p>
-
             <div class="market-section">
                 <h4>📈 股市实时行情</h4>
                 <iframe :src="fund.marketUrl" width="100%" height="300" frameborder="0" scrolling="yes"
@@ -29,69 +28,28 @@
 
             <div class="buy-link">
                 <h4>🔗 购买地址</h4>
-                <a :href="fund.buyUrl" target="_blank" rel="noopener noreferrer" class="buy-button">
+                <a :href="fund.fundUrl" target="_blank" rel="noopener noreferrer" class="buy-button">
                     点此前往购买（东方财富）
                 </a>
             </div>
         </div>
     </div>
 </template>
-
 <script>
+import { ref } from "vue";
+import fundData from "../../public/data/fundData.json";
 export default {
     name: 'FundSuggestionList',
     data() {
         return {
-            fundList: [
-                {
-                    name: '长城医药产业精选混合发起式C',
-                    code: '022287',
-                    deepSeek: {
-                        strategy: '基金估值上涨',
-                        amount: '80元',
-                    },
-                    lowBuy: {
-                        strategy: '暂不建议买入',
-                        amount: '0元',
-                    },
-                    marketUrl: 'https://stockapp.finance.qq.com/mstats/',
-                    fundMarketUrl:
-                        'https://lc.jr.jd.com/finance/fund/latestdetail/index/?fundCode=022287',
-                    buyUrl: 'https://fund.eastmoney.com/022287.html',
-                },
-                {
-                    name: '申万菱信消费增长混合C',
-                    code: '015254',
-                    deepSeek: {
-                        strategy: '大盘上涨',
-                        amount: '80元',
-                    },
-                    lowBuy: {
-                        strategy: '暂不建议买入',
-                        amount: '0元',
-                    },
-                    marketUrl: 'https://stockapp.finance.qq.com/mstats/',
-                    fundMarketUrl:
-                        'https://lc.jr.jd.com/finance/fund/latestdetail/index/?fundCode=015254',
-                    buyUrl: 'https://fund.eastmoney.com/015254.html',
-                },
-                {
-                    name: '同泰产业升级混合C',
-                    code: '014939',
-                    deepSeek: {
-                        strategy: '大盘上涨',
-                        amount: '50元',
-                    },
-                    lowBuy: {
-                        strategy: '暂不建议买入',
-                        amount: '0元',
-                    },
-                    marketUrl: 'https://stockapp.finance.qq.com/mstats/',
-                    fundMarketUrl:
-                        'https://lc.jr.jd.com/finance/fund/latestdetail/index/?fundCode=014939',
-                    buyUrl: 'https://fund.eastmoney.com/014939.html',
-                },
-            ],
+            fundList: []
+        };
+    },
+    setup() {
+        let fundList = ref(fundData);
+        console.info('fundList', fundList.value)
+        return {
+            fundList
         };
     },
 };
