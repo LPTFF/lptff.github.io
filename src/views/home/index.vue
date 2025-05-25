@@ -1,10 +1,6 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div
-      @scroll="handleScroll"
-      :class="isPCRes ? 'scroll-home-container' : 'inner-container'"
-      :style="containerStyle"
-    >
+    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -17,23 +13,11 @@
               <el-button type="success" round @click="gotoBlog">博客</el-button>
             </div>
           </div>
-          <el-menu
-            class="navigation"
-            mode="horizontal"
-            :default-active="selectIndex"
-            @select="handleSelect"
-          >
-            <el-menu-item index="0">热门资讯</el-menu-item>
-            <el-menu-item index="1">吾爱破解</el-menu-item>
-            <el-menu-item index="2">薅羊毛</el-menu-item>
-            <el-menu-item index="3">豆瓣电影</el-menu-item>
-            <el-menu-item index="4">导航专区</el-menu-item>
-            <el-menu-item index="5">技术论坛</el-menu-item>
-            <el-menu-item index="6">Boss直聘</el-menu-item>
-            <el-menu-item index="7">LeetCode</el-menu-item>
-            <el-menu-item index="8">面试题</el-menu-item>
-            <el-menu-item index="9">高级搜索</el-menu-item>
-            <el-menu-item index="10">GitHubTrending</el-menu-item>
+          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
+            <el-menu-item v-for="(item, index) in menuList" :key="index" :index="String(index)"
+              :ref="el => menuItemRefs[index] = el">
+              {{ item }}
+            </el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
@@ -65,14 +49,10 @@
             <findJobComponent></findJobComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '9'">
-            <advancedSearchComponent
-              :newsLocation="contentLocation"
-            ></advancedSearchComponent>
+            <advancedSearchComponent :newsLocation="contentLocation"></advancedSearchComponent>
           </div>
           <div class="component-div" v-if="selectIndex === '10'">
-            <githubTrendingComponent
-              :githubTrendingLocation="contentLocation"
-            ></githubTrendingComponent>
+            <githubTrendingComponent :githubTrendingLocation="contentLocation"></githubTrendingComponent>
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
@@ -117,7 +97,12 @@ export default {
     const isPCRes = computed(() => isPC());
     const router = useRouter();
     const selectIndex = isPCRes.value ? ref("4") : ref("0"); //默认首页
+    const menuList = [
+      '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
+      '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending'
+    ];
 
+    const menuItemRefs: any = ref([]); // 保存 menu-item 组件的引用
     const callMethod = () => {
       // console.log('233');
     };
@@ -155,6 +140,11 @@ export default {
     };
 
     const handleSelect = (key: any) => {
+      const elComponent = menuItemRefs.value[Number(key)];
+      const label = elComponent?.$el?.innerText || '';
+      console.log('选中 key:', key);
+      console.log('对应文本:', label);
+      document.title = label;
       selectIndex.value = key;
       let locationInfoInit = sessionStorage.getItem(`scrollInfoLocation${key}`);
       locationInfoInit = locationInfoInit
@@ -233,6 +223,8 @@ export default {
       containerStyle,
       contentLocation,
       currentYear,
+      menuList,
+      menuItemRefs
     };
   },
   components: {

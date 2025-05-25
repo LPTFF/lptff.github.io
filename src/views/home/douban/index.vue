@@ -1,12 +1,6 @@
 <template>
   <el-row>
-    <el-col
-      :span="24"
-      :md="8"
-      :lg="6"
-      v-for="(item, index) in moviesAllLimited"
-      :key="index"
-    >
+    <el-col :span="24" :md="8" :lg="6" v-for="(item, index) in moviesAllLimited" :key="index">
       <movieCard :moviesData="item" :index="index"></movieCard>
     </el-col>
   </el-row>
@@ -75,5 +69,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

@@ -32,6 +32,7 @@ enum WebsiteType {
   Info = "info",
   Default = "",
 }
+
 export default defineComponent({
   name: "App",
   setup() {
