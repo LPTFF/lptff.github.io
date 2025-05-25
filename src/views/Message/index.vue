@@ -55,6 +55,7 @@
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
+document.title = "【基金买入建议 - 多策略版】";
 function isWeChatMiniProgram() {
     // 这里用简单示例，你也可以用其他方式判断小程序环境
     const ua = navigator.userAgent || '';
