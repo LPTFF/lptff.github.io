@@ -36,19 +36,14 @@ async function run() {
         cp -f index.html 404.html
         `);
 
-        // 关闭旧进程
-        await runSSHCommand(`
-        PID=$(lsof -ti tcp:5000);
-        if [ -n "$PID" ]; then kill -9 $PID; fi
-        `);
 
         // 启动 http-server
         console.log('启动新服务');
         fs.unlinkSync(TEMP_ZIP_PATH);
-        await runSSHCommand(`
-        cd ${REMOTE_CONFIG.remotePath} &&
-        setsid nohup http-server -p 5000 --spa > server.log 2>&1 < /dev/null &
-        `);
+        await runSSHCommand('sudo systemctl restart http-server.service');
+        // 重启 frpc 服务以确保端口映射正常
+        console.log('🌐 重启 frpc 服务以刷新公网映射');
+        await runSSHCommand('sudo systemctl restart frpc');
         console.log('✅ 上传部署完成');
     } catch (err) {
         console.error('❌ 出错:', err.message);
