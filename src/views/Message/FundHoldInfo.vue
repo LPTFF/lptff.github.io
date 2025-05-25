@@ -19,13 +19,19 @@
                 }">{{ fund.holdRate }}</span><br />
             </p>
             <p><strong>▶ DeepSeek策略：</strong><br />
+                是否交易：{{ fund.strategies['DeepSeek策略'].needTrade }}<br />
+                交易类型：{{ fund.strategies['DeepSeek策略'].tradeType }}<br />
                 买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
-                买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].amount }}</span>
+                买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].amount }}</span><br />
+                分析理由：{{ fund.strategies['DeepSeek策略'].analysis }}<br />
             </p>
 
             <p><strong>▶ 低吸买入计算策略（参考）：</strong><br />
+                是否交易：{{ fund.strategies['低吸买入计算策略（参考）'].needTrade }}<br />
+                交易类型：{{ fund.strategies['低吸买入计算策略（参考）'].tradeType }}<br />
                 买入时机：{{ fund.strategies['低吸买入计算策略（参考）'].buyTiming }}<br />
-                买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略（参考）'].amount }}</span>
+                买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略（参考）'].amount }}</span><br />
+                分析理由：{{ fund.strategies['低吸买入计算策略（参考）'].analysis }}<br />
             </p>
 
             <!-- 股市实时行情 -->
@@ -34,7 +40,7 @@
                     📈 股市实时行情 <span>{{ visibleFunds[index].showMarket ? '（点击收起）' : '（点击展开）' }}</span>
                 </h4>
                 <iframe v-if="visibleFunds[index].showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
-                    height="300" frameborder="0" scrolling="yes" title="股市行情"></iframe>
+                    :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
             </div>
 
             <!-- 基金行情 -->
@@ -43,7 +49,7 @@
                     📊 基金行情 <span>{{ visibleFunds[index].showFund ? '（点击收起）' : '（点击展开）' }}</span>
                 </h4>
                 <iframe v-if="visibleFunds[index].showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
-                    height="300" frameborder="0" scrolling="yes" title="基金行情"></iframe>
+                    :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
             </div>
 
             <div class="buy-link">
@@ -79,7 +85,10 @@ const visibleFunds = ref([]);
 const generatedAt = ref("");
 const loadTrigger = ref(null);
 const LOAD_COUNT = 2;
-
+const isMobile = ref(window.innerWidth <= 768);
+const updateDeviceType = () => {
+    isMobile.value = window.innerWidth <= 768;
+};
 const marketRefs = ref([]);
 const fundRefs = ref([]);
 
@@ -118,6 +127,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 onMounted(async () => {
+    window.addEventListener('resize', updateDeviceType);
     try {
         // const res = await fetch("/data/fundData.json?t=" + Date.now());
         const res = await fetch("/data/fundHoldData.json?t=" + Date.now());
@@ -179,6 +189,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+    window.removeEventListener('resize', updateDeviceType);
     if (observer && loadTrigger.value) {
         observer.unobserve(loadTrigger.value);
     }

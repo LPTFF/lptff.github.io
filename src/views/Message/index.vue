@@ -10,12 +10,16 @@
 
             <p><strong>▶ DeepSeek策略：</strong><br />
                 买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
-                买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].purchaseAmount }}</span>
+                买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].purchaseAmount }}</span><br />
+                买入评分：{{ fund.strategies['DeepSeek策略'].purchaseScore }}<br />
+                分析理由：{{ fund.strategies['DeepSeek策略'].recommendation }}<br />
             </p>
 
             <p><strong>▶ 低吸买入计算策略（参考）：</strong><br />
                 买入时机：{{ fund.strategies['低吸买入计算策略'].buyTiming }}<br />
-                买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略'].purchaseAmount }}</span>
+                买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略'].purchaseAmount }}</span><br />
+                买入评分：{{ fund.strategies['低吸买入计算策略'].purchaseScore }}<br />
+                分析理由：{{ fund.strategies['低吸买入计算策略'].recommendation }}<br />
             </p>
 
             <!-- 股市实时行情 -->
@@ -24,7 +28,7 @@
                     📈 股市实时行情 <span>{{ visibleFunds[index].showMarket ? '（点击收起）' : '（点击展开）' }}</span>
                 </h4>
                 <iframe v-if="visibleFunds[index].showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
-                    height="300" frameborder="0" scrolling="yes" title="股市行情"></iframe>
+                    :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
             </div>
 
             <!-- 基金行情 -->
@@ -33,7 +37,7 @@
                     📊 基金行情 <span>{{ visibleFunds[index].showFund ? '（点击收起）' : '（点击展开）' }}</span>
                 </h4>
                 <iframe v-if="visibleFunds[index].showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
-                    height="300" frameborder="0" scrolling="yes" title="基金行情"></iframe>
+                    :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
             </div>
 
             <div class="buy-link">
@@ -99,7 +103,10 @@ const loadMoreFunds = () => {
     userToggled.value.market.push(...new Array(nextFunds.length).fill(false));
     userToggled.value.fund.push(...new Array(nextFunds.length).fill(false));
 };
-
+const isMobile = ref(window.innerWidth <= 768);
+const updateDeviceType = () => {
+    isMobile.value = window.innerWidth <= 768;
+};
 let observer = null;
 
 window.addEventListener("beforeunload", () => {
@@ -108,11 +115,13 @@ window.addEventListener("beforeunload", () => {
 });
 
 onMounted(async () => {
+    window.addEventListener('resize', updateDeviceType);
     try {
         const res = await fetch("/data/fundData.json?t=" + Date.now());
         if (!res.ok) throw new Error("加载失败");
         const data = await res.json();
         fundList.value = data;
+        console.info('data', data)
 
         if (data.length > 0 && data[0].generatedAt) {
             generatedAt.value = new Date(data[0].generatedAt).toLocaleString();
@@ -166,6 +175,7 @@ onMounted(async () => {
 });
 
 onBeforeUnmount(() => {
+    window.addEventListener('resize', updateDeviceType);
     if (observer && loadTrigger.value) {
         observer.unobserve(loadTrigger.value);
     }
