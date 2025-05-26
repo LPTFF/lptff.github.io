@@ -10,7 +10,7 @@
             shadow="hover">
             <el-link :href="item.url" target="_blank" class="website-link" :underline="false"
               @click.prevent="gotoNewsWebsite(item)">
-              <el-avatar :size="50" class="log-website" :src="item.icon" />
+              <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)" />
               {{ item.name }}
             </el-link>
           </el-card>
@@ -24,6 +24,7 @@
 import { defineComponent, ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
+import logoImageUrl from "../../../public/img/logo.jpg";
 import { ElRow, ElCol, ElCard, ElLink, ElAvatar, ElTag } from "element-plus";
 enum WebsiteType {
   Success = "success",
@@ -69,7 +70,9 @@ export default defineComponent({
           clickData[key].count += 1;
         }
         localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
-        gotoOutPage(website.url);
+        const isInternal = website.url.startsWith("/") && !/^https?:\/\//.test(website.url);
+        const targetUrl = isInternal ? window.location.origin + website.url : website.url;
+        gotoOutPage(targetUrl);
       }
     };
     const websiteTransformType = (parentIndex: number) => {
@@ -92,11 +95,18 @@ export default defineComponent({
       ];
       return colors[parentIndex % 5]; // 每5次循环一次
     };
+    const resolveIcon = (icon: string) => {
+      if (icon === "InternalWebsite") {
+        return logoImageUrl; // 替换为实际路径
+      }
+      return icon;
+    };
     return {
       websiteSource,
       gotoNewsWebsite,
       websiteTransformType,
       getBackgroundColor,
+      resolveIcon
     };
   },
   components: {
