@@ -77,7 +77,7 @@ run_script() {
 run_script "welfare.py"
 run_script "infzm.py"
 run_script "juejin.py"
-run_script "kuaishou.py"
+# run_script "kuaishou.py"
 run_script "weibo.py"
 run_script "v2ex.py"
 run_script "githubTrending.py"
