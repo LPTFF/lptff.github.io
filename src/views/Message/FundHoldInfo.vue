@@ -23,6 +23,7 @@
                 交易类型：{{ fund.strategies['DeepSeek策略'].tradeType }}<br />
                 买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
                 买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].amount }}</span><br />
+                目标分析收益：{{ fund.targetProfitRate * 100 }}%<br />
                 分析理由：{{ fund.strategies['DeepSeek策略'].analysis }}<br />
             </p>
 
@@ -31,6 +32,7 @@
                 交易类型：{{ fund.strategies['低吸买入计算策略（参考）'].tradeType }}<br />
                 买入时机：{{ fund.strategies['低吸买入计算策略（参考）'].buyTiming }}<br />
                 买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略（参考）'].amount }}</span><br />
+                目标分析收益：{{ fund.targetProfitRate * 100 }}%<br />
                 分析理由：{{ fund.strategies['低吸买入计算策略（参考）'].analysis }}<br />
             </p>
 

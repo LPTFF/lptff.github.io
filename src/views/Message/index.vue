@@ -12,6 +12,7 @@
                 买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
                 买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].purchaseAmount }}</span><br />
                 买入评分：{{ fund.strategies['DeepSeek策略'].purchaseScore }}<br />
+                目标分析收益：{{ fund.targetProfitRate * 100 }}%<br />
                 分析理由：{{ fund.strategies['DeepSeek策略'].recommendation }}<br />
             </p>
 
@@ -19,6 +20,7 @@
                 买入时机：{{ fund.strategies['低吸买入计算策略'].buyTiming }}<br />
                 买入金额：<span class="amount">{{ fund.strategies['低吸买入计算策略'].purchaseAmount }}</span><br />
                 买入评分：{{ fund.strategies['低吸买入计算策略'].purchaseScore }}<br />
+                目标分析收益：{{ fund.targetProfitRate * 100 }}%<br />
                 分析理由：{{ fund.strategies['低吸买入计算策略'].recommendation }}<br />
             </p>
 
