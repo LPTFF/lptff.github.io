@@ -36,17 +36,25 @@
                             <div>
                                 <a class="welfare-link-title" :href="handleLinkUrl(item)"
                                     @click.prevent="gotoWelfareWebsite(item)">
-                                    {{ item.title }}
+                                    【阅读指数：{{ item.readingScore }}】{{ item.title }}
                                 </a>
-                                <div class="welfare-div-link">
-                                    <div v-if="item.website == 'weibo'" class="weibo-img-link"
-                                        :style="`background:${item.image.small_icon_desc_color}`">
-                                        {{ item.image.small_icon_desc }}
+                                <div class="recommendation-card">
+                                    <div class="recommendation-title">
+                                        <svg class="icon" viewBox="0 0 1024 1024">
+                                            <path
+                                                d="M512 64a448 448 0 1 0 0 896 448 448 0 0 0 0-896z m0 820c-205.3 0-372-166.7-372-372S306.7 140 512 140s372 166.7 372 372-166.7 372-372 372z"
+                                                fill="#409EFF" />
+                                            <path d="M512 480m-40 0a40 40 0 1 0 80 0 40 40 0 1 0 -80 0Z"
+                                                fill="#409EFF" />
+                                        </svg>
+                                        推荐理由
                                     </div>
-                                    <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link"
-                                        @error="handleImageError" referrerPolicy="no-referrer" v-else />
+                                    <div class="recommendation-text">
+                                        {{ item.recommendation }}
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
                         <div class="welfare-div-website">
                             <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
@@ -58,15 +66,9 @@
                             <div class="mobile-div-news">
                                 <div class="mobile-link-title">
                                     <div @click="gotoMobileWebsite(item)">
-                                        {{ handleMobileTitle(item) }}
+                                        【阅读指数：{{ item.readingScore }}】 {{ handleMobileTitle(item) }}
                                     </div>
                                 </div>
-                                <div v-if="item.website == 'weibo'" class="weibo-img-link mobile-weibo-img"
-                                    :style="`background:${item.image.small_icon_desc_color}`">
-                                    {{ item.image.small_icon_desc }}
-                                </div>
-                                <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link mobile-img-link"
-                                    @error="handleImageError" referrerPolicy="no-referrer" v-else />
                             </div>
                             <div class="mobile-click-show">
                                 <div>
@@ -195,7 +197,7 @@ export default {
             return item.site_name || '随风而逝';
         };
         const handleWebsiteImg = (item: any) => {
-            return logoUrl.value;
+            return item.image_url;
         };
         const handleMonth = (item: any) => {
             const timestamp = new Date(item.created_at).getTime();
@@ -250,6 +252,37 @@ export default {
 </script>
 
 <style scoped>
+.recommendation-card {
+    /* background: #fff; */
+    border-radius: 12px;
+    /* padding: 16px; */
+    /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05); */
+    /* margin-top: 12px; */
+    transition: all 0.3s ease;
+}
+
+.recommendation-title {
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.recommendation-title .icon {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    fill: #409EFF;
+}
+
+.recommendation-text {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
 .welfare-container {
     max-width: 1000px;
     margin: 0 auto;
