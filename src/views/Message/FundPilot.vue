@@ -5,8 +5,9 @@
             数据更新于：{{ generatedAt }}
         </p>
         <!-- 持仓信息展示 -->
-        <div v-if="fundList.holdInfo.length && true">
-            <div v-for="(fund, index) in fundList.holdInfo" :key="'hold-' + fund.fundCode" class="fund-card">
+        <div v-if="fundList.holdInfo.length && true" ref="holdSection">
+            <div v-for="(fund, index) in fundList.holdInfo.slice(0, holdDisplayCount)" :key="'hold-' + fund.fundCode"
+                class="fund-card">
                 <h3>【持仓{{ index + 1 }}. {{ fund.fundName }}】</h3>
                 <p style="margin: 0;"><strong>▶ 持仓情况：</strong><br />
                     持有金额：{{ fund.holdAmount }}<br />
@@ -28,7 +29,6 @@
                         🎯 高估值浮盈，建议关注
                     </span>
                 </div>
-
                 <p v-if="fund.strategies?.['DeepSeek策略']">
                     ▶ DeepSeek策略<br />
                     是否交易：{{ fund.strategies['DeepSeek策略'].needTrade }}<br />
@@ -38,7 +38,6 @@
                     目标分析收益：{{ (fund.targetProfitRate * 100).toFixed(2) }}%<br />
                     分析理由：{{ fund.strategies['DeepSeek策略'].analysis }}
                 </p>
-
                 <p v-if="fund.strategies?.['低吸买入计算策略（参考）']">
                     ▶ 低吸买入计算策略（参考）<br />
                     是否交易：{{ fund.strategies['低吸买入计算策略（参考）'].needTrade }}<br />
@@ -55,7 +54,6 @@
                     <iframe v-if="fund.expand.showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
                 </div>
-
                 <!-- 基金行情 -->
                 <div class="fund-section">
                     <h4 class="toggle-header" @click="fund.expand.showFund = !fund.expand.showFund">
@@ -64,7 +62,6 @@
                     <iframe v-if="fund.expand.showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
                 </div>
-
                 <div class="buy-link">
                     <h4>🔗 购买地址</h4>
                     <a :href="fund.fundUrl" target="_blank" rel="noopener noreferrer" class="buy-button">
@@ -77,8 +74,9 @@
             <p>⚠️ fundList.holdInfo 数据为空或加载失败。</p>
         </div>
         <!-- 推荐信息展示 -->
-        <div v-if="fundList.recommendInfo.length && true">
-            <div v-for="(fund, index) in fundList.recommendInfo" :key="'recommend-' + fund.fundCode" class="fund-card">
+        <div v-if="fundList.recommendInfo.length && true" ref="recommendSection">
+            <div v-for="(fund, index) in fundList.recommendInfo.slice(0, recommendDisplayCount)"
+                :key="'recommend-' + fund.fundCode" class="fund-card">
                 <h3>【推荐 {{ index + 1 }}. {{ fund.fundName }}】</h3>
                 <p><strong>▶ DeepSeek策略：</strong><br />
                     买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
@@ -102,7 +100,6 @@
                     <iframe v-if="fund.expand.showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
                 </div>
-
                 <!-- 基金行情 -->
                 <div class="fund-section">
                     <h4 class="toggle-header" @click="fund.expand.showFund = !fund.expand.showFund">
@@ -111,7 +108,6 @@
                     <iframe v-if="fund.expand.showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
                 </div>
-
                 <div class="buy-link">
                     <h4>🔗 购买地址</h4>
                     <a :href="fund.fundUrl" target="_blank" rel="noopener noreferrer" class="buy-button">
@@ -127,26 +123,47 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-
+import { ref, onMounted, onBeforeUnmount } from "vue";
 document.title = "【基金分析 - tangfufa】";
-
 const isWeChatMiniProgram = () => /MicroMessenger/i.test(navigator.userAgent);
-
 const getMarketUrl = (fund) => {
     return isWeChatMiniProgram()
         ? "https://wzq.tenpay.com/mp/v2/index.html?stat_data=orv53p00gf001#/market/index"
         : "https://stockapp.finance.qq.com/mstats/";
 };
-
 const fundList = ref({
     holdInfo: [],
     recommendInfo: []
 });
 const generatedAt = ref("");
-
 const isMobile = ref(window.innerWidth <= 768);
-
+const holdSection = ref(null);
+const recommendSection = ref(null);
+// 控制显示数量
+const holdDisplayCount = ref(2);
+const recommendDisplayCount = ref(0);
+const loadMoreOnScroll = () => {
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const clientHeight = window.innerHeight;
+    const scrollBottom = scrollTop + clientHeight;
+    // 持仓区是否还没加载完
+    if (holdDisplayCount.value < fundList.value.holdInfo.length) {
+        holdDisplayCount.value += 2;
+        return;
+    }
+    // 判断推荐区是否进入可视区域
+    if (
+        recommendSection.value &&
+        scrollBottom >= recommendSection.value.offsetTop - 200
+    ) {
+        if (recommendDisplayCount.value < fundList.value.recommendInfo.length) {
+            recommendDisplayCount.value += 2;
+        }
+    }
+};
+onBeforeUnmount(() => {
+    window.removeEventListener("scroll", loadMoreOnScroll);
+});
 onMounted(async () => {
     try {
         const res = await fetch(`/data/fundPilotData.json?t=${Date.now()}`);
@@ -174,15 +191,12 @@ onMounted(async () => {
         if (firstGenerated) {
             generatedAt.value = new Date(firstGenerated).toLocaleString();
         }
+        window.addEventListener("scroll", loadMoreOnScroll);
     } catch (error) {
         console.error("读取数据失败:", error);
     }
 });
 </script>
-
-
-
-
 
 <style scoped>
 .profit-rate-wrapper {
