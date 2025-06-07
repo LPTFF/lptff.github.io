@@ -25,7 +25,7 @@
                         {{ fund.holdRate + '%' }}
                     </span>
                     <span v-if="Number(fund.holdRate) >= 5" class="rate-tip">
-                        🎯 达标
+                        🎯 高估值浮盈，建议关注
                     </span>
                 </div>
 
@@ -34,7 +34,7 @@
                     是否交易：{{ fund.strategies['DeepSeek策略'].needTrade }}<br />
                     交易类型：{{ fund.strategies['DeepSeek策略'].tradeType }}<br />
                     交易时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
-                    交易金额：{{ fund.strategies['DeepSeek策略'].amount }}<br />
+                    交易金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].amount }}</span><br />
                     目标分析收益：{{ (fund.targetProfitRate * 100).toFixed(2) }}%<br />
                     分析理由：{{ fund.strategies['DeepSeek策略'].analysis }}
                 </p>
@@ -44,7 +44,7 @@
                     是否交易：{{ fund.strategies['低吸买入计算策略（参考）'].needTrade }}<br />
                     交易类型：{{ fund.strategies['低吸买入计算策略（参考）'].tradeType }}<br />
                     交易时机：{{ fund.strategies['低吸买入计算策略（参考）'].buyTiming }}<br />
-                    交易金额：{{ fund.strategies['低吸买入计算策略（参考）'].amount }}<br />
+                    交易金额：<span class="amount">{{ fund.strategies['低吸买入计算策略（参考）'].amount }}</span><br />
                     目标分析收益：{{ (fund.targetProfitRate * 100).toFixed(2) }}%<br />
                     分析理由：{{ fund.strategies['低吸买入计算策略（参考）'].analysis }}
                 </p>
@@ -129,7 +129,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 
-document.title = "【基金持仓分析 - 多策略版】";
+document.title = "【基金分析 - tangfufa】";
 
 const isWeChatMiniProgram = () => /MicroMessenger/i.test(navigator.userAgent);
 
