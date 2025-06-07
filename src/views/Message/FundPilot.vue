@@ -40,19 +40,19 @@
                     分析理由：{{ fund.strategies['低吸买入计算策略（参考）'].analysis }}
                 </p>
                 <div class="market-section">
-                    <h4 class="toggle-header">
-                        📈 股市实时行情 <span>{{ false ? '（点击收起）' : '（点击展开）' }}</span>
+                    <h4 class="toggle-header" @click="fund.expand.showMarket = !fund.expand.showMarket">
+                        📈 股市实时行情 <span>{{ fund.expand.showMarket ? '（点击收起）' : '（点击展开）' }}</span>
                     </h4>
-                    <iframe v-if="false" :src="getMarketUrl(fund)" loading="lazy" width="100%"
+                    <iframe v-if="fund.expand.showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
                 </div>
 
                 <!-- 基金行情 -->
                 <div class="fund-section">
-                    <h4 class="toggle-header">
-                        📊 基金行情 <span>{{ false ? '（点击收起）' : '（点击展开）' }}</span>
+                    <h4 class="toggle-header" @click="fund.expand.showFund = !fund.expand.showFund">
+                        📊 基金行情 <span>{{ fund.expand.showFund ? '（点击收起）' : '（点击展开）' }}</span>
                     </h4>
-                    <iframe v-if="false" :src="fund.fundMarketUrl" loading="lazy" width="100%"
+                    <iframe v-if="fund.expand.showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
                 </div>
 
@@ -68,7 +68,7 @@
             <p>⚠️ fundList.holdInfo 数据为空或加载失败。</p>
         </div>
         <!-- 推荐信息展示 -->
-        <div v-if="fundList.recommendInfo.length">
+        <div v-if="fundList.recommendInfo.length && true">
             <div v-for="(fund, index) in fundList.recommendInfo" :key="'recommend-' + fund.fundCode" class="fund-card">
                 <h3>【推荐 {{ index + 1 }}. {{ fund.fundName }}】</h3>
                 <p><strong>▶ DeepSeek策略：</strong><br />
@@ -87,20 +87,22 @@
                 </p>
                 <!-- 股市实时行情 -->
                 <div class="market-section">
-                    <h4 class="toggle-header">
-                        📈 股市实时行情 <span>{{ false ? '（点击收起）' : '（点击展开）' }}</span>
+                    <h4 class="toggle-header" @click="fund.expand.showMarket = !fund.expand.showMarket">
+                        📈 股市实时行情 <span>{{ fund.expand.showMarket ? '（点击收起）' : '（点击展开）' }}</span>
                     </h4>
-                    <iframe v-if="false" :src="getMarketUrl(fund)" loading="lazy" width="100%"
+                    <iframe v-if="fund.expand.showMarket" :src="getMarketUrl(fund)" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 600" frameborder="0" scrolling="yes" title="股市行情"></iframe>
                 </div>
+
                 <!-- 基金行情 -->
                 <div class="fund-section">
-                    <h4 class="toggle-header">
-                        📊 基金行情 <span>{{ false ? '（点击收起）' : '（点击展开）' }}</span>
+                    <h4 class="toggle-header" @click="fund.expand.showFund = !fund.expand.showFund">
+                        📊 基金行情 <span>{{ fund.expand.showFund ? '（点击收起）' : '（点击展开）' }}</span>
                     </h4>
-                    <iframe v-if="false" :src="fund.fundMarketUrl" loading="lazy" width="100%"
+                    <iframe v-if="fund.expand.showFund" :src="fund.fundMarketUrl" loading="lazy" width="100%"
                         :height="isMobile ? 300 : 800" frameborder="0" scrolling="yes" title="基金行情"></iframe>
                 </div>
+
                 <div class="buy-link">
                     <h4>🔗 购买地址</h4>
                     <a :href="fund.fundUrl" target="_blank" rel="noopener noreferrer" class="buy-button">
@@ -141,8 +143,24 @@ onMounted(async () => {
         const res = await fetch(`/data/fundPilotData.json?t=${Date.now()}`);
         const data = await res.json();
         console.info('data', data)
-        fundList.value.holdInfo = data.holdInfo || [];
-        fundList.value.recommendInfo = data.recommendInfo || [];
+        const holdInfo = (data.holdInfo || []).map(fund => ({
+            ...fund,
+            expand: {
+                showMarket: false,
+                showFund: false
+            }
+        }));
+        const recommendInfo = (data.recommendInfo || []).map(fund => ({
+            ...fund,
+            expand: {
+                showMarket: false,
+                showFund: false
+            }
+        }));
+        console.info('holdInfo', holdInfo)
+        console.info('recommendInfo', recommendInfo)
+        fundList.value.holdInfo = holdInfo;
+        fundList.value.recommendInfo = recommendInfo;
         const firstGenerated = data?.recommendInfo?.[0]?.generatedAt;
         if (firstGenerated) {
             generatedAt.value = new Date(firstGenerated).toLocaleString();
