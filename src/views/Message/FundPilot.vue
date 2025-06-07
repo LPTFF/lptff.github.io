@@ -8,7 +8,8 @@
         <div v-if="fundList.holdInfo.length && true" ref="holdSection">
             <div v-for="(fund, index) in fundList.holdInfo.slice(0, holdDisplayCount)" :key="'hold-' + fund.fundCode"
                 class="fund-card">
-                <h3>【持仓{{ index + 1 }}. {{ fund.fundName }}】</h3>
+                <h3>【持仓{{ index + 1 }}. {{ fund.fundName }} <span style="font-size: 0.8em; font-weight: normal;">{{
+                    fund.fundCode }}</span>】</h3>
                 <p style="margin: 0;"><strong>▶ 持仓情况：</strong><br />
                     持有金额：{{ fund.holdAmount }}<br />
                     持有收益：<span class="amount" :class="{
@@ -77,7 +78,8 @@
         <div v-if="fundList.recommendInfo.length && true" ref="recommendSection">
             <div v-for="(fund, index) in fundList.recommendInfo.slice(0, recommendDisplayCount)"
                 :key="'recommend-' + fund.fundCode" class="fund-card">
-                <h3>【推荐 {{ index + 1 }}. {{ fund.fundName }}】</h3>
+                <h3>【推荐 {{ index + 1 }}. {{ fund.fundName }} <span style="font-size: 0.8em; font-weight: normal;">{{
+                    fund.fundCode }}</span>】</h3>
                 <p><strong>▶ DeepSeek策略：</strong><br />
                     买入时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
                     买入金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].purchaseAmount }}</span><br />
