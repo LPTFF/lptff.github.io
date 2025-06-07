@@ -4,75 +4,13 @@
         <p v-if="generatedAt" style="text-align:center; color: #888; margin-bottom: 24px;">
             数据更新于：{{ generatedAt }}
         </p>
-        <el-row>
-            <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in recommendArticleData" :key="sonIndex">
-                <el-card shadow="hover" class="welfare-card">
-                    <div class="welfare-date">
-                        <div class="day-week-welfare">
-                            <div class="welfare-month" :style="`color:${handleYearColor(item)}`">
-                                <div class="welfare-icon-hour">
-                                    <el-icon :size="15">
-                                        <Calendar />
-                                    </el-icon>
-                                </div>
-                                {{ handleMonth(item) }}
-                            </div>
-                            <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
-                                {{ handleDay(item) }}
-                            </div>
-                        </div>
-                        <div>
-                            <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
-                        </div>
-                        <div class="welfare-hour">
-                            <div class="welfare-icon-hour">
-                                <el-icon :size="16">
-                                    <Timer />
-                                </el-icon>
-                            </div>
-                            <div>{{ handleHour(item) }}</div>
-                        </div>
-                        <div>
-                            <a class="welfare-link-title" :href="handleLinkUrl(item)"
-                                @click.prevent="gotoWelfareWebsite(item)">
-                                {{ item.title }}
-                            </a>
-                            <div class="welfare-div-link">
-                                <div v-if="item.website == 'weibo'" class="weibo-img-link"
-                                    :style="`background:${item.image.small_icon_desc_color}`">
-                                    {{ item.image.small_icon_desc }}
-                                </div>
-                                <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link"
-                                    @error="handleImageError" referrerPolicy="no-referrer" v-else />
-                            </div>
-                        </div>
-                    </div>
-                    <div class="welfare-div-website">
-                        <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
-                        <div class="welfare-name-link">
-                            {{ handleWebsiteName(item) }}
-                        </div>
-                    </div>
-                    <div class="mobile-div">
-                        <div class="mobile-div-news">
-                            <div class="mobile-link-title">
-                                <div @click="gotoMobileWebsite(item)">
-                                    {{ handleMobileTitle(item) }}
-                                </div>
-                            </div>
-                            <div v-if="item.website == 'weibo'" class="weibo-img-link mobile-weibo-img"
-                                :style="`background:${item.image.small_icon_desc_color}`">
-                                {{ item.image.small_icon_desc }}
-                            </div>
-                            <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link mobile-img-link"
-                                @error="handleImageError" referrerPolicy="no-referrer" v-else />
-                        </div>
-                        <div class="mobile-click-show">
-                            <div>
-                                <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
-                                    {{ handleDay(item) }}
-                                </div>
-                                <div class="welfare-month">
+        <div class="welfare-container">
+            <el-row>
+                <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in recommendArticleData" :key="sonIndex">
+                    <el-card shadow="hover" class="welfare-card">
+                        <div class="welfare-date">
+                            <div class="day-week-welfare">
+                                <div class="welfare-month" :style="`color:${handleYearColor(item)}`">
                                     <div class="welfare-icon-hour">
                                         <el-icon :size="15">
                                             <Calendar />
@@ -80,9 +18,14 @@
                                     </div>
                                     {{ handleMonth(item) }}
                                 </div>
+                                <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
+                                    {{ handleDay(item) }}
+                                </div>
                             </div>
-
-                            <div class="welfare-hour welfare-mobile-hour">
+                            <div>
+                                <el-divider direction="vertical" color="#cccccc" class="el-welfare-divider" />
+                            </div>
+                            <div class="welfare-hour">
                                 <div class="welfare-icon-hour">
                                     <el-icon :size="16">
                                         <Timer />
@@ -90,16 +33,76 @@
                                 </div>
                                 <div>{{ handleHour(item) }}</div>
                             </div>
-                            <div class="mobile-bt-detail">
-                                <img :src="handleWebsiteImg(item)" alt="网站"
-                                    class="welfare-img-link mobile-welfare-img" />
-                                <div>{{ handleWebsiteName(item) }}</div>
+                            <div>
+                                <a class="welfare-link-title" :href="handleLinkUrl(item)"
+                                    @click.prevent="gotoWelfareWebsite(item)">
+                                    {{ item.title }}
+                                </a>
+                                <div class="welfare-div-link">
+                                    <div v-if="item.website == 'weibo'" class="weibo-img-link"
+                                        :style="`background:${item.image.small_icon_desc_color}`">
+                                        {{ item.image.small_icon_desc }}
+                                    </div>
+                                    <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link"
+                                        @error="handleImageError" referrerPolicy="no-referrer" v-else />
+                                </div>
                             </div>
                         </div>
-                    </div>
-                </el-card>
-            </el-col>
-        </el-row>
+                        <div class="welfare-div-website">
+                            <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
+                            <div class="welfare-name-link">
+                                {{ handleWebsiteName(item) }}
+                            </div>
+                        </div>
+                        <div class="mobile-div">
+                            <div class="mobile-div-news">
+                                <div class="mobile-link-title">
+                                    <div @click="gotoMobileWebsite(item)">
+                                        {{ handleMobileTitle(item) }}
+                                    </div>
+                                </div>
+                                <div v-if="item.website == 'weibo'" class="weibo-img-link mobile-weibo-img"
+                                    :style="`background:${item.image.small_icon_desc_color}`">
+                                    {{ item.image.small_icon_desc }}
+                                </div>
+                                <img :src="handleAuthorImg(item)" alt="作者" class="welfare-img-link mobile-img-link"
+                                    @error="handleImageError" referrerPolicy="no-referrer" v-else />
+                            </div>
+                            <div class="mobile-click-show">
+                                <div>
+                                    <div class="welfare-day" :style="`color:${handleYearColor(item)}`">
+                                        {{ handleDay(item) }}
+                                    </div>
+                                    <div class="welfare-month">
+                                        <div class="welfare-icon-hour">
+                                            <el-icon :size="15">
+                                                <Calendar />
+                                            </el-icon>
+                                        </div>
+                                        {{ handleMonth(item) }}
+                                    </div>
+                                </div>
+
+                                <div class="welfare-hour welfare-mobile-hour">
+                                    <div class="welfare-icon-hour">
+                                        <el-icon :size="16">
+                                            <Timer />
+                                        </el-icon>
+                                    </div>
+                                    <div>{{ handleHour(item) }}</div>
+                                </div>
+                                <div class="mobile-bt-detail">
+                                    <img :src="handleWebsiteImg(item)" alt="网站"
+                                        class="welfare-img-link mobile-welfare-img" />
+                                    <div>{{ handleWebsiteName(item) }}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+        </div>
+
     </div>
 </template>
 
@@ -247,6 +250,14 @@ export default {
 </script>
 
 <style scoped>
+.welfare-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    /* 居中 */
+    padding: 0 16px;
+    /* 防止在小屏幕左右贴边 */
+}
+
 .dialog-content {
     padding: 0;
 }
