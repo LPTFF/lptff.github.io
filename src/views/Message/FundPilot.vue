@@ -245,8 +245,8 @@ onMounted(async () => {
 
 .rate-tip {
     position: absolute;
-    top: -8px;
-    right: -50px;
+    top: 2px;
+    right: -150px;
     font-size: 12px;
     color: orange;
     font-weight: bold;
