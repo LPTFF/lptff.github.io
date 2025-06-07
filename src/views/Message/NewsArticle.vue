@@ -35,6 +35,7 @@
                             </div>
                             <div>
                                 <a class="welfare-link-title" :href="handleLinkUrl(item)"
+                                    :class="{ 'highlight': item.readingScore > 80 }"
                                     @click.prevent="gotoWelfareWebsite(item)">
                                     【阅读指数：{{ item.readingScore }}】{{ item.title }}
                                 </a>
@@ -64,7 +65,7 @@
                         </div>
                         <div class="mobile-div">
                             <div class="mobile-div-news">
-                                <div class="mobile-link-title">
+                                <div class="mobile-link-title" :class="{ 'highlight': item.readingScore > 80 }">
                                     <div @click="gotoMobileWebsite(item)">
                                         【阅读指数：{{ item.readingScore }}】 {{ handleMobileTitle(item) }}
                                     </div>
@@ -252,6 +253,16 @@ export default {
 </script>
 
 <style scoped>
+.highlight {
+    font-weight: bold;
+    color: #d0021b;
+    /* 红色字体 */
+    background-color: #fff3cd;
+    /* 淡黄色背景 */
+    padding: 2px 4px;
+    border-radius: 4px;
+}
+
 .recommendation-card {
     /* background: #fff; */
     border-radius: 12px;
@@ -347,7 +358,7 @@ export default {
 .welfare-link-title {
     display: block;
     color: #797979;
-    height: 50px;
+    height: 30px;
     font-size: 18px;
     font-weight: 600;
     text-decoration: none;
