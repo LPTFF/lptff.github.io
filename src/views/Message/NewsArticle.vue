@@ -182,7 +182,7 @@ export default {
             return item.url;
         };
         const gotoWelfareWebsite = (item: any) => {
-            let websiteUrl = handleLinkUrl(item);
+            let websiteUrl = item.source_url;
             console.log(websiteUrl);
             if (websiteUrl) {
                 gotoOutPage(websiteUrl);
@@ -219,7 +219,7 @@ export default {
                 : item.title.slice(0, lengthControl) + "...";
         };
         const gotoMobileWebsite = (item: any) => {
-            let websiteUrl = handleLinkUrl(item);
+            let websiteUrl = item.source_url;
             if (websiteUrl) {
                 gotoOutPage(websiteUrl);
             }
