@@ -8,17 +8,26 @@
         <div v-if="fundList.holdInfo.length && true">
             <div v-for="(fund, index) in fundList.holdInfo" :key="'hold-' + fund.fundCode" class="fund-card">
                 <h3>【持仓{{ index + 1 }}. {{ fund.fundName }}】</h3>
-                <p><strong>▶ 持仓情况：</strong><br />
+                <p style="margin: 0;"><strong>▶ 持仓情况：</strong><br />
                     持有金额：{{ fund.holdAmount }}<br />
                     持有收益：<span class="amount" :class="{
                         'text-red': fund.holdGain > 0,
                         'text-green': fund.holdGain < 0
                     }">{{ fund.holdGain }}</span><br />
-                    收益率：<span class="amount" :class="{
+                </p>
+                <!-- 收益率及右上角提示，独立结构展示 -->
+                <div class="profit-rate-wrapper">
+                    <span>收益率：</span>
+                    <span class="amount" :class="{
                         'text-red': fund.holdGain > 0,
                         'text-green': fund.holdGain < 0
-                    }">{{ fund.holdRate + '%' }}</span><br />
-                </p>
+                    }">
+                        {{ fund.holdRate + '%' }}
+                    </span>
+                    <span v-if="Number(fund.holdRate) >= 5" class="rate-tip">
+                        🎯 达标
+                    </span>
+                </div>
 
                 <p v-if="fund.strategies?.['DeepSeek策略']">
                     ▶ DeepSeek策略<br />
@@ -176,6 +185,21 @@ onMounted(async () => {
 
 
 <style scoped>
+.profit-rate-wrapper {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 0.5em;
+}
+
+.rate-tip {
+    position: absolute;
+    top: -8px;
+    right: -50px;
+    font-size: 12px;
+    color: orange;
+    font-weight: bold;
+}
+
 .fund-suggestion-list {
     font-family: Arial, sans-serif;
     padding: 20px;
