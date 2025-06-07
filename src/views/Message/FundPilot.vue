@@ -123,7 +123,35 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import { useRoute } from 'vue-router';
+const route = useRoute();
+// 存储滚动位置
+const saveScrollPosition = () => {
+    const keyPrefix = `scroll-${route.fullPath}`;
+    sessionStorage.setItem(keyPrefix + "-pos", window.scrollY.toString());
+    sessionStorage.setItem(keyPrefix + "-holdCount", holdDisplayCount.value.toString());
+    sessionStorage.setItem(keyPrefix + "-recommendCount", recommendDisplayCount.value.toString());
+};
+
+// 恢复滚动位置
+const restoreScrollPosition = () => {
+    const keyPrefix = `scroll-${route.fullPath}`;
+    const pos = sessionStorage.getItem(keyPrefix + "-pos");
+    const holdCount = sessionStorage.getItem(keyPrefix + "-holdCount");
+    const recommendCount = sessionStorage.getItem(keyPrefix + "-recommendCount");
+
+    if (holdCount) holdDisplayCount.value = parseInt(holdCount);
+    if (recommendCount) recommendDisplayCount.value = parseInt(recommendCount);
+
+    if (pos) {
+        nextTick(() => {
+            window.scrollTo({ top: parseInt(pos), behavior: "smooth" });
+        });
+    }
+};
+
+
 document.title = "【基金分析 - tangfufa】";
 const isWeChatMiniProgram = () => /MicroMessenger/i.test(navigator.userAgent);
 const getMarketUrl = (fund) => {
@@ -149,6 +177,7 @@ const loadMoreOnScroll = () => {
     // 持仓区是否还没加载完
     if (holdDisplayCount.value < fundList.value.holdInfo.length) {
         holdDisplayCount.value += 2;
+        saveScrollPosition();
         return;
     }
     // 判断推荐区是否进入可视区域
@@ -158,11 +187,18 @@ const loadMoreOnScroll = () => {
     ) {
         if (recommendDisplayCount.value < fundList.value.recommendInfo.length) {
             recommendDisplayCount.value += 2;
+            saveScrollPosition();
         }
     }
 };
+watch(() => fundList, (val) => {
+    if (val?.holdInfo?.length || val?.recommendInfo?.length) {
+        restoreScrollPosition();
+    }
+});
 onBeforeUnmount(() => {
     window.removeEventListener("scroll", loadMoreOnScroll);
+    window.removeEventListener('scroll', saveScrollPosition);
 });
 onMounted(async () => {
     try {
@@ -192,6 +228,8 @@ onMounted(async () => {
             generatedAt.value = new Date(firstGenerated).toLocaleString();
         }
         window.addEventListener("scroll", loadMoreOnScroll);
+        window.addEventListener('scroll', saveScrollPosition);
+        restoreScrollPosition();
     } catch (error) {
         console.error("读取数据失败:", error);
     }
