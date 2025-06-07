@@ -12,6 +12,8 @@ const routes = [
     { path: '/message', name: 'message', component: () => import('../views/Message/index.vue') },
     { path: '/fundHoldInfoMsg', name: 'fundHoldInfoMsg', component: () => import('../views/Message/FundHoldInfo.vue') },
     { path: '/newsArticle', name: 'newsArticle', component: () => import('../views/Message/NewsArticle.vue') },
+    { path: '/loginFund', name: 'loginFund', component: () => import('../views/Login/FundLogin.vue') },
+    { path: '/fundPilot', name: 'fundPilot', component: () => import('../views/Message/FundPilot.vue') },
     { path: '/', name: 'home', component: () => import('../views/home/index.vue') },
 ]
 
