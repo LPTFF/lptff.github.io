@@ -36,13 +36,13 @@ async function getRequestHead(url, param) {
     return data
 }
 function isPC() {
-    const ua = navigator.userAgent || navigator.vendor || window.opera;
-    // 判断是否微信浏览器
+    const ua = navigator.userAgent;
+    const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
     const isWeChat = /MicroMessenger/i.test(ua);
-    // 判断是否移动端设备
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    // 不是微信浏览器，且不是移动设备才算PC
-    return !isMobile && !isWeChat;
+    const hasMouse = window.matchMedia('(pointer: fine)').matches;
+    const isWideScreen = window.innerWidth >= 1024;
+    // 条件组合判断：非移动UA + 非微信 + 有鼠标 + 宽屏
+    return !isMobileUA && !isWeChat && hasMouse && isWideScreen;
 }
 function gotoOutPage(url) {
     // 判断是否为 PC

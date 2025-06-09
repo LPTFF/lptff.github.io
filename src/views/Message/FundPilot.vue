@@ -153,12 +153,16 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from "vue";
 import { useRoute } from 'vue-router';
+import { isPC } from "../../utils/utils";
 const showBackToTop = ref(false);
-const windowWidth = ref(window.innerWidth);
+const resizeTrigger = ref(0);
 function onResize() {
-    windowWidth.value = window.innerWidth;
+    resizeTrigger.value++;
 }
-const isPCRes = computed(() => windowWidth.value >= 768);
+const isPCRes = computed(() => {
+    resizeTrigger.value; // 触发依赖
+    return isPC();
+});
 console.info('isPCRes', isPCRes)
 const handleScroll = () => {
     showBackToTop.value = window.scrollY > 300; // 超过300px就显示
