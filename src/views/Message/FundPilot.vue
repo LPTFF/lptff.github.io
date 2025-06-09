@@ -1,9 +1,15 @@
 <template>
     <div class="fund-suggestion-list">
-        <h2>【基金分析 - tangfufa】</h2>
-        <p v-if="generatedAt" style="text-align:center;">
-            数据更新于：{{ generatedAt }}
-        </p>
+        <div style="position: sticky; top: 0; background-color: white; z-index: 1000; padding: 10px 0;">
+            <h2 style="margin: 0 0 10px 0; text-align: center;">【基金分析 - tangfufa】</h2>
+            <p v-if="generatedAt" style="text-align: center; margin: 0;">
+                数据更新于：{{ generatedAt }}
+            </p>
+            <p style="text-align: center; margin: 0;">
+                持仓基金数量：{{ fundList.holdInfo.length }}
+                推荐基金数量：{{ fundList.recommendInfo.length }}
+            </p>
+        </div>
         <!-- 持仓信息展示 -->
         <div v-if="fundList.holdInfo.length && true" ref="holdSection">
             <div v-for="(fund, index) in fundList.holdInfo.slice(0, holdDisplayCount)" :key="'hold-' + fund.fundCode"
@@ -137,12 +143,28 @@
         <div v-else>
             <p>⚠️ fundList.recommendInfo 数据为空或加载失败。</p>
         </div>
+        <button v-show="showBackToTop" class="back-to-top" @click="scrollToTop">
+            🚀 回到顶部
+        </button>
+
     </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
 import { useRoute } from 'vue-router';
+const showBackToTop = ref(false);
+const handleScroll = () => {
+    showBackToTop.value = window.scrollY > 300; // 超过300px就显示
+};
+
+// 滚动到顶部
+const scrollToTop = () => {
+    window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
+    });
+};
 const route = useRoute();
 // 存储滚动位置
 const saveScrollPosition = () => {
@@ -217,6 +239,7 @@ watch(() => fundList, (val) => {
 onBeforeUnmount(() => {
     window.removeEventListener("scroll", loadMoreOnScroll);
     window.removeEventListener('scroll', saveScrollPosition);
+    window.removeEventListener('scroll', handleScroll);
 });
 onMounted(async () => {
     try {
@@ -247,6 +270,7 @@ onMounted(async () => {
         }
         window.addEventListener("scroll", loadMoreOnScroll);
         window.addEventListener('scroll', saveScrollPosition);
+        window.addEventListener('scroll', handleScroll);
         restoreScrollPosition();
     } catch (error) {
         console.error("读取数据失败:", error);
@@ -255,6 +279,22 @@ onMounted(async () => {
 </script>
 
 <style scoped>
+.back-to-top {
+    position: fixed;
+    bottom: 10%;
+    right: 8%;
+    padding: 10px 20px;
+    background-color: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+    z-index: 10000;
+    font-size: 14px;
+    transition: opacity 0.3s;
+}
+
 .profit-rate-wrapper {
     position: relative;
     display: inline-block;
