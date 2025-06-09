@@ -33,7 +33,15 @@
                 <p v-if="fund.strategies?.['DeepSeek策略']">
                     ▶ DeepSeek策略<br />
                     是否交易：{{ fund.strategies['DeepSeek策略'].needTrade }}<br />
-                    交易类型：{{ fund.strategies['DeepSeek策略'].tradeType }}<br />
+                    交易类型：<span :style="fund.strategies['DeepSeek策略'].tradeType?.includes('减仓')
+                        ? 'color: red; font-weight: bold;'
+                        : ''">
+                        {{ fund.strategies['DeepSeek策略'].tradeType }}
+                    </span>
+                    <span v-if="fund.strategies['DeepSeek策略'].tradeType?.includes('减仓')"
+                        style="color: orange; font-weight: bold;">
+                        ⚠️当前为减仓操作，请注意控制风险
+                    </span><br />
                     交易时机：{{ fund.strategies['DeepSeek策略'].buyTiming }}<br />
                     交易金额：<span class="amount">{{ fund.strategies['DeepSeek策略'].amount }}</span><br />
                     目标分析收益：{{ (fund.targetProfitRate * 100).toFixed(2) }}%<br />
@@ -42,7 +50,15 @@
                 <p v-if="fund.strategies?.['低吸买入计算策略（参考）']">
                     ▶ 低吸买入计算策略（参考）<br />
                     是否交易：{{ fund.strategies['低吸买入计算策略（参考）'].needTrade }}<br />
-                    交易类型：{{ fund.strategies['低吸买入计算策略（参考）'].tradeType }}<br />
+                    交易类型：<span :style="fund.strategies['低吸买入计算策略（参考）'].tradeType?.includes('减仓')
+                        ? 'color: red; font-weight: bold;'
+                        : ''">
+                        {{ fund.strategies['DeepSeek策略'].tradeType }}
+                    </span>
+                    <span v-if="fund.strategies['低吸买入计算策略（参考）'].tradeType?.includes('减仓')"
+                        style="color: orange; font-weight: bold;">
+                        ⚠️当前为减仓操作，请注意控制风险
+                    </span><br />
                     交易时机：{{ fund.strategies['低吸买入计算策略（参考）'].buyTiming }}<br />
                     交易金额：<span class="amount">{{ fund.strategies['低吸买入计算策略（参考）'].amount }}</span><br />
                     目标分析收益：{{ (fund.targetProfitRate * 100).toFixed(2) }}%<br />
