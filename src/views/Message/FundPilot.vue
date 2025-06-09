@@ -153,14 +153,16 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from "vue";
 import { useRoute } from 'vue-router';
-import { isPC } from "../../utils/utils";
 const showBackToTop = ref(false);
-const isPCRes = computed(() => isPC());
+const windowWidth = ref(window.innerWidth);
+function onResize() {
+    windowWidth.value = window.innerWidth;
+}
+const isPCRes = computed(() => windowWidth.value >= 768);
 console.info('isPCRes', isPCRes)
 const handleScroll = () => {
     showBackToTop.value = window.scrollY > 300; // 超过300px就显示
 };
-
 // 滚动到顶部
 const scrollToTop = () => {
     window.scrollTo({
@@ -176,7 +178,6 @@ const saveScrollPosition = () => {
     sessionStorage.setItem(keyPrefix + "-holdCount", holdDisplayCount.value.toString());
     sessionStorage.setItem(keyPrefix + "-recommendCount", recommendDisplayCount.value.toString());
 };
-
 // 恢复滚动位置
 const restoreScrollPosition = () => {
     const keyPrefix = `scroll-${route.fullPath}`;
@@ -193,8 +194,6 @@ const restoreScrollPosition = () => {
         });
     }
 };
-
-
 document.title = "【基金分析 - tangfufa】";
 const isWeChatMiniProgram = () => /MicroMessenger/i.test(navigator.userAgent);
 const getMarketUrl = (fund) => {
@@ -243,6 +242,7 @@ onBeforeUnmount(() => {
     window.removeEventListener("scroll", loadMoreOnScroll);
     window.removeEventListener('scroll', saveScrollPosition);
     window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("resize", onResize);
 });
 onMounted(async () => {
     try {
@@ -274,6 +274,7 @@ onMounted(async () => {
         window.addEventListener("scroll", loadMoreOnScroll);
         window.addEventListener('scroll', saveScrollPosition);
         window.addEventListener('scroll', handleScroll);
+        window.addEventListener("resize", onResize);
         restoreScrollPosition();
     } catch (error) {
         console.error("读取数据失败:", error);
