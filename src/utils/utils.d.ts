@@ -36,8 +36,13 @@ async function getRequestHead(url, param) {
     return data
 }
 function isPC() {
-    // 判断是否为 PC
-    return !/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    // 判断是否微信浏览器
+    const isWeChat = /MicroMessenger/i.test(ua);
+    // 判断是否移动端设备
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
+    // 不是微信浏览器，且不是移动设备才算PC
+    return !isMobile && !isWeChat;
 }
 function gotoOutPage(url) {
     // 判断是否为 PC
