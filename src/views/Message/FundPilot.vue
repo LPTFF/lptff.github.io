@@ -143,7 +143,7 @@
         <div v-else>
             <p>⚠️ fundList.recommendInfo 数据为空或加载失败。</p>
         </div>
-        <button v-show="showBackToTop" class="back-to-top" @click="scrollToTop">
+        <button v-show="showBackToTop && isPCRes" class="back-to-top" @click="scrollToTop">
             🚀 回到顶部
         </button>
 
@@ -151,9 +151,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from "vue";
+import { ref, onMounted, onBeforeUnmount, watch, nextTick, computed } from "vue";
 import { useRoute } from 'vue-router';
+import { isPC } from "../../utils/utils";
 const showBackToTop = ref(false);
+const isPCRes = computed(() => isPC());
+console.info('isPCRes', isPCRes)
 const handleScroll = () => {
     showBackToTop.value = window.scrollY > 300; // 超过300px就显示
 };
