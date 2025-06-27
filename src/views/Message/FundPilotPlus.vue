@@ -1,19 +1,36 @@
 <template>
     <div style="width: 100%">
-        <div style="position: sticky; top: 0; background-color: white; z-index: 1000; padding: 10px 0;">当前选中的数量：{{
-            selectedRows.length }}，当前选中的持仓总金额：{{
-                selectedHoldAmount }}，当前选中的持仓总收益：{{
-                selectedHoldGain }}</div>
-        <el-table :data="currentPageData" style="width: 100%" @selection-change="handleSelectionChange">
+        <div style="position: sticky; top: 0; background-color: white; z-index: 1000; padding: 10px 0;">
+            <div>
+                <h2 style="margin: 0 0 10px 0; text-align: center;">【基金分析 - tangfufa】</h2>
+                <p v-if="generatedAt" style="text-align: center; margin: 0;">
+                    数据更新于：{{ generatedAt }}
+                </p>
+            </div>
+            <div v-if="selectedHoldRows.length > 0">当前选中的持仓基金数量：{{
+                selectedHoldRows.length }}，当前选中的持仓基金总金额：{{
+                    selectedHoldAmount }}，当前选中的持仓基金总收益：{{
+                    selectedHoldGain }}</div>
+            <div v-if="selectedHoldRows.length > 0">
+                <el-button type="primary" @click="batchGotoFundPage">批量前往购买</el-button>
+            </div>
+        </div>
+        <el-table :data="currentPageHoldData" style="width: 100%" @selection-change="handleHoldSelectionChange">
             <el-table-column type="selection" fixed width="45" />
             <el-table-column label="操作" fixed="left" width=" 100">
-                <template #default>
-                    <el-button size="small">
-                        查看详情
+                <template #default="scope">
+                    <el-button size="small" @click="gotoFundPage(scope.row)">
+                        前往购买
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="fundCode" label="基金代码" width="90" />
+            <el-table-column prop="fundCode" label="基金代码" width="90">
+                <template #default="scope">
+                    <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
+                        <div>{{ scope.row.fundCode }}</div>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
             <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
                 <template #default="scope">
                     <div class="profit-rate-wrapper">
@@ -89,23 +106,27 @@
         </el-table>
         <!-- 分页控件 -->
         <el-pagination background layout="total, prev, pager, next, sizes, jumper" :total="tableData.holdInfo.length"
-            :page-size="pageSize" :current-page="currentPage" @size-change="handleSizeChange"
-            @current-change="handlePageChange" style="float: right; margin-top: 16px;" />
+            :page-size="pageHoldSize" :current-page="currentHoldPage" @size-change="handleHoldSizeChange"
+            @current-change="handleHoldPageChange" style="float: right; margin-top: 16px;" />
     </div>
 
 </template>
 
 <script lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ElTable, ElTableColumn, ElPagination, ElButton } from 'element-plus'
+import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip } from 'element-plus'
+import { gotoOutPage } from "./../../utils/utils"
 export default {
     components: {
         ElTable,
         ElTableColumn,
         ElPagination,
-        ElButton
+        ElButton,
+        ElTooltip,
     },
     setup() {
+        document.title = "【基金分析 - tangfufa】";
+        const generatedAt = ref("");
         const tableData = ref<{
             holdInfo: any[]
             recommendInfo: any[]
@@ -113,20 +134,19 @@ export default {
             holdInfo: [],
             recommendInfo: [],
         })
-        const currentPage = ref(1)
-        const pageSize = ref(10)
+        const currentHoldPage = ref(1)
+        const pageHoldSize = ref(10)
         // 当前页显示的数据
-        const currentPageData = computed(() => {
-            const start = (currentPage.value - 1) * pageSize.value
-            const end = start + pageSize.value
+        const currentPageHoldData = computed(() => {
+            const start = (currentHoldPage.value - 1) * pageHoldSize.value
+            const end = start + pageHoldSize.value
             return tableData.value.holdInfo.slice(start, end)
         })
-        const selectedRows = ref<any[]>([])
+        const selectedHoldRows = ref<any[]>([])
         const selectedHoldAmount = ref(0)
         const selectedHoldGain = ref(0)
-        const handleSelectionChange = (rows: any[]) => {
-            selectedRows.value = rows
-            console.log('✅ 当前选中行：', rows)
+        const handleHoldSelectionChange = (rows: any[]) => {
+            selectedHoldRows.value = rows
             let totalHoldAmount = 0
             let totalHoldGain = 0
             rows.forEach((item) => {
@@ -136,25 +156,26 @@ export default {
                 totalHoldAmount += amount
                 totalHoldGain += item?.holdGain
             })
-
             // 控制精度，保留两位小数并转回 number
             selectedHoldAmount.value = parseFloat(totalHoldAmount.toFixed(2))
             selectedHoldGain.value = parseFloat(totalHoldGain.toFixed(2))
-            console.log('✅ 当前选中的总金额：', selectedHoldAmount.value)
-            console.log('✅ 当前选中的总收益：', selectedHoldGain.value)
         }
-        const handlePageChange = (newPage: number) => {
-            currentPage.value = newPage
+        const handleHoldPageChange = (newPage: number) => {
+            currentHoldPage.value = newPage
         }
-        const handleSizeChange = (newSize: number) => {
-            pageSize.value = newSize
-            currentPage.value = 1 // 改变每页数量后重置页码
+        const handleHoldSizeChange = (newSize: number) => {
+            pageHoldSize.value = newSize
+            currentHoldPage.value = 1 // 改变每页数量后重置页码
         }
         const fetchData = async () => {
             try {
                 const res = await fetch(`/data/fundPilotData.json?t=${Date.now()}`)
                 const data = await res.json()
                 console.info('✅ Loaded data:', data)
+                const firstGenerated = data?.recommendInfo?.[0]?.generatedAt;
+                if (firstGenerated) {
+                    generatedAt.value = new Date(firstGenerated).toLocaleString();
+                }
                 // 假设 JSON 数据格式为数组（请根据实际字段调整）
                 tableData.value = data
             } catch (err) {
@@ -225,16 +246,26 @@ export default {
         const filterEvaluateTypeTrade = (value: any, row: any) => {
             return row.strategies?.['低吸买入计算策略（参考）']?.tradeType === value
         }
+        const gotoFundPage = (row: any) => {
+            if (row.fundUrl) {
+                gotoOutPage(row.fundUrl);
+            }
+        }
+        const batchGotoFundPage = () => {
+            selectedHoldRows.value?.map((item) => {
+                gotoFundPage(item)
+            })
+        }
         onMounted(() => {
             fetchData()
         })
         return {
             tableData,
-            currentPage,
-            pageSize,
-            currentPageData,
-            handlePageChange,
-            handleSizeChange,
+            currentHoldPage,
+            pageHoldSize,
+            currentPageHoldData,
+            handleHoldPageChange,
+            handleHoldSizeChange,
             filterDeepSeekNeedOptions,
             filterDeepSeekNeedTrade,
             filterDeepSeekTypeOptions,
@@ -243,10 +274,13 @@ export default {
             filterEvaluateTypeOptions,
             filterEvaluateNeedTrade,
             filterEvaluateTypeTrade,
-            handleSelectionChange,
-            selectedRows,
+            handleHoldSelectionChange,
+            selectedHoldRows,
             selectedHoldAmount,
             selectedHoldGain,
+            gotoFundPage,
+            batchGotoFundPage,
+            generatedAt,
         }
     }
 }
