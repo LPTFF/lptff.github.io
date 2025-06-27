@@ -14,6 +14,7 @@ const routes = [
     { path: '/newsArticle', name: 'newsArticle', component: () => import('../views/Message/NewsArticle.vue') },
     { path: '/loginFund', name: 'loginFund', component: () => import('../views/Login/FundLogin.vue') },
     { path: '/fundPilot', name: 'fundPilot', component: () => import('../views/Message/FundPilot.vue') },
+    { path: '/fundPilotPlus', name: 'fundPilotPlus', component: () => import('../views/Message/FundPilotPlus.vue') },
     { path: '/', name: 'home', component: () => import('../views/home/index.vue') },
 ]
 
