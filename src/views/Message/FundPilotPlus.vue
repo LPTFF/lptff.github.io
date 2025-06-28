@@ -39,7 +39,8 @@
             </el-table-column>
             <el-table-column prop="holdRate" label="持仓收益率" fixed="left" width="120" sortable>
                 <template #default="scope">
-                    <el-tooltip class="item" effect="dark" :content="`持仓收益金额：${scope.row.holdGain} 元`" placement="top">
+                    <el-tooltip class="item" effect="dark"
+                        :content="`持仓金额：${scope.row.holdAmount} 元，持仓收益：${scope.row.holdGain} 元`" placement="top">
                         <div class="amount" :class="{
                             'text-red': scope.row.holdGain > 0,
                             'text-green': scope.row.holdGain < 0
@@ -59,7 +60,18 @@
                 <el-table-column label="交易类型" width="100" :filters="filterDeepSeekTypeOptions"
                     :filter-method="filterDeepSeekTypeTrade">
                     <template #default="scope">
-                        <div> {{ scope.row.strategies['DeepSeek策略'].tradeType }} </div>
+                        <template v-if="scope.row.strategies['DeepSeek策略'].tradeType?.includes('减仓')">
+                            <el-tooltip class="item" effect="dark" content="⚠️当前为减仓操作，请注意控制风险" placement="top">
+                                <div>
+                                    {{ scope.row.strategies['DeepSeek策略'].tradeType }}
+                                </div>
+                            </el-tooltip>
+                        </template>
+                        <template v-else>
+                            <div>
+                                {{ scope.row.strategies['DeepSeek策略'].tradeType }}
+                            </div>
+                        </template>
                     </template>
                 </el-table-column>
                 <el-table-column label="交易金额" width="90">
@@ -70,6 +82,11 @@
                 <el-table-column label="交易时机" width="120">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="其他" width="120">
+                    <template #default="scope">
+                        <el-button @click="handleMoreInfo(scope.row.strategies['DeepSeek策略'], '1')">更多信息</el-button>
                     </template>
                 </el-table-column>
             </el-table-column>
@@ -83,7 +100,18 @@
                 <el-table-column label="交易类型" width="100" :filters="filterEvaluateTypeOptions"
                     :filter-method="filterEvaluateTypeTrade">
                     <template #default="scope">
-                        <div> {{ scope.row.strategies['低吸买入计算策略（参考）'].tradeType }} </div>
+                        <template v-if="scope.row.strategies['DeepSeek策略'].tradeType?.includes('减仓')">
+                            <el-tooltip class="item" effect="dark" content="⚠️当前为减仓操作，请注意控制风险" placement="top">
+                                <div>
+                                    {{ scope.row.strategies['DeepSeek策略'].tradeType }}
+                                </div>
+                            </el-tooltip>
+                        </template>
+                        <template v-else>
+                            <div>
+                                {{ scope.row.strategies['DeepSeek策略'].tradeType }}
+                            </div>
+                        </template>
                     </template>
                 </el-table-column>
                 <el-table-column label="交易金额" width="90">
@@ -94,6 +122,11 @@
                 <el-table-column label="交易时机" width="120">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['低吸买入计算策略（参考）'].buyTiming }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="其他" width="120">
+                    <template #default="scope">
+                        <el-button @click="handleMoreInfo(scope.row.strategies['低吸买入计算策略（参考）'], '2')">更多信息</el-button>
                     </template>
                 </el-table-column>
             </el-table-column>
@@ -108,12 +141,20 @@
                     </div>
                 </template>
             </el-table-column>
+            <el-table-column prop="targetProfitRate" label="目标收益" width="150">
+                <template #default="scope">
+                    <div>
+                        {{ (scope.row.targetProfitRate * 100).toFixed(2) }}%
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column prop="fundName" label="基金名称" width="350" />
         </el-table>
         <!-- 分页控件 -->
         <el-pagination background layout="total, prev, pager, next, sizes, jumper" :total="tableData.holdInfo.length"
-            :page-size="pageHoldSize" :current-page="currentHoldPage" @size-change="handleHoldSizeChange"
-            @current-change="handleHoldPageChange" style="float: right; margin-top: 16px;" />
+            :page-size="pageHoldSize" :page-sizes="[tableData.holdInfo.length, 10, 20, 50, 100]"
+            :current-page="currentHoldPage" @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
+            style="float: right; margin-top: 16px;" />
         <p style="margin: 80px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
         <el-table :data="currentPageRecommendData" style="width: 100%"
             @selection-change="handleRecommendSelectionChange">
@@ -132,11 +173,6 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column prop="targetProfitRate" label="目标分析收益" width="120">
-                <template #default="scope">
-                    <div>{{ scope.row.targetProfitRate * 100 }}%</div>
-                </template>
-            </el-table-column>
             <el-table-column label="DeepSeek策略" width="150">
                 <el-table-column label="买入时机" width="150">
                     <template #default="scope">
@@ -151,6 +187,11 @@
                 <el-table-column label="买入评分" width="90">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['DeepSeek策略'].purchaseScore }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="其他" width="120">
+                    <template #default="scope">
+                        <el-button @click="handleMoreInfo(scope.row.strategies['DeepSeek策略'], '3')">更多信息</el-button>
                     </template>
                 </el-table-column>
             </el-table-column>
@@ -170,21 +211,76 @@
                         <div> {{ scope.row.strategies['低吸买入计算策略'].purchaseScore }} </div>
                     </template>
                 </el-table-column>
+                <el-table-column label="其他" width="120">
+                    <template #default="scope">
+                        <el-button @click="handleMoreInfo(scope.row.strategies['低吸买入计算策略'], '4')">更多信息</el-button>
+                    </template>
+                </el-table-column>
             </el-table-column>
-            <el-table-column prop="fundName" label="基金名称" />
+            <el-table-column prop="targetProfitRate" label="目标分析收益" width="120">
+                <template #default="scope">
+                    <div>{{ scope.row.targetProfitRate * 100 }}%</div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="fundName" label="基金名称" width="350" />
         </el-table>
         <!-- 分页控件 -->
         <el-pagination background layout="total, prev, pager, next, sizes, jumper"
-            :total="tableData.recommendInfo.length" :page-size="pageRecommendSize" :current-page="currentRecommendPage"
+            :total="tableData.recommendInfo.length" :page-size="pageRecommendSize"
+            :page-sizes="[tableData.recommendInfo.length, 10, 20, 50, 100]" :current-page="currentRecommendPage"
             @size-change="handleRecommendSizeChange" @current-change="handleRecommendPageChange"
             style="float: right; margin-top: 16px;" />
     </div>
-
+    <el-dialog v-model="dialogVisible" :title=dialogRow.title width="30%" :before-close="handleDialogClose">
+        <p v-if="dialogRow.type == '1'">
+            是否交易：{{ dialogRow.needTrade }}<br />
+            交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
+                ? 'color: red; font-weight: bold;'
+                : ''">
+                {{ dialogRow.tradeType }}
+            </span>
+            <span v-if="dialogRow.tradeType?.includes('减仓')" style="color: orange; font-weight: bold;">
+                ⚠️当前为减仓操作，请注意控制风险
+            </span><br />
+            交易时机：{{ dialogRow.buyTiming }}<br />
+            交易金额：<span class="amount">{{ dialogRow.amount }}</span><br />
+            分析理由：{{ dialogRow.analysis }}
+        </p>
+        <p v-if="dialogRow.type == '2'">
+            是否交易：{{ dialogRow.needTrade }}<br />
+            交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
+                ? 'color: red; font-weight: bold;'
+                : ''">
+                {{ dialogRow.tradeType }}
+            </span>
+            <span v-if="dialogRow.tradeType?.includes('减仓')" style="color: orange; font-weight: bold;">
+                ⚠️当前为减仓操作，请注意控制风险
+            </span><br />
+            交易时机：{{ dialogRow.buyTiming }}<br />
+            交易金额：<span class="amount">{{ dialogRow.amount }}</span><br />
+            分析理由：{{ dialogRow.analysis }}
+        </p>
+        <p v-if="dialogRow.type == '3'">
+            买入时机：{{ dialogRow.buyTiming }}<br />
+            买入金额：<span class="amount">{{ dialogRow.purchaseAmount }}</span><br />
+            买入评分：{{ dialogRow.purchaseScore }}<br />
+            分析理由：{{ dialogRow.recommendation }}<br />
+        </p>
+        <p v-if="dialogRow.type == '4'">
+            买入时机：{{ dialogRow.buyTiming }}<br />
+            买入金额：<span class="amount">{{ dialogRow.purchaseAmount }}</span><br />
+            买入评分：{{ dialogRow.purchaseScore }}<br />
+            分析理由：{{ dialogRow.recommendation }}<br />
+        </p>
+        <template #footer>
+            <el-button @click="dialogVisible = false">关闭</el-button>
+        </template>
+    </el-dialog>
 </template>
 
 <script lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip } from 'element-plus'
+import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog } from 'element-plus'
 import { gotoOutPage } from "./../../utils/utils"
 export default {
     components: {
@@ -193,9 +289,12 @@ export default {
         ElPagination,
         ElButton,
         ElTooltip,
+        ElDialog
     },
     setup() {
         document.title = "【基金分析 - tangfufa】";
+        const dialogVisible = ref(false)
+        const dialogRow = ref<any>({})
         const generatedAt = ref("");
         const tableData = ref<{
             holdInfo: any[]
@@ -348,6 +447,21 @@ export default {
                 gotoFundPage(item)
             })
         }
+        const handleMoreInfo = (row: any, type: any) => {
+            let tmpRow = row
+            if (type == '1' || type == '3') {
+                tmpRow.title = 'DeepSeek策略'
+            }
+            if (type == '2' || type == '4') {
+                tmpRow.title = '低吸买入计算策略（参考）'
+            }
+            tmpRow.type = type
+            dialogRow.value = tmpRow
+            dialogVisible.value = true
+        }
+        const handleDialogClose = () => {
+            dialogVisible.value = false
+        }
         onMounted(() => {
             fetchData()
         })
@@ -381,6 +495,10 @@ export default {
             batchGotoHoldFundPage,
             batchGotoRecommendFundPage,
             generatedAt,
+            dialogVisible,
+            dialogRow,
+            handleMoreInfo,
+            handleDialogClose
         }
     }
 }
