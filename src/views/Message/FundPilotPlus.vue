@@ -30,34 +30,23 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="fundCode" label="基金代码" width="90">
+            <el-table-column prop="fundCode" label="基金代码" fixed="left" width="90">
                 <template #default="scope">
                     <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
                         <div>{{ scope.row.fundCode }}</div>
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
+            <el-table-column prop="holdRate" label="持仓收益率" fixed="left" width="120" sortable>
                 <template #default="scope">
-                    <div class="profit-rate-wrapper">
-                        <span class="amount" :class="{
+                    <el-tooltip class="item" effect="dark" :content="`持仓收益金额：${scope.row.holdGain} 元`" placement="top">
+                        <div class="amount" :class="{
                             'text-red': scope.row.holdGain > 0,
                             'text-green': scope.row.holdGain < 0
                         }">
                             {{ scope.row.holdRate + '%' }}
-                        </span>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="holdAmount" label="持仓金额" width="150" />
-            <el-table-column prop="holdGain" label="持仓收益" width="100">
-                <template #default="scope">
-                    <div class="profit-rate-wrapper">
-                        <span class="amount" :class="{
-                            'text-red': scope.row.holdGain > 0,
-                            'text-green': scope.row.holdGain < 0
-                        }">{{ scope.row.holdGain }}</span>
-                    </div>
+                        </div>
+                    </el-tooltip>
                 </template>
             </el-table-column>
             <el-table-column label="DeepSeek策略" width="150">
@@ -107,6 +96,17 @@
                         <div> {{ scope.row.strategies['低吸买入计算策略（参考）'].buyTiming }} </div>
                     </template>
                 </el-table-column>
+            </el-table-column>
+            <el-table-column prop="holdAmount" label="持仓金额" width="150" />
+            <el-table-column prop="holdGain" label="持仓收益" width="100">
+                <template #default="scope">
+                    <div class="profit-rate-wrapper">
+                        <span class="amount" :class="{
+                            'text-red': scope.row.holdGain > 0,
+                            'text-green': scope.row.holdGain < 0
+                        }">{{ scope.row.holdGain }}</span>
+                    </div>
+                </template>
             </el-table-column>
             <el-table-column prop="fundName" label="基金名称" width="350" />
         </el-table>
