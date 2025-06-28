@@ -154,8 +154,8 @@ export default {
                 const data = await getRecommendArticleData();
                 recommendArticleData.value = data;
                 console.log('recommendArticleData.value', recommendArticleData.value);
-                if (data.length > 0 && data[0].created_at) {
-                    generatedAt.value = new Date(data[0].created_at).toLocaleString();
+                if (data.length > 0 && data[0].filteredAt) {
+                    generatedAt.value = new Date(data[0].filteredAt).toLocaleString();
                 }
             } catch (error) {
                 console.error('获取推荐文章失败:', error);
@@ -165,14 +165,14 @@ export default {
         newsGuide = githubList.value;
         newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
         const handleDay = (item: any) => {
-            const timestamp = new Date(item.created_at).getTime();
+            const timestamp = new Date(item.pubDate).getTime();
             const date = new Date(timestamp);
             const day = date.getDate();
             const formattedDay = day < 10 ? "0" + day : day.toString();
             return formattedDay;
         };
         const handleHour = (item: any) => {
-            const timestamp = new Date(item.created_at).getTime();
+            const timestamp = new Date(item.pubDate).getTime();
             const date = new Date(timestamp);
             const hours = date.getHours();
             const minutes = date.getMinutes();
@@ -188,20 +188,20 @@ export default {
             return item.url;
         };
         const gotoWelfareWebsite = (item: any) => {
-            let websiteUrl = item.source_url;
+            let websiteUrl = item.link;
             console.log(websiteUrl);
             if (websiteUrl) {
                 gotoOutPage(websiteUrl);
             }
         };
         const handleWebsiteName = (item: any) => {
-            return item.site_name || '随风而逝';
+            return item.source || '随风而逝';
         };
         const handleWebsiteImg = (item: any) => {
-            return item.image_url;
+            return item.image_url || logoUrl.value;
         };
         const handleMonth = (item: any) => {
-            const timestamp = new Date(item.created_at).getTime();
+            const timestamp = new Date(item.pubDate).getTime();
             const date = new Date(timestamp);
             const month = date.getMonth() + 1;
             return month + "月";
@@ -210,7 +210,7 @@ export default {
             event.target.src = logoUrl.value;
         };
         const handleYearColor = (item: any) => {
-            const timestamp = new Date(item.created_at).getTime();
+            const timestamp = new Date(item.pubDate).getTime();
             const date = new Date(timestamp);
             // 获取对应的年份
             const year = date.getFullYear();
