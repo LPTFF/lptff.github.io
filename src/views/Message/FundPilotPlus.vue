@@ -231,7 +231,7 @@
             @size-change="handleRecommendSizeChange" @current-change="handleRecommendPageChange"
             style="float: right; margin-top: 16px;" />
     </div>
-    <el-dialog v-model="dialogVisible" :title=dialogRow.title width="30%" :before-close="handleDialogClose">
+    <el-dialog v-model="dialogVisible" :title=dialogRow.title width="50%" :before-close="handleDialogClose">
         <p v-if="dialogRow.type == '1'">
             是否交易：{{ dialogRow.needTrade }}<br />
             交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
@@ -244,7 +244,21 @@
             </span><br />
             交易时机：{{ dialogRow.buyTiming }}<br />
             交易金额：<span class="amount">{{ dialogRow.amount }}</span><br />
-            分析理由：{{ dialogRow.analysis }}
+            分析理由：{{ dialogRow.analysis }}<br />
+            提示词：<span class="prompt-text">
+                {{ isExpanded ? dialogRow.prompt : dialogRow.prompt.slice(0, 100) + (dialogRow.prompt.length > 100 ?
+                    '...' :
+                    '') }}
+            </span>
+            <el-button text size="small" type="primary" @click="isExpanded = !isExpanded">
+                {{ isExpanded ? '收起' : '展开更多' }}
+            </el-button>
+            <span>
+                <el-icon @click="copyPrompt(dialogRow)" style="height: 16px;width: 16px">
+                    <CopyDocument style="height: 16px;width: 16px;" />
+                </el-icon>
+            </span>
+
         </p>
         <p v-if="dialogRow.type == '2'">
             是否交易：{{ dialogRow.needTrade }}<br />
@@ -265,6 +279,19 @@
             买入金额：<span class="amount">{{ dialogRow.purchaseAmount }}</span><br />
             买入评分：{{ dialogRow.purchaseScore }}<br />
             分析理由：{{ dialogRow.recommendation }}<br />
+            提示词：<span class="prompt-text">
+                {{ isExpanded ? dialogRow.prompt : dialogRow.prompt.slice(0, 100) + (dialogRow.prompt.length > 100 ?
+                    '...' :
+                    '') }}
+            </span>
+            <el-button text size="small" type="primary" @click="isExpanded = !isExpanded">
+                {{ isExpanded ? '收起' : '展开更多' }}
+            </el-button>
+            <span>
+                <el-icon @click="copyPrompt(dialogRow)" style="height: 16px;width: 16px">
+                    <CopyDocument style="height: 16px;width: 16px;" />
+                </el-icon>
+            </span>
         </p>
         <p v-if="dialogRow.type == '4'">
             买入时机：{{ dialogRow.buyTiming }}<br />
@@ -280,7 +307,8 @@
 
 <script lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog } from 'element-plus'
+import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon } from 'element-plus'
+import { CopyDocument } from '@element-plus/icons-vue'
 import { gotoOutPage } from "./../../utils/utils"
 export default {
     components: {
@@ -289,11 +317,42 @@ export default {
         ElPagination,
         ElButton,
         ElTooltip,
-        ElDialog
+        ElDialog,
+        CopyDocument,
+        ElIcon
     },
     setup() {
         document.title = "【基金分析 - tangfufa】";
         const dialogVisible = ref(false)
+        const isExpanded = ref(false)
+        const copyPrompt = (dialogRow: any) => {
+            console.info('1')
+            if (!dialogRow.prompt) return
+            try {
+                // 创建一个隐藏 textarea
+                const textarea = document.createElement('textarea');
+                textarea.value = dialogRow.prompt;
+
+                // 设置不可见并添加到页面中
+                textarea.setAttribute('readonly', '');
+                textarea.style.position = 'absolute';
+                textarea.style.left = '-9999px';
+                document.body.appendChild(textarea);
+
+                // 选中文本并复制
+                textarea.select();
+                const success = document.execCommand('copy');
+                document.body.removeChild(textarea);
+
+                if (success) {
+                    ElMessage.success('提示词已复制');
+                } else {
+                    ElMessage.warning('复制失败，请手动复制');
+                }
+            } catch (err) {
+                ElMessage.error('复制异常，请手动复制');
+            }
+        }
         const dialogRow = ref<any>({})
         const generatedAt = ref("");
         const tableData = ref<{
@@ -498,13 +557,24 @@ export default {
             dialogVisible,
             dialogRow,
             handleMoreInfo,
-            handleDialogClose
+            handleDialogClose,
+            isExpanded,
+            copyPrompt
         }
     }
 }
 </script>
 
 <style scoped>
+.prompt-text {
+    display: inline-block;
+    white-space: pre-wrap;
+    /* 支持换行符 \n */
+    word-break: break-word;
+    /* 支持长文本断行 */
+    max-width: 100%;
+}
+
 .back-to-top {
     position: fixed;
     bottom: 10%;
