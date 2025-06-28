@@ -12,9 +12,15 @@
                     selectedHoldAmount }}，当前选中的持仓基金总收益：{{
                     selectedHoldGain }}</div>
             <div v-if="selectedHoldRows.length > 0">
-                <el-button type="primary" @click="batchGotoFundPage">批量前往购买</el-button>
+                <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓基金</el-button>
+            </div>
+            <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
+                selectedRecommendRows.length }}</div>
+            <div v-if="selectedRecommendRows.length > 0">
+                <el-button type="primary" @click="batchGotoRecommendFundPage">批量前往购买推荐基金</el-button>
             </div>
         </div>
+        <p style="margin: 0 0 10px 0;"><strong>▶ 持仓情况：</strong></p>
         <el-table :data="currentPageHoldData" style="width: 100%" @selection-change="handleHoldSelectionChange">
             <el-table-column type="selection" fixed width="45" />
             <el-table-column label="操作" fixed="left" width=" 100">
@@ -108,6 +114,70 @@
         <el-pagination background layout="total, prev, pager, next, sizes, jumper" :total="tableData.holdInfo.length"
             :page-size="pageHoldSize" :current-page="currentHoldPage" @size-change="handleHoldSizeChange"
             @current-change="handleHoldPageChange" style="float: right; margin-top: 16px;" />
+        <p style="margin: 80px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
+        <el-table :data="currentPageRecommendData" style="width: 100%"
+            @selection-change="handleRecommendSelectionChange">
+            <el-table-column type="selection" fixed width="45" />
+            <el-table-column label="操作" fixed="left" width=" 100">
+                <template #default="scope">
+                    <el-button size="small" @click="gotoFundPage(scope.row)">
+                        前往购买
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="fundCode" label="基金代码" width="90">
+                <template #default="scope">
+                    <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
+                        <div>{{ scope.row.fundCode }}</div>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
+            <el-table-column prop="targetProfitRate" label="目标分析收益" width="120">
+                <template #default="scope">
+                    <div>{{ scope.row.targetProfitRate * 100 }}%</div>
+                </template>
+            </el-table-column>
+            <el-table-column label="DeepSeek策略" width="150">
+                <el-table-column label="买入时机" width="150">
+                    <template #default="scope">
+                        <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="买入金额" width="100">
+                    <template #default="scope">
+                        <div class="amount"> {{ scope.row.strategies['DeepSeek策略'].purchaseAmount }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="买入评分" width="90">
+                    <template #default="scope">
+                        <div> {{ scope.row.strategies['DeepSeek策略'].purchaseScore }} </div>
+                    </template>
+                </el-table-column>
+            </el-table-column>
+            <el-table-column label="低吸买入计算策略" width="150">
+                <el-table-column label="买入时机" width="150">
+                    <template #default="scope">
+                        <div> {{ scope.row.strategies['低吸买入计算策略'].buyTiming }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="买入金额" width="100">
+                    <template #default="scope">
+                        <div class="amount"> {{ scope.row.strategies['低吸买入计算策略'].purchaseAmount }} </div>
+                    </template>
+                </el-table-column>
+                <el-table-column label="买入评分" width="90">
+                    <template #default="scope">
+                        <div> {{ scope.row.strategies['低吸买入计算策略'].purchaseScore }} </div>
+                    </template>
+                </el-table-column>
+            </el-table-column>
+            <el-table-column prop="fundName" label="基金名称" />
+        </el-table>
+        <!-- 分页控件 -->
+        <el-pagination background layout="total, prev, pager, next, sizes, jumper"
+            :total="tableData.recommendInfo.length" :page-size="pageRecommendSize" :current-page="currentRecommendPage"
+            @size-change="handleRecommendSizeChange" @current-change="handleRecommendPageChange"
+            style="float: right; margin-top: 16px;" />
     </div>
 
 </template>
@@ -136,13 +206,21 @@ export default {
         })
         const currentHoldPage = ref(1)
         const pageHoldSize = ref(10)
+        const currentRecommendPage = ref(1)
+        const pageRecommendSize = ref(10)
         // 当前页显示的数据
         const currentPageHoldData = computed(() => {
             const start = (currentHoldPage.value - 1) * pageHoldSize.value
             const end = start + pageHoldSize.value
             return tableData.value.holdInfo.slice(start, end)
         })
+        const currentPageRecommendData = computed(() => {
+            const start = (currentRecommendPage.value - 1) * pageRecommendSize.value
+            const end = start + pageRecommendSize.value
+            return tableData.value.recommendInfo.slice(start, end)
+        })
         const selectedHoldRows = ref<any[]>([])
+        const selectedRecommendRows = ref<any[]>([])
         const selectedHoldAmount = ref(0)
         const selectedHoldGain = ref(0)
         const handleHoldSelectionChange = (rows: any[]) => {
@@ -152,7 +230,6 @@ export default {
             rows.forEach((item) => {
                 const matchHoldAmount = item?.holdAmount?.match(/\d+(\.\d+)?/)
                 const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0]) : 0
-                console.log('✅ finalHoldAmount', amount)
                 totalHoldAmount += amount
                 totalHoldGain += item?.holdGain
             })
@@ -160,12 +237,22 @@ export default {
             selectedHoldAmount.value = parseFloat(totalHoldAmount.toFixed(2))
             selectedHoldGain.value = parseFloat(totalHoldGain.toFixed(2))
         }
+        const handleRecommendSelectionChange = (rows: any[]) => {
+            selectedRecommendRows.value = rows
+        }
         const handleHoldPageChange = (newPage: number) => {
             currentHoldPage.value = newPage
+        }
+        const handleRecommendPageChange = (newPage: number) => {
+            currentRecommendPage.value = newPage
         }
         const handleHoldSizeChange = (newSize: number) => {
             pageHoldSize.value = newSize
             currentHoldPage.value = 1 // 改变每页数量后重置页码
+        }
+        const handleRecommendSizeChange = (newSize: number) => {
+            pageRecommendSize.value = newSize
+            currentRecommendPage.value = 1 // 改变每页数量后重置页码
         }
         const fetchData = async () => {
             try {
@@ -251,8 +338,13 @@ export default {
                 gotoOutPage(row.fundUrl);
             }
         }
-        const batchGotoFundPage = () => {
+        const batchGotoHoldFundPage = () => {
             selectedHoldRows.value?.map((item) => {
+                gotoFundPage(item)
+            })
+        }
+        const batchGotoRecommendFundPage = () => {
+            selectedRecommendRows.value?.map((item) => {
                 gotoFundPage(item)
             })
         }
@@ -264,8 +356,13 @@ export default {
             currentHoldPage,
             pageHoldSize,
             currentPageHoldData,
+            pageRecommendSize,
+            currentRecommendPage,
+            currentPageRecommendData,
             handleHoldPageChange,
+            handleRecommendPageChange,
             handleHoldSizeChange,
+            handleRecommendSizeChange,
             filterDeepSeekNeedOptions,
             filterDeepSeekNeedTrade,
             filterDeepSeekTypeOptions,
@@ -275,11 +372,14 @@ export default {
             filterEvaluateNeedTrade,
             filterEvaluateTypeTrade,
             handleHoldSelectionChange,
+            handleRecommendSelectionChange,
             selectedHoldRows,
+            selectedRecommendRows,
             selectedHoldAmount,
             selectedHoldGain,
             gotoFundPage,
-            batchGotoFundPage,
+            batchGotoHoldFundPage,
+            batchGotoRecommendFundPage,
             generatedAt,
         }
     }
