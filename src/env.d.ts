@@ -4,5 +4,6 @@ declare module '*.vue' {
     export default Component;
 }
 declare module '*.jpg'
-declare module '*.md' 
-declare module '*.js' 
+declare module '*.md'
+declare module '*.js'
+declare module 'file-saver'

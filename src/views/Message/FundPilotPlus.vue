@@ -13,6 +13,7 @@
                     selectedHoldGain }}</div>
             <div v-if="selectedHoldRows.length > 0">
                 <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓基金</el-button>
+                <el-button type="primary" @click="batchExportHoldFund">批量导出持仓基金</el-button>
             </div>
             <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
                 selectedRecommendRows.length }}</div>
@@ -309,6 +310,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
+import * as XLSX from 'xlsx'
+import { saveAs } from 'file-saver'
 import { gotoOutPage } from "./../../utils/utils"
 export default {
     components: {
@@ -501,6 +504,33 @@ export default {
                 gotoFundPage(item)
             })
         }
+        const batchExportHoldFund = () => {
+            console.info('batchExportHoldFund selectedHoldRows.value', selectedHoldRows.value)
+            if (!selectedHoldRows.value || selectedHoldRows.value.length === 0) {
+                ElMessage.warning('请先选择要导出的基金')
+                return
+            }
+            const exportData = selectedHoldRows.value.map(row => ({
+                基金名称: row.fundName,
+                基金代码: row.fundCode,
+                持仓金额: row.holdAmount,
+                持仓收益: row.holdGain,
+                收益率: row.holdRate,
+            }))
+            // 2. 转换为 worksheet
+            const worksheet = XLSX.utils.json_to_sheet(exportData)
+            // 3. 创建 workbook
+            const workbook = XLSX.utils.book_new()
+            XLSX.utils.book_append_sheet(workbook, worksheet, '持仓基金明细')
+
+            // 4. 导出为 blob 并下载
+            const excelBuffer = XLSX.write(workbook, {
+                bookType: 'xlsx',
+                type: 'array'
+            })
+            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+            saveAs(blob, `持仓基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
+        }
         const batchGotoRecommendFundPage = () => {
             selectedRecommendRows.value?.map((item) => {
                 gotoFundPage(item)
@@ -552,6 +582,7 @@ export default {
             selectedHoldGain,
             gotoFundPage,
             batchGotoHoldFundPage,
+            batchExportHoldFund,
             batchGotoRecommendFundPage,
             generatedAt,
             dialogVisible,
