@@ -80,11 +80,11 @@
                         <div class="amount"> {{ scope.row.strategies['DeepSeek策略'].amount }} </div>
                     </template>
                 </el-table-column>
-                <el-table-column label="交易时机" width="120">
+                <!-- <el-table-column label="交易时机" width="120">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="其他" width="120">
                     <template #default="scope">
                         <el-button @click="handleMoreInfo(scope.row.strategies['DeepSeek策略'], '1')">更多信息</el-button>
@@ -120,11 +120,11 @@
                         <div class="amount"> {{ scope.row.strategies['低吸买入计算策略（参考）'].amount }} </div>
                     </template>
                 </el-table-column>
-                <el-table-column label="交易时机" width="120">
+                <!-- <el-table-column label="交易时机" width="120">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['低吸买入计算策略（参考）'].buyTiming }} </div>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="其他" width="120">
                     <template #default="scope">
                         <el-button @click="handleMoreInfo(scope.row.strategies['低吸买入计算策略（参考）'], '2')">更多信息</el-button>
@@ -175,11 +175,11 @@
                 </template>
             </el-table-column>
             <el-table-column label="DeepSeek策略" width="150">
-                <el-table-column label="买入时机" width="150">
+                <!-- <el-table-column label="买入时机" width="150">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="买入金额" width="100">
                     <template #default="scope">
                         <div class="amount"> {{ scope.row.strategies['DeepSeek策略'].purchaseAmount }} </div>
@@ -197,11 +197,11 @@
                 </el-table-column>
             </el-table-column>
             <el-table-column label="低吸买入计算策略" width="150">
-                <el-table-column label="买入时机" width="150">
+                <!-- <el-table-column label="买入时机" width="150">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['低吸买入计算策略'].buyTiming }} </div>
                     </template>
-                </el-table-column>
+                </el-table-column> -->
                 <el-table-column label="买入金额" width="100">
                     <template #default="scope">
                         <div class="amount"> {{ scope.row.strategies['低吸买入计算策略'].purchaseAmount }} </div>
