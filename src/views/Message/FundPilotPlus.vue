@@ -75,7 +75,8 @@
                         </template>
                     </template>
                 </el-table-column>
-                <el-table-column label="交易金额" width="90">
+                <el-table-column label="交易金额" width="100" :filters="filterDeepSeekAmountOptions"
+                    :filter-method="filterDeepSeekAmountTrade">
                     <template #default="scope">
                         <div class="amount"> {{ scope.row.strategies['DeepSeek策略'].amount }} </div>
                     </template>
@@ -115,7 +116,8 @@
                         </template>
                     </template>
                 </el-table-column>
-                <el-table-column label="交易金额" width="90">
+                <el-table-column label="交易金额" width="100" :filters="filterEvaluateAmountOptions"
+                    :filter-method="filterEvaluateAmountTrade">
                     <template #default="scope">
                         <div class="amount"> {{ scope.row.strategies['低吸买入计算策略（参考）'].amount }} </div>
                     </template>
@@ -456,6 +458,19 @@ export default {
                 value: value
             }))
         })
+        const filterDeepSeekAmountOptions = computed((): { text: string; value: string }[] => {
+            const set = new Set<string>()
+            tableData.value.holdInfo.forEach((item: any) => {
+                const val = item?.strategies?.['DeepSeek策略']?.amount
+                if (val !== undefined && val !== null) {
+                    set.add(String(val))  // 强制转换为 string，确保类型一致
+                }
+            })
+            return Array.from(set).map(value => ({
+                text: value,
+                value: value
+            }))
+        })
         const filterEvaluateNeedOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.holdInfo.forEach((item: any) => {
@@ -482,17 +497,36 @@ export default {
                 value: value
             }))
         })
+        const filterEvaluateAmountOptions = computed((): { text: string; value: string }[] => {
+            const set = new Set<string>()
+            tableData.value.holdInfo.forEach((item: any) => {
+                const val = item?.strategies?.['低吸买入计算策略（参考）']?.amount
+                if (val !== undefined && val !== null) {
+                    set.add(String(val))  // 强制转换为 string，确保类型一致
+                }
+            })
+            return Array.from(set).map(value => ({
+                text: value,
+                value: value
+            }))
+        })
         const filterDeepSeekNeedTrade = (value: any, row: any) => {
             return row.strategies?.['DeepSeek策略']?.needTrade === value
         }
         const filterDeepSeekTypeTrade = (value: any, row: any) => {
             return row.strategies?.['DeepSeek策略']?.tradeType === value
         }
+        const filterDeepSeekAmountTrade = (value: any, row: any) => {
+            return row.strategies?.['DeepSeek策略']?.amount === value
+        }
         const filterEvaluateNeedTrade = (value: any, row: any) => {
             return row.strategies?.['低吸买入计算策略（参考）']?.needTrade === value
         }
         const filterEvaluateTypeTrade = (value: any, row: any) => {
             return row.strategies?.['低吸买入计算策略（参考）']?.tradeType === value
+        }
+        const filterEvaluateAmountTrade = (value: any, row: any) => {
+            return row.strategies?.['低吸买入计算策略（参考）']?.amount === value
         }
         const gotoFundPage = (row: any) => {
             if (row.fundUrl) {
@@ -569,9 +603,13 @@ export default {
             filterDeepSeekNeedOptions,
             filterDeepSeekNeedTrade,
             filterDeepSeekTypeOptions,
+            filterDeepSeekAmountOptions,
             filterDeepSeekTypeTrade,
+            filterDeepSeekAmountTrade,
             filterEvaluateNeedOptions,
             filterEvaluateTypeOptions,
+            filterEvaluateAmountOptions,
+            filterEvaluateAmountTrade,
             filterEvaluateNeedTrade,
             filterEvaluateTypeTrade,
             handleHoldSelectionChange,
