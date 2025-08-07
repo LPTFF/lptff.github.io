@@ -158,7 +158,70 @@
             :page-size="pageHoldSize" :page-sizes="[tableData.holdInfo.length, 10, 20, 50, 100]"
             :current-page="currentHoldPage" @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
             style="float: right; margin-top: 16px;" />
-        <p style="margin: 80px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
+        <p style="margin: 80px 0 10px 0;"><strong>▶ 对冲情况：</strong></p>
+        <el-table :data="currentPageConservativeData" style="width: 100%">
+            <el-table-column type="selection" fixed width="45" />
+            <el-table-column label="操作" fixed="left" width=" 100">
+                <template #default="scope">
+                    <el-button size="small" @click="gotoFundPage(scope.row)">
+                        前往购买
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="fundCode" label="基金代码" width="90">
+            </el-table-column>
+            <el-table-column prop="fundName" label="基金名称" width="300" />
+            <el-table-column prop="holdAmount" label="持仓金额" width="90">
+                <template #default="scope">
+                    <div>
+                        {{ extractNumber(scope.row.holdAmount) }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
+                <template #default="scope">
+                    <div class="amount" :class="{
+                        'text-red': scope.row.holdGain > 0,
+                        'text-green': scope.row.holdGain < 0
+                    }">
+                        {{ scope.row.holdRate + '%' }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="conservativeInvestingHoldAmount" label="稳健理财总金额" width="150">
+            </el-table-column>
+            <el-table-column prop="targetConservativeInvestingHoldAmount" label="对冲目标金额" width="120">
+                <template #default="scope">
+                    <div class="amount" :class="{
+                        'text-green': extractNumber(scope.row.holdAmount) > scope.row.targetConservativeInvestingHoldAmount,
+                        'text-red': extractNumber(scope.row.holdAmount) < scope.row.targetConservativeInvestingHoldAmount
+                    }">
+                        {{ scope.row.targetConservativeInvestingHoldAmount }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="advancedInvestingHoldAmount" label="进阶理财总持仓金额" width="150"></el-table-column>
+            <el-table-column prop="countLossHoldFundNum" label="亏损基金数量" width="120">
+                <template #default="scope">
+                    <div class="amount text-green">
+                        {{ scope.row.countLossHoldFundNum }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="countProfitHoldFundNum" label="盈利基金数量" width="120">
+                <template #default="scope">
+                    <div class="amount text-red">
+                        {{ scope.row.countProfitHoldFundNum }}
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+        <!-- 分页控件 -->
+        <!-- <el-pagination background layout="total, prev, pager, next, sizes, jumper"
+            :total="tableData.conservativeInfo.length" :page-size="pageConservativeSize"
+            :page-sizes="[tableData.conservativeInfo.length, 10, 20, 50, 100]" :current-page="currentConservativePage"
+            style="float: right; margin-top: 16px;" /> -->
+        <p style="margin: 40px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
         <el-table :data="currentPageRecommendData" style="width: 100%"
             @selection-change="handleRecommendSelectionChange">
             <el-table-column type="selection" fixed width="45" />
@@ -363,14 +426,18 @@ export default {
         const tableData = ref<{
             holdInfo: any[]
             recommendInfo: any[]
+            conservativeInfo: any[]
         }>({
             holdInfo: [],
             recommendInfo: [],
+            conservativeInfo: [],
         })
         const currentHoldPage = ref(1)
         const pageHoldSize = ref(10)
         const currentRecommendPage = ref(1)
         const pageRecommendSize = ref(10)
+        const currentConservativePage = ref(1)
+        const pageConservativeSize = ref(10)
         // 当前页显示的数据
         const currentPageHoldData = computed(() => {
             const start = (currentHoldPage.value - 1) * pageHoldSize.value
@@ -381,6 +448,11 @@ export default {
             const start = (currentRecommendPage.value - 1) * pageRecommendSize.value
             const end = start + pageRecommendSize.value
             return tableData.value.recommendInfo.slice(start, end)
+        })
+        const currentPageConservativeData = computed(() => {
+            const start = (currentConservativePage.value - 1) * pageConservativeSize.value
+            const end = start + pageConservativeSize.value
+            return tableData.value.conservativeInfo.slice(start, end)
         })
         const selectedHoldRows = ref<any[]>([])
         const selectedRecommendRows = ref<any[]>([])
@@ -423,6 +495,7 @@ export default {
                 const data = await res.json()
                 console.info('✅ Loaded data:', data)
                 const firstGenerated = data?.recommendInfo?.[0]?.generatedAt;
+                console.info('✅ firstGenerated firstGenerated:', firstGenerated)
                 if (firstGenerated) {
                     generatedAt.value = new Date(firstGenerated).toLocaleString();
                 }
@@ -585,6 +658,11 @@ export default {
         const handleDialogClose = () => {
             dialogVisible.value = false
         }
+        const extractNumber = (val: any) => {
+            const match = String(val).match(/[\d,]+\.\d+|[\d,]+/);
+            return match ? match[0] : '';
+        };
+
         onMounted(() => {
             fetchData()
         })
@@ -596,6 +674,9 @@ export default {
             pageRecommendSize,
             currentRecommendPage,
             currentPageRecommendData,
+            currentConservativePage,
+            pageConservativeSize,
+            currentPageConservativeData,
             handleHoldPageChange,
             handleRecommendPageChange,
             handleHoldSizeChange,
@@ -628,7 +709,8 @@ export default {
             handleMoreInfo,
             handleDialogClose,
             isExpanded,
-            copyPrompt
+            copyPrompt,
+            extractNumber
         }
     }
 }
