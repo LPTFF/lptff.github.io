@@ -51,6 +51,14 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
+            <el-table-column prop="tradeListInfo" label="持有时长" width="120" :sortable="true"
+                :sort-method="sortByHoldingDays">
+                <template #default="scope">
+                    <div :class="getHoldingDaysClass(scope.row.tradeListInfo)">
+                        {{ calculateHoldingDays(scope.row.tradeListInfo) }}
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column label="DeepSeek策略" width="150">
                 <el-table-column label="是否交易" width="100" :filters="filterDeepSeekNeedOptions"
                     :filter-method="filterDeepSeekNeedTrade">
@@ -185,6 +193,14 @@
                         'text-green': scope.row.holdGain < 0
                     }">
                         {{ scope.row.holdRate + '%' }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="tradeListInfo" label="持有时长" width="120" :sortable="true"
+                :sort-method="sortByHoldingDays">
+                <template #default="scope">
+                    <div :class="getHoldingDaysClass(scope.row.tradeListInfo)">
+                        {{ calculateHoldingDays(scope.row.tradeListInfo) }}
                     </div>
                 </template>
             </el-table-column>
@@ -662,7 +678,36 @@ export default {
             const match = String(val).match(/[\d,]+\.\d+|[\d,]+/);
             return match ? match[0] : '';
         };
+        const calculateHoldingDays = (tradeListInfo: any) => {
+            if (!tradeListInfo || tradeListInfo.length === 0) return '-';
+            // 获取最后一个日期字符串，比如 "2025-08-05"
+            const lastDateStr = tradeListInfo[tradeListInfo.length - 1].strikeStartDate;
+            if (!lastDateStr) return '-';
+            // 转为 Date 对象（建议转换成标准格式，兼容性好）
+            const lastDate = new Date(lastDateStr);
+            const now = new Date();
+            // 转成时间戳 number 类型再做减法
+            const diffMs = now.getTime() - lastDate.getTime();
+            if (diffMs < 0) return 0;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            return diffDays;
+        };
+        const getHoldingDaysClass = (tradeListInfo: any) => {
+            const days = calculateHoldingDays(tradeListInfo);
+            if (typeof days === 'number' && days >= 90) {
+                return 'amount text-red';  // 超过90天红色
+            }
+            return '';  // 否则黑色
+        };
+        const sortByHoldingDays = (a: any, b: any) => {
+            let daysA = calculateHoldingDays(a.tradeListInfo);
+            let daysB = calculateHoldingDays(b.tradeListInfo);
 
+            daysA = typeof daysA === 'number' ? daysA : 0;
+            daysB = typeof daysB === 'number' ? daysB : 0;
+
+            return daysA - daysB;
+        }
         onMounted(() => {
             fetchData()
         })
@@ -710,7 +755,10 @@ export default {
             handleDialogClose,
             isExpanded,
             copyPrompt,
-            extractNumber
+            extractNumber,
+            calculateHoldingDays,
+            getHoldingDaysClass,
+            sortByHoldingDays
         }
     }
 }
