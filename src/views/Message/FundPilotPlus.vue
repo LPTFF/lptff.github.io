@@ -263,12 +263,12 @@
                 </el-table-column> -->
                 <el-table-column label="买入金额" width="100">
                     <template #default="scope">
-                        <div class="amount"> {{ scope.row.strategies['DeepSeek策略'].purchaseAmount }} </div>
+                        <div class="amount"> {{ scope.row.strategies['DeepSeek策略']?.purchaseAmount }} </div>
                     </template>
                 </el-table-column>
                 <el-table-column label="买入评分" width="90">
                     <template #default="scope">
-                        <div> {{ scope.row.strategies['DeepSeek策略'].purchaseScore }} </div>
+                        <div> {{ scope.row.strategies['DeepSeek策略']?.purchaseScore }} </div>
                     </template>
                 </el-table-column>
                 <el-table-column label="其他" width="120">
@@ -285,12 +285,12 @@
                 </el-table-column> -->
                 <el-table-column label="买入金额" width="100">
                     <template #default="scope">
-                        <div class="amount"> {{ scope.row.strategies['低吸买入计算策略'].purchaseAmount }} </div>
+                        <div class="amount"> {{ scope.row.strategies['低吸买入计算策略']?.purchaseAmount }} </div>
                     </template>
                 </el-table-column>
                 <el-table-column label="买入评分" width="90">
                     <template #default="scope">
-                        <div> {{ scope.row.strategies['低吸买入计算策略'].purchaseScore }} </div>
+                        <div> {{ scope.row.strategies['低吸买入计算策略']?.purchaseScore }} </div>
                     </template>
                 </el-table-column>
                 <el-table-column label="其他" width="120">
@@ -313,8 +313,8 @@
             @size-change="handleRecommendSizeChange" @current-change="handleRecommendPageChange"
             style="float: right; margin-top: 16px;" />
     </div>
-    <el-dialog v-model="dialogVisible" :title=dialogRow.title width="50%" :before-close="handleDialogClose">
-        <p v-if="dialogRow.type == '1'">
+    <el-dialog v-model="dialogVisible" :title=dialogRow?.title width="50%" :before-close="handleDialogClose">
+        <p v-if="dialogRow?.type == '1'">
             是否交易：{{ dialogRow.needTrade }}<br />
             交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
                 ? 'color: red; font-weight: bold;'
@@ -342,7 +342,7 @@
             </span>
 
         </p>
-        <p v-if="dialogRow.type == '2'">
+        <p v-if="dialogRow?.type == '2'">
             是否交易：{{ dialogRow.needTrade }}<br />
             交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
                 ? 'color: red; font-weight: bold;'
@@ -356,10 +356,10 @@
             交易金额：<span class="amount">{{ dialogRow.amount }}</span><br />
             分析理由：{{ dialogRow.analysis }}
         </p>
-        <p v-if="dialogRow.type == '3'">
+        <p v-if="dialogRow?.type == '3'">
             买入时机：{{ dialogRow.buyTiming }}<br />
-            买入金额：<span class="amount">{{ dialogRow.purchaseAmount }}</span><br />
-            买入评分：{{ dialogRow.purchaseScore }}<br />
+            买入金额：<span class="amount">{{ dialogRow?.purchaseAmount }}</span><br />
+            买入评分：{{ dialogRow?.purchaseScore }}<br />
             分析理由：{{ dialogRow.recommendation }}<br />
             提示词：<span class="prompt-text">
                 {{ isExpanded ? dialogRow.prompt : dialogRow.prompt.slice(0, 100) + (dialogRow.prompt.length > 100 ?
@@ -375,10 +375,10 @@
                 </el-icon>
             </span>
         </p>
-        <p v-if="dialogRow.type == '4'">
+        <p v-if="dialogRow?.type == '4'">
             买入时机：{{ dialogRow.buyTiming }}<br />
-            买入金额：<span class="amount">{{ dialogRow.purchaseAmount }}</span><br />
-            买入评分：{{ dialogRow.purchaseScore }}<br />
+            买入金额：<span class="amount">{{ dialogRow?.purchaseAmount }}</span><br />
+            买入评分：{{ dialogRow?.purchaseScore }}<br />
             分析理由：{{ dialogRow.recommendation }}<br />
         </p>
         <template #footer>
@@ -660,14 +660,16 @@ export default {
             })
         }
         const handleMoreInfo = (row: any, type: any) => {
-            let tmpRow = row
-            if (type == '1' || type == '3') {
+            let tmpRow: any = row
+            if (tmpRow && (type == '1' || type == '3')) {
                 tmpRow.title = 'DeepSeek策略'
             }
-            if (type == '2' || type == '4') {
+            if (tmpRow && (type == '2' || type == '4')) {
                 tmpRow.title = '低吸买入计算策略（参考）'
             }
-            tmpRow.type = type
+            if (tmpRow) {
+                tmpRow.type = type
+            }
             dialogRow.value = tmpRow
             dialogVisible.value = true
         }
