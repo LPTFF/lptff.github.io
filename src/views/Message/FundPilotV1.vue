@@ -83,6 +83,7 @@
                         <div class="amount"> {{ scope.row.amount }} </div>
                     </template>
                 </el-table-column>
+                <el-table-column prop="analysis" label="分析理由" width="200"></el-table-column>
                 <!-- <el-table-column label="交易时机" width="120">
                     <template #default="scope">
                         <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
@@ -208,12 +209,7 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column label="DeepSeek策略" width="150">
-                <!-- <el-table-column label="买入时机" width="150">
-                    <template #default="scope">
-                        <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
-                    </template>
-                </el-table-column> -->
+            <el-table-column label="AI精细化模型策略" width="150">
                 <el-table-column label="买入金额" width="100">
                     <template #default="scope">
                         <div class="amount"> {{ scope.row?.purchaseAmount }} </div>
@@ -224,6 +220,7 @@
                         <div> {{ scope.row?.purchaseScore }} </div>
                     </template>
                 </el-table-column>
+                <el-table-column prop="recommendation" label="分析理由" width="200"></el-table-column>
                 <el-table-column label="其他" width="120">
                     <template #default="scope">
                         <el-button @click="handleMoreInfo(scope.row, '3')">更多信息</el-button>
@@ -246,25 +243,9 @@
     </div>
     <el-dialog v-model="dialogVisible" :title=dialogRow?.title width="50%" :before-close="handleDialogClose">
         <p v-if="dialogRow?.type == '1'">
-            是否交易：{{ dialogRow.needTrade }}<br />
-            交易类型：<span :style="dialogRow.tradeType?.includes('减仓')
-                ? 'color: red; font-weight: bold;'
-                : ''">
-                {{ dialogRow.tradeType }}
-            </span>
-            <span v-if="dialogRow.tradeType?.includes('减仓')" style="color: orange; font-weight: bold;">
-                ⚠️当前为减仓操作，请注意控制风险
-            </span><br />
-            交易金额：<span class="amount">{{ dialogRow.amount }}</span><br />
-            分析理由：{{ dialogRow.analysis }}<br />
             提示词：<span class="prompt-text">
-                {{ isExpanded ? dialogRow.prompt : dialogRow.prompt.slice(0, 100) + (dialogRow.prompt.length > 100 ?
-                    '...' :
-                    '') }}
+                {{ dialogRow.prompt }}
             </span>
-            <el-button text size="small" type="primary" @click="isExpanded = !isExpanded">
-                {{ isExpanded ? '收起' : '展开更多' }}
-            </el-button>
             <span>
                 <el-icon @click="copyPrompt(dialogRow)" style="height: 16px;width: 16px">
                     <CopyDocument style="height: 16px;width: 16px;" />
@@ -273,17 +254,9 @@
 
         </p>
         <p v-if="dialogRow?.type == '3'">
-            买入金额：<span class="amount">{{ dialogRow?.purchaseAmount }}</span><br />
-            买入评分：{{ dialogRow?.purchaseScore }}<br />
-            分析理由：{{ dialogRow.recommendation }}<br />
             提示词：<span class="prompt-text">
-                {{ isExpanded ? dialogRow.prompt : dialogRow.prompt.slice(0, 100) + (dialogRow.prompt.length > 100 ?
-                    '...' :
-                    '') }}
+                {{ dialogRow.prompt }}
             </span>
-            <el-button text size="small" type="primary" @click="isExpanded = !isExpanded">
-                {{ isExpanded ? '收起' : '展开更多' }}
-            </el-button>
             <span>
                 <el-icon @click="copyPrompt(dialogRow)" style="height: 16px;width: 16px">
                     <CopyDocument style="height: 16px;width: 16px;" />
