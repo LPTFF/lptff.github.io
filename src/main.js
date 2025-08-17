@@ -21,6 +21,7 @@ router.beforeEach((to, from, next) => {
     to.path === "/loginFund" ||
     to.path === "/fundPilot" ||
     to.path === "/fundPilotPlus" ||
+    to.path === "/fundPilotV1" ||
     to.path === "/"
   ) {
     next();
