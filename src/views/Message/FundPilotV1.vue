@@ -121,6 +121,27 @@
             :current-page="currentHoldPage" @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
             style="float: right; margin-top: 16px;" />
         <p style="margin: 80px 0 10px 0;"><strong>▶ 对冲情况：</strong></p>
+        <div style="display: flex;gap: 20px;margin-bottom: 20px;">
+            <div>
+                稳健理财总金额: {{ currentPageConservativeData?.[0]?.conservativeInvestingHoldAmount }}
+            </div>
+
+            <div class="amount" :class="{
+                'text-green': extractNumber(currentPageConservativeData?.[0]?.holdAmount) > currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount,
+                'text-red': extractNumber(currentPageConservativeData?.[0]?.holdAmount) < currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount
+            }">
+                对冲目标金额: {{ currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount }}
+            </div>
+            <div>
+                进阶理财总持仓金额: {{ currentPageConservativeData?.[0]?.advancedInvestingHoldAmount }}
+            </div>
+            <div class="amount text-green">
+                亏损基金数量: {{ currentPageConservativeData?.[0]?.countLossHoldFundNum }}
+            </div>
+            <div class="amount text-red">
+                盈利基金数量: {{ currentPageConservativeData?.[0]?.countProfitHoldFundNum }}
+            </div>
+        </div>
         <el-table :data="currentPageConservativeData" style="width: 100%">
             <el-table-column type="selection" fixed width="45" />
             <el-table-column label="操作" fixed="left" width=" 100">
@@ -131,14 +152,6 @@
                 </template>
             </el-table-column>
             <el-table-column prop="fundCode" label="基金代码" width="90">
-            </el-table-column>
-            <el-table-column prop="fundName" label="基金名称" width="300" />
-            <el-table-column prop="holdAmount" label="持仓金额" width="90">
-                <template #default="scope">
-                    <div>
-                        {{ extractNumber(scope.row.holdAmount) }}
-                    </div>
-                </template>
             </el-table-column>
             <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
                 <template #default="scope">
@@ -158,30 +171,14 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="conservativeInvestingHoldAmount" label="稳健理财总金额" width="150">
-            </el-table-column>
-            <el-table-column prop="targetConservativeInvestingHoldAmount" label="对冲目标金额" width="120">
+            <el-table-column prop="needTrade" label="是否交易" width="100" />
+            <el-table-column prop="amount" label="交易金额" width="100" />
+            <el-table-column prop="analysis" label="分析理由" width="200" />
+            <el-table-column prop="fundName" label="基金名称" width="300" />
+            <el-table-column prop="holdAmount" label="持仓金额" width="90">
                 <template #default="scope">
-                    <div class="amount" :class="{
-                        'text-green': extractNumber(scope.row.holdAmount) > scope.row.targetConservativeInvestingHoldAmount,
-                        'text-red': extractNumber(scope.row.holdAmount) < scope.row.targetConservativeInvestingHoldAmount
-                    }">
-                        {{ scope.row.targetConservativeInvestingHoldAmount }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="advancedInvestingHoldAmount" label="进阶理财总持仓金额" width="150"></el-table-column>
-            <el-table-column prop="countLossHoldFundNum" label="亏损基金数量" width="120">
-                <template #default="scope">
-                    <div class="amount text-green">
-                        {{ scope.row.countLossHoldFundNum }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="countProfitHoldFundNum" label="盈利基金数量" width="120">
-                <template #default="scope">
-                    <div class="amount text-red">
-                        {{ scope.row.countProfitHoldFundNum }}
+                    <div>
+                        {{ extractNumber(scope.row.holdAmount) }}
                     </div>
                 </template>
             </el-table-column>
