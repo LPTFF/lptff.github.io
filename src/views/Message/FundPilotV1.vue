@@ -122,6 +122,12 @@
             style="float: right; margin-top: 16px;" />
         <p style="margin: 80px 0 10px 0;"><strong>▶ 对冲情况：</strong></p>
         <div style="display: flex;gap: 20px;margin-bottom: 20px;">
+            <div class="amount" :class="{
+                'text-green': currentPageConservativeData?.[0]?.riskCoefficientCalculationResult < 0.5,
+                'text-red': currentPageConservativeData?.[0]?.riskCoefficientCalculationResult >= 0.5
+            }">
+                赚钱效益: {{ currentPageConservativeData?.[0]?.riskCoefficientCalculationResult?.toFixed(2) }}
+            </div>
             <div>
                 稳健理财总金额: {{ currentPageConservativeData?.[0]?.conservativeInvestingHoldAmount }}
             </div>
