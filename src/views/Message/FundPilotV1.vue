@@ -15,6 +15,14 @@
                 <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓基金</el-button>
                 <el-button type="primary" @click="batchExportHoldFund">批量导出持仓基金</el-button>
             </div>
+            <div v-if="selectedConservativeRows.length > 0">当前选中的对冲基金数量：{{
+                selectedConservativeRows.length }}，当前选中的对冲基金总金额：{{
+                    selectedConservativeAmount }}，当前选中的对冲基金总收益：{{
+                    selectedConservativeGain }}</div>
+            <div v-if="selectedConservativeRows.length > 0">
+                <el-button type="primary" @click="batchGotoConservativeFundPage">批量前往购买对冲基金</el-button>
+                <el-button type="primary" @click="batchExportConservativeFund">批量导出对冲基金</el-button>
+            </div>
             <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
                 selectedRecommendRows.length }}</div>
             <div v-if="selectedRecommendRows.length > 0">
@@ -95,7 +103,7 @@
                     </template>
                 </el-table-column>
             </el-table-column>
-            <el-table-column prop="holdAmount" label="持仓金额" width="150" />
+            <el-table-column prop="holdAmount" label="持仓金额" width="100" />
             <el-table-column prop="holdGain" label="持仓收益" width="100">
                 <template #default="scope">
                     <div class="profit-rate-wrapper">
@@ -106,10 +114,17 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="targetProfitRate" label="目标收益" width="150">
+            <el-table-column prop="targetProfitRate" label="静态目标收益" width="120">
                 <template #default="scope">
                     <div>
                         {{ (scope.row.targetProfitRate * 100).toFixed(2) }}%
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="targetYield" label="动态目标收益" width="120">
+                <template #default="scope">
+                    <div>
+                        {{ (scope.row.targetYield).toFixed(2) }}%
                     </div>
                 </template>
             </el-table-column>
@@ -148,7 +163,8 @@
                 盈利基金数量: {{ currentPageConservativeData?.[0]?.countProfitHoldFundNum }}
             </div>
         </div>
-        <el-table :data="currentPageConservativeData" style="width: 100%">
+        <el-table :data="currentPageConservativeData" style="width: 100%"
+            @selection-change="handleConservativeSelectionChange">
             <el-table-column type="selection" fixed width="45" />
             <el-table-column label="操作" fixed="left" width=" 100">
                 <template #default="scope">
@@ -157,7 +173,12 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="fundCode" label="基金代码" width="90">
+            <el-table-column prop="fundCode" label="基金代码" fixed="left" width="90">
+                <template #default="scope">
+                    <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
+                        <div>{{ scope.row.fundCode }}</div>
+                    </el-tooltip>
+                </template>
             </el-table-column>
             <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
                 <template #default="scope">
@@ -180,7 +201,6 @@
             <el-table-column prop="needTrade" label="是否交易" width="100" />
             <el-table-column prop="amount" label="交易金额" width="100" />
             <el-table-column prop="analysis" label="分析理由" width="200" />
-            <el-table-column prop="fundName" label="基金名称" width="300" />
             <el-table-column prop="holdAmount" label="持仓金额" width="90">
                 <template #default="scope">
                     <div>
@@ -188,6 +208,17 @@
                     </div>
                 </template>
             </el-table-column>
+            <el-table-column prop="holdGain" label="持仓收益" width="100">
+                <template #default="scope">
+                    <div class="profit-rate-wrapper">
+                        <span class="amount" :class="{
+                            'text-red': scope.row.holdGain > 0,
+                            'text-green': scope.row.holdGain < 0
+                        }">{{ scope.row.holdGain }}</span>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="fundName" label="基金名称" width="300" />
         </el-table>
         <!-- 分页控件 -->
         <!-- <el-pagination background layout="total, prev, pager, next, sizes, jumper"
@@ -355,22 +386,39 @@ export default {
             return tableData.value.conservativeInfo.slice(start, end)
         })
         const selectedHoldRows = ref<any[]>([])
+        const selectedConservativeRows = ref<any[]>([])
         const selectedRecommendRows = ref<any[]>([])
         const selectedHoldAmount = ref(0)
+        const selectedConservativeAmount = ref(0)
         const selectedHoldGain = ref(0)
+        const selectedConservativeGain = ref(0)
         const handleHoldSelectionChange = (rows: any[]) => {
             selectedHoldRows.value = rows
             let totalHoldAmount = 0
             let totalHoldGain = 0
             rows.forEach((item) => {
-                const matchHoldAmount = item?.holdAmount?.match(/\d+(\.\d+)?/)
-                const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0]) : 0
+                const matchHoldAmount = item?.holdAmount?.match(/[\d,]+(\.\d+)?/);
+                const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0].replace(/,/g, '')) : 0;
                 totalHoldAmount += amount
                 totalHoldGain += item?.holdGain
             })
             // 控制精度，保留两位小数并转回 number
             selectedHoldAmount.value = parseFloat(totalHoldAmount.toFixed(2))
             selectedHoldGain.value = parseFloat(totalHoldGain.toFixed(2))
+        }
+        const handleConservativeSelectionChange = (rows: any[]) => {
+            selectedConservativeRows.value = rows
+            let totalConservativeAmount = 0
+            let totalConservativeGain = 0
+            rows.forEach((item) => {
+                const matchHoldAmount = item?.holdAmount?.match(/[\d,]+(\.\d+)?/);
+                const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0].replace(/,/g, '')) : 0;
+                totalConservativeAmount += amount
+                totalConservativeGain += item?.holdGain
+            })
+            // 控制精度，保留两位小数并转回 number
+            selectedConservativeAmount.value = parseFloat(totalConservativeAmount.toFixed(2))
+            selectedConservativeGain.value = parseFloat(totalConservativeGain.toFixed(2))
         }
         const handleRecommendSelectionChange = (rows: any[]) => {
             selectedRecommendRows.value = rows
@@ -490,6 +538,38 @@ export default {
             const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
             saveAs(blob, `持仓基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
         }
+        const batchGotoConservativeFundPage = () => {
+            selectedConservativeRows.value?.map((item) => {
+                gotoFundPage(item)
+            })
+        }
+        const batchExportConservativeFund = () => {
+            console.info('batchExportConservativeFund selectedConservativeRows.value', selectedConservativeRows.value)
+            if (!selectedConservativeRows.value || selectedConservativeRows.value.length === 0) {
+                ElMessage.warning('请先选择要导出的基金')
+                return
+            }
+            const exportData = selectedConservativeRows.value.map(row => ({
+                基金名称: row.fundName,
+                基金代码: row.fundCode,
+                持仓金额: row.holdAmount,
+                持仓收益: row.holdGain,
+                收益率: row.holdRate,
+            }))
+            // 2. 转换为 worksheet
+            const worksheet = XLSX.utils.json_to_sheet(exportData)
+            // 3. 创建 workbook
+            const workbook = XLSX.utils.book_new()
+            XLSX.utils.book_append_sheet(workbook, worksheet, '对冲基金明细')
+
+            // 4. 导出为 blob 并下载
+            const excelBuffer = XLSX.write(workbook, {
+                bookType: 'xlsx',
+                type: 'array'
+            })
+            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
+            saveAs(blob, `对冲基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
+        }
         const batchGotoRecommendFundPage = () => {
             selectedRecommendRows.value?.map((item) => {
                 gotoFundPage(item)
@@ -572,13 +652,19 @@ export default {
             filterDeepSeekAmountTrade,
             handleHoldSelectionChange,
             handleRecommendSelectionChange,
+            handleConservativeSelectionChange,
             selectedHoldRows,
             selectedRecommendRows,
             selectedHoldAmount,
             selectedHoldGain,
+            selectedConservativeRows,
+            selectedConservativeAmount,
+            selectedConservativeGain,
             gotoFundPage,
             batchGotoHoldFundPage,
             batchExportHoldFund,
+            batchGotoConservativeFundPage,
+            batchExportConservativeFund,
             batchGotoRecommendFundPage,
             generatedAt,
             dialogVisible,
