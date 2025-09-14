@@ -22,12 +22,12 @@
             <div v-if="selectedConservativeRows.length > 0">
                 <el-button type="primary" @click="batchGotoConservativeFundPage">批量前往购买对冲基金</el-button>
                 <el-button type="primary" @click="batchExportConservativeFund">批量导出对冲基金</el-button>
-            </div>
+            </div> -->
             <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
                 selectedRecommendRows.length }}</div>
             <div v-if="selectedRecommendRows.length > 0">
                 <el-button type="primary" @click="batchGotoRecommendFundPage">批量前往购买推荐基金</el-button>
-            </div> -->
+            </div>
         </div>
         <p style="margin: 0 0 10px 0;"><strong>▶ 持仓情况：</strong></p>
         <el-table :data="currentPageHoldData" style="width: 100%" @selection-change="handleHoldSelectionChange">
@@ -254,7 +254,7 @@
             :total="tableData.conservativeInfo.length" :page-size="pageConservativeSize"
             :page-sizes="[tableData.conservativeInfo.length, 10, 20, 50, 100]" :current-page="currentConservativePage"
             style="float: right; margin-top: 16px;" /> -->
-        <!-- <p style="margin: 40px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
+        <p style="margin: 40px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
         <el-table :data="currentPageRecommendData" style="width: 100%"
             @selection-change="handleRecommendSelectionChange">
             <el-table-column type="selection" fixed width="45" />
@@ -265,38 +265,16 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="fundCode" label="基金代码" width="90">
+            <el-table-column prop="h" label="货币类型" fixed="left" width="90">
+            </el-table-column>
+            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="90">
                 <template #default="scope">
-                    <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
-                        <div>{{ scope.row.fundCode }}</div>
-                    </el-tooltip>
+                    <div>
+                        {{ scope.row.signalUp ? '是' : '否' }}
+                    </div>
                 </template>
             </el-table-column>
-            <el-table-column label="AI精细化模型策略" width="150">
-                <el-table-column label="买入金额" width="100">
-                    <template #default="scope">
-                        <div class="amount"> {{ scope.row?.purchaseAmount }} </div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="买入评分" width="90">
-                    <template #default="scope">
-                        <div> {{ scope.row?.purchaseScore }} </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="recommendation" label="分析理由" width="200"></el-table-column>
-                <el-table-column label="其他" width="120">
-                    <template #default="scope">
-                        <el-button @click="handleMoreInfo(scope.row, '3')">更多信息</el-button>
-                    </template>
-                </el-table-column>
-            </el-table-column>
-            <el-table-column prop="targetProfitRate" label="目标分析收益" width="120">
-                <template #default="scope">
-                    <div>{{ scope.row.targetProfitRate * 100 }}%</div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="fundName" label="基金名称" width="350" />
-        </el-table> -->
+        </el-table>
         <!-- 分页控件 -->
         <!-- <el-pagination background layout="total, prev, pager, next, sizes, jumper"
             :total="tableData.recommendInfo.length" :page-size="pageRecommendSize"
