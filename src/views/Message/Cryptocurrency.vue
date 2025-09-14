@@ -54,7 +54,8 @@
             </el-table-column>
             <el-table-column prop="asset" label="货币类型" fixed="left" width="90">
             </el-table-column>
-            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="90">
+            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="120" :filters="filterDeepSeekNeedOptions"
+                :filter-method="filterDeepSeekNeedTrade">
                 <template #default="scope">
                     <div>
                         {{ scope.row.signalUp ? '是' : '否' }}
@@ -64,7 +65,7 @@
             <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
                 <template #default="scope">
                     <div>
-                        {{ scope.row?.purchaseAmount || '1USDT' }}
+                        {{ scope.row.signalUp ? scope.row?.purchaseAmount || '1USDT' : '0USDT' }}
                     </div>
                 </template>
             </el-table-column>
@@ -284,7 +285,7 @@
             <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
                 <template #default="scope">
                     <div>
-                        {{ scope.row?.purchaseAmount || '1USDT' }}
+                        {{ scope.row.signalUp ? scope.row?.purchaseAmount || '1USDT' : '0USDT' }}
                     </div>
                 </template>
             </el-table-column>
@@ -476,10 +477,8 @@ export default {
         const filterDeepSeekNeedOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.enrichedHoldings.forEach((item: any) => {
-                const val = item?.needTrade
-                if (val !== undefined && val !== null) {
-                    set.add(String(val))  // 强制转换为 string，确保类型一致
-                }
+                const val = item?.signalUp
+                set.add(val)
             })
             return Array.from(set).map(value => ({
                 text: value,
@@ -489,10 +488,8 @@ export default {
         const filterDeepSeekTypeOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.enrichedHoldings.forEach((item: any) => {
-                const val = item?.tradeType
-                if (val !== undefined && val !== null) {
-                    set.add(String(val))  // 强制转换为 string，确保类型一致
-                }
+                const val = item?.signalUp
+                set.add(val)
             })
             return Array.from(set).map(value => ({
                 text: value,
@@ -513,7 +510,7 @@ export default {
             }))
         })
         const filterDeepSeekNeedTrade = (value: any, row: any) => {
-            return row?.needTrade === value
+            return row?.signalUp === value
         }
         const filterDeepSeekTypeTrade = (value: any, row: any) => {
             return row?.tradeType === value
