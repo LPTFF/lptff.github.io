@@ -16,6 +16,7 @@ const routes = [
     { path: '/fundPilot', name: 'fundPilot', component: () => import('../views/Message/FundPilot.vue') },
     { path: '/fundPilotPlus', name: 'fundPilotPlus', component: () => import('../views/Message/FundPilotPlus.vue') },
     { path: '/fundPilotV1', name: 'fundPilotV1', component: () => import('../views/Message/FundPilotV1.vue') },
+    { path: '/cryptocurrency', name: 'cryptocurrency', component: () => import('../views/Message/Cryptocurrency.vue') },
     { path: '/', name: 'home', component: () => import('../views/home/index.vue') },
 ]
 
