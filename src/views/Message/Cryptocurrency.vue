@@ -41,8 +41,8 @@
             </el-table-column>
             <el-table-column prop="holdGain" label="持仓收益率" fixed="left" width="200">
                 <template #default="scope">
-                    <el-tooltip class="item" effect="dark"
-                        :content="`持仓数量：${scope.row.profit} ${scope.row.profitAsset}`" placement="top">
+                    <el-tooltip class="item" effect="dark" :content="`持仓数量：${scope.row.cost} ${scope.row.costAsset}`"
+                        placement="top">
                         <div class="amount" :class="{
                             'text-red': scope.row.profit > 0,
                             'text-green': scope.row.profit < 0
@@ -58,6 +58,13 @@
                 <template #default="scope">
                     <div>
                         {{ scope.row.signalUp ? '是' : '否' }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row?.purchaseAmount || '1USDT' }}
                     </div>
                 </template>
             </el-table-column>
@@ -265,12 +272,19 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="h" label="货币类型" fixed="left" width="90">
+            <el-table-column prop="asset" label="货币类型" fixed="left" width="90">
             </el-table-column>
             <el-table-column prop="signalUp" label="是否交易" fixed="left" width="90">
                 <template #default="scope">
                     <div>
                         {{ scope.row.signalUp ? '是' : '否' }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row?.purchaseAmount || '1USDT' }}
                     </div>
                 </template>
             </el-table-column>
