@@ -7,15 +7,15 @@
                     数据更新于：{{ generatedAt }}
                 </p>
             </div>
-            <!-- <div v-if="selectedHoldRows.length > 0">当前选中的持仓基金数量：{{
+            <div v-if="selectedHoldRows.length > 0">当前选中的持仓基金数量：{{
                 selectedHoldRows.length }}，当前选中的持仓基金总金额：{{
-                    selectedHoldAmount }}，当前选中的持仓基金总收益：{{
-                    selectedHoldGain }}</div>
+                    selectedHoldAmount }} USDT，当前选中的持仓基金总收益：{{
+                    selectedHoldGain }} USDT</div>
             <div v-if="selectedHoldRows.length > 0">
                 <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓基金</el-button>
                 <el-button type="primary" @click="batchExportHoldFund">批量导出持仓基金</el-button>
             </div>
-            <div v-if="selectedConservativeRows.length > 0">当前选中的对冲基金数量：{{
+            <!-- <div v-if="selectedConservativeRows.length > 0">当前选中的对冲基金数量：{{
                 selectedConservativeRows.length }}，当前选中的对冲基金总金额：{{
                     selectedConservativeAmount }}，当前选中的对冲基金总收益：{{
                     selectedConservativeGain }}</div>
@@ -426,10 +426,9 @@ export default {
             let totalHoldAmount = 0
             let totalHoldGain = 0
             rows.forEach((item) => {
-                const matchHoldAmount = item?.holdAmount?.match(/[\d,]+(\.\d+)?/);
-                const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0].replace(/,/g, '')) : 0;
+                const amount = item?.marketValue;
                 totalHoldAmount += amount
-                totalHoldGain += item?.holdGain
+                totalHoldGain += item?.profit
             })
             // 控制精度，保留两位小数并转回 number
             selectedHoldAmount.value = parseFloat(totalHoldAmount.toFixed(2))
@@ -531,8 +530,8 @@ export default {
             return row?.amount === value
         }
         const gotoFundPage = (row: any) => {
-            if (row.fundUrl) {
-                gotoOutPage(row.fundUrl);
+            if (row.url) {
+                gotoOutPage(row.url);
             }
         }
         const batchGotoHoldFundPage = () => {
@@ -547,17 +546,16 @@ export default {
                 return
             }
             const exportData = selectedHoldRows.value.map(row => ({
-                基金名称: row.fundName,
-                基金代码: row.fundCode,
-                持仓金额: row.holdAmount,
-                持仓收益: row.holdGain,
-                收益率: row.holdRate,
+                货币类型: row.asset,
+                持仓金额: row.marketValue + row.marketValueAsset,
+                持仓收益: row.profit + row.marketValueAsset,
+                收益率: row.profitRate,
             }))
             // 2. 转换为 worksheet
             const worksheet = XLSX.utils.json_to_sheet(exportData)
             // 3. 创建 workbook
             const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, '持仓基金明细')
+            XLSX.utils.book_append_sheet(workbook, worksheet, '加密货币明细')
 
             // 4. 导出为 blob 并下载
             const excelBuffer = XLSX.write(workbook, {
