@@ -41,8 +41,8 @@
             </el-table-column>
             <el-table-column prop="holdGain" label="持仓收益率" fixed="left" width="200">
                 <template #default="scope">
-                    <el-tooltip class="item" effect="dark" :content="`持仓数量：${scope.row.cost} ${scope.row.costAsset}`"
-                        placement="top">
+                    <el-tooltip class="item" effect="dark"
+                        :content="`持仓数量：${scope.row.marketValue} ${scope.row.marketValueAsset}`" placement="top">
                         <div class="amount" :class="{
                             'text-red': scope.row.profit > 0,
                             'text-green': scope.row.profit < 0
@@ -62,10 +62,27 @@
                     </div>
                 </template>
             </el-table-column>
+            <el-table-column label="交易类型" width="100" fixed="left" :filters="filterDeepSeekTypeOptions"
+                :filter-method="filterDeepSeekTypeTrade">
+                <template #default="scope">
+                    <template v-if="scope.row.tradeType?.includes('减仓')">
+                        <el-tooltip class="item" effect="dark" content="⚠️当前为减仓操作，请注意控制风险" placement="top">
+                            <div>
+                                {{ scope.row.tradeType }}
+                            </div>
+                        </el-tooltip>
+                    </template>
+                    <template v-else>
+                        <div>
+                            {{ scope.row.tradeType }}
+                        </div>
+                    </template>
+                </template>
+            </el-table-column>
             <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.signalUp ? scope.row?.purchaseAmount || '1USDT' : '0USDT' }}
+                        {{ scope.row?.tradeAmount + 'USDT' }}
                     </div>
                 </template>
             </el-table-column>
@@ -285,7 +302,7 @@
             <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.signalUp ? scope.row?.purchaseAmount || '1USDT' : '0USDT' }}
+                        {{ scope.row?.tradeAmount + 'USDT' }}
                     </div>
                 </template>
             </el-table-column>
@@ -488,7 +505,7 @@ export default {
         const filterDeepSeekTypeOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.enrichedHoldings.forEach((item: any) => {
-                const val = item?.signalUp
+                const val = item?.tradeType
                 set.add(val)
             })
             return Array.from(set).map(value => ({
