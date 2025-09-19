@@ -7,13 +7,15 @@
                     数据更新于：{{ generatedAt }}
                 </p>
             </div>
+            <div v-if="usdtHolding">当前的资金持仓数量：{{
+                usdtHolding?.free }}{{ usdtHolding?.asset }}</div>
             <div v-if="selectedHoldRows.length > 0">当前选中的持仓基金数量：{{
                 selectedHoldRows.length }}，当前选中的持仓基金总金额：{{
                     selectedHoldAmount }} USDT，当前选中的持仓基金总收益：{{
                     selectedHoldGain }} USDT</div>
             <div v-if="selectedHoldRows.length > 0">
-                <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓基金</el-button>
-                <el-button type="primary" @click="batchExportHoldFund">批量导出持仓基金</el-button>
+                <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓货币</el-button>
+                <el-button type="primary" @click="batchExportHoldFund">批量导出持仓货币</el-button>
             </div>
             <!-- <div v-if="selectedConservativeRows.length > 0">当前选中的对冲基金数量：{{
                 selectedConservativeRows.length }}，当前选中的对冲基金总金额：{{
@@ -393,6 +395,7 @@ export default {
         }
         const dialogRow = ref<any>({})
         const generatedAt = ref("");
+        const usdtHolding = ref<any>({})
         const tableData = ref<{
             enrichedHoldings: any[]
             recommendInfo: any[]
@@ -482,6 +485,7 @@ export default {
                 console.info('✅ Loaded data:', data)
                 const firstGenerated = data?.generatedAt;
                 console.info('✅ firstGenerated firstGenerated:', firstGenerated)
+                usdtHolding.value = data?.usdtHolding;
                 if (firstGenerated) {
                     generatedAt.value = new Date(firstGenerated).toLocaleString();
                 }
@@ -548,7 +552,7 @@ export default {
         const batchExportHoldFund = () => {
             console.info('batchExportHoldFund selectedHoldRows.value', selectedHoldRows.value)
             if (!selectedHoldRows.value || selectedHoldRows.value.length === 0) {
-                ElMessage.warning('请先选择要导出的基金')
+                ElMessage.warning('请先选择要导出的加密货币')
                 return
             }
             const exportData = selectedHoldRows.value.map(row => ({
@@ -569,7 +573,7 @@ export default {
                 type: 'array'
             })
             const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-            saveAs(blob, `持仓基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
+            saveAs(blob, `持仓加密货币导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
         }
         const batchGotoConservativeFundPage = () => {
             selectedConservativeRows.value?.map((item) => {
@@ -695,6 +699,7 @@ export default {
             batchExportConservativeFund,
             batchGotoRecommendFundPage,
             generatedAt,
+            usdtHolding,
             dialogVisible,
             dialogRow,
             handleMoreInfo,
