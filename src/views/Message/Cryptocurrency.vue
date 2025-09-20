@@ -13,18 +13,18 @@
                 selectedHoldRows.length }}，当前选中的持仓基金总金额：{{
                     selectedHoldAmount }} USDT，当前选中的持仓基金总收益：{{
                     selectedHoldGain }} USDT</div>
+            <div style="display: flex;">
+                <div class="amount text-green">
+                    亏损数量: {{ currentPageConservativeData?.countLossHoldFundNum }}
+                </div>
+                <div class="amount text-red" style="margin-left: 20px;">
+                    盈利数量: {{ currentPageConservativeData?.countProfitHoldFundNum }}
+                </div>
+            </div>
             <div v-if="selectedHoldRows.length > 0">
                 <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓货币</el-button>
                 <el-button type="primary" @click="batchExportHoldFund">批量导出持仓货币</el-button>
             </div>
-            <!-- <div v-if="selectedConservativeRows.length > 0">当前选中的对冲基金数量：{{
-                selectedConservativeRows.length }}，当前选中的对冲基金总金额：{{
-                    selectedConservativeAmount }}，当前选中的对冲基金总收益：{{
-                    selectedConservativeGain }}</div>
-            <div v-if="selectedConservativeRows.length > 0">
-                <el-button type="primary" @click="batchGotoConservativeFundPage">批量前往购买对冲基金</el-button>
-                <el-button type="primary" @click="batchExportConservativeFund">批量导出对冲基金</el-button>
-            </div> -->
             <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
                 selectedRecommendRows.length }}</div>
             <div v-if="selectedRecommendRows.length > 0">
@@ -54,9 +54,9 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column prop="asset" label="货币类型" fixed="left" width="90">
+            <el-table-column prop="asset" label="货币类型" fixed="left" width="100">
             </el-table-column>
-            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="120" :filters="filterDeepSeekNeedOptions"
+            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="100" :filters="filterDeepSeekNeedOptions"
                 :filter-method="filterDeepSeekNeedTrade">
                 <template #default="scope">
                     <div>
@@ -81,17 +81,27 @@
                     </template>
                 </template>
             </el-table-column>
-            <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
+            <el-table-column prop="signalUp" label="交易金额" fixed="left" width="100">
                 <template #default="scope">
                     <div>
                         {{ scope.row?.tradeAmount + 'USDT' }}
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="btcValuation" label="数量" fixed="left" width="150">
+            <el-table-column prop="btcValuation" label="数量" fixed="left" width="240">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.userAssetData?.btcValuation + ' ' + scope.row.userAssetData?.asset }}
+                        {{ scope.row.amount + ' ' + scope.row.asset }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="holdGain" label="持仓收益" fixed="left" width="240">
+                <template #default="scope">
+                    <div class="amount" :class="{
+                        'text-red': scope.row.profit > 0,
+                        'text-green': scope.row.profit < 0
+                    }">
+                        {{ scope.row.profit + scope.row.profitAsset }}
                     </div>
                 </template>
             </el-table-column>
@@ -114,76 +124,6 @@
                     <el-button @click="handleMoreInfo(scope.row, '1')">更多信息</el-button>
                 </template>
             </el-table-column>
-            <!-- <el-table-column prop="holdDays" label="持有时长" width="120" sortable>
-            </el-table-column> -->
-            <!-- <el-table-column label="AI精细化策略" width="150">
-                <el-table-column label="是否交易" width="100" :filters="filterDeepSeekNeedOptions"
-                    :filter-method="filterDeepSeekNeedTrade">
-                    <template #default="scope">
-                        <div> {{ scope.row.needTrade }} </div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="交易类型" width="100" :filters="filterDeepSeekTypeOptions"
-                    :filter-method="filterDeepSeekTypeTrade">
-                    <template #default="scope">
-                        <template v-if="scope.row.tradeType?.includes('减仓')">
-                            <el-tooltip class="item" effect="dark" content="⚠️当前为减仓操作，请注意控制风险" placement="top">
-                                <div>
-                                    {{ scope.row.tradeType }}
-                                </div>
-                            </el-tooltip>
-                        </template>
-                        <template v-else>
-                            <div>
-                                {{ scope.row.tradeType }}
-                            </div>
-                        </template>
-                    </template>
-                </el-table-column>
-                <el-table-column label="交易金额" width="100" :filters="filterDeepSeekAmountOptions"
-                    :filter-method="filterDeepSeekAmountTrade">
-                    <template #default="scope">
-                        <div class="amount"> {{ scope.row.amount }} </div>
-                    </template>
-                </el-table-column>
-                <el-table-column prop="analysis" label="分析理由" width="200"></el-table-column>
-                <el-table-column label="交易时机" width="120">
-                    <template #default="scope">
-                        <div> {{ scope.row.strategies['DeepSeek策略'].buyTiming }} </div>
-                    </template>
-                </el-table-column>
-                <el-table-column label="其他" width="120">
-                    <template #default="scope">
-                        <el-button @click="handleMoreInfo(scope.row, '1')">更多信息</el-button>
-                    </template>
-                </el-table-column>
-            </el-table-column> -->
-            <!-- <el-table-column prop="holdAmount" label="持仓金额" width="100" />
-            <el-table-column prop="holdGain" label="持仓收益" width="100">
-                <template #default="scope">
-                    <div class="profit-rate-wrapper">
-                        <span class="amount" :class="{
-                            'text-red': scope.row.holdGain > 0,
-                            'text-green': scope.row.holdGain < 0
-                        }">{{ scope.row.holdGain }}</span>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="targetProfitRate" label="静态目标收益" width="120">
-                <template #default="scope">
-                    <div>
-                        {{ (scope.row.targetProfitRate * 100).toFixed(2) }}%
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="targetYield" label="动态目标收益" width="120">
-                <template #default="scope">
-                    <div>
-                        {{ (scope.row.targetYield).toFixed(2) }}%
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="fundName" label="基金名称" width="350" /> -->
         </el-table>
         <!-- 分页控件 -->
         <el-pagination background layout="total, prev, pager, next, sizes, jumper"
@@ -191,96 +131,6 @@
             :page-sizes="[tableData.enrichedHoldings.length, 10, 20, 50, 100]" :current-page="currentHoldPage"
             @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
             style="float: right; margin-top: 16px;" />
-        <!-- <p style="margin: 80px 0 10px 0;"><strong>▶ 对冲情况：</strong></p>
-        <div style="display: flex;gap: 20px;margin-bottom: 20px;">
-            <div class="amount" :class="{
-                'text-green': currentPageConservativeData?.[0]?.riskCoefficientCalculationResult < 0.5,
-                'text-red': currentPageConservativeData?.[0]?.riskCoefficientCalculationResult >= 0.5
-            }">
-                赚钱效益: {{ currentPageConservativeData?.[0]?.riskCoefficientCalculationResult?.toFixed(2) }}
-            </div>
-            <div>
-                稳健理财总金额: {{ currentPageConservativeData?.[0]?.conservativeInvestingHoldAmount }}
-            </div>
-
-            <div class="amount" :class="{
-                'text-green': extractNumber(currentPageConservativeData?.[0]?.holdAmount) > currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount,
-                'text-red': extractNumber(currentPageConservativeData?.[0]?.holdAmount) < currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount
-            }">
-                对冲目标金额: {{ currentPageConservativeData?.[0]?.targetConservativeInvestingHoldAmount }}
-            </div>
-            <div>
-                进阶理财总持仓金额: {{ currentPageConservativeData?.[0]?.advancedInvestingHoldAmount }}
-            </div>
-            <div class="amount text-green">
-                亏损基金数量: {{ currentPageConservativeData?.[0]?.countLossHoldFundNum }}
-            </div>
-            <div class="amount text-red">
-                盈利基金数量: {{ currentPageConservativeData?.[0]?.countProfitHoldFundNum }}
-            </div>
-        </div>
-        <el-table :data="currentPageConservativeData" style="width: 100%"
-            @selection-change="handleConservativeSelectionChange">
-            <el-table-column type="selection" fixed width="45" />
-            <el-table-column label="操作" fixed="left" width=" 100">
-                <template #default="scope">
-                    <el-button size="small" @click="gotoFundPage(scope.row)">
-                        前往购买
-                    </el-button>
-                </template>
-            </el-table-column>
-            <el-table-column prop="fundCode" label="基金代码" fixed="left" width="90">
-                <template #default="scope">
-                    <el-tooltip class="item" effect="dark" :content=scope.row.fundName placement="top">
-                        <div>{{ scope.row.fundCode }}</div>
-                    </el-tooltip>
-                </template>
-            </el-table-column>
-            <el-table-column prop="holdRate" label="持仓收益率" width="120" sortable>
-                <template #default="scope">
-                    <div class="amount" :class="{
-                        'text-red': scope.row.holdGain > 0,
-                        'text-green': scope.row.holdGain < 0
-                    }">
-                        {{ scope.row.holdRate + '%' }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="tradeListInfo" label="持有时长" width="120" :sortable="true"
-                :sort-method="sortByHoldingDays">
-                <template #default="scope">
-                    <div :class="getHoldingDaysClass(scope.row.tradeListInfo)">
-                        {{ calculateHoldingDays(scope.row.tradeListInfo) }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="needTrade" label="是否交易" width="100" />
-            <el-table-column prop="amount" label="交易金额" width="100" />
-            <el-table-column prop="analysis" label="分析理由" width="200" />
-            <el-table-column prop="holdAmount" label="持仓金额" width="90">
-                <template #default="scope">
-                    <div>
-                        {{ extractNumber(scope.row.holdAmount) }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="holdGain" label="持仓收益" width="100">
-                <template #default="scope">
-                    <div class="profit-rate-wrapper">
-                        <span class="amount" :class="{
-                            'text-red': scope.row.holdGain > 0,
-                            'text-green': scope.row.holdGain < 0
-                        }">{{ scope.row.holdGain }}</span>
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="fundName" label="基金名称" width="300" />
-        </el-table> -->
-        <!-- 分页控件 -->
-        <!-- <el-pagination background layout="total, prev, pager, next, sizes, jumper"
-            :total="tableData.conservativeInfo.length" :page-size="pageConservativeSize"
-            :page-sizes="[tableData.conservativeInfo.length, 10, 20, 50, 100]" :current-page="currentConservativePage"
-            style="float: right; margin-top: 16px;" /> -->
         <p style="margin: 40px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
         <el-table :data="currentPageRecommendData" style="width: 100%"
             @selection-change="handleRecommendSelectionChange">
@@ -309,12 +159,6 @@
                 </template>
             </el-table-column>
         </el-table>
-        <!-- 分页控件 -->
-        <!-- <el-pagination background layout="total, prev, pager, next, sizes, jumper"
-            :total="tableData.recommendInfo.length" :page-size="pageRecommendSize"
-            :page-sizes="[tableData.recommendInfo.length, 10, 20, 50, 100]" :current-page="currentRecommendPage"
-            @size-change="handleRecommendSizeChange" @current-change="handleRecommendPageChange"
-            style="float: right; margin-top: 16px;" /> -->
     </div>
     <el-dialog v-model="dialogVisible" :title=dialogRow?.title width="50%" :before-close="handleDialogClose">
         <p v-if="dialogRow?.type == '1'">
@@ -425,7 +269,19 @@ export default {
         const currentPageConservativeData = computed(() => {
             const start = (currentConservativePage.value - 1) * pageConservativeSize.value
             const end = start + pageConservativeSize.value
-            return tableData.value.conservativeInfo.slice(start, end)
+            let countLossHoldFundNum = 0;
+            let countProfitHoldFundNum = 0;
+            tableData.value.enrichedHoldings?.map((item) => {
+                if (item.profit > 0) {
+                    countProfitHoldFundNum++
+                } else if (item.profit < 0) {
+                    countLossHoldFundNum++
+                }
+            })
+            return {
+                countLossHoldFundNum,
+                countProfitHoldFundNum
+            }
         })
         const selectedHoldRows = ref<any[]>([])
         const selectedConservativeRows = ref<any[]>([])
