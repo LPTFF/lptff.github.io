@@ -88,10 +88,17 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="btcValuation" label="数量" fixed="left" width="240">
+            <el-table-column prop="cost" label="成本价" fixed="left" width="200">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.amount + ' ' + scope.row.asset }}
+                        {{ scope.row.cost + ' ' + scope.row.costAsset }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="cost" label="市场价" fixed="left" width="200">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row.marketValue + ' ' + scope.row.marketValueAsset }}
                     </div>
                 </template>
             </el-table-column>
@@ -105,17 +112,10 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="cost" label="成本价" fixed="left" width="200">
+            <el-table-column prop="btcValuation" label="数量" fixed="left" width="240">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.cost + ' ' + scope.row.costAsset }}
-                    </div>
-                </template>
-            </el-table-column>
-            <el-table-column prop="cost" label="市场价" fixed="left" width="200">
-                <template #default="scope">
-                    <div>
-                        {{ scope.row.marketValue + ' ' + scope.row.marketValueAsset }}
+                        {{ scope.row.amount + ' ' + scope.row.asset }}
                     </div>
                 </template>
             </el-table-column>
