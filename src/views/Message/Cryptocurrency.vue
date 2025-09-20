@@ -54,7 +54,7 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column prop="asset" label="货币类型" fixed="left" width="100">
+            <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
             </el-table-column>
             <el-table-column prop="signalUp" label="是否交易" fixed="left" width="100" :filters="filterDeepSeekNeedOptions"
                 :filter-method="filterDeepSeekNeedTrade">
@@ -142,7 +142,7 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="asset" label="货币类型" fixed="left" width="90">
+            <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
             </el-table-column>
             <el-table-column prop="signalUp" label="是否交易" fixed="left" width="90">
                 <template #default="scope">
