@@ -126,10 +126,9 @@
             </el-table-column>
         </el-table>
         <!-- 分页控件 -->
-        <el-pagination background layout="total, prev, pager, next, sizes, jumper"
-            :total="tableData.enrichedHoldings.length" :page-size="pageHoldSize"
-            :page-sizes="[tableData.enrichedHoldings.length, 10, 20, 50, 100]" :current-page="currentHoldPage"
-            @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
+        <el-pagination background layout="total, prev, pager, next, sizes" :total="tableData.enrichedHoldings.length"
+            :page-size="pageHoldSize" :page-sizes="[tableData.enrichedHoldings.length, 10, 20, 50, 100]"
+            :current-page="currentHoldPage" @size-change="handleHoldSizeChange" @current-change="handleHoldPageChange"
             style="float: right; margin-top: 16px;" />
         <p style="margin: 40px 0 10px 0;"><strong>▶ 推荐情况：</strong></p>
         <el-table :data="currentPageRecommendData" style="width: 100%"
@@ -144,7 +143,8 @@
             </el-table-column>
             <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
             </el-table-column>
-            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="90">
+            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="100"
+                :filters="filterDeepSeekRecommendOptions" :filter-method="filterDeepSeekRecommendTrade">
                 <template #default="scope">
                     <div>
                         {{ scope.row.signalUp ? '是' : '否' }}
@@ -159,6 +159,10 @@
                 </template>
             </el-table-column>
         </el-table>
+        <el-pagination background layout="total, prev, pager, next, sizes" :total="tableData.recommendInfo.length"
+            :page-size="pageRecommendSize" :page-sizes="[tableData.recommendInfo.length, 10, 20, 50, 100]"
+            :current-page="currentRecommendPage" @size-change="handleRecommendSizeChange"
+            @current-change="handleRecommendPageChange" style="float: right; margin-top: 16px;" />
     </div>
     <el-dialog v-model="dialogVisible" :title=dialogRow?.title width="50%" :before-close="handleDialogClose">
         <p v-if="dialogRow?.type == '1'">
@@ -373,6 +377,17 @@ export default {
                 value: value
             }))
         })
+        const filterDeepSeekRecommendOptions = computed((): { text: string; value: string }[] => {
+            const set = new Set<string>()
+            tableData.value.recommendInfo.forEach((item: any) => {
+                const val = item?.isTrade
+                set.add(val)
+            })
+            return Array.from(set).map(value => ({
+                text: value,
+                value: value
+            }))
+        })
         const filterDeepSeekAmountOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.enrichedHoldings.forEach((item: any) => {
@@ -387,6 +402,9 @@ export default {
             }))
         })
         const filterDeepSeekNeedTrade = (value: any, row: any) => {
+            return row?.isTrade === value
+        }
+        const filterDeepSeekRecommendTrade = (value: any, row: any) => {
             return row?.isTrade === value
         }
         const filterDeepSeekTypeTrade = (value: any, row: any) => {
@@ -534,6 +552,8 @@ export default {
             handleRecommendSizeChange,
             filterDeepSeekNeedOptions,
             filterDeepSeekNeedTrade,
+            filterDeepSeekRecommendOptions,
+            filterDeepSeekRecommendTrade,
             filterDeepSeekTypeOptions,
             filterDeepSeekAmountOptions,
             filterDeepSeekTypeTrade,
