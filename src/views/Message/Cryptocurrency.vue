@@ -56,11 +56,11 @@
             </el-table-column>
             <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
             </el-table-column>
-            <el-table-column prop="signalUp" label="是否交易" fixed="left" width="100" :filters="filterDeepSeekNeedOptions"
+            <el-table-column prop="isTrade" label="是否交易" fixed="left" width="100" :filters="filterDeepSeekNeedOptions"
                 :filter-method="filterDeepSeekNeedTrade">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.signalUp ? '是' : '否' }}
+                        {{ scope.row.isTrade ? '是' : '否' }}
                     </div>
                 </template>
             </el-table-column>
@@ -354,7 +354,7 @@ export default {
         const filterDeepSeekNeedOptions = computed((): { text: string; value: string }[] => {
             const set = new Set<string>()
             tableData.value.enrichedHoldings.forEach((item: any) => {
-                const val = item?.signalUp
+                const val = item?.isTrade
                 set.add(val)
             })
             return Array.from(set).map(value => ({
@@ -387,7 +387,7 @@ export default {
             }))
         })
         const filterDeepSeekNeedTrade = (value: any, row: any) => {
-            return row?.signalUp === value
+            return row?.isTrade === value
         }
         const filterDeepSeekTypeTrade = (value: any, row: any) => {
             return row?.tradeType === value
