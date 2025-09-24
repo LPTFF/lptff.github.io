@@ -218,6 +218,20 @@
                     </div>
                 </template>
             </el-table-column>
+            <el-table-column prop="targetProfitRate" label="静态目标收益" width="120">
+                <template #default="scope">
+                    <div>
+                        {{ (scope.row.targetProfitRate * 100).toFixed(2) }}%
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="targetYield" label="动态目标收益" width="120">
+                <template #default="scope">
+                    <div>
+                        {{ (scope.row.targetYield).toFixed(2) }}%
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column prop="fundName" label="基金名称" width="300" />
         </el-table>
         <!-- 分页控件 -->
