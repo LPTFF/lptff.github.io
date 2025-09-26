@@ -147,7 +147,7 @@
                 :filters="filterDeepSeekRecommendOptions" :filter-method="filterDeepSeekRecommendTrade">
                 <template #default="scope">
                     <div>
-                        {{ scope.row.signalUp ? '是' : '否' }}
+                        {{ scope.row.isTrade ? '是' : '否' }}
                     </div>
                 </template>
             </el-table-column>
