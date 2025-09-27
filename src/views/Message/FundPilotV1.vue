@@ -411,7 +411,7 @@ export default {
             let totalHoldAmount = 0
             let totalHoldGain = 0
             rows.forEach((item) => {
-                const matchHoldAmount = item?.holdAmount?.match(/[\d,]+(\.\d+)?/);
+                const matchHoldAmount = String(item?.holdAmount ?? "").match(/[\d,]+(\.\d+)?/);
                 const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0].replace(/,/g, '')) : 0;
                 totalHoldAmount += amount
                 totalHoldGain += item?.holdGain
@@ -425,7 +425,7 @@ export default {
             let totalConservativeAmount = 0
             let totalConservativeGain = 0
             rows.forEach((item) => {
-                const matchHoldAmount = item?.holdAmount?.match(/[\d,]+(\.\d+)?/);
+                const matchHoldAmount = String(item?.holdAmount ?? "").match(/[\d,]+(\.\d+)?/);
                 const amount = matchHoldAmount ? parseFloat(matchHoldAmount[0].replace(/,/g, '')) : 0;
                 totalConservativeAmount += amount
                 totalConservativeGain += item?.holdGain
