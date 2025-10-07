@@ -41,7 +41,7 @@
                     </el-button>
                 </template>
             </el-table-column>
-            <el-table-column prop="holdGain" label="持仓收益率" fixed="left" width="200">
+            <el-table-column prop="holdGain" label="持仓收益率" width="200" sortable>
                 <template #default="scope">
                     <el-tooltip class="item" effect="dark"
                         :content="`持仓数量：${scope.row.marketValue} ${scope.row.marketValueAsset}`" placement="top">
@@ -54,9 +54,9 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
-            <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
+            <el-table-column prop="asset" label="货币类型" width="80">
             </el-table-column>
-            <el-table-column prop="isTrade" label="是否交易" fixed="left" width="100" :filters="filterDeepSeekNeedOptions"
+            <el-table-column prop="isTrade" label="是否交易" width="100" :filters="filterDeepSeekNeedOptions"
                 :filter-method="filterDeepSeekNeedTrade">
                 <template #default="scope">
                     <div>
@@ -64,7 +64,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column label="交易类型" width="100" fixed="left" :filters="filterDeepSeekTypeOptions"
+            <el-table-column label="交易类型" width="100" :filters="filterDeepSeekTypeOptions"
                 :filter-method="filterDeepSeekTypeTrade">
                 <template #default="scope">
                     <template v-if="scope.row.tradeType?.includes('减仓')">
@@ -81,28 +81,35 @@
                     </template>
                 </template>
             </el-table-column>
-            <el-table-column prop="signalUp" label="交易金额" fixed="left" width="100">
+            <el-table-column prop="signalUp" label="交易金额" width="80">
                 <template #default="scope">
                     <div>
                         {{ scope.row?.tradeAmount + 'USDT' }}
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="cost" label="成本价" fixed="left" width="200">
+            <el-table-column prop="reason" label="交易理由" width="300">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row?.reason }}
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column prop="cost" label="成本价" width="200" sortable>
                 <template #default="scope">
                     <div>
                         {{ scope.row.cost + ' ' + scope.row.costAsset }}
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="cost" label="市场价" fixed="left" width="200">
+            <el-table-column prop="cost" label="市场价" width="200" sortable>
                 <template #default="scope">
                     <div>
                         {{ scope.row.marketValue + ' ' + scope.row.marketValueAsset }}
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="holdGain" label="持仓收益" fixed="left" width="240">
+            <el-table-column prop="holdGain" label="持仓收益" width="240" sortable>
                 <template #default="scope">
                     <div class="amount" :class="{
                         'text-red': scope.row.profit > 0,
@@ -112,7 +119,7 @@
                     </div>
                 </template>
             </el-table-column>
-            <el-table-column prop="btcValuation" label="数量" fixed="left" width="240">
+            <el-table-column prop="btcValuation" label="数量" width="240" sortable>
                 <template #default="scope">
                     <div>
                         {{ scope.row.amount + ' ' + scope.row.asset }}
