@@ -199,6 +199,8 @@
                 </template>
             </el-table-column>
             <el-table-column prop="needTrade" label="是否交易" width="100" />
+            <el-table-column prop="tradeType" label="交易类型" width="100">
+            </el-table-column>
             <el-table-column prop="amount" label="交易金额" width="100" />
             <el-table-column prop="analysis" label="分析理由" width="200" />
             <el-table-column prop="holdAmount" label="持仓金额" width="90">
