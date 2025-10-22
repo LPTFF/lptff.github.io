@@ -170,6 +170,34 @@
             :page-size="pageRecommendSize" :page-sizes="[tableData.recommendInfo.length, 10, 20, 50, 100]"
             :current-page="currentRecommendPage" @size-change="handleRecommendSizeChange"
             @current-change="handleRecommendPageChange" style="float: right; margin-top: 16px;" />
+        <p style="margin: 40px 0 10px 0;"><strong>▶ 合约情况：</strong></p>
+        <el-table :data="currentPageCandidatesData" style="width: 100%"
+            @selection-change="handleCandidatesSelectionChange">
+            <el-table-column type="selection" fixed width="45" />
+            <el-table-column label="操作" fixed="left" width=" 100">
+                <template #default="scope">
+                    <el-button size="small" @click="gotoFundPage(scope.row)">
+                        前往购买
+                    </el-button>
+                </template>
+            </el-table-column>
+            <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
+            </el-table-column>
+            <el-table-column prop="candidatesType" label="合约类型" fixed="left" width="120">
+            </el-table-column>
+            <el-table-column prop="signalUp" label="交易理由" fixed="left" width="200">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row?.decision?.reason }}
+                    </div>
+                </template>
+            </el-table-column>
+        </el-table>
+        <el-pagination background layout="total, prev, pager, next, sizes"
+            :total="tableCandidatesData?.candidatesInfo?.length" :page-size="pageCandidatesSize"
+            :page-sizes="[tableCandidatesData?.candidatesInfo?.length, 10, 20, 50, 100]"
+            :current-page="currentCandidatesPage" @size-change="handleCandidatesSizeChange"
+            @current-change="handleCandidatesPageChange" style="float: right; margin-top: 16px;" />
     </div>
     <el-dialog v-model="dialogVisible" :title=dialogRow?.title width="50%" :before-close="handleDialogClose">
         <p v-if="dialogRow?.type == '1'">
@@ -260,10 +288,13 @@ export default {
             recommendInfo: [],
             conservativeInfo: [],
         })
+        const tableCandidatesData = ref<any>({})
         const currentHoldPage = ref(1)
         const pageHoldSize = ref(10)
         const currentRecommendPage = ref(1)
         const pageRecommendSize = ref(10)
+        const currentCandidatesPage = ref(1)
+        const pageCandidatesSize = ref(10)
         const currentConservativePage = ref(1)
         const pageConservativeSize = ref(10)
         // 当前页显示的数据
@@ -276,6 +307,11 @@ export default {
             const start = (currentRecommendPage.value - 1) * pageRecommendSize.value
             const end = start + pageRecommendSize.value
             return tableData.value.recommendInfo.slice(start, end)
+        })
+        const currentPageCandidatesData = computed(() => {
+            const start = (currentCandidatesPage.value - 1) * pageCandidatesSize.value
+            const end = start + pageCandidatesSize.value
+            return tableCandidatesData.value.candidatesInfo?.slice(start, end)
         })
         const currentPageConservativeData = computed(() => {
             const start = (currentConservativePage.value - 1) * pageConservativeSize.value
@@ -297,6 +333,7 @@ export default {
         const selectedHoldRows = ref<any[]>([])
         const selectedConservativeRows = ref<any[]>([])
         const selectedRecommendRows = ref<any[]>([])
+        const selectedCandidatesRows = ref<any[]>([])
         const selectedHoldAmount = ref(0)
         const selectedConservativeAmount = ref(0)
         const selectedHoldGain = ref(0)
@@ -331,11 +368,17 @@ export default {
         const handleRecommendSelectionChange = (rows: any[]) => {
             selectedRecommendRows.value = rows
         }
+        const handleCandidatesSelectionChange = (rows: any[]) => {
+            selectedCandidatesRows.value = rows
+        }
         const handleHoldPageChange = (newPage: number) => {
             currentHoldPage.value = newPage
         }
         const handleRecommendPageChange = (newPage: number) => {
             currentRecommendPage.value = newPage
+        }
+        const handleCandidatesPageChange = (newPage: number) => {
+            currentCandidatesPage.value = newPage
         }
         const handleHoldSizeChange = (newSize: number) => {
             pageHoldSize.value = newSize
@@ -345,10 +388,17 @@ export default {
             pageRecommendSize.value = newSize
             currentRecommendPage.value = 1 // 改变每页数量后重置页码
         }
+        const handleCandidatesSizeChange = (newSize: number) => {
+            pageCandidatesSize.value = newSize
+            currentCandidatesPage.value = 1 // 改变每页数量后重置页码
+        }
         const fetchData = async () => {
             try {
                 const res = await fetch(`/data/Cryptocurrency.json?t=${Date.now()}`)
                 const data = await res.json()
+                const resCandidates = await fetch(`/data/CryptocurrencyForCandidates.json?t=${Date.now()}`)
+                const dataCandidates = await resCandidates.json()
+                console.info('✅ Loaded dataCandidates:', dataCandidates)
                 console.info('✅ Loaded data:', data)
                 const firstGenerated = data?.generatedAt;
                 console.info('✅ firstGenerated firstGenerated:', firstGenerated)
@@ -358,6 +408,7 @@ export default {
                 }
                 // 假设 JSON 数据格式为数组（请根据实际字段调整）
                 tableData.value = data
+                tableCandidatesData.value = dataCandidates
             } catch (err) {
                 console.error('❌ 数据加载失败:', err)
             }
@@ -548,15 +599,20 @@ export default {
             pageHoldSize,
             currentPageHoldData,
             pageRecommendSize,
+            pageCandidatesSize,
             currentRecommendPage,
+            currentCandidatesPage,
             currentPageRecommendData,
+            currentPageCandidatesData,
             currentConservativePage,
             pageConservativeSize,
             currentPageConservativeData,
             handleHoldPageChange,
             handleRecommendPageChange,
+            handleCandidatesPageChange,
             handleHoldSizeChange,
             handleRecommendSizeChange,
+            handleCandidatesSizeChange,
             filterDeepSeekNeedOptions,
             filterDeepSeekNeedTrade,
             filterDeepSeekRecommendOptions,
@@ -567,6 +623,7 @@ export default {
             filterDeepSeekAmountTrade,
             handleHoldSelectionChange,
             handleRecommendSelectionChange,
+            handleCandidatesSelectionChange,
             handleConservativeSelectionChange,
             selectedHoldRows,
             selectedRecommendRows,
@@ -592,7 +649,8 @@ export default {
             extractNumber,
             calculateHoldingDays,
             getHoldingDaysClass,
-            sortByHoldingDays
+            sortByHoldingDays,
+            tableCandidatesData
         }
     }
 }
