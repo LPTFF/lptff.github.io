@@ -171,6 +171,10 @@
             :current-page="currentRecommendPage" @size-change="handleRecommendSizeChange"
             @current-change="handleRecommendPageChange" style="float: right; margin-top: 16px;" />
         <p style="margin: 40px 0 10px 0;"><strong>▶ 合约情况：</strong></p>
+        <div v-if="tableCandidatesData?.btcTrend">
+            【BTC信号情况】trend15m：{{ tableCandidatesData?.btcTrend?.trend15m }}，trend1h：{{
+                tableCandidatesData?.btcTrend?.trend1h }}，trend4h：{{
+                tableCandidatesData?.btcTrend?.trend4h }}</div>
         <el-table :data="currentPageCandidatesData" style="width: 100%"
             @selection-change="handleCandidatesSelectionChange">
             <el-table-column type="selection" fixed width="45" />
@@ -184,6 +188,13 @@
             <el-table-column prop="asset" label="货币类型" fixed="left" width="120">
             </el-table-column>
             <el-table-column prop="candidatesType" label="合约类型" fixed="left" width="120">
+            </el-table-column>
+            <el-table-column prop="bbConfirm" label="布林带指标" fixed="left" width="180">
+                <template #default="scope">
+                    <div>
+                        做空: {{ scope.row?.decision?.bbConfirmShort }}，做多:{{ scope.row?.decision?.bbConfirmLong }}
+                    </div>
+                </template>
             </el-table-column>
             <el-table-column prop="signalUp" label="交易理由" fixed="left" width="200">
                 <template #default="scope">
