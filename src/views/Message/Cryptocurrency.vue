@@ -172,9 +172,9 @@
             @current-change="handleRecommendPageChange" style="float: right; margin-top: 16px;" />
         <p style="margin: 40px 0 10px 0;"><strong>▶ 合约情况：</strong></p>
         <div v-if="tableCandidatesData?.btcTrend">
-            【BTC信号情况】trend15m：{{ tableCandidatesData?.btcTrend?.trend15m }}，trend1h：{{
-                tableCandidatesData?.btcTrend?.trend1h }}，trend4h：{{
-                tableCandidatesData?.btcTrend?.trend4h }}</div>
+            【BTC信号情况】trend4h：{{
+                tableCandidatesData?.btcTrend?.trend4h }}，trend1h：{{
+                tableCandidatesData?.btcTrend?.trend1h }}，trend15m：{{ tableCandidatesData?.btcTrend?.trend15m }}</div>
         <el-table :data="currentPageCandidatesData" style="width: 100%"
             @selection-change="handleCandidatesSelectionChange">
             <el-table-column type="selection" fixed width="45" />
