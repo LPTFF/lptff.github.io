@@ -174,7 +174,11 @@
         <div v-if="tableCandidatesData?.btcTrend">
             【BTC信号情况】trend4h：{{
                 tableCandidatesData?.btcTrend?.trend4h }}，trend1h：{{
-                tableCandidatesData?.btcTrend?.trend1h }}，trend15m：{{ tableCandidatesData?.btcTrend?.trend15m }}</div>
+                tableCandidatesData?.btcTrend?.trend1h }}，trend15m：{{ tableCandidatesData?.btcTrend?.trend15m
+            }}，bbConfirmLong：{{
+                tableCandidatesData?.btcTrend?.bbConfirmLong }}，
+            bbConfirmShort：{{ tableCandidatesData?.btcTrend?.
+            bbConfirmShort }}</div>
         <el-table :data="currentPageCandidatesData" style="width: 100%"
             @selection-change="handleCandidatesSelectionChange">
             <el-table-column type="selection" fixed width="45" />
