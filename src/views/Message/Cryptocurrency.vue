@@ -25,10 +25,15 @@
                 <el-button type="primary" @click="batchGotoHoldFundPage">批量前往购买持仓货币</el-button>
                 <el-button type="primary" @click="batchExportHoldFund">批量导出持仓货币</el-button>
             </div>
-            <div v-if="selectedRecommendRows.length > 0">当前选中的推荐仓基金数量：{{
+            <div v-if="selectedRecommendRows.length > 0">当前选中的推荐基金数量：{{
                 selectedRecommendRows.length }}</div>
             <div v-if="selectedRecommendRows.length > 0">
-                <el-button type="primary" @click="batchGotoRecommendFundPage">批量前往购买推荐基金</el-button>
+                <el-button type="primary" @click="batchGotoRecommendFundPage">批量前往购买推荐货币</el-button>
+            </div>
+            <div v-if="selectedCandidatesRows.length > 0">当前选中的合约基金数量：{{
+                selectedCandidatesRows.length }}</div>
+            <div v-if="selectedCandidatesRows.length > 0">
+                <el-button type="primary" @click="batchGotoCandidatesPage">批量前往购买合约货币</el-button>
             </div>
         </div>
         <p style="margin: 0 0 10px 0;"><strong>▶ 持仓情况：</strong></p>
@@ -178,7 +183,7 @@
             }}，bbConfirmLong：{{
                 tableCandidatesData?.btcTrend?.bbConfirmLong }}，
             bbConfirmShort：{{ tableCandidatesData?.btcTrend?.
-            bbConfirmShort }}</div>
+                bbConfirmShort }}</div>
         <el-table :data="currentPageCandidatesData" style="width: 100%"
             @selection-change="handleCandidatesSelectionChange">
             <el-table-column type="selection" fixed width="45" />
@@ -559,6 +564,11 @@ export default {
                 gotoFundPage(item)
             })
         }
+        const batchGotoCandidatesPage = () => {
+            selectedCandidatesRows.value?.map((item) => {
+                gotoFundPage(item)
+            })
+        }
         const handleMoreInfo = (row: any, type: any) => {
             let tmpRow: any = row
             if (tmpRow) {
@@ -642,6 +652,7 @@ export default {
             handleConservativeSelectionChange,
             selectedHoldRows,
             selectedRecommendRows,
+            selectedCandidatesRows,
             selectedHoldAmount,
             selectedHoldGain,
             selectedConservativeRows,
@@ -653,6 +664,7 @@ export default {
             batchGotoConservativeFundPage,
             batchExportConservativeFund,
             batchGotoRecommendFundPage,
+            batchGotoCandidatesPage,
             generatedAt,
             usdtHolding,
             dialogVisible,
