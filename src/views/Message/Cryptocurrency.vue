@@ -2,10 +2,16 @@
     <div style="width: 100%">
         <div style="position: sticky; top: 0; background-color: white; z-index: 1000; padding: 10px 0;">
             <div>
-                <h2 style="margin: 0 0 10px 0; text-align: center;">【基金分析 - tangfufa】</h2>
+                <h2 style="margin: 0 0 10px 0; text-align: center;">【加密货币分析 - tangfufa】</h2>
                 <p v-if="generatedAt" style="text-align: center; margin: 0;">
                     数据更新于：{{ generatedAt }}
                 </p>
+                <div style="margin-bottom: 16px; font-weight: bold;">
+                    下一次自动刷新: {{ countdown }} 秒
+                    <el-button size="small" type="primary" @click="manualRefresh" style="margin-left: 16px;">
+                        手动刷新
+                    </el-button>
+                </div>
             </div>
             <div v-if="usdtHolding">当前的资金持仓数量：{{
                 usdtHolding?.free }}{{ usdtHolding?.asset }}</div>
@@ -248,8 +254,8 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, onMounted } from 'vue'
-import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon } from 'element-plus'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
+import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon, ElLoading } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
 import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
@@ -413,7 +419,15 @@ export default {
             currentCandidatesPage.value = 1 // 改变每页数量后重置页码
         }
         const fetchData = async () => {
+            let loadingInstance: any = null
             try {
+                // 创建全局 loading
+                loadingInstance = ElLoading.service({
+                    lock: true,               // 禁止操作页面
+                    text: '数据加载中...',      // 显示文字
+                    background: 'rgba(0, 0, 0, 0.3)', // 遮罩层
+                })
+
                 const res = await fetch(`/data/Cryptocurrency.json?t=${Date.now()}`)
                 const data = await res.json()
                 const resCandidates = await fetch(`/data/CryptocurrencyForCandidates.json?t=${Date.now()}`)
@@ -431,6 +445,9 @@ export default {
                 tableCandidatesData.value = dataCandidates
             } catch (err) {
                 console.error('❌ 数据加载失败:', err)
+            } finally {
+                // 关闭全局 loading
+                if (loadingInstance) loadingInstance.close();
             }
         }
         const filterDeepSeekNeedOptions = computed((): { text: string; value: string }[] => {
@@ -615,8 +632,33 @@ export default {
 
             return daysA - daysB;
         }
+        // 定时器相关
+        const refreshInterval = 60; // 秒
+        const countdown = ref(refreshInterval); // 倒计时初始值
+        let timer: any = null;
+
+        // 请求数据函数（你已有 fetchData）
+        const manualRefresh = async () => {
+            await fetchData();          // 手动刷新调用已有 fetchData
+            countdown.value = refreshInterval; // 重置倒计时
+        }
+
+        // 倒计时逻辑
+        const startCountdown = () => {
+            timer = setInterval(() => {
+                countdown.value -= 1;
+                if (countdown.value <= 0) {
+                    fetchData();           // 自动刷新
+                    countdown.value = refreshInterval;
+                }
+            }, 1000);
+        }
         onMounted(() => {
             fetchData()
+            startCountdown();
+        })
+        onBeforeUnmount(() => {
+            if (timer) clearInterval(timer);
         })
         return {
             tableData,
@@ -677,7 +719,9 @@ export default {
             calculateHoldingDays,
             getHoldingDaysClass,
             sortByHoldingDays,
-            tableCandidatesData
+            tableCandidatesData,
+            countdown,
+            manualRefresh,
         }
     }
 }
