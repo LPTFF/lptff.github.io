@@ -434,7 +434,10 @@ export default {
                 const dataCandidates = await resCandidates.json()
                 console.info('✅ Loaded dataCandidates:', dataCandidates)
                 console.info('✅ Loaded data:', data)
-                const firstGenerated = data?.generatedAt;
+                const firstGenerated = Math.max(
+                    new Date(dataCandidates?.generatedAt || 0).getTime(),
+                    new Date(data?.generatedAt || 0).getTime()
+                );
                 console.info('✅ firstGenerated firstGenerated:', firstGenerated)
                 usdtHolding.value = data?.usdtHolding;
                 if (firstGenerated) {
