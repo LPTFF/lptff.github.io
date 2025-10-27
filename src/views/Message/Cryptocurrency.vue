@@ -648,14 +648,14 @@ export default {
 
         // 倒计时逻辑
         const startCountdown = () => {
-            timer = setInterval(() => {
+            timer = setInterval(async () => {
                 countdown.value -= 1;
                 if (countdown.value <= 0) {
-                    fetchData();           // 自动刷新
+                    await fetchData(); // ✅ 自动刷新时异步等待完成
                     countdown.value = refreshInterval;
                 }
             }, 1000);
-        }
+        };
         onMounted(() => {
             fetchData()
             startCountdown();
