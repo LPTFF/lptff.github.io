@@ -169,6 +169,13 @@
                     </div>
                 </template>
             </el-table-column>
+            <el-table-column prop="signalUp" label="交易理由" fixed="left" width="300">
+                <template #default="scope">
+                    <div>
+                        {{ scope.row?.decision?.reason }}
+                    </div>
+                </template>
+            </el-table-column>
             <el-table-column prop="signalUp" label="交易金额" fixed="left" width="90">
                 <template #default="scope">
                     <div>
