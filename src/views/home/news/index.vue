@@ -71,12 +71,11 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import juejinNews from "../../../public/data/juejin.json";
 import v2exNews from "../../../public/data/v2ex.json";
 import meituanNews from "../../../public/data/techForum/meituanTech.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
 import bgImageUrl from "../../../public/img/bg.jpg";
 import { ElRow, ElCol, ElCard, ElAvatar } from "element-plus";
 export default {
@@ -84,20 +83,8 @@ export default {
     newsLocation: [String, Number],
   },
   setup(props: any) {
-    let juejinList = ref(juejinNews);
-    let v2exList = ref(v2exNews);
-    let meituanList = ref(meituanNews);
-    let newsAll: any[] = [];
-    newsAll = [...juejinList.value, ...v2exList.value, ...meituanList.value];
-    newsAll.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
-    const callMethod = () => {
-      // console.log('233');
-    };
-    const previousRoute = ref("");
-    // 创建计算属性
-    const isPCRes = computed(() => {
-      return isPC();
-    });
+    const newsAll = [...juejinNews, ...v2exNews, ...meituanNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const isPCRes = computed(() => isPC());
     const getWebsiteInfo = (item: any): any => {
       let websiteInfo = {};
       switch (String(item.website)) {
@@ -153,10 +140,7 @@ export default {
       let websiteInfo = getWebsiteInfo(item);
       return websiteInfo.name;
     };
-    onMounted(async () => {
-      callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state ? window.history.state.back : ""; //获取路由路径
-    });
+    const bgUrl = bgImageUrl;
     const handleNewsUrl = (item: any) => {
       let data = isPC();
       let handleUrl = "";
@@ -188,28 +172,24 @@ export default {
     const handleNewsDesc = (item: any, length: any) => {
       return item.substring(0, length) + "...";
     };
-    const logoUrl = ref(logoImageUrl); // 图片路径变量
-    const bgUrl = ref(bgImageUrl); // 图片路径变量
     let maxLength = 0;
     const newsAllLimited = computed(() => {
-      const length: number = Number(props.newsLocation); // 切割长度
+      const length: number = Number(props.newsLocation);
       let initData = isPCRes.value ? 6 : 2;
-      let newsTmpAll;
       let rate = isPCRes.value ? 2 : 1;
       maxLength < length ? (maxLength = length) : maxLength;
-      newsTmpAll = newsAll.slice(
+      return newsAll.slice(
         0,
         maxLength * rate + initData < newsAll.length
           ? maxLength * rate + initData
           : newsAll.length
       );
-      return newsTmpAll;
     });
     const handleCoverImg = (item: any) => {
-      return item.image ? item.image : bgUrl.value;
+      return item.image ? item.image : bgUrl;
     };
     const handleImageError = (event: any) => {
-      event.target.src = bgUrl.value;
+      event.target.src = bgUrl;
     };
     const gotoMainWebsite = (item: any) => {
       let websiteInfo = getWebsiteInfo(item);
@@ -218,15 +198,11 @@ export default {
       }
     };
     return {
-      callMethod,
       isPCRes,
-      previousRoute,
-      newsAll,
       getWebsiteLogo,
       getWebsiteName,
       handleNewsUrl,
       gotoNewsWebsite,
-      logoUrl,
       handleDescType,
       bgUrl,
       handleNewsDesc,

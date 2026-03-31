@@ -110,14 +110,7 @@ export default {
     };
   },
   setup() {
-    const callMethod = () => {
-      // console.log('233');
-    };
-    const previousRoute = ref("");
-    // 创建计算属性
-    const isPCRes = computed(() => {
-      return isPC();
-    });
+    const isPCRes = computed(() => isPC());
     const getProblemHard = (question: any) => {
       let hardRateName = "";
       switch (String(question.hardRate)) {
@@ -164,15 +157,6 @@ export default {
       },
     ]);
     onMounted(async () => {
-      callMethod(); // 在组件挂载后调用方法
-      previousRoute.value = window.history.state
-        ? window.history.state.back
-        : ""; //获取路由路径
-      // await importLeetCodeData();
-      // let randomDataIndex = Math.floor(Math.random() * leetCodeData.length);
-      // let randomFileContent = leetCodeData[randomDataIndex];
-      // let questionsList = ref(randomFileContent);
-      // questions.value = getRandomProblems(questionsList.value, 1);
       let questionsList =
         questionsPre.length == 0 ? leetCodeList : questionsPre;
       questionsPre = getRandomProblems(questionsList, 1);
@@ -209,15 +193,10 @@ export default {
       question.problemsUrl ? gotoOutPage(url) : "";
     };
     return {
-      callMethod,
       isPCRes,
-      previousRoute,
       getProblemHard,
       getDifficultyStyle,
       questions,
-      dialogTop,
-      dialogLeft,
-      handleDialogDrag,
       getRandomQuestion,
       gotoLeetCode,
     };

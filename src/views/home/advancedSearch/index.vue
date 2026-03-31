@@ -57,11 +57,9 @@ export default defineComponent({
     const submitSearch = (baseUrl: any, siteQuery: any) => {
       const trimmedInput = findKeyWords.value.trim();
       if (trimmedInput.length > 0) {
-        console.log("Search input:", trimmedInput);
         let url = `${baseUrl}${encodeURIComponent(trimmedInput)}${siteQuery}`;
         gotoOutPage(url);
       } else {
-        console.log("Input is empty");
         findKeyWords.value = "";
       }
     };
@@ -203,39 +201,33 @@ export default defineComponent({
         action: submitZhihuSourceWebsite,
       },
     ]);
+    const tags = [
+      { text: "青龙", type: "success" },
+      { text: "微信账号", type: "info" },
+      { text: "基金", type: "warning" },
+      { text: "安卓逆向", type: "danger" },
+      { text: "web逆向", type: "success" },
+      { text: "安卓root", type: "info" },
+      { text: "抓包", type: "warning" },
+      { text: "代理人抓包", type: "danger" },
+      { text: "微信账号批发", type: "info" },
+      { text: "青龙脚本", type: "warning" },
+      { text: "JS逆向", type: "danger" },
+      { text: "黑产大数据", type: "info" },
+      { text: "黑客新闻", type: "warning" },
+      { text: "加密", type: "danger" },
+      { text: "安卓app脱壳", type: "success" },
+      { text: "jadx-gui工具", type: "info" },
+      { text: "apktool工具", type: "warning" },
+      { text: "android sdk工具", type: "danger" },
+      { text: "小肩膀零基础一站式安卓逆向教程", type: "success" },
+      { text: "41期科锐逆向", type: "info" },
+      { text: "滴水逆向", type: "warning" },
+    ];
     return {
-      findKeyWords,
-      submitKey,
-      submitTitle,
-      submitContent,
-      submitTelegramKeyWordsWebsite,
-      submitV2exSourceWebsite,
-      submitGitHubSourceWebsite,
-      tags: [
-        { text: "青龙", type: "success" },
-        { text: "微信账号", type: "info" },
-        { text: "基金", type: "warning" },
-        { text: "安卓逆向", type: "danger" },
-        { text: "web逆向", type: "success" },
-        { text: "安卓root", type: "info" },
-        { text: "抓包", type: "warning" },
-        { text: "代理人抓包", type: "danger" },
-        { text: "微信账号批发", type: "info" },
-        { text: "青龙脚本", type: "warning" },
-        { text: "JS逆向", type: "danger" },
-        { text: "黑产大数据", type: "info" },
-        { text: "黑客新闻", type: "warning" },
-        { text: "加密", type: "danger" },
-        { text: "安卓app脱壳", type: "success" },
-        { text: "jadx-gui工具", type: "info" },
-        { text: "apktool工具", type: "warning" },
-        { text: "android sdk工具", type: "danger" },
-        { text: "小肩膀零基础一站式安卓逆向教程", type: "success" },
-        { text: "41期科锐逆向", type: "info" },
-        { text: "滴水逆向", type: "warning" },
-      ],
-      websiteTransformType,
       searches,
+      tags,
+      websiteTransformType,
     };
   },
   components: {

@@ -102,7 +102,7 @@ export default {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
-    const logoUrl = ref(logoImageUrl);
+    const logoUrl = logoImageUrl;
     const handleWeek = (item: any) => {
       const date = new Date(item.timestamp);
       const dayOfWeek = date.getDay();
@@ -259,10 +259,7 @@ export default {
 .welfare-img-link {
   height: 30px;
   width: 30px;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
+  border-radius: 50%;
   margin-right: 10px;
 }
 .welfare-link-title {

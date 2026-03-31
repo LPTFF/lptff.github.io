@@ -112,13 +112,11 @@ import logoImageUrl from "../../../public/img/logo.jpg";
 import { ElRow, ElCol, ElCard, ElIcon, ElDialog, ElButton } from "element-plus";
 export default {
   setup() {
-    const logoUrl = ref(logoImageUrl);
-    const bossLogo = ref(
-      "https://img.bosszhipin.com/static/file/2022/wf8r5vlj1y1653961013785.png"
-    );
-    let zhipinData = ref(zhipinSource);
+    const logoUrl = logoImageUrl;
+    const bossLogo = "https://img.bosszhipin.com/static/file/2022/wf8r5vlj1y1653961013785.png";
+    const zhipinData = zhipinSource;
     const handleImageError = (event: any) => {
-      event.target.src = logoUrl.value;
+      event.target.src = logoUrl;
     };
     const handleJobSkills = (skills: any) => {
       let result = "";
@@ -141,8 +139,6 @@ export default {
     };
     const isPCRes = computed(() => isPC());
     const gotoBossWebsite = (index: any, item: any) => {
-      console.log(index);
-      console.log("item", item);
       let url =
         "https://www.zhipin.com/web/geek/job?city=101020100&experience=104,105&degree=204,203&position=100901,100208&jobType=1901&salary=406";
       if (index == zhipinSource.length - 1) {
@@ -280,10 +276,7 @@ export default {
 .boss-img-info {
   height: 70px;
   width: 70px;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
+  border-radius: 50%;
 }
 .boss-info {
   margin-top: 26px;

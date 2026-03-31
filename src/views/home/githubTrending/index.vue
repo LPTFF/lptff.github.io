@@ -46,9 +46,9 @@
                 <div
                   v-if="item.website == 'weibo'"
                   class="weibo-img-link"
-                  :style="`background:${item.image.small_icon_desc_color}`"
+                  :style="`background:${(item.image as any).small_icon_desc_color}`"
                 >
-                  {{ item.image.small_icon_desc }}
+                  {{ (item.image as any).small_icon_desc }}
                 </div>
                 <img
                   :src="handleAuthorImg(item)"
@@ -77,9 +77,9 @@
               <div
                 v-if="item.website == 'weibo'"
                 class="weibo-img-link mobile-weibo-img"
-                :style="`background:${item.image.small_icon_desc_color}`"
+                :style="`background:${(item.image as any).small_icon_desc_color}`"
               >
-                {{ item.image.small_icon_desc }}
+                {{ (item.image as any).small_icon_desc }}
               </div>
               <img
                 :src="handleAuthorImg(item)"
@@ -168,15 +168,12 @@ export default {
     ElDivider,
   },
   setup(props: any) {
-    const logoUrl = ref(logoImageUrl);
+    const logoUrl = logoImageUrl;
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    let githubList = ref(githubNews);
-    let newsGuide: any[] = [];
-    newsGuide = githubList.value;
-    newsGuide.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
+    const newsGuide = [...githubNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -196,16 +193,15 @@ export default {
       let websiteLogo = "";
       switch (String(item.website)) {
         case "githubTrending":
-          websiteLogo = item.image ? item.image : logoUrl.value;
+          websiteLogo = item.image ? item.image : logoUrl;
           break;
         default:
-          websiteLogo = logoUrl.value;
+          websiteLogo = logoUrl;
       }
       return websiteLogo;
     };
     const handleLinkUrl = (item: any) => {
       let websiteUrl = "";
-      let data = isPC();
       switch (String(item.website)) {
         case "githubTrending":
           websiteUrl = item.url;
@@ -215,7 +211,6 @@ export default {
     };
     const gotoWelfareWebsite = (item: any) => {
       let websiteUrl = handleLinkUrl(item);
-      console.log(websiteUrl);
       if (websiteUrl) {
         gotoOutPage(websiteUrl);
       }
@@ -249,7 +244,7 @@ export default {
       return month + "月";
     };
     const handleImageError = (event: any) => {
-      event.target.src = logoUrl.value;
+      event.target.src = logoUrl;
     };
     const handleYearColor = (item: any) => {
       const date = new Date(item.timestamp);
@@ -292,26 +287,10 @@ export default {
     };
     const handleDialogConfirm = () => {
       dialogGuideVisible.value = false;
-      console.log("dialogParam.value", dialogParam.value);
       let websiteUrl = handleLinkUrl(dialogParam.value);
       if (websiteUrl) {
         gotoOutPage(websiteUrl);
       }
-    };
-    const divColor = ref(""); // 用于存储随机颜色的响应式变量
-
-    // 生成随机颜色的方法
-    const generateRandomColor = () => {
-      const randomColor = () => {
-        const letters = "0123456789ABCDEF";
-        let color = "#";
-        for (let i = 0; i < 6; i++) {
-          color += letters[Math.floor(Math.random() * 16)];
-        }
-        return color;
-      };
-
-      divColor.value = randomColor(); // 将随机颜色赋值给divColor
     };
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
@@ -330,13 +309,11 @@ export default {
       return guideTmpAll;
     });
     return {
-      logoUrl,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
       handleWebsiteName,
       handleWebsiteImg,
-      newsGuide,
       handleAuthorImg,
       handleLinkUrl,
       handleMonth,
@@ -351,8 +328,6 @@ export default {
       dialogMarginTop,
       handleDialogCancel,
       handleDialogConfirm,
-      divColor,
-      generateRandomColor,
       guideNewsLimited,
     };
   },
@@ -388,10 +363,7 @@ export default {
 .welfare-img-link {
   height: 30px;
   width: 30px;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
+  border-radius: 50%;
   margin-right: 10px;
 }
 .weibo-img-link {

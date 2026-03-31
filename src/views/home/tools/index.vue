@@ -1,12 +1,12 @@
 <template>
   <div>
     <div v-for="(websites, parentIndex) in websiteSource" :key="parentIndex">
-      <el-tag class="website-type" :type="websiteTransformType(parentIndex)">{{
+      <el-tag class="website-type" :type="websiteTransformType(parentIndex as number)">{{
         websites.category
       }}</el-tag>
       <el-row>
         <el-col :span="24" :md="8" :lg="6" v-for="(item, sonIndex) in websites.list" :key="sonIndex">
-          <el-card class="website-common-card" :style="`background-color:${getBackgroundColor(parentIndex)}`"
+          <el-card class="website-common-card" :style="`background-color:${getBackgroundColor(parentIndex as number)}`"
             shadow="hover">
             <el-link :href="item.url" target="_blank" class="website-link" :underline="false"
               @click.prevent="gotoNewsWebsite(item)">
@@ -52,9 +52,6 @@ export default defineComponent({
     };
     // 加载缓存并打印
     const frequentGroup = loadFrequentWebsites();
-    // 打印整理后的分组数据
-    console.info("frequentGroup for websiteSource:", frequentGroup);
-    console.info('websiteGroups', websiteGroups)
     const websiteSource: any = ref([
       ...loadFrequentWebsites(),
       ...websiteGroups
@@ -62,7 +59,6 @@ export default defineComponent({
     const gotoNewsWebsite = (website: any) => {
       if (website.url) {
         const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
-        console.info('clickData', clickData)
         const key = website.url;
         if (!clickData[key]) {
           clickData[key] = { ...website, count: 1 };
