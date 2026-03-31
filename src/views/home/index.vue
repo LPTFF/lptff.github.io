@@ -8,51 +8,21 @@
               <img :src="logoUrl" alt="作者" class="logo-img" />
               <div class="logo-title">tangff</div>
             </div>
-            <div v-if="false">
-              <el-button type="success" round @click="gotoJob">工作</el-button>
-              <el-button type="success" round @click="gotoBlog">博客</el-button>
-            </div>
           </div>
           <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
-            <el-menu-item v-for="(item, index) in menuList" :key="index" :index="String(index)"
-              :ref="el => menuItemRefs[index] = el">
+            <el-menu-item
+              v-for="(item, index) in menuList"
+              :key="index"
+              :index="String(index)"
+              :ref="el => menuItemRefs[index] = el"
+            >
               {{ item }}
             </el-menu-item>
           </el-menu>
         </el-header>
         <el-main class="main-content">
-          <div class="component-div" v-if="selectIndex === '0'">
-            <guideComponent :guideLocation="contentLocation"></guideComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '1'">
-            <pojieComponent :pojieLocation="contentLocation"></pojieComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '2'">
-            <welfareComponent :welfareLocation="contentLocation"></welfareComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '3'">
-            <doubanComponent :doubanLocation="contentLocation"></doubanComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '4'">
-            <toolsComponent></toolsComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '5'">
-            <newsComponent :newsLocation="contentLocation"></newsComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '6'">
-            <bossZhipinComponent></bossZhipinComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '7'">
-            <leetCodeComponent></leetCodeComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '8'">
-            <findJobComponent></findJobComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '9'">
-            <advancedSearchComponent :newsLocation="contentLocation"></advancedSearchComponent>
-          </div>
-          <div class="component-div" v-if="selectIndex === '10'">
-            <githubTrendingComponent :githubTrendingLocation="contentLocation"></githubTrendingComponent>
+          <div class="component-div">
+            <component :is="currentComponent" v-bind="currentComponentProps" />
           </div>
         </el-main>
         <el-footer class="footer" @click="gotoIssue">
@@ -66,149 +36,137 @@
 </template>
 
 <script lang="ts">
-import { ref, onMounted, computed, Ref } from "vue";
+import { ref, onMounted, computed, defineAsyncComponent, Ref } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
-import leetCodeComponent from "./leetCode/index.vue";
-import doubanComponent from "./douban/index.vue";
-import newsComponent from "./news/index.vue";
-import toolsComponent from "./tools/index.vue";
-import welfareComponent from "./welfare/index.vue";
-import bossZhipinComponent from "./bossZhipin/index.vue";
-import guideComponent from "./guide/index.vue";
-import findJobComponent from "./findJob/index.vue";
-import advancedSearchComponent from "./advancedSearch/index.vue";
-import pojieComponent from "./52pojie/index.vue";
-import githubTrendingComponent from "./githubTrending/index.vue";
 import { useRouter } from "vue-router";
 import logoImageUrl from "../../public/img/logo.jpg";
-// import "element-plus/theme-chalk/index.css";
 import {
-  ElCol,
   ElMenu,
   ElMenuItem,
   ElHeader,
   ElFooter,
   ElMain,
-  ElButton,
 } from "element-plus";
+
+// 子组件懒加载，按需分包，减少首屏加载体积
+const componentMap: Record<string, ReturnType<typeof defineAsyncComponent>> = {
+  '0': defineAsyncComponent(() => import('./guide/index.vue')),
+  '1': defineAsyncComponent(() => import('./52pojie/index.vue')),
+  '2': defineAsyncComponent(() => import('./welfare/index.vue')),
+  '3': defineAsyncComponent(() => import('./douban/index.vue')),
+  '4': defineAsyncComponent(() => import('./tools/index.vue')),
+  '5': defineAsyncComponent(() => import('./news/index.vue')),
+  '6': defineAsyncComponent(() => import('./bossZhipin/index.vue')),
+  '7': defineAsyncComponent(() => import('./leetCode/index.vue')),
+  '8': defineAsyncComponent(() => import('./findJob/index.vue')),
+  '9': defineAsyncComponent(() => import('./advancedSearch/index.vue')),
+  '10': defineAsyncComponent(() => import('./githubTrending/index.vue')),
+};
+
+// 各组件对应的 location prop 名称
+const propNameMap: Record<string, string> = {
+  '0': 'guideLocation',
+  '1': 'pojieLocation',
+  '2': 'welfareLocation',
+  '3': 'doubanLocation',
+  '5': 'newsLocation',
+  '9': 'newsLocation',
+  '10': 'githubTrendingLocation',
+};
+
 export default {
   setup() {
     const previousRoute = ref("");
     const isPCRes = computed(() => isPC());
     const router = useRouter();
-    const selectIndex = isPCRes.value ? ref("4") : ref("0"); //默认首页
+    const selectIndex = isPCRes.value ? ref("4") : ref("0");
     const menuList = [
       '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
       '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending'
     ];
 
-    const menuItemRefs: any = ref([]); // 保存 menu-item 组件的引用
-    const callMethod = () => {
-      // console.log('233');
-    };
+    const menuItemRefs: any = ref([]);
     const lastClickTime: Ref<number> = ref(0);
     let clickTimer: ReturnType<typeof setTimeout>;
     const erudaInitialized = ref(false);
+
     const goBack = () => {
       const nowTime = new Date().getTime();
       if (nowTime - lastClickTime.value < 300) {
-        /**/
         lastClickTime.value = 0;
         clickTimer && clearTimeout(clickTimer);
-        console.log("双击1");
         if (!erudaInitialized.value) {
-          console.log("双击2");
           initEruda();
           erudaInitialized.value = true;
         }
       } else {
-        /**/
         lastClickTime.value = nowTime;
         clickTimer = setTimeout(() => {
-          console.log("单击");
           previousRoute.value ? router.back() : router.push("/");
         }, 400);
       }
     };
-    const gotoJob = () => {
-      let url = window.location.origin + "/job";
-      window.open(url, "_blank");
-    };
-    const gotoBlog = () => {
-      let url = window.location.origin + "/blog";
-      window.open(url, "_blank");
-    };
 
     const handleSelect = (key: any) => {
       const elComponent = menuItemRefs.value[Number(key)];
-      const label = elComponent?.$el?.innerText || '';
-      console.log('选中 key:', key);
-      console.log('对应文本:', label);
-      document.title = label;
+      document.title = elComponent?.$el?.innerText || '';
       selectIndex.value = key;
-      let locationInfoInit = sessionStorage.getItem(`scrollInfoLocation${key}`);
-      locationInfoInit = locationInfoInit
-        ? JSON.parse(locationInfoInit)
-        : locationInfoInit;
+      const locationInfo = sessionStorage.getItem(`scrollInfoLocation${key}`);
       const container = document.querySelector(
         isPCRes.value ? ".scroll-home-container" : ".inner-container"
       );
       if (container) {
         container.scrollTo({
-          top: locationInfoInit ? Number(locationInfoInit) : 0,
+          top: locationInfo ? Number(JSON.parse(locationInfo)) : 0,
           behavior: "auto",
         });
       }
     };
 
     const gotoIssue = () => {
-      const pageUrl = window.location.origin;
-      const issueUrl = pageUrl.includes("love-tff.gitee.io")
+      const issueUrl = window.location.origin.includes("love-tff.gitee.io")
         ? "https://gitee.com/love-tff/love-tff/issues"
         : "https://github.com/LPTFF/lptff.github.io/issues";
       gotoOutPage(issueUrl);
     };
 
-    onMounted(async () => {
-      callMethod();
-      previousRoute.value = window.history.state ? window.history.state.back : "";
+    onMounted(() => {
+      previousRoute.value = window.history.state?.back ?? "";
     });
-    const logoUrl = ref(logoImageUrl); // 图片路径变量
-    let contentLocation = ref(0);
+
+    const logoUrl = logoImageUrl;
+    const contentLocation = ref(0);
     let currentScroll = 0;
     let previousScroll = 0;
+
     const handleScroll = (event: any) => {
-      let scrollLocation = event.target.scrollTop;
-      sessionStorage.setItem(
-        `scrollInfoLocation${selectIndex.value}`,
-        JSON.stringify(scrollLocation)
-      );
-      currentScroll = event.target.scrollHeight - event.target.scrollTop;
+      const { scrollTop, scrollHeight } = event.target;
+      sessionStorage.setItem(`scrollInfoLocation${selectIndex.value}`, JSON.stringify(scrollTop));
+      currentScroll = scrollHeight - scrollTop;
       if (currentScroll - previousScroll < 0) {
-        //向下滚动
-        contentLocation.value = Math.floor(
-          isPCRes.value ? event.target.scrollTop / 200 : event.target.scrollTop / 100
-        );
+        contentLocation.value = Math.floor(isPCRes.value ? scrollTop / 200 : scrollTop / 100);
       }
       previousScroll = currentScroll;
     };
-    const containerStyle = computed(() => {
-      return {
-        height: isPCRes.value
-          ? `${window.innerHeight - 16}px`
-          : `${window.innerHeight - 16}px`,
-      };
+
+    const containerStyle = computed(() => ({
+      height: `${window.innerHeight - 16}px`,
+    }));
+
+    // 当前激活的懒加载组件
+    const currentComponent = computed(() => componentMap[selectIndex.value]);
+
+    // 当前组件需要传入的 props（无 location prop 的组件传空对象）
+    const currentComponentProps = computed(() => {
+      const propName = propNameMap[selectIndex.value];
+      return propName ? { [propName]: contentLocation.value } : {};
     });
-    const getCurrentYear = () => {
-      const currentDate = new Date();
-      // 获取北京时间
-      const beijingOffset = 8 * 60; // 北京时间是 UTC+8
-      const currentBeijingTime = new Date(
-        currentDate.getTime() + (beijingOffset - currentDate.getTimezoneOffset()) * 60000
-      );
-      return currentBeijingTime.getFullYear();
-    };
-    const currentYear = ref(getCurrentYear());
+
+    // 北京时间年份，静态值无需响应式
+    const currentYear = new Date(
+      Date.now() + (8 * 60 - new Date().getTimezoneOffset()) * 60000
+    ).getFullYear();
+
     return {
       selectIndex,
       previousRoute,
@@ -216,36 +174,23 @@ export default {
       goBack,
       handleSelect,
       gotoIssue,
-      gotoJob,
       logoUrl,
-      gotoBlog,
       handleScroll,
       containerStyle,
       contentLocation,
       currentYear,
       menuList,
-      menuItemRefs
+      menuItemRefs,
+      currentComponent,
+      currentComponentProps,
     };
   },
   components: {
-    leetCodeComponent,
-    doubanComponent,
-    newsComponent,
-    toolsComponent,
-    welfareComponent,
-    bossZhipinComponent,
-    guideComponent,
-    ElCol,
     ElMenu,
     ElMenuItem,
     ElHeader,
     ElFooter,
     ElMain,
-    findJobComponent,
-    ElButton,
-    advancedSearchComponent,
-    pojieComponent,
-    githubTrendingComponent,
   },
 };
 </script>
@@ -303,10 +248,7 @@ export default {
   width: 35px;
   height: 35px;
   margin-right: 10px;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
+  border-radius: 50%;
 }
 
 .news-aggregator {
@@ -336,7 +278,6 @@ export default {
 }
 
 .component-div {
-  /* padding-top: 10px; */
   margin-bottom: 40px;
 }
 
