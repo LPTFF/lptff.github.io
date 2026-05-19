@@ -11,7 +11,10 @@ export default defineConfig({
     vue({
       include: [/\.vue$/, /\.md$/], // <-- allows Vue to compile Markdown files
     }),
-    Markdown({}),
+    Markdown({
+      // 超大提纲 md 走 ?raw + marked，避免 build-import-analysis 解析失败
+      exclude: [/前端八股文汇总背诵版/],
+    }),
     // visualizer(),
     // vitePrerender({
     //     staticDir: path.join(__dirname, 'dist'),

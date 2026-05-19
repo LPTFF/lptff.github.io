@@ -1,0 +1,1896 @@
+# HTML
+
+1. HTML5新增特性； HTML5 为什么只需要写 `<!DOCTYPE HTML >`，而不需要引入 DTD ；HTML5 元素的分类； HTML5 有哪些新特性、移除了那些元素；如何处理 HTML5 新标签的浏览器兼容问题； HTML5 的 form 的自动完成功能是什么；HTML5 的离线储存怎么使用,工作原理能不能解释一下；HTML5 新增的表单元素有哪些；在 HTML5 中,哪个方法用于获得用户的当前位置；用于预格式化文本的标签是什么
+
+2. `<link>`标签定义；`<title>`与 `<h1>`的区别；`<img>`的 title 和 alt 有什么区别；常用的 meta 标签；`<head >`标签中必不少的是哪些；`<b> `与 `<strong>` 的区别和 `<i> `与 `<em>` 的区别；`<label> `的作用是什么?是怎么用的；src和href的区别
+
+3. 标准模式与兼容模式各有什么区别；实现不使用 border 画出 1 px 高的线,在不同浏览器的标准模式与怪异模式下都能保持一致的效果
+
+4. 行内元素、块级元素、空（void）；行内元素定义；块级元素定义；行内元素与块级元素的区别； 空元素定义
+
+5. DOCTYPE(⽂档类型) 的作⽤；DOCTYPE 的作用是什么；DTD 介绍；DHTML 是什么；文档的不同注释方式
+
+6. 简述一下你对 HTML 语义化的理解；HTML语义化标签有哪些；SGML 、 HTML 、XML 和 XHTML 的区别；
+
+7. 对 web 标准、可用性、可访问性的理解；Html 规范中为什么要求引用资源不加协议头http或者https
+
+8. BOM 和 DOM 的区别；解释一下DOM操作(增删改查)及其不同点 ；怎样添加、移除、移动、复制、创建和查找节点；attribute 和 property 的区别是什么；DOMContentLoaded 事件和 Load 事件的区别
+
+9. script标签中defer和async的区别；async 和 defer 的作用是什么?有什么区别?(浏览器解析过程)
+
+10. 页面可见性(Page Visibility API) 可以有哪些用途；如何在页面上实现一个圆形的可点击区域
+
+11. 页面导入样式时,使用 `<link>`和 `@import`有什么区别； `<link>`和 `@import`的区别
+
+12. IE 各版本和 Chrome 可以并行下载多少个资源；介绍一下Chrome 中的 Waterfall
+
+13. 扫描二维码登录网页是什么原理，前后两个事件是如何联系的
+
+14. Flash、Ajax 各自的优缺点，在使用中如何取舍
+
+15. 网页验证码是干嘛的，是为了解决什么安全问题
+
+16. css reset 和 normalize.css 有什么区别
+
+17. Canvas 和 SVG 有什么区别
+
+18. disabled 和 readonly 的区别
+
+19. 渐进增强和优雅降级的定义
+
+20. iframe 有哪些优点和缺点
+
+21. 怎么重构页面
+
+22. picture、source 与响应式图片；img 的 loading、decoding、fetchpriority 属性
+
+23. template、slot、dialog、details/summary 等 HTML5 语义与交互标签
+
+24. preload、prefetch、preconnect、dns-prefetch 的区别与使用场景
+
+25. Content-Security-Policy（CSP）是什么，如何通过 meta 或响应头配置
+
+26. 无障碍（a11y）：ARIA 属性、role、alt 与 label 的关联、键盘可访问性
+
+27. SEO 相关：title、meta description、canonical、结构化数据（JSON-LD）、语义化标签对爬虫的影响
+
+28. 表单相关：novalidate、formaction、formenctype、input 的 type 新增类型（email、url、number、range、color、date 等）
+
+29. 拖拽 API（draggable、dropzone、DataTransfer）；全屏 API；剪贴板 API
+
+30. Web Components：Custom Elements、Shadow DOM、HTML Templates 基本概念
+
+31. 媒体查询在 HTML 中的 link media；打印样式 @media print
+
+32. 字符实体、HTML 实体编码；XSS 与 innerHTML 注入风险
+
+33. 什么是 Quirks Mode 与 Standards Mode；如何触发怪异模式
+
+34. data-* 自定义属性的作用与使用场景
+
+35. 什么是 Content Editable；designMode 与 contentEditable 的区别
+
+# CSS
+
+1. 讲一下盒模型，普通盒模型和怪异盒模型有什么区别；介绍一下标准的 CSS 的盒子模型和低版本 IE 的盒子模型有什么不同的； 内联盒模型基本概念；如何去除 inline-block 元素间间距；li 与 li 之间有看不见的空白间隔是什么原因引起的，有什么解决办法
+
+2. 几种常见的 CSS 布局；讲一下flex弹性盒布局；flex:1 是哪些属性的缩写，对应的属性代表什么含义；flexbox 布局的属性和使用场景；flex布局理解
+
+3. BFC、IFC是什么；BFC 块级格式化上下文；对BFC的理解，如何创建BFC；块元素和行内元素区别是什么，常见块元素和行内元素有哪些；什么是包含块，对于包含块的理解；对 BFC 规范(块级格式化上下文 block formatting context)的理解；IFC 是什么；元素竖向的百分比设定是相对于容器的高度吗
+
+4. 常见的水平垂直居中实现方案；CSS如何实现垂直居中，实现水平垂直居中，实现图片居中；如何居中 div；有一个高度自适应的 div，里面有两个 div，一个高度 100px，希望另一个填满剩下的高度；css 实现上下固定中间自适应布局；css 两栏布局的实现；css 三栏布局的实现
+
+5. CSS常见的选择器有哪些；CSS选择器和优先级；CSS的优先级如何计算；CSS3新增特性；CSS可继承属性和不可继承属性；CSS 选择符有哪些；CSS 中哪些属性可以继承；CSS 优先级算法如何计算
+
+6. 常见的CSS单位；长度单位px、em和rem的区别是什么；画一条0.5px的线；如何解决1px；使用 rem 布局的优缺点；设备像素、css 像素、设备独立像素、dpr、ppi 之间的区别
+
+7. 浮动塌陷问题解决方法是什么；请解释一下为什么需要清除浮动以及清除浮动的方式；使用 clear 属性清除浮动的原理；zoom:1 的清除浮动原理；对于 hasLayout 的理解；layout viewport、visual viewport 和 ideal viewport 的区别；常用 hack 的技巧；
+
+8. position 常用属性及其默认值是什么；position属性的值有哪些，各个值是什么含义；position 的值 relative 和 absolute 定位原点是什么； 绝对定位元素与非绝对定位元素的百分比计算的区别；display 、position 和 float的相互关系；absolute 的 containingblock(包含块)计算方式跟正常流有什么不同
+
+9. dislpay的属性和作用；单行、多行文本溢出；隐藏元素的方法；隐藏元素的方式；display 有哪些值，说明他们的作用；解释一下CSS 里的 visibility 属性中 collapse ；隐藏元素的 background-image 到底加不加载；如何实现单行/多行文本溢出的省略(...)；常见的元素隐藏方式有哪些
+
+10. 什么是margin重叠，如何解决；margin 重叠问题的理解；content 与替换元素的关系；margin:auto 的填充规则；margin 无效的情形；border 的特殊性；什么是基线和 x-height；line-height 的特殊性；vertical-align 的特殊性；overflow 的特殊性；无依赖绝对定位是什么；absolute 与 overflow 的关系；relative 的特殊性；margin 和 padding 分别适合什么场景使用；width:auto 和 width:100%的区别；为什么 height:100% 会无效；min-width、max-width 和 min-height、max-height 属性间的覆盖规则
+
+11. 为什么要初始化 CSS 样式；使用 CSS 预处理器吗，介绍一下有哪些；CSS 优化、提高性能的方法有哪些；浏览器是怎样解析 CSS 选择器的；为什么不建议使用统配符初始化 css 样式；介绍一下Sass、Less 的区别是什么；什么是 CSS 预处理器/后处理器
+
+12. 全屏滚动的原理是什么，用到了 CSS 的哪些属性待深入实践)；视差滚动效果，如何给每页做不同的动画（回到顶部，向下滑动要再次出现，和只出现一次分别怎么做）；overflow:scroll 不能平滑滚动的问题怎么处理；offsetWidth/offsetHeight,clientWidth/clientHeight 与 scrollWidth/scrollHeight 的区别
+
+13. 经常遇到的浏览器的兼容性有哪些，解释一下原因及其解决方法；介绍一下移动端的布局媒体查询；什么是响应式设计，响应式设计的基本原理是什么，如何兼容低版本的 IE(待深入了解)；position:fixed在 android 下无效怎么处理
+
+14. 简单介绍使用图片 base64 编码的优点和缺点；png、jpg、gif 、webp这些图片格式解释一下，分别什么时候用；浏览器如何判断是否支持 webp 格式图片
+
+15. 实现一个三角形；用纯 CSS 创建一个三角形的原理是什么；实现一个宽高自适应的正方形；一个自适应矩形,水平垂直居中，且宽高比为 2:1；CSS 多列等高如何实现
+
+16. ::before 和:after 中双冒号和单冒号有什么区别，解释一下这两个伪元素的作用；伪类与伪元素的区别；关于伪类 LVHA 的解释；CSS3 新增伪类有那些；伪类和伪元素的区别是什么
+
+17. 如何修改 chrome 记住密码后自动填充表单的黄色背景；怎么让 Chrome 支持小于 12px 的文字；让页面里的字体变清晰，变细用 CSS 怎么做；font-style 属性中 italic 和 oblique 的区别；font-weight 的特殊性；text-indent 的特殊性； letter-spacing 与字符间距；word-spacing 与单词间距；white-space 与换行和空格的控制；一个满屏品字布局如何设计
+
+18. CSS3 有哪些新特性(根据项目回答)；请解释一下 CSS3 的 Flex box(弹性盒布局模型)以及适用场景；简单说一下 css3 的 all 属性
+
+19. 在网页中应该使用奇数还是偶数的字体，解释一下
+
+20. 抽离样式模块怎么写
+
+21. 如果需要手动写动画，你认为最小时间间隔是多久，为什么； transition 和 animation 的区别
+
+22. 什么是 Cookie 隔离，请求资源的时候不要让它带 cookie 怎么做
+
+23. style 标签写在 body 后与 body 前有什么区别
+
+24. 阐述一下 CSSSprites
+
+25. 什么是首选最小宽度
+
+26. 什么是幽灵空白节点
+
+27. 什么是替换元素；替换元素的计算规则
+
+28. clip 裁剪是什么
+
+29. 什么是层叠上下文；什么是层叠水平；元素的层叠顺序；层叠准则
+
+30. 解释一下回流与重绘
+
+31. 你知道 CSS 中不同属性设置为百分比\x 时对应的计算基准
+
+32. 回流和重绘
+
+33. 盒模型
+
+34. 有哪些CSS选择器
+
+35. css优先级
+
+36. css居中
+
+37. 元素margin合并
+
+38. BFC、IFC
+
+39. block、inline和inline-block的元素有什么差别
+
+40. display：none与visibility:hidden区别
+
+41. 隐藏元素的方法
+
+42. css画三角形
+
+43. 盒模型盒子的宽度计算
+
+44. 两种盒模型对比
+
+45. 有哪些CSS选择器
+
+46. css优先级
+
+47. css优先级计算
+
+48. div .div #div div>div>div优先级
+
+49. class、id、tag 的优先级
+
+50. 为什么不推荐用多层css选择器
+
+51. css选择器处理
+
+52. css居中
+
+53. 多列等高布局
+
+54. 元素margin合并
+
+55. BFC、IFC
+
+56. 如何清除浮动
+
+57. block、inline和inline-block的元素有什么差别
+
+58. display属性
+
+59. 说说你对盒子模型的理解
+
+60. css选择器有哪些？优先级？哪些属性可以继承
+
+61. 说说em/px/rem/vh/vw区别
+
+62. 说说设备像素、css像素、设备独立像素、dpr、ppi 之间的区别
+
+63. css中，有哪些方式可以隐藏页面元素？区别
+
+64. 谈谈你对BFC的理解
+
+65. 元素水平垂直居中的方法有哪些？如果元素不定宽高呢
+
+66. 如何实现两栏布局，右侧自适应？三栏布局中间自适应呢
+
+67. 说说flexbox（弹性盒布局模型）,以及适用场景
+
+68. 介绍一下grid网格布局
+
+69. CSS3新增了哪些新特性
+
+70. css3动画有哪些
+
+71. 怎么理解回流跟重绘？什么场景下会触发
+
+72. 什么是响应式设计？响应式设计的基本原理是什么？如何做
+
+73. 如果要做优化，CSS提高性能的方法有哪些
+
+74. 如何实现单行／多行文本溢出的省略样式
+
+75. 如何使用css完成视差滚动效果
+
+76. CSS如何画一个三角形？原理是什么
+
+77. 让Chrome支持小于12px 的文字方式有哪些？区别
+
+78. 说说对Css预编语言的理解？有哪些区别?
+
+79. CSS 容器查询（container queries）与 @container；:has() 伪类及其应用场景
+
+80. CSS 逻辑属性（margin-inline、padding-block 等）与书写模式
+
+81. subgrid 是什么，解决什么问题
+
+82. CSS 变量（自定义属性）的作用域与继承；与 Sass 变量的区别
+
+83. will-change、contain、content-visibility 对渲染性能的影响
+
+84. CSS 层（@layer）与 cascade layers 优先级规则
+
+85. aspect-ratio、object-fit、object-position 的用法
+
+86. filter、backdrop-filter、mix-blend-mode 的区别与性能注意点
+
+87. CSS Grid 与 Flex 如何选择；grid-template-areas 布局
+
+88. 移动端 1px 边框、安全区域 env(safe-area-inset-*)、viewport-fit=cover
+
+89. CSS-in-JS、CSS Modules、Tailwind 等方案对比（工程化选型）
+
+90. @supports 特性检测与渐进增强
+
+# JS
+
+1. js有哪些数据类型；数据类型判断方式有几种；解释一下es6新增symbol数据类型；typeof和instance of的区别；js有哪些判断类型的方法；JS 类型检测的方法 typeof、instanceOf 、Object.prototype.toString() 需要理解各个检查方法的输出；instanceof 运算符的实现原理及实现；typeof 和 instanceof 区别；NaN是什么，如何判断是否是NaN类型；null、undefined及未声明变量之间的区别，如何区分；null和undefined区别；map和Object的区别map和weakMap的区别；介绍 js 的基本数据类型；JavaScript 有几种类型的值?你能画一下他们的内存图吗；什么是堆?什么是栈?它们之间有什么区别和联系；undefined 与 undeclared 的区别；null 和 undefined 的区别；如何获取安全的 undefined 值；在 js 中不同进制数字的表示方式； js 中整数的安全范围是多少；typeof NaN 的结果是什么；isNaN 和 Number.isNaN 函数的区别；Array 构造函数只有一个参数值时的表现；其他值到字符串的转换规则；其他值到数字值的转换规则；其他值到布尔类型的值的转换规则；{} 和 [] 的 valueOf 和 toString 的结果是什么；substring和substr的区别；解析字符串中的数字和将字符串强制类型转换为数字的返回结果都是数字,它们之间的区别是什么；操作符什么时候用于字符串的拼接；什么情况下会发生布尔值的隐式强制类型转换；|| 和 操作符的返回值；Symbol 值的强制类型转换；== 操作符的强制类型转换规则；如何将字符串转化为数字,例如 '12.3'；如何将浮点数点左边的数每三位添加一个逗号,如 12000000.11 转化为『12,000,000.11』；如何判断一个对象是否属于某个类；instanceof 的作用;Symbol 类型的注意点; Object.is() 与原来的比较操作符 “===”、“==” 的区别;Set 和 WeakSet 结构；Map 和 WeakMap 结构；如何封装一个 javascript 的类型判断函数;如何判断一个对象是否为空对象
+
+2. JS 模块化方案；CommonJS；CmmonJS和ESM区别；AMD、CMD、UMD；ES6 module是编译时导出接口，CommonJS是运行时导出对象。ES6 module输出的值的引用，CommonJS输出的是一个值的拷贝。ES6 module语法是静态的，CommonJS语法是动态的。ES6 module导入模块的是只读的引用，CommonJS导入的是可变的，是一个普通的变量。ES6 module支持异步，CommonJS不支持异步；模块化开发怎么做； js 的几种模块规范；AMD 和 CMD 规范的区别；ES6 模块与 CommonJS 模块、AMD、CMD 的差异；requireJS 的核心原理是什么?(如何动态加载的?如何避免多次加载的?如何缓存的?)；JS 模块加载器的轮子怎么造,也就是如何实现一个模块加载器；require 模块引入的查找方式
+
+3. 谈谈对原型链的理解；js如何实现继承（原型和原型链）；JS原型，原型链；实现继承的方式；实现寄生组合继承；JavaScript 原型,原型链? 有什么特点；js 获取原型的方法；Javascript 的作用域链；谈谈对闭包的理解，什么是闭包；闭包有哪些应用场景；闭包有什么缺点；如何避免闭包；闭包和作用域谈一下区别；JS作用域及作用域链/闭包（closure），常用场景举例说明；闭包和原型链谈一下区别；对作用域、作用域链的理解；对闭包的理解以及它的使用场景； JavaScript 继承的几种实现方式；寄生式组合继承的实现;什么是闭包,为什么要用它;使用闭包实现每隔一秒打印 1,2,3,4
+
+4. 如何判断一个变量是否数组；判断数组的方式有哪些；如何实现数组拍平；如何实现数组去重；数组的遍历方法；数组的for Each和map方法有哪些区别；常用哪些方法去对数组进行增、删、改；如何判断是否为空数组；数组方法 push、pop、shift、unshift功能及返回值 ；对类数组对象的理解，如何转化为数组；数组有哪些原生方法；JavaScript 类数组对象的定义；数组和对象有哪些原生方法,列举一下；数组的 fill 方法；[,,,] 的长度；生成随机数的各种方法；如何实现数组的随机排序
+
+5. 谈谈对js事件循环的理解；EventLoop；DOM事件流及事件委托机制；JS事件委托、事件冒泡；document的load事件和DOMContentLoaded事件之间的区别；请解释事件循环，调用堆栈和任务队列的区别；宏任务与微任务；IE和Firefox的事件机制有何区别，如何阻止冒泡；写一个通用的事件侦听器函数;事件是什么?IE 与火狐的事件机制有什么区别? 如何阻止冒泡;三种事件模型是什么;事件委托是什么；什么是 DOM 和 BOM；js 的事件循环是什么
+
+6. 介绍JS有哪些内置对象；宿主对象和原生对象的区别；如何将arguments转为数组，对象的遍历方法；如何判断两个对象相等；为什么0.1+0.2 != 0.3，如何让其相等；==和===的区别；JS执行对象查找时，永远不会去查找原型的函数是哪个；JS有哪几种创建对象的方式；介绍 js 有哪些内置对象；内部属性 [[Class]] 是什么；Javascript 中,有一个函数,执行时对象查找时,永远不会去查找原型,这个函数是什么；
+
+7. 说说你对Promise的理解；Promise方法；promise.all 和 promise.allsettled 区别；对async/await 的理解；async/await对比Promise的优势；谈谈对promise理解，手写 Promise和 Promise.all方法；Callback；什么是 Promise 对象,什么是 Promises/A 规范；手写一个 Promise
+
+8. 什么是 Ajax；对AJAX的理解，实现一个AJAX请求；ajax、axios、fetch的区别；异步加载JS 的方式有哪些；js 延迟加载的方式有哪些；Ajax 是什么? 如何创建一个 Ajax；谈一谈浏览器的缓存机制；Ajax 解决浏览器缓存问题；同步和异步的区别;异步加载；异步编程的实现方式
+
+9. for...in和for...of的区别；For 循环，for each和map的区别；forEach和.map()循环的主要区别，使用场景举例；如何使用for...of遍历对象；forEach和map方法有什么区别；["1 ", "2 ", "3 "].map(parseInt) 答案是多少;js for 循环注意点
+
+10. javascript 创建对象的几种方式；使用new创建对象的过程是什么样的；new关键字；实现一个类似关键字new功能的函数；new操作符的实现原理；new 操作符具体干了什么呢?如何实现
+
+11. this指向系列问题；解释一下JS执行上下文；请简述JS中的this ；解释一下JS变量和对象;谈谈 This 对象的理解;箭头函数和普通函数区别是什么；箭头函数和普通函数有什么区别
+
+12. document.write和innerHTML有何区别；documen.write 和 innerHTML 的区别；DOM 操作——怎样添加、移除、移动、复制、创建和查找节点；innerHTML 与 outerHTML 的区别；
+
+13. call bind apply的区别；call,apply和bind的作用是什么；手写bind方法；请说明Function.prototype.bind的用法；call() 和 .apply() 的区别；手写 call、apply 及 bind 函数
+
+14. Typescript中type和interface的区别是什么；讲讲Typescript中的泛型；Typescript如何实现一个函数的重载；type和interface的区别
+
+15. 深拷贝、浅拷贝的区别；如何实现深拷贝和浅拷贝；object.assign和扩展运算法是深拷贝还是浅拷贝，两者区别；js 中的深浅拷贝实现;Object.assign();
+
+16. ES next新特性有哪些；ES6 新语法/特性；ES6 Module；ES6知识点；ECMAScript6 怎么写 class,为什么会出现 class 这种东西
+
+17. 柯里化是什么，有什么用，怎么实现；JS函数与函数式编程；高阶函数；函数柯里化的实现；谈一谈你理解的函数式编程
+
+18. 对比 一下var、const、let；请解释变量提升；JavaScript 中的作用域与变量声明提升； let 和 const 的注意点
+
+19. 什么是user strict，使用它有什么优缺点；javascript 代码中的 "use strict "; 是什么意思 ? 使用它区别是什么
+
+20. 如何判断当前脚本运行在浏览器还是node环境中；如何判断当前脚本运行在浏览器还是 node 环境中?(阿里)
+
+21. 解构赋值 const { a = 2 } = { a: null } const { a = 2 } = { a: undefined } 上面两个 a 的值是什么
+
+22. 什么是尾调用，使用尾调用有什么好处；什么是 rest 参数；什么是尾调用,使用尾调用有什么好处
+
+23. JS隐式转换及应用场景;匿名函数的典型应用场景；Attribute和Property的区别
+
+24. 迭代器(iterator)接口和生成器(generator)函数的关系
+
+25. 正则表达式；常用正则表达式
+
+26. 立即执行函数；IIFE(立即执行函数)的用法；
+
+27. any、unknown、never
+
+28. 怎么优化 const value = a && a.b && a.b.c
+
+29. 深入浅出JSBridge，从原理到使用
+
+30. jQuery.extend和jQuery.fn.extend的区别；针对jQuery性能的优化方法
+
+31. oAuth实现方案；如何实现单点登录(Single Sign On)
+
+32. JS编码规范；说几条写 JavaScript 的基本规范
+
+33. 什么是假值对象
+
+34. ~ 操作符的作用
+
+35. eval 是做什么的
+
+36. 对于 JSON 的了解;开发中常用的几种 Content-Type;手写一个 jsonp
+
+37. [].forEach.call($$("<em>"),function(a){a.style.outline="1px solid #" (~~(Math.random()</em>(1<<24))).toString(16)}) 能解释一下这段代码的意思吗？
+
+38. 需求:实现一个页面操作不会整页刷新的网站,并且能在浏览器前进、后退时正确响应。给出你的技术实现方案
+
+39. 移动端的点击事件的有延迟,时间是多久,为什么会有? 怎么解决这个延时
+
+40. 如何测试前端代码么? 知道 BDD, TDD, Unit Test 么? 知道怎么测试你的前端工程么(mocha, sinon, jasmin, qUnit..)
+
+41. 使用 JS 实现获取文件扩展名
+
+42. escape,encodeURI,encodeURIComponent 有什么区别；Unicode 和 UTF-8 之间的关系
+
+43. 为什么 0.1 0.2 != 0.3?如何解决这个问题
+
+44. 原码、反码和补码的介绍
+
+45. toPrecision 和 toFixed 和 Math.round 的区别;Math.ceil 和 Math.floor
+
+46. Js 动画与 CSS 动画区别及相应实现；什么是 requestAnimationFrame
+
+47. mouseover 和 mouseenter 的区别；js 拖拽功能的实现；
+
+48. 为什么使用 setTimeout 实现 setInterval?怎么模拟
+
+49. Reflect 对象创建目的
+
+50. EventEmitter 实现
+
+51. 一道常被人轻视的前端 JS 面试题
+
+52. 如何确定页面的可用性时间,什么是 Performance API?
+
+53. js 中的命名规则
+
+54. js 语句末尾分号是否可以省略
+
+55. 前端埋点的实现，说说看思路；怎么做 JS 代码 Error 统计
+
+56. 箭头函数和普通函数有什么区别
+
+57. 讲讲promise
+58. apply、bind、call
+59. typescript泛型
+60. 实现防抖方法
+61. 实现深拷贝和浅拷贝
+62. 讲一下event loop
+63. 如何判断数组
+64. js数据类型
+65. 什么是柯里化
+66. 如何理解闭包
+67. 如何理解原型与原型链
+68. js继承
+69. 类型判断
+70. null和undefined的区别
+71. new一个对象发生了什么
+72. 手写promise
+
+73. 实现Promise.all,Promise.race,Promise.any
+
+74. 手写promise
+
+75. 如何实现Promise.all、Promise.race和Promise.any方法。
+76. Promise.all，Promise.race区别是什么？手写一个方法，使用Promise.all，实现所有都resolved/reject时才返回，并返回所有的结果
+77. promise的catch后面跟一个then会怎么执行
+78. callback改成promise
+79. 如何理解js的作用域
+80. 函数表达式和函数声明有什么区别
+81. 讲一下变量提升（js预编译），为什么会有变量提升？
+82. 讲讲promise，promise的3种状态和状态转换。Promise中回调函数是同步的还是异步的？then的链式调用是同步的还是异步的？
+83. js如何判断一个变量是数组？
+84. js数据类型都有哪些？
+85. ==和===区别
+86. 讲一下js中的包装类型
+87. 讲一下js类型的隐式转换
+88. typeof判断哪个类型会出错？Object.prototype.toString.call()判断哪个类型会出错？
+89. typeof能判断函数吗？能判断null吗？
+90. 如何判断一个对象为空
+91. typeof和instanceof的区别
+92. null和undefined有什么区别
+93. 说说Javascript中的数据类型？区别
+94. Javscript数组的常用方法有哪些
+95. Javascript字符串的常用方法有哪些
+96. 谈谈 Javascript 中的类型转换机制
+97. == 和 ===区别，分别在什么情况使用
+98. 深拷贝浅拷贝的区别？如何实现一个深拷贝
+99. 说说你对闭包的理解
+100. 说说你对作用域链的理解
+101. JavaScript原型，原型链 ? 有什么特点
+102. Javascript如何实现继承
+103. 谈谈this对象的理解
+104. JavaScript中执行上下文和执行栈是什么
+105. 说说JavaScript中的事件模型
+106. typeof 与 instanceof 区别
+107. 解释下什么是事件代理？应用场景
+108. 说说new操作符具体干了什么
+109. ajax原理是什么？如何实现
+110. bind、call、apply 区别？如何实现一个bind
+111. 说说你对正则表达式的理解？应用场景
+112. 说说你对事件循环的理解
+113. DOM常见的操作有哪些
+114. 说说你对BOM的理解，常见的BOM对象你了解哪些
+115. 举例说明你对尾递归的理解，有哪些应用场景
+116. 说说 JavaScript 中内存泄漏的几种情况
+117. Javascript本地存储的方式有哪些？区别及应用场景
+118. 说说你对函数式编程的理解？优缺点
+119. Javascript中如何实现函数缓存？函数缓存有哪些应用场景
+120. 说说 Javascript 数字精度丢失的问题，如何解决
+121. 什么是防抖和节流？有什么区别？如何实现
+122. 如何判断一个元素是否在可视区域中
+123. 大文件上传如何做断点续传
+124. 如何实现上拉加载，下拉刷新
+125. 什么是单点登录？如何实现
+126. web常见的攻击方式有哪些？如何防御
+127. JavaScript深入之从原型到原型链
+128. JavaScript深入之词法作用域和动态作用域
+129. JavaScript深入之执行上下文栈
+130. JavaScript深入之变量对象
+131. JavaScript深入之作用域链
+132. JavaScript深入之从ECMAScript规范解读this
+133. JavaScript深入之执行上下文
+134. JavaScript深入之闭包
+135. JavaScript深入之参数按值传递
+136. JavaScript深入之call和apply的模拟实现
+137. JavaScript深入之bind的模拟实现
+138. JavaScript深入之new的模拟实现
+139. JavaScript深入之类数组对象与arguments
+140. JavaScript深入之创建对象的多种方式以及优缺点
+141. JavaScript深入之继承的多种方式以及优缺点
+142. JavaScript深入系列15篇正式完结！
+143. JavaScript深入之浮点数精度
+144. JavaScript深入之头疼的类型转换(上)
+145. JavaScript深入之头疼的类型转换(下)
+146. JavaScript专题之跟着underscore学防抖
+147. JavaScript专题之跟着underscore学节流
+148. JavaScript专题之数组去重
+149. JavaScript专题之类型判断(上)
+150. JavaScript专题之类型判断(下)
+151. JavaScript专题之深浅拷贝
+152. JavaScript专题之从零实现jQuery的extend
+153. JavaScript专题之如何求数组的最大值和最小值
+154. JavaScript专题之数组扁平化
+155. JavaScript专题之学underscore在数组中查找指定元素
+156. JavaScript专题之jQuery通用遍历方法each的实现
+157. JavaScript专题之如何判断两个对象相等
+158. JavaScript专题之函数柯里化
+159. JavaScript专题之偏函数
+160. JavaScript专题之惰性函数
+161. JavaScript专题之函数组合
+162. JavaScript专题之函数记忆
+163. JavaScript专题之递归
+164. JavaScript专题之乱序
+165. JavaScript专题之解读 v8 排序源码
+166. JavaScript专题系列20篇正式完结！
+167. JavaScript专题之花式表示26个字母
+
+
+
+# ES6
+
+1. 说说var、let、const之间的区别
+2. ES6中数组新增了哪些扩展
+3. ES6中对象新增了哪些扩展
+4. ES6中函数新增了哪些扩展
+5. ES6中新增的Set、Map两种数据结构怎么理解
+6. 你是怎么理解ES6中 Promise的？使用场景
+7. 怎么理解ES6中 Generator的？使用场景
+8. 你是怎么理解ES6中Proxy的？使用场景
+9. 你是怎么理解ES6中Module的？使用场景
+10. 你是怎么理解ES6中 Decorator 的？使用场景
+11. ES6 系列之 let 和 const
+12. ES6 系列之模板字符串
+13. ES6 系列之箭头函数
+14. ES6 系列之模拟实现 Symbol 类型
+15. ES6 系列之迭代器与 for of
+16. ES6 系列之模拟实现一个 Set 数据结构
+17. ES6 系列之 WeakMap
+18. ES6 系列之我们来聊聊 Promise
+19. ES6 系列之 Generator 的自动执行
+20. ES6 系列之我们来聊聊 Async
+21. ES6 系列之异步处理实战
+22. ES6 系列之 Babel 将 Generator 编译成了什么样子
+23. ES6 系列之 Babel 将 Async 编译成了什么样子
+24. ES6 系列之 Babel 是如何编译 Class 的(上)
+25. ES6 系列之 Babel 是如何编译 Class 的(下)
+26. ES6 系列之 defineProperty 与 proxy
+27. ES6 系列之模块加载方案
+28. ES6 系列之我们来聊聊装饰器
+29. ES6 系列之私有变量的实现
+30. ES6 完全使用手册
+
+31. 可选链（?.）与空值合并（??）；与 ||、&& 的区别
+
+32. BigInt 的使用场景与限制；globalThis 是什么
+
+33. Promise.allSettled、Promise.any、Promise.finally 的区别与使用场景
+
+34. 结构化克隆（structuredClone）与 JSON.parse/stringify 深拷贝对比
+
+35. Array.at()、flatMap、findLast/findLastIndex；Object.hasOwn 与 hasOwnProperty
+
+36. 动态 import() 与静态 import 的区别；import.meta 的用途
+
+37. WeakRef、FinalizationRegistry 是什么（了解即可）
+
+38. Temporal API、Record & Tuple（了解 Stage 提案即可）
+
+39. 顶层 await 的使用条件与打包器支持
+
+40. ArrayBuffer、TypedArray、DataView 的区别
+
+41. 正则表达式 s、u 标志；命名捕获组
+
+42. 私有字段 #private、静态块 static {}、类字段声明
+
+# TypeScript
+
+1. 说说你对 TypeScript 的理解以及与 JavaScript 的区别；TS 的优势、局限与适用场景
+
+2. TypeScript 的数据类型有哪些；基本类型、联合类型、交叉类型、字面量类型
+
+3. any、unknown、never、void、null、undefined 的区别与使用场景
+
+4. type 和 interface 的区别；什么时候用 type，什么时候用 interface
+
+5. 枚举（enum）的理解；const enum 与普通 enum 的区别；为什么不推荐滥用枚举
+
+6. 泛型是什么；泛型约束（extends）、默认类型参数、泛型工具类型的编写
+
+7. 常用工具类型：Partial、Required、Readonly、Pick、Omit、Record、Exclude、Extract、ReturnType、Parameters、Awaited 等
+
+8. 高级类型：条件类型、infer、映射类型、索引访问类型、模板字面量类型
+
+9. 类型断言（as）、非空断言（!）、类型守卫（typeof、instanceof、in、自定义 type predicate）
+
+10. 函数类型：可选参数、默认参数、剩余参数、函数重载的声明与实现
+
+11. 类：public/private/protected、readonly、抽象类、implements、装饰器（了解 Stage 3）
+
+12. 命名空间（namespace）与 ES Module 的区别；Triple-Slash 指令
+
+13. 声明合并（interface merging）；declare 关键字；.d.ts ambient 声明
+
+14. 严格模式相关：strictNullChecks、noImplicitAny、strictFunctionTypes 等 compilerOptions
+
+15. tsconfig.json 常见配置：target、module、moduleResolution、paths、baseUrl、skipLibCheck
+
+16. 类型收窄与可辨识联合（discriminated union）
+
+17. 协变与逆变（函数参数逆变）在 TS 中的体现（了解即可）
+
+18. 如何在 Vue 项目中应用 TypeScript；vue-tsc、defineProps/defineEmits 类型
+
+19. 如何在 React 项目中应用 TypeScript；FC、PropsWithChildren、事件类型
+
+20. satisfies 运算符；const 类型断言（as const）
+
+21. 类型体操常考题：DeepPartial、DeepReadonly、GetReturnType、TupleToUnion 等思路
+
+22. anyScript 与类型安全的平衡；@ts-ignore、@ts-expect-error 的使用注意
+
+# Node.js
+
+1. Node.js 是什么；与浏览器 JavaScript 运行环境的区别
+
+2. Node 事件循环与浏览器 Event Loop 的区别；process.nextTick、setImmediate、setTimeout 优先级
+
+3. 单线程模型；为什么 Node 适合 I/O 密集型；CPU 密集型任务如何处理（worker_threads、子进程）
+
+4. CommonJS 与 ES Module 在 Node 中的使用；require 与 import 的区别；__dirname、__filename 在 ESM 中的替代
+
+5. 模块加载机制；require 查找规则；循环依赖如何处理
+
+6. Buffer 是什么；与 TypedArray 的关系；编码（utf8、base64、hex）
+
+7. Stream 流：Readable、Writable、Duplex、Transform；背压（backpressure）；pipe 与 pipeline
+
+8. fs 模块：同步与异步 API；fs.promises；大文件读写与流式处理
+
+9. path 模块常用方法；跨平台路径处理
+
+10. http/https 模块创建服务；与 Express/Koa 的关系
+
+11. Express 中间件机制；洋葱模型；错误处理中间件
+
+12. Koa 与 Express 的区别；ctx 对象；为什么 Koa 需要 async/await
+
+13. 中间件、路由、模板引擎、静态资源托管
+
+14. 进程（child_process）：spawn、exec、fork 的区别与使用场景
+
+15. cluster 模块多进程；PM2 的作用（进程守护、负载均衡、零停机重启）
+
+16. 环境变量 process.env；dotenv；配置管理最佳实践
+
+17. npm、yarn、pnpm 的区别；pnpm 为什么省磁盘、依赖如何隔离
+
+18. package.json 中 dependencies、devDependencies、peerDependencies 的区别
+
+19. npx 是什么；npm scripts 生命周期（pre/post）
+
+20. Node 错误处理：Error 类型、uncaughtException、unhandledRejection
+
+21. 调试 Node：--inspect、Chrome DevTools、VS Code 断点
+
+22. 性能分析：clinic、0x、火焰图；内存泄漏排查
+
+23. Node 安全：路径遍历、命令注入、原型污染；helmet、cors、rate-limit
+
+24. JWT 认证流程；session 与 token 在 Node 服务中的实现思路
+
+25. 文件上传：multer、分片上传、断点续传在服务端如何实现
+
+26. WebSocket 在 Node 中的实现（ws、socket.io）
+
+27. Redis 在 Node 中的常见用途：缓存、Session、分布式锁、消息队列
+
+28. 消息队列：RabbitMQ、Kafka 在前端全栈中的角色（了解即可）
+
+29. 数据库：MongoDB（Mongoose）与 MySQL（Sequelize/TypeORM）选型
+
+30. RESTful API 设计规范；GraphQL 与 REST 对比（了解）
+
+31. SSR 与 Node：Nuxt、Next 服务端渲染基本原理
+
+32. Serverless、Edge Runtime、Deno/Bun 与 Node 的对比（了解）
+
+33. ESM 的 import.meta.url；创建 __dirname 等价写法
+
+34. util.promisify、events.EventEmitter 的使用场景
+
+35. Node 版本管理：nvm、engines 字段、LTS 策略
+
+# 浏览器
+
+1. 事件流；浏览器的事件循环机制；浏览器下事件循环(Event Loop)；对浏览器事件循环的理解；Node.js的事件循环；Node和浏览器事件循环机制的区别；事件冒泡和捕获的区别；如何阻止事件冒泡；对事件委托的理解；执行顺序；process.nextTick；setImmediate 和 setTimeout;js 中倒计时的纠偏实现
+
+2. 浏览器架构；说说浏览器渲染页面的过程；浏览器解析流程；从输入 url 到展示的过程；输入 URL 回车后经过哪些过程；当在浏览器中输入 URL 并且按下回车之后发生了什么；DNS完整的查询过程；浏览器架构；你对浏览器的理解；介绍一下你对浏览器内核的理解；常见的浏览器内核比较； 常见浏览器所用内核；浏览器的渲染原理；渲染过程中遇到 JS 文件怎么处理?(浏览器解析过程)；什么是文档的预解析?(浏览器解析过程)；CSS 如何阻塞文档解析?(浏览器解析过程)；渲染页面时常见哪些不良现象?(浏览器渲染过程)；如何优化关键渲染路径?(浏览器渲染过程)； 什么是重绘和回流?(浏览器绘制过程)；如何减少回流?(浏览器绘制过程)；为什么操作 DOM 慢?(浏览器绘制过程)；主流浏览器内核私有属性 css 前缀；浏览器的渲染过程；浏览器渲染优化；chrome的v8引擎属于渲染引擎么，举例说一下渲染引擎有哪些;把 script 标签放在页面的最底部的 body 封闭之前和封闭之后有什么区别?浏览器会如何解析它们
+
+3. 垃圾回收机制；内存泄露；浏览器的垃圾回收机制；新生代（副垃圾回收器）；老生代（主垃圾回收器）；引用计数法；哪些情况会导致内存泄漏；Web Worker；讲讲js垃圾回收机制；JS内存空间的管理；如何编写高性能的 Javascript；简单介绍一下 V8 引擎的垃圾回收机制；哪些操作会造成内存泄漏；
+
+4. 浏览器是怎么对 HTML5 的离线储存资源进行管理和加载的呢；常见的浏览器端的存储技术有哪些；数据存储；浏览器缓存浏览器的存储有哪些及它们间的区别；cookie和session的区别；本地存储方式 cookie、sessionStorage、localStorage 、indexedDB 各个存储方式的特点，以及使用场景；请描述一下 cookies,sessionStorage 和 localStorage 的区别；
+
+5. 如何判断一个元素是否在可视区域中？ offsetTop、scrollTop getBoundingClientRect Intersection Observer
+
+6. HTTP状态码；谈谈 HTTP 缓存 ；HTTP 缓存相关的知识，要了解浏览器请求什么时候会返回 disk cache、304、200；TCP 三次握手四次挥手的理解；HTTP 1.1 和 HTTP 2.0 的区别；HTTP 1.0/1.1/2.0/3.0 的特性；HTTP和HTTPS协议的区别；对HTTP请求中的keep-alive有了解吗；HTTP队头堵塞，TCP队头阻塞； get 请求传参长度的误区；URL 和 URI 的区别；get 和 post 请求在缓存方面的区别
+
+7. OSI七层模型；TCP/IP五层协议；TCP和UDP的区别；UDP协议为什么不可靠；对 WebSocket 的理解；TCP和UDP的应用；GET和POST的请求的区别；POST和PUT请求的区别；
+
+8. 网络安全；Web安全举例；HTTPS；WebSocket；token可以放在cookie里吗；什么是HTTPS协议，如何加密的；TLS/SSL的工作原理；XSS（跨站脚本攻击）；CSRF（跨站请求伪造）；什么是 XSS 攻击?如何防范 XSS 攻击；什么是 CSP；什么是 CSRF 攻击?如何防范 CSRF 攻击；什么是 Samesite Cookie 属性；什么是点击劫持?如何防范点击劫持；SQL 注入攻击；
+
+9. 什么进程和线程，有什么区别；浏览器有哪些进程;进程间通信的方式
+
+10. 为什么需要浏览器缓存；协商缓存和强缓存的区别
+
+11. 常见浏览器所用内核；polyfill的作用；常见兼容性问题(移动端/PC端)；移动端屏幕适配；浏览器版本检测方式；功能检测、功能推断、navigator.userAgent的区别；webSocket 如何兼容低版本浏览器； 检测浏览器版本版本有哪些方式；什么是 Polyfill 
+
+12. 跨标签页通讯；域名发散与域名收敛；什么是同源策略；如何解决跨越问题； 如何实现浏览器内多个标签页之间的通信；什么是浏览器的同源政策；如何解决跨域问题；服务器代理转发时,该如何处理 cookie；简单谈一下 cookie ；
+
+13.  Cookie 和 SameSite 属性
+
+
+
+# HTTP
+
+1. 从输入url到看到界面的过程
+
+2. http各个版本的改进
+
+3. https的通信过程
+
+4. https为什么是安全的
+
+5. 前端性能优化方法
+
+6. 网络攻击有哪些
+
+7. 什么是HTTP? HTTP 和 HTTPS 的区别
+
+8. 为什么说HTTPS比HTTP安全? HTTPS是如何保证安全的
+
+9. 如何理解UDP 和 TCP? 区别? 应用场景
+
+10. 如何理解OSI七层模型
+
+11. 如何理解TCP/IP协议
+
+12. DNS协议 是什么？说说DNS 完整的查询过程
+
+13. 如何理解CDN？说说实现原理
+
+14. 说说 HTTP1.0/1.1/2.0 的区别
+
+15. 说说HTTP 常见的状态码有哪些，适用场景
+
+16. 说一下 GET 和 POST 的区别
+
+17. 说说 HTTP 常见的请求头有哪些? 作用
+
+18. 说说地址栏输入 URL 敲下回车后发生了什么
+
+19. 说说TCP为什么需要三次握手和四次挥手
+
+20. 说说对WebSocket的理解？应用场景？
+
+21. HTTP/3 与 QUIC 协议；与 HTTP/2 的主要区别
+
+22. 对称加密与非对称加密；数字证书与 CA；HTTPS 握手过程（TLS 1.2/1.3 了解）
+
+23. 正向代理与反向代理；Nginx 负载均衡策略（轮询、权重、ip_hash 等）
+
+24. 跨域预检请求（OPTIONS）；简单请求与复杂请求的判断条件
+
+25. Cookie 的 Secure、HttpOnly、SameSite、Domain、Path 属性
+
+26. 缓存头完整梳理：Cache-Control、Expires、ETag、Last-Modified、Vary
+
+27. 范围请求 Range、断点续传、206 Partial Content
+
+28. 内容协商：Accept、Accept-Encoding、Accept-Language、Content-Encoding（gzip、br）
+
+29. CORS 响应头 Access-Control-Allow-* 各字段含义
+
+30. 短连接与长连接；HTTP Keep-Alive；连接复用与队头阻塞
+
+31. REST、GraphQL、gRPC 在前端场景下的对比（了解）
+
+32. 接口幂等性；GET/PUT/DELETE 的幂等；POST 如何保证幂等（Token、唯一键）
+
+33. 限流、熔断、降级在前端与网关层的体现（了解）
+
+# Vue 
+
+1. 路由的钩子；vue-router的路由守卫；router和route的区别；路由传参和取参；路由钩子beforeEach三个参数；vue-router中的路由守卫有哪些；vue-router原理以及两种模式区别；vue-router用法；讲讲前端路由原理，比较一下history和hash这两种路由；前端有几种缓存方式；路由的hash和history模式的区别；router和route的区别；如何设置动态路由；路由守卫；vue-router 中的导航钩子函数；$route 和 $router 的区别；前端路由；什么是“前端路由”?什么时候适合使用“前端路由”?“前端路由”有哪些优点和缺点；Vue的路由实现:hash模式 和 history模式；Vue路由的钩子函数；vue-router原理以及两种模式区别
+
+2. Virtual Dom（虚拟DOM）；diff 算法；Vue的diff算法；Vue的数据为什么频繁变化但只会更新一次；讲讲Vue的虚拟DOM原理以及好处是什么，相对于手动操作DOM性能更好吗；讲讲Vue diff算法；vue2中虚拟DOM更新时标记差异怎么实现的，介绍一下它的原理；对虚拟DOM的理解；虚拟DOM就一定比真实DOM更快吗；虚拟DOM的解析过程；DIFF算法原理；什么是 Virtual DOM?为什么 Virtual DOM 比原生 DOM 快；如何比较两个 DOM 树的差异
+
+3. 常见的事件修饰符及其作用；常用的属性、指令有哪些；vue常用指令；v-for和v-if放在一起用好吗； v-if和v-show的区别；v-for和v-if同时使用有问题吗；vue如何实现自定义指令；v-html 的原理；v-model 是如何实现的，语法糖实际是什么；为什么v-for和v-if不能一起使用；vue 常用的修饰符；
+
+4. vue响应式原理；vue响应式原理；vue的模板渲染；vue的compile过程；vue框架原理；为什么Vue是渐进式框架；Vuex工作机制；vue3中的ref、toRef、toRefs；Object.defineProperty 介绍；使用 Object.defineProperty() 来进行数据劫持有什么缺点；什么是 Proxy
+
+5. 计算属性和监听属性；computed和watch的区别；vue组件watch中deep和immediate的作用；computed和method的区别；vue的computed和watch的实现原理；computed和watch区别是什么；vuex的使用；computed 和 watch 的差异；computed 和 watch 区别；vue computed和watch的区别
+
+6. v-model原理；数据双向绑定原理；关于vue3双向绑定的实现；v-model的作用；vue数据双向绑定原理；讲讲Vue双向绑定原理；vue 双向数据绑定原理；Vue实现数据双向绑定的原理
+
+7. Vue生命周期；vue组件的生命周期；vue父子组件挂载顺序；Vue父子组件生命周期触发顺序是怎样的；Vue 的生命周期是什么；Vue 的各个生命阶段是什么；Vue的生命周期；vue父子组件挂载顺序
+
+8. vue的keep-alive组件；vue2中keep-alive怎么实现缓存效果的，它的原理是什么；说说Vue的keep-alive使用及原理；keep-alive 组件有什么作用；对keep-alive 的了解
+
+9. 前端常用框架对比；React、Vue和JQuery的选型；vue和jquery的区别；vue和react的区别；vue和react的区别，有什么相同；Vue与Angular以及React的区别
+
+10. 讲讲Vuex的使用方法；Vuex 的原理；Vuex中action和mutation的区别；Vuex 和 localStorage 的区别；Vuex是什么?怎么使用?哪种功能场景使用它
+
+11. 组件通信；vue父子组件通信，兄弟组件通信；vue的eventbus的实现；Vue组件间通信方式有哪些；Vue 组件间的参数传递方式；Vue组件间的参数传递
+
+12. vue等待视图完成更新后进行下一次操作后，这个函数叫什么；process.nextTick和Vue.nextTick；vue异步渲染、nextTick；Vue.nextTick的实现
+
+13. 实战技巧；vue怎么检测到数组的变化；vue2中响应式变量如何变成非响应式；vue组件样式污染；Vue如何给一个对象添加新的属性
+
+14. vue中的data 为什么是个函数；vue组件data为什么是函数；vue组件data用箭头函数行不行；data为什么是一个函数而不是对象
+
+15. 什么是 MVVM?比之 MVC 有什么区别?什么又是 MVP ；mvvm和mvc区别是什么；MVVM的理解；对于MVVM的理解
+
+16. SPA的理解，有什么优缺点；SPA和多页面有什么区别；请解释SPA(单页应用)，优缺点是什么？如何使其对SEO友好
+
+17. vue3的变化（改进）；composition Api对比 option Api的优势；Vue3和Vue2的区别；Vue2和Vue3有哪些区别
+
+18. Vue中key的作用；为什么不建议用index作为key；vue 中 key 值的作用
+
+19. Vue-cli如何新增自定义指令；Vue如何自定义一个过滤器
+
+20. mixin 和 mixins 区别；vue 中 mixin 和 mixins 区别
+
+21. 数据请求方面；Token怎么存
+
+22. Vue.use方法的使用
+
+23. Vue的性能优化有哪些
+    - 编码阶段
+    - 打包优化
+    - 用户体验
+    - SEO优化
+
+24. slot
+
+25. v-for和v-if放在一起用好吗
+
+26. vue数据双向绑定原理
+
+27. Vue的diff算法
+
+28. vue nextTick
+
+29. vue的keep-alive组件
+
+30. vue父子组件通信,兄弟组件通信
+
+31. mvvm与mvc
+
+32. vuex的使用
+
+33. vue-router中的路由守卫有哪些
+
+34. vuex的使用
+
+35. v-model的作用
+
+36. vue框架原理
+
+37. vue常用指令
+
+38. Vue3和Vue2的区别
+
+39. vue父子组件挂载顺序 
+
+40. vue computed和watch的区别
+
+41. vue组件data为什么是函数
+
+42. vue组件data用箭头函数行不行
+
+43. Vuex工作机制 
+
+44. vue-router原理以及两种模式区别
+
+45. vue-router用法
+
+46. v-if和v-show的区别
+
+47. v-for和v-if放在一起用好吗
+
+48. vue组件样式污染
+
+49. Vue如何给一个对象添加新的属性
+
+50. vue响应式原理
+
+51. vue的compile过程
+
+52. vue的computed和watch的实现原理
+
+53. vue的模板渲染
+
+54. vue数据双向绑定原理
+
+55. vue怎么检测到数组的变化
+
+56. Vue的diff算法
+
+57. vue nextTick
+
+58. vue的keep-alive组件
+
+59. Vue的数据为什么频繁变化但只会更新一次
+
+60. process.nextTick和Vue.nextTick
+
+61. vue组件watch中deep和immediate的作用
+
+62. slot
+
+63. vue异步渲染、nextTick 
+
+64. vue如何实现自定义指令
+
+65. Vue.use方法的使用
+
+66. vue和react的区别
+
+67. vue父子组件通信，兄弟组件通信
+
+68. vue的eventbus的实现
+
+69. React、Vue和JQuery的选型
+
+70. vue和jquery的区别
+
+71. computed和watch的区别
+
+72. computed和method的区别
+
+73. vue组件的生命周期
+
+74. 为什么Vue是渐进式框架
+
+75. mvvm与mvc
+
+76. 说说你对vue的理解
+
+77. 说说你对双向绑定的理解
+
+78. 说说你对SPA（单页应用）的理解
+
+79. Vue中的v-show和v-if怎么理解
+
+80. Vue实例挂载的过程中发生了什么
+
+81. 说说你对Vue生命周期的理解
+
+82. 为什么Vue中的v-if和v-for不建议一起用
+
+83. SPA（单页应用）首屏加载速度慢怎么解决
+
+84. 为什么data属性是一个函数而不是一个对象
+
+85. Vue中给对象添加新属性界面不刷新
+
+86. Vue中组件和插件有什么区别
+
+87. Vue组件间通信方式都有哪些
+
+88. 说说你对nexttick的理解
+
+89. 说说你对vue的mixin的理解，有什么应用场景
+
+90. 说说你对slot的理解？slot使用场景有哪些
+
+91. Vue.observable你有了解过吗？说说看
+
+92. 你知道vue中key的原理吗？说说你对它的理解
+
+93. 怎么缓存当前的组件？缓存后怎么更新？说说你对keep-alive的理解是什么
+
+94. Vue常用的修饰符有哪些？有什么应用场景
+
+95. 你有写过自定义指令吗？自定义指令的应用场景有哪些
+
+96. Vue中的过滤器了解吗？过滤器的应用场景有哪些
+
+97. 什么是虚拟DOM？如何实现一个虚拟DOM？说说你的思路
+
+98. 了解过vue中的diff算法吗？说说看
+
+99. Vue项目中有封装过axios吗？怎么封装的
+
+100. 你了解Axios的原理吗？有看过它的源码吗
+
+101. SSR解决了什么问题？有做过SSR吗？你是怎么做的
+
+102. 说下你的Vue项目的目录结构，如果是大型项目你该怎么划分结构和划分组件呢
+
+103. Vue要做权限管理该怎么做？控制到按钮级别的权限怎么做
+
+104. 跨域是什么？Vue项目中你是如何解决跨域的呢
+
+105. Vue项目如何部署？有遇到布署服务器后刷新404问题吗
+
+106. 你是怎么处理vue项目中的错误的
+
+107. Vue3有了解过吗？能说说跟Vue2的区别吗？
+
+108. Vue3.0的设计目标是什么？做了哪些优化
+
+109. Vue3.0 性能提升主要是通过哪几方面体现的
+
+110. Vue3.0里为什么要用 Proxy API 替代 defineProperty API
+
+111. Vue3.0 所采用的 Composition Api 与 Vue2.x 使用的 Options Api 有什么不同
+
+112. 说说Vue 3.0中Treeshaking特性？举例说明一下
+
+113. 用Vue3.0 写过组件吗？如果想实现一个 Modal你会怎么设计？
+
+114. Pinia 与 Vuex 的区别；为什么 Vue3 推荐 Pinia
+
+115. Pinia 的 defineStore、state、getters、actions；与 Composition API 的配合
+
+116. Vue3 script setup 语法；defineProps、defineEmits、defineExpose、withDefaults
+
+117. ref、reactive、toRef、toRefs、shallowRef、shallowReactive 区别与使用场景
+
+118. watch、watchEffect 的区别；watch 的 flush、deep 选项
+
+119. provide/inject 跨层级通信；与 props、pinia 选型
+
+120. Teleport、Suspense 组件的作用与使用场景
+
+121. Vue3 自定义渲染器（了解）；compiler-dom 与 runtime-core 分层
+
+122. effectScope 与组合式函数中的副作用清理
+
+123. Vue3 响应式 API：effect、track、trigger 原理（了解）
+
+124. 宏 auto-import、unplugin-vue-components 等工程化实践
+
+125. Vue Router 4 与 3 的差异；createRouter、createWebHistory
+
+126. Vite + Vue3 项目常见目录结构与规范
+
+# React
+
+1. React 是什么；与 Vue、Angular 的对比；声明式 UI、单向数据流、虚拟 DOM
+
+2. JSX 是什么；为什么需要 Babel 编译；JSX 与 createElement 的关系
+
+3. 类组件与函数组件的区别；为什么推荐函数组件 + Hooks
+
+4. React 生命周期（类组件）：挂载、更新、卸载；componentDidMount、getDerivedStateFromProps 等
+
+5. Hooks 规则：为什么不能在条件/循环中调用；Hooks 调用顺序为何重要
+
+6. useState 原理与批量更新（batching）；函数式更新 setState(fn)
+
+7. useEffect 与类组件生命周期的对应关系；依赖数组；清理函数 return
+
+8. useLayoutEffect 与 useEffect 的区别；使用场景
+
+9. useRef 与 useState 的区别；保存可变值、访问 DOM、避免闭包陷阱
+
+10. useMemo、useCallback 的作用与滥用问题；何时真正需要优化
+
+11. useContext 与 Context API；Provider/Consumer；性能注意点
+
+12. useReducer 与 useState 选型；与 Redux 的关系
+
+13. 自定义 Hook 的设计与复用（useRequest、useToggle 等）
+
+14. React 18 新特性：并发渲染、自动批处理、startTransition、useDeferredValue
+
+15. StrictMode 双重调用在开发环境的原因
+
+16. 受控组件与非受控组件；表单处理；defaultValue 与 value
+
+17. 合成事件（SyntheticEvent）与原生事件；事件委托在 React 17+ 的变化
+
+18. 事件池（17 前）与 persist（了解历史即可）
+
+19. setState 同步还是异步；React 18 中 setState 批处理行为
+
+20. Fiber 架构是什么；可中断渲染、时间切片、双缓冲树
+
+21. React 调度器（Scheduler）；优先级 Lane 模型（了解）
+
+22. Diff 算法：单节点、多节点；key 的作用；为什么不建议用 index 作 key
+
+23. 列表渲染 key；reconciliation 过程
+
+24. 虚拟 DOM 一定更快吗；何时手动优化 DOM
+
+25. React.memo、PureComponent 浅比较；children 导致重渲染
+
+26. 状态提升、状态下沉、组合 vs 继承
+
+27. 组件通信：props、回调、Context、状态管理库
+
+28. Redux 三大原则；action、reducer、store；单向数据流
+
+29. Redux 中间件；redux-thunk、redux-saga 区别
+
+30. Redux Toolkit（RTK）：createSlice、configureStore、immer 集成
+
+31. MobX、Zustand、Jotai、Recoil 与 Redux 对比（了解）
+
+32. React Router：BrowserRouter vs HashRouter；路由参数、嵌套路由
+
+33. 路由守卫在 React 中如何实现（封装 ProtectedRoute）
+
+34. Code Splitting：React.lazy、Suspense、动态 import
+
+35. Error Boundary 错误边界；getDerivedStateFromError、componentDidCatch
+
+36. Portal 与 createPortal；模态框、Tooltip 挂载到 body
+
+37. forwardRef 与 useImperativeHandle
+
+38. Fragment、<> 短语法；为什么需要 key 的列表不能用 Fragment 省略 key 问题
+
+39. 高阶组件（HOC）模式；render props；与 Hooks 对比
+
+40. React 性能优化：memo、useMemo、useCallback、虚拟列表、windowing
+
+41. 长列表优化：react-window、react-virtualized
+
+42. 为什么要避免在 render 中创建新对象/函数作为 props
+
+43. useEffect 无限循环的常见原因与修复
+
+44. 闭包陷阱在 Hooks 中的体现；stale closure
+
+45. React 与 TypeScript：组件 Props 类型、事件类型、泛型组件
+
+46. React SSR：Next.js 基本原理；hydration、同构注意事项
+
+47. React 18 Streaming SSR、Suspense on Server（了解）
+
+48. CSS 方案：CSS Modules、Styled-components、Tailwind、CSS-in-JS 选型
+
+49. React 测试：React Testing Library、Jest、快照测试
+
+50. React 19 新特性了解：Actions、use、文档元数据等（按需）
+
+51. fiber 与 Concurrent Mode 对用户体验的影响
+
+52. 手写简易 useState、useEffect（面试常考）
+
+53. 说说 React 设计思想：组合、单向数据流、声明式
+
+# webpack
+
+1. 对webpack的理解；webpack的构建流程；Webpack构建流程简单说一下；模块打包原理知道吗；文件监听原理呢；文件指纹是什么，怎么用；说一下 Webpack 的热更新原理吧；vite和webpack的区别；谈谈你对 webpack 的看法
+
+2. webpack常见的优化方案；如何优化 Webpack 的构建速度；在实际工程中，配置文件上百行乃是常事，如何保证各个loader按照预想方式工作；Webpack的Tree Shaking原理；如何提高webpack的打包速度；vite比webpack快在哪里
+
+3. 那你再说一说Loader和Plugin的区别，webpack中plugin和loader分别做什么，它们之间的执行顺序是怎样的；Webpack 常使用的 Loader 和 Plugin
+
+4. 如何减少打包后的代码体积；如何对bundle体积进行监控和分析；bundle，chunk，module是什么；什么是Code Splitting
+
+5. webpack配置有哪些；使用webpack开发时，你用过哪些可以提高效率的插件；聊一聊Babel原理吧；关于babel的理解
+
+6. source map是什么；生产环境怎么用；Webpack的Source Map是什么，如何配置生成Source Map
+
+7. 有哪些常见的Loader，你用过哪些Loader，是否写过Loader，简单描述一下编写loader的思路
+
+8. 有哪些常见的Plugin，你用过哪些Plugin，是否写过Plugin，简单描述一下编写Plugin的思路
+
+9. 说一下你对Monorepo的理解；你在项目是怎么做Monorepo；为什么pnpm快
+
+10. webpack原理
+
+11. webpack的tree-shaking
+
+12. webpack优化
+
+13. webpack的plugin和loader
+
+14. 常见的webpack plugin和loader
+
+15. webpack使用
+
+16. webpack的splitChunks的使用
+
+17. webpack原理
+
+18. webpack的tree-shaking
+
+19. require引入的模块webpack能做Tree-Shaking吗？
+
+20. webpack如何动态加载
+
+21. webpack能动态加载require引入的模块吗？
+
+22. webpack优化
+
+23. webpack模块热重载
+
+24. happypack
+
+25. webpack的plugin和loader
+
+26. loader的加载顺序
+
+27. 常见的webpack plugin和loader
+
+28. 说说你对webpack的理解？解决了什么问题
+
+29. 说说webpack的构建流程
+
+30. 说说webpack中常见的Loader？解决了什么问题
+
+31. 说说webpack中常见的Plugin？解决了什么问题
+
+32. 说说Loader和Plugin的区别？编写Loader，Plugin的思路
+
+33. 说说webpack的热更新是如何做到的？原理是什么
+
+34. 说说webpack proxy工作原理？为什么能解决跨域
+
+35. 说说如何借助webpack来优化前端性能
+
+36. 如何提高webpack的构建速度
+
+37. 与webpack类似的工具还有哪些？区别？
+
+38. webpack 5 模块联邦（Module Federation）是什么；微前端场景
+
+39. sideEffects 字段与 tree-shaking 的关系；package.json 如何标记无副作用
+
+40. externals 配置；CDN 外链与 bundle 体积权衡
+
+41. DllPlugin / DllReferencePlugin（webpack 4 常见，了解历史）
+
+42. cache 持久化缓存（filesystem cache）；cache-loader、thread-loader
+
+43. 环境变量 DefinePlugin、EnvironmentPlugin；dotenv-webpack
+
+44. 打包分析：webpack-bundle-analyzer、速度分析 speed-measure-webpack-plugin
+
+45. 开发环境 vs 生产环境配置拆分；webpack-merge
+
+46. asset modules（webpack 5）替代 file/url/raw-loader
+
+47. 如何处理 node_modules 中的 ES 模块与 CJS 混用
+
+# Vite
+
+1. Vite 是什么；与 Webpack 的核心区别（开发时用 esbuild 预构建 + 原生 ESM，生产用 Rollup）
+
+2. 为什么 Vite 开发启动快；冷启动与 HMR 原理
+
+3. Vite 的依赖预构建（optimizeDeps）解决什么问题；如何配置 include/exclude
+
+4. Vite HMR API；import.meta.hot；边界模块更新
+
+5. Vite 配置文件 vite.config.ts：root、base、server、build、plugins
+
+6. Vite 插件机制；与 Rollup 插件的关系；常用插件（@vitejs/plugin-vue、react、legacy）
+
+7. 环境变量 import.meta.env；.env、.env.development、.env.production
+
+8. 路径别名 resolve.alias；与 tsconfig paths 配合
+
+9. CSS 处理：CSS Modules、PostCSS、预处理器在 Vite 中的配置
+
+10. 静态资源引用；public 目录与 assets 区别
+
+11. 代码分割与动态 import；build.rollupOptions.output.manualChunks
+
+12. 生产构建优化：rollup-plugin-visualizer、压缩、chunk 大小警告
+
+13. SSR 与 Vite：vite-plugin-ssr、官方 SSR 指南思路
+
+14. Vite 如何代理跨域 devServer.proxy
+
+15. legacy 插件与浏览器兼容；@vitejs/plugin-legacy
+
+16. Vite 与 Webpack 迁移注意点；为什么生产仍用 Rollup 打包
+
+17. Vitest 与 Vite 的关系（单元测试基于 Vite）
+
+18. 预渲染、SSG 在 Vite 生态中的方案（vite-ssg 等了解）
+
+19. Worker 与 WebAssembly 在 Vite 中的支持
+
+20. Monorepo 中使用 Vite（workspace、共享配置）
+
+# Rollup
+
+1. Rollup 是什么；与 Webpack 的定位区别（库打包 vs 应用打包）
+
+2. Rollup 的 Tree-shaking 为什么通常更彻底；ESM 静态分析
+
+3. 输入输出配置：input、output.format（es、cjs、umd、iife）
+
+4. 插件机制；常用插件 rollup-plugin-node-resolve、commonjs、typescript、terser
+
+5. external 外部依赖不打包；globals 在 UMD 中的映射
+
+6. 多入口打包与 output.dir；preserveModules
+
+7. Rollup 的 code splitting 与动态 import
+
+8. 为什么 Vue 3、Vite 生产构建选用 Rollup
+
+9. Rollup 与 Webpack 选型：库开发用 Rollup、复杂应用用 Webpack/Vite
+
+10. watch 模式与 rollup -c 开发体验
+
+11. 打包库的 package.json 字段：main、module、types、exports 条件导出
+
+12. sideEffects 与 rollup treeshake 配置
+
+13. @rollup/plugin-json、image、alias 等常用插件
+
+14. Rollup 如何生成类型声明（配合 tsc 或 rollup-plugin-dts）
+
+15. 与 esbuild、swc 在构建链中的分工（了解）
+
+# 前端性能优化
+
+1. 图片懒加载原理；前端需要注意哪些 SEO；前端性能优化 ；前端性能优化方案；图片的懒加载和预加载；
+
+2. 节流和防抖；谈一下防抖、节流的概念；如何实现防抖和节流；介绍一下 js 的节流与防抖
+
+3. SPA首屏为什么加载慢
+
+4. 为什么要做性能优化
+
+5. 常见性能优化有哪些关键指标
+
+6. 性能优化方式有哪些：HTML & CSS、JS、Vue、Webpack优化、网络优化
+
+7. 前端性能优化方法
+
+8. 白屏和首屏时间
+
+9. 浏览器渲染过程
+
+10. js动画的性能问题
+
+11. setTimeout和requestAnimationFrame的区别
+
+12. 什么会阻塞dom渲染
+
+13.  script标签什么情况不阻塞渲染
+
+14. FP、FCP、FMP
+
+15. 回流和重绘
+
+16. 用户页面打开很慢，有哪些优化方式？
+
+17. css和js加载，是同步还是异步？
+
+18. Core Web Vitals：LCP、FID/INP、CLS 含义与优化手段
+
+19. Performance API：performance.now、Navigation Timing、Resource Timing、LCP 观测
+
+20. 关键渲染路径（CRP）优化 checklist
+
+21. 资源优先级：preload、prefetch、preconnect 在性能优化中的实践
+
+22. 骨架屏、占位符、渐进式图片（LQIP、blur-up）
+
+23. 服务端渲染、静态生成、ISR 对首屏与 SEO 的影响
+
+24. HTTP/2 多路复用、服务器推送（了解）与资源合并策略的变化
+
+25. 长任务（Long Task）与 Total Blocking Time（TBT）
+
+26. 内存与性能：Detached DOM、事件监听器未移除、定时器泄漏
+
+27. Web Vitals 监控上报思路；RUM 与 Synthetic 监控区别
+
+28. 打包体积优化：动态 import、按需加载、分析重复依赖、替换重型库
+
+29. 图片格式选型 WebP/AVIF；responsive images；CDN 图片处理
+
+30. 字体优化：font-display、子集化、预加载 woff2
+
+31. 缓存策略分层：强缓存、协商缓存、Service Worker 缓存
+
+32. 移动端性能：触摸延迟、300ms、passive 事件监听器
+
+33. 离屏渲染、合成层过多问题；transform/opacity 动画优于 layout 属性
+
+# 在线笔试题
+
+1. js 实现一个函数,完成超过范围的两个大整数相加功能
+
+2. js 如何实现数组扁平化
+
+3. js 如何实现数组去重
+
+4. 如何求数组的最大值和最小值
+
+5. 如何求两个数的最大公约数
+
+6. 如何求两个数的最小公倍数
+
+7. 实现 IndexOf 方法
+
+8. 判断一个字符串是否为回文字符串
+
+9. 实现一个累加函数的功能比如 sum(1,2,3)(2).valueOf()
+
+10. 使用 reduce 方法实现 forEach、map、filter
+
+11. 设计一个简单的任务队列,要求分别在 1,3,4 秒后打印出 "1 ", "2 ", "3 "
+
+12. 如何查找一篇英文文章中出现频率最高的单词
+
+13. 如何检测浏览器所支持的最小字体大小
+
+14. 一个列表,假设有 100000 个数据,这个该怎么办
+
+15. 0.1 + 0.2 != 0.3原因是什么？
+
+16. number类型最大值是多少？如果后台发的数据超过这个值怎么办？
+
+17. 12和12.0有什么区别？
+
+18. 实现每隔一秒输出数组中的一个数字
+
+19. 为什么3.tostring()会报错？
+
+20. 代码的执行结果
+
+    ```
+    function Foo() {
+      getName = function () {
+        console.log(1)
+      }
+      console.log('this is ' + this)
+      return this
+    }
+    
+    
+    Foo.getName = function () {
+      console.log(2)
+    }
+    Foo.prototype.getName = function () {
+      console.log(3)
+    }
+    var getName = function () {
+      console.log(4)
+    }
+    function getName () {
+      console.log(5)
+    }
+    
+    
+    Foo.getName();
+    getName();
+    Foo().getName();
+    getName();
+    new Foo.getName();
+    new Foo().getName();
+    new new Foo().getName();
+    ```
+
+21. 代码的执行结果
+
+    ```
+    window.name = 'ByteDance';
+    function A () {
+      this.name = 123;
+    }
+    A.prototype.getA = function(){
+      console.log(this);
+      return this.name + 1;
+    }
+    let a = new A();
+    let funcA = a.getA;
+    funcA();
+    ```
+
+22. 说出代码的执行结果？如果只改最后一行怎么让它也能输出aaa？
+
+    ```
+    var obj = { 
+      name: 'aaa',
+      getName: function() {
+          console.log(this.name);
+      }
+    }
+    var get = obj.getName;
+    obj.getName();
+    get();
+    ```
+
+23. 代码的执行结果
+
+    ```
+    var name = 'win';
+    const obj = {
+        name: 'obj',
+        a: () => {
+            console.log(this.name);
+        }
+    };
+    const obj1 = {
+        name: 'obj1'
+    };
+    obj.a.call(obj1);
+    ```
+
+24. 说出下面代码执行结果
+
+    ```
+    const promise = new Promise((resolve,reject)=>{
+        console.log(1);
+        resolve();
+        console.log(2);
+        reject()
+    })
+    setTimeout(()=>{console.log(5)},0)
+    promise.then(()=>{console.log(3)})
+    .then(()=>{console.log(6)})
+    .catch(()=>{console.log(7)})
+    console.log(4)
+    ```
+
+25. 说出代码执行结果
+
+    ```
+    const first = () => (new Promise((resolve, reject) => {
+        console.log(3);
+        let p = new Promise((resolve, reject) => {
+            console.log(7);
+            setTimeout(() => {
+                console.log(5);
+                resolve();
+            }, 0);
+            resolve(1);
+        });
+        resolve(2);
+        p.then((arg) => {
+            console.log(arg);
+        });
+    }));
+    first().then((arg) => {
+        console.log(arg);
+    });
+    console.log(4);
+    ```
+
+26. 说出代码执行结果
+
+    ```
+    console.log(1);
+    new Promise(resolve => {
+        resolve();
+        console.log(2);
+    }).then(() => {
+        console.log(3);
+    })
+    setTimeout(() => {
+        console.log(4);
+    }, 0);
+    console.log(5);
+    ```
+
+27. 说出代码执行结果
+
+    ```
+    Promise.resolve()
+    .then(() => {
+        console.log('1');
+    })
+    .then(() => {
+        console.log('2');
+    });
+    
+    
+    setTimeout(() => {
+        Promise.resolve()
+        .then(() => {
+            console.log('3');
+        })
+        .then(() => {
+            console.log('4');
+        });
+        setInterval(() => {
+            console.log('5');
+        }, 3000);
+        console.log('6');
+    }, 0);
+    ```
+
+28. 说出代码执行结果
+
+    ```
+    setTimeout(function() {
+        console.log(1);
+    }, 0);
+    console.log(2);
+    async function s1() {
+        console.log(7)
+        await s2();
+        console.log(8);
+    }
+    asycn function s2() {
+        console.log(9);
+    }
+    s1();
+    new Promise((resolve, reject) => {
+        console.log(3);
+        resolve();
+        console.log(6);
+    }).then(() => console.log(4))
+    console.log(5);
+    ```
+
+29. 代码执行结果
+
+    ```
+    function fn() {
+      return new Promise((resolve, reject) => {
+          setTimeout(() => {
+              reject('error');
+          }, 1000);
+      });
+    }
+    const foo = async () => {
+       try {
+         await fn();
+      } catch (e) {
+          console.log('lala', e);  // some error
+      }
+    }
+    foo();
+    ```
+
+30. 循环打印数字
+
+    ```
+    for (var i = 0; i < 3; i++) {
+        document.body.addEventListener(
+            'click',
+            function() {
+                console.log(i);
+            }
+        )
+    }
+    ```
+
+    上面代码输出什么？
+
+    如果想0 1 2，怎么做？
+
+31. 代码执行结果
+
+    ```
+    var count = 10;
+    function a() {
+     return count + 10;
+    }
+    function b() {
+     var count = 20;
+     return a();
+    }
+    console.log(b());
+    ```
+
+32. 说出代码执行结果
+
+    ```
+    // 代码段1
+    console.log(a);
+    a = 1;
+    
+    
+    // 代码段2
+    console.log(b);
+    var b = 2; 
+    
+    
+    // 代码段3
+    var c = 1;
+    let c;
+    console.log(c);
+    ```
+
+33. 说出代码执行结果
+
+    ```
+    // 1
+    var a = 10;
+    function b() {
+        a = 100;
+    }
+    b();
+    console.log(a);
+     
+    // 2
+    var a = 10;
+    function b() {
+        a = 100;
+        function a() {};
+    }
+    b();
+    console.log(a);
+     
+    // 3
+    var a = 10;
+    function b() {
+        var a = 100;
+    }
+    b();
+    console.log(a);
+    
+    
+    // 4
+    var resource = ['a.png', 'b.png', 'c.png', 'd.png', 'e.png', 'f.png'];
+    for(var i = 0; i < resource.length; i++) {
+        var img = new Image();
+        img.src = resource[i];
+        img.onload = funtion(){
+            console.log(i);
+        }
+    }
+    ```
+
+30. 代码执行结果
+
+    ```
+    var a = {
+        name:1,
+        age:2,
+    }
+    var b = a;
+    b.name = 3；
+    
+    
+    console.log(a);
+    console.log(b);
+    ```
+
+31. 代码执行结果
+
+    ```
+    const o1 = {};
+    const o2 = {};
+    console.log(o1 == o2);
+    console.log(o1 === o2);
+    ```
+
+32. 代码执行结果
+
+    ```
+    [] + []
+    [] + ![]
+    [] == ![]
+    [] == []
+    ```
+
+33. 代码执行结果
+
+    ```
+    null == 0
+    null > 0
+    null < 0
+    null >= 0
+    null <= 0
+    ```
+
+34. 代码执行结果
+
+    ```
+    let num = 10;
+    function ch(num) {
+        num = 12;
+    }
+    ch(num);
+    console.log(num);
+    
+    
+    
+    let obj = {};
+    function ch1(obj) {
+        obj.a = 'a';
+    }
+    ch1(obj);
+    console.log(obj.a);
+    ```
+
+34. 
+35. 
+
+
+# 其他
+
+1. 类组件的生命周期，函数组件使用哪些hook来代替的哪些生命周期
+
+2. 对于Fiber架构理解
+
+3. 前端权限设计思路
+
+4. 微前端
+
+5. 前端低代码的认识
+
+6. 常用的git命令
+
+7. git rebase和git merge的区别
+
+8. 设计模式的最基本原则
+
+9. 使用过哪些设计模式 前端开发中用的比较多的就是策略模式、单例模式、发布订阅、外观模式
+
+10. 那堆和栈的概念有什么区别呢
+
+11. 单例模式模式是什么；策略模式是什么；代理模式是什么；中介者模式是什么；适配器模式是什么；观察者模式和发布订阅模式有什么不同；发布订阅模式的实现；手写一个观察者模式
+
+12. react fiber
+
+13. react diff算法
+
+14. 函数式组件和类组件的区别
+
+15. React性能优化
+
+16. React列表的key
+
+17. useState和userRef
+
+18. 常用的hook
+
+19. 说说你对版本管理的理解？常用的版本管理工具有哪些
+
+20. 说说你对Git的理解
+
+21. 说说Git中 fork, clone,branch这三个概念，有什么区别
+
+22. 说说Git常用的命令有哪些
+
+23. 说说Git 中 HEAD、工作树和索引之间的区别
+
+24. 说说对git pull 和 git fetch 的理解？有什么区别
+
+25. 说说你对git stash 的理解？应用场景
+
+26. 说说你对git rebase 和 git merge的理解？区别
+
+27. 说说 git 发生冲突的场景？如何解决
+
+28. 说说你对git reset 和 git revert 的理解？区别？
+
+29. 说说你对操作系统的理解？核心概念有哪些
+
+30. 说说什么是进程？什么是线程？区别
+
+31. 说说 linux系统下 文件操作常用的命令有哪些
+
+32. 说说 linux 系统下 文本编辑常用的命令有哪些
+
+33. 说说你对 linux 用户管理的理解？相关的命令有哪些
+
+34. 说说你对输入输出重定向和管道的理解？应用场景
+
+35. 说说你对 shell 的理解？常见的命令
+
+36. 说说对设计模式的理解？常见的设计模式有哪些
+
+37. 说说你对单例模式的理解？如何实现
+
+38. 说说你对工厂模式的理解？应用场景
+
+39. 说说你对策略模式的理解？应用场景
+
+40. 说说你对代理模式的理解？应用场景
+
+41. 说说你对发布订阅、观察者模式的理解？区别
+
+42. Pinia 与 Vuex 的区别；Vue3 状态管理选型
+
+43. 微前端：qiankun、single-spa、Module Federation 方案对比
+
+44. 前端工程化：ESLint、Prettier、Husky、lint-staged、commitlint
+
+45. CI/CD 基本概念；GitHub Actions / Jenkins 在前端项目中的典型流程
+
+46. 单元测试、集成测试、E2E 测试区别；Vitest、Jest、Cypress、Playwright
+
+47. 小程序开发：双线程模型、setData 性能、与 H5 的区别（了解）
+
+48. 跨端方案：Taro、uni-app、React Native、Flutter 对比（了解）
+
+49. WebAssembly 在前端的应用场景（了解）
+
+50. PWA：Service Worker、manifest、离线缓存、推送通知
+
+51. 前端监控：错误上报、性能指标、用户行为埋点、Source Map 反解
+
+52. 简历项目描述与 STAR 法则；如何讲解技术难点
+
+53. 手写题常考清单汇总：防抖节流、深拷贝、柯里化、并发控制、LRU、发布订阅
+
+54. 数据结构常考：栈、队列、链表、树、二叉树遍历、图 BFS/DFS（笔试）
+
+55. 算法常考：排序、二分、双指针、滑动窗口、动态规划入门题
+
+56. 设计题：短链服务、秒杀前端、无限滚动、大文件上传、权限系统前端方案
+
+57. TypeScript 在大型项目中的落地：类型覆盖率、any 治理、strict 渐进开启
+
+58. 技术选型文档应包含哪些维度：团队熟悉度、生态、性能、维护成本
+
+59. 前端安全清单：XSS、CSRF、点击劫持、依赖漏洞 npm audit、CSP
+
+60. 浏览器存储选型决策树：Cookie / sessionStorage / localStorage / IndexedDB
+
+61. SEO 与 SPA：预渲染、SSR、动态渲染（了解）
+
+62. 低代码平台前端架构关注点： schema 驱动、物料、渲染引擎（了解）
+
+63. 敏捷与前端协作：需求评审、估时、联调、提测 checklist
+
+64. 职业规划与项目亮点提炼（软技能面试）
