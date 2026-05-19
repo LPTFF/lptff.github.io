@@ -1,6 +1,6 @@
 <template>
-  <div>
-    <!-- <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
+    <div>
+        <!-- <div v-for="(knowledge, parentIndex) in knowledgeList" :key="parentIndex">
       <el-collapse v-model="activeKnowName" accordion>
         <el-collapse-item :title="knowledge.knowledgeType" :name="String(parentIndex)">
           <el-row>
@@ -105,11 +105,11 @@
         </el-collapse-item>
       </el-collapse>
     </div> -->
-    <div class="all-content">
-      <AllQuestion></AllQuestion>
-    </div>
+        <div class="all-content">
+            <AllQuestion></AllQuestion>
+        </div>
 
-    <!-- <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
+        <!-- <el-dialog v-model="dialogGuideVisible" :title="dialogTitle" center id="dialogEl">
       <div class="dialog-content">
         <component :is="dynamicComponent" v-if="dynamicComponent" />
       </div>
@@ -120,162 +120,162 @@
         </div>
       </template>
 </el-dialog> -->
-  </div>
+    </div>
 </template>
 
 <script lang="ts">
 import { defineComponent } from "vue";
-import AllQuestion from "./前端八股文汇总背诵版.md";
+import AllQuestion from "./前端八股文汇总背诵版-项目串联高级版.md";
 export default defineComponent({
-  setup() { },
-  components: {
-    AllQuestion,
-  },
+    setup() { },
+    components: {
+        AllQuestion,
+    },
 });
 </script>
 <style scoped>
 .all-content {
-  margin-bottom: 40px;
+    margin-bottom: 40px;
 }
 
 .dialog-footer {
-  display: flex;
-  justify-content: space-evenly;
+    display: flex;
+    justify-content: space-evenly;
 }
 
 .dialog-content {
-  padding: 0px 10px 0px 0px;
-  height: 400px;
-  overflow: auto;
+    padding: 0px 10px 0px 0px;
+    height: 400px;
+    overflow: auto;
 }
 
 .dialog-content :deep(pre) {
-  background: rgb(205, 214, 231);
-  padding: 10px 0px 10px 5px !important;
+    background: rgb(205, 214, 231);
+    padding: 10px 0px 10px 5px !important;
 }
 
 .website-type {
-  margin-bottom: 10px;
+    margin-bottom: 10px;
 }
 
 .welfare-div-website {
-  display: flex;
-  margin: auto 0;
+    display: flex;
+    margin: auto 0;
 }
 
 .welfare-name-link {
-  margin-top: 4px;
-  color: #797979;
-  font-weight: 600;
-  font-size: 14px;
+    margin-top: 4px;
+    color: #797979;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .welfare-img-link {
-  height: 30px;
-  width: 30px;
-  border-bottom-left-radius: 50%;
-  border-bottom-right-radius: 50%;
-  border-top-left-radius: 50%;
-  border-top-right-radius: 50%;
-  margin-right: 10px;
+    height: 30px;
+    width: 30px;
+    border-bottom-left-radius: 50%;
+    border-bottom-right-radius: 50%;
+    border-top-left-radius: 50%;
+    border-top-right-radius: 50%;
+    margin-right: 10px;
 }
 
 .welfare-link-title {
-  display: block;
-  color: #797979;
-  font-size: 18px;
-  font-weight: 600;
-  text-decoration: none;
-  margin-bottom: 40px;
-  max-width: 700px;
+    display: block;
+    color: #797979;
+    font-size: 18px;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 40px;
+    max-width: 700px;
 }
 
 .know-title {
-  margin-bottom: 0px;
-  max-width: 800px;
+    margin-bottom: 0px;
+    max-width: 800px;
 }
 
 .welfare-link-title :deep(p) {
-  margin: 0px;
+    margin: 0px;
 }
 
 .day-week-welfare {
-  margin: 0px 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  /* 水平居中对齐 */
-  align-items: center;
-  /* 垂直居中对齐 */
+    margin: 0px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    /* 水平居中对齐 */
+    align-items: center;
+    /* 垂直居中对齐 */
 }
 
 .welfare-day {
-  color: #737373;
-  font-weight: 600;
-  font-size: 46px;
+    color: #737373;
+    font-weight: 600;
+    font-size: 46px;
 }
 
 .welfare-week {
-  color: #797979;
-  font-weight: 600;
-  font-size: 16px;
-  margin-left: 5px;
+    color: #797979;
+    font-weight: 600;
+    font-size: 16px;
+    margin-left: 5px;
 }
 
 .welfare-icon-hour {
-  margin-right: 8px;
-  margin-top: 2px;
+    margin-right: 8px;
+    margin-top: 2px;
 }
 
 .welfare-hour {
-  margin: 0px 40px 0px 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #797979;
-  font-weight: 600;
-  font-size: 14px;
+    margin: 0px 40px 0px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #797979;
+    font-weight: 600;
+    font-size: 14px;
 }
 
 .welfare-div-link {
-  max-width: 700px;
+    max-width: 700px;
 }
 
 .welfare-div-link :deep(p) {
-  margin: 0px;
+    margin: 0px;
 }
 
 .el-welfare-divider {
-  height: 100%;
+    height: 100%;
 }
 
 .welfare-date {
-  margin-right: 20px;
-  display: flex;
+    margin-right: 20px;
+    display: flex;
 }
 
 .welfare-div-date {
-  display: flex;
-  justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
 }
 
 .know-welfare {
-  margin-right: 0px;
-  display: flex;
-  justify-content: space-between;
+    margin-right: 0px;
+    display: flex;
+    justify-content: space-between;
 }
 
 .welfare-title {
-  height: 30px;
-  width: 55px;
-  margin-bottom: 10px;
-  color: #5b5d5c;
-  font-weight: 600;
-  font-size: 21px;
+    height: 30px;
+    width: 55px;
+    margin-bottom: 10px;
+    color: #5b5d5c;
+    font-weight: 600;
+    font-size: 21px;
 }
 
 .welfare-card {
-  margin: 0px 0px 10px 0px;
-  background-color: rgb(253, 226, 226);
+    margin: 0px 0px 10px 0px;
+    background-color: rgb(253, 226, 226);
 }
 </style>

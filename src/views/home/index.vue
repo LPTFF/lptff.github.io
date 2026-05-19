@@ -10,12 +10,8 @@
             </div>
           </div>
           <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
-            <el-menu-item
-              v-for="(item, index) in menuList"
-              :key="index"
-              :index="String(index)"
-              :ref="el => menuItemRefs[index] = el"
-            >
+            <el-menu-item v-for="(item, index) in menuList" :key="index" :index="String(index)"
+              :ref="el => menuItemRefs[index] = el">
               {{ item }}
             </el-menu-item>
           </el-menu>
@@ -58,9 +54,10 @@ const componentMap: Record<string, ReturnType<typeof defineAsyncComponent>> = {
   '5': defineAsyncComponent(() => import('./news/index.vue')),
   '6': defineAsyncComponent(() => import('./bossZhipin/index.vue')),
   '7': defineAsyncComponent(() => import('./leetCode/index.vue')),
-  '8': defineAsyncComponent(() => import('./findJob/index.vue')),
+  '8': defineAsyncComponent(() => import('./findJobPlus/index.vue')),
   '9': defineAsyncComponent(() => import('./advancedSearch/index.vue')),
   '10': defineAsyncComponent(() => import('./githubTrending/index.vue')),
+  '11': defineAsyncComponent(() => import('./findJob/index.vue')),
 };
 
 // 各组件对应的 location prop 名称
@@ -82,7 +79,7 @@ export default {
     const selectIndex = isPCRes.value ? ref("4") : ref("0");
     const menuList = [
       '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
-      '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending'
+      '技术论坛', 'Boss直聘', 'LeetCode', '面试题PLus', '高级搜索', 'GitHubTrending', '面试题',
     ];
 
     const menuItemRefs: any = ref([]);
