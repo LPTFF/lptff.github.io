@@ -1765,6 +1765,221 @@
 35. 
 
 
+# 2024前端场景题（飞书·场景题攻略）
+
+> 来源：[2024年前端最新场景题面试攻略](https://my.feishu.cn/docx/Jz6hdxnsooRvnwxYFyacCIPonKe)（共 41 题，含热度标注）
+
+1. 前端如何实现截图？（Canvas、html2canvas、dom-to-image、toDataURL、跨域与高清屏）
+
+2. 当 QPS 达到峰值时该如何处理？（限流、降级、熔断、缓存、CDN、扩容、队列削峰、前端侧防抖合并请求）
+
+3. js 超过 Number 最大值的数怎么处理？（BigInt、字符串运算、decimal.js/big.js；不依赖库时的实现思路）
+
+4. 使用同一个链接，如何实现 PC 打开是 Web 应用、手机打开是 H5 应用？（UA 检测、响应式、独立域名/路径、服务端重定向）
+
+5. 如何保证用户的使用体验？（骨架屏、预加载、错误边界、弱网降级、交互反馈、性能指标 LCP/CLS）
+
+6. 如何解决页面请求接口大规模并发问题？（请求合并、队列、节流、取消重复请求、AbortController、接口批量化）
+
+7. 设计一套全站请求耗时统计工具
+   - 有哪些方式可以统计前端请求耗时（Performance API、Resource Timing、XHR/fetch 封装、RUM 上报）
+   - 全站请求耗时统计工具的设计要点（采样、聚合、慢请求告警、与 TraceId 关联）
+
+8. 大文件上传了解多少
+   - 大文件分片上传（chunk、并发数、MD5 校验）
+   - 大文件上传断点续传（已传分片记录、秒传、合并接口）
+
+9. H5 如何解决移动端适配问题？（viewport、rem/vw、flex、安全区、1px、高清图）
+
+10. 站点一键换肤的实现方式有哪些？
+    - 换肤实现方式汇总（CSS 变量、class 切换、主题 token、less/sass 变量）
+    - 以 less 为例的详细操作流程
+
+11. 如何实现网页加载进度条？
+    - 监听静态资源加载情况
+    - 进度条实现（NProgress、自研、与路由/懒加载结合）
+
+12. 常见图片懒加载方式有哪些？【热度: 1,001】（loading=lazy、Intersection Observer、占位图、LQIP）
+
+13. cookie 构成部分有哪些【热度: 598】（name、value、Domain、Path、Expires/Max-Age、Secure、HttpOnly、SameSite）
+
+14. 扫码登录实现方式【热度: 734】（轮询、WebSocket、ticket、OAuth、微信/飞书扫码流程）
+
+15. DNS 协议了解多少【热度: 712】
+    - DNS 基本概念（递归/迭代、A/AAAA/CNAME、TTL）
+    - 如何加快 DNS 解析（预解析 dns-prefetch、HTTPDNS、减少域名数）
+
+16. 函数式编程了解多少？【热度: 1,789】
+    - 函数式编程核心概念（纯函数、不可变、高阶函数、组合）
+    - 函数式编程优势（可测试、可推导、副作用隔离）
+
+17. 前端水印了解多少？【热度: 641】
+    - 明水印与暗水印区别
+    - 添加明水印手段（Canvas、SVG、background、伪元素）
+    - CSS 水印如何防止用户删样式去除水印
+    - 暗水印如何隐藏信息（频域、透明度、重复平铺）
+
+18. 什么是领域模型【热度: 1,092】
+    - 领域模型概念（实体、值对象、聚合、边界上下文）
+    - 前端系统如何划分领域模型（按业务域拆模块/状态/路由）
+
+19. 一直在 window 上面挂东西是否有什么风险？（命名冲突、内存泄漏、安全、可测试性、微前端隔离）
+
+20. 深度 SEO 优化的方式有哪些，从技术层面来说？（SSR/SSG、语义化、JSON-LD、sitemap、canonical、Core Web Vitals、预渲染）
+
+21. 小程序为什么会有两个线程？（逻辑层与渲染层分离、setData 通信、性能与安全）
+
+22. web 应用中如何对静态资源加载失败的场景做降级处理【热度: 1,093】（重试、备用 CDN、本地缓存、兜底页、SRI 失败处理）
+
+23. html 中前缀为 data- 开头的元素属性是什么？（自定义数据、dataset API、与 JS/CSS 配合）
+
+24. 移动端如何实现上拉加载，下拉刷新？【热度: 718】（touch 事件、scroll、Intersection Observer、第三方组件）
+
+25. 如何判断 dom 元素是否在可视区域【热度: 846】（getBoundingClientRect、Intersection Observer、offsetParent）
+
+26. 前端如何用 canvas 来做电影院选票功能？（坐标映射、座位状态、缩放拖拽、命中检测）
+
+27. 如何通过设置失效时间清除本地存储的数据？【热度: 1,085】（封装 setItem 带 expire、定时清理、版本号迁移）
+
+28. 如果不使用脚手架，如何用 webpack 构建自己的 react 应用【热度: 729】
+    - 利用 webpack 初始化基本应用构建
+    - 使用 less 同时支持 css module 与非 css module
+    - 如何引入 antd 并支持按需加载（babel-plugin-import、tree-shaking）
+
+29. 用 nodejs 实现一个命令行工具，统计输入目录下指定代码的行数【热度: 1,732】（fs、glob、readline、过滤注释）
+
+30. package.json 里面 sideEffects 属性的作用是啥【热度: 229】
+    - sideEffects 作用
+    - sideEffects 如何辅助 webpack tree-shaking
+
+31. script 标签上有哪些属性，分别作用是啥？【热度: 744】（async、defer、type=module、crossorigin、integrity、nomodule）
+
+32. 为什么 SPA 应用都会提供一个 hash 路由，好处是什么？【热度: 681】（无需服务端配置、兼容静态托管、与 history 对比）
+
+33. [React] 如何进行路由变化监听【热度: 698】（useLocation、history.listen、Router 事件）
+
+34. 单点登录是什么，具体流程是什么？（CAS、OAuth2、Token、跨域 Cookie、同域代理）
+
+35. web 网页如何禁止别人移除水印【热度: 540】（MutationObserver、多层水印、服务端渲染、暗水印）
+
+36. 用户访问页面白屏了，原因是啥，如何排查？【热度: 609】（JS 报错、资源 404、接口挂、路由配置、CDN、兼容性、Performance/Console）
+
+37. [代码实现] JS 中如何实现大对象深度对比【热度: 906】（递归、循环引用、类型判断、WeakMap、lodash isEqual 思路）
+
+38. 如何理解数据驱动视图，有哪些核心要素？【热度: 943】（响应式、虚拟 DOM、模板编译、状态→UI 映射）
+
+39. vue-cli 都做了哪些事儿，有哪些功能？【热度: 386】（脚手架、插件、webpack 配置、环境变量、lint、单元测试）
+
+40. JS 执行 100 万个任务，如何保证浏览器不卡顿？【热度: 806】（分片、requestIdleCallback、Web Worker、时间切片）
+
+41. JS 放在 head 里和放在 body 里有什么区别？【热度: 420】（阻塞解析、defer/async、执行顺序、FOUC）
+
+
+# 2024前端工程化场景题（飞书·工程化攻略）
+
+> 来源：[2024年最新前端工程化面试攻略](https://my.feishu.cn/docx/ILcfdXVozovOuzx15CBcFfLOnff)（共 28 题）
+
+1. [Webpack] 配置代码太多，达到数千行，该如何优化配置代码【热度: 186】
+   - 配置文件拆分（webpack.base.js / webpack.dev.js / webpack.prod.js）
+   - 使用环境变量 + webpack-merge / env-cmd 按环境合并
+   - 模块化配置（loaders.js、plugins.js、entries.js 封装后引入）
+   - 使用 webpack-merge 抽离通用配置；插件与 loader 集中管理
+
+2. [Webpack] 你用过哪些可以提高效率的插件？【热度: 179】
+   - webpack-dashboard、webpack-merge、speed-measure-webpack-plugin（SMP）
+   - size-plugin、HotModuleReplacementPlugin、webpack.ProgressPlugin
+   - webpack-bundle-analyzer、friendly-errors-webpack-plugin
+
+3. 在做 eslint 和 commitlint 时可用 --no-verify 跳过，如何强制卡点？【热度: 233】
+   - CI/CD 流水线中强制 eslint + commitlint，失败禁止合并/部署
+   - 分支保护、禁止 force push、Code Review 规范
+   - 服务端 hook 或 merge 前检查（GitHub Actions / GitLab CI）
+
+4. 如何做 commitlint？【热度: 425】
+   - @commitlint/config-conventional、husky commit-msg 钩子
+   - 约定式提交（feat/fix/docs 等）与 changelog 生成
+
+5. 写 npm 包时如何自动化流程？
+   - 版本发布（semantic-release / changesets）、CI 测试、构建、publish
+   - prepublishOnly、files 字段、入口 main/module/types/exports
+
+6. [Webpack] 使用 TypeScript 写的库如何在 webpack 中使用？
+   - ts-loader / babel-loader、declaration、paths、externals
+   - 消费方类型声明 .d.ts
+
+7. 前端代码覆盖率测试常见工具有哪些？
+   - Istanbul/nyc、c8、Jest/Vitest coverage、codecov 上报
+   - 单元测试与 E2E 覆盖率区别
+
+8. [Webpack] 如何抽取复用多个项目的代码？
+   - DllPlugin、Module Federation、npm 私有包、Monorepo 共享包
+   - externals + 统一版本管理
+
+9. [Webpack] 公共依赖如何处理？
+   - splitChunks.cacheGroups、vendor chunk、externals
+   - Module Federation shared、pnpm workspace 提升
+
+10. [Webpack] output 配置详解
+    - filename、chunkFilename、path、publicPath、library、environment
+
+11. [Webpack] 多入口打包与共享模块
+    - 多 entry、splitChunks、runtimeChunk、重复依赖提取
+
+12. [Webpack] 如何用 TS 写 webpack 配置？
+    - webpack.config.ts、ts-node、@types/webpack、类型推导配置项
+
+13. [Webpack] 内部执行原理【热度】
+    - 初始化参数 → 编译 compiler → 确定入口 → 递归模块 → Loader 转译 → 生成 chunk → 输出文件
+    - Tapable 事件流、插件在生命周期钩子中介入
+
+14. [Webpack] 为什么不支持 CMD 模块？
+    - 静态分析依赖、仅支持 ESM/CJS 等可分析格式；AMD/CMD 动态 require
+
+15. [Webpack] 支持哪些模块化加载？
+    - ESM、CommonJS、AMD（了解）、动态 import、JSON/资源模块
+
+16. 前端视角——如何保证系统稳定性？
+    - 监控告警、灰度发布、错误边界、降级兜底、限流、依赖锁定、回滚
+
+17. Webpack 主要配置项有哪些？
+    - entry、output、module、resolve、plugins、mode、devtool、optimization、devServer
+
+18. [Webpack] optimization 配置
+    - splitChunks 基础与 cacheGroups
+    - runtimeChunk、minimize、usedExports（tree-shaking）
+
+19. [Webpack] optimization 还有哪些可用配置？
+    - moduleIds、chunkIds、sideEffects、innerGraph、realContentHash
+
+20. [Webpack] mode 是干什么用的？
+    - development / production / none 对压缩、tree-shaking、devtool 的默认影响
+
+21. V8 中的 JIT 是什么？【热度】
+    - 解释执行 + 热点编译优化、Ignition + TurboFan（了解即可）
+
+22. 单元测试：TDD、BDD、DDD 区别
+    - 测试驱动开发、行为驱动、领域驱动；在前端项目中的实践边界
+
+23. husky 的作用及重要配置项
+    - Git hooks 管理、pre-commit / commit-msg / pre-push
+    - 与 lint-staged、commitlint 配合
+
+24. Husky 与 lint-staged 的区别
+    - husky 注册钩子；lint-staged 仅对暂存区文件跑 lint/format，提速提交
+
+25. [Webpack] 打包时 hash 是如何生成的？
+    - hash / chunkhash / contenthash 区别与缓存策略、文件指纹
+
+26. 如何从 0 到 1 搭建前端基础设施？【热度】
+    - 脚手架、规范（ESLint/Prettier/Commitlint）、CI/CD、组件库、监控、文档站、发布流程
+
+27. [React] 为什么 React 组件需要编译？Babel 7+/React 17+ 变化
+    - JSX → React.createElement / jsx runtime；新 JSX Transform 无需显式 import React
+
+28. babel 核心库有哪些？【热度: 35】
+    - @babel/core、parser、traverse、generator、preset-env、preset-react、plugin 体系
+
+
 # 其他
 
 1. 类组件的生命周期，函数组件使用哪些hook来代替的哪些生命周期
