@@ -1,15 +1,11 @@
 import { createApp } from "vue";
 import App from "./App.vue";
-const myApp = createApp(App);
-import * as ElIcons from "@element-plus/icons-vue";
-for (const name in ElIcons) {
-  myApp.component(name, ElIcons[name]);
-} //全局注册element-icon图标
 import router from "./router";
 import "element-plus/theme-chalk/index.css";
-// 全局前置守卫
+
+const myApp = createApp(App);
+
 router.beforeEach((to, from, next) => {
-  // 通过调用next()来继续导航
   if (
     to.path === "/home" ||
     to.path === "/job" ||
@@ -27,8 +23,9 @@ router.beforeEach((to, from, next) => {
   ) {
     next();
   } else {
-    next("/"); // 否则重定向到"/home"
+    next("/");
   }
 });
-myApp.use(router); //全局注册路由
+
+myApp.use(router);
 myApp.mount("#app");

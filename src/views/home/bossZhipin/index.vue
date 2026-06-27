@@ -147,7 +147,7 @@ export default {
         dialogGuideVisible.value = true;
         dialogTitle.value = item.brandName;
         dialogContent.value = item.jobDesc ? item.jobDesc : "";
-        websiteUrl = item.job_detail;
+        websiteUrl.value = item.job_detail;
       }
     };
     let dialogGuideVisible = ref(false);
@@ -179,8 +179,8 @@ export default {
     };
     const handleDialogConfirm = () => {
       dialogGuideVisible.value = false;
-      if (websiteUrl) {
-        gotoOutPage(websiteUrl);
+      if (websiteUrl.value) {
+        gotoOutPage(websiteUrl.value);
       }
     };
     return {

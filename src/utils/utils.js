@@ -53,35 +53,23 @@ function gotoOutPage(url) {
         window.location.href = url;
     }
 }
-import eruda from 'eruda';
-function initEruda() {
+async function initEruda() {
     try {
-        eruda.init();
+        if (window.eruda) {
+            window.eruda.init();
+            return;
+        }
+        await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = 'https://cdn.jsdelivr.net/npm/eruda';
+            script.onload = resolve;
+            script.onerror = reject;
+            document.body.appendChild(script);
+        });
+        window.eruda && window.eruda.init();
     } catch (error) {
         console.log('initEruda', error);
     }
 }
 
-import { Configuration, OpenAIApi } from "openai";
-async function generateText(prompt) {
-    console.log('js', prompt);
-    const messages = [
-        { role: "system", content: "You are a helpful assistant" },
-        { role: "user", content: `${prompt}` }
-    ];
-    let openaiKey = "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";
-    const configuration = new Configuration({
-        apiKey: openaiKey,
-    });
-    configuration.baseOptions.headers = {
-        Authorization: "Bearer " + `${openaiKey}`,
-    };
-    const openai = new OpenAIApi(configuration);
-    const response = await openai.createChatCompletion({
-        messages,
-        model: "gpt-3.5-turbo",
-    });
-    console.log(response.data.choices[0].message.content);
-    return response.data.choices[0].message.content
-}
-export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage, initEruda, generateText } 
+export { getRequestGet, getRequestPost, getRequestHead, isPC, gotoOutPage, initEruda } 
