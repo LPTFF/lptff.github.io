@@ -1,0 +1,452 @@
+[
+    {
+        "problemsName": " 2901.复杂链表的复制",
+        "hardRate": "MEDIUM",
+        "passRate": "71.54%",
+        "problemsUrl": "https://leetcode.cn/problems/fu-za-lian-biao-de-fu-zhi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/fu-za-lian-biao-de-fu-zhi-lcof/solution",
+        "problemsDesc": "<p>请实现 <code>copyRandomList</code> 函数，复制一个复杂链表。在复杂链表中，每个节点除了有一个 <code>next</code> 指针指向下一个节点，还有一个 <code>random</code> 指针指向链表中的任意节点或者 <code>null</code>。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e1.png\"></p>\n\n<pre><strong>输入：</strong>head = [[7,null],[13,0],[11,4],[10,2],[1,0]]\n<strong>输出：</strong>[[7,null],[13,0],[11,4],[10,2],[1,0]]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e2.png\"></p>\n\n<pre><strong>输入：</strong>head = [[1,1],[2,1]]\n<strong>输出：</strong>[[1,1],[2,1]]\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/01/09/e3.png\"></strong></p>\n\n<pre><strong>输入：</strong>head = [[3,null],[3,0],[3,null]]\n<strong>输出：</strong>[[3,null],[3,0],[3,null]]\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>head = []\n<strong>输出：</strong>[]\n<strong>解释：</strong>给定的链表为空（空指针），因此返回 null。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>-10000 &lt;= Node.val &lt;= 10000</code></li>\n\t<li><code>Node.random</code>&nbsp;为空（null）或指向链表中的节点。</li>\n\t<li>节点数目不超过 1000 。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong>本题与主站 138 题相同：<a href=\"https://leetcode-cn.com/problems/copy-list-with-random-pointer/\">https://leetcode-cn.com/problems/copy-list-with-random-pointer/</a></p>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2902.二叉搜索树与双向链表",
+        "hardRate": "MEDIUM",
+        "passRate": "64.86%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-yu-shuang-xiang-lian-biao-lcof/solution",
+        "problemsDesc": "<p>输入一棵二叉搜索树，将该二叉搜索树转换成一个排序的循环双向链表。要求不能创建任何新的节点，只能调整树中节点指针的指向。</p>\n\n<p>&nbsp;</p>\n\n<p>为了让您更好地理解问题，以下面的二叉搜索树为例：</p>\n\n<p>&nbsp;</p>\n\n<p><img src=\"https://assets.leetcode.com/uploads/2018/10/12/bstdlloriginalbst.png\"></p>\n\n<p>&nbsp;</p>\n\n<p>我们希望将这个二叉搜索树转化为双向循环链表。链表中的每个节点都有一个前驱和后继指针。对于双向循环链表，第一个节点的前驱是最后一个节点，最后一个节点的后继是第一个节点。</p>\n\n<p>下图展示了上面的二叉搜索树转化成的链表。&ldquo;head&rdquo; 表示指向链表中有最小元素的节点。</p>\n\n<p>&nbsp;</p>\n\n<p><img src=\"https://assets.leetcode.com/uploads/2018/10/12/bstdllreturndll.png\"></p>\n\n<p>&nbsp;</p>\n\n<p>特别地，我们希望可以就地完成转换操作。当转化完成以后，树中节点的左指针需要指向前驱，树中节点的右指针需要指向后继。还需要返回链表中的第一个节点的指针。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong>本题与主站 426 题相同：<a href=\"https://leetcode-cn.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/\">https://leetcode-cn.com/problems/convert-binary-search-tree-to-sorted-doubly-linked-list/</a></p>\n\n<p><strong>注意：</strong>此题对比原题有改动。</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2903.序列化二叉树",
+        "hardRate": "HARD",
+        "passRate": "57.42%",
+        "problemsUrl": "https://leetcode.cn/problems/xu-lie-hua-er-cha-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/xu-lie-hua-er-cha-shu-lcof/solution",
+        "problemsDesc": "<p>请实现两个函数，分别用来序列化和反序列化二叉树。</p>\n\n<p>你需要设计一个算法来实现二叉树的序列化与反序列化。这里不限定你的序列 / 反序列化算法执行逻辑，你只需要保证一个二叉树可以被序列化为一个字符串并且将这个字符串反序列化为原始的树结构。</p>\n\n<p><strong>提示：</strong>输入输出格式与 LeetCode 目前使用的方式一致，详情请参阅&nbsp;<a href=\"https://support.leetcode-cn.com/hc/kb/article/1567641/\">LeetCode 序列化二叉树的格式</a>。你并非必须采取这种方式，你也可以采用其他的方法解决这个问题。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例：</strong></p>\n<img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/09/15/serdeser.jpg\" style=\"width: 442px; height: 324px;\" />\n<pre>\n<strong>输入：</strong>root = [1,2,3,null,null,4,5]\n<strong>输出：</strong>[1,2,3,null,null,4,5]\n</pre>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 297 题相同：<a href=\"https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/\">https://leetcode-cn.com/problems/serialize-and-deserialize-binary-tree/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2904.字符串的排列",
+        "hardRate": "MEDIUM",
+        "passRate": "57.54%",
+        "problemsUrl": "https://leetcode.cn/problems/zi-fu-chuan-de-pai-lie-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/zi-fu-chuan-de-pai-lie-lcof/solution",
+        "problemsDesc": "<p>输入一个字符串，打印出该字符串中字符的所有排列。</p>\n\n<p>&nbsp;</p>\n\n<p>你可以以任意顺序返回这个字符串数组，但里面不能有重复元素。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例:</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;abc&quot;\n<strong>输出：[</strong>&quot;abc&quot;,&quot;acb&quot;,&quot;bac&quot;,&quot;bca&quot;,&quot;cab&quot;,&quot;cba&quot;<strong>]</strong>\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>1 &lt;= s 的长度 &lt;= 8</code></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2905.数组中出现次数超过一半的数字",
+        "hardRate": "EASY",
+        "passRate": "70.04%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-zu-zhong-chu-xian-ci-shu-chao-guo-yi-ban-de-shu-zi-lcof/solution",
+        "problemsDesc": "<p>数组中有一个数字出现的次数超过数组长度的一半，请找出这个数字。</p>\n\n<p>&nbsp;</p>\n\n<p>你可以假设数组是非空的，并且给定的数组总是存在多数元素。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre><strong>输入:</strong> [1, 2, 3, 2, 2, 2, 5, 4, 2]\n<strong>输出:</strong> 2</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>1 &lt;= 数组长度 &lt;= 50000</code></p>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 169 题相同：<a href=\"https://leetcode-cn.com/problems/majority-element/\">https://leetcode-cn.com/problems/majority-element/</a></p>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2906.最小的k个数",
+        "hardRate": "EASY",
+        "passRate": "57.69%",
+        "problemsUrl": "https://leetcode.cn/problems/zui-xiao-de-kge-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/zui-xiao-de-kge-shu-lcof/solution",
+        "problemsDesc": "<p>输入整数数组 <code>arr</code> ，找出其中最小的 <code>k</code> 个数。例如，输入4、5、1、6、2、7、3、8这8个数字，则最小的4个数字是1、2、3、4。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [3,2,1], k = 2\n<strong>输出：</strong>[1,2] 或者 [2,1]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [0,1,2,1], k = 1\n<strong>输出：</strong>[0]</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= k &lt;= arr.length &lt;= 10000</code></li>\n\t<li><code>0 &lt;= arr[i]&nbsp;&lt;= 10000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2907.数据流中的中位数",
+        "hardRate": "HARD",
+        "passRate": "58.28%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-ju-liu-zhong-de-zhong-wei-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-ju-liu-zhong-de-zhong-wei-shu-lcof/solution",
+        "problemsDesc": "<p>如何得到一个数据流中的中位数？如果从数据流中读出奇数个数值，那么中位数就是所有数值排序之后位于中间的数值。如果从数据流中读出偶数个数值，那么中位数就是所有数值排序之后中间两个数的平均值。</p>\n\n<p>例如，</p>\n\n<p>[2,3,4]&nbsp;的中位数是 3</p>\n\n<p>[2,3] 的中位数是 (2 + 3) / 2 = 2.5</p>\n\n<p>设计一个支持以下两种操作的数据结构：</p>\n\n<ul>\n\t<li>void addNum(int num) - 从数据流中添加一个整数到数据结构中。</li>\n\t<li>double findMedian() - 返回目前所有元素的中位数。</li>\n</ul>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：\n</strong>[&quot;MedianFinder&quot;,&quot;addNum&quot;,&quot;addNum&quot;,&quot;findMedian&quot;,&quot;addNum&quot;,&quot;findMedian&quot;]\n[[],[1],[2],[],[3],[]]\n<strong>输出：</strong>[null,null,null,1.50000,null,2.00000]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：\n</strong>[&quot;MedianFinder&quot;,&quot;addNum&quot;,&quot;findMedian&quot;,&quot;addNum&quot;,&quot;findMedian&quot;]\n[[],[2],[],[3],[]]\n<strong>输出：</strong>[null,null,2.00000,null,2.50000]</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li>最多会对&nbsp;<code>addNum、findMedian</code> 进行&nbsp;<code>50000</code>&nbsp;次调用。</li>\n</ul>\n\n<p>注意：本题与主站 295 题相同：<a href=\"https://leetcode-cn.com/problems/find-median-from-data-stream/\">https://leetcode-cn.com/problems/find-median-from-data-stream/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2908.连续子数组的最大和",
+        "hardRate": "EASY",
+        "passRate": "60.35%",
+        "problemsUrl": "https://leetcode.cn/problems/lian-xu-zi-shu-zu-de-zui-da-he-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/lian-xu-zi-shu-zu-de-zui-da-he-lcof/solution",
+        "problemsDesc": "<p>输入一个整型数组，数组中的一个或连续多个整数组成一个子数组。求所有子数组的和的最大值。</p>\n\n<p>要求时间复杂度为O(n)。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong>输入:</strong> nums = [-2,1,-3,4,-1,2,1,-5,4]\n<strong>输出:</strong> 6\n<strong>解释:</strong>&nbsp;连续子数组&nbsp;[4,-1,2,1] 的和最大，为&nbsp;6。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;=&nbsp;arr.length &lt;= 10^5</code></li>\n\t<li><code>-100 &lt;= arr[i] &lt;= 100</code></li>\n</ul>\n\n<p>注意：本题与主站 53 题相同：<a href=\"https://leetcode-cn.com/problems/maximum-subarray/\">https://leetcode-cn.com/problems/maximum-subarray/</a></p>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2909.1～n 整数中 1 出现的次数",
+        "hardRate": "HARD",
+        "passRate": "50.51%",
+        "problemsUrl": "https://leetcode.cn/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/1nzheng-shu-zhong-1chu-xian-de-ci-shu-lcof/solution",
+        "problemsDesc": "<p>输入一个整数 <code>n</code> ，求1～n这n个整数的十进制表示中1出现的次数。</p>\n\n<p>例如，输入12，1～12这些整数中包含1 的数字有1、10、11和12，1一共出现了5次。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 12\n<strong>输出：</strong>5\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 13\n<strong>输出：</strong>6</pre>\n\n<p> </p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 <= n < 2^31</code></li>\n</ul>\n\n<p>注意：本题与主站 233 题相同：<a href=\"https://leetcode-cn.com/problems/number-of-digit-one/\">https://leetcode-cn.com/problems/number-of-digit-one/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2910.数字序列中某一位的数字",
+        "hardRate": "MEDIUM",
+        "passRate": "43.08%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-zi-xu-lie-zhong-mou-yi-wei-de-shu-zi-lcof/solution",
+        "problemsDesc": "<p>数字以0123456789101112131415&hellip;的格式序列化到一个字符序列中。在这个序列中，第5位（从下标0开始计数）是5，第13位是1，第19位是4，等等。</p>\n\n<p>请写一个函数，求任意第n位对应的数字。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>n = 3\n<strong>输出：</strong>3\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>n = 11\n<strong>输出：</strong>0</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= n &lt;&nbsp;2^31</code></li>\n</ul>\n\n<p>注意：本题与主站 400 题相同：<a href=\"https://leetcode-cn.com/problems/nth-digit/\">https://leetcode-cn.com/problems/nth-digit/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2911.把数组排成最小的数",
+        "hardRate": "MEDIUM",
+        "passRate": "54.98%",
+        "problemsUrl": "https://leetcode.cn/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/ba-shu-zu-pai-cheng-zui-xiao-de-shu-lcof/solution",
+        "problemsDesc": "<p>输入一个非负整数数组，把数组里所有数字拼接起来排成一个数，打印能拼接出的所有数字中最小的一个。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> <code>[10,2]</code>\n<strong>输出:</strong> &quot;<code>102&quot;</code></pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre><strong>输入:</strong> <code>[3,30,34,5,9]</code>\n<strong>输出:</strong> &quot;<code>3033459&quot;</code></pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示:</strong></p>\n\n<ul>\n\t<li><code>0 &lt; nums.length &lt;= 100</code></li>\n</ul>\n\n<p><strong>说明: </strong></p>\n\n<ul>\n\t<li>输出结果可能非常大，所以你需要返回一个字符串而不是整数</li>\n\t<li>拼接起来的数字可能会有前导 0，最后结果不需要去掉前导 0</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2912.把数字翻译成字符串",
+        "hardRate": "MEDIUM",
+        "passRate": "51.26%",
+        "problemsUrl": "https://leetcode.cn/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/ba-shu-zi-fan-yi-cheng-zi-fu-chuan-lcof/solution",
+        "problemsDesc": "<p>给定一个数字，我们按照如下规则把它翻译为字符串：0 翻译成 &ldquo;a&rdquo; ，1 翻译成 &ldquo;b&rdquo;，&hellip;&hellip;，11 翻译成 &ldquo;l&rdquo;，&hellip;&hellip;，25 翻译成 &ldquo;z&rdquo;。一个数字可能有多个翻译。请编程实现一个函数，用来计算一个数字有多少种不同的翻译方法。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> 12258\n<strong>输出:</strong> <code>5\n</code><strong>解释:</strong> 12258有5种不同的翻译，分别是&quot;bccfi&quot;, &quot;bwfi&quot;, &quot;bczi&quot;, &quot;mcfi&quot;和&quot;mzi&quot;</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= num &lt; 2<sup>31</sup></code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2913.礼物的最大价值",
+        "hardRate": "MEDIUM",
+        "passRate": "69.35%",
+        "problemsUrl": "https://leetcode.cn/problems/li-wu-de-zui-da-jie-zhi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/li-wu-de-zui-da-jie-zhi-lcof/solution",
+        "problemsDesc": "<p>在一个 m*n 的棋盘的每一格都放有一个礼物，每个礼物都有一定的价值（价值大于 0）。你可以从棋盘的左上角开始拿格子里的礼物，并每次向右或者向下移动一格、直到到达棋盘的右下角。给定一个棋盘及其上面的礼物的价值，请计算你最多能拿到多少价值的礼物？</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> \n<code>[\n&nbsp; [1,3,1],\n&nbsp; [1,5,1],\n&nbsp; [4,2,1]\n]</code>\n<strong>输出:</strong> <code>12\n</code><strong>解释:</strong> 路径 1&rarr;3&rarr;5&rarr;2&rarr;1 可以拿到最多价值的礼物</pre>\n\n<p>&nbsp;</p>\n\n<p>提示：</p>\n\n<ul>\n\t<li><code>0 &lt; grid.length &lt;= 200</code></li>\n\t<li><code>0 &lt; grid[0].length &lt;= 200</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2914.最长不含重复字符的子字符串",
+        "hardRate": "MEDIUM",
+        "passRate": "46.10%",
+        "problemsUrl": "https://leetcode.cn/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/zui-chang-bu-han-zhong-fu-zi-fu-de-zi-zi-fu-chuan-lcof/solution",
+        "problemsDesc": "<p>请从字符串中找出一个最长的不包含重复字符的子字符串，计算该最长子字符串的长度。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre><strong>输入: </strong>&quot;abcabcbb&quot;\n<strong>输出: </strong>3 \n<strong>解释:</strong> 因为无重复字符的最长子串是 <code>&quot;abc&quot;，所以其</code>长度为 3。\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入: </strong>&quot;bbbbb&quot;\n<strong>输出: </strong>1\n<strong>解释: </strong>因为无重复字符的最长子串是 <code>&quot;b&quot;</code>，所以其长度为 1。\n</pre>\n\n<p><strong>示例 3:</strong></p>\n\n<pre><strong>输入: </strong>&quot;pwwkew&quot;\n<strong>输出: </strong>3\n<strong>解释: </strong>因为无重复字符的最长子串是&nbsp;<code>&quot;wke&quot;</code>，所以其长度为 3。\n&nbsp;    请注意，你的答案必须是 <strong>子串 </strong>的长度，<code>&quot;pwke&quot;</code>&nbsp;是一个<em>子序列，</em>不是子串。\n</pre>\n\n<p>&nbsp;</p>\n\n<p>提示：</p>\n\n<ul>\n\t<li><code>s.length &lt;= 40000</code></li>\n</ul>\n\n<p>注意：本题与主站 3 题相同：<a href=\"https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/\">https://leetcode-cn.com/problems/longest-substring-without-repeating-characters/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2915.丑数",
+        "hardRate": "MEDIUM",
+        "passRate": "64.65%",
+        "problemsUrl": "https://leetcode.cn/problems/chou-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/chou-shu-lcof/solution",
+        "problemsDesc": "<p>我们把只包含质因子 2、3 和 5 的数称作丑数（Ugly Number）。求按从小到大的顺序的第 n 个丑数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例:</strong></p>\n\n<pre><strong>输入:</strong> n = 10\n<strong>输出:</strong> 12\n<strong>解释: </strong><code>1, 2, 3, 4, 5, 6, 8, 9, 10, 12</code> 是前 10 个丑数。</pre>\n\n<p><strong>说明:&nbsp;</strong>&nbsp;</p>\n\n<ol>\n\t<li><code>1</code>&nbsp;是丑数。</li>\n\t<li><code>n</code>&nbsp;<strong>不超过</strong>1690。</li>\n</ol>\n\n<p>注意：本题与主站 264 题相同：<a href=\"https://leetcode-cn.com/problems/ugly-number-ii/\">https://leetcode-cn.com/problems/ugly-number-ii/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2916.第一个只出现一次的字符",
+        "hardRate": "EASY",
+        "passRate": "61.92%",
+        "problemsUrl": "https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/di-yi-ge-zhi-chu-xian-yi-ci-de-zi-fu-lcof/solution",
+        "problemsDesc": "<p>在字符串 s 中找出第一个只出现一次的字符。如果没有，返回一个单空格。 s 只包含小写字母。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n输入：s = \"abaccdeff\"\n输出：'b'\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n输入：s = \"\" \n输出：' '\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>0 &lt;= s 的长度 &lt;= 50000</code></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2917.数组中的逆序对",
+        "hardRate": "HARD",
+        "passRate": "49.54%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-zu-zhong-de-ni-xu-dui-lcof/solution",
+        "problemsDesc": "<p>在数组中的两个数字，如果前面一个数字大于后面的数字，则这两个数字组成一个逆序对。输入一个数组，求出这个数组中的逆序对的总数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入</strong>: [7,5,6,4]\n<strong>输出</strong>: 5</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>0 &lt;= 数组长度 &lt;= 50000</code></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2918.两个链表的第一个公共节点",
+        "hardRate": "EASY",
+        "passRate": "65.63%",
+        "problemsUrl": "https://leetcode.cn/problems/liang-ge-lian-biao-de-di-yi-ge-gong-gong-jie-dian-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/liang-ge-lian-biao-de-di-yi-ge-gong-gong-jie-dian-lcof/solution",
+        "problemsDesc": "<p>输入两个链表，找出它们的第一个公共节点。</p>\n\n<p>如下面的两个链表<strong>：</strong></p>\n\n<p><a href=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png\" style=\"height: 130px; width: 400px;\"></a></p>\n\n<p>在节点 c1 开始相交。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_1.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_1.png\" style=\"height: 130px; width: 400px;\"></a></p>\n\n<pre><strong>输入：</strong>intersectVal = 8, listA = [4,1,8,4,5], listB = [5,0,1,8,4,5], skipA = 2, skipB = 3\n<strong>输出：</strong>Reference of the node with value = 8\n<strong>输入解释：</strong>相交节点的值为 8 （注意，如果两个列表相交则不能为 0）。从各自的表头开始算起，链表 A 为 [4,1,8,4,5]，链表 B 为 [5,0,1,8,4,5]。在 A 中，相交节点前有 2 个节点；在 B 中，相交节点前有 3 个节点。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;2：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_2.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_2.png\" style=\"height: 136px; width: 350px;\"></a></p>\n\n<pre><strong>输入：</strong>intersectVal&nbsp;= 2, listA = [0,9,1,2,4], listB = [3,2,4], skipA = 3, skipB = 1\n<strong>输出：</strong>Reference of the node with value = 2\n<strong>输入解释：</strong>相交节点的值为 2 （注意，如果两个列表相交则不能为 0）。从各自的表头开始算起，链表 A 为 [0,9,1,2,4]，链表 B 为 [3,2,4]。在 A 中，相交节点前有 3 个节点；在 B 中，相交节点前有 1 个节点。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;3：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_3.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_3.png\" style=\"height: 126px; width: 200px;\"></a></p>\n\n<pre><strong>输入：</strong>intersectVal = 0, listA = [2,6,4], listB = [1,5], skipA = 3, skipB = 2\n<strong>输出：</strong>null\n<strong>输入解释：</strong>从各自的表头开始算起，链表 A 为 [2,6,4]，链表 B 为 [1,5]。由于这两个链表不相交，所以 intersectVal 必须为 0，而 skipA 和 skipB 可以是任意值。\n<strong>解释：</strong>这两个链表不相交，因此返回 null。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong></p>\n\n<ul>\n\t<li>如果两个链表没有交点，返回 <code>null</code>.</li>\n\t<li>在返回结果后，两个链表仍须保持原有的结构。</li>\n\t<li>可假定整个链表结构中没有循环。</li>\n\t<li>程序尽量满足 O(<em>n</em>) 时间复杂度，且仅用 O(<em>1</em>) 内存。</li>\n\t<li>本题与主站 160 题相同：<a href=\"https://leetcode-cn.com/problems/intersection-of-two-linked-lists/\">https://leetcode-cn.com/problems/intersection-of-two-linked-lists/</a></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2919.在排序数组中查找数字 I",
+        "hardRate": "EASY",
+        "passRate": "52.76%",
+        "problemsUrl": "https://leetcode.cn/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/zai-pai-xu-shu-zu-zhong-cha-zhao-shu-zi-lcof/solution",
+        "problemsDesc": "<p>统计一个数字在排序数组中出现的次数。</p>\n\n<p> </p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<strong>输入:</strong> nums = [<code>5,7,7,8,8,10]</code>, target = 8\n<strong>输出:</strong> 2</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n<strong>输入:</strong> nums = [<code>5,7,7,8,8,10]</code>, target = 6\n<strong>输出:</strong> 0</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 <= nums.length <= 10<sup>5</sup></code></li>\n\t<li><code>-10<sup>9</sup> <= nums[i] <= 10<sup>9</sup></code></li>\n\t<li><code>nums</code> 是一个非递减数组</li>\n\t<li><code>-10<sup>9</sup> <= target <= 10<sup>9</sup></code></li>\n</ul>\n\n<p> </p>\n\n<p><strong>注意：</strong>本题与主站 34 题相同（仅返回值不同）：<a href=\"https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/\">https://leetcode-cn.com/problems/find-first-and-last-position-of-element-in-sorted-array/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2920.0～n-1中缺失的数字",
+        "hardRate": "EASY",
+        "passRate": "44.84%",
+        "problemsUrl": "https://leetcode.cn/problems/que-shi-de-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/que-shi-de-shu-zi-lcof/solution",
+        "problemsDesc": "<p>一个长度为n-1的递增排序数组中的所有数字都是唯一的，并且每个数字都在范围0～n-1之内。在范围0～n-1内的n个数字中有且只有一个数字不在该数组中，请找出这个数字。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> [0,1,3]\n<strong>输出:</strong> 2\n</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre><strong>输入:</strong> [0,1,2,3,4,5,6,7,9]\n<strong>输出:</strong> 8</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>1 &lt;= 数组长度 &lt;= 10000</code></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2921.二叉搜索树的第k大节点",
+        "hardRate": "EASY",
+        "passRate": "76.46%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-de-di-kda-jie-dian-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-de-di-kda-jie-dian-lcof/solution",
+        "problemsDesc": "<p>给定一棵二叉搜索树，请找出其中第 <code>k</code> 大的节点的值。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<strong>输入:</strong> root = [3,1,4,null,2], k = 1\n   3\n  / \\\n 1   4\n  \\\n&nbsp;  2\n<strong>输出:</strong> 4</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n<strong>输入:</strong> root = [5,3,6,2,4,null,null,1], k = 3\n       5\n      / \\\n     3   6\n    / \\\n   2   4\n  /\n 1\n<strong>输出:</strong> 4</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li>1 ≤ k ≤ 二叉搜索树元素个数</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2922.二叉树的深度",
+        "hardRate": "EASY",
+        "passRate": "79.47%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-shu-de-shen-du-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-shu-de-shen-du-lcof/solution",
+        "problemsDesc": "<p>输入一棵二叉树的根节点，求该树的深度。从根节点到叶节点依次经过的节点（含根、叶节点）形成树的一条路径，最长路径的长度为树的深度。</p>\n\n<p>例如：</p>\n\n<p>给定二叉树 <code>[3,9,20,null,null,15,7]</code>，</p>\n\n<pre>    3\n   / \\\n  9  20\n    /  \\\n   15   7</pre>\n\n<p>返回它的最大深度&nbsp;3 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n\t<li><code>节点总数 &lt;= 10000</code></li>\n</ol>\n\n<p>注意：本题与主站 104&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/\">https://leetcode-cn.com/problems/maximum-depth-of-binary-tree/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2923.平衡二叉树",
+        "hardRate": "EASY",
+        "passRate": "59.66%",
+        "problemsUrl": "https://leetcode.cn/problems/ping-heng-er-cha-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/ping-heng-er-cha-shu-lcof/solution",
+        "problemsDesc": "<p>输入一棵二叉树的根节点，判断该树是不是平衡二叉树。如果某二叉树中任意节点的左右子树的深度相差不超过1，那么它就是一棵平衡二叉树。</p>\n\n<p> </p>\n\n<p><strong>示例 1:</strong></p>\n\n<p>给定二叉树 <code>[3,9,20,null,null,15,7]</code></p>\n\n<pre>\n    3\n   / \\\n  9  20\n    /  \\\n   15   7</pre>\n\n<p>返回 <code>true</code> 。<br />\n<br />\n<strong>示例 2:</strong></p>\n\n<p>给定二叉树 <code>[1,2,2,3,3,null,null,4,4]</code></p>\n\n<pre>\n       1\n      / \\\n     2   2\n    / \\\n   3   3\n  / \\\n 4   4\n</pre>\n\n<p>返回 <code>false</code> 。</p>\n\n<p> </p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>0 <= 树的结点个数 <= 10000</code></li>\n</ul>\n\n<p>注意：本题与主站 110 题相同：<a href=\"https://leetcode-cn.com/problems/balanced-binary-tree/\">https://leetcode-cn.com/problems/balanced-binary-tree/</a></p>\n\n<p> </p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2924.数组中数字出现的次数",
+        "hardRate": "MEDIUM",
+        "passRate": "68.82%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-lcof/solution",
+        "problemsDesc": "<p>一个整型数组 <code>nums</code> 里除两个数字之外，其他数字都出现了两次。请写程序找出这两个只出现一次的数字。要求时间复杂度是O(n)，空间复杂度是O(1)。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>nums = [4,1,4,6]\n<strong>输出：</strong>[1,6] 或 [6,1]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums = [1,2,10,4,1,4,3,3]\n<strong>输出：</strong>[2,10] 或 [10,2]</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= nums.length &lt;= 10000</code></li>\n</ul>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2925.数组中数字出现的次数 II",
+        "hardRate": "MEDIUM",
+        "passRate": "80.64%",
+        "problemsUrl": "https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-ii-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/shu-zu-zhong-shu-zi-chu-xian-de-ci-shu-ii-lcof/solution",
+        "problemsDesc": "<p>在一个数组 <code>nums</code> 中除一个数字只出现一次之外，其他数字都出现了三次。请找出那个只出现一次的数字。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>nums = [3,4,3,3]\n<strong>输出：</strong>4\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums = [9,1,7,9,7,9,7]\n<strong>输出：</strong>1</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 10000</code></li>\n\t<li><code>1 &lt;= nums[i] &lt; 2^31</code></li>\n</ul>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2926.和为s的两个数字",
+        "hardRate": "EASY",
+        "passRate": "67.94%",
+        "problemsUrl": "https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/he-wei-sde-liang-ge-shu-zi-lcof/solution",
+        "problemsDesc": "<p>输入一个递增排序的数组和一个数字s，在数组中查找两个数，使得它们的和正好是s。如果有多对数字的和等于s，则输出任意一对即可。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>nums = [2,7,11,15], target = 9\n<strong>输出：</strong>[2,7] 或者 [7,2]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums = [10,26,30,31,47,60], target = 40\n<strong>输出：</strong>[10,30] 或者 [30,10]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= nums[i]&nbsp;&lt;= 10^6</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2927.和为s的连续正数序列",
+        "hardRate": "EASY",
+        "passRate": "71.28%",
+        "problemsUrl": "https://leetcode.cn/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/he-wei-sde-lian-xu-zheng-shu-xu-lie-lcof/solution",
+        "problemsDesc": "<p>输入一个正整数 <code>target</code> ，输出所有和为 <code>target</code> 的连续正整数序列（至少含有两个数）。</p>\n\n<p>序列内的数字由小到大排列，不同序列按照首个数字从小到大排列。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>target = 9\n<strong>输出：</strong>[[2,3,4],[4,5]]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>target = 15\n<strong>输出：</strong>[[1,2,3,4,5],[4,5,6],[7,8]]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= target &lt;= 10^5</code></li>\n</ul>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2928.翻转单词顺序",
+        "hardRate": "EASY",
+        "passRate": "44.75%",
+        "problemsUrl": "https://leetcode.cn/problems/fan-zhuan-dan-ci-shun-xu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/fan-zhuan-dan-ci-shun-xu-lcof/solution",
+        "problemsDesc": "<p>输入一个英文句子，翻转句子中单词的顺序，但单词内字符的顺序不变。为简单起见，标点符号和普通字母一样处理。例如输入字符串&quot;I am a student. &quot;，则输出&quot;student. a am I&quot;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入:</strong> &quot;<code>the sky is blue</code>&quot;\n<strong>输出:&nbsp;</strong>&quot;<code>blue is sky the</code>&quot;\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入:</strong> &quot; &nbsp;hello world! &nbsp;&quot;\n<strong>输出:&nbsp;</strong>&quot;world! hello&quot;\n<strong>解释: </strong>输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入:</strong> &quot;a good &nbsp; example&quot;\n<strong>输出:&nbsp;</strong>&quot;example good a&quot;\n<strong>解释: </strong>如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>说明：</strong></p>\n\n<ul>\n\t<li>无空格字符构成一个单词。</li>\n\t<li>输入字符串可以在前面或者后面包含多余的空格，但是反转后的字符不能包括。</li>\n\t<li>如果两个单词间有多余的空格，将反转后单词间的空格减少到只含一个。</li>\n</ul>\n\n<p><strong>注意：</strong>本题与主站 151 题相同：<a href=\"https://leetcode-cn.com/problems/reverse-words-in-a-string/\">https://leetcode-cn.com/problems/reverse-words-in-a-string/</a></p>\n\n<p><strong>注意：</strong>此题对比原题有改动</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2929.左旋转字符串",
+        "hardRate": "EASY",
+        "passRate": "85.71%",
+        "problemsUrl": "https://leetcode.cn/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/zuo-xuan-zhuan-zi-fu-chuan-lcof/solution",
+        "problemsDesc": "<p>字符串的左旋转操作是把字符串前面的若干个字符转移到字符串的尾部。请定义一个函数实现字符串左旋转操作的功能。比如，输入字符串&quot;abcdefg&quot;和数字2，该函数将返回左旋转两位得到的结果&quot;cdefgab&quot;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入:</strong> s = &quot;abcdefg&quot;, k = 2\n<strong>输出:&nbsp;</strong>&quot;cdefgab&quot;\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入:</strong> s = &quot;lrloseumgh&quot;, k = 6\n<strong>输出:&nbsp;</strong>&quot;umghlrlose&quot;\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= k &lt; s.length &lt;= 10000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2930.滑动窗口的最大值",
+        "hardRate": "HARD",
+        "passRate": "44.98%",
+        "problemsUrl": "https://leetcode.cn/problems/hua-dong-chuang-kou-de-zui-da-zhi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/hua-dong-chuang-kou-de-zui-da-zhi-lcof/solution",
+        "problemsDesc": "<p>给定一个数组 <code>nums</code> 和滑动窗口的大小 <code>k</code>，请找出所有滑动窗口里的最大值。</p>\n\n<p><strong>示例:</strong></p>\n\n<pre>\n<strong>输入:</strong> <em>nums</em> = <code>[1,3,-1,-3,5,3,6,7]</code>, 和 <em>k</em> = 3\n<strong>输出: </strong><code>[3,3,5,5,6,7] \n<strong>解释: \n</strong></code>\n  滑动窗口的位置                最大值\n---------------               -----\n[1  3  -1] -3  5  3  6  7       3\n 1 [3  -1  -3] 5  3  6  7       3\n 1  3 [-1  -3  5] 3  6  7       5\n 1  3  -1 [-3  5  3] 6  7       5\n 1  3  -1  -3 [5  3  6] 7       6\n 1  3  -1  -3  5 [3  6  7]      7</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<p>你可以假设 <em>k </em>总是有效的，在输入数组&nbsp;<strong>不为空&nbsp;</strong>的情况下，<code>1 ≤ k ≤&nbsp;nums.length</code>。</p>\n\n<p>注意：本题与主站 239 题相同：<a href=\"https://leetcode-cn.com/problems/sliding-window-maximum/\">https://leetcode-cn.com/problems/sliding-window-maximum/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2931.队列的最大值",
+        "hardRate": "MEDIUM",
+        "passRate": "47.94%",
+        "problemsUrl": "https://leetcode.cn/problems/dui-lie-de-zui-da-zhi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/dui-lie-de-zui-da-zhi-lcof/solution",
+        "problemsDesc": "<p>请定义一个队列并实现函数 <code>max_value</code> 得到队列里的最大值，要求函数<code>max_value</code>、<code>push_back</code> 和 <code>pop_front</code> 的<strong>均摊</strong>时间复杂度都是O(1)。</p>\n\n<p>若队列为空，<code>pop_front</code> 和 <code>max_value</code>&nbsp;需要返回 -1</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入:</strong> \n[&quot;MaxQueue&quot;,&quot;push_back&quot;,&quot;push_back&quot;,&quot;max_value&quot;,&quot;pop_front&quot;,&quot;max_value&quot;]\n[[],[1],[2],[],[],[]]\n<strong>输出:&nbsp;</strong>[null,null,null,2,1,2]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入:</strong> \n[&quot;MaxQueue&quot;,&quot;pop_front&quot;,&quot;max_value&quot;]\n[[],[],[]]\n<strong>输出:&nbsp;</strong>[null,-1,-1]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= push_back,pop_front,max_value的总操作数&nbsp;&lt;= 10000</code></li>\n\t<li><code>1 &lt;= value &lt;= 10^5</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2932.n个骰子的点数",
+        "hardRate": "MEDIUM",
+        "passRate": "57.39%",
+        "problemsUrl": "https://leetcode.cn/problems/nge-tou-zi-de-dian-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/nge-tou-zi-de-dian-shu-lcof/solution",
+        "problemsDesc": "<p>把n个骰子扔在地上，所有骰子朝上一面的点数之和为s。输入n，打印出s的所有可能的值出现的概率。</p>\n\n<p>&nbsp;</p>\n\n<p>你需要用一个浮点数数组返回答案，其中第 i 个元素代表这 n 个骰子所能掷出的点数集合中第 i 小的那个的概率。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> 1\n<strong>输出:</strong> [0.16667,0.16667,0.16667,0.16667,0.16667,0.16667]\n</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre><strong>输入:</strong> 2\n<strong>输出:</strong> [0.02778,0.05556,0.08333,0.11111,0.13889,0.16667,0.13889,0.11111,0.08333,0.05556,0.02778]</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>1 &lt;= n &lt;= 11</code></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2933.扑克牌中的顺子",
+        "hardRate": "EASY",
+        "passRate": "45.33%",
+        "problemsUrl": "https://leetcode.cn/problems/bu-ke-pai-zhong-de-shun-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/bu-ke-pai-zhong-de-shun-zi-lcof/solution",
+        "problemsDesc": "<p>从<strong>若干副扑克牌</strong>中随机抽 <code>5</code> 张牌，判断是不是一个顺子，即这5张牌是不是连续的。2～10为数字本身，A为1，J为11，Q为12，K为13，而大、小王为 0 ，可以看成任意数字。A 不能视为 14。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre>\n<strong>输入:</strong> [1,2,3,4,5]\n<strong>输出:</strong> True</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入:</strong> [0,0,1,2,5]\n<strong>输出:</strong> True</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p>数组长度为 5&nbsp;</p>\n\n<p>数组的数取值为 [0, 13] .</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2934.圆圈中最后剩下的数字",
+        "hardRate": "EASY",
+        "passRate": "65.47%",
+        "problemsUrl": "https://leetcode.cn/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/yuan-quan-zhong-zui-hou-sheng-xia-de-shu-zi-lcof/solution",
+        "problemsDesc": "<p>0,1,···,n-1这n个数字排成一个圆圈，从数字0开始，每次从这个圆圈里删除第m个数字（删除后从下一个数字开始计数）。求出这个圆圈里剩下的最后一个数字。</p>\n\n<p>例如，0、1、2、3、4这5个数字组成一个圆圈，从数字0开始每次删除第3个数字，则删除的前4个数字依次是2、0、4、1，因此最后剩下的数字是3。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入:</strong> n = 5, m = 3\n<strong>输出: </strong>3\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入:</strong> n = 10, m = 17\n<strong>输出: </strong>2\n</pre>\n\n<p> </p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 <= n <= 10^5</code></li>\n\t<li><code>1 <= m <= 10^6</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2935.股票的最大利润",
+        "hardRate": "MEDIUM",
+        "passRate": "62.92%",
+        "problemsUrl": "https://leetcode.cn/problems/gu-piao-de-zui-da-li-run-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/gu-piao-de-zui-da-li-run-lcof/solution",
+        "problemsDesc": "<p>假设把某股票的价格按照时间先后顺序存储在数组中，请问买卖该股票一次可能获得的最大利润是多少？</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> [7,1,5,3,6,4]\n<strong>输出:</strong> 5\n<strong>解释: </strong>在第 2 天（股票价格 = 1）的时候买入，在第 5 天（股票价格 = 6）的时候卖出，最大利润 = 6-1 = 5 。\n     注意利润不能是 7-1 = 6, 因为卖出价格需要大于买入价格。\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> [7,6,4,3,1]\n<strong>输出:</strong> 0\n<strong>解释: </strong>在这种情况下, 没有交易完成, 所以最大利润为 0。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<p><code>0 &lt;= 数组长度 &lt;= 10^5</code></p>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong>本题与主站 121 题相同：<a href=\"https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/\">https://leetcode-cn.com/problems/best-time-to-buy-and-sell-stock/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2936.求1+2+…+n",
+        "hardRate": "MEDIUM",
+        "passRate": "85.93%",
+        "problemsUrl": "https://leetcode.cn/problems/qiu-12n-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/qiu-12n-lcof/solution",
+        "problemsDesc": "<p>求 <code>1+2+...+n</code> ，要求不能使用乘除法、for、while、if、else、switch、case等关键字及条件判断语句（A?B:C）。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入:</strong> n = 3\n<strong>输出:&nbsp;</strong>6\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入:</strong> n = 9\n<strong>输出:&nbsp;</strong>45\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= n&nbsp;&lt;= 10000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2937.不用加减乘除做加法",
+        "hardRate": "EASY",
+        "passRate": "59.59%",
+        "problemsUrl": "https://leetcode.cn/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/bu-yong-jia-jian-cheng-chu-zuo-jia-fa-lcof/solution",
+        "problemsDesc": "<p>写一个函数，求两个整数之和，要求在函数体内不得使用 &ldquo;+&rdquo;、&ldquo;-&rdquo;、&ldquo;*&rdquo;、&ldquo;/&rdquo; 四则运算符号。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例:</strong></p>\n\n<pre><strong>输入:</strong> a = 1, b = 1\n<strong>输出:</strong> 2</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>a</code>,&nbsp;<code>b</code>&nbsp;均可能是负数或 0</li>\n\t<li>结果不会溢出 32 位整数</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2938.构建乘积数组",
+        "hardRate": "MEDIUM",
+        "passRate": "58.57%",
+        "problemsUrl": "https://leetcode.cn/problems/gou-jian-cheng-ji-shu-zu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/gou-jian-cheng-ji-shu-zu-lcof/solution",
+        "problemsDesc": "<p>给定一个数组 <code>A[0,1,…,n-1]</code>，请构建一个数组 <code>B[0,1,…,n-1]</code>，其中 <code>B[i]</code> 的值是数组 <code>A</code> 中除了下标 <code>i</code> 以外的元素的积, 即 <code>B[i]=A[0]×A[1]×…×A[i-1]×A[i+1]×…×A[n-1]</code>。不能使用除法。</p>\n\n<p> </p>\n\n<p><strong>示例:</strong></p>\n\n<pre>\n<strong>输入:</strong> [1,2,3,4,5]\n<strong>输出:</strong> [120,60,40,30,24]</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>所有元素乘积之和不会溢出 32 位整数</li>\n\t<li><code>a.length <= 100000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2939.把字符串转换成整数",
+        "hardRate": "MEDIUM",
+        "passRate": "28.41%",
+        "problemsUrl": "https://leetcode.cn/problems/ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/ba-zi-fu-chuan-zhuan-huan-cheng-zheng-shu-lcof/solution",
+        "problemsDesc": "<p>写一个函数 StrToInt，实现把字符串转换成整数这个功能。不能使用 atoi 或者其他类似的库函数。</p>\n\n<p>&nbsp;</p>\n\n<p>首先，该函数会根据需要丢弃无用的开头空格字符，直到寻找到第一个非空格的字符为止。</p>\n\n<p>当我们寻找到的第一个非空字符为正或者负号时，则将该符号与之后面尽可能多的连续数字组合起来，作为该整数的正负号；假如第一个非空字符是数字，则直接将其与之后连续的数字字符组合起来，形成整数。</p>\n\n<p>该字符串除了有效的整数部分之后也可能会存在多余的字符，这些字符可以被忽略，它们对于函数不应该造成影响。</p>\n\n<p>注意：假如该字符串中的第一个非空格字符不是一个有效整数字符、字符串为空或字符串仅包含空白字符时，则你的函数不需要进行转换。</p>\n\n<p>在任何情况下，若函数不能进行有效的转换时，请返回 0。</p>\n\n<p><strong>说明：</strong></p>\n\n<p>假设我们的环境只能存储 32 位大小的有符号整数，那么其数值范围为&nbsp;[&minus;2<sup>31</sup>,&nbsp; 2<sup>31&nbsp;</sup>&minus; 1]。如果数值超过这个范围，请返回 &nbsp;INT_MAX (2<sup>31&nbsp;</sup>&minus; 1) 或&nbsp;INT_MIN (&minus;2<sup>31</sup>) 。</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre><strong>输入:</strong> &quot;42&quot;\n<strong>输出:</strong> 42\n</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre><strong>输入:</strong> &quot;   -42&quot;\n<strong>输出:</strong> -42\n<strong>解释: </strong>第一个非空白字符为 &#39;-&#39;, 它是一个负号。\n&nbsp;    我们尽可能将负号与后面所有连续出现的数字组合起来，最后得到 -42 。\n</pre>\n\n<p><strong>示例&nbsp;3:</strong></p>\n\n<pre><strong>输入:</strong> &quot;4193 with words&quot;\n<strong>输出:</strong> 4193\n<strong>解释:</strong> 转换截止于数字 &#39;3&#39; ，因为它的下一个字符不为数字。\n</pre>\n\n<p><strong>示例&nbsp;4:</strong></p>\n\n<pre><strong>输入:</strong> &quot;words and 987&quot;\n<strong>输出:</strong> 0\n<strong>解释:</strong> 第一个非空字符是 &#39;w&#39;, 但它不是数字或正、负号。\n     因此无法执行有效的转换。</pre>\n\n<p><strong>示例&nbsp;5:</strong></p>\n\n<pre><strong>输入:</strong> &quot;-91283472332&quot;\n<strong>输出:</strong> -2147483648\n<strong>解释:</strong> 数字 &quot;-91283472332&quot; 超过 32 位有符号整数范围。 \n&nbsp;    因此返回 INT_MIN (&minus;2<sup>31</sup>) 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 8 题相同：<a href=\"https://leetcode-cn.com/problems/string-to-integer-atoi/\">https://leetcode-cn.com/problems/string-to-integer-atoi/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2940.二叉搜索树的最近公共祖先",
+        "hardRate": "EASY",
+        "passRate": "69.28%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-sou-suo-shu-de-zui-jin-gong-gong-zu-xian-lcof/solution",
+        "problemsDesc": "<p>给定一个二叉搜索树, 找到该树中两个指定节点的最近公共祖先。</p>\n\n<p><a href=\"https://baike.baidu.com/item/%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/8918834?fr=aladdin\" target=\"_blank\">百度百科</a>中最近公共祖先的定义为：&ldquo;对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（<strong>一个节点也可以是它自己的祖先</strong>）。&rdquo;</p>\n\n<p>例如，给定如下二叉搜索树:&nbsp; root =&nbsp;[6,2,8,0,4,7,9,null,null,3,5]</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/binarysearchtree_improved.png\"></p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 8\n<strong>输出:</strong> 6 \n<strong>解释: </strong>节点 <code>2 </code>和节点 <code>8 </code>的最近公共祖先是 <code>6。</code>\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> root = [6,2,8,0,4,7,9,null,null,3,5], p = 2, q = 4\n<strong>输出:</strong> 2\n<strong>解释: </strong>节点 <code>2</code> 和节点 <code>4</code> 的最近公共祖先是 <code>2</code>, 因为根据定义最近公共祖先节点可以为节点本身。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>说明:</strong></p>\n\n<ul>\n\t<li>所有节点的值都是唯一的。</li>\n\t<li>p、q 为不同节点且均存在于给定的二叉搜索树中。</li>\n</ul>\n\n<p>注意：本题与主站 235 题相同：<a href=\"https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-search-tree/\">https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-search-tree/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2941.二叉树的最近公共祖先",
+        "hardRate": "EASY",
+        "passRate": "70.32%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-shu-de-zui-jin-gong-gong-zu-xian-lcof/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-shu-de-zui-jin-gong-gong-zu-xian-lcof/solution",
+        "problemsDesc": "<p>给定一个二叉树, 找到该树中两个指定节点的最近公共祖先。</p>\n\n<p><a href=\"https://baike.baidu.com/item/%E6%9C%80%E8%BF%91%E5%85%AC%E5%85%B1%E7%A5%96%E5%85%88/8918834?fr=aladdin\" target=\"_blank\">百度百科</a>中最近公共祖先的定义为：&ldquo;对于有根树 T 的两个结点 p、q，最近公共祖先表示为一个结点 x，满足 x 是 p、q 的祖先且 x 的深度尽可能大（<strong>一个节点也可以是它自己的祖先</strong>）。&rdquo;</p>\n\n<p>例如，给定如下二叉树:&nbsp; root =&nbsp;[3,5,1,6,2,0,8,null,null,7,4]</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/15/binarytree.png\"></p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1\n<strong>输出:</strong> 3\n<strong>解释: </strong>节点 <code>5 </code>和节点 <code>1 </code>的最近公共祖先是节点 <code>3。</code>\n</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4\n<strong>输出:</strong> 5\n<strong>解释: </strong>节点 <code>5 </code>和节点 <code>4 </code>的最近公共祖先是节点 <code>5。</code>因为根据定义最近公共祖先节点可以为节点本身。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>说明:</strong></p>\n\n<ul>\n\t<li>所有节点的值都是唯一的。</li>\n\t<li>p、q 为不同节点且均存在于给定的二叉树中。</li>\n</ul>\n\n<p>注意：本题与主站 236 题相同：<a href=\"https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree/\">https://leetcode-cn.com/problems/lowest-common-ancestor-of-a-binary-tree/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2942.整数除法",
+        "hardRate": "EASY",
+        "passRate": "21.06%",
+        "problemsUrl": "https://leetcode.cn/problems/xoh6Oh/",
+        "solutionsUrl": "https://leetcode.cn/problems/xoh6Oh/solution",
+        "problemsDesc": "<p>给定两个整数 <code>a</code> 和 <code>b</code> ，求它们的除法的商 <code>a/b</code> ，要求不得使用乘号 <code>&#39;*&#39;</code>、除号 <code>&#39;/&#39;</code> 以及求余符号 <code>&#39;%&#39;</code>&nbsp;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong></p>\n\n<ul>\n\t<li>整数除法的结果应当截去（<code>truncate</code>）其小数部分，例如：<code>truncate(8.345) = 8</code>&nbsp;以及&nbsp;<code>truncate(-2.7335) = -2</code></li>\n\t<li>假设我们的环境只能存储 32 位有符号整数，其数值范围是 <code>[&minus;2<sup>31</sup>,&nbsp;2<sup>31</sup>&minus;1]</code>。本题中，如果除法结果溢出，则返回 <code>2<sup>31&nbsp;</sup>&minus; 1</code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>a = 15, b = 2\n<strong>输出：</strong>7\n<strong><span style=\"white-space: pre-wrap;\">解释：</span></strong>15/2 = truncate(7.5) = 7\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>a = 7, b = -3\n<strong>输出：</strong><span style=\"white-space: pre-wrap;\">-2</span>\n<strong><span style=\"white-space: pre-wrap;\">解释：</span></strong>7/-3 = truncate(-2.33333..) = -2</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>a = 0, b = 1\n<strong>输出：</strong><span style=\"white-space: pre-wrap;\">0</span></pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre>\n<strong>输入：</strong>a = 1, b = 1\n<strong>输出：</strong><span style=\"white-space: pre-wrap;\">1</span></pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示:</strong></p>\n\n<ul>\n\t<li><code>-2<sup>31</sup>&nbsp;&lt;= a, b &lt;= 2<sup>31</sup>&nbsp;- 1</code></li>\n\t<li><code>b != 0</code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 29&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/divide-two-integers/\">https://leetcode-cn.com/problems/divide-two-integers/</a></p>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2943.二进制加法",
+        "hardRate": "EASY",
+        "passRate": "53.78%",
+        "problemsUrl": "https://leetcode.cn/problems/JFETK5/",
+        "solutionsUrl": "https://leetcode.cn/problems/JFETK5/solution",
+        "problemsDesc": "<p>给定两个 01 字符串&nbsp;<code>a</code>&nbsp;和&nbsp;<code>b</code>&nbsp;，请计算它们的和，并以二进制字符串的形式输出。</p>\n\n<p>输入为 <strong>非空 </strong>字符串且只包含数字&nbsp;<code>1</code>&nbsp;和&nbsp;<code>0</code>。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre>\n<strong>输入:</strong> a = &quot;11&quot;, b = &quot;10&quot;\n<strong>输出:</strong> &quot;101&quot;</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入:</strong> a = &quot;1010&quot;, b = &quot;1011&quot;\n<strong>输出:</strong> &quot;10101&quot;</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>每个字符串仅由字符 <code>&#39;0&#39;</code> 或 <code>&#39;1&#39;</code> 组成。</li>\n\t<li><code>1 &lt;= a.length, b.length &lt;= 10^4</code></li>\n\t<li>字符串如果不是 <code>&quot;0&quot;</code> ，就都不含前导零。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 67&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/add-binary/\">https://leetcode-cn.com/problems/add-binary/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2944.前 n 个数字二进制中 1 的个数",
+        "hardRate": "EASY",
+        "passRate": "78.19%",
+        "problemsUrl": "https://leetcode.cn/problems/w3tCBm/",
+        "solutionsUrl": "https://leetcode.cn/problems/w3tCBm/solution",
+        "problemsDesc": "<p>给定一个非负整数 <code>n</code><b>&nbsp;</b>，请计算 <code>0</code> 到 <code>n</code> 之间的每个数字的二进制表示中 1 的个数，并输出一个数组。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<strong>输入: </strong>n =<strong> </strong>2\n<strong>输出: </strong>[0,1,1]\n<strong>解释: \n</strong>0 --&gt; 0\n1 --&gt; 1\n2 --&gt; 10\n</pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入: </strong>n =<strong> </strong>5\n<strong>输出: </strong><code>[0,1,1,2,1,2]\n</code><span style=\"white-space: pre-wrap;\"><strong>解释:</strong>\n</span>0 --&gt; 0\n1 --&gt; 1\n2 --&gt; 10\n3 --&gt; 11\n4 --&gt; 100\n5 --&gt; 101\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>说明 :</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= n &lt;= 10<sup>5</sup></code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶:</strong></p>\n\n<ul>\n\t<li>给出时间复杂度为&nbsp;<code>O(n*sizeof(integer))</code><strong>&nbsp;</strong>的解答非常容易。但你可以在线性时间&nbsp;<code>O(n)</code><strong>&nbsp;</strong>内用一趟扫描做到吗？</li>\n\t<li>要求算法的空间复杂度为&nbsp;<code>O(n)</code>&nbsp;。</li>\n\t<li>你能进一步完善解法吗？要求在C++或任何其他语言中不使用任何内置函数（如 C++ 中的&nbsp;<code>__builtin_popcount</code><strong>&nbsp;</strong>）来执行此操作。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 338&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/counting-bits/\">https://leetcode-cn.com/problems/counting-bits/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2945.只出现一次的数字 ",
+        "hardRate": "MEDIUM",
+        "passRate": "70.80%",
+        "problemsUrl": "https://leetcode.cn/problems/WGki4K/",
+        "solutionsUrl": "https://leetcode.cn/problems/WGki4K/solution",
+        "problemsDesc": "<p>给你一个整数数组&nbsp;<code>nums</code> ，除某个元素仅出现 <strong>一次</strong> 外，其余每个元素都恰出现 <strong>三次 。</strong>请你找出并返回那个只出现了一次的元素。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [2,2,3,2]\n<strong>输出：</strong>3\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [0,1,0,1,0,1,100]\n<strong>输出：</strong>100\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 3 * 10<sup>4</sup></code></li>\n\t<li><code>-2<sup>31</sup> &lt;= nums[i] &lt;= 2<sup>31</sup> - 1</code></li>\n\t<li><code>nums</code> 中，除某个元素仅出现 <strong>一次</strong> 外，其余每个元素都恰出现 <strong>三次</strong></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶：</strong>你的算法应该具有线性时间复杂度。 你可以不使用额外空间来实现吗？</p>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 137&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/single-number-ii/\">https://leetcode-cn.com/problems/single-number-ii/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2946.单词长度的最大乘积",
+        "hardRate": "MEDIUM",
+        "passRate": "71.13%",
+        "problemsUrl": "https://leetcode.cn/problems/aseY1I/",
+        "solutionsUrl": "https://leetcode.cn/problems/aseY1I/solution",
+        "problemsDesc": "<p>给定一个字符串数组&nbsp;<code>words</code>，请计算当两个字符串 <code>words[i]</code> 和 <code>words[j]</code> 不包含相同字符时，它们长度的乘积的最大值。假设字符串中只包含英语的小写字母。如果没有不包含相同字符的一对字符串，返回 0。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre>\n<strong>输入:</strong> words = <code>[&quot;abcw&quot;,&quot;baz&quot;,&quot;foo&quot;,&quot;bar&quot;,&quot;fxyz&quot;,&quot;abcdef&quot;]</code>\n<strong>输出: </strong><code>16 \n<strong>解释:</strong> 这两个单词为<strong> </strong></code><code>&quot;abcw&quot;, &quot;fxyz&quot;</code>。它们不包含相同字符，且长度的乘积最大。</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n<strong>输入:</strong> words = <code>[&quot;a&quot;,&quot;ab&quot;,&quot;abc&quot;,&quot;d&quot;,&quot;cd&quot;,&quot;bcd&quot;,&quot;abcd&quot;]</code>\n<strong>输出: </strong><code>4 \n<strong>解释: </strong></code>这两个单词为 <code>&quot;ab&quot;, &quot;cd&quot;</code>。</pre>\n\n<p><strong>示例 3:</strong></p>\n\n<pre>\n<strong>输入:</strong> words = <code>[&quot;a&quot;,&quot;aa&quot;,&quot;aaa&quot;,&quot;aaaa&quot;]</code>\n<strong>输出: </strong><code>0 \n<strong>解释: </strong>不存在这样的两个单词。</code>\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= words.length &lt;= 1000</code></li>\n\t<li><code>1 &lt;= words[i].length &lt;= 1000</code></li>\n\t<li><code>words[i]</code>&nbsp;仅包含小写字母</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 318&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/maximum-product-of-word-lengths/\">https://leetcode-cn.com/problems/maximum-product-of-word-lengths/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2947.排序数组中两个数字之和",
+        "hardRate": "EASY",
+        "passRate": "67.26%",
+        "problemsUrl": "https://leetcode.cn/problems/kLl5u1/",
+        "solutionsUrl": "https://leetcode.cn/problems/kLl5u1/solution",
+        "problemsDesc": "<p>给定一个已按照<strong><em> </em>升序排列&nbsp; </strong>的整数数组&nbsp;<code>numbers</code> ，请你从数组中找出两个数满足相加之和等于目标数&nbsp;<code>target</code> 。</p>\n\n<p>函数应该以长度为 <code>2</code> 的整数数组的形式返回这两个数的下标值<em>。</em><code>numbers</code> 的下标 <strong>从 0&nbsp;开始计数</strong> ，所以答案数组应当满足 <code>0&nbsp;&lt;= answer[0] &lt; answer[1] &lt;&nbsp;numbers.length</code>&nbsp;。</p>\n\n<p>假设数组中存在且只存在一对符合条件的数字，同时一个数字不能使用两次。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>numbers = [1,2,4,6,10], target = 8\n<strong>输出：</strong>[1,3]\n<strong>解释：</strong>2 与 6 之和等于目标数 8 。因此 index1 = 1, index2 = 3 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>numbers = [2,3,4], target = 6\n<strong>输出：</strong>[0,2]\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>numbers = [-1,0], target = -1\n<strong>输出：</strong>[0,1]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= numbers.length &lt;= 3 * 10<sup>4</sup></code></li>\n\t<li><code>-1000 &lt;= numbers[i] &lt;= 1000</code></li>\n\t<li><code>numbers</code> 按 <strong>非递减顺序</strong> 排列</li>\n\t<li><code>-1000 &lt;= target &lt;= 1000</code></li>\n\t<li>仅存在一个有效答案</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 167 题相似（下标起点不同）：<a href=\"https://leetcode.cn/problems/two-sum-ii-input-array-is-sorted/\">https://leetcode.cn/problems/two-sum-ii-input-array-is-sorted/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2948.数组中和为 0 的三个数",
+        "hardRate": "MEDIUM",
+        "passRate": "43.55%",
+        "problemsUrl": "https://leetcode.cn/problems/1fGaJU/",
+        "solutionsUrl": "https://leetcode.cn/problems/1fGaJU/solution",
+        "problemsDesc": "<p>给你一个整数数组 <code>nums</code> ，判断是否存在三元组 <code>[nums[i], nums[j], nums[k]]</code> 满足 <code>i != j</code>、<code>i != k</code> 且 <code>j != k</code> ，同时还满足 <code>nums[i] + nums[j] + nums[k] == 0</code> 。请</p>\n\n<p>你返回所有和为 <code>0</code> 且不重复的三元组。</p>\n\n<p><strong>注意：</strong>答案中不可以包含重复的三元组。</p>\n\n<p>&nbsp;</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [-1,0,1,2,-1,-4]\n<strong>输出：</strong>[[-1,-1,2],[-1,0,1]]\n<strong>解释：</strong>\nnums[0] + nums[1] + nums[2] = (-1) + 0 + 1 = 0 。\nnums[1] + nums[2] + nums[4] = 0 + 1 + (-1) = 0 。\nnums[0] + nums[3] + nums[4] = (-1) + 2 + (-1) = 0 。\n不同的三元组是 [-1,0,1] 和 [-1,-1,2] 。\n注意，输出的顺序和三元组的顺序并不重要。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [0,1,1]\n<strong>输出：</strong>[]\n<strong>解释：</strong>唯一可能的三元组和不为 0 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [0,0,0]\n<strong>输出：</strong>[[0,0,0]]\n<strong>解释：</strong>唯一可能的三元组和为 0 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>3 &lt;= nums.length &lt;= 3000</code></li>\n\t<li><code>-10<sup>5</sup> &lt;= nums[i] &lt;= 10<sup>5</sup></code></li>\n</ul>\n&nbsp;\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 15&nbsp;题相同：<a href=\"https://leetcode.cn/problems/3sum/\">leetcode.cn/problems/3sum/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2949.和大于等于 target 的最短子数组",
+        "hardRate": "MEDIUM",
+        "passRate": "49.86%",
+        "problemsUrl": "https://leetcode.cn/problems/2VG8Kg/",
+        "solutionsUrl": "https://leetcode.cn/problems/2VG8Kg/solution",
+        "problemsDesc": "<p>给定一个含有&nbsp;<code>n</code><strong>&nbsp;</strong>个正整数的数组和一个正整数 <code>target</code><strong> 。</strong></p>\n\n<p>找出该数组中满足其和<strong> </strong><code>&ge; target</code><strong> </strong>的长度最小的 <strong>连续子数组</strong>&nbsp;<code>[nums<sub>l</sub>, nums<sub>l+1</sub>, ..., nums<sub>r-1</sub>, nums<sub>r</sub>]</code> ，并返回其长度<strong>。</strong>如果不存在符合条件的子数组，返回 <code>0</code> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = 7, nums = [2,3,1,2,4,3]\n<strong>输出：</strong>2\n<strong>解释：</strong>子数组&nbsp;<code>[4,3]</code>&nbsp;是该条件下的长度最小的子数组。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = 4, nums = [1,4,4]\n<strong>输出：</strong>1\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = 11, nums = [1,1,1,1,1,1,1,1]\n<strong>输出：</strong>0\n</pre>\n\n<p>&nbsp;</p>\n\n<p>提示：</p>\n\n<ul>\n\t<li><code>1 &lt;= target &lt;= 10<sup>9</sup></code></li>\n\t<li><code>1 &lt;= nums.length &lt;= 10<sup>5</sup></code></li>\n\t<li><code>1 &lt;= nums[i] &lt;= 10<sup>5</sup></code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p>进阶：</p>\n\n<ul>\n\t<li>如果你已经实现<em> </em><code>O(n)</code> 时间复杂度的解法, 请尝试设计一个 <code>O(n log(n))</code> 时间复杂度的解法。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 209&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/minimum-size-subarray-sum/\">https://leetcode-cn.com/problems/minimum-size-subarray-sum/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2950.乘积小于 K 的子数组",
+        "hardRate": "MEDIUM",
+        "passRate": "53.12%",
+        "problemsUrl": "https://leetcode.cn/problems/ZVAVXX/",
+        "solutionsUrl": "https://leetcode.cn/problems/ZVAVXX/solution",
+        "problemsDesc": "<p>给定一个正整数数组&nbsp;<code>nums</code>和整数 <code>k</code>&nbsp;，请找出该数组内乘积小于&nbsp;<code>k</code>&nbsp;的连续的子数组的个数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<strong>输入:</strong> nums = [10,5,2,6], k = 100\n<strong>输出:</strong> 8\n<strong>解释:</strong> 8 个乘积小于 100 的子数组分别为: [10], [5], [2], [6], [10,5], [5,2], [2,6], [5,2,6]。\n需要注意的是 [10,5,2] 并不是乘积小于100的子数组。\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n<strong>输入:</strong> nums = [1,2,3], k = 0\n<strong>输出:</strong> 0</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示:&nbsp;</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 3 * 10<sup>4</sup></code></li>\n\t<li><code>1 &lt;= nums[i] &lt;= 1000</code></li>\n\t<li><code>0 &lt;= k &lt;= 10<sup>6</sup></code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 713&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/subarray-product-less-than-k/\">https://leetcode-cn.com/problems/subarray-product-less-than-k/</a>&nbsp;</p>\n",
+        "isPlus": false
+    }
+]
