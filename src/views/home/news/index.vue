@@ -280,7 +280,7 @@ export default {
   width: 100%;
   height: 1px;
   background-color: #f9f9f9;
-  margin-bottom: 5px;
+  /* margin-bottom: 5px; */
 }
 
 .line-add-split {
