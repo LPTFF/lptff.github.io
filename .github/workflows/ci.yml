@@ -1,59 +1,42 @@
 # Simple workflow for deploying static content to GitHub Pages
 name: CI
 on:
-  # 设置定时任务
-  # schedule:
-    # - cron: "0 4 * * *" # 每天的 UTC 04:00（北京时间上午12点）执行任务
-    # - cron: "0 9 * * *" # 每天的 UTC 09:00（北京时间下午5点）执行任务
-    # - cron: "0 19 * * *" # 每天的 UTC 19:00（北京时间凌晨3点）执行任务
-  # 仅在推送到默认分支时运行。
   push:
     branches:
       - master
 
-  # 这个选项可以使你手动在 Action tab 页面触发工作流
   workflow_dispatch:
 
-# 设置 GITHUB_TOKEN 的权限，以允许部署到 GitHub Pages。
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# 允许一个并发的部署
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
-  # 单次部署的工作描述
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: echo filepath
-        run: |
-          pwd
-          ls -al
       - name: Checkout
         uses: actions/checkout@v3
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 20
           cache: "npm"
       - name: Install dependencies
         run: npm install
-      # - name: Build
-      #   run:
-      #     npm run build
       - name: crawl
         run: |
           chmod +x build.sh
           ./build.sh
-          python  ./src/crawl/sendNotify.py 
+          python  ./src/crawl/sendNotify.py
           cd ./src/public/data/
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
@@ -70,21 +53,10 @@ jobs:
           npm run build
       - name: 404
         run: cp dist/index.html dist/404.html
-      # - name: Setup Pages
-      #   uses: actions/configure-pages@v3
-      # - name: Upload artifact
-      #   uses: actions/upload-pages-artifact@v1
-      #   with:
-      # path: './docs/.vuepress/dist'
-      # - name: Deploy to GitHub Pages
-      #   id: deployment
-      #   uses: actions/deploy-pages@v1
       - name: Deploy
         run: |
-          pwd
-          ls -a
           cd ./dist/
-          echo lptff.github.io > CNAME  
+          echo lptff.github.io > CNAME
           echo > .nojekyll
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
@@ -92,13 +64,4 @@ jobs:
           git init
           git add -A
           git commit -m $(date +%F日%H时%M分%S秒)
-          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages       
-      # - name: Deploy to GitHub Pages
-      #   uses: crazy-max/ghaction-github-pages@v2.2.0
-      #   with:
-      #     # 部署到 gh-pages 分支
-      #     target_branch: gh-pages
-      #     # 部署目录为 VuePress 的默认输出目录
-      #     build_dir: docs/.vuepress/dist
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:gh-pages
