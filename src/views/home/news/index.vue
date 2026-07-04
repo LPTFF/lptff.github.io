@@ -1,29 +1,14 @@
 <template>
   <el-row>
-    <el-col
-      :span="24"
-      :md="8"
-      :lg="8"
-      v-for="(item, index) in newsAllLimited"
-      :key="index"
-    >
+    <el-col :span="24" :md="8" :lg="8" v-for="(item, index) in newsAllLimited" :key="index">
       <el-card class="news-card" shadow="hover">
         <div v-if="handleDescType(item) == '1'">
-          <a
-            class="news-title"
-            :href="handleNewsUrl(item)"
-            @click.prevent="gotoNewsWebsite(item)"
-          >
+          <a class="news-title" :href="handleNewsUrl(item)" @click.prevent="gotoNewsWebsite(item)">
             {{ item.title }}
           </a>
           <div class="background-container">
-            <img
-              class="news-img-inner"
-              :src="handleCoverImg(item)"
-              @error="handleImageError"
-              referrerPolicy="no-referrer"
-              alt="网站"
-            />
+            <img class="news-img-inner" :src="handleCoverImg(item)" @error="handleImageError"
+              referrerPolicy="no-referrer" alt="网站" />
           </div>
           <div class="line-split line-add-split"></div>
           <div class="news-bottom common-flex">
@@ -41,11 +26,7 @@
           </div>
         </div>
         <div v-else>
-          <a
-            class="news-title"
-            :href="handleNewsUrl(item)"
-            @click.prevent="gotoNewsWebsite(item)"
-          >
+          <a class="news-title" :href="handleNewsUrl(item)" @click.prevent="gotoNewsWebsite(item)">
             {{ item.title }}
           </a>
           <div class="news-source">
@@ -230,13 +211,14 @@ export default {
   height: 370px;
   object-fit: cover;
 }
+
 .background-container {
   position: relative;
 }
 
 .news-card {
   margin-bottom: 20px;
-  min-height: 482px;
+  height: 482px;
   margin-right: 20px;
   overflow: hidden;
 }
@@ -257,25 +239,31 @@ export default {
   margin-bottom: 10px;
   color: rgb(48, 49, 51) !important;
   text-decoration: none;
-  white-space: nowrap; /* 防止内容换行 */
-  overflow: hidden; /* 隐藏超出容器宽度的内容 */
-  text-overflow: ellipsis; /* 使用省略号表示被截断的文本 */
+  white-space: nowrap;
+  /* 防止内容换行 */
+  overflow: hidden;
+  /* 隐藏超出容器宽度的内容 */
+  text-overflow: ellipsis;
+  /* 使用省略号表示被截断的文本 */
   max-width: 300px;
 }
 
 .news-summary {
   display: block;
   margin: 0;
-  max-height: 320px;
+  height: 320px;
   font-size: 18px;
   font-family: Arial;
-  overflow: hidden; /* 隐藏溢出部分 */
-  text-overflow: ellipsis; /* 显示省略号 */
+  overflow: hidden;
+  /* 隐藏溢出部分 */
+  text-overflow: ellipsis;
+  /* 显示省略号 */
   display: -webkit-box;
   -webkit-line-clamp: 10;
   line-clamp: 10;
   -webkit-box-orient: vertical;
 }
+
 .news-date {
   color: #999;
   margin: auto 10px;
@@ -294,20 +282,25 @@ export default {
   background-color: #f9f9f9;
   margin-bottom: 5px;
 }
+
 .line-add-split {
   margin-top: 380px;
 }
+
 .news-bottom {
   display: flex;
 }
+
 .common-flex {
   justify-content: space-between;
 }
+
 .is-new {
   margin: 5px 5px;
   width: 40px;
   height: 40px;
 }
+
 .news-source {
   display: flex;
   margin: 10px 0px;
@@ -315,6 +308,5 @@ export default {
 }
 
 /* 响应式布局 */
-@media screen and (max-width: 768px) {
-}
+@media screen and (max-width: 768px) {}
 </style>
