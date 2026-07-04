@@ -1,10 +1,19 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Markdown from "unplugin-vue-markdown/vite";
+import AutoImport from "unplugin-auto-import/vite";
+import Components from "unplugin-vue-components/vite";
+import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
 export default defineConfig({
   base: "./",
   plugins: [
+    AutoImport({
+      resolvers: [ElementPlusResolver()],
+    }),
+    Components({
+      resolvers: [ElementPlusResolver()],
+    }),
     vue({
       include: [/\.vue$/, /\.md$/],
     }),
@@ -51,42 +60,58 @@ export default defineConfig({
         manualChunks(id) {
           if (id.includes("node_modules")) {
             const arr = id.toString().split("node_modules/")[1].split("/");
-            switch (arr[0]) {
-              case "@vue":
-              case "element-plus":
-              case "@element-plus":
-              case "eruda":
-              case "openai":
-              case "axios":
-                return arr[0];
-              default:
-                return "framework";
-            }
+            const pkgName = arr[0];
+
+            // 大型库单独分包
+            if (pkgName === "xlsx") return "xlsx";
+            if (pkgName === "marked") return "marked";
+            if (pkgName === "ssh2" || pkgName === "ssh2-sftp-client") return "ssh2";
+            if (pkgName === "archiver") return "archiver";
+            if (pkgName === "jsencrypt") return "jsencrypt";
+            if (pkgName === "openai") return "openai";
+
+            // Vue 生态
+            if (pkgName === "@vue" || pkgName === "vue" || pkgName === "vue-router") return "vue";
+
+            // Element Plus 相关拆分
+            if (pkgName === "element-plus" || pkgName === "@element-plus") return "element-plus";
+            if (pkgName === "@element-plus/icons-vue") return "element-icons";
+
+            // 工具库单独分包
+            if (pkgName === "axios") return "axios";
+            if (pkgName === "eruda") return "eruda";
+            if (pkgName === "file-saver") return "file-saver";
+
+            // 剩余小型库按类别细分
+            if (pkgName.startsWith("@types")) return "types";
+            if (pkgName.includes("vite") || pkgName.includes("rollup")) return "build-tools";
+
+            return "vendor-misc";
           }
-          if (id.includes("zhipin.json")) {
-            return "zhipin.json";
-          }
-          if (id.includes("leetCode_1.json")) {
-            return "leetCode_1.json";
-          }
-          if (id.includes("websiteGroups.json")) {
-            return "websiteGroups.json";
-          }
-          if (id.includes("src/public/data/findJobMarkDown/vue")) {
-            return "vueMarkDown";
-          }
-          if (id.includes("src/views/home/findJob")) {
-            return "findJob";
-          }
-          if (id.includes("findJobUtils.js")) {
-            return "findJobUtils";
-          }
-          if (id.includes("src/public/data/findJobMarkDown")) {
-            return "findJobMarkDown";
-          }
-          if (id.includes("src")) {
-            return "src";
-          }
+          // JSON 数据文件单独分包
+          if (id.includes("zhipin.json")) return "zhipin";
+          if (id.includes("leetCode_1.json")) return "leetcode";
+          if (id.includes("websiteGroups.json")) return "websiteGroups";
+
+          // src 目录按模块细分
+          if (id.includes("src/public/data/findJobMarkDown/vue")) return "vue-md";
+          if (id.includes("src/public/data/findJobMarkDown")) return "findjob-md";
+          if (id.includes("src/views/home/findJob")) return "findjob";
+          if (id.includes("src/views/home/leetCode")) return "leetcode-view";
+          if (id.includes("src/views/home/bossZhipin")) return "boss-view";
+          if (id.includes("src/views/home/githubTrending")) return "github-view";
+          if (id.includes("src/views/home/douban")) return "douban-view";
+          if (id.includes("src/views/home/news")) return "news-view";
+          if (id.includes("src/views/Message")) return "message-view";
+          if (id.includes("src/views/Login")) return "login-view";
+          if (id.includes("src/views/Blog")) return "blog-view";
+          if (id.includes("src/views/job")) return "job-view";
+          if (id.includes("src/views/life")) return "life-view";
+          if (id.includes("src/components")) return "components";
+          if (id.includes("src/utils")) return "utils";
+          if (id.includes("src/public/data")) return "data";
+          if (id.includes("src")) return "app-core";
+
           return undefined;
         },
       },

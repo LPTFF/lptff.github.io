@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import router from "./router";
 import "element-plus/theme-chalk/index.css";
+// Element Plus 按需自动导入，无需手动引入
 
 const myApp = createApp(App);
 
