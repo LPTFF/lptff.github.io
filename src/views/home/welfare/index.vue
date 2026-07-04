@@ -83,6 +83,7 @@ import yqhd8Image from "./img/yqhd8.png";
 import hxm5Image from "./img/hxm5.png";
 import zhuanyesImage from "./img/zhuanyes.png";
 import daydayzhuanImage from "./img/daydayzhuan.png";
+import { Timer, CircleCheck } from "@element-plus/icons-vue";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
 let welfareInitSource: any[] = [];
 let welfareTopSource: any[] = [];
@@ -242,6 +243,8 @@ export default {
     ElCard,
     ElIcon,
     ElDivider,
+    Timer,
+    CircleCheck,
   },
 };
 </script>

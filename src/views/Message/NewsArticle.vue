@@ -112,6 +112,7 @@
 <script lang="ts">
 import { ref, nextTick, watch, computed, onMounted } from "vue";
 import { gotoOutPage, isPC } from "./../../utils/utils"
+import { Calendar, Timer } from "@element-plus/icons-vue";
 import githubNews from "./../../public/data/githubTrending.json";
 import logoImageUrl from "./../../public/img/logo.jpg";
 import {
@@ -135,6 +136,8 @@ export default {
         ElButton,
         ElIcon,
         ElDivider,
+        Calendar,
+        Timer,
     },
     setup(props: any) {
         document.title = '资讯文章'

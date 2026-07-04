@@ -8,31 +8,32 @@
     "build": "node ./scripts/sync-findJob-summary.js && vue-tsc --noEmit && vite build && node ./scripts/copy-404.js"
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "archiver": "^7.0.1",
-    "axios": "1.4.0",
-    "element-plus": "2.3.6",
+    "element-plus": "^2.14.2",
     "file-saver": "^2.0.5",
     "gh-pages": "5.0.0",
     "jsencrypt": "^3.3.2",
     "marked": "^11.1.1",
-    "openai": "3.3.0",
     "ssh2": "^1.16.0",
     "ssh2-sftp-client": "^12.0.0",
-    "unplugin-vue-markdown": "0.24.1",
-    "vue": "3.2.47",
-    "vue-router": "4.1.6",
+    "vue": "^3.5.39",
+    "vue-router": "^4.6.4",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",
-    "@types/node": "18.16.0",
-    "@vitejs/plugin-vue": "3.1.0",
+    "@types/node": "^20.19.43",
+    "@vitejs/plugin-vue": "^4.6.2",
+    "axios": "^1.18.1",
     "eruda": "3.0.0",
+    "openai": "^4.104.0",
     "rollup-plugin-visualizer": "5.9.0",
-    "typescript": "4.6.4",
-    "vite": "3.1.0",
-    "vite-plugin-compression": "0.5.1",
+    "typescript": "^5.9.3",
+    "unplugin-vue-markdown": "^0.26.3",
+    "vite": "^4.5.14",
+    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-prerender": "1.0.8",
-    "vue-tsc": "0.40.4"
+    "vue-tsc": "^2.2.12"
   }
 }

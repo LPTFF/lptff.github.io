@@ -54,6 +54,7 @@ import { ref, onMounted, computed, nextTick } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import leetCodeList from "../../../public/data/leetCode/leetCode_1.json";
 import axios from "axios";
+import { Refresh } from "@element-plus/icons-vue";
 import { ElLoading, ElCard, ElButton, ElIcon } from "element-plus";
 let leetCodeData = [] as any[];
 const importLeetCodeData = async () => {
@@ -205,6 +206,7 @@ export default {
     ElCard,
     ElButton,
     ElIcon,
+    Refresh,
   },
 };
 </script>

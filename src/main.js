@@ -5,22 +5,15 @@ import "element-plus/theme-chalk/index.css";
 
 const myApp = createApp(App);
 
+// 允许的路由白名单
+const allowedRoutes = [
+  "/", "/job", "/blog", "/life", "/message",
+  "/fundHoldInfoMsg", "/newsArticle", "/loginFund",
+  "/fundPilot", "/fundPilotPlus", "/fundPilotV1", "/cryptocurrency",
+];
+
 router.beforeEach((to, from, next) => {
-  if (
-    to.path === "/home" ||
-    to.path === "/job" ||
-    to.path === "/blog" ||
-    to.path === "/life" ||
-    to.path === "/message" ||
-    to.path === "/fundHoldInfoMsg" ||
-    to.path === "/newsArticle" ||
-    to.path === "/loginFund" ||
-    to.path === "/fundPilot" ||
-    to.path === "/fundPilotPlus" ||
-    to.path === "/fundPilotV1" ||
-    to.path === "/cryptocurrency" ||
-    to.path === "/"
-  ) {
+  if (allowedRoutes.includes(to.path)) {
     next();
   } else {
     next("/");

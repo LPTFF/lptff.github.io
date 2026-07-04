@@ -29,12 +29,13 @@
 import { defineComponent, ref } from "vue";
 import { ElInput, ElIcon, ElTag } from "element-plus";
 import { gotoOutPage } from "../../../utils/utils";
+import { Search } from "@element-plus/icons-vue";
 enum WebsiteType {
   Success = "success",
   Warning = "warning",
   Danger = "danger",
   Info = "info",
-  Default = "",
+  Default = "primary",
 }
 export default defineComponent({
   name: "App",
@@ -234,6 +235,7 @@ export default defineComponent({
     ElInput,
     ElIcon,
     ElTag,
+    Search,
   },
 });
 </script>

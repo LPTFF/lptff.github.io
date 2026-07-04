@@ -8,7 +8,7 @@
         <el-col :span="24" :md="8" :lg="6" v-for="(item, sonIndex) in websites.list" :key="sonIndex">
           <el-card class="website-common-card" :style="`background-color:${getBackgroundColor(parentIndex as number)}`"
             shadow="hover">
-            <el-link :href="item.url" target="_blank" class="website-link" :underline="false"
+            <el-link :href="item.url" target="_blank" class="website-link" underline="never"
               @click.prevent="gotoNewsWebsite(item)">
               <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)" />
               {{ item.name }}
@@ -31,7 +31,7 @@ enum WebsiteType {
   Warning = "warning",
   Danger = "danger",
   Info = "info",
-  Default = "",
+  Default = "primary",
 }
 
 export default defineComponent({

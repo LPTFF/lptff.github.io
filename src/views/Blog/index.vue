@@ -73,7 +73,7 @@
 <script lang="ts">
 import { ref } from "vue";
 import { ElMessage } from "element-plus";
-import { Plus, Search } from "@element-plus/icons-vue";
+import { Plus, Search, SemiSelect } from "@element-plus/icons-vue";
 import logoImageUrl from "../../public/img/logo.jpg";
 import { ElButton } from "element-plus";
 export default {
@@ -93,6 +93,7 @@ export default {
       selectIndex,
       Plus,
       Search,
+      SemiSelect,
       input1,
       activeName,
       handleClick,

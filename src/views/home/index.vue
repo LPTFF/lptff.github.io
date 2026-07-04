@@ -31,11 +31,11 @@
   </div>
 </template>
 
-<script lang="ts">
-import { ref, onMounted, computed, defineAsyncComponent, Ref } from "vue";
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, computed, defineAsyncComponent } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRouter } from "vue-router";
-import logoImageUrl from "../../public/img/logo.jpg";
+import logoUrl from "../../public/img/logo.jpg";
 import {
   ElMenu,
   ElMenuItem,
@@ -70,125 +70,100 @@ const propNameMap: Record<string, string> = {
   '10': 'githubTrendingLocation',
 };
 
-export default {
-  setup() {
-    const previousRoute = ref("");
-    const isPCRes = computed(() => isPC());
-    const router = useRouter();
-    const selectIndex = isPCRes.value ? ref("4") : ref("0");
-    const menuList = [
-      '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
-      '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending',
-    ];
+const previousRoute = ref("");
+const isPCRes = computed(() => isPC());
+const router = useRouter();
+const selectIndex = ref(isPCRes.value ? "4" : "0");
+const menuList = [
+  '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
+  '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending',
+];
 
-    const menuItemRefs: any = ref([]);
-    const lastClickTime: Ref<number> = ref(0);
-    let clickTimer: ReturnType<typeof setTimeout>;
-    const erudaInitialized = ref(false);
+const menuItemRefs = ref<any[]>([]);
+const lastClickTime = ref(0);
+let clickTimer: ReturnType<typeof setTimeout>;
+let erudaInitialized = false;
 
-    const goBack = () => {
-      const nowTime = new Date().getTime();
-      if (nowTime - lastClickTime.value < 300) {
-        lastClickTime.value = 0;
-        clickTimer && clearTimeout(clickTimer);
-        if (!erudaInitialized.value) {
-          initEruda();
-          erudaInitialized.value = true;
-        }
-      } else {
-        lastClickTime.value = nowTime;
-        clickTimer = setTimeout(() => {
-          previousRoute.value ? router.back() : router.push("/");
-        }, 400);
-      }
-    };
-
-    const handleSelect = (key: any) => {
-      const elComponent = menuItemRefs.value[Number(key)];
-      document.title = elComponent?.$el?.innerText || '';
-      selectIndex.value = key;
-      const locationInfo = sessionStorage.getItem(`scrollInfoLocation${key}`);
-      const container = document.querySelector(
-        isPCRes.value ? ".scroll-home-container" : ".inner-container"
-      );
-      if (container) {
-        container.scrollTo({
-          top: locationInfo ? Number(JSON.parse(locationInfo)) : 0,
-          behavior: "auto",
-        });
-      }
-    };
-
-    const gotoIssue = () => {
-      const issueUrl = window.location.origin.includes("love-tff.gitee.io")
-        ? "https://gitee.com/love-tff/love-tff/issues"
-        : "https://github.com/LPTFF/lptff.github.io/issues";
-      gotoOutPage(issueUrl);
-    };
-
-    onMounted(() => {
-      previousRoute.value = window.history.state?.back ?? "";
-    });
-
-    const logoUrl = logoImageUrl;
-    const contentLocation = ref(0);
-    let currentScroll = 0;
-    let previousScroll = 0;
-
-    const handleScroll = (event: any) => {
-      const { scrollTop, scrollHeight } = event.target;
-      sessionStorage.setItem(`scrollInfoLocation${selectIndex.value}`, JSON.stringify(scrollTop));
-      currentScroll = scrollHeight - scrollTop;
-      if (currentScroll - previousScroll < 0) {
-        contentLocation.value = Math.floor(isPCRes.value ? scrollTop / 200 : scrollTop / 100);
-      }
-      previousScroll = currentScroll;
-    };
-
-    const containerStyle = computed(() => ({
-      height: `${window.innerHeight - 16}px`,
-    }));
-
-    // 当前激活的懒加载组件
-    const currentComponent = computed(() => componentMap[selectIndex.value]);
-
-    // 当前组件需要传入的 props（无 location prop 的组件传空对象）
-    const currentComponentProps = computed(() => {
-      const propName = propNameMap[selectIndex.value];
-      return propName ? { [propName]: contentLocation.value } : {};
-    });
-
-    // 北京时间年份，静态值无需响应式
-    const currentYear = new Date(
-      Date.now() + (8 * 60 - new Date().getTimezoneOffset()) * 60000
-    ).getFullYear();
-
-    return {
-      selectIndex,
-      previousRoute,
-      isPCRes,
-      goBack,
-      handleSelect,
-      gotoIssue,
-      logoUrl,
-      handleScroll,
-      containerStyle,
-      contentLocation,
-      currentYear,
-      menuList,
-      menuItemRefs,
-      currentComponent,
-      currentComponentProps,
-    };
-  },
-  components: {
-    ElMenu,
-    ElMenuItem,
-    ElHeader,
-    ElFooter,
-    ElMain,
-  },
+const goBack = () => {
+  const nowTime = Date.now();
+  if (nowTime - lastClickTime.value < 300) {
+    lastClickTime.value = 0;
+    clearTimeout(clickTimer);
+    if (!erudaInitialized) {
+      initEruda();
+      erudaInitialized = true;
+    }
+  } else {
+    lastClickTime.value = nowTime;
+    clickTimer = setTimeout(() => {
+      previousRoute.value ? router.back() : router.push("/");
+    }, 400);
+  }
 };
+
+const handleSelect = (key: string) => {
+  const elComponent = menuItemRefs.value[Number(key)];
+  document.title = elComponent?.$el?.innerText || '';
+  selectIndex.value = key;
+  const locationInfo = sessionStorage.getItem(`scrollInfoLocation${key}`);
+  const container = document.querySelector(
+    isPCRes.value ? ".scroll-home-container" : ".inner-container"
+  );
+  if (container) {
+    container.scrollTo({
+      top: locationInfo ? Number(JSON.parse(locationInfo)) : 0,
+      behavior: "auto",
+    });
+  }
+};
+
+const gotoIssue = () => {
+  const issueUrl = window.location.hostname.includes("gitee.io")
+    ? "https://gitee.com/love-tff/love-tff/issues"
+    : "https://github.com/LPTFF/lptff.github.io/issues";
+  gotoOutPage(issueUrl);
+};
+
+onMounted(() => {
+  previousRoute.value = window.history.state?.back ?? "";
+});
+
+onUnmounted(() => {
+  clearTimeout(clickTimer);
+});
+
+const contentLocation = ref(0);
+let currentScroll = 0;
+let previousScroll = 0;
+
+const handleScroll = (event: Event) => {
+  const target = event.target as HTMLElement;
+  const { scrollTop, scrollHeight } = target;
+  sessionStorage.setItem(`scrollInfoLocation${selectIndex.value}`, JSON.stringify(scrollTop));
+  currentScroll = scrollHeight - scrollTop;
+  if (currentScroll - previousScroll < 0) {
+    contentLocation.value = Math.floor(isPCRes.value ? scrollTop / 200 : scrollTop / 100);
+  }
+  previousScroll = currentScroll;
+};
+
+const containerStyle = computed(() => ({
+  height: `${window.innerHeight - 16}px`,
+}));
+
+// 当前激活的懒加载组件
+const currentComponent = computed(() => componentMap[selectIndex.value]);
+
+// 当前组件需要传入的 props（无 location prop 的组件传空对象）
+const currentComponentProps = computed(() => {
+  const propName = propNameMap[selectIndex.value];
+  return propName ? { [propName]: contentLocation.value } : {};
+});
+
+// 北京时间年份，静态值无需响应式
+const currentYear = new Date(
+  Date.now() + (8 * 60 - new Date().getTimezoneOffset()) * 60000
+).getFullYear();
 </script>
 
 <style scoped>
