@@ -236,8 +236,13 @@ export default {
 
 .news-card {
   margin-bottom: 20px;
-  height: 482px;
+  min-height: 482px;
   margin-right: 20px;
+  overflow: hidden;
+}
+
+.news-card :deep(.el-card__body) {
+  overflow: hidden;
 }
 
 .img-news {
@@ -261,11 +266,15 @@ export default {
 .news-summary {
   display: block;
   margin: 0;
-  height: 320px;
+  max-height: 320px;
   font-size: 18px;
   font-family: Arial;
   overflow: hidden; /* 隐藏溢出部分 */
   text-overflow: ellipsis; /* 显示省略号 */
+  display: -webkit-box;
+  -webkit-line-clamp: 10;
+  line-clamp: 10;
+  -webkit-box-orient: vertical;
 }
 .news-date {
   color: #999;
