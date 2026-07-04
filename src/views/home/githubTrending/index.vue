@@ -176,7 +176,7 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    const newsGuide = [...githubNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const newsGuide: any[] = [...githubNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
