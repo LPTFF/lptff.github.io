@@ -6,7 +6,7 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 
 export default defineConfig({
-  base: "./",
+  base: "/",
   plugins: [
     AutoImport({
       resolvers: [ElementPlusResolver({ importStyle: "css" })],
@@ -111,6 +111,7 @@ export default defineConfig({
           if (id.includes("src/views/Message")) return "message-view";
           if (id.includes("src/views/Login")) return "login-view";
           if (id.includes("src/views/Blog")) return "blog-view";
+          if (id.includes("src/study/notebook")) return "blog-content";
           if (id.includes("src/views/job")) return "job-view";
           if (id.includes("src/views/life")) return "life-view";
           if (id.includes("src/components")) return "components";

@@ -1,6 +1,16 @@
-# 水下机器人的运动分析与建模
-
-<div style='color:red'>2018-12-09 </div>
+---
+title: "水下机器人的运动分析与建模"
+date: "2018-12-09"
+slug: "underwaterRobots01"
+category: "水下机器人"
+tags: ["机器人", "运动建模"]
+summary: "水下机器人运动分析与建模学习笔记。"
+cover: "/image/underwaterRobots01/1683700534763.png"
+legacyPaths:
+  - "/study/notebook/2018/underwaterRobots01.md"
+  - "/study/notebook/2018/underwaterRobots01.html"
+  - "/2018/12/09/水下机器人研究01/"
+---
 
 先放出框架图
 

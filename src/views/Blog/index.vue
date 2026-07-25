@@ -1,202 +1,62 @@
 <template>
-  <div class="home-head common-flex">
-    <div class="common-evenly">
-      <div class="title">tangff</div>
-      <div class="options">
-        <el-dropdown @command="handleCommand" @visible-change="handleClick">
-          <span class="three-span-select">
-            <div class="three-div-select">
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-              <div class="three-select">
-                <el-icon color="#cccccc"><SemiSelect /></el-icon>
-              </div>
-            </div>
-            <el-icon v-if="!selectIndex" color="#cccccc" class="caret-bottom"
-              ><CaretRight
-            /></el-icon>
-            <el-icon v-if="selectIndex" color="#cccccc" class="caret-bottom"
-              ><CaretBottom
-            /></el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item command="a">求学笔记</el-dropdown-item>
-              <el-dropdown-item command="b">学术网站</el-dropdown-item>
-              <el-dropdown-item command="c">常用链接</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
+  <section>
+    <div class="hero">
+      <div>
+        <p class="eyebrow">学习笔记 · 技术分享</p>
+        <h1>把问题想清楚，再写下来。</h1>
+        <p class="hero-copy">这里收录关于人工智能、自动驾驶和水下机器人的学习记录。</p>
       </div>
-      <div class="vertical-line">
-        <el-divider direction="vertical" color="#cccccc" />
-      </div>
-      <div class="el-search">
-        <el-input
-          v-model="input1"
-          class="el-input-search"
-          size="large"
-          placeholder="Search article here..."
-          :prefix-icon="Search"
-        />
-      </div>
+      <img :src="logoUrl" alt="tangff" class="hero-avatar" />
     </div>
-    <div class="common-flex">
-      <div class="el-div-button">
-        <el-button type="success" round>博客</el-button>
+    <div class="toolbar">
+      <div class="filters">
+        <el-button v-for="category in categories" :key="category" :type="selectedCategory === category ? 'success' : 'info'" plain size="small" @click="selectedCategory = selectedCategory === category ? '' : category">{{ category }}</el-button>
       </div>
-      <div class="el-div-avatar">
-        <el-avatar :size="50" :src="logoUrl" />
-      </div>
+      <span class="count">共 {{ filteredArticles.length }} 篇文章</span>
     </div>
-  </div>
-  <div class="body-content">
-    <el-tabs v-model="activeName" class="demo-tabs">
-      <el-tab-pane label="首页" name="first">
-        <div>
-          <el-row>
-            <el-col :span="24" :md="8" :lg="8" v-for="index in 13" :key="index">
-              <el-card class="box-card" shadow="hover"> </el-card>
-            </el-col>
-          </el-row>
-        </div>
-      </el-tab-pane>
-      <el-tab-pane label="电影" name="second">Config</el-tab-pane>
-      <el-tab-pane label="题库" name="third">Role</el-tab-pane>
-    </el-tabs>
-  </div>
+    <el-row :gutter="18">
+      <el-col v-for="article in filteredArticles" :key="article.slug" :xs="24" :sm="12" :lg="8" class="article-col">
+        <RouterLink class="article-card" :to="`/blog/articles/${article.slug}`">
+          <img :src="article.cover" :alt="article.title" class="cover" />
+          <div class="card-body">
+            <div class="meta"><span>{{ article.date }}</span><span>{{ article.category }}</span></div>
+            <h2>{{ article.title }}</h2>
+            <p>{{ article.summary }}</p>
+            <div class="tags"><el-tag v-for="tag in article.tags" :key="tag" size="small" effect="plain">{{ tag }}</el-tag></div>
+          </div>
+        </RouterLink>
+      </el-col>
+    </el-row>
+  </section>
 </template>
-<script lang="ts">
-import { ref } from "vue";
-import { ElMessage } from "element-plus";
-import { Plus, Search, SemiSelect } from "@element-plus/icons-vue";
-import logoImageUrl from "../../public/img/logo.jpg";
-import { ElButton } from "element-plus";
-export default {
-  setup() {
-    let selectIndex = ref(true);
-    let input1 = ref("");
-    const activeName = ref("first");
-    const handleCommand = (command: string | number | object) => {
-      ElMessage(`click on item ${command}`);
-    };
-    const handleClick = (type: any) => {
-      selectIndex.value = type;
-    };
-    const logoUrl = ref(logoImageUrl); // 图片路径变量
-    return {
-      handleCommand,
-      selectIndex,
-      Plus,
-      Search,
-      SemiSelect,
-      input1,
-      activeName,
-      handleClick,
-      logoUrl,
-    };
-  },
-  components: {
-    ElButton,
-  },
-};
+
+<script setup lang="ts">
+import { computed, ref } from "vue";
+import { articles } from "./data/articles";
+import logoUrl from "../../public/img/logo.jpg";
+
+const selectedCategory = ref("");
+const categories = [...new Set(articles.map((article) => article.category))];
+const filteredArticles = computed(() => selectedCategory.value ? articles.filter((article) => article.category === selectedCategory.value) : articles);
 </script>
 
 <style scoped>
-.el-right-card {
-  margin-right: 64px;
-}
-.el-div-card {
-  display: flex;
-}
-.box-card {
-  /* width: 433px; */
-  height: 482px;
-  margin-bottom: 66px;
-  border-radius: 4px;
-  margin-right: 20px;
-}
-.home-head {
-  height: 155px;
-}
-.common-flex {
-  display: flex;
-  justify-content: space-between;
-}
-.common-evenly {
-  display: flex;
-  justify-content: space-evenly;
-}
-.title {
-  color: rgb(174, 209, 125);
-  margin: 58px 0px 0px 247px;
-  font-size: 30px;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-  font-weight: 400;
-  line-height: 21px;
-}
-.body-content {
-  background: #f7f8fa;
-  min-height: 800px;
-}
-.demo-tabs {
-  padding: 77px 247px;
-}
-.options {
-  margin: 60px 0px 0px 10px;
-}
-.three-select {
-  height: 5px;
-}
-.three-span-select {
-  display: flex;
-}
-.three-div-select {
-  margin-top: -4px;
-}
-.caret-bottom {
-  margin-left: 2px;
-}
-.vertical-line {
-  margin: 50px 0 0 30px;
-}
-.el-search {
-  margin: 49px 0px 0px 40px;
-}
-.el-input-search {
-  width: 434px;
-  height: 45px;
-}
-.el-div-button {
-  margin: 53px 0px 0px 0px;
-}
-.el-div-avatar {
-  margin: 40px 247px 0px 20px;
-}
-:deep(.el-input__wrapper) {
-  border-radius: 30px;
-}
-:deep(.el-divider--vertical) {
-  height: 3em;
-}
-:deep(.el-tabs__item) {
-  color: #c8c9ca;
-  font-size: 30px;
-  margin-bottom: 20px;
-  margin-right: 40px;
-  font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB",
-    "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
-}
-:deep(.el-tabs__item.is-active) {
-  color: #454545;
-}
-:deep(.el-tabs__active-bar) {
-  background-color: rgb(103, 194, 58);
-}
+.hero { display:flex; justify-content:space-between; align-items:center; padding: 30px 34px; margin-bottom: 28px; background: linear-gradient(135deg, #f0f9eb, #fff); border: 1px solid #e1f3d8; border-radius: 14px; }
+.eyebrow { color: #67c23a; font-size: 13px; letter-spacing: .08em; }
+h1 { margin: 10px 0; font-size: clamp(28px, 5vw, 42px); font-weight: 650; }
+.hero-copy { margin: 0; color: #909399; }
+.hero-avatar { width: 86px; height: 86px; border-radius: 50%; object-fit: cover; border: 4px solid #fff; box-shadow: 0 8px 22px #67c23a33; }
+.toolbar { display:flex; align-items:center; justify-content:space-between; margin-bottom: 18px; }
+.filters { display:flex; flex-wrap:wrap; gap:8px; }
+.count { color:#909399; font-size:13px; }
+.article-col { margin-bottom: 18px; }
+.article-card { display:block; height:100%; overflow:hidden; border:1px solid #ebeef5; border-radius:12px; background:#fff; color:inherit; text-decoration:none; transition: transform .2s, box-shadow .2s; }
+.article-card:hover { transform: translateY(-3px); box-shadow: 0 10px 26px #30313314; }
+.cover { display:block; width:100%; height:150px; object-fit:cover; background:#f0f9eb; }
+.card-body { padding: 18px; }
+.meta { display:flex; justify-content:space-between; color:#a8abb2; font-size:12px; }
+h2 { margin: 12px 0 8px; font-size:19px; }
+.card-body p { min-height:42px; margin:0 0 15px; color:#606266; line-height:1.65; font-size:14px; }
+.tags { display:flex; gap:6px; flex-wrap:wrap; }
+@media (max-width: 520px) { .hero { padding: 24px; } .hero-avatar { width:62px; height:62px; } .hero-copy { font-size:13px; } }
 </style>
-;

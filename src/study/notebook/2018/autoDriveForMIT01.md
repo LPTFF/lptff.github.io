@@ -1,6 +1,16 @@
-# 无人驾驶麻省理工01讲
-
-<div style='color:red'>2018-12-09 </div>
+---
+title: "无人驾驶麻省理工01讲"
+date: "2018-12-09"
+slug: "autoDriveForMIT01"
+category: "无人驾驶"
+tags: ["自动驾驶", "深度学习"]
+summary: "麻省理工自动驾驶 MIT 6.S094 第一讲学习笔记。"
+cover: "/image/autoDriveForMIT01/1683701632578.png"
+legacyPaths:
+  - "/study/notebook/2018/autoDriveForMIT01.md"
+  - "/study/notebook/2018/autoDriveForMIT01.html"
+  - "/2018/12/09/自动驾驶麻省理工01/"
+---
 
 PDF链接: [麻省理工自动驾驶 MIT 6.S094第一讲](https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/EUUMsVDo9yJAg9bWfz40jQsBuXFY13DTisylqQDg1nwyUQ?e=EGdbDD)
 

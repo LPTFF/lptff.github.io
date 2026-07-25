@@ -1,6 +1,16 @@
-# 无人驾驶麻省理工03讲
-
-<div style='color:red'>2018-12-15 </div>
+---
+title: "无人驾驶麻省理工03讲"
+date: "2018-12-15"
+slug: "autoDriveForMIT03"
+category: "无人驾驶"
+tags: ["深度强化学习", "自动驾驶"]
+summary: "麻省理工自动驾驶 MIT 6.S094 第三讲学习笔记。"
+cover: "/image/autoDriveForMIT03/1683702913884.png"
+legacyPaths:
+  - "/study/notebook/2018/autoDriveForMIT03.md"
+  - "/study/notebook/2018/autoDriveForMIT03.html"
+  - "/2018/12/15/自动驾驶麻省理工03/"
+---
 
 相关资料打包链接: [麻省理工自动驾驶 MIT 6.S094第三讲](https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/Es2eM_taTLZFkwlT-hbnkXABGafyJ10B19kd1Ltqijg9xA?e=dFowgK)
 

@@ -1,6 +1,16 @@
-# 无人驾驶麻省理工02讲
-
-<div style='color:red'>2018-12-09 </div>
+---
+title: "无人驾驶麻省理工02讲"
+date: "2018-12-09"
+slug: "autoDriveForMIT02"
+category: "无人驾驶"
+tags: ["自动驾驶", "传感器"]
+summary: "麻省理工自动驾驶 MIT 6.S094 第二讲学习笔记。"
+cover: "/image/autoDriveForMIT02/1683701246968.png"
+legacyPaths:
+  - "/study/notebook/2018/autoDriveForMIT02.md"
+  - "/study/notebook/2018/autoDriveForMIT02.html"
+  - "/2018/12/09/自动驾驶麻省理工02/"
+---
 
 相关资料打包链接: [麻省理工自动驾驶 MIT 6.S094第二讲](https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/ErQbTLrw69xLr7uSGoyKLfcB0wnatT99IWidnrhy7elCHA?e=JuGaNq)
 

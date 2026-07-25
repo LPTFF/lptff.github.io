@@ -1,6 +1,16 @@
-# AI应用之水下机器人02
-
-<div style='color:red'>2019-04-26</div>
+---
+title: "AI应用之水下机器人02"
+date: "2019-04-26"
+slug: "underwaterRobots02"
+category: "水下机器人"
+tags: ["人工智能", "机器人"]
+summary: "AI 应用之水下机器人学习笔记。"
+cover: "/image/underwaterRobots02/1683703712573.png"
+legacyPaths:
+  - "/study/notebook/2019/underwaterRobots02.md"
+  - "/study/notebook/2019/underwaterRobots02.html"
+  - "/2019/04/26/计算机技术应用之水下机器人02/"
+---
 
 相关资料打包链接: [AI应用之水下机器人](https://whuteducn-my.sharepoint.com/:f:/g/personal/220077_whut_edu_cn/EkoOUW1B3C9PgiqVEJ25sM4BI1AFSso1CblshRNbYsQ4Hg?e=dV5Ht7)
 

@@ -1,6 +1,16 @@
-# 无人驾驶麻省理工04讲
-
-<div style='color:red'>2019-01-12 </div>
+---
+title: "无人驾驶麻省理工04讲"
+date: "2019-01-12"
+slug: "autoDriveForMIT04"
+category: "无人驾驶"
+tags: ["计算机视觉", "自动驾驶"]
+summary: "麻省理工自动驾驶 MIT 6.S094 第四讲学习笔记。"
+cover: "/image/autoDriveForMIT04/1683703412719.png"
+legacyPaths:
+  - "/study/notebook/2019/autoDriveForMIT04.md"
+  - "/study/notebook/2019/autoDriveForMIT04.html"
+  - "/2019/01/12/自动驾驶麻省理工04/"
+---
 
 相关资料打包链接: [麻省理工自动驾驶 MIT 6.S094第四讲](https://whuteducn-my.sharepoint.com/:b:/g/personal/220077_whut_edu_cn/Ea5iXqDY4Q5Og-Io6nAyUAYBM4ByRP4tgk2RIkq79QRLPg?e=JdssEk)
 
