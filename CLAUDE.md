@@ -26,21 +26,21 @@
 
 ## 工作规则
 
-- 每项任务开始时先阅读 `.claude/project-context.md`；使用其已确认的事实和决策，而不是重新发现它们。
-- 首先对请求进行分类。对于清晰、低风险的工作，直接执行；将冗长的规划保留给架构性、跨领域、破坏性或实质上模糊的变更。
-- 仅验证任务影响区域内的事实。优先使用当前源码/配置，然后是项目上下文、定向搜索和生成输出。将结论标记为已确认、推断或未解决，而不是猜测。
+- 普通任务默认在当前 checkout 中定向探索并进行最小修改，不创建隔离副本。
+- 不默认启动并行 Agent、Plan Agent 或分阶段流程。仅当依赖/构建链迁移、跨领域变更、破坏性操作或实质模糊的需求需要回滚边界时，才按 `AGENTS.md` 的高风险升级流程处理。
+- 使用 `.claude/project-context.md` 中已确认的事实和决策，避免重复全仓库发现；仅验证任务影响区域内的事实，优先使用当前源码/配置、项目上下文、定向搜索和生成输出，并将结论标记为已确认、推断或未解决。
 - 如果当前代码与上下文矛盾，相信代码，验证受影响的路径，并在同一迭代中更新上下文。
 - 保持变更最小化并限定在用户请求范围内。仅当一个未解决的抉择会改变行为、兼容性、架构或不可逆操作时才向用户询问；先将其记录在`未解决问题`下。
-- 交接前，当持久化事实发生变化时更新 `.claude/project-context.md`，并将该次迭代追加到 `.claude/iteration-log.md`。
+- 仅当项目事实、约定或复杂迭代证据实际变化时，更新 `.claude/project-context.md`、本文件或 `.claude/iteration-log.md`；小型局部 UI/内容编辑和纯只读说明无需机械更新文档。
 - 优先选择 `src/`、`scripts/`、`vite.config.ts`、`package.json` 和 `tsconfig*.json` 下的源文件，而非生成输出。
-- 对于广泛搜索，排除 `node_modules/`、`dist/`、`.git/`、`.claude/worktrees/`、`src/public/data/`、`public/image/`、`package-lock.json`、`auto-imports.d.ts` 和 `components.d.ts`；仅在相关时明确包含它们。
-- 仅当 VS Code/LSP 上下文、符号、引用或当前编辑器有用时才使用 `vscode-context-mcp`；普通的仓库搜索可以使用标准文件工具。
+- 对于广泛搜索，排除 `node_modules/`、`dist/`、`.git/`、`src/public/data/`、`public/image/`、`package-lock.json`、`auto-imports.d.ts` 和 `components.d.ts`；仅在相关时明确包含它们。
+- 仅当 VS Code/LSP 上下文、符号、引用或当前编辑器有用时才使用 `vscode-context-mcp`；普通仓库搜索、文件读写不使用它。
 - 不要从此仓库修改用户级别的 Claude 配置、记忆、`.claude.json` 或全局设置。
 - 除非用户明确要求，否则不要添加自动钩子或定时任务。
 
-## 依赖安全与 Agent 规划经验
+## 依赖安全与构建链基线
 
-- 依赖安全任务采用“基线审计 → 并行只读探索 → Plan Agent 汇总 → 分阶段实施 → 每阶段重新安装/构建/审计”的流程；不要直接运行 `npm audit fix --force`。
+- 依赖安全和构建链的高风险升级才使用 `AGENTS.md` 中的升级流程；普通任务不默认并行探索或 Plan Agent。
 - `npm audit --registry=https://registry.npmjs.org` 统计的是依赖树漏洞，GitHub Dependabot 的告警条数可能因公告、节点和历史告警而不同；必须通过 `npm ls` 和 `npm explain` 追踪实际链路。
 - 生产依赖与开发依赖分开报告：同时运行完整审计和 `npm audit --omit=dev`，不要把构建工具漏洞误报成线上运行时漏洞。
 - 直接依赖替换前先搜索实际 API 使用边界；本项目的 Excel 功能只写出工作簿，因此用 `write-excel-file` 替代 `xlsx`，并通过 [src/utils/exportExcel.ts](src/utils/exportExcel.ts) 保持页面调用一致和动态加载。
@@ -48,12 +48,7 @@
 - Windows 上 `npm ci` 可能因开发服务器残留的 `esbuild.exe` 或 Rollup 原生模块文件锁失败；先停止相关 Node/esbuild 进程后再重试，并在日志中记录该环境因素。
 - `npm run serve` 返回首页 HTTP 200 不等于浏览器流程验证成功；如果 Vite 依赖预构建出现 504、HMR 或控制台错误，必须明确标记导出按钮等交互验证为未完成。
 
+## 验证
 
-- 对于代码变更，优先使用 `npm run build`。
-- 对于仅类型检查，使用 `npx vue-tsc --noEmit`。
-- 对于浏览器相关变更，运行 `npm run serve` 并检查 Vite 应用。
-- 如实报告失败的测试或跳过的验证。
-
-## 持续上下文维护
-
-`.claude/project-context.md` 是维护的项目上下文记录。每次迭代如果改变了架构、目录、路由、构建行为、依赖、生成文件或数据流，都必须更新其基线和维护检查清单。小型独立的 UI 编辑只需检查清单即可。
+- 对代码变更优先运行 `npm run build`；仅类型检查使用 `npx vue-tsc --noEmit`。
+- 浏览器相关变更运行 `npm run serve` 并检查受影响流程；如实报告失败或跳过的验证。
