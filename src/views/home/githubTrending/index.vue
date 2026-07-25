@@ -298,6 +298,9 @@ export default {
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
     const guideNewsLimited = computed(() => {
+      if (props.githubTrendingLocation === undefined || props.githubTrendingLocation === null) {
+        return newsGuide;
+      }
       const length: number = Number(props.githubTrendingLocation); // 切割长度
       let initData = isPCRes.value ? 9 : 5;
       let guideTmpAll;

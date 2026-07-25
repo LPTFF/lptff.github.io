@@ -155,6 +155,9 @@ export default {
     };
     let maxLength = 0;
     const newsAllLimited = computed(() => {
+      if (props.newsLocation === undefined || props.newsLocation === null) {
+        return newsAll;
+      }
       const length: number = Number(props.newsLocation);
       let initData = isPCRes.value ? 6 : 2;
       let rate = isPCRes.value ? 2 : 1;

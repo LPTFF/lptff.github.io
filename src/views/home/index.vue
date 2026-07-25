@@ -10,9 +10,8 @@
             </div>
           </div>
           <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
-            <el-menu-item v-for="(item, index) in menuList" :key="index" :index="String(index)"
-              :ref="el => menuItemRefs[index] = el">
-              {{ item }}
+            <el-menu-item v-for="item in menuConfig" :key="item.key" :index="item.key">
+              {{ item.label }}
             </el-menu-item>
           </el-menu>
         </el-header>
@@ -45,41 +44,42 @@ import {
 } from "element-plus";
 
 // 子组件懒加载，按需分包，减少首屏加载体积
-const componentMap: Record<string, ReturnType<typeof defineAsyncComponent>> = {
-  '0': defineAsyncComponent(() => import('./guide/index.vue')),
-  '1': defineAsyncComponent(() => import('./52pojie/index.vue')),
-  '2': defineAsyncComponent(() => import('./welfare/index.vue')),
-  '3': defineAsyncComponent(() => import('./douban/index.vue')),
-  '4': defineAsyncComponent(() => import('./tools/index.vue')),
-  '5': defineAsyncComponent(() => import('./news/index.vue')),
-  '6': defineAsyncComponent(() => import('./bossZhipin/index.vue')),
-  '7': defineAsyncComponent(() => import('./leetCode/index.vue')),
-  '8': defineAsyncComponent(() => import('./findJob/index.vue')),
-  '9': defineAsyncComponent(() => import('./advancedSearch/index.vue')),
-  '10': defineAsyncComponent(() => import('./githubTrending/index.vue')),
-};
-
-// 各组件对应的 location prop 名称
-const propNameMap: Record<string, string> = {
-  '0': 'guideLocation',
-  '1': 'pojieLocation',
-  '2': 'welfareLocation',
-  '3': 'doubanLocation',
-  '5': 'newsLocation',
-  '9': 'newsLocation',
-  '10': 'githubTrendingLocation',
-};
+const menuConfig = [
+  {
+    key: "guide",
+    label: "热门资讯",
+    component: defineAsyncComponent(() => import("./guide/index.vue")),
+    propName: "guideLocation",
+  },
+  {
+    key: "pojie",
+    label: "吾爱破解",
+    component: defineAsyncComponent(() => import("./52pojie/index.vue")),
+    propName: "pojieLocation",
+  },
+  {
+    key: "tools",
+    label: "导航专区",
+    component: defineAsyncComponent(() => import("./tools/index.vue")),
+  },
+  {
+    key: "boss-zhipin",
+    label: "Boss直聘",
+    component: defineAsyncComponent(() => import("./bossZhipin/index.vue")),
+  },
+  {
+    key: "douban",
+    label: "豆瓣电影",
+    component: defineAsyncComponent(() => import("./douban/index.vue")),
+    propName: "doubanLocation",
+  },
+];
 
 const previousRoute = ref("");
 const isPCRes = computed(() => isPC());
 const router = useRouter();
-const selectIndex = ref(isPCRes.value ? "4" : "0");
-const menuList = [
-  '热门资讯', '吾爱破解', '薅羊毛', '豆瓣电影', '导航专区',
-  '技术论坛', 'Boss直聘', 'LeetCode', '面试题', '高级搜索', 'GitHubTrending',
-];
+const selectIndex = ref(isPCRes.value ? "tools" : "guide");
 
-const menuItemRefs = ref<any[]>([]);
 const lastClickTime = ref(0);
 let clickTimer: ReturnType<typeof setTimeout>;
 let erudaInitialized = false;
@@ -102,10 +102,10 @@ const goBack = () => {
 };
 
 const handleSelect = (key: string) => {
-  const elComponent = menuItemRefs.value[Number(key)];
-  document.title = elComponent?.$el?.innerText || '';
+  const currentItem = menuConfig.find((item) => item.key === key);
+  document.title = currentItem?.label || "";
   selectIndex.value = key;
-  const locationInfo = sessionStorage.getItem(`scrollInfoLocation${key}`);
+  const locationInfo = sessionStorage.getItem(`scrollInfoLocation-${key}`);
   const container = document.querySelector(
     isPCRes.value ? ".scroll-home-container" : ".inner-container"
   );
@@ -126,6 +126,7 @@ const gotoIssue = () => {
 
 onMounted(() => {
   previousRoute.value = window.history.state?.back ?? "";
+  document.title = menuConfig.find((item) => item.key === selectIndex.value)?.label || "";
 });
 
 onUnmounted(() => {
@@ -139,7 +140,7 @@ let previousScroll = 0;
 const handleScroll = (event: Event) => {
   const target = event.target as HTMLElement;
   const { scrollTop, scrollHeight } = target;
-  sessionStorage.setItem(`scrollInfoLocation${selectIndex.value}`, JSON.stringify(scrollTop));
+  sessionStorage.setItem(`scrollInfoLocation-${selectIndex.value}`, JSON.stringify(scrollTop));
   currentScroll = scrollHeight - scrollTop;
   if (currentScroll - previousScroll < 0) {
     contentLocation.value = Math.floor(isPCRes.value ? scrollTop / 200 : scrollTop / 100);
@@ -152,11 +153,13 @@ const containerStyle = computed(() => ({
 }));
 
 // 当前激活的懒加载组件
-const currentComponent = computed(() => componentMap[selectIndex.value]);
+const currentComponent = computed(() =>
+  menuConfig.find((item) => item.key === selectIndex.value)?.component
+);
 
 // 当前组件需要传入的 props（无 location prop 的组件传空对象）
 const currentComponentProps = computed(() => {
-  const propName = propNameMap[selectIndex.value];
+  const propName = menuConfig.find((item) => item.key === selectIndex.value)?.propName;
   return propName ? { [propName]: contentLocation.value } : {};
 });
 

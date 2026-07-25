@@ -206,6 +206,9 @@ export default {
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
     const welfareLimited = computed(() => {
+      if (props.welfareLocation === undefined || props.welfareLocation === null) {
+        return welfareSource;
+      }
       const length: number = Number(props.welfareLocation); // 切割长度
       let initData = isPCRes.value ? 9 : 5;
       let welfareTmpAll;

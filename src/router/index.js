@@ -34,6 +34,42 @@ const routes = [
   { path: "/fundPilotPlus", name: "fundPilotPlus", component: () => import("../views/Message/FundPilotPlus.vue") },
   { path: "/fundPilotV1", name: "fundPilotV1", component: () => import("../views/Message/FundPilotV1.vue") },
   { path: "/cryptocurrency", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") },
+  {
+    path: "/welfare",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "薅羊毛" },
+    children: [{ path: "", name: "welfare", component: () => import("../views/home/welfare/index.vue") }],
+  },
+  {
+    path: "/advanced-search",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "高级搜索" },
+    children: [{ path: "", name: "advanced-search", component: () => import("../views/home/advancedSearch/index.vue") }],
+  },
+  {
+    path: "/tech-forum",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "技术论坛" },
+    children: [{ path: "", name: "tech-forum", component: () => import("../views/home/news/index.vue") }],
+  },
+  {
+    path: "/github-trending",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "GitHub Trending" },
+    children: [{ path: "", name: "github-trending", component: () => import("../views/home/githubTrending/index.vue") }],
+  },
+  {
+    path: "/leetcode",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "LeetCode" },
+    children: [{ path: "", name: "leetcode", component: () => import("../views/home/leetCode/index.vue") }],
+  },
+  {
+    path: "/interview",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "面试题" },
+    children: [{ path: "", name: "interview", component: () => import("../views/home/findJob/index.vue") }],
+  },
   { path: "/", name: "home", component: () => import("../views/home/index.vue") },
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
