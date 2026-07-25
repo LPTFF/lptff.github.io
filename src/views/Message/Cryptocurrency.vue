@@ -264,8 +264,8 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon, ElLoading } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
-import { saveAs } from 'file-saver'
 import { gotoOutPage } from "../../utils/utils"
+import { exportObjectsToXlsx } from "../../utils/exportExcel"
 export default {
     components: {
         ElTable,
@@ -533,26 +533,22 @@ export default {
                 ElMessage.warning('请先选择要导出的加密货币')
                 return
             }
-            const XLSX = await import('xlsx')
-            const exportData = selectedHoldRows.value.map(row => ({
-                货币类型: row.asset,
-                持仓金额: row.marketValue + row.marketValueAsset,
-                持仓收益: row.profit + row.marketValueAsset,
-                收益率: row.profitRate,
-            }))
-            // 2. 转换为 worksheet
-            const worksheet = XLSX.utils.json_to_sheet(exportData)
-            // 3. 创建 workbook
-            const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, '加密货币明细')
-
-            // 4. 导出为 blob 并下载
-            const excelBuffer = XLSX.write(workbook, {
-                bookType: 'xlsx',
-                type: 'array'
+            await exportObjectsToXlsx({
+                data: selectedHoldRows.value.map(row => ({
+                    asset: row.asset,
+                    marketValue: row.marketValue + row.marketValueAsset,
+                    profit: row.profit + row.marketValueAsset,
+                    profitRate: row.profitRate,
+                })),
+                columns: [
+                    { header: '货币类型', key: 'asset', width: 20 },
+                    { header: '持仓金额', key: 'marketValue', width: 16 },
+                    { header: '持仓收益', key: 'profit', width: 16 },
+                    { header: '收益率', key: 'profitRate', width: 14 },
+                ],
+                sheetName: '加密货币明细',
+                fileName: `持仓加密货币导出_${new Date().toISOString().slice(0, 10)}.xlsx`,
             })
-            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-            saveAs(blob, `持仓加密货币导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
         }
         const batchGotoConservativeFundPage = () => {
             selectedConservativeRows.value?.map((item) => {
@@ -565,27 +561,24 @@ export default {
                 ElMessage.warning('请先选择要导出的基金')
                 return
             }
-            const XLSX = await import('xlsx')
-            const exportData = selectedConservativeRows.value.map(row => ({
-                基金名称: row.fundName,
-                基金代码: row.fundCode,
-                持仓金额: row.holdAmount,
-                持仓收益: row.holdGain,
-                收益率: row.holdRate,
-            }))
-            // 2. 转换为 worksheet
-            const worksheet = XLSX.utils.json_to_sheet(exportData)
-            // 3. 创建 workbook
-            const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, '对冲基金明细')
-
-            // 4. 导出为 blob 并下载
-            const excelBuffer = XLSX.write(workbook, {
-                bookType: 'xlsx',
-                type: 'array'
+            await exportObjectsToXlsx({
+                data: selectedConservativeRows.value.map(row => ({
+                    fundName: row.fundName,
+                    fundCode: row.fundCode,
+                    holdAmount: row.holdAmount,
+                    holdGain: row.holdGain,
+                    holdRate: row.holdRate,
+                })),
+                columns: [
+                    { header: '基金名称', key: 'fundName', width: 20 },
+                    { header: '基金代码', key: 'fundCode', width: 14 },
+                    { header: '持仓金额', key: 'holdAmount', width: 14 },
+                    { header: '持仓收益', key: 'holdGain', width: 14 },
+                    { header: '收益率', key: 'holdRate', width: 14 },
+                ],
+                sheetName: '对冲基金明细',
+                fileName: `对冲基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`,
             })
-            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-            saveAs(blob, `对冲基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
         }
         const batchGotoRecommendFundPage = () => {
             selectedRecommendRows.value?.map((item) => {

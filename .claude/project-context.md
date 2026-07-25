@@ -4,7 +4,7 @@
 
 ## 当前架构
 
-- 技术栈：Vue 3、Vue Router 4、Vite 4、JavaScript 和 TypeScript；npm 管理依赖。
+- 技术栈：Vue 3、Vue Router 4、Vite 5.4.21、JavaScript 和 TypeScript；npm 管理依赖。
 - 入口流程：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
 - 页面位于 `src/views/`；主要路由分组为首页、博客、求职/生活、登录、留言/理财工具。
 - 博客路由嵌套在 `/blog` 下；旧版归档、读书、关于、笔记本和带日期的文章 URL 都重定向到当前博客路由。
@@ -17,7 +17,7 @@
 - `npm run build` 同步面试摘要，运行 `vue-tsc --noEmit`，用 Vite 构建，然后运行 `scripts/copy-404.js`。
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
 - `dist/` 是构建输出；`auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件。
-- Vite 将 `xlsx` 保留在懒加载 chunk 中，因为基金和加密货币页面只在导出电子表格时才会加载它。
+- Vite 将 `write-excel-file` 保留在懒加载的 `xlsx-export` chunk 中，因为基金和加密货币页面只在导出电子表格时才会加载它。
 
 ## 部署和运维路径
 
@@ -29,10 +29,10 @@
 ## 依赖决策
 
 - 移除了 `gh-pages` 和 `vite-plugin-prerender`，因为仓库搜索确认它们未被使用；这移除了它们过时的部署/预渲染依赖树。
-- 只要 `uploadQL.js` 还在使用，就保留 `archiver`。
-- 只要电子表格导出功能还在使用，就保留 `xlsx`。当前用法是从应用程序数据生成工作簿，不解析上传的工作簿；其未解决的安全通告仍需要未来做替换决策。
-- 保留 Vite 4，直到单独规划的大版本迁移获得批准并通过浏览器测试。
-- `vite-plugin-compression` 和 `rollup-plugin-visualizer` 已声明但尚未配置。它们预期的未来用途未确认；移除前需询问。
+- 只要 `uploadQL.js` 还在使用，就保留 `archiver`；当前已升级到 `archiver@8`。
+- 电子表格导出已从有安全通告且无官方修复的 `xlsx` 切换到浏览器端 `write-excel-file@4.1.1`，当前仅生成工作簿，不解析上传文件。
+- 构建链已从 Vite 4 升级到 Vite 5.4.21，`@vitejs/plugin-vue` 为 5.2.4；`vue-tsc` 已升级到 3.3.8，PostCSS 锁定到 8.5.18。
+- `vite-plugin-compression` 和 `rollup-plugin-visualizer` 已声明但尚未配置；visualizer 当前升级到 5.14.0，预期用途仍未确认。
 
 ## 验证和安全基线
 
@@ -40,7 +40,8 @@
 - 仅类型验证：`npx vue-tsc --noEmit`。
 - 浏览器相关变更：运行 `npm run serve` 并在浏览器中检查受影响的流程。
 - 依赖审计必须使用 `npm audit --registry=https://registry.npmjs.org`，因为配置的 npm 镜像没有审计端点。
-- 移除未使用的部署/预渲染包后，本地 npm 审计基线为 8 个受影响包：7 个高危和 1 个中危，直接根源于 Vite 和 `xlsx`。
+- 本次升级后，完整依赖审计仍有 2 个开发依赖漏洞：Vite 5.4.21 链路中的 `esbuild@0.21.5`（中危）和 Vite 5 本身相关高危公告；生产依赖审计为 0 个漏洞。
+- `npm run build` 已在 Vite 5、vue-tsc 3 和新的浏览器导出适配器下通过；构建会保留独立的 `xlsx-export` 延迟加载 chunk。
 
 ## 已验证的工作偏好
 
@@ -53,8 +54,8 @@
 
 - `vite-plugin-compression` 和 `rollup-plugin-visualizer` 是为了将来使用而有意保留的，还是应该作为未使用的工具移除？
 - 手动 `uploadQL.js` SFTP 部署路径是否应长期保留？
-- 如果导出兼容性允许替换，哪个受维护的电子表格库应该替换 `xlsx`？
-- 未来的 Vite 迁移应使用哪个 Vite 目标版本和浏览器支持基线？
+- 未来是否升级到 Vite 6+，以及采用哪个 Node 和浏览器支持基线？当前 Vite 5 开发依赖中的 esbuild/Vite 告警需要在该迁移中处理。
+
 
 通过将已解答的问题替换为相关部分的已确认事实或决策来解决；不要把已回答的问题留在这里。
 

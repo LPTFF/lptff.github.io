@@ -38,7 +38,16 @@
 - 不要从此仓库修改用户级别的 Claude 配置、记忆、`.claude.json` 或全局设置。
 - 除非用户明确要求，否则不要添加自动钩子或定时任务。
 
-## 验证
+## 依赖安全与 Agent 规划经验
+
+- 依赖安全任务采用“基线审计 → 并行只读探索 → Plan Agent 汇总 → 分阶段实施 → 每阶段重新安装/构建/审计”的流程；不要直接运行 `npm audit fix --force`。
+- `npm audit --registry=https://registry.npmjs.org` 统计的是依赖树漏洞，GitHub Dependabot 的告警条数可能因公告、节点和历史告警而不同；必须通过 `npm ls` 和 `npm explain` 追踪实际链路。
+- 生产依赖与开发依赖分开报告：同时运行完整审计和 `npm audit --omit=dev`，不要把构建工具漏洞误报成线上运行时漏洞。
+- 直接依赖替换前先搜索实际 API 使用边界；本项目的 Excel 功能只写出工作簿，因此用 `write-excel-file` 替代 `xlsx`，并通过 [src/utils/exportExcel.ts](src/utils/exportExcel.ts) 保持页面调用一致和动态加载。
+- 构建工具升级要保留中间版本和回滚边界：本次先从 Vite 4 升到 Vite 5，Vite/esbuild 残余告警不通过强制升级处理，留待另行规划 Vite 6+、插件兼容性和 Node 基线。
+- Windows 上 `npm ci` 可能因开发服务器残留的 `esbuild.exe` 或 Rollup 原生模块文件锁失败；先停止相关 Node/esbuild 进程后再重试，并在日志中记录该环境因素。
+- `npm run serve` 返回首页 HTTP 200 不等于浏览器流程验证成功；如果 Vite 依赖预构建出现 504、HMR 或控制台错误，必须明确标记导出按钮等交互验证为未完成。
+
 
 - 对于代码变更，优先使用 `npm run build`。
 - 对于仅类型检查，使用 `npx vue-tsc --noEmit`。

@@ -391,8 +391,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
-import { saveAs } from 'file-saver'
 import { gotoOutPage } from "./../../utils/utils"
+import { exportObjectsToXlsx } from "./../../utils/exportExcel"
 export default {
     components: {
         ElTable,
@@ -632,27 +632,24 @@ export default {
                 ElMessage.warning('请先选择要导出的基金')
                 return
             }
-            const XLSX = await import('xlsx')
-            const exportData = selectedHoldRows.value.map(row => ({
-                基金名称: row.fundName,
-                基金代码: row.fundCode,
-                持仓金额: row.holdAmount,
-                持仓收益: row.holdGain,
-                收益率: row.holdRate,
-            }))
-            // 2. 转换为 worksheet
-            const worksheet = XLSX.utils.json_to_sheet(exportData)
-            // 3. 创建 workbook
-            const workbook = XLSX.utils.book_new()
-            XLSX.utils.book_append_sheet(workbook, worksheet, '持仓基金明细')
-
-            // 4. 导出为 blob 并下载
-            const excelBuffer = XLSX.write(workbook, {
-                bookType: 'xlsx',
-                type: 'array'
+            await exportObjectsToXlsx({
+                data: selectedHoldRows.value.map(row => ({
+                    fundName: row.fundName,
+                    fundCode: row.fundCode,
+                    holdAmount: row.holdAmount,
+                    holdGain: row.holdGain,
+                    holdRate: row.holdRate,
+                })),
+                columns: [
+                    { header: '基金名称', key: 'fundName', width: 20 },
+                    { header: '基金代码', key: 'fundCode', width: 14 },
+                    { header: '持仓金额', key: 'holdAmount', width: 14 },
+                    { header: '持仓收益', key: 'holdGain', width: 14 },
+                    { header: '收益率', key: 'holdRate', width: 14 },
+                ],
+                sheetName: '持仓基金明细',
+                fileName: `持仓基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`,
             })
-            const blob = new Blob([excelBuffer], { type: 'application/octet-stream' })
-            saveAs(blob, `持仓基金导出_${new Date().toISOString().slice(0, 10)}.xlsx`)
         }
         const batchGotoRecommendFundPage = () => {
             selectedRecommendRows.value?.map((item) => {

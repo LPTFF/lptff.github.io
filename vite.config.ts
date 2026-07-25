@@ -69,7 +69,7 @@ export default defineConfig({
             : packagePath.split("/")[0];
 
           // 保留导出功能的延迟加载边界，只有用户执行导出时才请求
-          if (packageName === "xlsx") return "xlsx";
+          if (packageName === "write-excel-file") return "xlsx-export";
 
           // Vue 运行时稳定分包，避免业务代码变化导致框架缓存失效
           if (packageName === "vue" || packageName === "vue-router" || packageName.startsWith("@vue/")) {
