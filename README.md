@@ -11,6 +11,17 @@
 - Markdown 内容编译与渲染
 - npm 管理依赖
 
+## UI 设计约定
+
+项目已采用 Element Plus 作为基础组件库。为降低页面设计和实现成本、保持不同功能页的一致性，后续新增或重构页面默认遵循 Element Plus 的设计语言和组件体系：
+
+- 优先使用 Element Plus 的现有组件、布局、主题变量和交互模式；
+- 页面结构优先采用 `el-container`、`el-header`、`el-main`、`el-footer`、`el-row`、`el-col`、`el-card`、`el-table`、`el-form`、`el-tabs`、`el-dialog` 等组件组合；
+- 按钮、表单、反馈、加载、分页、筛选、弹窗和表格等交互优先复用 Element Plus，不重复设计同类基础控件；
+- 局部 CSS 只用于业务布局、内容适配和必要的品牌调整，不覆盖或另起一套与 Element Plus 冲突的视觉体系；
+- 新页面应优先参考 Element Plus 官方组件语义和当前项目已有页面，保证快速搭建、可维护性和响应式一致性；
+- 如确需偏离 Element Plus 风格，应在任务说明或迭代记录中明确原因和影响范围。
+
 ## 主要功能
 
 - 首页及个人信息展示
@@ -82,6 +93,7 @@ npm audit --registry=https://registry.npmjs.org
 
 ## 项目维护文档
 
+- [业务功能说明](docs/business-function-overview.md)：按用户入口、业务域和典型流程说明当前功能边界
 - [AGENTS.md](AGENTS.md)：可复用的 Agent 工作流和项目协作规则
 - [CLAUDE.md](CLAUDE.md)：项目命令、目录事实和验证规则
 - [.claude/project-context.md](.claude/project-context.md)：当前项目事实和未解决决策

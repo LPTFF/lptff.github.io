@@ -9,10 +9,16 @@
 - 面向用户的 Markdown 内容位于 `src/content/blog/` 和 `src/content/interview/`。
 - 运行时/静态资源位于 `public/`；大型导入的数据快照位于 `src/public/data/`。
 
+## UI 设计与组件约定
+
+- 项目使用 Element Plus 作为基础组件库；为降低页面设计和实现成本，后续新增或重构页面默认遵循 Element Plus 的设计语言、主题变量、布局方式和交互模式。
+- 优先复用 Element Plus 组件和当前项目已有页面模式，尤其是布局、导航、卡片、表格、表单、按钮、加载、反馈、分页、筛选和弹窗；不要在没有必要时重复设计同类基础控件。
+- 局部 CSS 仅用于业务布局、内容适配和必要的品牌调整，避免另起一套与 Element Plus 冲突的视觉体系；如确需偏离，应在任务说明或迭代记录中写明原因和影响范围。
+- 新增 UI 需求优先按“业务结构 → Element Plus 组件组合 → 少量业务样式”的顺序设计，并保持桌面端和移动端的响应式行为。
+
 ## 命令
 
 - `npm run serve`：同步面试摘要，然后在端口 8080 启动 Vite 开发服务器。
-- `npm run build`：同步面试摘要，运行 `vue-tsc --noEmit`，用 Vite 构建，然后创建 `dist/404.html`。
 - `npm run preview`：预览构建输出。
 - `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。
 - `npm run context:check`：检查高影响路径是否同步更新项目上下文和迭代日志；这是只读检查，不会自动改写文件。

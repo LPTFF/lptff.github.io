@@ -91,3 +91,19 @@
 - 文件：`src/views/home/StandaloneFeatureLayout.vue`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证：`npm run build` 通过（面试摘要同步、`vue-tsc --noEmit`、Vite 构建和 404 复制成功）；`npm run context:check` 通过，确认本轮没有需要持久化的高影响项目事实；`npm run iteration:report -- --write --summary "统一独立功能页与首页视觉风格并完善迭代记录"` 已追加本条记录；未启动开发服务器或执行浏览器/移动视口验证，本轮视觉效果由用户确认。
 - 未解决问题：无；本次尚未执行 Git commit 或 push，等待用户确认推送前的工作区检查。
+
+## 2026-07-25 — 新增业务功能说明文档并同步 README 入口
+
+- 范围：新增 `docs/business-function-overview.md`，按当前源码、路由、首页导航和功能页整理产品定位、业务能力地图、用户流程、入口总表及正式/演示/待开发边界；README 增加文档入口。未修改应用代码、路由行为、数据源、依赖或部署流程。
+- 证据/决策：业务说明以 `src/router/index.js`、`src/views/home/tools/websiteGroups.json` 和各页面当前可见交互为主要依据；将基金和加密货币页面定义为信息展示、辅助判断、外部跳转和导出，不定义为交易执行；将 `/loginFund` 标记为演示/状态待确认，将 `/job` 和 `/life` 标记为待开发；业务说明不替代后续技术设计或产品规划。
+- 文件：`docs/business-function-overview.md`、`README.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：`npm run iteration:report` 已生成并写入日志；`npm run context:check` 通过；`git diff --check` 通过。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅新增和同步 Markdown 文档。
+- 未解决问题：登录入口未来是下线、保留演示还是接入正式认证，仍待后续单独决定；`job` 和 `life` 的业务方向仍未定义。
+
+## 2026-07-25 — 确立 Element Plus 统一 UI 设计约定
+
+- 范围：在 `README.md`、`CLAUDE.md`、`AGENTS.md` 和 `.claude/project-context.md` 中确立 Element Plus 统一 UI 设计约定：后续新增或重构页面优先复用 Element Plus 组件、主题变量、布局和交互模式，以少量业务 CSS 完成页面搭建；未修改现有页面样式、应用代码、依赖或路由行为。
+- 证据/决策：项目已将 Element Plus 作为基础组件库，现有页面已使用布局、卡片、表格、表单、标签、弹窗、加载和分页等组件。为降低 UI 设计难度并保持页面一致性，默认采用“业务结构 → Element Plus 组件组合 → 少量业务样式”的设计顺序；只有明确品牌或交互理由时才允许偏离，并记录原因和影响范围。
+- 文件：`README.md`、`CLAUDE.md`、`AGENTS.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：`npm run iteration:report` 已生成并写入日志；`npm run context:check` 通过；`git diff --check` 通过。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅更新项目约定文档。
+- 未解决问题：无。
