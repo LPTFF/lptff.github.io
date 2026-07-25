@@ -14,6 +14,8 @@
 - `npm run serve`：同步面试摘要，然后在端口 8080 启动 Vite 开发服务器。
 - `npm run build`：同步面试摘要，运行 `vue-tsc --noEmit`，用 Vite 构建，然后创建 `dist/404.html`。
 - `npm run preview`：预览构建输出。
+- `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。
+- `npm run context:check`：检查高影响路径是否同步更新项目上下文和迭代日志；这是只读检查，不会自动改写文件。
 - 除非用户明确请求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
 
 ## 生成和派生文件
@@ -31,7 +33,7 @@
 - 使用 `.claude/project-context.md` 中已确认的事实和决策，避免重复全仓库发现；仅验证任务影响区域内的事实，优先使用当前源码/配置、项目上下文、定向搜索和生成输出，并将结论标记为已确认、推断或未解决。
 - 如果当前代码与上下文矛盾，相信代码，验证受影响的路径，并在同一迭代中更新上下文。
 - 保持变更最小化并限定在用户请求范围内。仅当一个未解决的抉择会改变行为、兼容性、架构或不可逆操作时才向用户询问；先将其记录在`未解决问题`下。
-- 仅当项目事实、约定或复杂迭代证据实际变化时，更新 `.claude/project-context.md`、本文件或 `.claude/iteration-log.md`；小型局部 UI/内容编辑和纯只读说明无需机械更新文档。
+- 仅当项目事实、约定或复杂迭代证据实际变化时，更新 `.claude/project-context.md`、本文件或 `.claude/iteration-log.md`；本项目提供 `iteration:report` 生成日志草稿、`context:check` 检查高影响变更是否漏记。局部 UI/内容编辑仍由 Agent 判断是否需要持久化。完成代码迭代后默认运行这两个命令，确认并补充草稿，不要把推断直接写成事实。
 - 优先选择 `src/`、`scripts/`、`vite.config.ts`、`package.json` 和 `tsconfig*.json` 下的源文件，而非生成输出。
 - 对于广泛搜索，排除 `node_modules/`、`dist/`、`.git/`、`src/public/data/`、`public/image/`、`package-lock.json`、`auto-imports.d.ts` 和 `components.d.ts`；仅在相关时明确包含它们。
 - 仅当 VS Code/LSP 上下文、符号、引用或当前编辑器有用时才使用 `vscode-context-mcp`；普通仓库搜索、文件读写不使用它。

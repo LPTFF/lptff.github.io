@@ -6,7 +6,9 @@
   "scripts": {
     "preview": "vite preview",
     "serve": "node ./scripts/sync-findJob-summary.js && vite",
-    "build": "node ./scripts/sync-findJob-summary.js && vue-tsc --noEmit && vite build && node ./scripts/copy-404.js"
+    "build": "node ./scripts/sync-findJob-summary.js && vue-tsc --noEmit && vite build && node ./scripts/copy-404.js",
+    "iteration:report": "node ./scripts/iteration-report.js",
+    "context:check": "node ./scripts/check-context-maintenance.js"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

@@ -1,4 +1,12 @@
-## 2026-07-25 — 首页功能拆分为独立页面
+## 2026-07-25 — 修复高级搜索页动态模块加载白屏并建立迭代文档自动化
+
+- 范围：排查 `/advanced-search` 首次访问时的 `504 (Outdated Optimize Dep)` 和动态导入失败；将高级搜索页的 Element Plus 搜索图标从嵌套 `<el-icon>` 改为 `el-input` 的 `prefix-icon` 绑定，移除不再需要的 `ElIcon` 注册；新增迭代日志草稿和上下文遗漏检查脚本。未修改路由结构、搜索跳转行为、数据源或部署流程。
+- 证据/决策：高级搜索页的动态模块可正常返回并渲染；改用显式 `:prefix-icon="Search"` 后避开了原先的组件注册组合，保持 Element Plus 的按组件导入边界。开发机同时存在多个 Vite 服务，8080、8081、8082 已被占用；旧服务或 `node_modules/.vite` 过期缓存可能继续产生 504，因此调试时应先关闭残留 Node/Vite 进程，必要时清理该缓存。自动化只生成可审查草稿和报告缺失，不根据文件名自动推断架构事实，不挂入 `serve`/`build`，不自动提交或推送。
+- 文件：`src/views/home/advancedSearch/index.vue`、`scripts/iteration-report.js`、`scripts/check-context-maintenance.js`、`package.json`、`AGENTS.md`、`CLAUDE.md`、`.claude/project-context.md`。
+- 验证：`npm run build` 通过（`vue-tsc`、Vite 构建和 404 复制成功）；浏览器访问 `/advanced-search` 正常展示，控制台无错误和警告；脚本新增后通过 `npm run iteration:report`、`npm run context:check` 和 `git diff --check` 复核。
+- 未解决问题：无。
+
+
 
 - 范围：保留首页热门资讯、吾爱破解、导航专区、Boss直聘、豆瓣电影；将薅羊毛、高级搜索、技术论坛、GitHub Trending、LeetCode、面试题迁移为六个独立路由，并通过导航专区的 `InternalWebsite` 分类提供入口。未修改数据源和全局 `App.vue` 外壳。
 - 证据/决策：新增共享独立页布局；首页改用稳定 key 配置并保持 PC 默认导航专区、移动端默认热门资讯；三个 location 驱动列表在独立路由未传 prop 时展示全量，在首页继续按滚动增量展示。

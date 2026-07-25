@@ -5,12 +5,9 @@
       <el-input
         v-model="search.model"
         :placeholder="search.placeholder"
+        :prefix-icon="Search"
         @keyup.enter="search.action"
-      >
-        <template #prefix>
-          <el-icon><search /></el-icon>
-        </template>
-      </el-input>
+      />
     </div>
     <div class="tips-common">
       <span class="tips-title">提示词</span>
@@ -27,7 +24,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { ElInput, ElIcon, ElTag } from "element-plus";
+import { ElInput, ElTag } from "element-plus";
 import { gotoOutPage } from "../../../utils/utils";
 import { Search } from "@element-plus/icons-vue";
 enum WebsiteType {
@@ -228,14 +225,13 @@ export default defineComponent({
     return {
       searches,
       tags,
+      Search,
       websiteTransformType,
     };
   },
   components: {
     ElInput,
-    ElIcon,
     ElTag,
-    Search,
   },
 });
 </script>

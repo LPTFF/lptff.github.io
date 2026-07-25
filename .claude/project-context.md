@@ -18,6 +18,7 @@
 
 - `npm run serve` 在启动 Vite 开发服务器（端口 8080）之前运行 `scripts/sync-findJob-summary.js`。
 - `npm run build` 同步面试摘要，运行 `vue-tsc --noEmit`，用 Vite 构建，然后运行 `scripts/copy-404.js`。
+- `npm run iteration:report` 从当前 Git 工作区生成可审查的迭代日志草稿；`npm run context:check` 只读检查高影响路径是否同步更新协作文档。两者不挂载到 `serve`/`build`，也不自动提交或推送。
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
 - `dist/` 是构建输出；`auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件。
 - Vite 将 `write-excel-file` 保留在懒加载的 `xlsx-export` chunk 中，因为基金和加密货币页面只在导出电子表格时才会加载它。
