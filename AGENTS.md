@@ -1,7 +1,28 @@
-# Agent Notes
+# 智能体说明
 
-Use `CLAUDE.md` as the source of truth for project facts, commands, generated files, search exclusions, and verification.
+本文件定义了仓库工作的快速、可重复工作流。将持久的项目事实保存在 `.claude/project-context.md` 中；将简洁的迭代记录保存在 `.claude/iteration-log.md` 中。
 
-Use `.claude/project-context.md` when a change affects directories, routes, build behavior, dependencies, generated files, or data flow.
+## 行动之前
 
-Keep changes scoped to the user's request. Do not modify user-level Claude configuration, memory, `.claude.json`, or global settings. Do not add automatic hooks unless explicitly requested.
+1. 先阅读 `.claude/project-context.md`。
+2. 将请求分类为内容/UI、行为、架构、依赖、构建/部署或数据流工作。
+3. 利用上下文将探索范围限制在受影响的文件和符号。从指定的路径、其直接消费者以及最近的测试/构建入口点开始；除非记录的事实已过期或被推翻，否则不要重复全仓库范围的发现过程。
+4. 对于清晰、低风险的请求，直接进行最小的编辑。仅当变更是架构性、跨领域、破坏性或实质上模糊时才使用规划阶段。
+
+## 证据和不确定性
+
+- 在内部将结论标记为**已确认**、**推断**或**未解决**。不要将推断作为项目事实呈现。
+- 优先按此顺序获取证据：当前源码/配置、项目上下文、定向搜索、生成输出，然后是一般惯例。
+- 如果源码与上下文矛盾，相信受影响的源码，仅验证该路径，并在同一迭代中更新上下文。
+- 仅当一个未解决的抉择会改变行为、兼容性、架构或不可逆操作时才向用户询问。在询问之前，将问题记录在**未解决问题**中，并附上已检查的证据。
+- 切勿仅仅为了避免提问而用猜测填补缺失的项目意图。
+
+## 每次迭代期间和之后
+
+- 保持变更范围限定在请求内，除非明确要求变更，否则保留现有行为。
+- 首先运行最相关的验证；在实际可行时运行文档化的基线验证。如实报告失败和跳过的检查。
+- 交接前，审查 `.claude/project-context.md`：更新持久化事实、决策、命令、路由、数据流、依赖或未解决问题；移除过时条目。
+- 在 `.claude/iteration-log.md` 中添加一条简洁记录，包含日期、范围、证据/决策、变更的文件、验证和未解决的问题。日志记录演进过程；它不取代当前事实。
+- 最终回复必须声明 `project context updated` 或 `project context reviewed; no durable facts changed`，并提及验证状态。
+
+除非用户要求，否则不要修改用户级别的 Claude 配置、记忆、`.claude.json` 或全局设置。不要添加自动钩子。
