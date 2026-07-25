@@ -107,3 +107,19 @@
 - 文件：`README.md`、`CLAUDE.md`、`AGENTS.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证：`npm run iteration:report` 已生成并写入日志；`npm run context:check` 通过；`git diff --check` 通过。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅更新项目约定文档。
 - 未解决问题：无。
+
+## 2026-07-25 — 升级 Vite 6 并收紧本地开发服务器
+
+- 范围：将开发依赖 Vite 从 5.4.21 升级到 6.4.3，随 Vite 将 esbuild 更新到 0.25.12；删除开发服务器的全网卡监听和全来源 CORS 配置，使其恢复本机默认行为。保留现有插件、端口、代理目标、业务代码、CI、提交和推送流程，未执行 `npm audit fix --force`。
+- 证据/决策：官方 registry 完整审计和生产依赖审计均为 0 个漏洞；`@vitejs/plugin-vue@5.2.4`、`unplugin-vue-markdown@0.26.3` 与 Vite 6 的依赖声明兼容。`npm ci` 首次因 Windows 上残留 `esbuild.exe`/Rollup 原生模块文件锁失败，停止 Node/esbuild 进程后重试成功；不通过手工修改锁文件解决。
+- 文件：`.claude/project-context.md`、`CLAUDE.md`、`README.md`、`package-lock.json`、`package.json`、`vite.config.ts`、`.claude/iteration-log.md`。
+- 验证：`npm ci --registry=https://registry.npmjs.org` 成功（释放 Windows 文件锁后）；`npm run build` 通过（摘要同步、`vue-tsc --noEmit`、Vite 6 构建和 404 复制成功，仅有既有 `@vueuse/core` PURE 注释警告）；`npm ls`/`npm explain` 确认 Vite 6.4.3、esbuild 0.25.12 及无 peer 冲突；两次官方 registry 审计均报告 0 个漏洞。`npm run serve` 输出仅有 Local 地址并提示需 `--host` 才暴露，`curl http://localhost:8080/` 返回 200；第二个路由请求因服务在重启窗口结束而未完成，未连接 Chrome 浏览器 MCP，故未完成完整浏览器流程检查。
+- 未解决问题：Vite 7/8、Node/浏览器基线、手动 SFTP 路径和未使用构建插件是否长期保留，仍待后续单独决定。
+
+## 2026-07-25 — 修复 Element Plus 类型声明解析并增加独立类型检查
+
+- 范围：将根目录由 `unplugin-auto-import` 和 `unplugin-vue-components` 生成的 `auto-imports.d.ts`、`components.d.ts` 纳入 `tsconfig.json`；新增 `npm run typecheck` 并让 `npm run build` 复用该命令。未添加 `declare module` any shim、未修改第三方声明、源码导入路径、依赖版本或 CI 部署流程。
+- 证据/决策：`element-plus@2.14.2` 已提供 `es/index.d.ts`，项目源码从包名导入且 `npx vue-tsc --noEmit -p tsconfig.json` 通过，因此采用修正 TypeScript 项目边界而不是掩盖类型错误。后续插件类型问题可通过 `npm run typecheck` 在本地和现有构建/CI 链路中自动发现并阻止继续。
+- 文件：`tsconfig.json`、`package.json`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：`npm run typecheck` 通过；`npm run build` 通过（摘要同步、类型检查、Vite 构建和 404 复制成功，仅有既有 `@vueuse/core` PURE 注释警告）；`npm run context:check` 和 `git diff --check` 通过。VS Code 诊断当前仅剩 cSpell 对业务词 `pojie` 的 information 提示，未再报告 Element Plus 类型错误；未修改该拼写检查提示。
+- 未解决问题：若编辑器缓存仍显示旧诊断，应选择工作区 TypeScript 并重启 Vue/TypeScript 语言服务；不要添加 any shim。

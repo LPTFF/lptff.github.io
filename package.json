@@ -6,7 +6,8 @@
   "scripts": {
     "preview": "vite preview",
     "serve": "node ./scripts/sync-findJob-summary.js && vite",
-    "build": "node ./scripts/sync-findJob-summary.js && vue-tsc --noEmit && vite build && node ./scripts/copy-404.js",
+    "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "build": "node ./scripts/sync-findJob-summary.js && npm run typecheck && vite build && node ./scripts/copy-404.js",
     "iteration:report": "node ./scripts/iteration-report.js",
     "context:check": "node ./scripts/check-context-maintenance.js"
   },
@@ -34,7 +35,7 @@
     "unplugin-auto-import": "^21.0.0",
     "unplugin-vue-components": "^32.1.0",
     "unplugin-vue-markdown": "^0.26.3",
-    "vite": "^5.4.21",
+    "vite": "^6.4.3",
     "vite-plugin-compression": "^0.5.1",
     "vue-tsc": "^3.3.8"
   }

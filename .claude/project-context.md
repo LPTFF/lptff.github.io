@@ -4,7 +4,7 @@
 
 ## 当前架构
 
-- 技术栈：Vue 3、Vue Router 4、Vite 5.4.21、JavaScript 和 TypeScript；npm 管理依赖。
+- 技术栈：Vue 3、Vue Router 4、Vite 6.4.3、JavaScript 和 TypeScript；npm 管理依赖。
 - UI 设计约定：Element Plus 是项目的基础组件库；后续新增或重构页面默认遵循 Element Plus 设计语言、主题变量、布局和交互模式，优先复用组件与现有页面模式，仅以少量业务 CSS 完成布局和品牌调整；确需偏离时记录原因和影响范围。
 - 入口流程：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
 - 页面位于 `src/views/`；主要路由分组为首页、博客、求职/生活、登录、留言/理财工具，以及通过导航专区进入的独立功能页。
@@ -19,9 +19,10 @@
 ## 构建和生成数据流
 
 - `npm run serve` 在启动 Vite 开发服务器（端口 8080）之前运行 `scripts/sync-findJob-summary.js`。
-- `npm run build` 同步面试摘要，运行 `vue-tsc --noEmit`，用 Vite 构建，然后运行 `scripts/copy-404.js`。
+- `npm run build` 同步面试摘要，运行 `npm run typecheck`（`vue-tsc --noEmit -p tsconfig.json`），用 Vite 构建，然后运行 `scripts/copy-404.js`。
 - `npm run iteration:report` 从当前 Git 工作区生成可审查的迭代日志草稿；`npm run context:check` 只读检查高影响路径是否同步更新协作文档。两者不挂载到 `serve`/`build`，也不自动提交或推送。
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
+- `auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件，已纳入 `tsconfig.json`；`npm run typecheck` 是独立的 Vue/TypeScript 类型检查入口。
 - `dist/` 是构建输出；`auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件。
 - Vite 将 `write-excel-file` 保留在懒加载的 `xlsx-export` chunk 中，因为基金和加密货币页面只在导出电子表格时才会加载它。
 
@@ -29,6 +30,7 @@
 
 - `.github/workflows/ci.yml` 安装依赖、运行爬虫工作、构建站点，并将 `dist/` 直接推送到 `gh-pages` 分支；未使用 `gh-pages` npm 包。
 - Vite 构建未使用预渲染插件。
+- Vite 开发服务器默认仅监听本机，不启用全来源 CORS；需要局域网调试时由开发者显式使用 `--host`。
 - `uploadQL.js` 是一个单独的手动 SFTP 部署路径，需要 `archiver`、`ssh2` 和 `ssh2-sftp-client`。
 - 除非明确要求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
 
@@ -37,7 +39,7 @@
 - 移除了 `gh-pages` 和 `vite-plugin-prerender`，因为仓库搜索确认它们未被使用；这移除了它们过时的部署/预渲染依赖树。
 - 只要 `uploadQL.js` 还在使用，就保留 `archiver`；当前已升级到 `archiver@8`。
 - 电子表格导出已从有安全通告且无官方修复的 `xlsx` 切换到浏览器端 `write-excel-file@4.1.1`，当前仅生成工作簿，不解析上传文件。
-- 构建链已从 Vite 4 升级到 Vite 5.4.21，`@vitejs/plugin-vue` 为 5.2.4；`vue-tsc` 已升级到 3.3.8，PostCSS 锁定到 8.5.18。
+- 构建工具已从 Vite 4 升级到 Vite 6.4.3，`@vitejs/plugin-vue` 为 5.2.4；`vue-tsc` 已升级到 3.3.8，PostCSS 锁定到 8.5.18。
 - `vite-plugin-compression` 和 `rollup-plugin-visualizer` 已声明但尚未配置；visualizer 当前升级到 5.14.0，预期用途仍未确认。
 
 ## 验证和安全基线
@@ -46,8 +48,8 @@
 - 仅类型验证：`npx vue-tsc --noEmit`。
 - 浏览器相关变更：运行 `npm run serve` 并在浏览器中检查受影响的流程。
 - 依赖审计必须使用 `npm audit --registry=https://registry.npmjs.org`，因为配置的 npm 镜像没有审计端点。
-- 本次升级后，完整依赖审计仍有 2 个开发依赖漏洞：Vite 5.4.21 链路中的 `esbuild@0.21.5`（中危）和 Vite 5 本身相关高危公告；生产依赖审计为 0 个漏洞。
-- `npm run build` 已在 Vite 5、vue-tsc 3 和新的浏览器导出适配器下通过；构建会保留独立的 `xlsx-export` 延迟加载 chunk。
+- 完整依赖审计和生产依赖审计均为 0 个漏洞；Vite 6.4.3 已将 esbuild 更新到 0.25.12，现有 Vue/Markdown 插件和 CI Node 20 构建已通过验证。
+- `npm run build` 已在 Vite 6、vue-tsc 3 和新的浏览器导出适配器下通过；构建会保留独立的 `xlsx-export` 延迟加载 chunk。
 
 ## 已验证的工作偏好
 
@@ -60,7 +62,6 @@
 
 - `vite-plugin-compression` 和 `rollup-plugin-visualizer` 是为了将来使用而有意保留的，还是应该作为未使用的工具移除？
 - 手动 `uploadQL.js` SFTP 部署路径是否应长期保留？
-- 未来是否升级到 Vite 6+，以及采用哪个 Node 和浏览器支持基线？当前 Vite 5 开发依赖中的 esbuild/Vite 告警需要在该迁移中处理。
 
 
 通过将已解答的问题替换为相关部分的已确认事实或决策来解决；不要把已回答的问题留在这里。

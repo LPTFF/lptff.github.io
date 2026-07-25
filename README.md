@@ -5,7 +5,7 @@
 ## 技术栈
 
 - Vue 3 + Vue Router 4
-- Vite 5.4.21
+- Vite 6.4.3
 - JavaScript + TypeScript
 - Element Plus
 - Markdown 内容编译与渲染
@@ -89,7 +89,7 @@ GitHub Actions 会构建站点，并将 `dist/` 发布到 `gh-pages` 分支。
 npm audit --registry=https://registry.npmjs.org
 ```
 
-当前生产依赖审计为 0 个漏洞。完整依赖树仍可能报告 Vite 5 构建链中的开发依赖告警；Vite 6+ 升级、Node 版本基线和相关插件兼容性需要单独规划。不要直接运行 `npm audit fix --force`。
+当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器默认仅监听本机且不启用全来源 CORS。不要直接运行 `npm audit fix --force`。
 
 ## 项目维护文档
 

@@ -20,6 +20,7 @@
 
 - `npm run serve`：同步面试摘要，然后在端口 8080 启动 Vite 开发服务器。
 - `npm run preview`：预览构建输出。
+- `npm run typecheck`：仅运行 `vue-tsc --noEmit -p tsconfig.json`，检查 Vue/TypeScript 类型和插件生成声明的解析。
 - `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。
 - `npm run context:check`：检查高影响路径是否同步更新项目上下文和迭代日志；这是只读检查，不会自动改写文件。
 - 除非用户明确请求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
@@ -52,7 +53,7 @@
 - `npm audit --registry=https://registry.npmjs.org` 统计的是依赖树漏洞，GitHub Dependabot 的告警条数可能因公告、节点和历史告警而不同；必须通过 `npm ls` 和 `npm explain` 追踪实际链路。
 - 生产依赖与开发依赖分开报告：同时运行完整审计和 `npm audit --omit=dev`，不要把构建工具漏洞误报成线上运行时漏洞。
 - 直接依赖替换前先搜索实际 API 使用边界；本项目的 Excel 功能只写出工作簿，因此用 `write-excel-file` 替代 `xlsx`，并通过 [src/utils/exportExcel.ts](src/utils/exportExcel.ts) 保持页面调用一致和动态加载。
-- 构建工具升级要保留中间版本和回滚边界：本次先从 Vite 4 升到 Vite 5，Vite/esbuild 残余告警不通过强制升级处理，留待另行规划 Vite 6+、插件兼容性和 Node 基线。
+- 构建工具升级已从 Vite 4 升到 Vite 6.4.3；`@vitejs/plugin-vue@5.2.4` 与 `unplugin-vue-markdown@0.26.3` 已验证兼容，Vite/esbuild 残余告警已通过官方 registry 审计确认解决。
 - Windows 上 `npm ci` 可能因开发服务器残留的 `esbuild.exe` 或 Rollup 原生模块文件锁失败；先停止相关 Node/esbuild 进程后再重试，并在日志中记录该环境因素。
 - `npm run serve` 返回首页 HTTP 200 不等于浏览器流程验证成功；如果 Vite 依赖预构建出现 504、HMR 或控制台错误，必须明确标记导出按钮等交互验证为未完成。
 
@@ -60,3 +61,59 @@
 
 - 对代码变更优先运行 `npm run build`；仅类型检查使用 `npx vue-tsc --noEmit`。
 - 浏览器相关变更运行 `npm run serve` 并检查受影响流程；如实报告失败或跳过的验证。
+
+<!-- BEGIN vscode-context-mcp -->
+## VS Code Context MCP — Available Tools
+
+This project uses the **VS Code Smart Context MCP** extension, which runs an MCP server
+inside VS Code and exposes 31 workspace-aware tools. Use these tools via MCP to interact
+with the editor, file system, and language intelligence.
+
+### File Tools
+- `read_file` — Read file contents with optional line range
+- `write_file` — Create or edit files in the workspace
+- `list_directory` — List directory contents recursively
+- `file_search` — Glob-based file search across the workspace
+- `text_search` — Full-text / regex search in workspace files
+- `get_changes` — Show uncommitted git changes (diff)
+
+### Execute Tools
+- `execute_command` — Run shell commands in the VS Code integrated terminal
+- `terminal_last_command` — Retrieve the last terminal command and its output
+- `terminal_selection` — Get the current terminal selection text
+
+### Intelligence Tools
+- `get_diagnostics` — Get compiler/linter errors and warnings
+- `get_file_symbols` — List all symbols (functions, classes, variables) in a file
+- `get_workspace_symbols` — Search symbols across the entire workspace
+- `find_references` — Find all references to a symbol
+- `find_symbol_definition` — Jump to a symbol's definition
+- `find_symbol_references` — Find references to a symbol by name
+- `go_to_definition` — Navigate to the definition of a symbol at a position
+- `get_hover_info` — Get hover/tooltip information for a symbol
+- `get_implementations` — Find all implementations of an interface or abstract method
+- `get_call_hierarchy` — Get incoming/outgoing call hierarchy for a function
+- `get_code_actions` — Get available code actions (quick fixes, refactors) at a position
+- `rename_symbol` — Rename a symbol across the entire workspace
+- `resolve_symbol` — Resolve a symbol to its full qualified name and location
+- `get_codebase_graph` — Build a high-level graph of the codebase structure
+
+### Editor Tools
+- `get_active_file` — Get the currently active editor file path and content
+- `get_selection` — Get the current text selection in the active editor
+- `get_open_files` — List all currently open editor tabs
+- `get_problems` — Get all problems/diagnostics from the Problems panel
+
+### Todo Tools
+- `todo_list` — List all todo items
+- `todo_add` — Add a new todo item
+- `todo_complete` — Mark a todo item as complete
+- `todo_remove` — Remove a todo item
+
+### Usage Notes
+
+- The MCP server runs locally inside VS Code on a configurable port (default 3785).
+- All file paths are relative to the workspace root unless specified otherwise.
+- Intelligence tools leverage the VS Code LSP — results depend on language extensions being active.
+- `execute_command` may require user approval depending on the extension settings.
+<!-- END vscode-context-mcp -->
