@@ -391,7 +391,6 @@
 import { ref, computed, onMounted } from 'vue'
 import { ElTable, ElTableColumn, ElPagination, ElButton, ElTooltip, ElDialog, ElMessage, ElIcon } from 'element-plus'
 import { CopyDocument } from '@element-plus/icons-vue'
-import * as XLSX from 'xlsx'
 import { saveAs } from 'file-saver'
 import { gotoOutPage } from "./../../utils/utils"
 export default {
@@ -627,12 +626,13 @@ export default {
                 gotoFundPage(item)
             })
         }
-        const batchExportHoldFund = () => {
+        const batchExportHoldFund = async () => {
             console.info('batchExportHoldFund selectedHoldRows.value', selectedHoldRows.value)
             if (!selectedHoldRows.value || selectedHoldRows.value.length === 0) {
                 ElMessage.warning('请先选择要导出的基金')
                 return
             }
+            const XLSX = await import('xlsx')
             const exportData = selectedHoldRows.value.map(row => ({
                 基金名称: row.fundName,
                 基金代码: row.fundCode,

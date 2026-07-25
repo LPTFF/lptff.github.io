@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+﻿import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
@@ -9,10 +9,10 @@ export default defineConfig({
   base: "./",
   plugins: [
     AutoImport({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [ElementPlusResolver({ importStyle: "css" })],
     }),
     Components({
-      resolvers: [ElementPlusResolver()],
+      resolvers: [ElementPlusResolver({ importStyle: "css" })],
     }),
     vue({
       include: [/\.vue$/, /\.md$/],
@@ -54,7 +54,7 @@ export default defineConfig({
   },
   build: {
     target: "es2015",
-    emptyOutDir: false,
+    emptyOutDir: true,
     rollupOptions: {
       output: {
         manualChunks(id) {
@@ -76,6 +76,12 @@ export default defineConfig({
             // Element Plus 相关拆分
             if (pkgName === "element-plus" || pkgName === "@element-plus") return "element-plus";
             if (pkgName === "@element-plus/icons-vue") return "element-icons";
+            if (pkgName === "@popperjs") return "popper";
+            if (pkgName === "@ctrl") return "tinycolor";
+            if (pkgName === "@vueuse") return "vueuse";
+            if (pkgName === "dayjs") return "dayjs";
+            if (pkgName === "lodash-es") return "lodash-es";
+            if (pkgName === "normalize-wheel-es") return "normalize-wheel-es";
 
             // 工具库单独分包
             if (pkgName === "axios") return "axios";
@@ -86,7 +92,7 @@ export default defineConfig({
             if (pkgName.startsWith("@types")) return "types";
             if (pkgName.includes("vite") || pkgName.includes("rollup")) return "build-tools";
 
-            return "vendor-misc";
+            return undefined;
           }
           // JSON 数据文件单独分包
           if (id.includes("zhipin.json")) return "zhipin";

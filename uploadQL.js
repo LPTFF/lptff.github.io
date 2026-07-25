@@ -1,65 +1,67 @@
-const fs = require('fs');
+﻿const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 const SftpClient = require('ssh2-sftp-client');
 const { Client } = require('ssh2');
 
-// ====== 配置项 ======
-const LOCAL_DIR = './dist'; // ✅ 本地目录
+const LOCAL_DIR = './dist';
 const ZIP_NAME = `upload_${getTimeStamp()}.zip`;
 const TEMP_ZIP_PATH = path.join(__dirname, ZIP_NAME);
 
 const REMOTE_CONFIG = {
-    host: '****',
-    port: 0,
-    username: '***',
-    password: '***',
-    remotePath: '/root/Test' // ✅ 远程上传目录
+    host: requireEnv('DEPLOY_HOST'),
+    port: Number(process.env.DEPLOY_PORT || 60022),
+    username: requireEnv('DEPLOY_USER'),
+    password: requireEnv('DEPLOY_PASSWORD'),
+    remotePath: process.env.DEPLOY_REMOTE_PATH || '/root/Test',
 };
 
 async function run() {
     try {
-        console.log('📦 正在打包...');
+        console.log('[deploy] packaging dist...');
         await zipFolder(LOCAL_DIR, TEMP_ZIP_PATH);
 
-        console.log('📤 正在上传...');
+        console.log('[deploy] uploading zip...');
         const sftp = new SftpClient();
         await sftp.connect(REMOTE_CONFIG);
         await sftp.put(TEMP_ZIP_PATH, `${REMOTE_CONFIG.remotePath}/${ZIP_NAME}`);
         await sftp.end();
 
-        console.log('📂 正在远程解压...');
+        console.log('[deploy] extracting on remote host...');
         await runSSHCommand(`
-        cd ${REMOTE_CONFIG.remotePath} &&
-        unzip -oq ${ZIP_NAME} &&
-        rm -f ${ZIP_NAME} &&
-        cp -f index.html 404.html
+cd ${REMOTE_CONFIG.remotePath} &&
+unzip -oq ${ZIP_NAME} &&
+rm -f ${ZIP_NAME} &&
+cp -f index.html 404.html
         `);
 
-
-        // 启动 http-server
-        console.log('启动新服务');
+        console.log('[deploy] restarting services...');
         fs.unlinkSync(TEMP_ZIP_PATH);
         await runSSHCommand('sudo systemctl restart http-server.service');
-        // 重启 frpc 服务以确保端口映射正常
-        console.log('🌐 重启 frpc 服务以刷新公网映射');
         await runSSHCommand('sudo systemctl restart frpc');
-        console.log('✅ 上传部署完成');
+
+        console.log('[deploy] upload complete');
     } catch (err) {
-        console.error('❌ 出错:', err.message);
+        console.error('[deploy] failed:', err.message);
     } finally {
-        // 确保无论成功失败都删除本地打包文件
         if (fs.existsSync(TEMP_ZIP_PATH)) {
             try {
                 fs.unlinkSync(TEMP_ZIP_PATH);
-                console.log('✅ 本地打包文件已删除');
+                console.log('[deploy] local archive removed');
             } catch (unlinkErr) {
-                console.error('❌ 删除本地打包文件失败:', unlinkErr.message);
+                console.error('[deploy] archive cleanup failed:', unlinkErr.message);
             }
         }
     }
 }
 
+function requireEnv(name) {
+    const value = process.env[name];
+    if (!value) {
+        throw new Error(`Missing required environment variable: ${name}`);
+    }
+    return value;
+}
 
 function zipFolder(sourceDir, outPath) {
     return new Promise((resolve, reject) => {
@@ -98,7 +100,8 @@ function runSSHCommand(command) {
 
 function getTimeStamp() {
     const now = new Date();
-    return `${now.getFullYear()}${(now.getMonth() + 1).toString().padStart(2, '0')}${now.getDate().toString().padStart(2, '0')}_${now.getHours().toString().padStart(2, '0')}${now.getMinutes().toString().padStart(2, '0')}${now.getSeconds().toString().padStart(2, '0')}`;
+    const pad = (n) => String(n).padStart(2, '0');
+    return `${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
 }
 
 run();
