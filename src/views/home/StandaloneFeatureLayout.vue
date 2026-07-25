@@ -32,7 +32,7 @@ watchEffect(() => {
 <style scoped>
 .standalone-page {
   min-height: 100vh;
-  background: #f5f7fa;
+  background: #fff;
   color: rgb(44, 62, 80);
 }
 
@@ -43,12 +43,20 @@ watchEffect(() => {
 }
 
 .standalone-header {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  z-index: 9;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  box-sizing: border-box;
+  min-height: 80px;
   gap: 24px;
-  padding: 18px 0;
-  background: #fff;
+  padding: 11px 0;
+  border-bottom: 1px solid #ebeef5;
+  background-color: var(--el-menu-bg-color);
+  transform: translateX(-50%);
 }
 
 .brand-link,
@@ -61,6 +69,7 @@ watchEffect(() => {
   display: flex;
   align-items: center;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .logo-img {
@@ -71,6 +80,7 @@ watchEffect(() => {
 }
 
 .brand-title {
+  color: rgb(44, 62, 80);
   font-size: 21px;
   font-weight: 600;
 }
@@ -83,7 +93,9 @@ watchEffect(() => {
 
 .page-heading h1 {
   margin: 0;
-  font-size: 22px;
+  color: rgb(44, 62, 80);
+  font-size: 20px;
+  font-weight: 600;
 }
 
 .back-link {
@@ -91,8 +103,13 @@ watchEffect(() => {
   white-space: nowrap;
 }
 
+.back-link:hover {
+  color: #66b1ff;
+}
+
 .standalone-content {
-  padding: 18px 0 40px;
+  box-sizing: border-box;
+  padding: 100px 0 40px;
 }
 
 @media screen and (max-width: 768px) {
@@ -103,6 +120,7 @@ watchEffect(() => {
 
   .standalone-header {
     align-items: flex-start;
+    min-height: 64px;
     padding: 12px 0;
   }
 
@@ -117,7 +135,7 @@ watchEffect(() => {
   }
 
   .standalone-content {
-    padding-top: 12px;
+    padding-top: 84px;
   }
 }
 </style>

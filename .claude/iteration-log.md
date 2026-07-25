@@ -83,3 +83,11 @@
 - 文件：`package.json`、`package-lock.json`、`vite.config.ts`、`src/utils/exportExcel.ts`、`src/views/Message/FundPilotV1.vue`、`FundPilotPlus.vue`、`Cryptocurrency.vue`、`.claude/project-context.md`。
 - 验证：`npm ci` 成功（Windows 文件锁释放后）；`npm run build` 成功；生产 `npm audit --registry=https://registry.npmjs.org --omit=dev` 报告 0 个漏洞；完整审计报告 2 个开发依赖漏洞；开发服务器首页曾返回 200，但浏览器检查遇到 Vite 预构建依赖 504/HMR 配置错误，未完成导出按钮的真实下载验证。
 - 未解决问题：Vite 5 的开发依赖审计残留、Vite 6+ 迁移目标及 Node/浏览器基线；`uploadQL.js` 的手动 SFTP 路径和未使用构建插件是否长期保留。
+
+## 2026-07-25 — 统一独立功能页与首页视觉风格并完善迭代记录
+
+- 范围：将共享独立功能页布局的背景、顶部固定区域、最大宽度、品牌标识、标题、返回链接、底部边框和内容留白统一为首页的视觉风格，并保留现有路由、页面标题和返回首页行为；同步记录本轮 Agent 规划经验和验证结果。未修改业务组件、路由结构、数据源或部署流程。
+- 证据/决策：对照 `src/views/home/index.vue` 已确认首页使用白色背景、`1200px` 内容宽度、固定顶部区域、`35px` 圆形 Logo、`21px` 品牌标题和 `rgb(44, 62, 80)` 主色；独立布局采用相同视觉基线，并为固定头部补充内容顶部留白、为头部底部增加 `#ebeef5` 分隔线，移动端保留紧凑布局。该变更属于局部 UI 调整，不需要并行 Agent、Plan Agent 或架构级上下文改动；后续同类任务应先读取项目上下文，再定向对照目标页面、最小修改、运行基线构建和上下文检查，最后由用户确认后再提交/推送。
+- 文件：`src/views/home/StandaloneFeatureLayout.vue`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：`npm run build` 通过（面试摘要同步、`vue-tsc --noEmit`、Vite 构建和 404 复制成功）；`npm run context:check` 通过，确认本轮没有需要持久化的高影响项目事实；`npm run iteration:report -- --write --summary "统一独立功能页与首页视觉风格并完善迭代记录"` 已追加本条记录；未启动开发服务器或执行浏览器/移动视口验证，本轮视觉效果由用户确认。
+- 未解决问题：无；本次尚未执行 Git commit 或 push，等待用户确认推送前的工作区检查。

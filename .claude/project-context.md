@@ -8,7 +8,7 @@
 - 入口流程：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
 - 页面位于 `src/views/`；主要路由分组为首页、博客、求职/生活、登录、留言/理财工具，以及通过导航专区进入的独立功能页。
 - 首页顶部保留热门资讯、吾爱破解、导航专区、Boss直聘、豆瓣电影；PC 默认选中导航专区，移动端默认选中热门资讯。首页菜单使用稳定 key 配置，滚动位置按功能 key 缓存。
-- 独立功能页包括 `/welfare`、`/advanced-search`、`/tech-forum`、`/github-trending`、`/leetcode`、`/interview`，共享 `src/views/home/StandaloneFeatureLayout.vue`，入口位于导航专区 `InternalWebsite` 分类。
+- 独立功能页包括 `/welfare`、`/advanced-search`、`/tech-forum`、`/github-trending`、`/leetcode`、`/interview`，共享 `src/views/home/StandaloneFeatureLayout.vue`，入口位于导航专区 `InternalWebsite` 分类；共享布局沿用首页的白色背景、1200px 内容宽度、固定顶部品牌区和移动端紧凑间距。
 - 首页列表组件的 location prop 仅用于首页内部滚动增量；薅羊毛、技术论坛、GitHub Trending 独立路由未传 prop 时展示完整数据快照。
 - 博客路由嵌套在 `/blog` 下；旧版归档、读书、关于、笔记本和带日期的文章 URL 都重定向到当前博客路由。
 - 面向用户的 Markdown 内容位于 `src/content/blog/` 和 `src/content/interview/`。
