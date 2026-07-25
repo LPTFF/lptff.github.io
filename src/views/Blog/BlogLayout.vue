@@ -125,7 +125,7 @@ const search = () => {
 }
 
 .blog-main {
-  width: min(1160px, calc(100% - 40px));
+  width: calc(100% - 200px);
   margin: 0 auto;
   padding: 38px 0 70px;
 }
@@ -143,7 +143,7 @@ const search = () => {
 
   .header-inner,
   .blog-main {
-    width: min(100% - 24px, 1160px);
+    width: calc(100% - 24px);
   }
 
   .desktop-nav {

@@ -10,7 +10,7 @@
           <h1>{{ article.title }}</h1>
           <p>{{ article.summary }}</p>
           <div class="tags"><el-tag v-for="tag in article.tags" :key="tag" size="small" effect="plain">{{ tag
-              }}</el-tag></div>
+          }}</el-tag></div>
         </header>
         <div ref="contentRef" class="markdown-body">
           <component :is="article.component" />
@@ -73,7 +73,7 @@ onBeforeUnmount(() => observer?.disconnect());
 
 <style>
 .article-page {
-  max-width: 1160px;
+  width: calc(100% - 100px);
   margin: 0 auto;
 }
 
@@ -82,9 +82,9 @@ onBeforeUnmount(() => observer?.disconnect());
 }
 
 .article-grid {
-  max-width: 1160px;
   width: 100%;
   margin: 0 auto;
+  /* display: grid; */
   grid-template-columns: minmax(0, 1fr) 220px;
   gap: 28px;
   align-items: start;
@@ -213,6 +213,11 @@ onBeforeUnmount(() => observer?.disconnect());
 }
 
 @media(max-width:800px) {
+  .article-page {
+    width: calc(100% - 24px);
+    margin: 0 auto;
+  }
+
   .article-grid {
     display: block
   }
