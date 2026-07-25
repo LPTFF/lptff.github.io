@@ -16,7 +16,7 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, watch } from "vue";
 import { useRoute } from "vue-router";
 import { articles } from "./data/articles";
 const route = useRoute();
@@ -26,6 +26,9 @@ const filtered = computed(() => {
 });
 const title = computed(() => route.params.year ? `${route.params.year} 年归档` : route.query.category ? `${route.query.category} · 归档` : "文章归档");
 const groups = computed(() => Object.entries(filtered.value.reduce<Record<string, typeof articles>>((result, article) => { const year = article.date.slice(0, 4); (result[year] ||= []).push(article); return result; }, {})).map(([year, items]) => ({ year, items })));
+watch(title, (value) => {
+  document.title = `${value} · tangff`;
+}, { immediate: true });
 </script>
 <style scoped>
 .listing-page {

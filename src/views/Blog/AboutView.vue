@@ -12,7 +12,14 @@
         <p>写作是整理知识的过程，也是一种与未来的自己交流的方式。希望这些并不完美的笔记，能给正在学习的你带来一点帮助。</p>
     </section>
 </template>
-<script setup lang="ts">import logoUrl from "../../public/img/logo.jpg";</script>
+<script setup lang="ts">
+import { onMounted } from "vue";
+import logoUrl from "../../public/img/logo.jpg";
+
+onMounted(() => {
+    document.title = "关于 · tangff";
+});
+</script>
 <style scoped>
 .about {
     /* max-width: 800px; */

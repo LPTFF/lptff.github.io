@@ -51,6 +51,8 @@ const search = () => {
 
 .blog-shell {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
   background: var(--blog-bg);
   color: var(--blog-text);
 }
@@ -127,7 +129,9 @@ const search = () => {
 
 .blog-main {
   /* width: calc(100% - 200px); */
+  flex: 1;
   max-width: 1200px;
+  width: 100%;
   margin: 0 auto;
   padding: 38px 0 70px;
 }

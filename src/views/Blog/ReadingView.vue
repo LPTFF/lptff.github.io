@@ -11,7 +11,14 @@
     </section>
 </template>
 <script setup
-    lang="ts">    const books = [{ title: "深度学习", status: "在读", note: "理解神经网络和表示学习的基础。", link: "https://book.douban.com/" }, { title: "机器学习", status: "读过", note: "从概率和模型角度重新认识机器学习。", link: "https://book.douban.com/" }, { title: "机器学习实战", status: "读过", note: "用代码验证算法与想法。", link: "https://book.douban.com/" }, { title: "计算机程序的构造和解释", status: "想读", note: "重新思考程序、抽象和计算。", link: "https://book.douban.com/" }, { title: "C和指针", status: "读过", note: "补足工程实践中的语言基础。", link: "https://book.douban.com/" }];</script>
+    lang="ts">
+import { onMounted } from "vue";
+
+onMounted(() => {
+    document.title = "阅读 · tangff";
+});
+
+const books = [{ title: "深度学习", status: "在读", note: "理解神经网络和表示学习的基础。", link: "https://book.douban.com/" }, { title: "机器学习", status: "读过", note: "从概率和模型角度重新认识机器学习。", link: "https://book.douban.com/" }, { title: "机器学习实战", status: "读过", note: "用代码验证算法与想法。", link: "https://book.douban.com/" }, { title: "计算机程序的构造和解释", status: "想读", note: "重新思考程序、抽象和计算。", link: "https://book.douban.com/" }, { title: "C和指针", status: "读过", note: "补足工程实践中的语言基础。", link: "https://book.douban.com/" }];</script>
 <style scoped>
 .static-page {
     max-width: 1200px;
