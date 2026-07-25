@@ -10,7 +10,7 @@
           <h1>{{ article.title }}</h1>
           <p>{{ article.summary }}</p>
           <div class="tags"><el-tag v-for="tag in article.tags" :key="tag" size="small" effect="plain">{{ tag
-          }}</el-tag></div>
+              }}</el-tag></div>
         </header>
         <div ref="contentRef" class="markdown-body">
           <component :is="article.component" />
@@ -73,7 +73,7 @@ onBeforeUnmount(() => observer?.disconnect());
 
 <style>
 .article-page {
-  width: calc(100% - 100px);
+  width: calc(100% - 0px);
   margin: 0 auto;
 }
 

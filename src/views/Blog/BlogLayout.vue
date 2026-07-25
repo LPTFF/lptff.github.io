@@ -65,7 +65,8 @@ const search = () => {
 }
 
 .header-inner {
-  width: min(1160px, calc(100% - 40px));
+  /* width: calc(100% - 200px); */
+  max-width: 1200px;
   min-height: 72px;
   margin: 0 auto;
   display: flex;
@@ -125,7 +126,8 @@ const search = () => {
 }
 
 .blog-main {
-  width: calc(100% - 200px);
+  /* width: calc(100% - 200px); */
+  max-width: 1200px;
   margin: 0 auto;
   padding: 38px 0 70px;
 }
