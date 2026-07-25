@@ -23,6 +23,7 @@
 - `npm run typecheck`：仅运行 `vue-tsc --noEmit -p tsconfig.json`，检查 Vue/TypeScript 类型和插件生成声明的解析。
 - `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。
 - `npm run context:check`：检查高影响路径是否同步更新项目上下文和迭代日志；这是只读检查，不会自动改写文件。
+- 编辑器拼写检查：仓库根目录的 `.cspell.json` 启用全局文件扫描，遵循 `.gitignore` 并排除依赖、构建产物、大型数据快照和生成文件；项目专有词和技术术语集中维护在 `words` 中。
 - 除非用户明确请求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
 
 ## 生成和派生文件

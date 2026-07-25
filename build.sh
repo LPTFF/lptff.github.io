@@ -28,7 +28,7 @@ elif [[ "$OSTYPE" == "msys"* ]]; then
     exit 1
 else
     # 其他操作系统
-    echo "Detected deafault OS"
+    echo "Detected default OS"
     echo "Installing Python..."
 
     # 在此处添加适用于 Linux 系统的安装命令

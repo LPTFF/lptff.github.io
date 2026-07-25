@@ -123,3 +123,19 @@
 - 文件：`tsconfig.json`、`package.json`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证：`npm run typecheck` 通过；`npm run build` 通过（摘要同步、类型检查、Vite 构建和 404 复制成功，仅有既有 `@vueuse/core` PURE 注释警告）；`npm run context:check` 和 `git diff --check` 通过。VS Code 诊断当前仅剩 cSpell 对业务词 `pojie` 的 information 提示，未再报告 Element Plus 类型错误；未修改该拼写检查提示。
 - 未解决问题：若编辑器缓存仍显示旧诊断，应选择工作区 TypeScript 并重启 Vue/TypeScript 语言服务；不要添加 any shim。
+
+## 2026-07-26 — 建立全局拼写检查配置并总结 Agent 规划经验
+
+- 范围：针对编辑器报告的 `pojie` 未知词提示，新增根目录 `.cspell.json`，从仓库可检查文本文件执行一次全局 cSpell 扫描，将已确认的项目专有词、技术术语、爬虫字段和既有内容中的专有名词集中加入词典；配置遵循 `.gitignore` 并排除依赖、构建产物、大型数据快照、发布图片、锁文件和自动生成声明。同步在 `README.md`、`CLAUDE.md`、`AGENTS.md` 和 `.claude/project-context.md` 补充配置用途、运行方式与维护边界，未修改业务代码、依赖、路由或部署流程。
+- 证据/决策：本轮是清晰、低风险的编辑器配置与文档同步任务，因此未启动并行 Agent、Plan Agent、worktree 或分阶段编排；采用“定向确认现有配置 → 全局扫描收集词项 → 最小配置和文档更新 → 全局复核”的单 Agent 规划。扫描发现的 `deafault`、`dislpay`、`Javscript`、`asycn`、`funtion` 等疑似真实拼写错误没有直接加入词典作为正确词，而是在文档中明确后续需单独确认修正，避免以消除告警为目的掩盖内容错误。可复用经验：cSpell 配置应区分“已确认专有词”和“疑似拼写错误”，全局扫描应明确排除生成物与大数据，并将命令和排除边界写入项目文档。
+- 文件：`.cspell.json`、`README.md`、`CLAUDE.md`、`AGENTS.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：使用 Node 兼容的临时 `cspell@8.17.5` 完成仓库全局扫描并以 `cspell-exit=0` 通过；`git diff --check` 通过；`npm run iteration:report` 已生成本轮草稿；`npm run context:check` 通过，确认本轮项目上下文已同步；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅修改拼写配置和协作文档。
+- 未解决问题：全局扫描中识别出的疑似真实拼写错误尚未修改，需后续逐项确认其是否为内容错误；cSpell CLI 未固定为项目依赖，当前通过 `npx --yes cspell@8.17.5` 临时复核。
+
+## 2026-07-26 — 逐项确认并修正疑似拼写错误
+
+- 范围：对全局 cSpell 扫描中定位到的疑似错误逐项核对上下文后修正：`deafault` → `default`、`containingblock` → `containing block`、`dislpay` → `display`、`CmmonJS` → `CommonJS`、`promise.allsettled` → `promise.allSettled`、`documen.write` → `document.write`、`jasmin` → `jasmine`、`Javscript` → `JavaScript`、`asycn` → `async`、`funtion` → `function`、`jsencrpt` → `jsencrypt`，并将访谈内容中的 `eventbus` → `event bus`、`nexttick` → `nextTick`、`tostring` → `toString` 统一为正确技术术语。面试源 Markdown 同步生成的 `public/findJob-summary/full.md` 已更新；未修改仅为合法专有名词、Cookie/接口字段或爬虫随机标识的词项。
+- 证据/决策：源码、脚本和技术内容中的上述词均有明确标准拼写或可由上下文确认；`event bus` 作为普通技术术语采用带空格写法，`nextTick`、`toString`、`allSettled` 保留标准 API 大小写。修正后从 `.cspell.json` 移除对应的错误词条，不再通过词典掩盖问题；README 中原先用于举例的错误词也改为泛化描述。
+- 文件：`build.sh`、`src/content/interview/full.md`、`public/findJob-summary/full.md`、`src/views/Login/FundLogin.vue`、`.cspell.json`、`README.md`、`.claude/iteration-log.md`。
+- 验证：`node ./scripts/sync-findJob-summary.js` 成功；全局 `npx --yes cspell@8.17.5 --no-progress --no-summary .` 通过且无剩余发现；`npm run typecheck` 通过；`npm run build` 通过（包含摘要同步、Vite 构建和 404 复制，仅有既有 `@vueuse/core` PURE 注释警告）；`npm run serve` 已验证同步后的摘要包含 `event bus`，但因 8080–8083 均已有服务，临时服务自动顺延端口；`npm run context:check` 和 `git diff --check` 通过。
+- 未解决问题：无。`cspell` 仍未固定为项目依赖，仅使用 Node 兼容版本临时执行全局复核。

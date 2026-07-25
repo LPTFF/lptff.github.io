@@ -132,17 +132,17 @@ export default {
             // encrypt.setPublicKey(publicKeyPEM);
 
             // 鉴于你提供的是 N 和 E 的十六进制字符串，JSEncrypt 似乎没有直接接受 N, E 作为十六进制字符串的便捷方法来设置公钥。
-            // 原始的 `jsencrpt.js` 内部很可能实现了从 N, E 构建公钥对象进行加密的逻辑。
-            // 这里我将模拟 `jsencrpt` 的行为，并建议你引入 `jsencrypt` 或 `node-rsa`，并可能需要转换 N 和 E 为 PEM 格式。
+            // 原始的 `jsencrypt.js` 内部很可能实现了从 N, E 构建公钥对象进行加密的逻辑。
+            // 这里我将模拟 `jsencrypt` 的行为，并建议你引入 `jsencrypt` 或 `node-rsa`，并可能需要转换 N 和 E 为 PEM 格式。
 
             // 模拟使用 N 和 E 设置公钥 (这需要 JSEncrypt 内部支持，或你手动构建 PEM)
             // JSEncrypt 默认的 `setPublic` 方法期望 PEM 格式。
-            // 实际上，如果 `jsencrpt.js` 是一个自定义的加密工具，你可能需要重写或适配它的 `encrypt` 方法。
+            // 实际上，如果 `jsencrypt.js` 是一个自定义的加密工具，你可能需要重写或适配它的 `encrypt` 方法。
             // 为了能够使用 `jsencrypt`，一种方法是将 N 和 E 转换成标准的 PEM 格式。
             // 这是一个通用的 PEM 公钥头和尾。中间是实际的公钥数据，需要从 N 和 E 编码而来。
             // 这部分转换非常复杂，通常需要用到 ASN.1 编码，超出了直接工具转换的范畴。
 
-            // 假定你的后端或原始 jsencrpt.js 最终能提供一个标准的 PEM 格式公钥：
+            // 假定你的后端或原始 `jsencrypt.js` 最终能提供一个标准的 PEM 格式公钥：
             // 这里我直接用一个占位符，你需要替换为从 `loginmin.js` 实际加密逻辑中提取或转换出的 PEM 格式公钥。
             // 例如：const publicKeyPEM = `-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA${rsaPublicKeyN}AQAB\n-----END PUBLIC KEY-----`;
             // 注意：上面的 publicKeyPEM 只是一个演示，它不能直接工作，因为十六进制的 N 需要被 Base64 编码，并且要符合 ASN.1 结构。
@@ -160,8 +160,8 @@ export default {
             // 构建 PEM 格式需要 N 和 E 的 Base64 编码，并且包裹在 ASN.1 结构中。
             // 这是一个复杂的过程，涉及到 `jsbn` 库（JSEncrypt 内部使用）。
             // 鉴于此，我将提供一个使用 PEM 格式公钥的示例，你需要确保你的公钥是 PEM 格式。
-            // 如果你的 N 和 E 是十六进制，并且原始 `jsencrpt.js` 是直接用这些值加密，
-            // 那么你可能需要阅读 `jsencrpt.js` 或 `loginmin.js` 中是如何将这些值转换为加密对象并进行加密的。
+            // 如果你的 N 和 E 是十六进制，并且原始 `jsencrypt.js` 是直接用这些值加密，
+            // 那么你可能需要阅读 `jsencrypt.js` 或 `loginmin.js` 中是如何将这些值转换为加密对象并进行加密的。
 
             // **重要提示：** 如果你没有 PEM 格式的公钥，只有 N 和 E 的十六进制字符串，
             // 最简单的方法是尝试从后端获取 PEM 格式的公钥，或者使用 `node-rsa` 库，
@@ -190,8 +190,8 @@ export default {
             // const tempKey = `-----BEGIN PUBLIC KEY-----\n${Base64.encode(hexToArrayBuffer(pubKeyN))}\n-----END PUBLIC KEY-----`;
             // 但这个 Base64 编码和 ASN.1 结构不对。
 
-            // **最靠谱的解决方案是：** 如果你的原始 `loginmin.js` 能够利用 `jsencrpt.js` 中的底层 `BigInt` 和 `RSA` 模块使用 N 和 E 直接进行加密，
-            // 你应该尝试将那部分核心加密逻辑从 `loginmin.js` 和 `jsencrpt.js` 中抽取出来，
+            // **最靠谱的解决方案是：** 如果你的原始 `loginmin.js` 能够利用 `jsencrypt.js` 中的底层 `BigInt` 和 `RSA` 模块使用 N 和 E 直接进行加密，
+            // 你应该尝试将那部分核心加密逻辑从 `loginmin.js` 和 `jsencrypt.js` 中抽取出来，
             // 独立成一个工具函数，并将其适配到 Vue 组件中，而不是试图用 `jsencrypt` 来替代一个定制的加密过程。
             // 这会非常复杂，因为需要理解那些低层库是如何工作的。
 

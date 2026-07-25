@@ -86,9 +86,9 @@
 
 7. 浮动塌陷问题解决方法是什么；请解释一下为什么需要清除浮动以及清除浮动的方式；使用 clear 属性清除浮动的原理；zoom:1 的清除浮动原理；对于 hasLayout 的理解；layout viewport、visual viewport 和 ideal viewport 的区别；常用 hack 的技巧；
 
-8. position 常用属性及其默认值是什么；position属性的值有哪些，各个值是什么含义；position 的值 relative 和 absolute 定位原点是什么； 绝对定位元素与非绝对定位元素的百分比计算的区别；display 、position 和 float的相互关系；absolute 的 containingblock(包含块)计算方式跟正常流有什么不同
+8. position 常用属性及其默认值是什么；position属性的值有哪些，各个值是什么含义；position 的值 relative 和 absolute 定位原点是什么； 绝对定位元素与非绝对定位元素的百分比计算的区别；display 、position 和 float的相互关系；absolute 的 containing block(包含块)计算方式跟正常流有什么不同
 
-9. dislpay的属性和作用；单行、多行文本溢出；隐藏元素的方法；隐藏元素的方式；display 有哪些值，说明他们的作用；解释一下CSS 里的 visibility 属性中 collapse ；隐藏元素的 background-image 到底加不加载；如何实现单行/多行文本溢出的省略(...)；常见的元素隐藏方式有哪些
+9. display的属性和作用；单行、多行文本溢出；隐藏元素的方法；隐藏元素的方式；display 有哪些值，说明他们的作用；解释一下CSS 里的 visibility 属性中 collapse ；隐藏元素的 background-image 到底加不加载；如何实现单行/多行文本溢出的省略(...)；常见的元素隐藏方式有哪些
 
 10. 什么是margin重叠，如何解决；margin 重叠问题的理解；content 与替换元素的关系；margin:auto 的填充规则；margin 无效的情形；border 的特殊性；什么是基线和 x-height；line-height 的特殊性；vertical-align 的特殊性；overflow 的特殊性；无依赖绝对定位是什么；absolute 与 overflow 的关系；relative 的特殊性；margin 和 padding 分别适合什么场景使用；width:auto 和 width:100%的区别；为什么 height:100% 会无效；min-width、max-width 和 min-height、max-height 属性间的覆盖规则
 
@@ -256,7 +256,7 @@
 
 1. js有哪些数据类型；数据类型判断方式有几种；解释一下es6新增symbol数据类型；typeof和instance of的区别；js有哪些判断类型的方法；JS 类型检测的方法 typeof、instanceOf 、Object.prototype.toString() 需要理解各个检查方法的输出；instanceof 运算符的实现原理及实现；typeof 和 instanceof 区别；NaN是什么，如何判断是否是NaN类型；null、undefined及未声明变量之间的区别，如何区分；null和undefined区别；map和Object的区别map和weakMap的区别；介绍 js 的基本数据类型；JavaScript 有几种类型的值?你能画一下他们的内存图吗；什么是堆?什么是栈?它们之间有什么区别和联系；undefined 与 undeclared 的区别；null 和 undefined 的区别；如何获取安全的 undefined 值；在 js 中不同进制数字的表示方式； js 中整数的安全范围是多少；typeof NaN 的结果是什么；isNaN 和 Number.isNaN 函数的区别；Array 构造函数只有一个参数值时的表现；其他值到字符串的转换规则；其他值到数字值的转换规则；其他值到布尔类型的值的转换规则；{} 和 [] 的 valueOf 和 toString 的结果是什么；substring和substr的区别；解析字符串中的数字和将字符串强制类型转换为数字的返回结果都是数字,它们之间的区别是什么；操作符什么时候用于字符串的拼接；什么情况下会发生布尔值的隐式强制类型转换；|| 和 操作符的返回值；Symbol 值的强制类型转换；== 操作符的强制类型转换规则；如何将字符串转化为数字,例如 '12.3'；如何将浮点数点左边的数每三位添加一个逗号,如 12000000.11 转化为『12,000,000.11』；如何判断一个对象是否属于某个类；instanceof 的作用;Symbol 类型的注意点; Object.is() 与原来的比较操作符 “===”、“==” 的区别;Set 和 WeakSet 结构；Map 和 WeakMap 结构；如何封装一个 javascript 的类型判断函数;如何判断一个对象是否为空对象
 
-2. JS 模块化方案；CommonJS；CmmonJS和ESM区别；AMD、CMD、UMD；ES6 module是编译时导出接口，CommonJS是运行时导出对象。ES6 module输出的值的引用，CommonJS输出的是一个值的拷贝。ES6 module语法是静态的，CommonJS语法是动态的。ES6 module导入模块的是只读的引用，CommonJS导入的是可变的，是一个普通的变量。ES6 module支持异步，CommonJS不支持异步；模块化开发怎么做； js 的几种模块规范；AMD 和 CMD 规范的区别；ES6 模块与 CommonJS 模块、AMD、CMD 的差异；requireJS 的核心原理是什么?(如何动态加载的?如何避免多次加载的?如何缓存的?)；JS 模块加载器的轮子怎么造,也就是如何实现一个模块加载器；require 模块引入的查找方式
+2. JS 模块化方案；CommonJS；CommonJS和ESM区别；AMD、CMD、UMD；ES6 module是编译时导出接口，CommonJS是运行时导出对象。ES6 module输出的值的引用，CommonJS输出的是一个值的拷贝。ES6 module语法是静态的，CommonJS语法是动态的。ES6 module导入模块的是只读的引用，CommonJS导入的是可变的，是一个普通的变量。ES6 module支持异步，CommonJS不支持异步；模块化开发怎么做； js 的几种模块规范；AMD 和 CMD 规范的区别；ES6 模块与 CommonJS 模块、AMD、CMD 的差异；requireJS 的核心原理是什么?(如何动态加载的?如何避免多次加载的?如何缓存的?)；JS 模块加载器的轮子怎么造,也就是如何实现一个模块加载器；require 模块引入的查找方式
 
 3. 谈谈对原型链的理解；js如何实现继承（原型和原型链）；JS原型，原型链；实现继承的方式；实现寄生组合继承；JavaScript 原型,原型链? 有什么特点；js 获取原型的方法；Javascript 的作用域链；谈谈对闭包的理解，什么是闭包；闭包有哪些应用场景；闭包有什么缺点；如何避免闭包；闭包和作用域谈一下区别；JS作用域及作用域链/闭包（closure），常用场景举例说明；闭包和原型链谈一下区别；对作用域、作用域链的理解；对闭包的理解以及它的使用场景； JavaScript 继承的几种实现方式；寄生式组合继承的实现;什么是闭包,为什么要用它;使用闭包实现每隔一秒打印 1,2,3,4
 
@@ -266,7 +266,7 @@
 
 6. 介绍JS有哪些内置对象；宿主对象和原生对象的区别；如何将arguments转为数组，对象的遍历方法；如何判断两个对象相等；为什么0.1+0.2 != 0.3，如何让其相等；==和===的区别；JS执行对象查找时，永远不会去查找原型的函数是哪个；JS有哪几种创建对象的方式；介绍 js 有哪些内置对象；内部属性 [[Class]] 是什么；Javascript 中,有一个函数,执行时对象查找时,永远不会去查找原型,这个函数是什么；
 
-7. 说说你对Promise的理解；Promise方法；promise.all 和 promise.allsettled 区别；对async/await 的理解；async/await对比Promise的优势；谈谈对promise理解，手写 Promise和 Promise.all方法；Callback；什么是 Promise 对象,什么是 Promises/A 规范；手写一个 Promise
+7. 说说你对Promise的理解；Promise方法；promise.all 和 promise.allSettled 区别；对async/await 的理解；async/await对比Promise的优势；谈谈对promise理解，手写 Promise和 Promise.all方法；Callback；什么是 Promise 对象,什么是 Promises/A 规范；手写一个 Promise
 
 8. 什么是 Ajax；对AJAX的理解，实现一个AJAX请求；ajax、axios、fetch的区别；异步加载JS 的方式有哪些；js 延迟加载的方式有哪些；Ajax 是什么? 如何创建一个 Ajax；谈一谈浏览器的缓存机制；Ajax 解决浏览器缓存问题；同步和异步的区别;异步加载；异步编程的实现方式
 
@@ -276,7 +276,7 @@
 
 11. this指向系列问题；解释一下JS执行上下文；请简述JS中的this ；解释一下JS变量和对象;谈谈 This 对象的理解;箭头函数和普通函数区别是什么；箭头函数和普通函数有什么区别
 
-12. document.write和innerHTML有何区别；documen.write 和 innerHTML 的区别；DOM 操作——怎样添加、移除、移动、复制、创建和查找节点；innerHTML 与 outerHTML 的区别；
+12. document.write和innerHTML有何区别；document.write 和 innerHTML 的区别；DOM 操作——怎样添加、移除、移动、复制、创建和查找节点；innerHTML 与 outerHTML 的区别；
 
 13. call bind apply的区别；call,apply和bind的作用是什么；手写bind方法；请说明Function.prototype.bind的用法；call() 和 .apply() 的区别；手写 call、apply 及 bind 函数
 
@@ -332,7 +332,7 @@
 
 39. 移动端的点击事件的有延迟,时间是多久,为什么会有? 怎么解决这个延时
 
-40. 如何测试前端代码么? 知道 BDD, TDD, Unit Test 么? 知道怎么测试你的前端工程么(mocha, sinon, jasmin, qUnit..)
+40. 如何测试前端代码么? 知道 BDD, TDD, Unit Test 么? 知道怎么测试你的前端工程么(mocha, sinon, jasmine, qUnit..)
 
 41. 使用 JS 实现获取文件扩展名
 
@@ -406,7 +406,7 @@
 91. typeof和instanceof的区别
 92. null和undefined有什么区别
 93. 说说Javascript中的数据类型？区别
-94. Javscript数组的常用方法有哪些
+94. JavaScript数组的常用方法有哪些
 95. Javascript字符串的常用方法有哪些
 96. 谈谈 Javascript 中的类型转换机制
 97. == 和 ===区别，分别在什么情况使用
@@ -778,7 +778,7 @@
 
 10. 讲讲Vuex的使用方法；Vuex 的原理；Vuex中action和mutation的区别；Vuex 和 localStorage 的区别；Vuex是什么?怎么使用?哪种功能场景使用它
 
-11. 组件通信；vue父子组件通信，兄弟组件通信；vue的eventbus的实现；Vue组件间通信方式有哪些；Vue 组件间的参数传递方式；Vue组件间的参数传递
+11. 组件通信；vue父子组件通信，兄弟组件通信；vue的event bus的实现；Vue组件间通信方式有哪些；Vue 组件间的参数传递方式；Vue组件间的参数传递
 
 12. vue等待视图完成更新后进行下一次操作后，这个函数叫什么；process.nextTick和Vue.nextTick；vue异步渲染、nextTick；Vue.nextTick的实现
 
@@ -896,7 +896,7 @@
 
 67. vue父子组件通信，兄弟组件通信
 
-68. vue的eventbus的实现
+68. vue的event bus的实现
 
 69. React、Vue和JQuery的选型
 
@@ -936,7 +936,7 @@
 
 87. Vue组件间通信方式都有哪些
 
-88. 说说你对nexttick的理解
+88. 说说你对nextTick的理解
 
 89. 说说你对vue的mixin的理解，有什么应用场景
 
@@ -1398,7 +1398,7 @@
 
 18. 实现每隔一秒输出数组中的一个数字
 
-19. 为什么3.tostring()会报错？
+19. 为什么3.toString()会报错？
 
 20. 代码的执行结果
 
@@ -1576,7 +1576,7 @@
         await s2();
         console.log(8);
     }
-    asycn function s2() {
+    async function s2() {
         console.log(9);
     }
     s1();
@@ -1692,7 +1692,7 @@
     for(var i = 0; i < resource.length; i++) {
         var img = new Image();
         img.src = resource[i];
-        img.onload = funtion(){
+        img.onload = function(){
             console.log(i);
         }
     }
