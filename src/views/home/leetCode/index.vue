@@ -56,19 +56,6 @@ import leetCodeList from "../../../public/data/leetCode/leetCode_1.json";
 import axios from "axios";
 import { Refresh } from "@element-plus/icons-vue";
 import { ElLoading, ElCard, ElButton, ElIcon } from "element-plus";
-let leetCodeData = [] as any[];
-const importLeetCodeData = async () => {
-  const files = import.meta.glob(
-    "../../../public/data/leetCode/leetCode_*.json"
-  );
-  for (const path in files) {
-    if (Object.hasOwnProperty.call(files, path)) {
-      const module: any = await files[path]();
-      leetCodeData.push(module.default);
-    }
-  }
-};
-
 const getRandomProblems = (array: any, num: any) => {
   const result = [] as any[];
   const length = array.length;

@@ -58,67 +58,25 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks(id) {
-          if (id.includes("node_modules")) {
-            const arr = id.toString().split("node_modules/")[1].split("/");
-            const pkgName = arr[0];
+          const normalizedId = id.replace(/\\/g, "/");
+          const nodeModulesIndex = normalizedId.lastIndexOf("/node_modules/");
 
-            // 大型库单独分包
-            if (pkgName === "xlsx") return "xlsx";
-            if (pkgName === "marked") return "marked";
-            if (pkgName === "ssh2" || pkgName === "ssh2-sftp-client") return "ssh2";
-            if (pkgName === "archiver") return "archiver";
-            if (pkgName === "jsencrypt") return "jsencrypt";
-            if (pkgName === "openai") return "openai";
+          if (nodeModulesIndex === -1) return undefined;
 
-            // Vue 生态
-            if (pkgName === "@vue" || pkgName === "vue" || pkgName === "vue-router") return "vue";
+          const packagePath = normalizedId.slice(nodeModulesIndex + "/node_modules/".length);
+          const packageName = packagePath.startsWith("@")
+            ? packagePath.split("/").slice(0, 2).join("/")
+            : packagePath.split("/")[0];
 
-            // Element Plus 相关拆分
-            if (pkgName === "element-plus" || pkgName === "@element-plus") return "element-plus";
-            if (pkgName === "@element-plus/icons-vue") return "element-icons";
-            if (pkgName === "@popperjs") return "popper";
-            if (pkgName === "@ctrl") return "tinycolor";
-            if (pkgName === "@vueuse") return "vueuse";
-            if (pkgName === "dayjs") return "dayjs";
-            if (pkgName === "lodash-es") return "lodash-es";
-            if (pkgName === "normalize-wheel-es") return "normalize-wheel-es";
+          // 保留导出功能的延迟加载边界，只有用户执行导出时才请求
+          if (packageName === "xlsx") return "xlsx";
 
-            // 工具库单独分包
-            if (pkgName === "axios") return "axios";
-            if (pkgName === "eruda") return "eruda";
-            if (pkgName === "file-saver") return "file-saver";
-
-            // 剩余小型库按类别细分
-            if (pkgName.startsWith("@types")) return "types";
-            if (pkgName.includes("vite") || pkgName.includes("rollup")) return "build-tools";
-
-            return undefined;
+          // Vue 运行时稳定分包，避免业务代码变化导致框架缓存失效
+          if (packageName === "vue" || packageName === "vue-router" || packageName.startsWith("@vue/")) {
+            return "vue-vendor";
           }
-          // JSON 数据文件单独分包
-          if (id.includes("zhipin.json")) return "zhipin";
-          if (id.includes("leetCode_1.json")) return "leetcode";
-          if (id.includes("websiteGroups.json")) return "websiteGroups";
 
-          // src 目录按模块细分
-          if (id.includes("src/public/data/findJobMarkDown/vue")) return "vue-md";
-          if (id.includes("src/public/data/findJobMarkDown")) return "findjob-md";
-          if (id.includes("src/views/home/findJob")) return "findjob";
-          if (id.includes("src/views/home/leetCode")) return "leetcode-view";
-          if (id.includes("src/views/home/bossZhipin")) return "boss-view";
-          if (id.includes("src/views/home/githubTrending")) return "github-view";
-          if (id.includes("src/views/home/douban")) return "douban-view";
-          if (id.includes("src/views/home/news")) return "news-view";
-          if (id.includes("src/views/Message")) return "message-view";
-          if (id.includes("src/views/Login")) return "login-view";
-          if (id.includes("src/views/Blog")) return "blog-view";
-          if (id.includes("src/study/notebook")) return "blog-content";
-          if (id.includes("src/views/job")) return "job-view";
-          if (id.includes("src/views/life")) return "life-view";
-          if (id.includes("src/components")) return "components";
-          if (id.includes("src/utils")) return "utils";
-          if (id.includes("src/public/data")) return "data";
-          if (id.includes("src")) return "app-core";
-
+          // 其余依赖交给 Rollup 按静态/动态导入关系自然拆分
           return undefined;
         },
       },

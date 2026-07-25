@@ -11,18 +11,11 @@ const outDir = path.join(root, "public", "findJob-summary");
 
 const files = [
   {
-    from: path.join(root, "src", "views", "home", "findJob", "前端八股文汇总背诵版.md"),
+    from: path.join(root, "src", "content", "interview", "full.md"),
     to: path.join(outDir, "full.md"),
   },
   {
-    from: path.join(
-      root,
-      "src",
-      "views",
-      "home",
-      "findJobPlus",
-      "前端八股文汇总背诵版-项目串联高级版.md"
-    ),
+    from: path.join(root, "src", "content", "interview", "chain.md"),
     to: path.join(outDir, "chain.md"),
   },
 ];
