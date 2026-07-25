@@ -139,3 +139,11 @@
 - 文件：`build.sh`、`src/content/interview/full.md`、`public/findJob-summary/full.md`、`src/views/Login/FundLogin.vue`、`.cspell.json`、`README.md`、`.claude/iteration-log.md`。
 - 验证：`node ./scripts/sync-findJob-summary.js` 成功；全局 `npx --yes cspell@8.17.5 --no-progress --no-summary .` 通过且无剩余发现；`npm run typecheck` 通过；`npm run build` 通过（包含摘要同步、Vite 构建和 404 复制，仅有既有 `@vueuse/core` PURE 注释警告）；`npm run serve` 已验证同步后的摘要包含 `event bus`，但因 8080–8083 均已有服务，临时服务自动顺延端口；`npm run context:check` 和 `git diff --check` 通过。
 - 未解决问题：无。`cspell` 仍未固定为项目依赖，仅使用 Node 兼容版本临时执行全局复核。
+
+## 2026-07-26 — 统一协作工具说明的中文表达
+
+- 范围：全局检查项目协作说明中的英文段落，将 `CLAUDE.md` 中 VS Code Context MCP 的标题、介绍、工具分组、工具说明和使用注意事项翻译为中文；同步翻译 `.claude/skills/vscode-context-mcp/SKILL.md` 与 `.opencode/instructions.md`。工具名称、命令、路径、协议名称和代码标识保留原文，避免影响实际调用和检索。未修改应用代码、依赖、路由或部署配置。
+- 证据/决策：本轮检查确认主要面向开发者的英文说明集中在上述三个协作文档中；README、AGENTS 和项目上下文已有中文说明，代码、命令、文件路径及 MCP 工具标识不应意译。采用“保留可执行标识、翻译自然语言说明”的最小文档变更策略。
+- 文件：`CLAUDE.md`、`.claude/skills/vscode-context-mcp/SKILL.md`、`.opencode/instructions.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：全局 `npx --yes cspell@8.17.5 --no-progress --no-summary .` 通过；`git diff --check` 通过；`npm run iteration:report` 已生成本轮草稿；待项目上下文和本条日志同步后运行 `npm run context:check`；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅修改协作文档。
+- 未解决问题：无。

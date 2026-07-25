@@ -1,65 +1,59 @@
----
-name: vscode-context-mcp
-description: VS Code Smart Context MCP tools available via MCP server
----
+# VS Code 上下文 MCP 技能
 
-# VS Code Context MCP Skill
+该技能说明 VS Code Smart Context MCP 扩展提供的 31 个 MCP 工具。
+MCP 服务在 VS Code 内运行，提供面向工作区的智能分析、文件操作、编辑器上下文和命令执行能力。
 
-This skill describes the 31 MCP tools exposed by the VS Code Smart Context MCP extension.
-The MCP server runs inside VS Code and provides workspace-aware intelligence, file operations,
-editor context, and command execution.
+### 文件工具
+- `read_file` — 读取文件内容，可指定行范围
+- `write_file` — 在工作区创建或编辑文件
+- `list_directory` — 递归列出目录内容
+- `file_search` — 在工作区按 glob 模式搜索文件
+- `text_search` — 在工作区进行文本或正则表达式搜索
+- `get_changes` — 显示未提交的 Git 变更（差异）
 
-### File Tools
-- `read_file` — Read file contents with optional line range
-- `write_file` — Create or edit files in the workspace
-- `list_directory` — List directory contents recursively
-- `file_search` — Glob-based file search across the workspace
-- `text_search` — Full-text / regex search in workspace files
-- `get_changes` — Show uncommitted git changes (diff)
+### 执行工具
+- `execute_command` — 在 VS Code 集成终端中运行 Shell 命令
+- `terminal_last_command` — 获取上一次终端命令及其输出
+- `terminal_selection` — 获取当前终端选中的文本
 
-### Execute Tools
-- `execute_command` — Run shell commands in the VS Code integrated terminal
-- `terminal_last_command` — Retrieve the last terminal command and its output
-- `terminal_selection` — Get the current terminal selection text
+### 智能分析工具
+- `get_diagnostics` — 获取编译器、检查器和警告信息
+- `get_file_symbols` — 列出文件中的所有符号（函数、类和变量）
+- `get_workspace_symbols` — 搜索整个工作区中的符号
+- `find_references` — 查找符号的所有引用
+- `find_symbol_definition` — 跳转到符号定义
+- `find_symbol_references` — 按符号名称查找引用
+- `go_to_definition` — 跳转到当前符号的定义位置
+- `get_hover_info` — 获取符号的悬停提示、类型信息和文档
+- `get_implementations` — 查找接口或抽象方法的所有实现
+- `get_call_hierarchy` — 获取符号的调用层级关系
+- `get_code_actions` — 获取指定位置可用的代码操作、快速修复和重构
+- `rename_symbol` — 在整个工作区重命名符号
+- `resolve_symbol` — 解析符号的完整限定名称和位置
+- `get_codebase_graph` — 构建代码库的高层结构图
 
-### Intelligence Tools
-- `get_diagnostics` — Get compiler/linter errors and warnings
-- `get_file_symbols` — List all symbols (functions, classes, variables) in a file
-- `get_workspace_symbols` — Search symbols across the entire workspace
-- `find_references` — Find all references to a symbol
-- `find_symbol_definition` — Jump to a symbol's definition
-- `find_symbol_references` — Find references to a symbol by name
-- `go_to_definition` — Navigate to the definition of a symbol at a position
-- `get_hover_info` — Get hover/tooltip information for a symbol
-- `get_implementations` — Find all implementations of an interface or abstract method
-- `get_call_hierarchy` — Get incoming/outgoing call hierarchy for a function
-- `get_code_actions` — Get available code actions (quick fixes, refactors) at a position
-- `rename_symbol` — Rename a symbol across the entire workspace
-- `resolve_symbol` — Resolve a symbol to its full qualified name and location
-- `get_codebase_graph` — Build a high-level graph of the codebase structure
+### 编辑器工具
+- `get_active_file` — 获取当前活动编辑器中的文件路径和完整内容
+- `get_selection` — 获取当前编辑器中的文本选区
+- `get_open_files` — 列出当前在 VS Code 中打开的文件标签页
+- `get_problems` — 获取“问题”面板中的全部诊断信息
 
-### Editor Tools
-- `get_active_file` — Get the currently active editor file path and content
-- `get_selection` — Get the current text selection in the active editor
-- `get_open_files` — List all currently open editor tabs
-- `get_problems` — Get all problems/diagnostics from the Problems panel
+### 待办工具
+- `todo_list` — 列出待办事项
+- `todo_add` — 添加持久化的工作区待办事项
+- `todo_complete` — 将工作区待办事项标记为已完成
+- `todo_remove` — 移除工作区待办事项
 
-### Todo Tools
-- `todo_list` — List all todo items
-- `todo_add` — Add a new todo item
-- `todo_complete` — Mark a todo item as complete
-- `todo_remove` — Remove a todo item
+## 使用时机
 
-## When to Use
+- 需要读取、写入、搜索或浏览工作区文件时，使用文件工具。
+- 需要 LSP 分析（定义、引用、符号或诊断）时，使用智能分析工具。
+- 需要运行 Shell 命令或查看终端状态时，使用执行工具。
+- 需要了解用户当前编辑上下文时，使用编辑器工具。
+- 需要管理任务列表时，使用待办工具。
 
-- Use **File Tools** for reading, writing, searching, and navigating workspace files.
-- Use **Intelligence Tools** when you need LSP-powered analysis (definitions, references, symbols, diagnostics).
-- Use **Execute Tools** to run shell commands or inspect terminal state.
-- Use **Editor Tools** to understand the user's current editing context.
-- Use **Todo Tools** to manage task lists.
+## 注意事项
 
-## Notes
-
-- The server runs on `http://127.0.0.1:<port>/mcp` (default port 3785).
-- Intelligence tools require VS Code language extensions to be active for the relevant language.
-- `execute_command` may prompt the user for approval.
+- 服务地址为 `http://127.0.0.1:<端口>/mcp`，默认端口为 3785。
+- 智能分析工具要求相关语言扩展已在 VS Code 中启用。
+- `execute_command` 可能需要用户批准后才能执行。

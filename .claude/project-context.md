@@ -24,6 +24,7 @@
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
 - `auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件，已纳入 `tsconfig.json`；`npm run typecheck` 是独立的 Vue/TypeScript 类型检查入口。
 - `.cspell.json` 是仓库级拼写检查配置：全局检查遵循 `.gitignore`，排除依赖、构建产物、大型数据快照、发布图片、锁文件和自动生成声明；项目专有词统一维护在 `words` 中，不把疑似拼写错误自动当作正确词修改。
+- `CLAUDE.md`、`.claude/skills/vscode-context-mcp/SKILL.md` 和 `.opencode/instructions.md` 中面向协作工具的说明统一使用中文；命令名、工具名、路径和协议名保留原文，以保证可执行性和检索准确性。
 - `dist/` 是构建输出；`auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件。
 - Vite 将 `write-excel-file` 保留在懒加载的 `xlsx-export` chunk 中，因为基金和加密货币页面只在导出电子表格时才会加载它。
 
