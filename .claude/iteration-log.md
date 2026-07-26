@@ -152,7 +152,21 @@
 - 验证：全局 `npx --yes cspell@8.17.5 --no-progress --no-summary .` 通过；`git diff --check` 通过；`npm run iteration:report` 已生成本轮草稿；待项目上下文和本条日志同步后运行 `npm run context:check`；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅修改协作文档。
 - 未解决问题：无。
 
-## 2026-07-26 — 落地业务演进规划文件并同步项目文档入口
+## 2026-07-26 — 补充可复制的上下文管理机制
+
+- 任务基线：补充外部开发者可以直接理解和复制的上下文管理机制，说明文件职责、信息更新时机、最小落地步骤和验收标准；提供不含内部事实、凭据或公司模板原文的公开模板包，不修改应用代码、依赖或部署行为。
+- 实际变更/偏离控制：新增 `05-context-management-guide.md`，将规则、项目入口、当前事实、迭代证据、业务基线和未来规划拆分说明；新增 `templates/context-kit/`，提供 `AGENTS.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md` 和两份业务文档模板；在外部协作 README 和项目上下文中增加复制入口及占位符替换边界。没有复制本项目的业务事实或内部 Agent 配置。
+- 文件：`docs/external-developer-collaboration/05-context-management-guide.md`、`docs/external-developer-collaboration/templates/context-kit/`、`docs/external-developer-collaboration/README.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已检查新增文档的 15 个 Markdown 文件及其相对链接，未发现缺失目标；已运行 `git diff --check`、`npm run context:check` 和 `npm run iteration:report`。`context:check` 确认项目上下文和迭代日志已包含在本轮长期事实变更中；`iteration:report` 生成了本轮记录草稿。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只修改公开协作文档和模板；文档检查不能证明外部团队已经正确适配模板，复制者仍需补充自身项目事实并负责验证。
+- 剩余风险/责任人：模板只提供方法和占位符，不自动生成真实项目上下文，也不替代公司内部审批；采用模板的开发者负责补充命令、路径、权限、数据边界和测试证据。
+
+
+- 任务基线：为公司内部适配 Agent 管理模板、开源方法论来源和经脱敏审批后反哺开源的工作方式建立对外沟通资料；不公开公司内部模板、项目、客户、凭据或未公开决策，不修改应用行为、依赖或部署流程。
+- 实际变更/偏离控制：新增 `docs/external-developer-collaboration/`，包含目录说明、协作模型、Agent 管理方法论、脱敏与发布审批、开源反馈闭环以及外部问题、改进提案和上游 PR 模板；在 `README.md`、`CLAUDE.md` 和 `.claude/project-context.md` 增加入口与职责边界。内容采用组织无关表述，没有复制内部模板或加入真实业务材料。
+- 文件：`docs/external-developer-collaboration/README.md`、`01-collaboration-model.md`、`02-agent-management-methodology.md`、`03-sanitization-and-approval.md`、`04-open-source-feedback-loop.md`、`templates/external-question.md`、`templates/change-proposal.md`、`templates/upstream-pr.md`、`README.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已审查新增文档的目录链接、职责边界、脱敏检查项和审批状态；已运行 `git diff --check`、`npm run context:check` 和 `npm run iteration:report`。`context:check` 确认 `project-context` 和 `iteration-log` 已包含在本轮长期事实变更中；`iteration:report` 生成了本轮记录草稿。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只新增和同步 Markdown 协作文档；这些检查不能证明公司内部审批已经完成，发布责任仍由实际审批人承担。
+- 剩余风险/责任人：本目录是公开沟通模板，不替代公司法务、安全、隐私或发布审批制度；任何实际对外文档或开源 PR 仍需由对应脱敏审查人、技术审查人和发布审批人确认。
+
 
 - 范围：新增 `docs/business-evolution-plan.md`，将用户提供的业务演进方向整理为独立规划文件，包含产品演进原则、业务方向、阶段路线、P0/P1/P2/P3 实施清单、代码落点、决策机制和验收标准；README 增加规划文档入口；项目上下文补充规划文件与当前业务基线的分工。未修改应用代码、路由、数据源、依赖、认证行为或部署流程。
 - 证据/决策：保留 `docs/business-function-overview.md` 作为当前源码和路由的业务基线，将未来假设与已实现能力分开维护；当前只落地规划文件，后续按“使用观测与数据可信度 → 投资判断和复盘 → 高频工作台 → 知识资产 → 外部复用验证”逐步实施；第一阶段不引入账号、远程埋点、交易执行或云端同步。

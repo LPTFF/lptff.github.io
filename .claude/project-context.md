@@ -10,6 +10,8 @@
 - 页面位于 `src/views/`；主要路由分组为首页、博客、求职/生活、登录、留言/理财工具，以及通过导航专区进入的独立功能页。
 - 业务功能说明统一维护在 `docs/business-function-overview.md`，按用户入口、业务域、典型流程和当前业务边界描述现有能力；该文档不作为未来规划或技术设计文档。
 - 业务演进规划统一维护在 `docs/business-evolution-plan.md`，记录产品假设、阶段路线、验证指标、决策规则和后续实施清单；规划内容必须与当前已实现能力分开标记。
+- 面向外部开发者的交流资料统一维护在 `docs/external-developer-collaboration/`，公开 Agent 管理方法论、脱敏与发布审批边界、开源反哺流程和沟通模板；不复制公司内部 Agent 管理模板，不放置内部项目、客户、凭据或未公开决策。
+- 外部协作资料同时提供 `templates/context-kit/` 可复制模板包，用于将 Agent 工作规则、项目入口、当前事实、迭代证据、业务基线和未来规划分开维护；复制者必须用目标项目的实际事实和命令替换占位符。
 - 首页顶部保留热门资讯、吾爱破解、导航专区、Boss直聘、豆瓣电影；PC 默认选中导航专区，移动端默认选中热门资讯。首页菜单使用稳定 key 配置，滚动位置按功能 key 缓存。
 - 独立功能页包括 `/welfare`、`/advanced-search`、`/tech-forum`、`/github-trending`、`/leetcode`、`/interview`，共享 `src/views/home/StandaloneFeatureLayout.vue`，入口位于导航专区 `InternalWebsite` 分类；共享布局沿用首页的白色背景、1200px 内容宽度、固定顶部品牌区和移动端紧凑间距。
 - 首页列表组件的 location prop 仅用于首页内部滚动增量；薅羊毛、技术论坛、GitHub Trending 独立路由未传 prop 时展示完整数据快照。

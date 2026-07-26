@@ -106,6 +106,7 @@ npm audit --registry=https://registry.npmjs.org
 
 - [业务功能说明](docs/business-function-overview.md)：按用户入口、业务域和典型流程说明当前功能边界
 - [业务演进规划](docs/business-evolution-plan.md)：记录产品假设、阶段路线、指标和后续实施清单
+- [外部开发者协作资料](docs/external-developer-collaboration/README.md)：用于外部交流的 Agent 管理方法论、脱敏审批和开源反哺模板
 - [AGENTS.md](AGENTS.md)：可复用的 Agent 工作流和项目协作规则
 - [CLAUDE.md](CLAUDE.md)：项目命令、目录事实和验证规则
 - [.claude/project-context.md](.claude/project-context.md)：当前项目事实和未解决决策

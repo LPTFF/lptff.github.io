@@ -7,6 +7,7 @@
 - 应用入口为 `index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
 - 页面组件位于 `src/views/`。
 - 面向用户的 Markdown 内容位于 `src/content/blog/` 和 `src/content/interview/`。
+- 面向外部开发者的公开协作资料位于 `docs/external-developer-collaboration/`，用于交流通用 Agent 管理方法论、脱敏审批边界和开源反哺流程；公司内部 Agent 管理模板不直接复制到该目录。
 - 运行时/静态资源位于 `public/`；大型导入的数据快照位于 `src/public/data/`。
 
 ## UI 设计与组件约定
