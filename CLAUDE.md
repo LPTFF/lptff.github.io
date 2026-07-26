@@ -19,7 +19,7 @@
 
 ## 命令
 
-- `npm run serve`：同步面试摘要，然后在端口 8080 启动 Vite 开发服务器。
+- `npm run serve`：同步面试摘要，然后在端口 8090 启动 Vite 开发服务器。
 - `npm run preview`：预览构建输出。
 - `npm run typecheck`：仅运行 `vue-tsc --noEmit -p tsconfig.json`，检查 Vue/TypeScript 类型和插件生成声明的解析。
 - `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。

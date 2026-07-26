@@ -21,7 +21,7 @@
 
 ## 构建和生成数据流
 
-- `npm run serve` 在启动 Vite 开发服务器（端口 8080）之前运行 `scripts/sync-findJob-summary.js`。
+- `npm run serve` 在启动 Vite 开发服务器（端口 8090）之前运行 `scripts/sync-findJob-summary.js`。
 - `npm run build` 同步面试摘要，运行 `npm run typecheck`（`vue-tsc --noEmit -p tsconfig.json`），用 Vite 构建，然后运行 `scripts/copy-404.js`。
 - `npm run iteration:report` 从当前 Git 工作区生成可审查的迭代日志草稿；`npm run context:check` 只读检查高影响路径是否同步更新协作文档。两者不挂载到 `serve`/`build`，也不自动提交或推送。
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
@@ -35,7 +35,7 @@
 
 - `.github/workflows/ci.yml` 安装依赖、运行爬虫工作、构建站点，并将 `dist/` 直接推送到 `gh-pages` 分支；未使用 `gh-pages` npm 包。
 - Vite 构建未使用预渲染插件。
-- Vite 开发服务器默认仅监听本机，不启用全来源 CORS；需要局域网调试时由开发者显式使用 `--host`。
+- Vite 开发服务器严格固定在 `8090` 端口、监听 `0.0.0.0` 并启用 CORS；`strictPort: true` 会在端口被占用时直接报错，不自动顺延到其他端口。`/data` 代理到家庭服务器 `http://192.168.1.100:5000`。远程 HTTP 服务工作目录为 `/root/Test`，因此 `/data/fundHoldData.json` 对应远程文件 `/root/Test/data/fundHoldData.json`。基金持仓页面通过 `/data/fundHoldData.json` 相对路径读取，不能将远程绝对地址硬编码到组件中；详见 [`docs/development-environment.md`](../docs/development-environment.md)。
 - `uploadQL.js` 是一个单独的手动 SFTP 部署路径，需要 `archiver`、`ssh2` 和 `ssh2-sftp-client`。
 - 除非明确要求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
 

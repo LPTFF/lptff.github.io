@@ -40,7 +40,7 @@ Excel 导出使用浏览器端 `write-excel-file`，仅在用户执行导出时�
 npm install
 ```
 
-启动开发服务器（端口 8080）：
+启动开发服务器（端口 8090）：
 
 ```bash
 npm run serve
@@ -51,6 +51,12 @@ npm run serve
 ```bash
 npm run preview
 ```
+
+## 本地开发数据服务
+
+本地开发时，Vite 严格固定在 `8090` 端口运行，并将页面使用的 `/data` 请求代理到家庭服务器 `http://192.168.1.100:5000`；如果 `8090` 已被占用，Vite 会直接启动失败，不会自动顺延到其他端口。基金持仓数据的远程文件为 `/root/Test/data/fundHoldData.json`，页面代码保持使用 `/data/fundHoldData.json` 相对路径，不直接硬编码远程地址。
+
+如需通过 SSH 检查该服务器，可连接 `root@192.168.1.100:22`；密码不写入仓库。完整的本地开发、远程数据服务、SSH 运维边界和排查步骤见 [开发环境与远程数据服务](docs/development-environment.md)。
 
 ## 构建
 
@@ -100,7 +106,7 @@ GitHub Actions 会构建站点，并将 `dist/` 发布到 `gh-pages` 分支。
 npm audit --registry=https://registry.npmjs.org
 ```
 
-当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器默认仅监听本机且不启用全来源 CORS。不要直接运行 `npm audit fix --force`。
+当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS，`/data` 请求代理到家庭服务器；详见[开发环境与远程数据服务](docs/development-environment.md)。不要直接运行 `npm audit fix --force`。
 
 ## 项目维护文档
 

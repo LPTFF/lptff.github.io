@@ -25,7 +25,8 @@ export default defineConfig({
     cors: true,
     open: false,
     host: '0.0.0.0',
-    port: 8080,
+    port: 8090,
+    strictPort: true,
     proxy: {
       "/Run": {
         target: "https://www.runoob.com",
@@ -46,7 +47,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/douban/, ""),
       },
       '/data': {
-        target: 'http://106.15.131.89:60080',
+        target: 'http://192.168.1.100:5000',
         changeOrigin: true,
         rewrite: path => path.replace(/^\/data/, '/data')
       }

@@ -1,3 +1,17 @@
+## 2026-07-26 — 固定 Vite 本地开发端口并阻止自动顺延
+
+- 任务基线：修复 `npm run serve` 在 `8090` 被占用后自动切换到 `8091`、`8092`、`8093`，以及配置热重载后回到旧端口的问题；开发地址必须稳定，端口冲突应显式失败，便于发现残留服务并保持文档、浏览器访问地址和数据代理一致。
+- 实际变更/偏离控制：将 `vite.config.ts` 的端口固定为 `8090` 并启用 `strictPort: true`；保留 `0.0.0.0` 监听、CORS 和 `192.168.1.100:5000` 数据代理。同步更新 README、开发环境说明和项目上下文；未修改业务页面或远程服务。
+- 文件：`vite.config.ts`、`README.md`、`docs/development-environment.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已运行 `git diff --check` 和 `npm run context:check`，均通过；静态复核确认 `port: 8090` 与 `strictPort: true` 已生效。本轮未启动 Vite 实测，因为当前日志已显示 `8090` 至少被残留服务占用，直接启动只会按预期失败；未执行构建，因为仅修改开发服务器配置和文档。
+- 剩余风险/责任人：需要先停止占用 `8090` 的旧 Node/Vite 进程，再运行 `npm run serve`；端口冲突后的排查和进程清理由本地开发者负责。
+
+
+- 任务基线：记录本地开发环境、Vite `/data` 代理和经授权的家庭服务器 SSH/远程数据文件关系，降低后续代码理解和维护成本；不在仓库写入密码，不修改远程文件或服务进程。
+- 实际变更/偏离控制：确认 Vite 开发服务器当前端口为 `8090`、监听 `0.0.0.0`，`/data` 代理目标为 `http://192.168.1.100:5000`；确认远程 `http-server` 工作目录为 `/root/Test`，`/data/fundHoldData.json` 对应 `/root/Test/data/fundHoldData.json`。新增开发环境架构文档，并同步 README、项目上下文和命令说明；未将密码写入任何文件。
+- 文件：`vite.config.ts`、`docs/development-environment.md`、`README.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已通过 SSH 检查远程文件路径、HTTP 服务工作目录和监听端口；已验证 `http://192.168.1.100:5000/data/fundHoldData.json` 返回 HTTP 200 JSON；已运行 `git diff --check`（此前代理修改已通过）。本轮仅修改文档和项目事实说明，未运行 `npm run build` 或浏览器流程验证，因为用户已确认此前开发环境测试无问题。
+- 剩余风险/责任人：家庭服务器为局域网开发依赖，离线或地址变化时本地基金页面数据请求会失败；后续维护者需在远程服务、`vite.config.ts` 和本文档之间同步变更。SSH 密码由用户/本地安全凭据管理负责，不进入仓库。
 ## 2026-07-25 — 修复高级搜索页动态模块加载白屏并建立迭代文档自动化
 
 - 范围：排查 `/advanced-search` 首次访问时的 `504 (Outdated Optimize Dep)` 和动态导入失败；将高级搜索页的 Element Plus 搜索图标从嵌套 `<el-icon>` 改为 `el-input` 的 `prefix-icon` 绑定，移除不再需要的 `ElIcon` 注册；新增迭代日志草稿和上下文遗漏检查脚本。未修改路由结构、搜索跳转行为、数据源或部署流程。
