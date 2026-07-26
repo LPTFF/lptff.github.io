@@ -187,3 +187,11 @@
 - 文件：`docs/business-evolution-plan.md`、`README.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证：`npm run iteration:report -- --write --summary "落地业务演进规划文件并同步项目文档入口"` 已追加本条记录；`npm run context:check` 已检查项目上下文同步；`git diff --check` 通过；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只新增和同步 Markdown 文档。
 - 未解决问题：无；下一轮具体实施范围按规划文件中的阶段 0/P0 清单确认。
+
+## 2026-07-26 — 收敛个人高收益软件产品方向并更新业务演进路线
+
+- 任务基线：在现有业务演进规划基础上，吸收新的产品结论，将项目从“个人综合信息工作台持续扩展”收敛为利用私人数据持续改善重要决策的个人高收益软件；只更新规划与长期事实，不修改应用行为。
+- 实际变更/偏离控制：在 `docs/business-evolution-plan.md` 增加五项需求判断标准、通用决策复盘模型和产品边界；将交易复盘明确为 P0 第一主线，职业资产、健康精力列为后续候选，通用复盘引擎延后到具体场景闭环验证后抽象；补充交易、职业、健康的阶段路线、任务看板、验收问题和非目标，明确通用聊天壳、普通待办/日报/摘要、无反馈 AI 建议、纯仪表盘和复杂多 Agent 为当前非目标；同步 `.claude/project-context.md` 的长期产品事实。未新增路由、依赖、数据存储、账号、远程埋点、交易执行或健康诊断能力。
+- 文件：`docs/business-evolution-plan.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已运行 `npm run iteration:report -- --write --summary "收敛个人高收益软件产品方向并更新业务演进路线"`、`npm run context:check` 和 `git diff --check`；检查证明规划文档、项目上下文和迭代日志已同步，文档无空白错误。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只修改 Markdown 规划和项目事实，不改变运行时代码；静态文档检查不能证明产品假设或后续交易复盘闭环已经验证。
+- 剩余风险/责任人：产品方向仍属于待验证假设，交易复盘的实际使用频率、记录负担和是否能改变行动尚无运行证据；由项目所有者在完成 `INV-DATA-001` 后，通过最小交易记录和多次复盘验证。职业资产与健康精力暂不并行开发，通用引擎不得提前抽象。
