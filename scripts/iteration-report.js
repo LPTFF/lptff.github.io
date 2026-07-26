@@ -36,25 +36,17 @@ function changedFiles() {
   return [...files].sort();
 }
 
-function validationLines() {
-  const files = changedFiles();
-  const checks = [];
-  if (files.length) checks.push("已由 `iteration:report` 读取当前 Git 工作区变更");
-  checks.push("请补充本轮实际运行的构建、测试或浏览器验证结果");
-  return checks;
-}
-
 const files = changedFiles();
 const date = new Date().toISOString().slice(0, 10);
 const title = summary || "本轮迭代记录（请补充摘要）";
 const entry = [
   `## ${date} — ${title}`,
   "",
-  `- 范围：${summary || "请补充本轮变更范围；脚本不会根据文件名推断业务事实。"}`,
-  "- 证据/决策：请补充已确认的原因、方案和有意未修改的范围。",
+  `- 任务基线：${summary || "请补充本轮目标、依据的已确认事实、明确不做什么和完成条件。"}`,
+  "- 实际变更/偏离控制：请补充实际变更；如偏离任务基线，说明触发证据、影响范围和确认状态。",
   `- 文件：${files.length ? files.map((file) => `\`${file}\``).join("、") : "当前工作区没有可识别的变更文件。"}。`,
-  `- 验证：${validationLines().join("；")}。`,
-  "- 未解决问题：无（如有未决兼容性、部署或后续规划，请在这里补充）。",
+  "- 验证证据：请补充已运行什么、证明了什么、跳过了什么、仍不能证明什么。",
+  "- 剩余风险/责任人：请确认并填写“无（已核验）”，或列出风险、影响、责任人和后续动作。",
   "",
 ].join("\n");
 
@@ -68,4 +60,4 @@ const existing = readFileSync(logPath, "utf8");
 const separator = existing.endsWith("\n") ? "\n" : "\n\n";
 appendFileSync(logPath, `${separator}${entry}`, "utf8");
 console.log(`已追加迭代日志草稿：${logPath}`);
-console.log("请人工补充“证据/决策”和“验证”中的占位内容，避免把推断写成项目事实。");
+console.log("请人工补充任务基线、偏离控制、验证证据和剩余风险/责任人，避免把推断写成项目事实。");
