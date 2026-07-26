@@ -147,3 +147,11 @@
 - 文件：`CLAUDE.md`、`.claude/skills/vscode-context-mcp/SKILL.md`、`.opencode/instructions.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证：全局 `npx --yes cspell@8.17.5 --no-progress --no-summary .` 通过；`git diff --check` 通过；`npm run iteration:report` 已生成本轮草稿；待项目上下文和本条日志同步后运行 `npm run context:check`；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮仅修改协作文档。
 - 未解决问题：无。
+
+## 2026-07-26 — 落地业务演进规划文件并同步项目文档入口
+
+- 范围：新增 `docs/business-evolution-plan.md`，将用户提供的业务演进方向整理为独立规划文件，包含产品演进原则、业务方向、阶段路线、P0/P1/P2/P3 实施清单、代码落点、决策机制和验收标准；README 增加规划文档入口；项目上下文补充规划文件与当前业务基线的分工。未修改应用代码、路由、数据源、依赖、认证行为或部署流程。
+- 证据/决策：保留 `docs/business-function-overview.md` 作为当前源码和路由的业务基线，将未来假设与已实现能力分开维护；当前只落地规划文件，后续按“使用观测与数据可信度 → 投资判断和复盘 → 高频工作台 → 知识资产 → 外部复用验证”逐步实施；第一阶段不引入账号、远程埋点、交易执行或云端同步。
+- 文件：`docs/business-evolution-plan.md`、`README.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证：`npm run iteration:report -- --write --summary "落地业务演进规划文件并同步项目文档入口"` 已追加本条记录；`npm run context:check` 已检查项目上下文同步；`git diff --check` 通过；未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只新增和同步 Markdown 文档。
+- 未解决问题：无；下一轮具体实施范围按规划文件中的阶段 0/P0 清单确认。
