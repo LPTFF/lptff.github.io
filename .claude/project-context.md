@@ -20,6 +20,7 @@
 - 博客路由嵌套在 `/blog` 下；旧版归档、读书、关于、笔记本和带日期的文章 URL 都重定向到当前博客路由。
 - 面向用户的 Markdown 内容位于 `src/content/blog/` 和 `src/content/interview/`。
 - 运行时/静态资源位于 `public/`；大型爬虫数据快照位于 `src/public/data/`。
+- 个人 Claude Code + GitHub Copilot gateway 配置放在被 `*.local` 忽略的 `.claude/settings.local.json` 中；可提交的接入说明位于 `.claude/github-copilot-gateway.md`，不把个人 gateway 地址和模型映射写入项目级 `.claude/settings.json`。
 
 ## 构建和生成数据流
 
