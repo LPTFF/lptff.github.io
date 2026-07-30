@@ -203,3 +203,11 @@
 - 文件：`AGENTS.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证证据：已审查既有协作规范并运行 `git diff --check`（通过，仅有 Windows 工作区 LF/CRLF 转换提示）、`npm run iteration:report`（成功生成草稿）和 `npm run context:check`；首次 `context:check` 正确指出长期事实及日志尚未同步，随后已补齐。未运行应用构建、开发服务器或浏览器验证，因为本轮仅修改 Markdown 协作规范，不改变运行时代码；文档检查不能保证所有非 Claude Agent 自动读取这些文件，具体工具仍需将 `AGENTS.md` 或 `CLAUDE.md` 设为规则入口。
 - 剩余风险/责任人：项目内 Claude Code 可通过 `CLAUDE.md` 发现该标准；其他 Agent 工具是否自动读取 `AGENTS.md` 取决于各自的加载机制，由后续接入者确认并配置入口。
+
+## 2026-07-30 — 明确远程提交目标分支确认规则
+
+- 任务基线：记录本轮纠正后的 Git 推送偏好：当用户只要求提交到远程但未指定目标分支时，Agent 应先确认目标，不擅自创建远程分支；本轮用户已明确授权直接推送到 `master`。不修改应用代码、依赖或部署配置。
+- 实际变更/偏离控制：在 `AGENTS.md`、`CLAUDE.md` 和项目上下文中增加目标分支确认规则；保留推送前检查远程状态和快进边界的安全要求。随后将既有 Agent 标准提交和本轮规则提交快进合入并推送到 `origin/master`；不创建新的远程分支或 merge commit。
+- 文件：`AGENTS.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：计划运行 `git diff --check`、`npm run context:check` 和 `npm run iteration:report` 验证文档与记录完整性；推送前获取 `origin/master` 并验证本地合并可快进，推送后检查远程引用。未运行应用构建或浏览器验证，因为本轮仅修改 Markdown 协作规则。
+- 剩余风险/责任人：远程功能分支 `origin/docs/agent-operating-standard` 是上一轮已创建的历史分支，本轮不擅自删除；如需清理，由用户另行授权。
