@@ -195,3 +195,11 @@
 - 文件：`docs/business-evolution-plan.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证证据：已运行 `npm run iteration:report -- --write --summary "收敛个人高收益软件产品方向并更新业务演进路线"`、`npm run context:check` 和 `git diff --check`；检查证明规划文档、项目上下文和迭代日志已同步，文档无空白错误。未运行 `npm run build`、开发服务器或浏览器验证，因为本轮只修改 Markdown 规划和项目事实，不改变运行时代码；静态文档检查不能证明产品假设或后续交易复盘闭环已经验证。
 - 剩余风险/责任人：产品方向仍属于待验证假设，交易复盘的实际使用频率、记录负担和是否能改变行动尚无运行证据；由项目所有者在完成 `INV-DATA-001` 后，通过最小交易记录和多次复盘验证。职业资产与健康精力暂不并行开发，通用引擎不得提前抽象。
+
+## 2026-07-30 — 固化 Agent 运行标准
+
+- 任务基线：将用户提供的 Agent Operating Standard 纳入项目，作为后续 Agent 执行参考；沿用现有协作规范入口，不修改应用代码、依赖、用户级配置或自动化钩子；完成条件为标准内容完整落盘、Claude 项目入口可发现并通过文档检查。
+- 实际变更/偏离控制：在 `AGENTS.md` 新增“Agent 运行标准”，覆盖使命、优先级、任务定义、基准交付、探索模式、决策、实施、验证和最终报告；在 `CLAUDE.md` 增加执行入口，在项目上下文记录长期工作偏好。未另建重复规范文件，也未改变现有普通任务最小修改和高风险升级边界。
+- 文件：`AGENTS.md`、`CLAUDE.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：已审查既有协作规范并运行 `git diff --check`（通过，仅有 Windows 工作区 LF/CRLF 转换提示）、`npm run iteration:report`（成功生成草稿）和 `npm run context:check`；首次 `context:check` 正确指出长期事实及日志尚未同步，随后已补齐。未运行应用构建、开发服务器或浏览器验证，因为本轮仅修改 Markdown 协作规范，不改变运行时代码；文档检查不能保证所有非 Claude Agent 自动读取这些文件，具体工具仍需将 `AGENTS.md` 或 `CLAUDE.md` 设为规则入口。
+- 剩余风险/责任人：项目内 Claude Code 可通过 `CLAUDE.md` 发现该标准；其他 Agent 工具是否自动读取 `AGENTS.md` 取决于各自的加载机制，由后续接入者确认并配置入口。
