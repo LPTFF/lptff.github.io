@@ -5,6 +5,10 @@ on:
     branches:
       - master
 
+  schedule:
+    # GitHub Actions 使用 UTC；每天北京时间 06:17 自动采集并发布。
+    - cron: "17 22 * * *"
+
   workflow_dispatch:
 
 permissions:
@@ -30,27 +34,52 @@ jobs:
         with:
           node-version: 20
           cache: "npm"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
       - name: Install dependencies
-        run: npm install
-      - name: crawl
+        run: |
+          npm install
+          python -m pip install --requirement requirements-crawl.txt
+      - name: Test public data collectors
+        run: npm run test:collectors
+      - name: Collect public RSS for Pages
+        run: npm run collect:rss:site
+      - name: Crawl and validate site data
         run: |
           chmod +x build.sh
-          ./build.sh
-          python  ./src/crawl/sendNotify.py
+          ./build.sh --full --summary .artifacts/collectors/python-ci.json
+        env:
+          KUAISHOU_COOKIE: ${{ secrets.KUAISHOU_COOKIE }}
+          DOUYIN_COOKIE: ${{ secrets.DOUYIN_COOKIE }}
+          LEETCODE_COOKIE: ${{ secrets.LEETCODE_COOKIE }}
+      - name: Publish validated crawler data
+        run: |
           cd ./src/public/data/
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
           git config --global init.defaultBranch master
           git init
           git add -A
-          git commit -m $(date +%F日%H时%M分%S秒)
+          git commit -m "$(date +%F日%H时%M分%S秒)"
           git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:python-crawl
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+      - name: Notify crawl result
+        continue-on-error: true
+        run: python ./src/crawl/sendNotify.py
+        env:
           QYWX_KEY: ${{ secrets.QYWX_KEY }}
       - name: Build
         run: |
           npm run build
+      - name: Verify RSS in production build
+        run: |
+          test -s public/data/recommendArticleData.json
+          test -s dist/data/recommendArticleData.json
+          cmp public/data/recommendArticleData.json dist/data/recommendArticleData.json
       - name: 404
         run: cp dist/index.html dist/404.html
       - name: Deploy

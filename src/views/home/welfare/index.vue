@@ -40,6 +40,7 @@
                   :src="item.img_src ? item.img_src : logoUrl"
                   alt="作者"
                   class="welfare-img-link"
+                  @error="handleImageError"
                 />
                 <el-icon
                   :size="32"
@@ -139,6 +140,12 @@ export default {
         gotoOutPage(item.link);
       }
     };
+    const handleImageError = (event: Event) => {
+      const image = event.target as HTMLImageElement;
+      if (image.src !== logoUrl) {
+        image.src = logoUrl;
+      }
+    };
     const getWebsiteInfo = (item: any): any => {
       let websiteInfo = {};
       switch (String(item.website)) {
@@ -234,6 +241,7 @@ export default {
       handleDay,
       handleHour,
       gotoWelfareWebsite,
+      handleImageError,
       handleWebsiteName,
       handleWebsiteImg,
       welfareLimited,

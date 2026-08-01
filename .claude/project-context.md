@@ -10,6 +10,7 @@
 - 页面位于 `src/views/`；主要路由分组为首页、博客、求职/生活、登录、留言/理财工具，以及通过导航专区进入的独立功能页。
 - 业务功能说明统一维护在 `docs/business-function-overview.md`，按用户入口、业务域、典型流程和当前业务边界描述现有能力；该文档不作为未来规划或技术设计文档。
 - 业务演进规划统一维护在 `docs/business-evolution-plan.md`，记录产品假设、阶段路线、验证指标、决策规则和后续实施清单；规划内容必须与当前已实现能力分开标记。
+- 外部项目的优秀思路统一记录在 `docs/project-references/`：保留来源、许可证、观察事实、适用边界和最小验证实验；其中内容属于研究材料或待验证假设，验证通过前不作为当前项目事实或实施承诺。
 - 最新产品方向已从“个人综合信息工作台扩展”收敛为“利用私人数据持续改善重要决策的个人高收益软件”：交易复盘是第一主线，职业资产和健康精力是后续候选，通用个人决策复盘引擎需在具体场景完成闭环后再抽象；通用聊天壳、普通待办/日报/摘要、无反馈 AI 建议、纯仪表盘和复杂多 Agent 系统不是当前核心方向。
 - 产品方向统一采用“记录 → 分析 → 改进 → 验证”闭环和“目标 → 信息 → 判断 → 行动 → 预期 → 结果 → 错误归因 → 修改规则”决策模型；个人数据默认本地优先，云端同步、远程埋点和外部复用需单独评估隐私与责任边界。
 - 面向外部开发者的交流资料统一维护在 `docs/external-developer-collaboration/`，公开 Agent 管理方法论、脱敏与发布审批边界、开源反哺流程和沟通模板；不复制公司内部 Agent 管理模板，不放置内部项目、客户、凭据或未公开决策。
@@ -27,6 +28,12 @@
 - `npm run serve` 在启动 Vite 开发服务器（端口 8090）之前运行 `scripts/sync-findJob-summary.js`。
 - `npm run build` 同步面试摘要，运行 `npm run typecheck`（`vue-tsc --noEmit -p tsconfig.json`），用 Vite 构建，然后运行 `scripts/copy-404.js`。
 - `npm run iteration:report` 从当前 Git 工作区生成可审查的迭代日志草稿；`npm run context:check` 只读检查高影响路径是否同步更新协作文档。两者不挂载到 `serve`/`build`，也不自动提交或推送。
+- `scripts/collectors/` 提供无认证公共数据采集基准：`npm run test:collectors` 使用离线 fixture 验证 HTTP 边界、RSS/Atom 解析、数据校验和失败不覆盖；`npm run collect:rss:fixture` 生成被 Git 忽略的候选 artifact。`npm run verify:rss:local` 会先测试，再通过与 CI 共用的 `npm run collect:rss:site` 访问白名单真实来源并生成根 `public/data/recommendArticleData.json`，执行生产构建后用 `vite preview` 打开现有 `/newsArticle`；页面从 `/data/recommendArticleData.json` 加载真实 JSON。该 JSON 是被 Git 忽略的动态生产构建输入，不随源码提交。原始 RSS 不伪造参考脚本中依赖 LLM 才能生成的阅读评分和推荐理由。验证应优先补齐现有业务页面的数据链路，不新增平行验证页；直接打开 JSON 或独立静态 HTML 不属于页面消费者验证。
+- `src/crawl/lib/` 和 `src/crawl/run_collectors.py` 是 Python 采集可靠性基线：公共层统一 HTTPS/白名单、超时和有限重试、响应大小与挑战页检查、Schema/最低条数/重复项校验、原子发布及 `success`/`preserved`/`skipped`/`failed` 状态。一个来源可声明多个 allowlisted 官方 HTTPS fallback，仍对每个主机使用有限超时/重试，challenge 不作为普通网络波动跨主机重试。`requirements-crawl.txt` 固定 Python 依赖；`npm run test:crawlers` 运行离线回归测试，`npm run crawl` 运行核心采集器，`npm run crawl:full` 包含 LeetCode、Douban、Boss 和 TikTok 长任务。账号态配置只允许通过环境变量或 Actions Secrets 注入；来源失败时保留最后有效快照，required 数据新旧都无效才阻止发布。LeetCode 使用 staging、manifest 和整批替换，避免新旧分块混合。
+- 福利聚合的 HXM5 来源使用其公开前端协议的 HTTPS POST JSON 接口，外部作者图不进入快照；DaydayzhuanTop 和 ZhuanyesTop 只发布能从详情页取得真实日期的置顶项，不用当前时间伪造发布时间。当前 0818 只有 HTTP 内容可达，HTTPS 证书/边缘节点不可用，因此 collector 保持 skipped，历史 HTTP 链接 JSON 也不属于有效 last-known-good。
+- Weibo collector 可通过公开 endpoint 的浏览器式请求上下文生成 `src/public/data/weibo.json`，但当前仓库没有导入该文件的 Vue 消费者；采集成功不能被报告为前端消费闭环。V2EX 使用三个 allowlisted 官方 HTTPS 主机 fallback；Zhipin 会在初次加载和等待失败后识别登录/安全检查并保留旧快照，不绕过挑战。
+- `master` push、手动触发和每日北京时间 06:17（UTC 22:17）的 schedule 会运行 `.github/workflows/ci.yml`：依赖安装后先运行 collector 离线测试，再用 `npm run collect:rss:site` 生成真实 RSS JSON，然后继续原有 Python crawl、生产构建和 Pages 部署。RSS 来源独立容错：单个来源失败时记录警告并发布其余成功来源；全部来源失败或最终数据校验失败时停止本次发布。构建后必须确认 `public/data/recommendArticleData.json` 与 `dist/data/recommendArticleData.json` 都存在且逐字节一致，才继续部署。
+- `docs/project-references/qinglongBackup/` 是仅供本地研究的嵌套仓库，外层 `.gitignore` 明确排除；其中的账户、交易、SFTP/SSH、青龙管理、代理、浏览器登录和原生工具不进入当前网站或 Actions，脱敏评估见 `docs/project-references/qinglong-backup-assessment.md`。
 - `src/content/interview/full.md` 和 `chain.md` 生成 `public/findJob-summary/full.md` 和 `chain.md`。
 - `auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件，已纳入 `tsconfig.json`；`npm run typecheck` 是独立的 Vue/TypeScript 类型检查入口。
 - `.cspell.json` 是仓库级拼写检查配置：全局检查遵循 `.gitignore`，排除依赖、构建产物、大型数据快照、发布图片、锁文件和自动生成声明；项目专有词统一维护在 `words` 中，不把疑似拼写错误自动当作正确词修改。
@@ -38,7 +45,7 @@
 
 - `.github/workflows/ci.yml` 安装依赖、运行爬虫工作、构建站点，并将 `dist/` 直接推送到 `gh-pages` 分支；未使用 `gh-pages` npm 包。
 - Vite 构建未使用预渲染插件。
-- Vite 开发服务器严格固定在 `8090` 端口、监听 `0.0.0.0` 并启用 CORS；`strictPort: true` 会在端口被占用时直接报错，不自动顺延到其他端口。`/data` 代理到家庭服务器 `http://192.168.1.100:5000`。远程 HTTP 服务工作目录为 `/root/Test`，因此 `/data/fundHoldData.json` 对应远程文件 `/root/Test/data/fundHoldData.json`。基金持仓页面通过 `/data/fundHoldData.json` 相对路径读取，不能将远程绝对地址硬编码到组件中；详见 [`docs/development-environment.md`](../docs/development-environment.md)。
+- Vite 开发服务器严格固定在 `8090` 端口、监听 `0.0.0.0` 并启用 CORS；`strictPort: true` 会在端口被占用时直接报错，不自动顺延到其他端口。开发服务器的 `/data` 代理到家庭服务器 `http://192.168.1.100:5000`，但生产 `vite preview` 显式禁用该代理并直接读取 `dist/data/`，避免生产构建验收误命中家庭服务器的历史数据。远程 HTTP 服务工作目录为 `/root/Test`，因此开发代理下的 `/data/fundHoldData.json` 对应远程文件 `/root/Test/data/fundHoldData.json`。基金持仓页面通过 `/data/fundHoldData.json` 相对路径读取，不能将远程绝对地址硬编码到组件中；详见 [`docs/development-environment.md`](../docs/development-environment.md)。
 - `uploadQL.js` 是一个单独的手动 SFTP 部署路径，需要 `archiver`、`ssh2` 和 `ssh2-sftp-client`。
 - 除非明确要求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
 
@@ -55,6 +62,8 @@
 - 默认代码验证：`npm run build`。
 - 仅类型验证：`npx vue-tsc --noEmit`。
 - 浏览器相关变更：运行 `npm run serve` 并在浏览器中检查受影响的流程。
+- 数据采集、生成链或消费者发生变化时，fixture、单元测试和构建只作为前置证据；先识别并补齐项目中已经依赖该类数据的真实业务页面，不新增平行验证页绕过既有功能缺口。环境与权限允许时必须运行真实采集/生成命令，通过项目实际前端框架和数据接口启动既有消费者，并在桌面及相关移动视口检查真实产物的页面展示、网络请求和控制台。直接打开 JSON、独立静态 HTML 或确认文件存在不能替代前后端消费闭环；任一环节无法完成时，端到端验证必须明确标记为未完成。复杂数据流、UI 或部署的浏览器验收应在被 Git 忽略的 `docs/verification-reports/` 保存本地报告和按需生成的截图、页面指标、关键网络状态及控制台摘要，不能只在对话中描述结论；报告至少记录基线、工具与启动条件、脱敏执行、Schema/完整性、页面/网络/控制台、失败与跳过及剩余风险责任。这些本地验收产物不纳入提交范围，简单文档或局部代码修改不机械生成报告。
+- 完成声明遵循证据等级：源码/配置证明实现意图，fixture/测试/编译证明局部契约，退出码和 HTTP 状态只证明运行达到某一步，经过 Schema 和完整性校验的真实产物证明可发布候选，现有业务页面在生产预览中正确消费并通过网络/控制台检查才证明前后端闭环。`docs/agent-verification-playbook.md` 是高影响任务的执行清单；`npm run context:check` 对采集器、生成链、消费者和 CI/部署变更只读检查本地报告必需章节、项目上下文和迭代日志；该检查不判断业务结果正确。
 - 依赖审计必须使用 `npm audit --registry=https://registry.npmjs.org`，因为配置的 npm 镜像没有审计端点。
 - 完整依赖审计和生产依赖审计均为 0 个漏洞；Vite 6.4.3 已将 esbuild 更新到 0.25.12，现有 Vue/Markdown 插件和 CI Node 20 构建已通过验证。
 - `npm run build` 已在 Vite 6、vue-tsc 3 和新的浏览器导出适配器下通过；构建会保留独立的 `xlsx-export` 延迟加载 chunk。

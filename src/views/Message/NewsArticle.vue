@@ -4,9 +4,12 @@
         <p v-if="generatedAt" style="text-align:center; color: #888; margin-bottom: 24px;">
             数据更新于：{{ generatedAt }}
         </p>
-        <div class="welfare-container">
+        <el-skeleton v-if="loading" :rows="5" animated class="data-status" />
+        <el-alert v-else-if="errorMessage" :title="errorMessage" type="error" :closable="false" show-icon class="data-status" />
+        <el-empty v-else-if="recommendArticleData.length === 0" description="暂无资讯文章" />
+        <div v-else class="welfare-container">
             <el-row>
-                <el-col :span="24" :md="24" :lg="24" v-for="(item, sonIndex) in recommendArticleData" :key="sonIndex">
+                <el-col :span="24" :md="24" :lg="24" v-for="item in recommendArticleData" :key="item.link || item.url">
                     <el-card shadow="hover" class="welfare-card">
                         <div class="welfare-date">
                             <div class="day-week-welfare">
@@ -37,9 +40,9 @@
                                 <a class="welfare-link-title" :href="handleLinkUrl(item)"
                                     :class="{ 'highlight': item.readingScore > 80 }"
                                     @click.prevent="gotoWelfareWebsite(item)">
-                                    【阅读指数：{{ item.readingScore }}】{{ item.title }}
+                                    <span v-if="hasReadingScore(item)">【阅读指数：{{ item.readingScore }}】</span>{{ item.title }}
                                 </a>
-                                <div class="recommendation-card">
+                                <div v-if="item.recommendation" class="recommendation-card">
                                     <div class="recommendation-title">
                                         <svg class="icon" viewBox="0 0 1024 1024">
                                             <path
@@ -67,7 +70,7 @@
                             <div class="mobile-div-news">
                                 <div class="mobile-link-title" :class="{ 'highlight': item.readingScore > 80 }">
                                     <div @click="gotoMobileWebsite(item)">
-                                        【阅读指数：{{ item.readingScore }}】 {{ handleMobileTitle(item) }}
+                                        <span v-if="hasReadingScore(item)">【阅读指数：{{ item.readingScore }}】</span> {{ handleMobileTitle(item) }}
                                     </div>
                                 </div>
                             </div>
@@ -144,24 +147,30 @@ export default {
         const generatedAt = ref("");
         const logoUrl = ref(logoImageUrl);
         const recommendArticleData = ref<any[]>([]);
+        const loading = ref(true);
+        const errorMessage = ref("");
+        const dataUrl = "/data/recommendArticleData.json";
         const getRecommendArticleData = async () => {
-            const res = await fetch("/data/recommendArticleData.json?t=" + Date.now());
-            if (!res.ok) throw new Error("加载失败");
+            const res = await fetch(`${dataUrl}?t=${Date.now()}`, { cache: "no-store" });
+            if (!res.ok) throw new Error(`资讯数据加载失败：HTTP ${res.status}`);
             const data = await res.json();
-            return data
-        }
+            const items = Array.isArray(data) ? data : data?.items;
+            if (!Array.isArray(items)) throw new Error("资讯数据结构无效");
+            return { generatedAt: data?.generatedAt, items };
+        };
 
         let githubList = ref(githubNews);
         onMounted(async () => {
             try {
                 const data = await getRecommendArticleData();
-                recommendArticleData.value = data;
-                console.log('recommendArticleData.value', recommendArticleData.value);
-                if (data.length > 0 && data[0].filteredAt) {
-                    generatedAt.value = new Date(data[0].filteredAt).toLocaleString();
-                }
+                recommendArticleData.value = data.items;
+                const updatedAt = data.generatedAt || data.items[0]?.filteredAt;
+                if (updatedAt) generatedAt.value = new Date(updatedAt).toLocaleString();
             } catch (error) {
-                console.error('获取推荐文章失败:', error);
+                errorMessage.value = error instanceof Error ? error.message : "获取资讯文章失败";
+                console.error("获取资讯文章失败:", error);
+            } finally {
+                loading.value = false;
             }
         });
         let newsGuide: any[] = [];
@@ -188,11 +197,10 @@ export default {
             return item.image_url || logoUrl.value;
         };
         const handleLinkUrl = (item: any) => {
-            return item.url;
+            return item.link || item.url;
         };
         const gotoWelfareWebsite = (item: any) => {
-            let websiteUrl = item.link;
-            console.log(websiteUrl);
+            const websiteUrl = handleLinkUrl(item);
             if (websiteUrl) {
                 gotoOutPage(websiteUrl);
             }
@@ -228,11 +236,12 @@ export default {
                 : item.title.slice(0, lengthControl) + "...";
         };
         const gotoMobileWebsite = (item: any) => {
-            let websiteUrl = item.source_url;
+            const websiteUrl = item.link || item.source_url || item.url;
             if (websiteUrl) {
                 gotoOutPage(websiteUrl);
             }
         };
+        const hasReadingScore = (item: any) => Number.isFinite(Number(item.readingScore));
         return {
             logoUrl,
             handleDay,
@@ -248,14 +257,22 @@ export default {
             handleImageError,
             handleMobileTitle,
             gotoMobileWebsite,
+            hasReadingScore,
             recommendArticleData,
-            generatedAt
+            generatedAt,
+            loading,
+            errorMessage
         };
     },
 };
 </script>
 
 <style scoped>
+.data-status {
+    max-width: 1000px;
+    margin: 0 auto 20px;
+}
+
 .highlight {
     font-weight: bold;
     color: #d0021b;

@@ -1,92 +1,89 @@
-import requests
-import json
-import datetime
-import base64
-# 发起 post 请求
-url = 'https://api.juejin.cn/recommend_api/v1/article/recommend_cate_feed?aid=2608&uuid=6898684445210232328&spider=0'
-headers = {
-    'Content-Type': 'application/json',
-    'Cookie':'_ga=GA1.2.1946730532.1606225142; __tea_cookie_tokens_2608=%257B%2522web_id%2522%253A%25226898684445210232328%2522%252C%2522ssid%2522%253A%25220399d7f9-d16b-4e7d-9a66-6f264bb7a09d%2522%252C%2522user_unique_id%2522%253A%25226898684445210232328%2522%252C%2522timestamp%2522%253A1606225142293%257D; _tea_utm_cache_2608=undefined; csrf_session_id=a3ac3f9f7072e09865160632a164ff43; msToken=QqTM-PPRFuROVbWVcP6s-ERdZgtqx8S1Pa5ZXREYNi9ePpSLFtcxphYwpy9tkg1nHbqnJxkuuNF28c1DW8Sb6cytYC0T8kDLORb9aVr8ydRVas1nNRjFCnaVKIz6WJZT',
-    'Origin':'https://juejin.cn',
-    'Referer':'https://juejin.cn/',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-}
-data_json = {
-    'cate_id': "6809637767543259144",
-    'cursor': "0",
-    'id_type': 2,
-    'limit': 20,
-    'sort_type': 200
-}
+from __future__ import annotations
 
-try:
-    response = requests.post(url, headers=headers, json=data_json)
-    response.raise_for_status()  # 检查请求是否成功
-    print('掘金response', response)
-    if response.status_code == 200:
-        # 解析响应数据
-        data = response.json()
-        # print('data', data)
-        dataList = data["data"]
-        dataHandle = []
-        for index, item in enumerate(dataList):
-            #  "url": "https://juejin.cn/post/7243435843145678907",
-            # "desc": "前言",
-            # "time": "2023-06-12 09:24:00",
-            # "timestamp": 1686533040000,
-            # "image": "",
-            # "website": "juejin",
-            # "title": "纯前端导出多表头xlsx"
-            if len(item) == 0:
-                # 需要过滤
-                continue
-            else:
-                tmpTime = int(item['article_info']['mtime'])
-                date = datetime.datetime.fromtimestamp(tmpTime)
-                formatted_date = date.strftime("%Y-%m-%d %H:%M:%S")
-                newEntry = {
-                    "url": 'https://juejin.cn/post/'+item['article_info']['article_id'],
-                    "desc": item['article_info']['brief_content'],
-                    "time": formatted_date,
-                    "timestamp": int(item['article_info']['mtime']+ '000'),
-                    "image": item['article_info']['cover_image'],
-                    "title": item['article_info']['title'],
-                    "articleId": item['article_info']['article_id'],
-                    "website": "juejin"
-                }
-                base64ForCover=""
-                if item['article_info']['cover_image']:
-                    try:
-                        headersForCover = {
-                            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-                        }
-                        responseForCover = requests.get(item['article_info']['cover_image'], headers=headersForCover)
-                        if responseForCover.status_code == 200 or responseForCover.status_code == 304:
-                            # 获取图片数据并转换为Base64编码
-                            base64ForCover = base64.b64encode(responseForCover.content).decode('utf-8')
-                            # 检查base64编码后的数据是否超过100MB
-                            if len(base64ForCover) >= 100 * 1024 * 1024:
-                                print(f"掘金数据第{index}次 获取图片成功，但超过了100MB大小限制")
-                                base64ForCover = ""  # 清空base64编码，以避免文件写入
-                            else:
-                                if index % 10 == 0:
-                                    print(f"掘金数据第{index}次 获取图片成功,{item['article_info']['cover_image']}")
-                        else:
-                            print(f"掘金数据第{index}次 获取图片失败,{item['article_info']['cover_image']}")
-                    except Exception as e:
-                        print('responseForCover.content',e)
-                        print(f"掘金数据第{index}次请求失败,{item['article_info']['cover_image']}")  
-                file_path = f"./src/public/data/juejinImg/articlePoster_{item['article_info']['article_id']}.json"
-                with open(file_path, 'w', encoding='utf-8') as file:
-                    json.dump(base64ForCover, file, ensure_ascii=False, indent=4)
-            dataHandle.append(newEntry)
-        dataHandle.sort(key=lambda x: x['timestamp'],reverse=True)
-        with open('./src/public/data/juejin.json', 'w', encoding='utf-8') as file:
-            json.dump(dataHandle, file, ensure_ascii=False, indent=4)
-            print('掘金分析数据导出成功')
-    else:
-        print('请求失败')
-except requests.exceptions.RequestException as e:
-    print('请求异常:', e)
-except Exception as e:
-    print('发生异常:', e)
+import json
+import os
+import sys
+from datetime import datetime
+from pathlib import Path
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.crawl.lib.http import HttpClient
+from src.crawl.lib.runner import run_guarded
+
+NAME = "juejin"
+OUTPUT = "juejin.json"
+URL = "https://api.juejin.cn/recommend_api/v1/article/recommend_cate_feed"
+
+
+def parse_response(payload: object) -> list[dict[str, object]]:
+    if not isinstance(payload, dict) or payload.get("err_no") not in (0, None):
+        raise ValueError("Juejin response has an error envelope")
+    data = payload.get("data")
+    if not isinstance(data, list):
+        raise ValueError("Juejin response has no data array")
+    items: list[dict[str, object]] = []
+    for entry in data:
+        info = entry.get("article_info") if isinstance(entry, dict) else None
+        if not isinstance(info, dict):
+            continue
+        article_id = str(info.get("article_id") or "")
+        title = str(info.get("title") or "").strip()
+        try:
+            modified = int(info.get("mtime"))
+        except (TypeError, ValueError):
+            continue
+        if not article_id or not title:
+            continue
+        items.append(
+            {
+                "url": f"https://juejin.cn/post/{article_id}",
+                "desc": info.get("brief_content") or title,
+                "time": datetime.fromtimestamp(modified).strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": modified * 1000,
+                "image": info.get("cover_image") or "",
+                "title": title,
+                "articleId": article_id,
+                "website": NAME,
+            }
+        )
+    return sorted(items, key=lambda item: int(item["timestamp"]), reverse=True)
+
+
+def collect() -> list[dict[str, object]]:
+    client = HttpClient(allowed_hostnames=["api.juejin.cn"], max_bytes=4_000_000)
+    headers = {"Content-Type": "application/json", "Origin": "https://juejin.cn"}
+    cookie = os.environ.get("JUEJIN_COOKIE", "").strip()
+    if cookie:
+        headers["Cookie"] = cookie
+    response = client.post(
+        URL,
+        headers=headers,
+        params={"aid": "2608", "spider": "0"},
+        json={
+            "cate_id": "6809637767543259144",
+            "cursor": "0",
+            "id_type": 2,
+            "limit": 20,
+            "sort_type": 200,
+        },
+    )
+    return parse_response(response.json())
+
+
+def main() -> int:
+    result = run_guarded(
+        collect,
+        name=NAME,
+        output=OUTPUT,
+        kind="article",
+        min_items=3,
+        unique_by="url",
+    )
+    print(json.dumps(result.to_dict(), ensure_ascii=False))
+    return 0 if result.is_usable else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

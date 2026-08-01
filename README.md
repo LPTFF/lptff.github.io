@@ -54,7 +54,7 @@ npm run preview
 
 ## 本地开发数据服务
 
-本地开发时，Vite 严格固定在 `8090` 端口运行，并将页面使用的 `/data` 请求代理到家庭服务器 `http://192.168.1.100:5000`；如果 `8090` 已被占用，Vite 会直接启动失败，不会自动顺延到其他端口。基金持仓数据的远程文件为 `/root/Test/data/fundHoldData.json`，页面代码保持使用 `/data/fundHoldData.json` 相对路径，不直接硬编码远程地址。
+本地开发时，Vite 严格固定在 `8090` 端口运行，并将页面使用的 `/data` 请求代理到家庭服务器 `http://192.168.1.100:5000`；如果 `8090` 已被占用，Vite 会直接启动失败，不会自动顺延到其他端口。`npm run preview` 不继承该开发代理，而是直接读取 `dist/data/`，用于验证生产构建中的静态数据。基金持仓数据的远程文件为 `/root/Test/data/fundHoldData.json`，页面代码保持使用 `/data/fundHoldData.json` 相对路径，不直接硬编码远程地址。
 
 如需通过 SSH 检查该服务器，可连接 `root@192.168.1.100:22`；密码不写入仓库。完整的本地开发、远程数据服务、SSH 运维边界和排查步骤见 [开发环境与远程数据服务](docs/development-environment.md)。
 
@@ -70,6 +70,27 @@ npm run build
 2. 运行 `vue-tsc --noEmit` 类型检查；
 3. 执行 Vite 生产构建；
 4. 生成 `dist/404.html`。
+
+## 公共数据采集验证
+
+项目提供一套本地与 GitHub Actions 共用的 Node.js 公共数据采集实现。先用离线 fixture 验证采集边界：
+
+```bash
+npm run test:collectors
+npm run collect:rss:fixture
+```
+
+离线 fixture 命令会验证 RSS/Atom 解析、域名和 HTTPS 边界、数据结构、非空/大小限制及失败不覆盖，并把候选结果写入被 Git 忽略的 `.artifacts/`。离线验证通过后，还必须执行真实数据和浏览器闭环：
+
+```bash
+npm run verify:rss:local
+```
+
+该命令依次运行 collector 测试、访问白名单真实 RSS 来源、通过与 CI 共用的 `collect:rss:site` 生成 `public/data/recommendArticleData.json`、执行生产构建，再用 `vite preview` 打开项目已有的资讯页面 `http://localhost:4173/newsArticle`。页面请求 `/data/recommendArticleData.json`；维护者需确认生成时间、来源和文章列表正常，JSON 网络请求为 200、控制台无错误。原始 RSS 没有 AI 阅读评分和推荐理由，页面不会伪造这些字段。只运行 fixture、直接打开 JSON 或新增平行验证页面不能视为现有业务功能闭环。验证结束后按 `Ctrl+C` 停止预览，并删除本地生成的 `public/data/recommendArticleData.json`，避免将动态数据误提交。
+
+正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下自动运行同一组 collector 测试与 `collect:rss:site`，随后执行原有 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署。
+
+本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](docs/project-references/qinglong-backup-assessment.md)。
 
 ## 拼写检查
 
@@ -91,6 +112,7 @@ npm run build
 - `public/`：静态资源和运行时资源
 - `src/public/data/`：较大的数据快照
 - `scripts/`：摘要同步和构建辅助脚本
+- `docs/project-references/`：其他项目优秀思路的来源记录、适用性分析和最小验证实验
 
 ## 部署
 
@@ -112,6 +134,7 @@ npm audit --registry=https://registry.npmjs.org
 
 - [业务功能说明](docs/business-function-overview.md)：按用户入口、业务域和典型流程说明当前功能边界
 - [业务演进规划](docs/business-evolution-plan.md)：记录产品假设、阶段路线、指标和后续实施清单
+- [项目参考与借鉴](docs/project-references/README.md)：记录其他项目的来源、优秀思路、适用边界和最小验证实验
 - [外部开发者协作资料](docs/external-developer-collaboration/README.md)：用于外部交流的 Agent 管理方法论、脱敏审批和开源反哺模板
 - [AGENTS.md](AGENTS.md)：可复用的 Agent 工作流和项目协作规则
 - [CLAUDE.md](CLAUDE.md)：项目命令、目录事实和验证规则

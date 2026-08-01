@@ -1,48 +1,96 @@
-import requests
-import json
-import datetime
-import time
-import urllib.parse
-# 发起 GET 请求
-url='https://weibo.com/ajax/side/hotSearch'
-headers = {
-    'Cookie':'SINAGLOBAL=3238169644400.8457.1557491943080; UOR=,,www.google.com; _s_tentry=passport.weibo.com; Apache=5332797249312.629.1689311836236; ULV=1689311836245:29:1:1:5332797249312.629.1689311836236:1663770116590; XSRF-TOKEN=f4thszCFwugbzWWrKQiSNqce; login_sid_t=955b0bd60e50c05cff69f31c955bccde; cross_origin_proto=SSL; wb_view_log=1920*10801; SCF=Avd9w65H14BjedL78YEjstYo2FqbdXqhkGpKuFaGMkCbEAef6u55NCs_JtvSIwepL3sYUW_1VXH6az-CPMVeuSM.; SUB=_2A25JtJVDDeRhGeBN71AY8ijIyDiIHXVqw4GLrDV8PUNbmtAbLUz6kW9NRHtGT1gseeOL1GzuT14i13JVPl6kBCoO; SUBP=0033WrSXqPxfM725Ws9jqgMF55529P9D9W5OzKRDuwVQLyzg8gnZUVjy5JpX5KzhUgL.Foq0Shz4eoqXe0B2dJLoIp7LxKML1KBLBKnLxKqL1hnLBoMce0BE1KzcSheX; ALF=1720850577; SSOLoginState=1689314579; WBPSESS=x5plewmnehsORp7c0yGIB5E8XyIYTvyCJIW7U5gf8lrT7pb0ipi9KJCI91PpePuyBGVB3mlzxFE2ZXzuRemA_-48J0ycrjCNIQGesAjNiq1a6NY1H77f7Zs131H4DPCt',
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36'
-}
-try:
-    response = requests.get(url, headers=headers)
-    print('微博response',response)
-    if response.status_code == 200:
-        # 解析响应数据
-        data = response.json()
-        hotList=data['data']['realtime']
-        handleList=[]
-        for index, item in enumerate(hotList):
-            if item.get('ad_type'):
-                continue
-            topic_title=item['note']
-            urlItem='https://s.weibo.com/weibo?q='+ urllib.parse.quote(item['word_scheme'], safe='')
-            timestamp=item.get('onboard_time','')
-            dt = datetime.datetime.fromtimestamp(timestamp)
-            originTime = dt.strftime("%Y-%m-%d %H:%M:%S")
-            image={"small_icon_desc": item.get('small_icon_desc', ''), "small_icon_desc_color": item.get('small_icon_desc_color', '')}
-            new_entry = {
-                'url': urlItem,
-                'desc': '',
-                'time': originTime,
-                'timestamp': timestamp*1000,
-                'image': image,
-                'website': 'weibo',
-                'title': topic_title,
-            }
-            handleList.append(new_entry)
-        # 导出为 JSON 文件
-        sorted_data = sorted(handleList, key=lambda x: -x['timestamp'])
-        with open('./src/public/data/weibo.json', 'w', encoding='utf-8') as file:
-            json.dump(handleList, file, ensure_ascii=False, indent=4)
-            print('微博数据导出成功')
-    else:
-        print('微博请求失败')
+from __future__ import annotations
 
-except Exception as e:
-    print('微博请求报错:', str(e))
+import json
+import sys
+from datetime import datetime
+from pathlib import Path
+from urllib.parse import quote
+
+if __package__ in (None, ""):
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+
+from src.crawl.lib.http import HttpClient
+from src.crawl.lib.runner import run_guarded
+
+NAME = "weibo"
+OUTPUT = "weibo.json"
+URL = "https://weibo.com/ajax/side/hotSearch"
+REQUEST_HEADERS = {
+    "Accept": "application/json, text/plain, */*",
+    "Referer": "https://weibo.com/hot/search",
+    "X-Requested-With": "XMLHttpRequest",
+}
+BROWSER_USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/150.0.0.0 Safari/537.36"
+)
+
+
+def parse_response(
+    payload: object,
+    collected_at: datetime | None = None,
+) -> list[dict[str, object]]:
+    if not isinstance(payload, dict):
+        raise ValueError("Weibo response is not an object")
+    data = payload.get("data")
+    if payload.get("ok") != 1:
+        raise ValueError("Weibo response is not successful")
+    hot_list = data.get("realtime") if isinstance(data, dict) else None
+    if not isinstance(hot_list, list):
+        raise ValueError("Weibo response has no realtime list")
+    items: list[dict[str, object]] = []
+    collection_time = collected_at or datetime.now().astimezone()
+    collection_timestamp = int(collection_time.timestamp())
+    for entry in hot_list:
+        if not isinstance(entry, dict) or entry.get("ad_type"):
+            continue
+        title = str(entry.get("note") or "").strip()
+        word = str(entry.get("word_scheme") or entry.get("word") or title).strip()
+        try:
+            timestamp = int(entry.get("onboard_time") or collection_timestamp)
+        except (TypeError, ValueError):
+            continue
+        if not title or not word:
+            continue
+        items.append(
+            {
+                "url": f"https://s.weibo.com/weibo?q={quote(word, safe='')}",
+                "desc": "",
+                "time": datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": timestamp * 1000,
+                "image": {
+                    "small_icon_desc": entry.get("small_icon_desc") or "",
+                    "small_icon_desc_color": entry.get("small_icon_desc_color") or "",
+                },
+                "website": NAME,
+                "title": title,
+            }
+        )
+    return sorted(items, key=lambda item: int(item["timestamp"]), reverse=True)
+
+
+def collect() -> list[dict[str, object]]:
+    client = HttpClient(
+        allowed_hostnames=["weibo.com"],
+        max_bytes=3_000_000,
+        user_agent=BROWSER_USER_AGENT,
+    )
+    response = client.get(URL, headers=REQUEST_HEADERS)
+    return parse_response(response.json())
+
+
+def main() -> int:
+    result = run_guarded(
+        collect,
+        name=NAME,
+        output=OUTPUT,
+        kind="article",
+        min_items=5,
+        unique_by="url",
+    )
+    print(json.dumps(result.to_dict(), ensure_ascii=False))
+    return 0 if result.is_usable else 1
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

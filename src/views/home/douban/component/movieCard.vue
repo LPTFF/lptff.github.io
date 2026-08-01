@@ -3,11 +3,8 @@
     <el-card class="movie-item" shadow="hover">
       <div>
         <img
-          :src="
-            posterMovie.length > 0
-              ? posterMovie
-              : `https://images.weserv.nl/?url=` + moviesData.cover
-          "
+          :src="posterMovie || bgImageUrl"
+          :data-poster-source="posterSource"
           alt="电影封面"
           class="movie-image"
           @error="handleImageError"
@@ -36,32 +33,41 @@
 import { toRefs, ref, onMounted } from "vue";
 import bgImageUrl from "../../../../public/img/bg.jpg";
 import { gotoOutPage } from "../../../../utils/utils";
-import axios from "axios";
 import { ElCard } from "element-plus";
-interface CacheDict {
-  [key: string]: any;
-}
 
-const cache: CacheDict = {}; // 使用普通对象模拟缓存
+const posterModules = import.meta.glob(
+  "../../../../public/data/doubanImg/moviePoster_*.json",
+  { import: "default" },
+);
 
-const getMoviePost = async (baseUrl: string): Promise<any> => {
-  if (cache[baseUrl]) {
-    // 如果已经在缓存中，则直接返回缓存的数据
-    return cache[baseUrl];
+const normalizePoster = (value: unknown): string => {
+  if (value && typeof value === "object" && "cover" in value) {
+    return normalizePoster((value as { cover: unknown }).cover);
   }
-  try {
-    const cdnWebsite =
-      "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@python-crawl";
-    const response = await axios.get(cdnWebsite + baseUrl);
-    const data = response.data;
-    // 将获取到的数据缓存起来
-    cache[baseUrl] = data;
-    return data;
-  } catch (error) {
+  if (typeof value !== "string") {
     return "";
-  } finally {
-    // 可以在这里执行一些收尾工作，如果有需要的话
   }
+
+  const content = value.trim();
+  if (/^data:image\/(?:jpeg|png|webp|gif);base64,/i.test(content)) {
+    return content;
+  }
+
+  const base64 = content.replace(/\s/g, "");
+  if (!/^[A-Za-z0-9+/]+={0,2}$/.test(base64)) {
+    return "";
+  }
+
+  const mimeType = base64.startsWith("/9j/")
+    ? "image/jpeg"
+    : base64.startsWith("iVBORw0KGgo")
+      ? "image/png"
+      : base64.startsWith("UklGR")
+        ? "image/webp"
+        : base64.startsWith("R0lGOD")
+          ? "image/gif"
+          : "";
+  return mimeType ? `data:${mimeType};base64,${base64}` : "";
 };
 
 export default {
@@ -71,36 +77,41 @@ export default {
   },
   setup(props: any) {
     const { moviesData, index } = toRefs(props);
-    let posterMovie = ref(""); // 图片路径变量
+    const posterMovie = ref(bgImageUrl);
+    const posterSource = ref("fallback");
 
     onMounted(async () => {
-      if (Number(index.value) < 1000) {
-        const basUrl = `/doubanImg/moviePoster_${moviesData.value.id}.json`;
-        let postData = await getMoviePost(basUrl);
-        if (postData.cover) {
-          posterMovie.value = postData.cover;
-        } else if (postData) {
-          posterMovie.value = postData.startsWith("data:image/png;base64,")
-            ? postData
-            : "data:image/png;base64," + postData;
-        }
+      if (Number(index.value) >= 1000) {
+        return;
+      }
+      const modulePath = `../../../../public/data/doubanImg/moviePoster_${moviesData.value.id}.json`;
+      const loadPoster = posterModules[modulePath];
+      if (!loadPoster) {
+        return;
+      }
+      const poster = normalizePoster(await loadPoster());
+      if (poster) {
+        posterMovie.value = poster;
+        posterSource.value = "local";
       }
     });
 
-    const bgUrl = ref(bgImageUrl); // 图片路径变量
-    const handleImageError = (event: any) => {
-      event.target.src = bgUrl.value;
+    const handleImageError = () => {
+      posterMovie.value = bgImageUrl;
+      posterSource.value = "fallback";
     };
     const gotoMovieWebsite = (item: any) => {
       console.log(item);
       item.url ? gotoOutPage(item.url) : "";
     };
     return {
+      bgImageUrl,
       handleImageError,
       gotoMovieWebsite,
       moviesData,
       index,
       posterMovie,
+      posterSource,
     };
   },
   components: {
