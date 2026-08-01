@@ -324,3 +324,19 @@
 - 文件：`AGENTS.md`、`docs/agent-verification-playbook.md`、`scripts/verification-report-index.js`、`scripts/tests/verification-report-index.test.js`、`scripts/check-context-maintenance.js`、`.claude/project-context.md`、`.claude/iteration-log.md`；被忽略的 `docs/verification-reports/current/index.json`、权威综合报告和自动生成 `latest.md` 同步采用该合同。
 - 验证证据：报告治理测试由 7 项增加至 11 项，覆盖确定性生成、缺少 inference、缺少证据、路径越界和未知证据类型；`npm run verification:refresh` 连续两次生成相同 SHA-256，并在总览中为投资缺失状态、Boss、0818 普通/Top、V2EX、账号态 collectors 和 Pages 因果边界生成可点击事实链。`npm run context:check` 读取同一索引并验证权威报告包含“关键结论证据导航”；`git diff --check` 用于收尾。未运行应用构建或重新采集，因为本轮只修改 Agent 治理和报告生成/校验逻辑，引用的是本轮已保存并经过真实执行的现有证据。
 - 剩余风险/责任人：结构检查能保证链接存在和字段齐全，不能自动判断截图内容、JSON 字段和推导逻辑是否真实一致；执行 Agent 仍需按证据等级做人工语义审查。被 Git 忽略的本地报告不会随源码提交，长期共享这些证据时需项目所有者另行决定安全的发布或归档方式。
+
+## 2026-08-02 — 修复 Requests moderate Dependabot 告警
+
+- 任务基线：定位推送响应中默认分支的 1 个 moderate Dependabot 告警，区分 npm 与 Python 依赖树，确认具体公告、受影响清单和引入关系后做最小安全升级；不使用 `npm audit fix --force`，不盲目升级其他 Python 包，不运行采集、部署或 GitHub Actions。
+- 实际变更/偏离控制：npm 完整和生产树均为 0 个漏洞；以独立 Python 3.11 环境审计 `requirements-crawl.txt` 后，确认直接依赖 `requests==2.32.4` 命中 `GHSA-gc5v-m9x4-r6x2` / `CVE-2026-25645`，受影响范围 `<2.33.0`，修复版本为 2.33.0。漏洞只影响直接调用 `requests.utils.extract_zipped_paths()` 的应用；仓库定向搜索没有调用点，但易受影响版本仍应升级并会触发 Dependabot。仅将 Requests 固定版本更新为 2.33.0，没有改变 HTTPS/TLS 校验、采集目标或其他依赖版本。
+- 文件：`requirements-crawl.txt`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：GitHub Advisory API 确认公告 severity=medium、pip 包为 requests、受影响范围 `<2.33.0`、首个修复版本 2.33.0；隔离环境安装固定依赖后实际载入 `requests=2.33.0`，`pip check` 无破损依赖，`pip-audit -r requirements-crawl.txt` 从修复前 1 个已知漏洞变为 0。Python crawler 回归 39/39 和 `compileall` 通过。首次 `npm ci` 因残留 `esbuild.exe` 文件锁以 EPERM 失败，按项目 Windows 基线停止残留 Node/esbuild 进程后重试成功；npm 完整/生产审计均为 0，报告治理测试 11/11、类型检查和生产构建通过。未运行真实外部采集或浏览器流程，因为本轮只替换 HTTP 库的安全 patch/minor 版本且离线采集合同已完整回归。
+- 剩余风险/责任人：本地修复和审计不能直接读取私有 Dependabot alert 214 的关闭状态；修复提交推送后仍需等待 GitHub 重新扫描默认分支，再确认远程告警关闭。当前用户只要求修复，尚未授权本轮提交或推送，由项目所有者决定何时发布。
+
+## 2026-08-02 — 固化自动驾驶、流水线可视化与批量执行规范
+
+- 任务基线：将用户确认的工作偏好加入项目治理：任务流程已经确认后不再要求逐步 `yes`，在授权范围内自动连续推进；非简单任务流水线化并可视化过程；每个阶段尽可能批量处理同构目标。保留宿主工具权限、外部发布、破坏性操作、凭据和安全边界的必要人工门禁，不新增自动 Hook、定时任务或运行时代码。
+- 实际变更/偏离控制：在 Agent 运行标准中增加持续授权、重新确认条件、可恢复流水线、检查点、失败隔离和批量执行原则；明确一次读取/搜索覆盖多个目标、独立操作并行、有依赖操作流水线化、文件/来源/视口/用例矩阵统一执行，同时要求结果可归因、失败可定向重试、破坏性操作不混批、外部调用遵守限流。同步 Claude 项目入口、可信验证 Playbook 和长期项目上下文。没有把“自动驾驶”解释为绕过宿主权限，也没有将上一轮推送授权扩展到本轮。
+- 文件：`AGENTS.md`、`CLAUDE.md`、`docs/agent-verification-playbook.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：审查新增规则与既有“仅在实质抉择时询问”“未经授权不提交推送”“不默认启动多 Agent/Plan Agent”边界的一致性；运行 `git diff --check`、`npm run iteration:report` 和 `npm run context:check`。未运行应用构建、采集或浏览器验收，因为本轮只修改项目内 Agent 治理文档，不改变运行时代码、依赖、数据或部署行为。
+- 剩余风险/责任人：项目规则可减少 Agent 主动发起的重复确认，但不能消除宿主权限系统、外部平台和不可逆操作要求的确认；工具是否支持真正的批量调用和并发仍取决于当前环境。执行 Agent 负责在吞吐量与错误归因、限流和安全之间保持边界。
