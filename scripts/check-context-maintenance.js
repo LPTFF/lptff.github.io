@@ -2,7 +2,7 @@
 
 import { execFileSync } from "node:child_process";
 import { existsSync, readFileSync, readdirSync } from "node:fs";
-import { resolve } from "node:path";
+import { relative, resolve } from "node:path";
 
 const root = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
@@ -14,6 +14,16 @@ function git(...gitArgs) {
     return execFileSync("git", gitArgs, { cwd: root, encoding: "utf8" });
   } catch (error) {
     console.error(`无法读取 Git 信息：${error.message}`);
+    process.exit(1);
+  }
+}
+
+function refreshVerificationReports() {
+  const script = resolve(import.meta.dirname, "refresh-verification-reports.js");
+  try {
+    execFileSync(process.execPath, [script], { cwd: root, encoding: "utf8", stdio: "pipe" });
+  } catch (error) {
+    console.error(`无法刷新验证报告总览：${error.message}`);
     process.exit(1);
   }
 }
@@ -67,17 +77,23 @@ const requiredReportSections = [
 
 function verificationReportStatus() {
   if (!existsSync(reportDirectory)) return { found: false, missing: requiredReportSections };
-  const reports = readdirSync(reportDirectory)
+  const currentDirectory = resolve(reportDirectory, "current");
+  const candidateDirectory = existsSync(currentDirectory) ? currentDirectory : reportDirectory;
+  const reports = readdirSync(candidateDirectory)
     .filter((file) => file.endsWith(".md"))
     .sort()
     .reverse();
   for (const report of reports) {
-    const content = readFileSync(resolve(reportDirectory, report), "utf8");
+    const content = readFileSync(resolve(candidateDirectory, report), "utf8");
     const missing = requiredReportSections.filter((section) => !content.includes(section));
-    if (!missing.length) return { found: true, report, missing: [] };
+    if (!missing.length) {
+      return { found: true, report: relative(root, resolve(candidateDirectory, report)), missing: [] };
+    }
   }
   return { found: false, missing: requiredReportSections };
 }
+
+refreshVerificationReports();
 
 if (!files.length) {
   console.log("context:check：当前没有可检查的变更。");
@@ -89,7 +105,7 @@ if (verificationChanges.length) {
   const reportStatus = verificationReportStatus();
   console.log(`context:check：发现需要可信事实链的高影响变更：${verificationChanges.join("、")}`);
   if (reportStatus.found) {
-    console.log(`context:check：发现包含必需章节的本地验证报告 docs/verification-reports/${reportStatus.report}。`);
+    console.log(`context:check：发现包含必需章节的本地验证报告 ${reportStatus.report}。`);
     console.log("context:check：此检查只确认报告结构，不判断采集、页面或部署业务结果是否正确。");
   } else {
     console.error("context:check：未发现包含必需章节的本地可信验证报告。");

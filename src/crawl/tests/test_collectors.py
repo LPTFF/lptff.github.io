@@ -14,7 +14,12 @@ from src.crawl.githubTrending import parse_trending
 from src.crawl.infzm import parse_response as parse_infzm
 from src.crawl.juejin import parse_response as parse_juejin
 from src.crawl.kuaishou import parse_response as parse_kuaishou
-from src.crawl.leetCode import normalize_legacy_item, publish_release, validate_existing_release
+from src.crawl.leetCode import (
+    build_item,
+    normalize_legacy_item,
+    publish_release,
+    validate_existing_release,
+)
 from src.crawl.meituanTech import parse_feed
 from src.crawl.sendNotify import send_notification
 from src.crawl.v2ex import parse_response as parse_v2ex
@@ -197,6 +202,21 @@ class ReleaseAndNotificationTests(unittest.TestCase):
         item["problemsDesc"] = ""
         normalized = normalize_legacy_item(item)
         self.assertTrue(normalized["problemsDesc"])
+
+    def test_leetcode_uses_default_title_when_translation_is_missing(self):
+        item = build_item(
+            4005,
+            {
+                "titleCn": "",
+                "title": "Minimum Operations to Make Array Equal III",
+                "titleSlug": "minimum-operations-to-make-array-equal-iii",
+                "acRate": 50,
+                "difficulty": "HARD",
+                "paidOnly": False,
+            },
+            "<p>Description</p>",
+        )
+        self.assertEqual(item["problemsName"], " 4005.Minimum Operations to Make Array Equal III")
 
     def movie(self, index: int):
         return {

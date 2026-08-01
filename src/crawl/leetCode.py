@@ -24,7 +24,7 @@ LIST_QUERY = """
 query problemsetQuestionList($limit: Int, $skip: Int) {
   problemsetQuestionList(categorySlug: "", limit: $limit, skip: $skip, filters: {}) {
     hasMore total
-    questions { acRate difficulty frontendQuestionId paidOnly titleCn titleSlug }
+    questions { acRate difficulty frontendQuestionId paidOnly title titleCn titleSlug }
   }
 }
 """
@@ -102,7 +102,7 @@ def fetch_description_safely(title_slug: str) -> tuple[str, bool]:
 
 def build_item(index: int, question: dict[str, object], description: str) -> dict[str, object]:
     slug = str(question.get("titleSlug") or "")
-    title = str(question.get("titleCn") or "")
+    title = str(question.get("titleCn") or question.get("title") or "")
     if not slug or not title or not description:
         raise ValidationError("LeetCode question misses its title, slug, or description")
     rate = float(question.get("acRate") or 0)

@@ -6,6 +6,22 @@
 - 验证证据：已运行 `git diff --check` 和 `npm run context:check`，均通过；静态复核确认 `port: 8090` 与 `strictPort: true` 已生效。本轮未启动 Vite 实测，因为当前日志已显示 `8090` 至少被残留服务占用，直接启动只会按预期失败；未执行构建，因为仅修改开发服务器配置和文档。
 - 剩余风险/责任人：需要先停止占用 `8090` 的旧 Node/Vite 进程，再运行 `npm run serve`；端口冲突后的排查和进程清理由本地开发者负责。
 
+## 2026-08-01 — 修复 LeetCode 标题缺失导致的整批保留
+
+- 任务基线：处理最新采集报告中 LeetCode 因单条列表记录缺少 `titleCn` 而保留旧 3,169 条快照的问题；同时复核 V2EX、Zhipin 和 0818 的未完成状态，不能降低 HTTPS 边界、绕过登录/安全检查或伪造采集结果。
+- 实际变更/偏离控制：LeetCode GraphQL 列表请求增加同源 `title` 字段，并在中文标题为空时将其作为显示标题回退；新增该字段组合的回归测试。V2EX 三个官方 HTTPS 主机仍超时、Zhipin 仍返回登录/安全检查、0818 仍无可用 HTTPS 端点，均保留既有安全失败/快照策略，未作投机性修复。
+- 文件：`src/crawl/leetCode.py`、`src/crawl/tests/test_collectors.py`、`.claude/project-context.md`、`.claude/iteration-log.md`；本地忽略的 `docs/verification-reports/2026-08-01-leetcode-title-fallback.md` 保存真实运行证据。
+- 验证证据：针对性 LeetCode 回归 3/3 通过，完整 Python 回归 29/29 通过。真实 `run_collectors --only leetCode` 在 195.09 秒内成功发布 4,393 条、88 个分块；manifest 逐分块计数与声明总数一致。随后 `npm run build` 成功（仅保留既有第三方 PURE 注释警告）。动态快照已恢复，不进入源码提交。GitHub-hosted CI 运行 `30681585333` 已成功完成。
+- 剩余风险/责任人：新 4,393 条 LeetCode 快照尚未在本轮浏览器重新检查 `/leetcode` 的 DOM、网络和控制台，由前端维护者在下一次可用生产 preview 中完成。V2EX、Zhipin 和 0818 的新候选分别受官方主机超时、源站挑战和无 HTTPS 端点阻断，由采集维护者在来源恢复且不绕过安全边界时复核。
+
+## 2026-08-01 — 重构本地验证报告管理
+
+- 任务基线：解决 `docs/verification-reports/` 中报告、截图、机器摘要平铺堆积，且维护检查只按文件名字母顺序寻找报告、无法反映当前验证状态的问题；保留所有原始证据，不把归档当作删除。
+- 实际变更/偏离控制：新增 `npm run verification:refresh`，自动生成中文 `latest.md`，展示最新结论、当前报告、当前证据规模及日期归档；`context:check` 在检查前自动刷新总览。将仍与当前代码相关的两份报告和 51 个证据整理到 `current/` 与 `current/assets/`，将 2026-07-31 的 14 个历史文件移动到 `archive/2026-07-31/`；新增本地 README 说明命名、归档和中文报告规则。未删除或压缩任何原始证据，未改变应用运行时、采集或部署行为。
+- 文件：`scripts/refresh-verification-reports.js`、`scripts/check-context-maintenance.js`、`package.json`、`.claude/project-context.md`、`.claude/iteration-log.md`；被 Git 忽略的 `docs/verification-reports/` 管理产物。
+- 验证证据：`npm run verification:refresh` 成功生成当前总览；脚本语法检查通过；当前两份 Markdown 报告的证据链接均可解析；`npm run context:check` 成功刷新总览并找到完整可信报告。当前总览为 2 份结论报告、51 个当前证据（14.8 MB）及 14 个历史归档文件（1.1 MB）。
+- 剩余风险/责任人：自动总览只汇总报告标题、修改时间、启发式状态和文件规模，不能判断业务结论真实正确；报告编写者仍需填写已证明、未证明和风险。当前证据保留策略尚未设置自动过期清理，以避免未授权删除，由仓库维护者按批次完成状态手动归档。
+
 ## 2026-08-01 — 修复 GitHub Actions 运行时与 pip 缓存配置
 
 - 任务基线：GitHub Actions 在 `master` 推送后报告旧版 JavaScript Action 的 Node 20 弃用提示，并且 `actions/setup-python@v5` 的 pip 缓存默认查找 `requirements.txt` 或 `pyproject.toml`，未识别仓库实际的 `requirements-crawl.txt`。本轮只修复 CI 启动配置，不改变采集、构建或部署步骤。
