@@ -15,7 +15,7 @@ if __package__ in (None, ""):
 
 from src.crawl.lib.output import DATA_ROOT, REPOSITORY_ROOT
 from src.crawl.lib.status import CollectorResult
-from src.crawl.lib.validate import existing_snapshot_is_valid
+from src.crawl.lib.validate import UNIQUE_KEYS, existing_snapshot_is_valid
 from src.crawl.leetCode import validate_existing_release
 
 
@@ -36,11 +36,11 @@ COLLECTORS = (
     CollectorSpec("infzm", "infzm.py", "infzm.json", "article", 3),
     CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3),
     CollectorSpec("weibo", "weibo.py", "weibo.json", "article", 5),
-    CollectorSpec("v2ex", "v2ex.py", "v2ex.json", "article", 3),
     CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3),
     CollectorSpec("52pojie", "52pojie.py", "52pojie.json", "article", 3),
     CollectorSpec("meituanTech", "meituanTech.py", "techForum/meituanTech.json", "article", 3),
-    CollectorSpec("0818tuan", "welfare/0818tuan.py", "welfare/0818tuan.json", "welfare", optional=True),
+    CollectorSpec("v2ex", "v2ex.py", "v2ex.json", "article", 3, optional=True),
+    CollectorSpec("0818tuan", "welfare/0818tuan.py", "welfare/0818tuan.json", "welfare", 3, optional=True),
     CollectorSpec("0818tuanTop", "welfare/0818tuanTop.py", "welfare/0818tuanTop.json", "welfare", optional=True),
     CollectorSpec("zhuanyes", "welfare/zhuanyes.py", "welfare/zhuanyes.json", "welfare"),
     CollectorSpec("zhuanyesTop", "welfare/zhuanyesTop.py", "welfare/zhuanyesTop.json", "welfare", optional=True),
@@ -69,7 +69,50 @@ def valid_count(spec: CollectorSpec) -> int:
     path = DATA_ROOT / spec.output
     if spec.kind == "leetcode":
         return validate_existing_release(path)
-    return existing_snapshot_is_valid(path, kind=spec.kind, min_items=spec.min_items)
+    return existing_snapshot_is_valid(
+        path,
+        kind=spec.kind,
+        min_items=spec.min_items,
+        require_unique=UNIQUE_KEYS.get(spec.kind),
+    )
+
+
+def snapshot_metrics(path: Path, kind: str) -> dict[str, object]:
+    if not path.is_file() or kind == "leetcode":
+        return {"keys": set(), "maxTimestamp": None}
+    try:
+        items = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        return {"keys": set(), "maxTimestamp": None}
+    if not isinstance(items, list):
+        return {"keys": set(), "maxTimestamp": None}
+    unique_key = UNIQUE_KEYS.get(kind)
+    keys = {
+        str(item[unique_key])
+        for item in items
+        if unique_key and isinstance(item, dict) and item.get(unique_key)
+    }
+    timestamps = [
+        int(item["timestamp"])
+        for item in items
+        if isinstance(item, dict) and isinstance(item.get("timestamp"), (int, float))
+    ]
+    return {"keys": keys, "maxTimestamp": max(timestamps, default=None)}
+
+
+def is_fresh_candidate(
+    *,
+    state: str,
+    changed: bool,
+    kind: str,
+    new_item_count: int,
+    timestamp_advanced: bool,
+) -> bool:
+    if state != "success" or not changed:
+        return False
+    if kind in {"article", "welfare", "video", "job"}:
+        return new_item_count > 0 and timestamp_advanced
+    return True
 
 
 def parse_result(stdout: str, spec: CollectorSpec) -> CollectorResult | None:
@@ -99,6 +142,7 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
     path = DATA_ROOT / spec.output
     before_digest = digest_path(path)
     before_count = valid_count(spec)
+    before_metrics = snapshot_metrics(path, spec.kind)
     started = time.monotonic()
     timed_out = False
     return_code: int | None = None
@@ -130,6 +174,7 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
             stderr = stderr.decode("utf-8", "replace")
 
     after_count = valid_count(spec)
+    after_metrics = snapshot_metrics(path, spec.kind)
     parsed = parse_result(stdout, spec)
     if timed_out:
         state = "preserved" if after_count else "failed"
@@ -147,14 +192,36 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
         state = "failed"
         reason = parsed.reason if parsed else "collector failed and no valid snapshot remains"
 
+    changed = before_digest != digest_path(path)
+    new_item_count = len(after_metrics["keys"] - before_metrics["keys"])
+    timestamp_advanced = (
+        after_metrics["maxTimestamp"] is not None
+        and (
+            before_metrics["maxTimestamp"] is None
+            or after_metrics["maxTimestamp"] > before_metrics["maxTimestamp"]
+        )
+    )
+    fresh_candidate = is_fresh_candidate(
+        state=state,
+        changed=changed,
+        kind=spec.kind,
+        new_item_count=new_item_count,
+        timestamp_advanced=timestamp_advanced,
+    )
+
     return {
         "name": spec.name,
         "state": state,
         "required": not spec.optional,
         "durationSeconds": round(time.monotonic() - started, 2),
         "itemCount": after_count,
-        "changed": before_digest != digest_path(path),
+        "changed": changed,
+        "freshCandidate": fresh_candidate,
+        "newItemCount": new_item_count,
         "previousItemCount": before_count,
+        "previousMaxTimestamp": before_metrics["maxTimestamp"],
+        "maxTimestamp": after_metrics["maxTimestamp"],
+        "timestampAdvanced": timestamp_advanced,
         "exitCode": return_code,
         "timedOut": timed_out,
         "stdoutBytes": len(stdout.encode("utf-8")),
@@ -189,7 +256,7 @@ def main() -> int:
         results.append(result)
         print(json.dumps(result, ensure_ascii=False), flush=True)
     summary = {
-        "version": 1,
+        "version": 2,
         "collectors": results,
         "counts": {
             state: sum(item["state"] == state for item in results)

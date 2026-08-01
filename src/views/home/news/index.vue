@@ -1,4 +1,12 @@
 <template>
+  <el-alert
+    v-if="v2exSnapshotPreserved"
+    class="snapshot-alert"
+    :title="`V2EX 当前展示保留快照，最近数据时间 ${v2exLatestTime}，不代表当前热点。`"
+    type="warning"
+    :closable="false"
+    show-icon
+  />
   <el-row>
     <el-col :span="24" :md="8" :lg="8" v-for="(item, index) in newsAllLimited" :key="index">
       <el-card class="news-card" shadow="hover">
@@ -55,16 +63,19 @@
 import { ref, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
 import juejinNews from "../../../public/data/juejin.json";
-import v2exNews from "../../../public/data/v2ex.json";
 import meituanNews from "../../../public/data/techForum/meituanTech.json";
+import v2exNews from "../../../public/data/v2ex.json";
 import bgImageUrl from "../../../public/img/bg.jpg";
-import { ElRow, ElCol, ElCard, ElAvatar } from "element-plus";
+import { ElRow, ElCol, ElCard, ElAvatar, ElAlert } from "element-plus";
 export default {
   props: {
     newsLocation: [String, Number],
   },
   setup(props: any) {
-    const newsAll = [...juejinNews, ...v2exNews, ...meituanNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const newsAll = [...juejinNews, ...meituanNews, ...v2exNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const v2exLatestTimestamp = Math.max(...v2exNews.map((item: any) => Number(item.timestamp) || 0));
+    const v2exLatestTime = v2exNews.find((item: any) => item.timestamp === v2exLatestTimestamp)?.time || "未知";
+    const v2exSnapshotPreserved = v2exLatestTimestamp < Date.now() - 30 * 24 * 60 * 60 * 1000;
     const isPCRes = computed(() => isPC());
     const getWebsiteInfo = (item: any): any => {
       let websiteInfo = {};
@@ -85,20 +96,19 @@ export default {
               "http://www.infzm.com/web/images/infzm-meta-icon.png?f25705e975f00770a3e8a74f1a08a170",
           };
           break;
-        case "v2ex":
-          websiteInfo = {
-            name: "V2EX",
-            mainWebsite: "https://www.v2ex.com/",
-            logo:
-              "https://www.v2ex.com/static/icon-192.png",
-          };
-          break;
         case "meituan":
           websiteInfo = {
             name: "美团科技",
             mainWebsite: "https://tech.meituan.com/",
             logo:
               "https://s3plus.meituan.net/v1/mss_e2821d7f0cfe4ac1bf9202ecf9590e67/cdn-prod/file:1040877d/favicon-mt.ico",
+          };
+          break;
+        case "v2ex":
+          websiteInfo = {
+            name: v2exSnapshotPreserved ? "V2EX（保留快照）" : "V2EX",
+            mainWebsite: "https://www.v2ex.com/",
+            logo: "https://www.v2ex.com/static/icon-192.png",
           };
           break;
         default:
@@ -132,8 +142,8 @@ export default {
             : `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
           break;
         case "juejin":
-        case "v2ex":
         case "meituan":
+        case "v2ex":
           handleUrl = item.url;
           break;
         default:
@@ -194,6 +204,8 @@ export default {
       handleCoverImg,
       handleImageError,
       gotoMainWebsite,
+      v2exLatestTime,
+      v2exSnapshotPreserved,
     };
   },
   components: {
@@ -201,11 +213,16 @@ export default {
     ElCol,
     ElCard,
     ElAvatar,
+    ElAlert,
   },
 };
 </script>
 
 <style scoped>
+.snapshot-alert {
+  margin-bottom: 20px;
+}
+
 .news-img-inner {
   position: absolute;
   top: 0;

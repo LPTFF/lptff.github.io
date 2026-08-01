@@ -1,14 +1,19 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
+
+import pytz
+import requests
 
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from src.crawl.lib.http import HttpClient
+from src.crawl.lib.http import ChallengeError, HttpClient, HttpError
 from src.crawl.lib.runner import run_guarded
 
 NAME = "v2ex"
@@ -18,6 +23,9 @@ FALLBACK_URLS = (
     "https://v2ex.com/api/topics/hot.json",
     "https://api.v2ex.com/api/topics/hot.json",
 )
+ALLOWED_HOSTNAMES = ("www.v2ex.com", "v2ex.com", "api.v2ex.com")
+BEIJING = pytz.timezone("Asia/Shanghai")
+TOPIC_PATH = re.compile(r"^/t/\d+/?$")
 
 
 def parse_response(payload: object) -> list[dict[str, object]]:
@@ -35,6 +43,15 @@ def parse_response(payload: object) -> list[dict[str, object]]:
             continue
         if not title or not url:
             continue
+        parsed_url = urlparse(url)
+        if (
+            parsed_url.scheme != "https"
+            or parsed_url.hostname not in ALLOWED_HOSTNAMES
+            or not TOPIC_PATH.fullmatch(parsed_url.path)
+            or parsed_url.username
+            or parsed_url.password
+        ):
+            continue
         member = entry.get("member") if isinstance(entry.get("member"), dict) else {}
         avatar = str(member.get("avatar_large") or member.get("avatar_normal") or "")
         if avatar.startswith("//"):
@@ -43,7 +60,7 @@ def parse_response(payload: object) -> list[dict[str, object]]:
             {
                 "url": url,
                 "desc": entry.get("content_rendered") or entry.get("content") or title,
-                "time": datetime.fromtimestamp(created).strftime("%Y-%m-%d %H:%M:%S"),
+                "time": datetime.fromtimestamp(created, BEIJING).strftime("%Y-%m-%d %H:%M:%S"),
                 "timestamp": created * 1000,
                 "image": avatar,
                 "website": NAME,
@@ -55,18 +72,27 @@ def parse_response(payload: object) -> list[dict[str, object]]:
 
 def collect() -> list[dict[str, object]]:
     client = HttpClient(
-        allowed_hostnames=["www.v2ex.com", "v2ex.com", "api.v2ex.com"],
+        allowed_hostnames=ALLOWED_HOSTNAMES,
         max_bytes=4_000_000,
         retries=1,
         timeout=(5, 12),
     )
-    return parse_response(
-        client.get(
-            URL,
-            fallback_urls=FALLBACK_URLS,
-            headers={"Accept": "application/json"},
-        ).json()
-    )
+    last_error: Exception | None = None
+    for endpoint in (URL, *FALLBACK_URLS):
+        try:
+            response = client.get(
+                endpoint,
+                headers={"Accept": "application/json"},
+            )
+            items = parse_response(response.json())
+            if len(items) < 3:
+                raise ValueError("V2EX response contains fewer than 3 usable topics")
+            return items
+        except ChallengeError:
+            raise
+        except (HttpError, ValueError, requests.exceptions.JSONDecodeError) as error:
+            last_error = error
+    raise HttpError("all official V2EX endpoints returned unusable responses") from last_error
 
 
 def main() -> int:

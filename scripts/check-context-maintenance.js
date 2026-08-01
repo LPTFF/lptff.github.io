@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
+import { loadVerificationIndex } from "./verification-report-index.js";
 
 const root = resolve(import.meta.dirname, "..");
 const args = process.argv.slice(2);
@@ -69,6 +70,7 @@ const reportDirectory = resolve(root, "docs/verification-reports");
 const requiredReportSections = [
   "基线",
   "工具与启动条件",
+  "关键结论证据导航",
   "产物校验",
   "页面、网络与控制台",
   "失败与跳过",
@@ -78,19 +80,27 @@ const requiredReportSections = [
 function verificationReportStatus() {
   if (!existsSync(reportDirectory)) return { found: false, missing: requiredReportSections };
   const currentDirectory = resolve(reportDirectory, "current");
-  const candidateDirectory = existsSync(currentDirectory) ? currentDirectory : reportDirectory;
-  const reports = readdirSync(candidateDirectory)
-    .filter((file) => file.endsWith(".md"))
-    .sort()
-    .reverse();
-  for (const report of reports) {
-    const content = readFileSync(resolve(candidateDirectory, report), "utf8");
-    const missing = requiredReportSections.filter((section) => !content.includes(section));
-    if (!missing.length) {
-      return { found: true, report: relative(root, resolve(candidateDirectory, report)), missing: [] };
-    }
+  if (!existsSync(currentDirectory)) return { found: false, missing: requiredReportSections };
+
+  let index;
+  try {
+    index = loadVerificationIndex(currentDirectory);
+  } catch (error) {
+    return { found: false, missing: requiredReportSections, error: error.message };
   }
-  return { found: false, missing: requiredReportSections };
+  if (!index) {
+    return { found: false, missing: requiredReportSections, error: "未建立 current/index.json 权威索引" };
+  }
+
+  const reportPath = resolve(currentDirectory, index.authoritative.path);
+  const content = readFileSync(reportPath, "utf8");
+  const missing = requiredReportSections.filter((section) => !content.includes(section));
+  return {
+    found: !missing.length,
+    report: relative(root, reportPath),
+    status: index.authoritative.status,
+    missing,
+  };
 }
 
 refreshVerificationReports();
@@ -105,10 +115,11 @@ if (verificationChanges.length) {
   const reportStatus = verificationReportStatus();
   console.log(`context:check：发现需要可信事实链的高影响变更：${verificationChanges.join("、")}`);
   if (reportStatus.found) {
-    console.log(`context:check：发现包含必需章节的本地验证报告 ${reportStatus.report}。`);
+    console.log(`context:check：显式权威报告 ${reportStatus.report} 包含必需章节，状态为 ${reportStatus.status}。`);
     console.log("context:check：此检查只确认报告结构，不判断采集、页面或部署业务结果是否正确。");
   } else {
-    console.error("context:check：未发现包含必需章节的本地可信验证报告。");
+    console.error("context:check：未发现包含必需章节的本地权威验证报告。");
+    if (reportStatus.error) console.error(`原因：${reportStatus.error}。`);
     console.error(`报告至少需要：${reportStatus.missing.join("、")}。报告目录应继续被 Git 忽略。`);
     process.exit(1);
   }

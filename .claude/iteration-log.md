@@ -1,4 +1,36 @@
-## 2026-07-26 — 固定 Vite 本地开发端口并阻止自动顺延
+## 2026-08-01 — 保留 0818 数据目标并恢复 HTTPS 索引消费
+
+- 任务基线：用户明确纠正“因官方 HTTPS 不可用就删除 collector、快照和消费者”的做法，要求保留 `0818tuan.py`、`0818tuanTop.py` 及 0818 产品目标，并优先改变采集方法。继续禁止 HTTP fallback、关闭 TLS、直接 IP/伪造 Host、代理绕过、登录/CAPTCHA、stealth 或对第三方 403 做检测规避。
+- 实际变更/偏离控制：恢复两个 collector 文件和 0818 品牌资源；普通列表改为从公开 `rsshub.rssforever.com/tophub/4MdAkn1oxD` HTTPS RSS 路由读取 TopHub 的 0818 索引，严格校验 channel 标题、TopHub node URL、RSSHub generator、更新时间和每条原始 `www.0818tuan.com/xbhd/<id>.html` 目标。消费者只接收唯一 TopHub HTTPS 索引 URL，并明确 `sourceType/sourceProvider/timestampMeaning/originalHost`，不保存或打开原始 HTTP 详情。由于没有显式 HTTPS 置顶证据，`0818tuanTop` 保留 registry/文件合同但返回 skipped，删除不符合当前 HTTPS Schema 的 2023 旧 top 快照，不把榜首伪造成置顶。`/welfare` 恢复 0818 普通数据和图标，来源标为“0818团（HTTPS 公共索引）”。
+- 文件：`src/crawl/lib/welfare_sources.py`、`src/crawl/welfare/0818tuan.py`、`0818tuanTop.py`、`src/crawl/run_collectors.py`、`src/crawl/tests/test_collectors.py`、`src/public/data/welfare/0818tuan.json`、`src/views/home/welfare/index.vue`、0818 图标、业务说明、项目上下文和本日志；忽略型证据位于 `docs/verification-reports/current/assets/`。
+- 验证证据：官方 `www` HTTPS 仍因证书 hostname mismatch 失败、裸域 443 拒绝连接；TopHub 透明 requests 随后返回 403/503 安全验证，未绕过。公开 RSSHub HTTPS 路由连续读取成功并发布 49 条当前 0818 索引，49 个唯一 HTTPS 消费链接、0 HTTP 详情、0 敏感字段，时间明确为 RSS `lastBuildDate`。后续一次真实运行新增 9 个 URL 并正确报告 `freshCandidate=true`，紧接着稳定重复新 URL 为 0 且 `freshCandidate=false`，证明不会单因索引时间推进误报新候选；top collector 明确 skipped 0。Python crawler 38/38、compileall、typecheck 和 production build 通过。首次独立 preview `43217` 与 feed 更新后重新构建的最终 preview `43219` 均在桌面 `1365×768` 与 mobile/touch `390×844` 显示 49 条 0818 / 共 168 卡片，0 原站 HTTP link、0 破图、无横向溢出、console error/warn/issue 为 0。
+- 剩余风险/责任人：RSSHub 镜像与 TopHub 索引是第三方可用性依赖，不等同于 0818 官方 HTTPS，也不能证明单条内容发布时间或原始详情可安全打开；当前 TopHub 页面会返回安全验证，因此只保留索引跳转语义且不作绕过。显式置顶来源仍未解决，由采集维护者继续寻找合法 HTTPS 证据；外部条款、转载授权和长期可用性由项目所有者/合规责任人确认。本轮未触发 Actions、部署、提交或推送。
+
+## 2026-08-01 — 保留 Boss 招聘能力并改用官方公开城市页
+
+- 任务基线：用户明确要求保留 Boss/Zhipin 招聘业务与 `src/views/home/bossZhipin/index.vue`，并进一步纠正“可改变采集方法但不能改变采集目标”；因此第三方 Ashby 职位不能作为 Boss 产品数据。继续禁止登录、Cookie、CAPTCHA、stealth、安全挑战绕过和 robots 禁止的 query 搜索页。
+- 实际变更/偏离控制：移除 OpenAI/Replit/Ramp Ashby 目标和 provenance；`zhipin` collector 改为只访问 Boss 官方 `https://www.zhipin.com/<city>/` 无查询参数城市首页，读取公开职位卡与 JSON-LD `upDate`，筛选前端/客户端相关职位。详情 URL 仅允许 `www.zhipin.com/job_detail/*.html`，不请求详情页或内部 API；公开页缺失的薪资和职位说明不伪造。首页保留全部职位卡和已修复的视口内滚动弹窗，来源提示改为 Boss 官方公开页语义。
+- 文件：`src/crawl/zhipin.py`、`src/crawl/tests/test_collectors.py`、`src/public/data/zhipin.json`、`src/views/home/bossZhipin/index.vue`、`docs/business-function-overview.md`、`.claude/project-context.md`、`.claude/iteration-log.md`；忽略型报告和证据位于 `docs/verification-reports/current/`。
+- 验证证据：robots 真实读取确认旧 query 路径被禁止；旧筛选页和具体详情页真实浏览器会进入 security/login，未作绕过；`/sitemap.xml` 重定向目标返回 `NoSuchKey`。无查询城市首页通过安全 HTTP 客户端返回公开 HTML；真实采集首次 `success 3`、3 个新 Boss URL、时间戳推进，重复运行 `changed=false` 且 `freshCandidate=false`。产物 3 条、3 个唯一 `www.zhipin.com` HTTPS 详情、来源页和时间字段完整、无第三方招聘目标；Python 36/36、compileall 通过。production build 与桌面/移动消费者证据见本轮权威本地验证报告。
+- 剩余风险/责任人：公开城市页只提供有限热门职位，当前候选少且薪资/完整说明可能缺失；详情跳转可能触发登录或安全验证，项目不保证职位持续有效。外部条款、robots 和转载授权仍由项目所有者/合规责任人确认。任何后续入口变更都必须保持 Boss 为采集目标并重新验证；不得恢复 Ashby 替代目标。本轮未触发 Actions、部署、提交或推送。
+
+## 2026-08-01 — 关闭 V2EX 采集限制（0818 与 Zhipin 结论随后修正）
+
+- 任务基线：权威报告仍有 `COLLECTOR-LIMITS`，分别缺少 0818 严格 HTTPS、V2EX 当前新候选和 Zhipin 自然非挑战新职位证据；旧的 2023 快照仍被静态消费。验收采用“本轮合法新候选或从活跃 collector/消费者合同明确退役”，不以旧快照、退出码、HTTP 降级、关闭 TLS、登录/Cookie、CAPTCHA 或 stealth 代替成功。
+- 实际变更/偏离控制：公共 HTTP 客户端新增重定向链和最终 URL 的 HTTPS/exact-host 复核；runner 使用有限脱敏失败分类，现有快照与候选统一校验唯一键；collector summary v2 增加新 URL、最大时间戳推进和 `freshCandidate`。该批次曾因无官方可验证 HTTPS 将 0818 退役，也曾将 Zhipin 退役并短暂采用第三方职位源；两项均已被用户纠正并由上方 0818 HTTPS 公共索引与 Boss 官方城市页实现取代。V2EX 三个官方 HTTPS endpoint 当前仍不可用且没有新候选，退役其 registry、2023 JSON 和 `/tech-forum` 消费。高级搜索/导航专区中的普通外部网站入口不属于上述快照合同，予以保留。
+- 文件：`src/crawl/lib/http.py`、`runner.py`、`validate.py`、`welfare_sources.py`、`run_collectors.py`、`v2ex.py`、`src/crawl/tests/`、`src/views/home/news/index.vue`、`welfare/index.vue`、0818/V2EX 退役数据/资源、`docs/business-function-overview.md`、`.claude/project-context.md`、`.claude/iteration-log.md`；忽略型报告和证据位于 `docs/verification-reports/current/`。该批次对 Zhipin 页面/数据的删除及随后的第三方替代目标均已被上方官方 Boss 城市页实现取代。
+- 验证证据：该批次 Python 回归 37/37 与 compileall 通过；V2EX 真实运行 preserved 7、`freshCandidate=false`、新 URL 0、最大时间戳未前进；直接 Boss 旧 query 流程真实运行 preserved 60、`freshCandidate=false`、新 URL 0，证明该入口受 challenge 限制。该批次的 0818/Zhipin 退役构建和消费者观察均已被上方恢复实现及其 production preview 验收取代。
+- 剩余风险/责任人：不能证明外部源未来恢复、站点条款/转载授权、未推送变更已部署或 GitHub Secrets/远程定时任务有效；由项目所有者和合规责任人承担。V2EX 的未来恢复需要重新完成合法源与消费者验收；0818 与 Boss 产品当前状态以上方后续实现为准。本轮未触发 Actions、部署、提交或推送。
+
+## 2026-08-01 — 全面复核产品任务、真实数据链与验证总览
+
+- 任务基线：解决 `docs/verification-reports/latest.md` 只按修改时间和关键词生成简陋“部分完成”状态、旧 Python 报告仍保留 LeetCode 3,169 条和远程 CI 未运行等过时结论的问题；全面梳理仍有效的产品与测试缺口，并用真实公共采集、生产构建、桌面/移动浏览器和只读远程证据形成可信事实链。
+- 实际变更/偏离控制：新增显式验证报告索引模型、7 项回归测试和 `test:verification-reports`；`verification:refresh` 与 `context:check` 统一使用唯一权威报告、支持/部分被取代关系和显式未解决项，不再猜测状态。未实现待办产品功能，未运行 `build.sh`/`uploadQL.js`，未触发 Actions、部署、提交或推送，未绕过 challenge 或运行未授权账号态采集。
+- 文件：`scripts/verification-report-index.js`、`scripts/refresh-verification-reports.js`、`scripts/check-context-maintenance.js`、`scripts/tests/verification-report-index.test.js`、`package.json`、`.claude/project-context.md`、`.claude/iteration-log.md`；被 Git 忽略的 `docs/verification-reports/current/index.json`、综合报告、`latest.md` 和本轮证据。
+- 验证证据：报告索引 7/7、RSS 9/9、Python 29/29 和 compileall 通过；真实 core crawl 逐项记录 success/preserved/skipped，RSS 为 2 来源/20 条，LeetCode 在 200.42 秒内 success 4,393 条/88 分块；`npm run build` 通过且 public/dist RSS 字节一致。独立 production preview `4182` 完成 RSS、welfare、tech-forum、GitHub Trending、LeetCode、Boss、豆瓣和投资页面的桌面/移动定向验收；LeetCode 两个视口各三次随机并取得远程分块 200 JSON。公共 API 证明 HEAD `a88c5d4` 的 Actions run `30682973877` 完整成功，线上 `/newsArticle` 当前可用。收尾时受跟踪动态快照、忽略型 RSS 和 `dist/` 均恢复到写前基线，6 个目标的存在性、文件数、字节数和 SHA-256 全部一致。
+- 关键发现：`INV-DATA-001` 仍为真实 P0 缺口；production preview 中缺失的投资 JSON 被 SPA fallback 返回为 HTTP 200 HTML，FundPilotPlus/Cryptocurrency 随后 JSON parse 失败并只显示空表格，用户看不到来源、失败、过期、旧快照或多数据集独立状态。Weibo 本轮 success 52 但无 Vue 消费者；0818 skipped、V2EX preserved 7、Kuaishou 无凭据 skipped 且只保留旧 43 条。
+- 剩余风险/责任人：投资功能维护者优先实现并验证 `INV-DATA-001`；项目所有者决定正式认证、job/life、Weibo 消费者、SFTP 和未用插件去留；采集维护者继续处理 0818/V2EX/Zhipin 及授权账号态来源；外部条款与转载授权由项目所有者/合规责任人确认。本轮未推送代码，因此当前线上成功不能证明本轮本地批次已部署。
+
 
 - 任务基线：修复 `npm run serve` 在 `8090` 被占用后自动切换到 `8091`、`8092`、`8093`，以及配置热重载后回到旧端口的问题；开发地址必须稳定，端口冲突应显式失败，便于发现残留服务并保持文档、浏览器访问地址和数据代理一致。
 - 实际变更/偏离控制：将 `vite.config.ts` 的端口固定为 `8090` 并启用 `strictPort: true`；保留 `0.0.0.0` 监听、CORS 和 `192.168.1.100:5000` 数据代理。同步更新 README、开发环境说明和项目上下文；未修改业务页面或远程服务。
@@ -275,3 +307,20 @@
 - 文件：`src/crawl/lib/http.py`、`src/crawl/lib/welfare_sources.py`、`src/crawl/welfare.py`、`src/crawl/weibo.py`、`src/crawl/v2ex.py`、`src/crawl/zhipin.py`、`src/crawl/tests/`、`src/views/home/welfare/index.vue`、`.claude/project-context.md`、`.claude/iteration-log.md`；被忽略的最终报告为 `docs/verification-reports/2026-08-01-python-collector-reliability.md`。
 - 验证证据：28 个 Python 测试、9 个 Node collector 测试、`compileall`、类型检查和生产构建通过。真实 collector 最终为 welfare success 25、Weibo success 50、DaydayzhuanTop success 6、ZhuanyesTop success 12、GitHub Trending success 后 preserved 12、V2EX preserved 7、Zhipin challenge 后 preserved 60、两个 0818 skipped；目标数据除两个 0818 历史 HTTP 文件外均通过 Schema、最低条数、唯一键、乱码和敏感字段检查。生产 `/welfare` 桌面/移动显示 129 卡片、0 破图、0 远程作者图、0 横向溢出且控制台无问题；`/github-trending` 显示 12 个唯一仓库、0 破图、无溢出；`/tech-forum` 显示 preserved 的 7 条 V2EX，0 破图且控制台无问题；首页 Boss 显示 preserved 职位数据。仓库没有导入 `weibo.json` 的 Vue 消费者，因此 Weibo 页面闭环明确未完成。
 - 剩余风险/责任人：采集维护者需继续寻找满足 HTTPS/Schema 的 0818 来源，在允许网络中复核 V2EX 新候选，并仅在不绕过安全挑战的授权环境验证 Zhipin 新职位；前端维护者决定是否把 Weibo 接入现有业务页面。GitHub Actions、`python-crawl`、`gh-pages` 和线上 Pages 未远程实跑，由仓库维护者在获得明确推送授权后验收。
+
+
+# 2026-08-01 — 保留 V2EX 与 0818 Top 合同并复核账号态阻断
+
+- 任务基线：纠正通过删除 `src/public/data/v2ex.json` 和 `src/public/data/welfare/0818tuanTop.json` 收口验证项的错误方向；保留 V2EX、0818 普通与置顶业务目标，继续使用合法 HTTPS 与显式数据语义；只在当前环境确有授权凭据时运行账号态 Kuaishou/Douyin，不读取、输出或猜测凭据，不绕过安全验证。
+- 实际变更/偏离控制：恢复 V2EX optional registry、历史数据文件和 `/tech-forum` 消费，页面用 Element Plus warning 显示“保留快照”、最近数据时间及“不代表当前热点”；真实官方 V2EX collector 仍为 `preserved 7`，因此没有伪报新候选。移除 0818 Top collector 删除历史文件的逻辑并增加回归测试；置顶文件保留但因三条链接仍为 2023 HTTP 数据而不接入 `/welfare`。调查公开 RSS、TopHub route 源码与页面边界后确认前两者只提供 title/link/description，未提供 top/pinned/sticky 字段，TopHub 页面受安全验证阻断且未绕过，因此不能把普通榜首伪造为置顶。本地 `KUAISHOU_COOKIE`、`DOUYIN_COOKIE` 均未配置；两个 collector 定向运行均真实记录为 skipped 并保留旧快照，没有输出凭据。
+- 文件：`src/crawl/lib/welfare_sources.py`、`src/crawl/run_collectors.py`、`src/crawl/tests/test_collectors.py`、`src/views/home/news/index.vue`、`src/public/data/v2ex.json`、`src/public/data/welfare/0818tuanTop.json`、`docs/business-function-overview.md`、`.claude/project-context.md`、`.claude/iteration-log.md`；被忽略证据位于 `docs/verification-reports/current/`。
+- 验证证据：Python crawler 39/39、`compileall`、`npm run typecheck`、生产构建通过；V2EX 真实执行为 preserved 7、changed=false、新 URL 0、时间戳未推进。独立 `vite preview` 43223 的 `/tech-forum` 在桌面 1365×768 与 mobile/touch 390×844 均显示 7 个唯一 HTTPS V2EX 链接和保留快照警告，0 破图、无横溢、console error/warn/issue 为 0。`/welfare` 两视口仍只消费 49 个唯一 0818 HTTPS 索引链接，原站链接 0、三条旧 top 标题 0，证明保留文件没有重新接入无效数据。账号态定向结果为 Kuaishou skipped/旧 43 条、Douyin collector（registry 名 tiktok）skipped/旧 270 条。
+- 剩余风险/责任人：`0818-TOP-HTTPS` 尚不能由当前公共证据真实关闭；采集维护者需要显式标识置顶且全链 HTTPS 的合法入口，成功前保持合同与历史文件、但不消费旧 HTTP 数据。`ACCOUNT-COLLECTORS` 仍需要项目所有者提供或在执行环境配置已授权且有效的 `KUAISHOU_COOKIE`/`DOUYIN_COOKIE` 后重新运行；无凭据时不能伪造完成。V2EX 当前只是透明展示历史快照，尚无当前新候选。外部来源许可与账号授权由项目所有者/合规责任人确认。本轮未提交、推送、部署或触发 Actions。
+
+## 2026-08-01 — 固化结论—证据可追溯与产品合同保护
+
+- 任务基线：总结本轮多源采集、产品纠正和真实浏览器验收中的优秀 Agent 做法，提升后续管理的效率、准确率和速度；只沉淀可复用规则、playbook、报告索引合同与只读检查，不扩大产品功能、不新增 Hook、不修改用户级配置。
+- 实际变更/偏离控制：将有效模式收敛为“先机器证据、后事实观察、再推导结论、最后生成总览”，要求关键结论直接链接 collector/接口、产物、浏览器指标、网络与截图，并区分各证据能证明的层级；`current/index.json` 的 `claims` 成为机器可检查合同，缺少 inference、缺失/越界证据或未知证据类型会阻止刷新，未解决项可从 `latest.md` 跳到对应推导链。将本轮反复出现的失败模式固化为产品合同保护：外部源失败、无新候选、缺凭据或缺显式语义时，默认保留 source/registry/文件/消费者目标，以 preserved/skipped/blocked 或 stale UI 表达；未经用户明确同意不再通过删除数据源、替换采集目标或伪造字段制造完成。为减少重复探索，后续先复用已登记 claims，仅在源码、数据、消费者或运行环境变化时定向重跑对应事实链。
+- 文件：`AGENTS.md`、`docs/agent-verification-playbook.md`、`scripts/verification-report-index.js`、`scripts/tests/verification-report-index.test.js`、`scripts/check-context-maintenance.js`、`.claude/project-context.md`、`.claude/iteration-log.md`；被忽略的 `docs/verification-reports/current/index.json`、权威综合报告和自动生成 `latest.md` 同步采用该合同。
+- 验证证据：报告治理测试由 7 项增加至 11 项，覆盖确定性生成、缺少 inference、缺少证据、路径越界和未知证据类型；`npm run verification:refresh` 连续两次生成相同 SHA-256，并在总览中为投资缺失状态、Boss、0818 普通/Top、V2EX、账号态 collectors 和 Pages 因果边界生成可点击事实链。`npm run context:check` 读取同一索引并验证权威报告包含“关键结论证据导航”；`git diff --check` 用于收尾。未运行应用构建或重新采集，因为本轮只修改 Agent 治理和报告生成/校验逻辑，引用的是本轮已保存并经过真实执行的现有证据。
+- 剩余风险/责任人：结构检查能保证链接存在和字段齐全，不能自动判断截图内容、JSON 字段和推导逻辑是否真实一致；执行 Agent 仍需按证据等级做人工语义审查。被 Git 忽略的本地报告不会随源码提交，长期共享这些证据时需项目所有者另行决定安全的发布或归档方式。

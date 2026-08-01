@@ -72,16 +72,15 @@ import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../public/data/welfare.json";
 import tuanSource from "../../../public/data/welfare/0818tuan.json";
-import tuanTopSource from "../../../public/data/welfare/0818tuanTop.json";
 import zhuanyesSource from "../../../public/data/welfare/zhuanyes.json";
 import zhuanyesTopSource from "../../../public/data/welfare/zhuanyesTop.json";
 import daydayzhuanSource from "../../../public/data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../public/data/welfare/daydayzhuanTop.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
-import tuanImage from "./img/0818tuan.png";
 import mutouxbImage from "./img/mutouxb.png";
 import yqhd8Image from "./img/yqhd8.png";
 import hxm5Image from "./img/hxm5.png";
+import tuanImage from "./img/0818tuan.png";
 import zhuanyesImage from "./img/zhuanyes.png";
 import daydayzhuanImage from "./img/daydayzhuan.png";
 import { Timer, CircleCheck } from "@element-plus/icons-vue";
@@ -95,7 +94,7 @@ welfareInitSource = [
   ...zhuanyesSource,
   ...daydayzhuanSource,
 ];
-welfareTopSource = [...tuanTopSource, ...zhuanyesTopSource, ...daydayzhuanTopSource];
+welfareTopSource = [...zhuanyesTopSource, ...daydayzhuanTopSource];
 welfareTopSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareInitSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
 welfareSource = [...welfareTopSource, ...welfareInitSource];
@@ -172,8 +171,8 @@ export default {
           break;
         case "0818tuan":
           websiteInfo = {
-            websiteName: "0818团",
-            mainWebsite: "http://www.0818tuan.com/",
+            websiteName: "0818团（HTTPS 公共索引）",
+            mainWebsite: "https://tophub.today/n/4MdAkn1oxD",
             websiteImg: tuanImage,
           };
           break;

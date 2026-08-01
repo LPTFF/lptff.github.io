@@ -6,6 +6,14 @@ from collections.abc import Iterable, Mapping, Sequence
 from urllib.parse import urlparse
 
 SENSITIVE_KEY_PATTERN = re.compile(r"(?:access[_-]?token|authorization|cookie|password|secret|session)", re.I)
+UNIQUE_KEYS: dict[str, str] = {
+    "article": "url",
+    "welfare": "link",
+    "video": "videoUrl",
+    "movie": "url",
+    "job": "job_detail",
+    "leetcode": "problemsUrl",
+}
 
 
 class ValidationError(ValueError):
@@ -98,7 +106,13 @@ def validate_json_bytes(data: bytes, *, max_bytes: int = 5_000_000) -> object:
     return json.loads(data.decode("utf-8"))
 
 
-def existing_snapshot_is_valid(path: object, *, kind: str, min_items: int = 1) -> int:
+def existing_snapshot_is_valid(
+    path: object,
+    *,
+    kind: str,
+    min_items: int = 1,
+    require_unique: str | None = None,
+) -> int:
     from pathlib import Path
 
     file_path = Path(path)
@@ -106,6 +120,13 @@ def existing_snapshot_is_valid(path: object, *, kind: str, min_items: int = 1) -
         return 0
     try:
         items = json.loads(file_path.read_text(encoding="utf-8"))
-        return len(validate_items(items, kind=kind, min_items=min_items))
+        return len(
+            validate_items(
+                items,
+                kind=kind,
+                min_items=min_items,
+                require_unique=require_unique or UNIQUE_KEYS.get(kind),
+            )
+        )
     except (OSError, json.JSONDecodeError, ValidationError, UnicodeDecodeError):
         return 0

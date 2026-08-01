@@ -17,15 +17,25 @@ from src.crawl.lib.http import (
     looks_like_challenge,
 )
 from src.crawl.lib.output import write_json_atomically
-from src.crawl.lib.runner import preserve_or_fail, publish_items
+from src.crawl.lib.runner import _failure_reason, preserve_or_fail, publish_items
 from src.crawl.lib.validate import ValidationError, validate_items
 
 
 class FakeResponse:
-    def __init__(self, status=200, content=b"{}", content_type="application/json"):
+    def __init__(
+        self,
+        status=200,
+        content=b"{}",
+        content_type="application/json",
+        url="https://example.com/data",
+        history=None,
+        headers=None,
+    ):
         self.status_code = status
         self.content = content
-        self.headers = {"Content-Type": content_type}
+        self.url = url
+        self.history = history or []
+        self.headers = {"Content-Type": content_type, **(headers or {})}
 
     @property
     def text(self):
@@ -37,6 +47,14 @@ class FakeResponse:
 
 
 class HttpTests(unittest.TestCase):
+    def test_failure_reason_is_bounded_and_sanitized(self):
+        reason = _failure_reason(HttpError("request failed for https://user:secret@example.com/?token=x"))
+        self.assertEqual(reason, "HttpError: http")
+        self.assertNotIn("secret", reason)
+        self.assertNotIn("token", reason)
+        self.assertEqual(_failure_reason(ChallengeError("sensitive page body")), "ChallengeError: challenge")
+        self.assertEqual(_failure_reason(requests.exceptions.ConnectTimeout("private URL")), "ConnectTimeout: timeout")
+
     def test_rejects_non_https_and_credentials(self):
         with self.assertRaises(HttpError):
             assert_allowed_url("http://example.com/data", ["example.com"])
@@ -60,7 +78,7 @@ class HttpTests(unittest.TestCase):
         session.request.side_effect = [
             requests.ConnectTimeout(),
             requests.ConnectTimeout(),
-            FakeResponse(content=b'[{"ok": true}]'),
+            FakeResponse(content=b'[{"ok": true}]', url="https://fallback.example.com/data"),
         ]
         response = HttpClient(
             allowed_hostnames=["primary.example.com", "fallback.example.com"],
@@ -73,6 +91,48 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(session.request.call_args.args[1], "https://fallback.example.com/data")
         self.assertEqual(session.request.call_count, 3)
+
+    def test_rejects_redirects_outside_https_allowlist(self):
+        session = Mock()
+        redirect = FakeResponse(
+            status=302,
+            url="https://example.com/data",
+            headers={"Location": "http://example.com/final"},
+        )
+        session.request.return_value = FakeResponse(
+            url="http://example.com/final",
+            history=[redirect],
+        )
+        with self.assertRaises(HttpError):
+            HttpClient(allowed_hostnames=["example.com"], session=session, retries=0).get(
+                "https://example.com/data"
+            )
+
+        redirect.headers["Location"] = "https://other.example.com/final"
+        session.request.return_value = FakeResponse(
+            url="https://other.example.com/final",
+            history=[redirect],
+        )
+        with self.assertRaises(HttpError):
+            HttpClient(allowed_hostnames=["example.com"], session=session, retries=0).get(
+                "https://example.com/data"
+            )
+
+    def test_accepts_redirects_within_https_allowlist(self):
+        session = Mock()
+        redirect = FakeResponse(
+            status=302,
+            url="https://example.com/data",
+            headers={"Location": "/final"},
+        )
+        session.request.return_value = FakeResponse(
+            url="https://example.com/final",
+            history=[redirect],
+        )
+        response = HttpClient(
+            allowed_hostnames=["example.com"], session=session, retries=0
+        ).get("https://example.com/data")
+        self.assertEqual(response.url, "https://example.com/final")
 
     def test_challenge_detection_requires_page_level_evidence(self):
         self.assertFalse(looks_like_challenge("A project supports captcha integrations."))
@@ -135,6 +195,19 @@ class ValidationAndOutputTests(unittest.TestCase):
                 )
             self.assertEqual(path.read_bytes(), before)
             self.assertEqual(list(path.parent.glob("*.tmp")), [])
+
+    def test_preserve_rejects_duplicate_existing_snapshot(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data.json"
+            path.write_text(json.dumps([self.article(), self.article()]), encoding="utf-8")
+            result = preserve_or_fail(
+                name="example",
+                output=path,
+                kind="article",
+                reason="source failed",
+                unique_by="url",
+            )
+            self.assertEqual(result.state, "failed")
 
     def test_publish_and_preserve_states(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 import time
 from collections.abc import Iterable
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
 
 import requests
 
@@ -79,6 +79,7 @@ class HttpClient:
         user_agent: str = "lptff.github.io collector/1.0",
     ) -> None:
         self.allowed_hostnames = tuple(allowed_hostnames)
+        self._allowed_hostname_set = {hostname.lower() for hostname in self.allowed_hostnames}
         self.max_bytes = max_bytes
         self.retries = retries
         self.timeout = timeout
@@ -111,6 +112,14 @@ class HttpClient:
                         timeout=self.timeout,
                         **kwargs,
                     )
+                    for redirect in response.history:
+                        assert_allowed_url(redirect.url, self._allowed_hostname_set)
+                        location = redirect.headers.get("Location")
+                        if location:
+                            assert_allowed_url(
+                                urljoin(redirect.url, location), self._allowed_hostname_set
+                            )
+                    assert_allowed_url(response.url, self._allowed_hostname_set)
                     if response.status_code == 429 or 500 <= response.status_code < 600:
                         if attempt < self.retries:
                             time.sleep(0.25 * (2**attempt))

@@ -1,29 +1,27 @@
 <template>
   <div>
+    <el-alert
+      title="Boss 直聘职位"
+      :description="dataStatusText"
+      :type="dataStatusType"
+      :closable="false"
+      show-icon
+      class="boss-data-status"
+    />
     <el-row>
       <el-col
         :span="24"
         :md="8"
         :lg="8"
-        v-for="(parentItem, parentIndex) in zhipinData"
-        :key="parentIndex"
+        v-for="parentItem in zhipinData"
+        :key="parentItem.job_detail"
       >
         <el-card
           shadow="hover"
           class="el-boss-card"
-          :style="
-            parentIndex == zhipinData.length - 1
-              ? `background-image: url(${bossLogo}); background-size: cover;`
-              : ''
-          "
-          @click="gotoBossWebsite(parentIndex, parentItem)"
+          @click="showJobDetail(parentItem)"
         >
-          <div
-            class="boss-head-div"
-            :style="
-              parentIndex == zhipinData.length - 1 ? `visibility: hidden` : ''
-            "
-          >
+          <div class="boss-head-div">
             <div class="boss-info">
               <img
                 :src="parentItem.brandLogo ? parentItem.brandLogo : logoUrl"
@@ -36,19 +34,14 @@
                 <el-icon color="#7e8895" :size="20" class="boss-logo-title"
                   ><Suitcase
                 /></el-icon>
-                <div class="boss-title-info">前端开发工程师</div>
+                <div class="boss-title-info">{{ parentItem.bossTitle }}</div>
               </div>
             </div>
             <div class="boss-more-info">
               <el-icon :size="30" color="#4d4a4d"><MoreFilled /></el-icon>
             </div>
           </div>
-          <div
-            class="boss-job-info"
-            :style="
-              parentIndex == zhipinData.length - 1 ? `visibility: hidden` : ''
-            "
-          >
+          <div class="boss-job-info">
             <div class="boss-head-div">
               <div class="boss-industry-info">
                 <div class="boss-detail-industry">所属行业</div>
@@ -79,7 +72,8 @@
       v-model="dialogGuideVisible"
       :title="dialogTitle"
       center
-      :style="`margin-top:${dialogMarginTop}px`"
+      top="5vh"
+      :width="isPCRes ? '50%' : '92%'"
       id="dialogEl"
     >
       <div
@@ -105,17 +99,28 @@
 </template>
 
 <script lang="ts">
-import { ref, nextTick, watch, computed } from "vue";
+import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import zhipinSource from "../../../public/data/zhipin.json";
 import logoImageUrl from "../../../public/img/logo.jpg";
 import { Suitcase, MoreFilled, Opportunity } from "@element-plus/icons-vue";
-import { ElRow, ElCol, ElCard, ElIcon, ElDialog, ElButton } from "element-plus";
+import { ElRow, ElCol, ElCard, ElIcon, ElDialog, ElButton, ElAlert } from "element-plus";
 export default {
   setup() {
     const logoUrl = logoImageUrl;
-    const bossLogo = "https://img.bosszhipin.com/static/file/2022/wf8r5vlj1y1653961013785.png";
     const zhipinData = zhipinSource;
+    const latestTimestamp = Math.max(
+      0,
+      ...zhipinData.map((item: any) => Number(item.timestamp) || 0)
+    );
+    const isBossSnapshot = zhipinData.length > 0 && zhipinData.every(
+      (item: any) => item.website === "zhipin" &&
+        new URL(item.job_detail).hostname === "www.zhipin.com"
+    );
+    const dataStatusType: "success" | "warning" = isBossSnapshot ? "success" : "warning";
+    const dataStatusText = isBossSnapshot && latestTimestamp
+      ? `数据来自 Boss 直聘公开城市页，页面最近更新时间：${new Date(latestTimestamp).toLocaleString("zh-CN")}；职位详情如触发登录或安全验证，请停止访问并稍后在 Boss 直聘确认。`
+      : "Boss 公开页面当前无法生成合格的新快照；保留产品入口，但不展示第三方招聘数据。";
     const handleImageError = (event: any) => {
       event.target.src = logoUrl;
     };
@@ -139,17 +144,11 @@ export default {
       return result;
     };
     const isPCRes = computed(() => isPC());
-    const gotoBossWebsite = (index: any, item: any) => {
-      let url =
-        "https://www.zhipin.com/web/geek/job?city=101020100&experience=104,105&degree=204,203&position=100901,100208&jobType=1901&salary=406";
-      if (index == zhipinSource.length - 1) {
-        gotoOutPage(url);
-      } else {
-        dialogGuideVisible.value = true;
-        dialogTitle.value = item.brandName;
-        dialogContent.value = item.jobDesc ? item.jobDesc : "";
-        websiteUrl.value = item.job_detail;
-      }
+    const showJobDetail = (item: any) => {
+      dialogGuideVisible.value = true;
+      dialogTitle.value = `${item.brandName} · ${item.bossTitle}`;
+      dialogContent.value = item.jobDesc ? item.jobDesc : "";
+      websiteUrl.value = item.job_detail;
     };
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
@@ -161,20 +160,6 @@ export default {
         ? item
         : item.slice(0, lengthControl) + "...";
     };
-    const dialogMarginTop = ref();
-    watch(dialogGuideVisible, async (newValue) => {
-      if (newValue) {
-        await nextTick(); // 等待元素渲染完成
-        const dialogData = document.getElementById("dialogEl");
-        if (dialogData) {
-          let dialogHeight = dialogData.clientHeight;
-          let windowHeight = window.innerHeight;
-          let initMargin = isPCRes.value ? 0 : 58;
-          dialogMarginTop.value =
-            (Number(windowHeight) - dialogHeight) / 2 + initMargin;
-        }
-      }
-    });
     const handleDialogCancel = () => {
       dialogGuideVisible.value = false;
     };
@@ -186,16 +171,17 @@ export default {
     };
     return {
       logoUrl,
+      dataStatusText,
+      dataStatusType,
       zhipinData,
       handleImageError,
       handleJobSkills,
-      bossLogo,
-      gotoBossWebsite,
+      showJobDetail,
       dialogGuideVisible,
       dialogTitle,
       dialogContent,
       handleDialogContent,
-      dialogMarginTop,
+      isPCRes,
       handleDialogCancel,
       handleDialogConfirm,
     };
@@ -207,6 +193,7 @@ export default {
     ElIcon,
     ElDialog,
     ElButton,
+    ElAlert,
     Suitcase,
     MoreFilled,
     Opportunity,
@@ -214,8 +201,15 @@ export default {
 };
 </script>
 <style scoped>
+.boss-data-status {
+  margin-bottom: 16px;
+}
 .dialog-content {
   padding: 0;
+  max-height: 60vh;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 .dialog-footer {
   display: flex;

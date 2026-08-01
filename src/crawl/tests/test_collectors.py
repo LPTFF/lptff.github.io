@@ -22,19 +22,20 @@ from src.crawl.leetCode import (
 )
 from src.crawl.meituanTech import parse_feed
 from src.crawl.sendNotify import send_notification
-from src.crawl.v2ex import parse_response as parse_v2ex
+from src.crawl.v2ex import collect as collect_v2ex, parse_response as parse_v2ex
 from src.crawl.weibo import parse_response as parse_weibo
 from src.crawl.welfare import hxm5_request_body, parse_hxm5_response
 from src.crawl.lib.welfare_sources import (
-    parse_0818,
+    parse_0818_rss,
+    run_0818_source,
     parse_daydayzhuan,
     parse_daydayzhuan_top_candidates,
     parse_flexible_time,
     parse_zhuanyes_top_candidates,
 )
-from src.crawl.run_collectors import select_collectors
+from src.crawl.run_collectors import is_fresh_candidate, select_collectors
 from src.crawl.tiktokData import collect as collect_tiktok
-from src.crawl.zhipin import collect as collect_zhipin, is_challenge_page
+from src.crawl.zhipin import parse_public_page as parse_zhipin_public_page
 
 
 class ParserTests(unittest.TestCase):
@@ -61,6 +62,49 @@ class ParserTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     parser({})
 
+    def test_v2ex_parser_normalizes_and_orders_valid_topics(self):
+        payload = [
+            {
+                "title": "Older",
+                "url": "https://www.v2ex.com/t/100",
+                "created": 1_754_006_400,
+                "content": "Plain content",
+                "member": {"avatar_normal": "//cdn.v2ex.com/avatar.png"},
+            },
+            {
+                "title": "Newer",
+                "url": "https://v2ex.com/t/101",
+                "created": 1_754_010_000,
+                "content_rendered": "<p>Rendered</p>",
+                "member": {},
+            },
+            {
+                "title": "Wrong host",
+                "url": "https://example.com/t/102",
+                "created": 1_754_020_000,
+            },
+        ]
+        items = parse_v2ex(payload)
+        self.assertEqual([item["title"] for item in items], ["Newer", "Older"])
+        self.assertEqual(items[0]["time"], "2025-08-01 09:00:00")
+        self.assertEqual(items[0]["desc"], "<p>Rendered</p>")
+        self.assertEqual(items[1]["image"], "https://cdn.v2ex.com/avatar.png")
+
+    @patch("src.crawl.v2ex.HttpClient")
+    def test_v2ex_falls_back_after_invalid_envelope(self, http_client):
+        responses = []
+        for payload in ({"wrong": True}, [
+            {"title": f"Topic {index}", "url": f"https://www.v2ex.com/t/{index}", "created": 1_754_006_400 + index}
+            for index in range(1, 4)
+        ]):
+            response = Mock()
+            response.json.return_value = payload
+            responses.append(response)
+        http_client.return_value.get.side_effect = responses
+        items = collect_v2ex()
+        self.assertEqual(len(items), 3)
+        self.assertEqual(http_client.return_value.get.call_count, 2)
+
     def test_infzm_parser_builds_https_content_url(self):
         items = parse_infzm(
             {
@@ -78,15 +122,10 @@ class ParserTests(unittest.TestCase):
         )
         self.assertEqual(items[0]["url"], "https://www.infzm.com/contents/123")
 
-    def test_welfare_time_and_parser(self):
+    def test_welfare_time_parser(self):
         now = pytz.timezone("Asia/Shanghai").localize(datetime(2026, 8, 1, 12))
         self.assertEqual(parse_flexible_time("08-01 09:30", now).hour, 9)
-        items = parse_0818(
-            '<div id="redtag"><a class="list-group-item" title="Deal" href="/deal">'
-            '<span class="badge badge-success red">09:30</span></a></div>',
-            top=False,
-        )
-        self.assertEqual(items[0]["link"], "https://www.0818tuan.com/deal")
+
     def test_daydayzhuan_does_not_invent_missing_timestamps(self):
         missing = (
             '<article class="layui-row title-li"><h2><a href="/deal" title="置顶内容">'
@@ -121,6 +160,84 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(items[0]["link"], "https://www.hxm5.com/t/123")
         self.assertEqual(items[0]["website"], "hxm5")
 
+    def test_0818_rss_preserves_target_with_https_index_provenance(self):
+        xml = """
+        <rss><channel>
+          <title>0818团 ‧ 最新线报活动</title>
+          <link>https://tophub.today/n/4MdAkn1oxD</link>
+          <generator>RSSHub</generator>
+          <lastBuildDate>Sat, 01 Aug 2026 14:00:20 GMT</lastBuildDate>
+          <item><title>当前线报</title>
+            <guid>http://www.0818tuan.com/xbhd/2728343.html</guid>
+          </item>
+          <item><title>重复线报</title>
+            <link>http://www.0818tuan.com/xbhd/2728343.html</link>
+          </item>
+          <item><title>错误来源</title>
+            <guid>https://example.com/xbhd/1.html</guid>
+          </item>
+          <item><title>非活动入口</title>
+            <guid>http://www.0818tuan.com/pdd/zudui.php</guid>
+          </item>
+        </channel></rss>
+        """
+        items = parse_0818_rss(xml)
+        self.assertEqual(len(items), 1)
+        self.assertEqual(items[0]["website"], "0818tuan")
+        self.assertEqual(
+            items[0]["link"],
+            "https://tophub.today/n/4MdAkn1oxD?source=0818tuan&entry=2728343",
+        )
+        self.assertEqual(items[0]["time"], "2026-08-01 22:00:20")
+        self.assertEqual(items[0]["timestampMeaning"], "source-index-updated-at")
+        self.assertEqual(items[0]["sourceProvider"], "RSSHub / TopHub")
+        self.assertNotIn("http://", json.dumps(items, ensure_ascii=False))
+
+    def test_0818_rss_requires_exact_channel_identity(self):
+        template = """
+        <rss><channel><title>{title}</title><link>{link}</link>
+          <generator>{generator}</generator>
+          <lastBuildDate>Sat, 01 Aug 2026 14:00:20 GMT</lastBuildDate>
+        </channel></rss>
+        """
+        invalid_channels = (
+            ("其他来源", "https://tophub.today/n/4MdAkn1oxD", "RSSHub"),
+            ("0818团 ‧ 最新线报活动", "https://example.com/node", "RSSHub"),
+            ("0818团 ‧ 最新线报活动", "https://tophub.today/n/4MdAkn1oxD", "Other"),
+        )
+        for title, link, generator in invalid_channels:
+            with self.subTest(title=title, link=link, generator=generator):
+                with self.assertRaises(ValueError):
+                    parse_0818_rss(
+                        template.format(title=title, link=link, generator=generator)
+                    )
+
+    def test_0818_top_skip_does_not_delete_preserved_contract(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "0818tuanTop.json"
+            original = '[{"title":"历史置顶合同"}]'
+            output.write_text(original, encoding="utf-8")
+            result = Mock(is_usable=True)
+            result.to_dict.return_value = {"name": "0818tuanTop", "state": "skipped"}
+            with patch(
+                "src.crawl.lib.welfare_sources.preserve_or_fail",
+                return_value=result,
+            ) as preserve:
+                self.assertEqual(
+                    run_0818_source(name="0818tuanTop", output=str(output), top=True),
+                    0,
+                )
+            self.assertEqual(output.read_text(encoding="utf-8"), original)
+            preserve.assert_called_once_with(
+                name="0818tuanTop",
+                output=str(output),
+                kind="welfare",
+                reason="collector: no explicit HTTPS top-item evidence",
+                min_items=1,
+                optional=True,
+                unique_by="link",
+            )
+
     def test_top_candidates_do_not_invent_list_timestamps(self):
         daydayzhuan = parse_daydayzhuan_top_candidates(
             '<article class="layui-row title-li"><a href="/article/1" title="置顶内容">'
@@ -153,19 +270,118 @@ class ParserTests(unittest.TestCase):
         )
         self.assertEqual(items[0]["timestamp"], int(collected_at.timestamp() * 1000))
 
-    def test_zhipin_detects_security_redirect_without_broad_text_match(self):
+    def test_zhipin_parses_public_city_page_roles(self):
+        html = """
+        <html><head><script type="application/ld+json">
+        {"upDate": "2026-08-01T19:00:00"}
+        </script></head><body>
+          <div class="hot-company-wrapper"><ul><li>
+            <a class="company-info-top"><div class="company-img">
+              <img src="https://img.bosszhipin.com/logo.png" />
+            </div><div class="company-info"><h3>示例科技</h3><p>已上市 互联网</p></div></a>
+            <ul class="company-job-list"><li class="company-job-item">
+              <a class="job-info" href="/job_detail/abc_123~.html?tracking=sensitive">
+                <div class="job-info-top"><p class="name">前端开发工程师</p><p class="salary">20-30K</p></div>
+                <p class="job-text"><span>南京</span><span>3-5年</span><span>本科</span></p>
+              </a>
+            </li></ul>
+          </li></ul></div>
+          <div class="hot-company-wrapper"><ul><li>
+            <a class="company-info-top"><div class="company-info"><h3>后端公司</h3></div></a>
+            <ul class="company-job-list"><li><a class="job-info" href="/job_detail/backend.html">
+              <p class="name">后端开发工程师</p>
+            </a></li></ul>
+          </li></ul></div>
+        </body></html>
+        """
+        jobs = parse_zhipin_public_page(
+            html,
+            source_url="https://www.zhipin.com/nanjing/",
+        )
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(
+            jobs[0]["job_detail"],
+            "https://www.zhipin.com/job_detail/abc_123~.html",
+        )
+        self.assertEqual(jobs[0]["time"], "2026-08-01 19:00:00")
+        self.assertEqual(jobs[0]["brandName"], "示例科技")
+        self.assertEqual(jobs[0]["skills"], ["前端开发"])
+        self.assertEqual(jobs[0]["website"], "zhipin")
+        self.assertEqual(jobs[0]["sourcePage"], "/nanjing/")
+
+    def test_zhipin_rejects_query_source_and_disallowed_detail_path(self):
+        with self.assertRaises(ValueError):
+            parse_zhipin_public_page(
+                '<script type="application/ld+json">{"upDate":"2026-08-01T19:00:00"}</script>',
+                source_url="https://www.zhipin.com/nanjing/?query=frontend",
+            )
+        html = """
+        <script type="application/ld+json">{"upDate":"2026-08-01T19:00:00"}</script>
+        <div><a class="company-info-top"><div class="company-info"><h3>示例科技</h3></div></a>
+          <ul class="company-job-list"><li><a class="job-info" href="/job_detail/l123.html">
+            <p class="name">前端开发工程师</p>
+          </a></li></ul>
+        </div>
+        """
+        self.assertEqual(
+            parse_zhipin_public_page(html, source_url="https://www.zhipin.com/nanjing/"),
+            [],
+        )
+
+    def test_fresh_candidate_requires_newer_timestamped_content(self):
         self.assertTrue(
-            is_challenge_page(
-                "https://www.zhipin.com/web/user/?fromUrl=https%3A%2F%2Fwww.zhipin.com%2Fweb%2Fgeek%2Fjobs%3F_security_check%3D1",
-                "注册登录",
-                "验证码登录/注册",
+            is_fresh_candidate(
+                state="success",
+                changed=True,
+                kind="article",
+                new_item_count=1,
+                timestamp_advanced=True,
             )
         )
         self.assertFalse(
-            is_challenge_page(
-                "https://www.zhipin.com/web/geek/jobs",
-                "职位列表",
-                "岗位验证经验要求",
+            is_fresh_candidate(
+                state="success",
+                changed=True,
+                kind="article",
+                new_item_count=1,
+                timestamp_advanced=False,
+            )
+        )
+        self.assertFalse(
+            is_fresh_candidate(
+                state="preserved",
+                changed=False,
+                kind="article",
+                new_item_count=0,
+                timestamp_advanced=False,
+            )
+        )
+
+        self.assertTrue(
+            is_fresh_candidate(
+                state="success",
+                changed=True,
+                kind="job",
+                new_item_count=3,
+                timestamp_advanced=True,
+            )
+        )
+        self.assertFalse(
+            is_fresh_candidate(
+                state="success",
+                changed=True,
+                kind="job",
+                new_item_count=3,
+                timestamp_advanced=False,
+            )
+        )
+        self.assertFalse(
+            is_fresh_candidate(
+                state="success",
+                changed=True,
+                kind="job",
+                new_item_count=0,
+                timestamp_advanced=False,
             )
         )
 
@@ -277,15 +493,6 @@ class ReleaseAndNotificationTests(unittest.TestCase):
         chrome.return_value = driver
         with self.assertRaises(RuntimeError):
             collect_tiktok("redacted", max_scrolls=1, deadline_seconds=1)
-        driver.quit.assert_called_once()
-
-    @patch("src.crawl.zhipin.webdriver.Chrome")
-    def test_zhipin_driver_quits_after_navigation_failure(self, chrome):
-        driver = Mock()
-        driver.get.side_effect = RuntimeError("navigation failed")
-        chrome.return_value = driver
-        with self.assertRaises(RuntimeError):
-            collect_zhipin(max_pages=1, deadline_seconds=1)
         driver.quit.assert_called_once()
 
     @patch("src.crawl.sendNotify.requests.post")

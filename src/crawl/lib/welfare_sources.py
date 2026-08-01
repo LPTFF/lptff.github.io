@@ -2,18 +2,131 @@ from __future__ import annotations
 
 import json
 import re
+import xml.etree.ElementTree as ET
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta
+from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urljoin
+from urllib.parse import urljoin, urlparse
 
 import pytz
 from bs4 import BeautifulSoup
 
 from src.crawl.lib.http import HttpClient, decode_response
-from src.crawl.lib.runner import run_guarded
+from src.crawl.lib.runner import preserve_or_fail, run_guarded
 
 BEIJING = pytz.timezone("Asia/Shanghai")
+TOPHUB_0818_NODE = "https://tophub.today/n/4MdAkn1oxD"
+TOPHUB_0818_RSS_ROUTE = "/tophub/4MdAkn1oxD"
+RSSHUB_0818_HOSTNAME = "rsshub.rssforever.com"
+RSSHUB_0818_URL = f"https://{RSSHUB_0818_HOSTNAME}{TOPHUB_0818_RSS_ROUTE}"
+
+
+def _safe_0818_index_link(origin_url: str) -> str:
+    parsed = urlparse(origin_url)
+    if (
+        parsed.scheme != "http"
+        or parsed.hostname != "www.0818tuan.com"
+        or parsed.username
+        or parsed.password
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("0818 RSS item has an unexpected origin URL")
+    match = re.fullmatch(r"/xbhd/(\d+)\.html", parsed.path)
+    if not match:
+        raise ValueError("0818 RSS item is not a supported activity entry")
+    return f"{TOPHUB_0818_NODE}?source=0818tuan&entry={match.group(1)}"
+
+
+def parse_0818_rss(xml: str) -> list[dict[str, object]]:
+    try:
+        root = ET.fromstring(xml)
+    except ET.ParseError as error:
+        raise ValueError("0818 RSS is not valid XML") from error
+    channel = root.find("channel")
+    if channel is None:
+        raise ValueError("0818 RSS channel is missing")
+    if (channel.findtext("title") or "").strip() != "0818团 ‧ 最新线报活动":
+        raise ValueError("0818 RSS channel identity does not match")
+    if (channel.findtext("link") or "").strip() != TOPHUB_0818_NODE:
+        raise ValueError("0818 RSS channel provenance does not match")
+    if (channel.findtext("generator") or "").strip() != "RSSHub":
+        raise ValueError("0818 RSS generator does not match")
+
+    raw_updated_at = (channel.findtext("lastBuildDate") or "").strip()
+    try:
+        updated_at = parsedate_to_datetime(raw_updated_at).astimezone(BEIJING)
+    except (TypeError, ValueError) as error:
+        raise ValueError("0818 RSS update timestamp is invalid") from error
+
+    items: list[dict[str, object]] = []
+    seen_links: set[str] = set()
+    for element in channel.findall("item"):
+        title = (element.findtext("title") or "").strip()
+        origin_url = (element.findtext("guid") or element.findtext("link") or "").strip()
+        if not title or "�" in title:
+            continue
+        try:
+            index_link = _safe_0818_index_link(origin_url)
+        except ValueError:
+            continue
+        if index_link in seen_links:
+            continue
+        seen_links.add(index_link)
+        items.append(
+            {
+                "link": index_link,
+                "title": title,
+                "img_src": "",
+                "time": updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "timestamp": int(updated_at.timestamp() * 1000),
+                "website": "0818tuan",
+                "sourceType": "public-https-index",
+                "sourceProvider": "RSSHub / TopHub",
+                "sourceFeed": TOPHUB_0818_NODE,
+                "timestampMeaning": "source-index-updated-at",
+                "originalHost": "www.0818tuan.com",
+                "isTop": "0",
+            }
+        )
+    return items
+
+
+def collect_0818_rss() -> list[dict[str, object]]:
+    response = HttpClient(
+        allowed_hostnames=[RSSHUB_0818_HOSTNAME],
+        max_bytes=1_000_000,
+        retries=1,
+    ).get(
+        RSSHUB_0818_URL,
+        expected_content_types=["application/rss+xml", "application/xml", "text/xml"],
+    )
+    return parse_0818_rss(decode_response(response, default="utf-8"))
+
+
+def run_0818_source(*, name: str, output: str, top: bool) -> int:
+    if top:
+        result = preserve_or_fail(
+            name=name,
+            output=output,
+            kind="welfare",
+            reason="collector: no explicit HTTPS top-item evidence",
+            min_items=1,
+            optional=True,
+            unique_by="link",
+        )
+    else:
+        result = run_guarded(
+            collect_0818_rss,
+            name=name,
+            output=output,
+            kind="welfare",
+            min_items=3,
+            unique_by="link",
+        )
+    print(json.dumps(result.to_dict(), ensure_ascii=False))
+    return 0 if result.is_usable else 1
 
 
 def parse_flexible_time(value: str, now: datetime | None = None) -> datetime:
@@ -56,35 +169,6 @@ def parse_flexible_time(value: str, now: datetime | None = None) -> datetime:
     if value in {"昨天", "昨日"}:
         return current.replace(hour=0, minute=0, second=0, microsecond=0) - timedelta(days=1)
     raise ValueError("unsupported welfare timestamp")
-
-
-def parse_0818(html: str, *, top: bool) -> list[dict[str, object]]:
-    soup = BeautifulSoup(html, "html.parser")
-    container = soup.select_one("div.list-group") if top else soup.select_one("div#redtag")
-    if not container:
-        return []
-    items = []
-    for article in container.select("a.list-group-item"):
-        badge = article.select_one("span.badge-success.red")
-        title = str(article.get("title") or article.get_text(" ", strip=True))
-        if not badge or not article.get("href") or not title:
-            continue
-        try:
-            date = parse_flexible_time(badge.get_text(" ", strip=True))
-        except ValueError:
-            continue
-        item = {
-            "link": urljoin("https://www.0818tuan.com/", str(article["href"])),
-            "title": title,
-            "img_src": "",
-            "time": date.strftime("%Y-%m-%d %H:%M:%S"),
-            "timestamp": int(date.timestamp() * 1000),
-            "website": "0818tuan",
-        }
-        if top:
-            item["isTop"] = "1"
-        items.append(item)
-    return items
 
 
 def _detail_date(
