@@ -6,6 +6,14 @@
 - 验证证据：已运行 `git diff --check` 和 `npm run context:check`，均通过；静态复核确认 `port: 8090` 与 `strictPort: true` 已生效。本轮未启动 Vite 实测，因为当前日志已显示 `8090` 至少被残留服务占用，直接启动只会按预期失败；未执行构建，因为仅修改开发服务器配置和文档。
 - 剩余风险/责任人：需要先停止占用 `8090` 的旧 Node/Vite 进程，再运行 `npm run serve`；端口冲突后的排查和进程清理由本地开发者负责。
 
+## 2026-08-01 — 修复 GitHub Actions 运行时与 pip 缓存配置
+
+- 任务基线：GitHub Actions 在 `master` 推送后报告旧版 JavaScript Action 的 Node 20 弃用提示，并且 `actions/setup-python@v5` 的 pip 缓存默认查找 `requirements.txt` 或 `pyproject.toml`，未识别仓库实际的 `requirements-crawl.txt`。本轮只修复 CI 启动配置，不改变采集、构建或部署步骤。
+- 实际变更/偏离控制：将 checkout、Node 和 Python Action 分别升级至 Node 24 兼容的 v5、v5、v6；构建运行时从 Node 20 升至 Node 22；为 pip 缓存显式设置根目录 `requirements-crawl.txt`。未更改 Python 版本、依赖内容或密钥边界。
+- 文件：`.github/workflows/ci.yml`、`.claude/project-context.md`、`.claude/iteration-log.md`。
+- 验证证据：静态复核工作流确认 `cache-dependency-path` 指向已存在的根目录依赖清单，且 Action 版本与 Node 24 迁移要求一致。无法在本地执行 GitHub-hosted runner；下一次 `master` 推送的 Actions 日志将验证缓存恢复与完整采集/部署流程。
+- 剩余风险/责任人：GitHub Actions 运行结果尚待远程 workflow 验证，由仓库维护者在 Actions 日志中确认；若后续失败，应以第一个业务命令错误为准而非弃用提示。
+
 
 - 任务基线：记录本地开发环境、Vite `/data` 代理和经授权的家庭服务器 SSH/远程数据文件关系，降低后续代码理解和维护成本；不在仓库写入密码，不修改远程文件或服务进程。
 - 实际变更/偏离控制：确认 Vite 开发服务器当前端口为 `8090`、监听 `0.0.0.0`，`/data` 代理目标为 `http://192.168.1.100:5000`；确认远程 `http-server` 工作目录为 `/root/Test`，`/data/fundHoldData.json` 对应 `/root/Test/data/fundHoldData.json`。新增开发环境架构文档，并同步 README、项目上下文和命令说明；未将密码写入任何文件。
