@@ -1,0 +1,138 @@
+# Claude Code 项目说明
+
+## 项目事实
+
+- 这是一个使用 JavaScript 和 TypeScript 的 Vue 3 + Vite 网站。
+- 包管理器为 npm；保持 `package-lock.json` 与依赖变更同步。
+- 应用入口为 `index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
+- 页面组件位于 `src/views/`。
+- 面向用户的 Markdown 内容位于 `src/content/blog/` 和 `src/content/interview/`。
+- 面向外部开发者的公开协作资料位于 `agent/collaboration/`，用于交流通用 Agent 管理方法论、脱敏审批边界和开源反哺流程；公司内部 Agent 管理模板不直接复制到该目录。
+- 运行时/静态资源位于 `public/`；大型导入的数据快照位于 `src/public/data/`。
+
+## UI 设计与组件约定
+
+- 项目使用 Element Plus 作为基础组件库；为降低页面设计和实现成本，后续新增或重构页面默认遵循 Element Plus 的设计语言、主题变量、布局方式和交互模式。
+- 优先复用 Element Plus 组件和当前项目已有页面模式，尤其是布局、导航、卡片、表格、表单、按钮、加载、反馈、分页、筛选和弹窗；不要在没有必要时重复设计同类基础控件。
+- 局部 CSS 仅用于业务布局、内容适配和必要的品牌调整，避免另起一套与 Element Plus 冲突的视觉体系；如确需偏离，应在任务说明或迭代记录中写明原因和影响范围。
+- 新增 UI 需求优先按“业务结构 → Element Plus 组件组合 → 少量业务样式”的顺序设计，并保持桌面端和移动端的响应式行为。
+
+## 命令
+
+- `npm run serve`：同步面试摘要，然后在端口 8090 启动 Vite 开发服务器。
+- `npm run preview`：预览构建输出。
+- `npm run typecheck`：仅运行 `vue-tsc --noEmit -p tsconfig.json`，检查 Vue/TypeScript 类型和插件生成声明的解析。
+- `npm run iteration:report`：根据当前 Git 工作区生成迭代日志草稿；默认只预览，确认后可追加 `--write --summary "本轮摘要"`。
+- `npm run context:check`：检查高影响路径是否同步更新项目上下文和迭代日志；这是只读检查，不会自动改写文件。
+- 编辑器拼写检查：仓库根目录的 `.cspell.json` 启用全局文件扫描，遵循 `.gitignore` 并排除依赖、构建产物、大型数据快照和生成文件；项目专有词和技术术语集中维护在 `words` 中。
+- 除非用户明确请求爬虫或部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
+
+## 生成和派生文件
+
+- `public/findJob-summary/full.md` 和 `public/findJob-summary/chain.md` 由 `scripts/sync-findJob-summary.js` 从 `src/content/interview/full.md` 和 `src/content/interview/chain.md` 生成。
+- `dist/` 是构建输出。
+- `auto-imports.d.ts` 和 `components.d.ts` 是自动生成的声明文件；除非任务直接针对生成输出，否则避免直接编辑它们。
+- `src/public/data/` 包含大型爬虫/数据快照。仅当任务涉及数据源或消费者时才读取特定文件。
+- `public/image/` 包含博客内容使用的已发布图片 URL；未经检查兼容性路径，请勿移动或重命名。
+
+## 工作规则
+
+- 所有任务遵循 `AGENTS.md` 中的“Agent 运行标准”：先明确结果、约束和验收条件，优先交付最小可靠基准；仅在满足探索条件时比较不超过三个实质不同的方案，并以可验证、可回滚的证据完成报告。
+- 行为、数据流、采集、UI 和部署任务必须建立“上下文基线 → 真实执行 → 产物校验 → 现有消费者/业务结果 → 剩余风险”的事实链；缺少任一相关环节只能报告部分完成。源码、fixture、编译、退出码、HTTP 200 或 JSON 可解析都不能替代更高等级的真实产物和消费者证据。
+- 工具使用前确认观测环境和数据来源；尤其区分开发代理与生产 `vite preview`、独立 JSON/HTML 与现有 Vue 消费者、工作区快照与线上产物。结果冲突时先检查代理、缓存、端口、进程、路径和来源，并在报告中说明最终采信依据。
+- 用户纠正的重复性错误或验证发现的流程缺陷，应在同一轮判断是否沉淀到 `AGENTS.md`、本文件、[`agent/verification/playbook.md`](../verification/playbook.md)、测试或只读检查；可自动验证的规则优先自动化，不只保留对话说明。
+- 普通任务默认在当前 checkout 中定向探索并进行最小修改，不创建隔离副本。
+- 用户已经确认任务目标、约束、验收条件和本轮允许的外部操作后，在该任务范围内自动连续推进，不为可逆、本地、范围内步骤重复询问确认；只有行为/架构/兼容性变化、未授权的提交推送部署、破坏性操作、凭据/付费资源、安全边界变化或事实推翻既定方案时重新确认。宿主工具权限提示仍按平台策略执行，不试图绕过。
+- 非简单任务使用可恢复流水线和可见任务状态：明确阶段、输入输出、验收门槛、失败策略、检查点、阻断项与下一步；恢复时从最后一个已确认检查点继续。每一步优先批量读取、搜索、编辑、测试和矩阵验收，独立步骤可并行、有依赖步骤按流水线推进，结果必须可映射到具体输入并支持定向重试；破坏性操作不混入批次。
+- 不默认启动并行 Agent、Plan Agent 或分阶段流程。仅当依赖/构建链迁移、跨领域变更、破坏性操作或实质模糊的需求需要回滚边界时，才按 `AGENTS.md` 的高风险升级流程处理。
+- 使用 `agent/context/project-context.md` 中已确认的事实和决策，避免重复全仓库发现；仅验证任务影响区域内的事实，优先使用当前源码/配置、项目上下文、定向搜索和生成输出，并将结论标记为已确认、推断或未解决。
+- 如果当前代码与上下文矛盾，相信代码，验证受影响的路径，并在同一迭代中更新上下文。
+- 保持变更最小化并限定在用户请求范围内。仅当一个未解决的抉择会改变行为、兼容性、架构或不可逆操作时才向用户询问；先将其记录在`未解决问题`下。
+- 仅当项目事实、约定或复杂迭代证据实际变化时，更新 `agent/context/project-context.md`、本文件或 `agent/context/iteration-log.md`；本项目提供 `iteration:report` 生成日志草稿、`context:check` 检查高影响变更是否漏记。局部 UI/内容编辑仍由 Agent 判断是否需要持久化。完成代码迭代后默认运行这两个命令，确认并补充草稿，不要把推断直接写成事实。
+- 优先选择 `src/`、`scripts/`、`vite.config.ts`、`package.json` 和 `tsconfig*.json` 下的源文件，而非生成输出。
+- 对于广泛搜索，排除 `node_modules/`、`dist/`、`.git/`、`src/public/data/`、`public/image/`、`package-lock.json`、`auto-imports.d.ts` 和 `components.d.ts`；仅在相关时明确包含它们。
+- 仅当 VS Code/LSP 上下文、符号、引用或当前编辑器有用时才使用 `vscode-context-mcp`；普通仓库搜索、文件读写不使用它。
+- 不要从此仓库修改用户级别的 Claude 配置、记忆、`.claude.json` 或全局设置。
+- 除非用户明确要求，否则不要添加自动钩子或定时任务。
+- 当用户只要求提交到远程仓库但未指定目标分支时，先确认直接更新默认分支还是推送功能分支，不要自行创建远程分支；用户明确指定后再按授权推送。
+
+## 依赖安全与构建链基线
+
+- 依赖安全和构建链的高风险升级才使用 `AGENTS.md` 中的升级流程；普通任务不默认并行探索或 Plan Agent。
+- `npm audit --registry=https://registry.npmjs.org` 统计的是依赖树漏洞，GitHub Dependabot 的告警条数可能因公告、节点和历史告警而不同；必须通过 `npm ls` 和 `npm explain` 追踪实际链路。
+- 生产依赖与开发依赖分开报告：同时运行完整审计和 `npm audit --omit=dev`，不要把构建工具漏洞误报成线上运行时漏洞。
+- 直接依赖替换前先搜索实际 API 使用边界；本项目的 Excel 功能只写出工作簿，因此用 `write-excel-file` 替代 `xlsx`，并通过 [src/utils/exportExcel.ts](../../src/utils/exportExcel.ts) 保持页面调用一致和动态加载。
+- 构建工具升级已从 Vite 4 升到 Vite 6.4.3；`@vitejs/plugin-vue@5.2.4` 与 `unplugin-vue-markdown@0.26.3` 已验证兼容，Vite/esbuild 残余告警已通过官方 registry 审计确认解决。
+- Windows 上 `npm ci` 可能因开发服务器残留的 `esbuild.exe` 或 Rollup 原生模块文件锁失败；先停止相关 Node/esbuild 进程后再重试，并在日志中记录该环境因素。
+- `npm run serve` 返回首页 HTTP 200 不等于浏览器流程验证成功；如果 Vite 依赖预构建出现 504、HMR 或控制台错误，必须明确标记导出按钮等交互验证为未完成。
+
+## 可审查开发生命周期
+
+审查对象是任务基线、行为差异、验证证据和剩余风险，不是 AI 的内部思维过程。每轮工作应能回答：本轮以什么事实为基线、实际行为是否偏离、验证证明了什么、剩余风险由谁承担。详细协作原则见 `AGENTS.md`；本文件只规定项目内的执行落点。
+
+## 验证
+
+除运行命令外，验证记录必须说明“已运行什么、证明了什么；跳过什么、为什么跳过；仍不能证明什么、谁负责后续处理”。按任务类型选择证据：
+
+- 文档变更：审查内容和链接/路径，运行 `git diff --check`，说明不运行构建的原因；
+- UI 或交互变更：运行 `npm run typecheck`/`npm run build`，检查受影响页面的浏览器流程，必要时检查移动视口；
+- 路由、数据流或生成链变更：运行构建，访问目标路由，检查数据消费者/生成链和兼容路径；涉及数据采集或生成时，优先识别并补齐项目中已有的数据消费页面，不为绕过既有页面问题新增平行验证页；在环境与权限允许的情况下必须本地运行真实采集/生成命令，通过项目实际前端框架和数据接口启动既有消费者，并用浏览器检查真实产物的页面展示、网络请求和控制台；直接打开 JSON、独立静态 HTML 或确认文件存在不能替代前后端端到端证据；
+- 数据采集、生成链或复杂 UI/部署浏览器验收不能只在对话中描述结果；在被 Git 忽略的 `agent/verification/reports/` 保存本地可审查报告，并按任务影响保存截图、页面指标、关键网络状态和控制台摘要。这些本地验收产物不纳入提交范围；简单文档或局部代码变更不要求机械生成报告。报告至少包含基线、工具与启动条件、脱敏命令、产物 Schema/完整性、页面/网络/控制台证据、失败与跳过项、复现步骤和剩余风险责任，并区分业务错误与无关外部资源噪声。
+- 依赖或构建链变更：运行 `npm ci`、类型检查、构建、官方 registry 审计和受影响的运行时检查；
+- 部署变更：检查发布路径、CI/构建产物、目标环境和回滚边界。
+
+证据不足时必须如实标记未完成，不以首页 HTTP 200、单次静态检查或“代码看起来正确”替代受影响流程验证。
+
+<!-- BEGIN vscode-context-mcp -->
+## VS Code 上下文 MCP — 可用工具
+
+本项目使用 **VS Code Smart Context MCP** 扩展。该扩展在 VS Code 内运行 MCP 服务，提供面向工作区的智能分析、文件操作、编辑器上下文和命令执行能力。
+
+### 文件工具
+- `read_file` — 读取文件内容，可指定行范围
+- `write_file` — 在工作区创建或编辑文件
+- `list_directory` — 递归列出目录内容
+- `file_search` — 在工作区按 glob 模式搜索文件
+- `text_search` — 在工作区进行文本或正则表达式搜索
+- `get_changes` — 显示未提交的 Git 变更（差异）
+
+### 执行工具
+- `execute_command` — 在 VS Code 集成终端中运行 Shell 命令
+- `terminal_last_command` — 获取上一次终端命令及其输出
+- `terminal_selection` — 获取当前终端选中的文本
+
+### 智能分析工具
+- `get_diagnostics` — 获取编译器、检查器和警告信息
+- `get_file_symbols` — 列出文件中的所有符号（函数、类和变量）
+- `get_workspace_symbols` — 搜索整个工作区中的符号
+- `find_references` — 查找符号的所有引用
+- `find_symbol_definition` — 跳转到符号定义
+- `find_symbol_references` — 按符号名称查找引用
+- `go_to_definition` — 跳转到当前符号的定义位置
+- `get_hover_info` — 获取符号的悬停提示、类型信息和文档
+- `get_implementations` — 查找接口或抽象方法的所有实现
+- `get_call_hierarchy` — 获取符号的调用层级关系
+- `get_code_actions` — 获取指定位置可用的代码操作、快速修复和重构
+- `rename_symbol` — 在整个工作区重命名符号
+- `resolve_symbol` — 解析符号的完整限定名称和位置
+- `get_codebase_graph` — 构建代码库的高层结构图
+
+### 编辑器工具
+- `get_active_file` — 获取当前活动编辑器中的文件路径和完整内容
+- `get_selection` — 获取当前编辑器中的文本选区
+- `get_open_files` — 列出当前在 VS Code 中打开的文件标签页
+- `get_problems` — 获取“问题”面板中的全部诊断信息
+
+### 待办工具
+- `todo_list` — 列出待办事项
+- `todo_add` — 添加持久化的工作区待办事项
+- `todo_complete` — 将工作区待办事项标记为已完成
+- `todo_remove` — 移除工作区待办事项
+
+### 使用说明
+
+- MCP 服务在 VS Code 内运行，可使用可配置端口（默认端口为 3785）。
+- 除非另有说明，所有文件路径都相对于工作区根目录。
+- 智能分析工具依赖 VS Code 的 LSP；实际效果取决于相关语言扩展是否已启用。
+- `execute_command` 可能需要用户批准后才能执行。
+<!-- END vscode-context-mcp -->

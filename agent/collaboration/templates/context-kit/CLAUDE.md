@@ -36,8 +36,8 @@
 
 ## 文档职责
 
-- 当前项目事实：`.claude/project-context.md`
-- 迭代证据：`.claude/iteration-log.md`
-- 当前业务能力：`docs/business-function-overview.md`
-- 未来规划：`docs/business-evolution-plan.md`
+- 当前项目事实：`agent/context/project-context.md`
+- 迭代证据：`agent/context/iteration-log.md`
+- 当前业务能力：`agent/product/business-overview.md`
+- 未来规划：`agent/product/business-planning.md`
 - Agent 工作规则：`AGENTS.md`

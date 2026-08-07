@@ -101,7 +101,7 @@
 ### 4.1 热门资讯
 
 **入口**：首页 → 热门资讯  
-**实现页面**：[src/views/home/guide/index.vue](../src/views/home/guide/index.vue)
+**实现页面**：[src/views/home/guide/index.vue](../../src/views/home/guide/index.vue)
 
 业务目的：将多个来源的内容合并为一个按时间排序的信息流，作为用户进入网站后的综合资讯入口。
 
@@ -128,7 +128,7 @@
 ### 4.2 吾爱破解
 
 **入口**：首页 → 吾爱破解  
-**实现页面**：[src/views/home/52pojie/index.vue](../src/views/home/52pojie/index.vue)
+**实现页面**：[src/views/home/52pojie/index.vue](../../src/views/home/52pojie/index.vue)
 
 业务目的：集中浏览吾爱破解相关帖子或资讯。
 
@@ -143,9 +143,11 @@
 
 ### 4.3 导航专区
 
-**入口**：首页 → 导航专区  
-**实现页面**：[src/views/home/tools/index.vue](../src/views/home/tools/index.vue)  
-**导航配置**：[src/views/home/tools/websiteGroups.json](../src/views/home/tools/websiteGroups.json)
+**入口**：首页 → 导航专区
+
+**实现页面**：[src/views/home/tools/index.vue](../../src/views/home/tools/index.vue)
+
+**导航配置**：[src/views/home/tools/websiteGroups.json](../../src/views/home/tools/websiteGroups.json)
 
 业务目的：作为个人常用网站和站内功能的统一入口。
 
@@ -172,7 +174,7 @@
 ### 4.4 Boss 直聘（公开职位聚合）
 
 **入口**：首页 → Boss直聘  
-**实现页面**：[src/views/home/bossZhipin/index.vue](../src/views/home/bossZhipin/index.vue)
+**实现页面**：[src/views/home/bossZhipin/index.vue](../../src/views/home/bossZhipin/index.vue)
 
 业务目的：保留首页 Boss 招聘信息能力，仅从 Boss 官方公开、无查询参数的城市页面聚合与前端或客户端开发相关的职位；不使用第三方招聘平台替代 Boss，也不使用 Cookie、登录、CAPTCHA、账号或 stealth 绕过安全挑战。
 
@@ -187,7 +189,7 @@
 ### 4.5 豆瓣电影
 
 **入口**：首页 → 豆瓣电影  
-**实现页面**：[src/views/home/douban/index.vue](../src/views/home/douban/index.vue)
+**实现页面**：[src/views/home/douban/index.vue](../../src/views/home/douban/index.vue)
 
 业务目的：浏览电影数据并帮助用户发现电影内容。
 
@@ -207,7 +209,7 @@
 ### 5.1 薅羊毛
 
 **路由**：`/welfare`  
-**实现页面**：[src/views/home/welfare/index.vue](../src/views/home/welfare/index.vue)
+**实现页面**：[src/views/home/welfare/index.vue](../../src/views/home/welfare/index.vue)
 
 业务目的：聚合多个线报、优惠和活动来源，帮助用户发现可参与的福利信息。
 
@@ -223,7 +225,7 @@
 ### 5.2 高级搜索
 
 **路由**：`/advanced-search`  
-**实现页面**：[src/views/home/advancedSearch/index.vue](../src/views/home/advancedSearch/index.vue)
+**实现页面**：[src/views/home/advancedSearch/index.vue](../../src/views/home/advancedSearch/index.vue)
 
 业务目的：将常用的 Google 高级搜索条件封装成表单，减少用户手动编写搜索语法的成本。
 
@@ -242,7 +244,7 @@
 ### 5.3 技术论坛
 
 **路由**：`/tech-forum`  
-**实现页面**：[src/views/home/news/index.vue](../src/views/home/news/index.vue)
+**实现页面**：[src/views/home/news/index.vue](../../src/views/home/news/index.vue)
 
 业务目的：集中浏览技术资讯和论坛内容，作为首页热门资讯之外的技术内容入口。
 
@@ -257,7 +259,7 @@
 ### 5.4 GitHub Trending
 
 **路由**：`/github-trending`  
-**实现页面**：[src/views/home/githubTrending/index.vue](../src/views/home/githubTrending/index.vue)
+**实现页面**：[src/views/home/githubTrending/index.vue](../../src/views/home/githubTrending/index.vue)
 
 业务目的：浏览 GitHub 热门项目和趋势内容，辅助发现开源项目。
 
@@ -272,7 +274,7 @@
 ### 5.5 LeetCode
 
 **路由**：`/leetcode`  
-**实现页面**：[src/views/home/leetCode/index.vue](../src/views/home/leetCode/index.vue)
+**实现页面**：[src/views/home/leetCode/index.vue](../../src/views/home/leetCode/index.vue)
 
 业务目的：为用户提供随机刷题入口，降低选择题目的成本。
 
@@ -290,7 +292,7 @@
 ### 5.6 面试题
 
 **路由**：`/interview`  
-**实现页面**：[src/views/home/findJob/index.vue](../src/views/home/findJob/index.vue)
+**实现页面**：[src/views/home/findJob/index.vue](../../src/views/home/findJob/index.vue)
 
 业务目的：提供前端学习、面试复习和项目表达准备资料。
 
@@ -311,7 +313,7 @@
 ## 6. 博客业务
 
 **根路由**：`/blog`  
-**布局页面**：[src/views/Blog/BlogLayout.vue](../src/views/Blog/BlogLayout.vue)
+**布局页面**：[src/views/Blog/BlogLayout.vue](../../src/views/Blog/BlogLayout.vue)
 
 博客的业务目标是沉淀个人学习记录和技术分享，当前内容介绍主要覆盖人工智能、自动驾驶和水下机器人等主题。
 
@@ -369,7 +371,7 @@
 ### 7.1 基金买入建议
 
 **路由**：`/message`  
-**实现页面**：[src/views/Message/index.vue](../src/views/Message/index.vue)
+**实现页面**：[src/views/Message/index.vue](../../src/views/Message/index.vue)
 
 业务目的：展示基金买入建议和多策略分析结果。
 
@@ -389,7 +391,7 @@
 ### 7.2 基金持仓分析
 
 **路由**：`/fundHoldInfoMsg`  
-**实现页面**：[src/views/Message/FundHoldInfo.vue](../src/views/Message/FundHoldInfo.vue)
+**实现页面**：[src/views/Message/FundHoldInfo.vue](../../src/views/Message/FundHoldInfo.vue)
 
 业务目的：展示当前基金持仓及其策略分析。
 
@@ -405,7 +407,7 @@
 ### 7.3 基金分析 Plus
 
 **路由**：`/fundPilotPlus`  
-**实现页面**：[src/views/Message/FundPilotPlus.vue](../src/views/Message/FundPilotPlus.vue)
+**实现页面**：[src/views/Message/FundPilotPlus.vue](../../src/views/Message/FundPilotPlus.vue)
 
 业务目的：以表格形式对基金持仓、对冲和推荐信息进行更细粒度的比较和筛选。
 
@@ -430,7 +432,7 @@
 ### 7.4 基金分析 V1
 
 **路由**：`/fundPilotV1`  
-**实现页面**：[src/views/Message/FundPilotV1.vue](../src/views/Message/FundPilotV1.vue)
+**实现页面**：[src/views/Message/FundPilotV1.vue](../../src/views/Message/FundPilotV1.vue)
 
 业务目的：提供基金持仓、对冲和推荐的表格化分析版本。
 
@@ -454,7 +456,7 @@
 ### 7.5 加密货币分析
 
 **路由**：`/cryptocurrency`  
-**实现页面**：[src/views/Message/Cryptocurrency.vue](../src/views/Message/Cryptocurrency.vue)
+**实现页面**：[src/views/Message/Cryptocurrency.vue](../../src/views/Message/Cryptocurrency.vue)
 
 业务目的：展示加密货币持仓、推荐和合约候选信息，为个人交易判断提供数据参考。
 
@@ -475,7 +477,7 @@
 ### 7.6 资讯文章
 
 **路由**：`/newsArticle`  
-**实现页面**：[src/views/Message/NewsArticle.vue](../src/views/Message/NewsArticle.vue)
+**实现页面**：[src/views/Message/NewsArticle.vue](../../src/views/Message/NewsArticle.vue)
 
 业务目的：展示经过筛选和推荐的财经或投资相关文章。
 
@@ -491,7 +493,7 @@
 ### 7.7 登录入口的业务状态
 
 **路由**：`/loginFund`  
-**实现页面**：[src/views/Login/FundLogin.vue](../src/views/Login/FundLogin.vue)
+**实现页面**：[src/views/Login/FundLogin.vue](../../src/views/Login/FundLogin.vue)
 
 当前可以确认：项目保留了基金登录相关页面入口，但源码中的认证行为属于演示/占位性质，不能视为已经上线的正式账户登录业务。
 

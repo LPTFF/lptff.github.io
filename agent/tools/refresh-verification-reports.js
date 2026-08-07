@@ -4,8 +4,8 @@ import { existsSync, mkdirSync, readdirSync, statSync, writeFileSync } from "nod
 import { resolve } from "node:path";
 import { loadVerificationIndex, renderVerificationOverview } from "./verification-report-index.js";
 
-const root = resolve(import.meta.dirname, "..");
-const reportsRoot = resolve(root, "docs/verification-reports");
+const root = resolve(import.meta.dirname, "../..");
+const reportsRoot = resolve(root, "agent/verification/reports");
 const currentReports = resolve(reportsRoot, "current");
 const currentEvidence = resolve(currentReports, "assets");
 const archiveRoot = resolve(reportsRoot, "archive");
@@ -71,5 +71,5 @@ const content = renderVerificationOverview({
 
 writeFileSync(indexFile, content, "utf8");
 console.log(
-  `verification:refresh：已刷新 docs/verification-reports/latest.md（${reports.length} 份当前报告，${evidenceFiles.length} 个当前证据${index ? "，使用显式权威索引" : "，未建立权威索引"}）。`,
+  `verification:refresh：已刷新 agent/verification/reports/latest.md（${reports.length} 份当前报告，${evidenceFiles.length} 个当前证据${index ? "，使用显式权威索引" : "，未建立权威索引"}）。`,
 );

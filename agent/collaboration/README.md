@@ -42,10 +42,10 @@
 
 - `AGENTS.md`：Agent 工作规则和验证门槛；
 - `CLAUDE.md`：项目命令、目录、生成文件和验证基线；
-- `.claude/project-context.md`：当前事实、关键决策和未解决问题；
-- `.claude/iteration-log.md`：每轮变更和证据；
-- `docs/business-function-overview.md`：当前业务能力；
-- `docs/business-evolution-plan.md`：未来规划和验收标准。
+- `agent/context/project-context.md`：当前事实、关键决策和未解决问题；
+- `agent/context/iteration-log.md`：每轮变更和证据；
+- `agent/product/business-overview.md`：当前业务能力；
+- `agent/product/business-planning.md`：未来规划和验收标准。
 
 复制后必须先补充目标项目的实际命令、路径和边界，再让 Agent 使用；模板中的占位符不是项目事实。
 ## 3. 使用规则
@@ -71,9 +71,9 @@
 
 本目录的资料面向外部沟通，不能替代：
 
-- 当前项目事实：见 `.claude/project-context.md`；
-- 单轮实施证据：见 `.claude/iteration-log.md`；
+- 当前项目事实：见 `agent/context/project-context.md`；
+- 单轮实施证据：见 `agent/context/iteration-log.md`；
 - 项目内 Agent 工作规则：见 `AGENTS.md` 和 `CLAUDE.md`；
-- 当前业务能力和未来规划：见 `docs/business-function-overview.md` 与 `docs/business-evolution-plan.md`。
+- 当前业务能力和未来规划：见 `agent/product/business-overview.md` 与 `agent/product/business-planning.md`。
 
 外部资料与项目源码发生冲突时，以当前源码和受影响路径的验证结果为准，并在需要时更新相应的项目上下文。

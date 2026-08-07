@@ -9,15 +9,16 @@
 ```text
 AGENTS.md                         # Agent 通用工作流和升级条件
 CLAUDE.md                         # 项目入口、命令、目录和验证规则
-.claude/
-├── project-context.md            # 当前仍有效的项目事实、决策和风险
-└── iteration-log.md              # 每轮变更、证据和剩余风险
-docs/
-├── business-function-overview.md # 当前业务能力和边界
-└── business-evolution-plan.md    # 未来规划、假设和验收标准
+agent/
+├── context/
+│   ├── project-context.md            # 当前仍有效的项目事实、决策和风险
+│   └── iteration-log.md              # 每轮变更、证据和剩余风险
+└── product/
+    ├── business-overview.md           # 当前业务能力和边界
+    └── business-planning.md           # 未来规划、假设和验收标准
 ```
 
-如果项目不使用 Claude Code，可以将 `AGENTS.md`、`CLAUDE.md` 替换为团队使用的 Agent 入口文件；`.claude/` 只是建议的目录名，机制本身不依赖特定工具。
+如果项目不使用 Claude Code，可以将 `AGENTS.md`、`CLAUDE.md` 替换为团队使用的 Agent 入口文件；`agent/context/` 只是建议的目录名，机制本身不依赖特定工具。
 
 ## 2. 六类信息分别放在哪里
 
@@ -25,10 +26,10 @@ docs/
 | --- | --- | --- |
 | `AGENTS.md` | Agent 如何进入任务、探索、实施和验证 | 频繁变化的项目事实、单次过程日志 |
 | `CLAUDE.md` | 这个仓库如何运行、有哪些路径和命令 | 复杂决策历史、每次迭代的流水账 |
-| `.claude/project-context.md` | 当前项目是什么、为什么这样设计、有哪些长期风险 | 普通过程、已失效事实、聊天记录 |
-| `.claude/iteration-log.md` | 本轮改了什么、证据是什么、剩余风险由谁承担 | 下一轮仍需长期维护的全部事实 |
-| `docs/business-function-overview.md` | 当前用户能做什么、不能做什么 | 未来愿望、技术实现细节 |
-| `docs/business-evolution-plan.md` | 未来要验证什么、按什么阶段演进 | 把未实现规划写成已上线能力 |
+| `agent/context/project-context.md` | 当前项目是什么、为什么这样设计、有哪些长期风险 | 普通过程、已失效事实、聊天记录 |
+| `agent/context/iteration-log.md` | 本轮改了什么、证据是什么、剩余风险由谁承担 | 下一轮仍需长期维护的全部事实 |
+| `agent/product/business-overview.md` | 当前用户能做什么、不能做什么 | 未来愿望、技术实现细节 |
+| `agent/product/business-planning.md` | 未来要验证什么、按什么阶段演进 | 把未实现规划写成已上线能力 |
 
 职责边界比文件名更重要。小项目可以合并文件，但合并后仍要保留“规则、事实、当前业务、未来规划、迭代证据”的区分。
 
@@ -91,8 +92,8 @@ docs/
 
 - 新增或删除路由、目录、生成链、命令、依赖、部署路径：更新 `project-context.md`；
 - 仅本轮有效的故障、验证结果和未完成检查：更新 `iteration-log.md`；
-- 用户能力、入口或业务边界改变：更新 `business-function-overview.md`；
-- 产品假设、阶段目标或验收指标改变：更新 `business-evolution-plan.md`；
+- 用户能力、入口或业务边界改变：更新 `agent/product/business-overview.md`；
+- 产品假设、阶段目标或验收指标改变：更新 `agent/product/business-planning.md`；
 - Agent 工作方式或验证门槛改变：更新 `AGENTS.md`；
 - 项目命令、技术栈或目录说明改变：更新 `CLAUDE.md`。
 

@@ -5,7 +5,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { relative, resolve } from "node:path";
 import { loadVerificationIndex } from "./verification-report-index.js";
 
-const root = resolve(import.meta.dirname, "..");
+const root = resolve(import.meta.dirname, "../..");
 const args = process.argv.slice(2);
 const stagedOnly = args.includes("--staged");
 const diffArgs = stagedOnly ? ["diff", "--cached", "--name-only"] : ["status", "--short"];
@@ -41,17 +41,17 @@ function changedFiles() {
 }
 
 const files = changedFiles();
-const projectContextFile = ".claude/project-context.md";
-const iterationLogFile = ".claude/iteration-log.md";
+const projectContextFile = "agent/context/project-context.md";
+const iterationLogFile = "agent/context/iteration-log.md";
 const durablePatterns = [
   /^(package\.json|package-lock\.json)$/,
   /^(vite\.config\.(js|ts)|tsconfig[^/]*\.json)$/,
   /^(scripts|\.github\/workflows|src\/router)(\/|$)/,
   /^(src\/public\/data|public\/findJob-summary)(\/|$)/,
-  /^(AGENTS\.md|CLAUDE\.md|README\.md|\.opencode\/)/,
+  /^(agent\/(standards|product|tools)|AGENTS\.md|CLAUDE\.md|README\.md|\.opencode\/)/,
 ];
 const iterationPatterns = [
-  /^(src\/|scripts\/|docs\/|public\/|AGENTS\.md|CLAUDE\.md|README\.md|\.opencode\/)/,
+  /^(src\/|scripts\/|docs\/|public\/|agent\/|AGENTS\.md|CLAUDE\.md|README\.md|\.opencode\/)/,
   /^(package\.json|package-lock\.json|vite\.config\.(js|ts)|tsconfig[^/]*\.json|\.github\/)/,
 ];
 const iterationChanges = files.filter((file) => iterationPatterns.some((pattern) => pattern.test(file)));
@@ -66,7 +66,7 @@ const verificationPatterns = [
 const verificationChanges = files.filter((file) =>
   verificationPatterns.some((pattern) => pattern.test(file)),
 );
-const reportDirectory = resolve(root, "docs/verification-reports");
+const reportDirectory = resolve(root, "agent/verification/reports");
 const requiredReportSections = [
   "基线",
   "工具与启动条件",
@@ -130,7 +130,7 @@ if (!iterationChanges.length) {
 }
 
 if (!changedIterationLog) {
-  console.error("context:check：发现需要迭代记录的变更，但本轮未更新 .claude/iteration-log.md。");
+  console.error("context:check：发现需要迭代记录的变更，但本轮未更新 agent/context/iteration-log.md。");
   console.error("先运行 `npm run iteration:report` 预览日志草稿，再按需使用 `--write` 并人工补充基线、偏离、验证和风险责任。");
   process.exit(1);
 }

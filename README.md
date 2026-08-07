@@ -90,7 +90,7 @@ npm run verify:rss:local
 
 正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下自动运行同一组 collector 测试与 `collect:rss:site`，随后执行原有 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署。
 
-本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](docs/project-references/qinglong-backup-assessment.md)。
+本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](agent/product/research/qinglong-backup-assessment.md)。
 
 ## 拼写检查
 
@@ -111,8 +111,8 @@ npm run verify:rss:local
 - `src/utils/`：共享工具，包括 Excel 导出适配器
 - `public/`：静态资源和运行时资源
 - `src/public/data/`：较大的数据快照
-- `scripts/`：摘要同步和构建辅助脚本
-- `docs/project-references/`：其他项目优秀思路的来源记录、适用性分析和最小验证实验
+- `scripts/`：产品摘要同步、数据采集和构建辅助脚本
+- `agent/`：业务规划、产品设计、Agent 标准、项目上下文、研究和自测体系
 
 ## 部署
 
@@ -130,13 +130,8 @@ npm audit --registry=https://registry.npmjs.org
 
 当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS，`/data` 请求代理到家庭服务器；详见[开发环境与远程数据服务](docs/development-environment.md)。不要直接运行 `npm audit fix --force`。
 
-## 项目维护文档
+## Agent 资产
 
-- [业务功能说明](docs/business-function-overview.md)：按用户入口、业务域和典型流程说明当前功能边界
-- [业务演进规划](docs/business-evolution-plan.md)：记录产品假设、阶段路线、指标和后续实施清单
-- [项目参考与借鉴](docs/project-references/README.md)：记录其他项目的来源、优秀思路、适用边界和最小验证实验
-- [外部开发者协作资料](docs/external-developer-collaboration/README.md)：用于外部交流的 Agent 管理方法论、脱敏审批和开源反哺模板
-- [AGENTS.md](AGENTS.md)：可复用的 Agent 工作流和项目协作规则
-- [CLAUDE.md](CLAUDE.md)：项目命令、目录事实和验证规则
-- [.claude/project-context.md](.claude/project-context.md)：当前项目事实和未解决决策
-- [.claude/iteration-log.md](.claude/iteration-log.md)：项目迭代记录
+项目功能代码与 Agent 资产分开维护。Agent 相关的业务规划、产品设计、执行标准、代码组织标准、项目上下文、外部协作资料和自测结果入口统一位于 [agent/README.md](agent/README.md)。
+
+根 [AGENTS.md](AGENTS.md) 与 [CLAUDE.md](CLAUDE.md) 只用于工具自动发现，canonical 内容不在根目录重复维护。

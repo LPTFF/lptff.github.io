@@ -340,3 +340,11 @@
 - 文件：`AGENTS.md`、`CLAUDE.md`、`docs/agent-verification-playbook.md`、`.claude/project-context.md`、`.claude/iteration-log.md`。
 - 验证证据：审查新增规则与既有“仅在实质抉择时询问”“未经授权不提交推送”“不默认启动多 Agent/Plan Agent”边界的一致性；运行 `git diff --check`、`npm run iteration:report` 和 `npm run context:check`。未运行应用构建、采集或浏览器验收，因为本轮只修改项目内 Agent 治理文档，不改变运行时代码、依赖、数据或部署行为。
 - 剩余风险/责任人：项目规则可减少 Agent 主动发起的重复确认，但不能消除宿主权限系统、外部平台和不可逆操作要求的确认；工具是否支持真正的批量调用和并发仍取决于当前环境。执行 Agent 负责在吞吐量与错误归因、限流和安全之间保持边界。
+
+## 2026-08-07 — 严格还原基金复盘助手并隔离 Agent 资产
+
+- 任务基线：严格按照用户提供的扫码 Diff 记录还原 `/investment`，不加入解释性修复；随后将业务规划、产品设计、Agent 执行与代码组织标准、项目上下文、协作资料和自测体系统一放入 `agent/`，产品区域只保留运行时源码、资源和构建所需文件；验证后直接推送 `master`。
+- 实际变更/偏离控制：基金助手 16 个文件先以独立提交还原；Agent canonical 内容迁入 `agent/standards`、`product`、`context`、`verification`、`collaboration`、`tools` 和 `records`，根 `AGENTS.md`/`CLAUDE.md` 仅保留工具发现入口。生命周期脚本与 npm 命令保持原命令名并改读新路径。本地验证报告和 qinglongBackup 研究仓库迁入 Agent 目录并继续忽略。未修改基金原始 Diff 行为，未运行爬虫、部署脚本或 Pages 发布。
+- 文件：还原提交 `11810be` 的 16 个基金文件；本轮治理变更为 `agent/`、根薄入口、`.opencode/instructions.md`、`.gitignore`、`README.md`、`docs/development-environment.md` 和 `package.json`。
+- 验证证据：16 个还原目标在提交前与提取补丁逐字节一致；Agent Markdown canonical 链接全部解析；报告治理测试 11/11；`verification:refresh` 连续输出 SHA-256 一致；`iteration:report` 和 `context:check` 从新路径正常运行；typecheck 和生产构建通过。生产预览 4175 中加载示例数据成功，解析 5 只基金和 5 条交易，六个路由可访问；390×844 mobile/touch 无横向溢出和 NaN/Infinity，最终控制台 0 error/warn/issue，网络请求均为 200/304。被忽略的报告位于 `agent/verification/reports/current/2026-08-07-investment-agent-isolation.md`。
+- 剩余风险/责任人：原始 Diff 提及但未包含的 Chrome 扩展和开发下载端点仍无源码；收益曲线仍使用原始简化模型。构建只存在既有 PURE 注释警告和原始静态/动态重复导入警告。GitHub Actions/Pages 在推送后由仓库维护者观察，不以本地预览替代远程发布证据。

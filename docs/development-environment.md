@@ -31,7 +31,7 @@
 | 远程基金数据文件 | `/root/Test/data/fundHoldData.json` |
 | Vite 配置 | [`vite.config.ts`](../vite.config.ts) 的 `server.proxy['/data']` |
 
-`http://106.15.131.89:60080` 不属于当前本地开发环境的数据代理目标；修改代理目标时必须同步检查本文档和 [`.claude/project-context.md`](../.claude/project-context.md)。
+`http://106.15.131.89:60080` 不属于当前本地开发环境的数据代理目标；修改代理目标时必须同步检查本文档和 [项目上下文](../agent/context/project-context.md)。
 
 ## SSH 运维入口
 

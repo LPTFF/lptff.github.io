@@ -4,8 +4,8 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-const root = resolve(import.meta.dirname, "..");
-const logPath = resolve(root, ".claude", "iteration-log.md");
+const root = resolve(import.meta.dirname, "../..");
+const logPath = resolve(root, "agent", "context", "iteration-log.md");
 const args = process.argv.slice(2);
 const shouldWrite = args.includes("--write");
 const summaryIndex = args.indexOf("--summary");
