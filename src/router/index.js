@@ -70,6 +70,25 @@ const routes = [
     meta: { title: "面试题" },
     children: [{ path: "", name: "interview", component: () => import("../views/home/findJob/index.vue") }],
   },
+  {
+    path: "/investment",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "基金复盘助手" },
+    children: [
+      {
+        path: "",
+        component: () => import("../views/investment/FundLayout.vue"),
+        children: [
+          { path: "", name: "fund-dashboard", component: () => import("../views/investment/FundDashboard.vue") },
+          { path: "import", name: "fund-import", component: () => import("../views/investment/FundImport.vue") },
+          { path: "holding", name: "fund-holding", component: () => import("../views/investment/FundHolding.vue") },
+          { path: "performance", name: "fund-performance", component: () => import("../views/investment/FundPerformance.vue") },
+          { path: "transaction", name: "fund-transaction", component: () => import("../views/investment/FundTransaction.vue") },
+          { path: "review", name: "fund-review", component: () => import("../views/investment/FundReview.vue") },
+        ],
+      },
+    ],
+  },
   { path: "/", name: "home", component: () => import("../views/home/index.vue") },
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
