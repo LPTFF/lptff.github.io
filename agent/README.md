@@ -1,30 +1,29 @@
-# Agent 资产中心
+# agent/：个人工作台
 
-本目录是项目内 Agent 相关资产的唯一事实来源。产品功能代码、运行时资源和构建配置留在项目目录；规划、规范、上下文、协作方法和本地验证证据统一维护在这里。
+这里不是让人服从 Agent 的控制面，而是项目的外置认知工具箱。它帮助人记住事实、理解取舍、规划产品、研究外部方案和复盘结果。
 
-## 阅读顺序
+## 按问题使用
 
-1. [项目执行说明](standards/project-instructions.md)：项目事实、命令、边界和验证要求。
-2. [Agent 执行标准](standards/agent-execution.md)：任务定义、实施、证据和报告标准。
-3. [代码组织标准](standards/code-organization.md)：如何高效组织项目代码与 Agent 资产。
-4. [项目上下文](context/project-context.md)：当前已确认事实、决策和未解决问题。
-5. [业务能力基线](product/business-overview.md)、[业务规划](product/business-planning.md)和[产品设计标准](product/product-design.md)。
-6. [自测与验收手册](verification/playbook.md)：按任务影响选择验证证据。
+- 想了解项目现在是什么：看 `context/project-context.md`。
+- 想知道产品服务谁、解决什么问题：看 `product/business-overview.md`。
+- 想决定下一步做什么：看 `product/business-planning.md`。
+- 想设计页面或交互：看 `product/product-design.md`。
+- 想了解代码放在哪里：看 `standards/code-organization.md`。
+- 想验证一个改动是否真的有效：看 `verification/playbook.md`。
+- 想研究其他项目：看 `product/research/`。
+- 想回顾过去做过什么：看 `context/iteration-log.md`，但以当前代码和当前事实为准。
 
-## 目录职责
+不要求每次任务先读完整目录，也不要求使用固定模板或维护无助于判断的流程。资料是否值得更新，由维护者根据未来的人是否会因此更快理解和做出更好判断来决定。
 
-- `standards/`：Agent 执行、项目约束和代码组织规范。
-- `product/`：业务现状、产品规划、产品设计和外部项目研究。
-- `context/`：持久项目事实和可审查迭代记录。
-- `verification/`：自测方法；`reports/` 保存被 Git 忽略的本地报告、截图和机器证据。
-- `collaboration/`：面向外部开发者的通用方法、脱敏审批和开源反哺模板。
-- `tools/`：生成迭代日志、检查上下文和管理验证报告的 Agent 工具。
-- `records/`：用户提供的原始恢复记录等非运行时输入。
+## 人机协作原则
 
-## 隔离规则
+人负责定义问题、选择取舍、批准外部或不可逆行动，并承担最终结果。Agent 可以帮助搜索、比较、起草、运行可逆的本地检查和暴露未知，但不能替人决定目标、风险承受能力、产品范围或完成标准。
 
-- `src/`、`public/`、运行时直接导入的内容和构建/部署必需配置属于项目功能产物。
-- Agent 规范、规划、上下文、过程日志、验证报告和研究资料属于本目录。
-- 根 [AGENTS.md](../AGENTS.md)、[CLAUDE.md](../CLAUDE.md)及工具专用配置仅作为自动发现入口，不复制完整规范。
-- 同一事实只维护一份 canonical 内容；其他位置使用链接，不复制正文。
-- `verification/reports/` 是本地证据目录，不提交；长期有效的结论写回 `context/project-context.md`，过程证据写入 `context/iteration-log.md`。
+好的记录应该让未来的人少走弯路：写清楚事实、判断、依据、未知和下一步；不要为了让某个工具更容易解析而堆砌格式。
+
+## 资料边界
+
+- 产品源码、运行时资源和构建配置留在项目目录。
+- 项目事实、产品判断、研究结论和有长期价值的复盘资料放在这里。
+- 临时输出、自动生成文件、凭据、个人宿主配置和无助于判断的过程材料不放在这里。
+- `AGENTS.md` 和 `CLAUDE.md` 只是宿主发现入口，不是第二套规则来源。

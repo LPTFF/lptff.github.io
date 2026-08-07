@@ -1,11 +1,5 @@
 # Agent 入口
 
-项目的 Agent 规范统一维护在 [agent/](agent/README.md)。开始任务前必须依次阅读：
+本文件只用于宿主发现。项目资料和人机协作原则统一放在 [agent/](agent/README.md)。
 
-1. [Agent 执行标准](agent/standards/agent-execution.md)
-2. [项目执行说明](agent/standards/project-instructions.md)
-3. [项目上下文](agent/context/project-context.md)
-
-按任务需要再读取[代码组织标准](agent/standards/code-organization.md)、[产品设计标准](agent/product/product-design.md)和[自测与验收手册](agent/verification/playbook.md)。
-
-本文件只用于根目录自动发现；完整规则只在 `agent/` 维护，禁止在此复制形成第二份标准。
+`agent/` 是人的项目工作台，不是要求人服从 Agent 的流程系统。请按当前问题选择需要的事实、产品、代码组织或验收资料；不要求固定阅读顺序、模板或治理命令。

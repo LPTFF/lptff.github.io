@@ -112,7 +112,7 @@ npm run verify:rss:local
 - `public/`：静态资源和运行时资源
 - `src/public/data/`：较大的数据快照
 - `scripts/`：产品摘要同步、数据采集和构建辅助脚本
-- `agent/`：业务规划、产品设计、Agent 标准、项目上下文、研究和自测体系
+- `agent/`：维护者的项目工作台，记录业务规划、产品设计、项目事实、研究材料和有长期价值的验收经验
 
 ## 部署
 
@@ -132,6 +132,6 @@ npm audit --registry=https://registry.npmjs.org
 
 ## Agent 资产
 
-项目功能代码与 Agent 资产分开维护。Agent 相关的业务规划、产品设计、执行标准、代码组织标准、项目上下文、外部协作资料和自测结果入口统一位于 [agent/README.md](agent/README.md)。
+项目功能代码与维护者资料分开维护。`agent/` 是帮助人理解项目、做产品取舍和复盘结果的工作台，不要求固定阅读顺序或治理命令，入口见 [agent/README.md](agent/README.md)。
 
-根 [AGENTS.md](AGENTS.md) 与 [CLAUDE.md](CLAUDE.md) 只用于工具自动发现，canonical 内容不在根目录重复维护。
+根 [AGENTS.md](AGENTS.md) 与 [CLAUDE.md](CLAUDE.md) 只用于宿主发现，项目资料不在根文件重复维护。
