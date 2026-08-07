@@ -1,4 +1,11 @@
-## 2026-08-01 — 保留 0818 数据目标并恢复 HTTPS 索引消费
+## 2026-08-07 — 整理远程数据快照发布记录
+
+- 任务基线：审查最近远程 `master` 的两个提交，确认其中的数据变更是否为有效发布产物；用户选择保留最新数据，不改写远程历史，并通过新增说明提交改善提交可追溯性。
+- 实际变更/偏离控制：确认 `1c81abc` 包含基金复盘助手导航入口、自动生成的 `components.d.ts`、豆瓣海报增删以及首页资讯、福利、论坛、招聘和电影快照刷新；`c6c961b` 仅新增 Pages 发布所需的 `.nojekyll` 与 `CNAME`。本轮不回退数据、不重写历史、不拆分已发布提交，只补充数据发布记录。
+- 文件：`agent/context/iteration-log.md`。远程已存在的发布文件和快照包括 `src/public/data/doubanImg/`、`githubTrending.json`、`infzm.json`、`juejin.json`、`movie.json`、`techForum/meituanTech.json`、`v2ex.json`、`weibo.json`、福利数据和 `zhipin.json`。
+- 验证证据：对 `8154970..origin/master` 的 165 个路径进行范围审查；所有受影响 JSON 均可解析，主要快照时间戳已从 2023 年推进到 2026-08-07，且对应 Vue 消费者和 collector 存在。确认导航入口位于 `websiteGroups.json` 的 `InternalWebsite` 分类并指向 `/investment`；`components.d.ts` 的新增组件声明与基金复盘页面使用的 Element Plus 组件一致。未重新运行完整采集或线上 Pages 验收，因为本轮只整理已发布数据的记录，不重新生成或覆盖快照。
+- 剩余风险/责任人：数据内容的新鲜度、外部来源授权和 GitHub Actions/Pages 最终发布状态仍由仓库维护者按各 collector 与远程 workflow 负责；本轮证据证明文件结构、Schema 可解析性和消费者引用，不替代每个来源的重新采集验收。
+
 
 - 任务基线：用户明确纠正“因官方 HTTPS 不可用就删除 collector、快照和消费者”的做法，要求保留 `0818tuan.py`、`0818tuanTop.py` 及 0818 产品目标，并优先改变采集方法。继续禁止 HTTP fallback、关闭 TLS、直接 IP/伪造 Host、代理绕过、登录/CAPTCHA、stealth 或对第三方 403 做检测规避。
 - 实际变更/偏离控制：恢复两个 collector 文件和 0818 品牌资源；普通列表改为从公开 `rsshub.rssforever.com/tophub/4MdAkn1oxD` HTTPS RSS 路由读取 TopHub 的 0818 索引，严格校验 channel 标题、TopHub node URL、RSSHub generator、更新时间和每条原始 `www.0818tuan.com/xbhd/<id>.html` 目标。消费者只接收唯一 TopHub HTTPS 索引 URL，并明确 `sourceType/sourceProvider/timestampMeaning/originalHost`，不保存或打开原始 HTTP 详情。由于没有显式 HTTPS 置顶证据，`0818tuanTop` 保留 registry/文件合同但返回 skipped，删除不符合当前 HTTPS Schema 的 2023 旧 top 快照，不把榜首伪造成置顶。`/welfare` 恢复 0818 普通数据和图标，来源标为“0818团（HTTPS 公共索引）”。
