@@ -1,13 +1,40 @@
-﻿import { defineConfig } from "vite";
+﻿import { defineConfig, type Plugin } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
+import { buildExtensionZip } from "./scripts/extension/build-zip.js";
+import fs from "node:fs";
+
+const extensionDownloadPlugin = (): Plugin => ({
+  name: "lptff-extension-download",
+  configureServer(server) {
+    server.middlewares.use(async (request, response, next) => {
+      if (request.url !== "/__extension_download__") {
+        next();
+        return;
+      }
+
+      try {
+        const outputFile = await buildExtensionZip();
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "application/zip");
+        response.setHeader("Content-Disposition", "attachment; filename=lptff-investment-assistant.zip");
+        fs.createReadStream(outputFile).pipe(response);
+      } catch (error) {
+        response.statusCode = 500;
+        response.setHeader("Content-Type", "text/plain; charset=utf-8");
+        response.end(error instanceof Error ? error.message : "扩展打包失败");
+      }
+    });
+  },
+});
 
 export default defineConfig({
   base: "/",
   plugins: [
+    extensionDownloadPlugin(),
     AutoImport({
       resolvers: [ElementPlusResolver({ importStyle: "css" })],
     }),

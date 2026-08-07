@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>基金复盘助手</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="popup">
+      <h1>基金复盘助手</h1>
+      <p>先在天天基金正常登录，再点击一次自动采集。插件会使用当前浏览器登录会话自动打开持仓、基金详情和交易查询页面，不读取或保存 Cookie。</p>
+      <button id="export" type="button">自动采集全部基金数据</button>
+      <div id="status" role="status" aria-live="polite">仅使用当前浏览器登录会话，数据只下载到本地。</div>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>

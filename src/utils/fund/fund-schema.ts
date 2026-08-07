@@ -5,6 +5,18 @@
  * 网页端导入后统一使用此结构。所有字段均为前端本地使用，不上传服务器。
  */
 
+/** 经过扩展脱敏后的天天基金接口快照 */
+export interface FundSourceSnapshot {
+  key: string;
+  method: string;
+  path: string;
+  query?: Record<string, string>;
+  requestBody?: unknown;
+  status: number;
+  contentType?: string;
+  response: unknown;
+}
+
 /** 账户总览 */
 export interface FundAccount {
   /** 总资产（元） */
@@ -29,20 +41,31 @@ export interface FundHolding {
   profitRate: number;
   /** 仓位比例（%） */
   ratio: number;
+  /** 天天基金接口原始持仓对象及扩展字段 */
+  details?: Record<string, unknown>;
+  nav?: number;
+  navDate?: string;
+  shares?: number;
+  availableShares?: number;
 }
 
 /** 交易流水 */
 export interface FundTransaction {
   /** 交易日期 YYYY-MM-DD */
   date: string;
-  /** 交易类型：BUY=买入 / SELL=卖出 / DIVIDEND=分红 */
-  type: "BUY" | "SELL" | "DIVIDEND";
+  /** 交易类型：BUY=买入 / SELL=卖出 / DIVIDEND=分红 / OTHER=其他 */
+  type: "BUY" | "SELL" | "DIVIDEND" | "OTHER";
   /** 基金代码 */
   fundCode: string;
   /** 基金名称 */
   fundName: string;
   /** 交易金额（元） */
   amount: number;
+  amountUnit?: string;
+  confirmedAmount?: number;
+  confirmedAmountUnit?: string;
+  status?: string;
+  details?: Record<string, unknown>;
 }
 
 /** 标准协议根结构 */
@@ -59,6 +82,14 @@ export interface FundData {
   holdings: FundHolding[];
   /** 交易流水 */
   transactions: FundTransaction[];
+  /** 采集时保存的脱敏接口快照和上下文 */
+  raw?: {
+    capturedAt?: string;
+    pageUrl?: string;
+    snapshots?: FundSourceSnapshot[];
+    collectionWarnings?: string[];
+  };
+  collectionWarnings?: string[];
 }
 
 /** 校验结果 */
@@ -69,7 +100,7 @@ export interface ValidationResult {
   data: FundData | null;
 }
 
-export const FUND_DATA_VERSION = "1.0";
+export const FUND_DATA_VERSION = "1.1";
 
 /** 创建一份空数据，用于补全缺失字段 */
 export function createEmptyFundData(): FundData {
@@ -80,6 +111,8 @@ export function createEmptyFundData(): FundData {
     account: { totalAsset: 0, totalProfit: 0, profitRate: 0 },
     holdings: [],
     transactions: [],
+    raw: { snapshots: [], collectionWarnings: [] },
+    collectionWarnings: [],
   };
 }
 
@@ -118,6 +151,11 @@ export function validateFundData(raw: unknown): ValidationResult {
         profit: toNumber(item.profit),
         profitRate: toNumber(item.profitRate),
         ratio: toNumber(item.ratio),
+        details: asRecord(item.details),
+        nav: toOptionalNumber(item.nav),
+        navDate: typeof item.navDate === "string" ? item.navDate : undefined,
+        shares: toOptionalNumber(item.shares),
+        availableShares: toOptionalNumber(item.availableShares),
       };
     });
   } else {
@@ -131,10 +169,15 @@ export function validateFundData(raw: unknown): ValidationResult {
       const type = item.type as FundTransaction["type"];
       return {
         date: String(item.date ?? ""),
-        type: type === "BUY" || type === "SELL" || type === "DIVIDEND" ? type : "BUY",
+        type: type === "BUY" || type === "SELL" || type === "DIVIDEND" || type === "OTHER" ? type : "OTHER",
         fundCode: String(item.fundCode ?? ""),
         fundName: String(item.fundName ?? ""),
         amount: toNumber(item.amount),
+        amountUnit: typeof item.amountUnit === "string" ? item.amountUnit : undefined,
+        confirmedAmount: toOptionalNumber(item.confirmedAmount),
+        confirmedAmountUnit: typeof item.confirmedAmountUnit === "string" ? item.confirmedAmountUnit : undefined,
+        status: typeof item.status === "string" ? item.status : undefined,
+        details: asRecord(item.details),
       };
     });
   } else {
@@ -145,7 +188,32 @@ export function validateFundData(raw: unknown): ValidationResult {
     errors.push("未检测到任何持仓数据");
   }
 
+  const rawSection = asRecord(obj.raw);
+  data.raw = {
+    capturedAt: typeof rawSection?.capturedAt === "string" ? rawSection.capturedAt : undefined,
+    pageUrl: typeof rawSection?.pageUrl === "string" ? rawSection.pageUrl : undefined,
+    snapshots: Array.isArray(rawSection?.snapshots) ? rawSection.snapshots.filter(isSourceSnapshot) : [],
+    collectionWarnings: Array.isArray(rawSection?.collectionWarnings) ? rawSection.collectionWarnings.filter((item): item is string => typeof item === "string") : [],
+  };
+  data.collectionWarnings = Array.isArray(obj.collectionWarnings)
+    ? obj.collectionWarnings.filter((item): item is string => typeof item === "string")
+    : [];
+
   return { ok: errors.length === 0, errors, data: errors.length === 0 ? data : data };
+}
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
+function toOptionalNumber(value: unknown): number | undefined {
+  const result = toNumber(value);
+  return value === undefined || value === null || value === "" ? undefined : result;
+}
+
+function isSourceSnapshot(value: unknown): value is FundSourceSnapshot {
+  const item = asRecord(value);
+  return Boolean(item && typeof item.key === "string" && typeof item.method === "string" && typeof item.path === "string" && typeof item.status === "number");
 }
 
 function toNumber(v: unknown): number {

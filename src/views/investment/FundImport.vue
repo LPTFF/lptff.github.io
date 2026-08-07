@@ -9,8 +9,8 @@
       </template>
 
       <div class="plugin-intro">
-        登录天天基金后，用浏览器插件主动导出你的持仓数据为 <code>fund-data.json</code>，再到本页上传。
-        插件只在你主动点击时读取当前页 DOM，不后台运行、不保存账号密码、不向任何服务器发送数据。
+        先在天天基金正常登录，再点击浏览器插件的自动采集。插件会使用当前浏览器登录会话自动打开持仓、每只基金详情和交易查询页面，完成后下载 <code>fund-data.json</code>。
+        采集过程不读取或保存 Cookie、账号密码和认证令牌；数据只在本地整理并下载，不向任何服务器发送。
       </div>
 
       <div class="plugin-actions">
@@ -30,8 +30,10 @@
 
       <ol class="plugin-steps">
         <li>解压 zip，打开 <code>chrome://extensions</code>，开启「开发者模式」，「加载已解压的扩展程序」选择解压后的目录。</li>
-        <li>登录天天基金，进入「我的资产 - 持仓」（类似 <code>trade.1234567.com.cn/myAssets/hold</code>）。</li>
-        <li>点击工具栏扩展图标「导出基金数据」（或页面右下角浮动按钮），浏览器下载 <code>fund-data.json</code>。</li>
+        <li>先在天天基金完成正常登录，确认登录会话可访问「我的资产」。不需要把 Cookie 复制给插件。</li>
+        <li>点击工具栏扩展图标「自动采集全部基金数据」，插件会以受控并发方式自动创建临时页面，并显示持仓、单基金详情和交易查询进度。</li>
+        <li>插件会并行加载少量基金详情页面，并行查询当前/历史交易范围；每个交易页面内部仍按顺序加载实际分页。</li>
+        <li>任务完成后浏览器下载 <code>fund-data.json</code>；插件会关闭自己创建的临时页面，不关闭你的原始登录页面。</li>
         <li>回到本页，将 <code>fund-data.json</code> 拖入下方导入区。</li>
       </ol>
     </el-card>
@@ -88,11 +90,12 @@
     <el-card shadow="never" class="proto">
       <template #header>协议字段说明</template>
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="version">协议版本，如 "1.0"</el-descriptions-item>
+        <el-descriptions-item label="version">协议版本，如 "1.1"</el-descriptions-item>
         <el-descriptions-item label="updateTime">数据更新时间 YYYY-MM-DD</el-descriptions-item>
         <el-descriptions-item label="account">账户总览：totalAsset / totalProfit / profitRate</el-descriptions-item>
-        <el-descriptions-item label="holdings">持仓数组：code/name/amount/profit/profitRate/ratio</el-descriptions-item>
-        <el-descriptions-item label="transactions">交易数组：date/type/fundCode/fundName/amount</el-descriptions-item>
+        <el-descriptions-item label="holdings">持仓数组：标准字段 + nav / navDate / shares / availableShares / details</el-descriptions-item>
+        <el-descriptions-item label="transactions">交易数组：标准字段 + amountUnit / confirmedAmount / status / details</el-descriptions-item>
+        <el-descriptions-item label="raw">脱敏接口快照：请求路径、非敏感参数、状态和完整业务响应</el-descriptions-item>
       </el-descriptions>
     </el-card>
 
@@ -127,14 +130,35 @@ const RELEASE_URL =
   "https://github.com/LPTFF/lptff.github.io/releases/latest/download/lptff-investment-assistant.zip";
 const pluginHint = ref<{ type: "success" | "info" | "warning" | "error"; title: string; desc: string } | null>(null);
 
-function downloadPlugin() {
+async function downloadPlugin() {
   if (isDev) {
     pluginHint.value = {
       type: "success",
       title: "正在打包本地扩展源码",
       desc: "已触发 dev 服务实时打包 extension 目录，浏览器即将开始下载 lptff-investment-assistant.zip。",
     };
-    window.location.href = "/__extension_download__";
+    try {
+      const response = await fetch("/__extension_download__");
+      if (!response.ok) throw new Error(`打包服务返回 ${response.status}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "lptff-investment-assistant.zip";
+      link.click();
+      URL.revokeObjectURL(url);
+      pluginHint.value = {
+        type: "success",
+        title: "插件下载已开始",
+        desc: "已生成当前扩展源码压缩包 lptff-investment-assistant.zip。",
+      };
+    } catch (error) {
+      pluginHint.value = {
+        type: "error",
+        title: "插件下载失败",
+        desc: error instanceof Error ? error.message : "无法获取本地扩展压缩包",
+      };
+    }
   } else {
     pluginHint.value = {
       type: "info",

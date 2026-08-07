@@ -1,0 +1,33 @@
+{
+  "manifest_version": 3,
+  "name": "LPTFF Investment Assistant",
+  "version": "1.0.0",
+  "description": "在用户主动点击后，从已登录的天天基金页面导出本地基金复盘数据。",
+  "permissions": ["activeTab", "downloads", "tabs"],
+  "action": {
+    "default_title": "导出基金数据",
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://trade.1234567.com.cn/*",
+        "https://query.1234567.com.cn/*"
+      ],
+      "js": ["content/network-bridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": [
+        "https://trade.1234567.com.cn/*",
+        "https://query.1234567.com.cn/*"
+      ],
+      "js": ["content/collector.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
