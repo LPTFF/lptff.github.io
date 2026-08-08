@@ -4,7 +4,7 @@ import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import { buildExtensionZip } from "./scripts/extension/build-zip.js";
+import { buildExtensionZip } from "./project-support/scripts/extension/build-zip.js";
 import fs from "node:fs";
 
 const extensionDownloadPlugin = (): Plugin => ({
@@ -33,6 +33,7 @@ const extensionDownloadPlugin = (): Plugin => ({
 
 export default defineConfig({
   base: "/",
+  publicDir: "project-support/public",
   plugins: [
     extensionDownloadPlugin(),
     AutoImport({

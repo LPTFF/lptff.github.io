@@ -24,7 +24,7 @@
 import { defineComponent, ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
+import logoImageUrl from "../../../assets/logo.jpg";
 import { ElRow, ElCol, ElCard, ElLink, ElAvatar, ElTag } from "element-plus";
 enum WebsiteType {
   Success = "success",

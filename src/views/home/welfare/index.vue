@@ -70,13 +70,13 @@
 <script lang="ts">
 import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
-import oldSource from "../../../public/data/welfare.json";
-import tuanSource from "../../../public/data/welfare/0818tuan.json";
-import zhuanyesSource from "../../../public/data/welfare/zhuanyes.json";
-import zhuanyesTopSource from "../../../public/data/welfare/zhuanyesTop.json";
-import daydayzhuanSource from "../../../public/data/welfare/daydayzhuan.json";
-import daydayzhuanTopSource from "../../../public/data/welfare/daydayzhuanTop.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
+import oldSource from "../../../data/welfare.json";
+import tuanSource from "../../../data/welfare/0818tuan.json";
+import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
+import zhuanyesTopSource from "../../../data/welfare/zhuanyesTop.json";
+import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
+import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
+import logoImageUrl from "../../../assets/logo.jpg";
 import mutouxbImage from "./img/mutouxb.png";
 import yqhd8Image from "./img/yqhd8.png";
 import hxm5Image from "./img/hxm5.png";

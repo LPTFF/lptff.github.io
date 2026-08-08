@@ -1,5 +1,5 @@
 /**
- * 静态文档放在 public/findJob-summary/（full.md / chain.md）
+ * 静态文档放在 project-support/public/findJob-summary/（full.md / chain.md）
  * 注意：不能使用 /data 前缀，vite.config 里 /data 会代理到远程服务器
  */
 const SUMMARY_BASE = `${import.meta.env.BASE_URL}findJob-summary/`;

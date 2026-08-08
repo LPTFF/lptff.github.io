@@ -29,5 +29,5 @@
 - 扩展脚本 `node --check` 通过。
 - `npm run typecheck` 通过。
 - `git diff --check` 通过（仅有现有换行符提示）。
-- `node scripts/extension/build-zip.js` 成功生成 `dist-extension/lptff-investment-assistant.zip`。
+- `node project-support/scripts/extension/build-zip.js` 成功生成 `dist-project-support/extension/lptff-investment-assistant.zip`。
 - 限制：本记录不替代每次真实登录会话下的逐请求 Network 核验；实际历史数据仍受账户权限、站点接口和页面实际分页加载结果限制。

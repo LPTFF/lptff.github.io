@@ -116,8 +116,8 @@
 import { ref, nextTick, watch, computed, onMounted } from "vue";
 import { gotoOutPage, isPC } from "./../../utils/utils"
 import { Calendar, Timer } from "@element-plus/icons-vue";
-import githubNews from "./../../public/data/githubTrending.json";
-import logoImageUrl from "./../../public/img/logo.jpg";
+import githubNews from "./../../data/githubTrending.json";
+import logoImageUrl from "./../../assets/logo.jpg";
 import {
     ElCol,
     ElRow,

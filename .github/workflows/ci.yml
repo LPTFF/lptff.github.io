@@ -39,26 +39,26 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-          cache-dependency-path: requirements-crawl.txt
+          cache-dependency-path: project-support/requirements-crawl.txt
       - name: Install dependencies
         run: |
           npm install
-          python -m pip install --requirement requirements-crawl.txt
+          python -m pip install --requirement project-support/requirements-crawl.txt
       - name: Test public data collectors
         run: npm run test:collectors
       - name: Collect public RSS for Pages
         run: npm run collect:rss:site
       - name: Crawl and validate site data
         run: |
-          chmod +x build.sh
-          ./build.sh --full --summary .artifacts/collectors/python-ci.json
+          chmod +x project-support/build.sh
+          ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
         env:
           KUAISHOU_COOKIE: ${{ secrets.KUAISHOU_COOKIE }}
           DOUYIN_COOKIE: ${{ secrets.DOUYIN_COOKIE }}
           LEETCODE_COOKIE: ${{ secrets.LEETCODE_COOKIE }}
       - name: Publish validated crawler data
         run: |
-          cd ./src/public/data/
+          cd ./src/data/
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
           git config --global init.defaultBranch master
@@ -70,7 +70,7 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Notify crawl result
         continue-on-error: true
-        run: python ./src/crawl/sendNotify.py
+        run: python ./project-support/crawl/sendNotify.py
         env:
           QYWX_KEY: ${{ secrets.QYWX_KEY }}
       - name: Build
@@ -78,12 +78,12 @@ jobs:
           npm run build
       - name: Verify RSS in production build
         run: |
-          test -s public/data/recommendArticleData.json
+          test -s project-support/public/data/recommendArticleData.json
           test -s dist/data/recommendArticleData.json
-          cmp public/data/recommendArticleData.json dist/data/recommendArticleData.json
+          cmp project-support/public/data/recommendArticleData.json dist/data/recommendArticleData.json
       - name: Package investment assistant extension
         run: |
-          node scripts/extension/build-zip.js
+          node project-support/scripts/extension/build-zip.js
           test -s dist-extension/lptff-investment-assistant.zip
       - name: Publish investment assistant extension release
         env:

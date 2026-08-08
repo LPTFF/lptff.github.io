@@ -101,8 +101,8 @@
 <script lang="ts">
 import { ref, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
-import zhipinSource from "../../../public/data/zhipin.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
+import zhipinSource from "../../../data/zhipin.json";
+import logoImageUrl from "../../../assets/logo.jpg";
 import { Suitcase, MoreFilled, Opportunity } from "@element-plus/icons-vue";
 import { ElRow, ElCol, ElCard, ElIcon, ElDialog, ElButton, ElAlert } from "element-plus";
 export default {

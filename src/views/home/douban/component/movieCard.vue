@@ -31,12 +31,12 @@
 
 <script lang="ts">
 import { toRefs, ref, onMounted } from "vue";
-import bgImageUrl from "../../../../public/img/bg.jpg";
+import bgImageUrl from "../../../../assets/bg.jpg";
 import { gotoOutPage } from "../../../../utils/utils";
 import { ElCard } from "element-plus";
 
 const posterModules = import.meta.glob(
-  "../../../../public/data/doubanImg/moviePoster_*.json",
+  "../../../../data/doubanImg/moviePoster_*.json",
   { import: "default" },
 );
 
@@ -84,7 +84,7 @@ export default {
       if (Number(index.value) >= 1000) {
         return;
       }
-      const modulePath = `../../../../public/data/doubanImg/moviePoster_${moviesData.value.id}.json`;
+      const modulePath = `../../../../data/doubanImg/moviePoster_${moviesData.value.id}.json`;
       const loadPoster = posterModules[modulePath];
       if (!loadPoster) {
         return;

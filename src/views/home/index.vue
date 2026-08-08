@@ -34,7 +34,7 @@
 import { ref, onMounted, onUnmounted, computed, defineAsyncComponent } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRouter } from "vue-router";
-import logoUrl from "../../public/img/logo.jpg";
+import logoUrl from "../../assets/logo.jpg";
 import {
   ElMenu,
   ElMenuItem,

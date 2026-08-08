@@ -144,8 +144,8 @@
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
-import pojieNews from "../../../public/data/52pojie.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
+import pojieNews from "../../../data/52pojie.json";
+import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
   ElRow,

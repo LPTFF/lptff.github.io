@@ -62,10 +62,10 @@
 <script lang="ts">
 import { ref, computed } from "vue";
 import { isPC, gotoOutPage } from "../../../utils/utils";
-import juejinNews from "../../../public/data/juejin.json";
-import meituanNews from "../../../public/data/techForum/meituanTech.json";
-import v2exNews from "../../../public/data/v2ex.json";
-import bgImageUrl from "../../../public/img/bg.jpg";
+import juejinNews from "../../../data/juejin.json";
+import meituanNews from "../../../data/techForum/meituanTech.json";
+import v2exNews from "../../../data/v2ex.json";
+import bgImageUrl from "../../../assets/bg.jpg";
 import { ElRow, ElCol, ElCard, ElAvatar, ElAlert } from "element-plus";
 export default {
   props: {
@@ -116,7 +116,7 @@ export default {
             name: "随风而逝",
             mainWebsite: "https://lptff.github.io/",
             logo:
-              "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/public/img/logo.jpg",
+              "https://cdn.jsdelivr.net/gh/LPTFF/lptff.github.io@master/src/assets/logo.jpg",
           };
       }
       return websiteInfo;

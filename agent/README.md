@@ -8,7 +8,10 @@
 - 想知道产品服务谁、解决什么问题：看 `product/business-overview.md`。
 - 想决定下一步做什么：看 `product/business-planning.md`。
 - 想设计页面或交互：看 `product/product-design.md`。
+- 想知道当前 Investment OS 的产品基线和拆解：看 `product/prd/README.md`。
+- 想知道哪些文件属于项目功能、哪些属于工作台：看 `context/project-file-boundaries.md`。
 - 想了解代码放在哪里：看 `standards/code-organization.md`。
+- 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
 - 想验证一个改动是否真的有效：看 `verification/playbook.md`。
 - 想研究其他项目：看 `product/research/`。
 - 想回顾过去做过什么：看 `context/iteration-log.md`，但以当前代码和当前事实为准。

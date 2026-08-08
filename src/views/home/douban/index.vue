@@ -9,7 +9,7 @@
 <script lang="ts">
 import { computed } from "vue";
 import { isPC } from "../../../utils/utils";
-import crawlMovie from "../../../public/data/movie.json";
+import crawlMovie from "../../../data/movie.json";
 import movieCard from "./component/movieCard.vue";
 import { ElCol, ElRow } from "element-plus";
 export default {

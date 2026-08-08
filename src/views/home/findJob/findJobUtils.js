@@ -225,14 +225,14 @@ async function getComponents(markdownPath) {
       dynamicComponentDefinition = defineAsyncComponent(() =>
         import(
           /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/${markdownPathPrefixMap[markdownPrefix]}/${markdownPathMap[markdownPath]}.md`
+          `../../../data/findJobMarkDown/${markdownPathPrefixMap[markdownPrefix]}/${markdownPathMap[markdownPath]}.md`
         )
       );
     } else {
       dynamicComponentDefinition = defineAsyncComponent(() =>
         import(
           /* @vite-ignore */
-          `../../../public/data/findJobMarkDown/javaScript/原型、原型链.md`
+          `../../../data/findJobMarkDown/javaScript/原型、原型链.md`
         )
       );
     }

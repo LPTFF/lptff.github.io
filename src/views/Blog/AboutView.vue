@@ -14,7 +14,7 @@
 </template>
 <script setup lang="ts">
 import { onMounted } from "vue";
-import logoUrl from "../../public/img/logo.jpg";
+import logoUrl from "../../assets/logo.jpg";
 
 onMounted(() => {
     document.title = "关于 · tangff";

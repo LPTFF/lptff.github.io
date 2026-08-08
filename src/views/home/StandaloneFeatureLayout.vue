@@ -19,7 +19,7 @@
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
 import { RouterLink, RouterView, useRoute } from "vue-router";
-import logoUrl from "../../public/img/logo.jpg";
+import logoUrl from "../../assets/logo.jpg";
 
 const route = useRoute();
 const pageTitle = computed(() => String(route.meta.title || "独立功能"));

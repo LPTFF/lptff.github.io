@@ -144,10 +144,10 @@
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
-import infzmNews from "../../../public/data/infzm.json";
-import githubNews from "../../../public/data/githubTrending.json";
-import pojieNews from "../../../public/data/52pojie.json";
-import logoImageUrl from "../../../public/img/logo.jpg";
+import infzmNews from "../../../data/infzm.json";
+import githubNews from "../../../data/githubTrending.json";
+import pojieNews from "../../../data/52pojie.json";
+import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
   ElRow,

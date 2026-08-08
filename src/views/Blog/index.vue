@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { articles } from "./data/articles";
-import logoUrl from "../../public/img/logo.jpg";
+import logoUrl from "../../assets/logo.jpg";
 
 const selectedCategory = ref("");
 const categories = [...new Set(articles.map((article) => article.category))];

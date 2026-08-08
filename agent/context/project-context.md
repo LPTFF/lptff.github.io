@@ -6,9 +6,9 @@
 
 - 技术栈：Vue 3、Vue Router 4、Vite 6.4.3、JavaScript、TypeScript；npm 管理依赖。
 - 入口：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
-- 页面位于 `src/views/`，用户内容位于 `src/content/`，运行时资源位于 `public/`，大型数据快照位于 `src/public/data/`。
+- 页面位于 `src/views/`，用户内容位于 `src/content/`，应用数据位于 `src/data/`，应用资源位于 `src/assets/`；项目支持区位于 `project-support/`。
 - Element Plus 是默认 UI 基础；新增或重构页面优先复用现有组件和页面模式。
-- `public/findJob-summary/`、`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 由源文件或构建过程生成。
+- `project-support/public/findJob-summary/`、`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 由源文件或构建过程生成。
 
 ## 产品与业务
 
@@ -27,18 +27,20 @@
 - 账号态、凭据和个人宿主配置不属于项目资料，不写入仓库。
 - 天天基金采集插件已采用接口优先的本地导出边界：持仓、单基金详情和交易记录来自真实页面成功发出的业务接口响应；接口快照递归脱敏后才进入 `fund-data.json`，页面 DOM 仅用于触发筛选和分页，不作为业务字段来源。
 - 插件自动采集使用最多 4 路单基金详情并发、当前/历史交易独立页面并发；未实际加载的历史范围或分页不视为已采集。名称以 `/request/hold` 的 `fundName` 为准，避免 single 页面名称回退覆盖持仓接口字段。
+- 维护资料与运行时文件按实际消费者隔离：`agent/` 只供维护者阅读，禁止 `src/`、Vite、npm scripts 或 CI 依赖它；边界与不可移动清单见 `agent/context/project-file-boundaries.md`。
+- `project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/` 和 `project-support/crawl/` 是构建、采集和发布链路。`src/content/investment/investment-assistant.md` 被投资导入页以 `?raw` 编译，也是运行时输入；不要按目录名称把它们移动进 `agent/`。
 
 ## 投资助手采集任务验收
 
 - 用户已在本地浏览器验证扩展采集流程可用。
-- 静态证据：扩展脚本 `node --check` 通过，`npm run typecheck` 通过，`git diff --check` 通过，`node scripts/extension/build-zip.js` 可生成 zip。
+- 静态证据：扩展脚本 `node --check` 通过，`npm run typecheck` 通过，`git diff --check` 通过，`node project-support/scripts/extension/build-zip.js` 可生成 zip。
 - 限制：当前记录不替代每次真实登录会话下的 Network 逐请求核验；导出内容仍受账户授权、站点接口、时间范围和分页实际加载结果限制。
 
 ## 已知决策与风险
 
 - Excel 导出使用 `write-excel-file`，通过 `src/utils/exportExcel.ts` 保持页面调用一致并延迟加载。
 - Vite 构建链已升级到 6.4.3；`@vitejs/plugin-vue@5.2.4`、`unplugin-vue-markdown@0.26.3` 和当前类型检查已验证兼容。
-- `vite-plugin-compression`、`rollup-plugin-visualizer` 和手动 `uploadQL.js` 路径是否长期保留，仍是待决定事项。
+- `vite-plugin-compression`、`rollup-plugin-visualizer` 和手动 `project-support/deploy/uploadQL.js` 路径是否长期保留，仍是待决定事项。
 - 研究目录中的第三方项目只提供待验证思路；采用前要确认许可证、隐私、安全、成本和退出方式。
 
 ## 如何维护

@@ -56,7 +56,7 @@ npm run preview
 
 本地开发时，Vite 严格固定在 `8090` 端口运行，并将页面使用的 `/data` 请求代理到家庭服务器 `http://192.168.1.100:5000`；如果 `8090` 已被占用，Vite 会直接启动失败，不会自动顺延到其他端口。`npm run preview` 不继承该开发代理，而是直接读取 `dist/data/`，用于验证生产构建中的静态数据。基金持仓数据的远程文件为 `/root/Test/data/fundHoldData.json`，页面代码保持使用 `/data/fundHoldData.json` 相对路径，不直接硬编码远程地址。
 
-如需通过 SSH 检查该服务器，可连接 `root@192.168.1.100:22`；密码不写入仓库。完整的本地开发、远程数据服务、SSH 运维边界和排查步骤见 [开发环境与远程数据服务](docs/development-environment.md)。
+如需通过 SSH 检查该服务器，可连接 `root@192.168.1.100:22`；密码不写入仓库。完整的本地开发、远程数据服务、SSH 运维边界和排查步骤见 [开发环境与远程数据服务](agent/docs/development-environment.md)。
 
 ## 构建
 
@@ -66,7 +66,7 @@ npm run build
 
 构建命令会依次：
 
-1. 从 `src/content/interview/` 同步面试摘要到 `public/findJob-summary/`；
+1. 从 `src/content/interview/` 同步面试摘要到 `project-support/public/findJob-summary/`；
 2. 运行 `vue-tsc --noEmit` 类型检查；
 3. 执行 Vite 生产构建；
 4. 生成 `dist/404.html`。
@@ -86,9 +86,9 @@ npm run collect:rss:fixture
 npm run verify:rss:local
 ```
 
-该命令依次运行 collector 测试、访问白名单真实 RSS 来源、通过与 CI 共用的 `collect:rss:site` 生成 `public/data/recommendArticleData.json`、执行生产构建，再用 `vite preview` 打开项目已有的资讯页面 `http://localhost:4173/newsArticle`。页面请求 `/data/recommendArticleData.json`；维护者需确认生成时间、来源和文章列表正常，JSON 网络请求为 200、控制台无错误。原始 RSS 没有 AI 阅读评分和推荐理由，页面不会伪造这些字段。只运行 fixture、直接打开 JSON 或新增平行验证页面不能视为现有业务功能闭环。验证结束后按 `Ctrl+C` 停止预览，并删除本地生成的 `public/data/recommendArticleData.json`，避免将动态数据误提交。
+该命令依次运行 collector 测试、访问白名单真实 RSS 来源、通过与 CI 共用的 `collect:rss:site` 生成 `project-support/public/data/recommendArticleData.json`、执行生产构建，再用 `vite preview` 打开项目已有的资讯页面 `http://localhost:4173/newsArticle`。页面请求 `/data/recommendArticleData.json`；维护者需确认生成时间、来源和文章列表正常，JSON 网络请求为 200、控制台无错误。原始 RSS 没有 AI 阅读评分和推荐理由，页面不会伪造这些字段。只运行 fixture、直接打开 JSON 或新增平行验证页面不能视为现有业务功能闭环。验证结束后按 `Ctrl+C` 停止预览，并删除本地生成的 `project-support/public/data/recommendArticleData.json`，避免将动态数据误提交。
 
-正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下自动运行同一组 collector 测试与 `collect:rss:site`，随后执行原有 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署。
+正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下自动运行同一组 collector 测试与 `collect:rss:site`，随后执行原有 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `project-support/public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署。
 
 本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](agent/product/research/qinglong-backup-assessment.md)。
 
@@ -109,16 +109,22 @@ npm run verify:rss:local
 - `src/content/blog/`：博客 Markdown 内容
 - `src/content/interview/`：面试/求职 Markdown 内容
 - `src/utils/`：共享工具，包括 Excel 导出适配器
-- `public/`：静态资源和运行时资源
-- `src/public/data/`：较大的数据快照
-- `scripts/`：产品摘要同步、数据采集和构建辅助脚本
+- `src/assets/`：页面打包图片等应用资源
+- `project-support/public/`：Vite 静态发布资源
+- `src/data/`：页面打包的数据快照
+- `project-support/scripts/`：产品摘要同步、数据采集和构建辅助脚本
+- `project-support/crawl/`：Python 数据采集和 CI 发布链路
+- `project-support/extension/`：Chrome 投资助手运行功能
+- `project-support/deploy/`：手工部署工具
 - `agent/`：维护者的项目工作台，记录业务规划、产品设计、项目事实、研究材料和有长期价值的验收经验
+- `agent/product/prd/`：Investment OS PRD 原文归档、拆解和需求追踪
+- `agent/docs/`：没有运行时消费者的维护文档
 
 ## 部署
 
 GitHub Actions 会构建站点，并将 `dist/` 发布到 `gh-pages` 分支。
 
-仓库还保留一个独立的 `uploadQL.js` SFTP 手动部署路径。除非明确进行部署工作，否则不要运行 `build.sh` 或 `uploadQL.js`。
+仓库还保留一个位于 `project-support/deploy/uploadQL.js` 的 SFTP 手动部署路径。除非明确进行部署工作，否则不要运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
 
 ## 依赖安全
 
@@ -128,7 +134,7 @@ GitHub Actions 会构建站点，并将 `dist/` 发布到 `gh-pages` 分支。
 npm audit --registry=https://registry.npmjs.org
 ```
 
-当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS，`/data` 请求代理到家庭服务器；详见[开发环境与远程数据服务](docs/development-environment.md)。不要直接运行 `npm audit fix --force`。
+当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS，`/data` 请求代理到家庭服务器；详见[开发环境与远程数据服务](agent/docs/development-environment.md)。不要直接运行 `npm audit fix --force`。
 
 ## Agent 资产
 
