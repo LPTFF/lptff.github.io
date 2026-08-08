@@ -122,7 +122,7 @@ npm run verify:rss:local
 
 ## 部署
 
-GitHub Actions 会构建站点，并将 `dist/` 发布到 `gh-pages` 分支。
+GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；该文件是发布配置，不是页面业务源码。
 
 仓库还保留一个位于 `project-support/deploy/uploadQL.js` 的 SFTP 手动部署路径。除非明确进行部署工作，否则不要运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
 
