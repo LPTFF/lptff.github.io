@@ -11,13 +11,13 @@ interface Frontmatter {
   legacyPaths: string[];
 }
 
-const markdownModules = import.meta.glob("../../../content/blog/**/*.md", {
+const markdownModules = import.meta.glob("../articles/**/*.md", {
   eager: true,
   query: "?raw",
   import: "default",
 }) as Record<string, string>;
 
-const componentModules = import.meta.glob("../../../content/blog/**/*.md") as Record<string, () => Promise<unknown>>;
+const componentModules = import.meta.glob("../articles/**/*.md") as Record<string, () => Promise<unknown>>;
 
 function parseFrontmatter(source: string): { metadata: Frontmatter; content: string } {
   const match = source.match(/^---\s*\n([\s\S]*?)\n---\s*\n?([\s\S]*)$/);

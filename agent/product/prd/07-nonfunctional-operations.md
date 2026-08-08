@@ -11,7 +11,7 @@
 - `project-support/scripts/sync-findJob-summary.js`、`project-support/scripts/copy-404.js`
 - `project-support/scripts/collectors/**`
 - `package.json`、`vite.config.ts`、`project-support/build.sh`、`.github/workflows/ci.yml`
-- `src/content/investment/investment-assistant.md`（被 Vite `?raw` 作为用户可见内容编译）
+- `src/views/investment/investment-assistant.md`（被 Vite `?raw` 作为用户可见内容编译）
 
 这些路径分别被页面、npm scripts、Vite 开发下载端点、RSS 数据生成、GitHub Actions 或发布流程直接消费。目录名看起来像“辅助”不改变其项目功能属性。
 

@@ -17,7 +17,7 @@
 ## 项目边界
 
 - 页面在 `src/views/`，路由在 `src/router/`，跨页面纯逻辑在 `src/utils/`。
-- 用户内容在 `src/content/`；应用数据在 `src/data/`；项目支持静态资源在 `project-support/public/`。
+- 页面使用的 Markdown 内容直接放在对应页面目录：博客文章在 `src/views/Blog/articles/`，面试资料在 `src/views/home/findJob/`，投资协议在 `src/views/investment/`；应用数据在 `src/data/`；项目支持静态资源在 `project-support/public/`。
 - `project-support/public/findJob-summary/`、`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。

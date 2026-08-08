@@ -5,7 +5,7 @@
 ## 项目区与工作台隔离
 
 - 先按实际消费者判断文件归属，不按 `docs/`、`scripts/` 或 `extension/` 名称机械移动。
-- `project-support/extension/`、`project-support/scripts/`、`project-support/crawl/` 和 `src/content/investment/investment-assistant.md` 属于项目功能或交付链路；`agent/` 只放维护资料。
+- `project-support/extension/`、`project-support/scripts/`、`project-support/crawl/` 和 `src/views/investment/investment-assistant.md` 属于项目功能或交付链路；`agent/` 只放维护资料。
 - 确认 `src/`、Vite、npm scripts、扩展打包器和 CI 没有 import 或执行 `agent/` 文件。
 - 检查 `agent/` 没有生成 ZIP、动态 JSON、凭据、Cookie、登录状态、真实投资数据或原始网络日志。
 - 文件迁移后检查 Markdown 相对链接，并运行受影响的构建、采集和扩展验证。

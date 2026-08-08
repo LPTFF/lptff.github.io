@@ -66,7 +66,7 @@ npm run build
 
 构建命令会依次：
 
-1. 从 `src/content/interview/` 同步面试摘要到 `project-support/public/findJob-summary/`；
+1. 从 `src/views/home/findJob/` 同步面试摘要到 `project-support/public/findJob-summary/`；
 2. 运行 `vue-tsc --noEmit` 类型检查；
 3. 执行 Vite 生产构建；
 4. 生成 `dist/404.html`。
@@ -106,8 +106,9 @@ npm run verify:rss:local
 ## 目录说明
 
 - `src/views/`：页面组件
-- `src/content/blog/`：博客 Markdown 内容
-- `src/content/interview/`：面试/求职 Markdown 内容
+- `src/views/Blog/articles/`：博客文章 Markdown 内容
+- `src/views/home/findJob/`：求职页面使用的面试资料 Markdown 和加载逻辑
+- `src/views/investment/`：投资页面及其运行时协议文档
 - `src/utils/`：共享工具，包括 Excel 导出适配器
 - `src/assets/`：页面打包图片等应用资源
 - `project-support/public/`：Vite 静态发布资源

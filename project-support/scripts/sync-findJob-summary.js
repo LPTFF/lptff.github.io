@@ -11,11 +11,11 @@ const outDir = path.join(root, "project-support", "public", "findJob-summary");
 
 const files = [
   {
-    from: path.join(root, "src", "content", "interview", "full.md"),
+    from: path.join(root, "src", "views", "home", "findJob", "full.md"),
     to: path.join(outDir, "full.md"),
   },
   {
-    from: path.join(root, "src", "content", "interview", "chain.md"),
+    from: path.join(root, "src", "views", "home", "findJob", "chain.md"),
     to: path.join(outDir, "chain.md"),
   },
 ];

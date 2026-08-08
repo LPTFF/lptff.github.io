@@ -6,10 +6,10 @@
 | --- | --- | --- |
 | 基金协议导入与归一化 | `src/views/investment/FundImport.vue`、`src/utils/fund/fund-parser.ts`、`project-support/public/fund/sample-fund-data.json` | `npm run typecheck`、`npm run build`、浏览器导入示例 |
 | 基金资产/持仓/收益/交易/复盘 | `src/views/investment/`、`src/utils/fund/` | `/investment` 主流程、空数据和错误数据 |
-| Investment 助手产品文案 | `src/content/investment/investment-assistant.md` 被 `FundImport.vue` `?raw` 导入 | 构建成功、导入页文档可见 |
+| Investment 助手产品文案 | `src/views/investment/investment-assistant.md` 被 `FundImport.vue` `?raw` 导入 | 构建成功、导入页文档可见 |
 | Chrome 扩展采集 | `project-support/extension/lptff-investment-assistant/` | 扩展脚本 `node --check`、真实登录下按授权范围 Smoke Test |
 | 扩展 ZIP 下载/发布 | `vite.config.ts`、`project-support/scripts/extension/build-zip.js`、`.github/workflows/ci.yml` | `node project-support/scripts/extension/build-zip.js`、ZIP 结构检查 |
-| 面试摘要同步 | `project-support/scripts/sync-findJob-summary.js`、`src/content/interview/`、`project-support/public/findJob-summary/` | `npm run serve`、`npm run build` |
+| 面试摘要同步 | `project-support/scripts/sync-findJob-summary.js`、`src/views/home/findJob/`、`project-support/public/findJob-summary/` | `npm run serve`、`npm run build` |
 | 404 构建产物 | `project-support/scripts/copy-404.js` | 检查 `dist/404.html` |
 | RSS 采集 | `project-support/scripts/collectors/`、`src/views/Message/NewsArticle.vue`、`project-support/public/data/` | `npm run test:collectors`、fixture/site 构建后页面请求 |
 | Data Coverage / 增量同步 / IndexedDB Ledger | PRD 规划；需先检查 `src/investment/` 是否已落地 | Mock、typecheck、build、边界场景和真实验证 |

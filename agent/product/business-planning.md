@@ -357,7 +357,7 @@
 
 - `src/utils/career/`：项目成果、问题案例、方案证据和复用记录模型；
 - `src/components/career/`：案例记录、检索和复用反馈组件；
-- 现有 `src/content/blog/`、`src/content/interview/`：作为可关联的内容资产，不直接改造成数据库。
+- 现有 `src/views/Blog/articles/`、`src/views/home/findJob/`：作为可关联的内容资产，不直接改造成数据库。
 
 ### 健康精力候选落点
 

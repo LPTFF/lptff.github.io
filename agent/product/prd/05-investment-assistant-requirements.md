@@ -1,6 +1,6 @@
 # 05 投资助手需求
 
-**来源**：PRD 第 7–15、30–37 节；当前实现参考 `src/content/investment/investment-assistant.md`。**状态**：真实采集基线 + V2 规划，需以源码和验证结果为准。
+**来源**：PRD 第 7–15、30–37 节；当前实现参考 `src/views/investment/investment-assistant.md`。**状态**：真实采集基线 + V2 规划，需以源码和验证结果为准。
 
 ## 角色
 
@@ -28,7 +28,7 @@ Chrome Extension 是 Investment Sensor，只获取真实投资事实；Investmen
 
 ## 当前运行时边界
 
-`project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/extension/build-zip.js` 是本地下载和 Release 打包链路；二者不能搬入 `agent/`。`src/content/investment/investment-assistant.md` 虽是 Markdown，但被 `FundImport.vue` 以 `?raw` 编译进用户可见页面，必须留在运行时可读路径。
+`project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/extension/build-zip.js` 是本地下载和 Release 打包链路；二者不能搬入 `agent/`。`src/views/investment/investment-assistant.md` 虽是 Markdown，但被 `FundImport.vue` 以 `?raw` 编译进用户可见页面，必须留在运行时可读路径。
 
 ## 验收重点
 

@@ -34,4 +34,4 @@
 - `project-support/`：扩展、脚本、爬虫、静态发布资源、依赖和部署入口。
 - `agent/`：维护工作台。
 
-运行时代码不得依赖 `agent/`。投资导入页使用的协议文档位于 [`src/content/investment/investment-assistant.md`](../../../src/content/investment/investment-assistant.md)，不是本目录的维护资料。
+运行时代码不得依赖 `agent/`。页面内容直接放在唯一消费者目录：博客文章位于 `src/views/Blog/articles/`，面试资料位于 `src/views/home/findJob/`，投资导入页协议位于 [`src/views/investment/investment-assistant.md`](../../../src/views/investment/investment-assistant.md)。

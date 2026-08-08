@@ -116,7 +116,7 @@ import { saveFundData } from "../../utils/fund/fund-storage";
 import type { ValidationResult } from "../../utils/fund/fund-schema";
 // 协议文档以原始字符串打入 bundle（?raw），用 MarkdownRawContent 在页内渲染。
 // 避免直接 window.open('/docs/...md')：dev 因静态返回无 charset 会乱码，prod docs/ 不进 dist 会 404。
-import protocolMdRaw from "../../content/investment/investment-assistant.md?raw";
+import protocolMdRaw from "./investment-assistant.md?raw";
 import MarkdownRawContent from "../home/findJob/MarkdownRawContent.vue";
 
 const router = useRouter();
