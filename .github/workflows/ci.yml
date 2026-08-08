@@ -81,6 +81,26 @@ jobs:
           test -s public/data/recommendArticleData.json
           test -s dist/data/recommendArticleData.json
           cmp public/data/recommendArticleData.json dist/data/recommendArticleData.json
+      - name: Package investment assistant extension
+        run: |
+          node scripts/extension/build-zip.js
+          test -s dist-extension/lptff-investment-assistant.zip
+      - name: Publish investment assistant extension release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="extension-latest"
+          release_title="LPTFF Investment Assistant (latest)"
+          release_notes="自动发布于 commit $GITHUB_SHA，GitHub Actions run $GITHUB_RUN_ID。"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" dist-extension/lptff-investment-assistant.zip --clobber
+            gh release edit "$release_tag" --title "$release_title" --notes "$release_notes" --latest
+          else
+            gh release create "$release_tag" dist-extension/lptff-investment-assistant.zip \
+              --title "$release_title" \
+              --notes "$release_notes" \
+              --latest
+          fi
       - name: 404
         run: cp dist/index.html dist/404.html
       - name: Deploy

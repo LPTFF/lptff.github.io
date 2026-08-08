@@ -141,14 +141,14 @@ GitHub Pages (lptff.github.io/investment)
 网页端「导入数据」页顶部有「下载采集插件（zip）」入口，行为随环境不同：
 
 - **本地调试（`npm run serve`）**：点击下载时，dev 服务实时把当前工作区的 `extension/lptff-investment-assistant/` 目录打包成 `lptff-investment-assistant.zip` 返回给浏览器。打包逻辑见 `scripts/extension/build-zip.js`，依赖仓库已有的 `archiver`，不需要额外安装。便于在改扩展源码后立刻重新加载验证。
-- **线上（GitHub Pages）**：下载按钮指向已发布的 GitHub Release 资产 `https://github.com/LPTFF/lptff.github.io/releases/latest/download/lptff-investment-assistant.zip`。若该链接 404，是因为尚未发布 Release。
+- **线上（GitHub Pages）**：下载按钮指向 GitHub Actions 自动维护的 latest Release 资产 `https://github.com/LPTFF/lptff.github.io/releases/latest/download/lptff-investment-assistant.zip`。每次 `master` 构建成功后，CI 会自动打包并更新固定的 `extension-latest` Release，资产名固定为 `lptff-investment-assistant.zip`；首次发布或刚推送更新时需等待对应 workflow 完成。
 
 发布 Release 流程：
 
 1. 本地打包：`node scripts/extension/build-zip.js`，生成 `dist-extension/lptff-investment-assistant.zip`（该目录已 gitignore，不进提交）；
 2. 解压校验 zip 内 `manifest.json` 位于根层、含 `background.js` / `popup.*` / `content/`，可在 `chrome://extensions` 直接加载；
-3. 在 GitHub 仓库 `LPTFF/lptff.github.io` 新建 Release（建议 tag 形如 `extension-v1.0.0`），上传 zip，资产名固定为 `lptff-investment-assistant.zip`；
-4. 发布后网页端线上下载按钮即自动指向该 Release。
+3. GitHub Actions 在站点构建成功后自动更新 `extension-latest` Release，上传资产名固定为 `lptff-investment-assistant.zip`；Release 创建/更新使用 workflow 的 `GITHUB_TOKEN`，不需要额外复制个人 token；
+4. 发布完成后网页端线上下载按钮自动指向该 Release 资产。
 
 ## 六、隐私与安全
 

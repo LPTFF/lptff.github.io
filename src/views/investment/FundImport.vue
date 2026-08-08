@@ -123,8 +123,8 @@ const router = useRouter();
 const result = ref<ValidationResult | null>(null);
 const docsVisible = ref(false);
 
-// 插件下载入口：dev 模式实时打包本地 extension 源码为 zip，prod 模式指向 GitHub Release 资产。
-// 线上 Release 需先按 docs/investment-assistant.md 发布并上传 lptff-investment-assistant.zip，否则链接会 404。
+// 插件下载入口：dev 模式实时打包本地 extension 源码为 zip，prod 模式指向 GitHub Actions 自动更新的 Release 资产。
+// master 分支的 CI 会在站点构建成功后更新 extension-latest Release。
 const isDev = import.meta.env.DEV;
 const RELEASE_URL =
   "https://github.com/LPTFF/lptff.github.io/releases/latest/download/lptff-investment-assistant.zip";
@@ -163,7 +163,7 @@ async function downloadPlugin() {
     pluginHint.value = {
       type: "info",
       title: "跳转 GitHub Release 下载",
-      desc: "线上版本从 GitHub Release 获取已发布 zip；若链接 404，请先按协议文档发布 Release 并上传资产。",
+      desc: "线上版本从 GitHub Actions 自动发布的 latest Release 获取；若刚完成首次部署，请等待 CI 发布完成后再试。",
     };
     window.open(RELEASE_URL, "_blank");
   }
