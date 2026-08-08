@@ -1,0 +1,1 @@
+const n="fundData";function e(){try{const t=localStorage.getItem(n);if(!t)return null;const a=JSON.parse(t);return!a||typeof a!="object"?null:a}catch(t){return null}}function o(t){localStorage.setItem(n,JSON.stringify(t))}function r(){localStorage.removeItem(n)}export{r as c,e as l,o as s};
