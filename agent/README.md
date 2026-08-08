@@ -11,8 +11,9 @@
 - 想知道当前 Investment OS 的产品基线和拆解：看 `product/prd/README.md`。
 - 想知道哪些文件属于项目功能、哪些属于工作台：看 `context/project-file-boundaries.md`。
 - 想了解代码放在哪里：看 `standards/code-organization.md`。
+- 想查看已收藏理论或引入新理论：看 `theories/README.md`；想了解当前可执行的 Agent 约定：看 `standards/`。
 - 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
-- 想验证一个改动是否真的有效：看 `verification/playbook.md`。
+- 想验证一个改动是否真的有效：看 `verification/playbook.md`；需要可信验证原则、证据边界和方法选择时，再看 `standards/trusted-verification.md`。
 - 想研究其他项目：看 `product/research/`。
 - 想回顾过去做过什么：看 `context/iteration-log.md`，但以当前代码和当前事实为准。
 

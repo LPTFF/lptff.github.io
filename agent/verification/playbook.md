@@ -1,6 +1,6 @@
 # 人类验收清单
 
-验证不是为了让工具显示绿色，而是为了让维护者知道改动是否真的改善了目标结果。
+验证不是为了让工具显示绿色，而是让维护者知道改动是否真的改善了目标结果。具体验证方法应遵循 [`standards/trusted-verification.md`](../standards/trusted-verification.md)；理论来源、适用边界和未知项见 [`theories/software-trusted-verification.md`](../theories/software-trusted-verification.md)。结论必须由与要求匹配的客观证据支持，证据不足时保持未知。
 
 ## 项目区与工作台隔离
 
