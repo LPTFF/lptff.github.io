@@ -324,8 +324,11 @@ P2 保留 attribution reconciliation/residual、Level 2 数据不足、Dispositi
 
 ## 7. Agent 边界与回传协议
 
+本节是[主力 Agent—授权验证 Agent—人类裁决者协作标准](../../standards/main-agent-authorized-validation.md)在 Investment Review 中的领域加严实例。Agent A 是主力交付者，常态承担 80% 以上工作；Agent B 不是通用代码 reviewer，只填补 A 无权接触的天天基金真实登录环境证据缺口。这里的真实 Chrome、金融隐私和脱敏协议不能被反向解释为其他产品都必须启用 B。
+
 ### Agent A
 
+- 负责需求细化、目标契约、Core 公式和状态机、migration、人工 fixture、Property/Invariant、测试、UI、构建、修复与非私人环境验证；不能因为技术复杂而转交 B；
 - 只使用源码、人工 fixture 和 B 的脱敏结论；
 - 不访问真实账户、真实资产或交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；
 - 核心判断明确输入、规则版本、Coverage、公式/状态和 unknown 条件；
@@ -334,8 +337,10 @@ P2 保留 attribution reconciliation/residual、Level 2 数据不足、Dispositi
 
 ### Agent B
 
+只有 A 已完成可由源码、Mock、fixture 和普通环境完成的工作，剩余主张被收敛为可观察问题，且维护者明确批准目标、数据、动作和停止条件时，才启用 B：
+
 - 单次只验证一个明确授权的来源能力、场景和目标；
-- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓；
+- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓，也不接管 A 的实现、自测或普通验证；
 - 真实登录 Chrome 是验收目标时，隔离 profile 不得替代真实验收；
 - 不能证明时返回 `BLOCKED/unknown` 和 Required change，不猜 mapping；
 - 不输出或保存基金名、真实金额、收益、可组合识别个人的日期金额、Raw JSON/HTML、Cookie、Token、银行卡信息、登录态或完整 Network Logs。

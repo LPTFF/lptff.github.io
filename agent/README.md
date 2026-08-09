@@ -12,6 +12,7 @@
 - 想了解代码放在哪里：看 `standards/code-organization.md`。
 - 想查看已收藏理论或引入新理论：看 `theories/README.md`；想了解当前可执行的 Agent 约定：看 `standards/`。
 - 想分析一个需求背后的业务目的、用户任务、判断与信息成本：看 `standards/business-task-analysis.md`；它用于复杂或信息密集型问题，不要求简单任务套固定模板。
+- 想用有限 Agent 资源完成涉及私人真实环境的任务：看 [主力 Agent—授权验证 Agent—人类裁决者协作标准](standards/main-agent-authorized-validation.md)。Agent A 默认完成绝大多数工作；Agent B 只在存在必须由人授权的真实私人环境证据缺口时介入。
 - 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
 - 想验证一个改动是否真的有效：看 `verification/playbook.md`；需要可信验证原则、证据边界和方法选择时，再看 `standards/trusted-verification.md`。
 - 想研究其他项目：看 `product/research/`。
@@ -22,6 +23,8 @@
 ## 人机协作原则
 
 人负责定义问题、选择取舍、批准外部或不可逆行动，并承担最终结果。Agent 可以帮助搜索、比较、起草、运行可逆的本地检查和暴露未知，但不能替人决定目标、风险承受能力、产品范围或完成标准。
+
+涉及私人真实环境时，默认由一个主力 Agent 完成需求、实现、自测和非私人验证；只有剩余主张必须访问用户授权的私人数据或真实登录环境才能证明时，才启用范围更窄的授权验证 Agent。这是最小权限升级，不是复杂任务默认增加第二 Agent，具体见[协作标准](standards/main-agent-authorized-validation.md)。
 
 好的记录应该让未来的人少走弯路：写清楚事实、判断、依据、未知和下一步；不要为了让某个工具更容易解析而堆砌格式。
 

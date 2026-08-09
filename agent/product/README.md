@@ -10,7 +10,8 @@
 | 当前交付 | **P0 纪律与执行复盘**：按用户自己的计划与规则检查操作异常、仓位边界、移动止损、减仓进度和真实恢复 |
 | 实现状态 | 产品逻辑已定义，运行时未交付；当前 `/investment` 只有可复用的数据、Ledger、Coverage 和局部 Policy/Behavior/Action 基础 |
 | 人的审查入口 | [Investment Review：人的基金复盘产品审查](investment-review.md) |
-| 本次分工 | 在同一审查正文的 `WP0-1` 至 `WP0-4` 中按用户结果查看 Agent A、Agent B、维护者、交接物和验收 |
+| 本次分工 | 在同一审查正文的 `WP0-1` 至 `WP0-4` 中按用户结果查看分工；Agent A 是承担绝大多数交付的主力 Agent，Agent B 只在维护者授权后填补私人真实环境证据缺口 |
+| 协作方式 | [主力 Agent—授权验证 Agent—人类裁决者协作标准](../standards/main-agent-authorized-validation.md)，不建立 A/B 平行任务板 |
 | 工程深审 | [Investment Review 工程附录](reference/investment-review-engineering.md)，可选阅读 |
 
 若要回答“这次为什么做、做什么、谁做、怎样验收、是否对人友好”，只读[人的产品审查正文](investment-review.md)，不要从工程附录、source 或 archive 开始。

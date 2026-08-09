@@ -34,6 +34,14 @@
 - 未完成：真实交易 timeType 3/4 均只确认第 1 页；`pageSize=20`，期望页数分别为 84 和 60，失败仍归类为 `page_response_missing` 和 `paging_incomplete`。即使复用非敏感请求头、真实 Content-Type、JSON/表单 body 并等待快照写入，后续页仍未成功，因此 Coverage 必须保持 `partial`。下一次应在真实 Network 中比较“页面成功请求”和“扩展委托请求”的非敏感结构差异，不能放宽完整性 Oracle 来消除 warning。
 - 下次快速开始：先确认唯一目标 Chrome、真实 Investment OS origin、扩展 ID/加载目录和源码哈希；再核对 collection progress、staging、Ledger import 与 receipt；然后按 timeType 检查 `pageNum/pageSize/totalCount/expectedPages` 和实际页集合；只有获得这些观察证据后才定位 bridge、collector 或 adapter。
 
+## 2026-08-09 — 主力 Agent 与授权验证 Agent 的非对称协作
+
+- 触发：Investment Review 的 A/B 分工能够隔离真实私人数据，但推广为通用标准时一度被理解成“构建 Agent—通用验证 Agent”的对称双 Agent 流程，会让复杂任务机械增加资源，也偏离 A 作为主力开发者的原意。
+- 决定：Agent A 默认拥有纵向任务，从需求、设计、实现、迁移和 UI 到 fixture、测试、构建、修复与非私人验证，常态承担 80% 以上工作；Agent B 不是通用 reviewer，只在 A 已完成可完成部分，而关键主张仍只能由人授权的私人数据或真实登录环境证明时，做一次窄范围、只读、脱敏验证。
+- 人的边界：维护者定义结果和规则，批准 B 的目标、环境、数据、动作与停止条件，并裁决价值冲突和剩余风险。授权被拒绝或证据无法安全取得时保持 `BLOCKED/UNKNOWN`，不得让 A 猜测或让 B 扩权。
+- 资源原则：“80% 以上”不建立工时配额；B 是否启用取决于权限隔离造成的真实证据缺口，而不是代码复杂度、高风险标签或希望再找一个 Agent 重看。B 返回失败后，由 A 使用脱敏语义和人工 fixture 修复，必要时再经人授权定点复验。
+- 反治理边界：只新增一份可读标准并内嵌到现有产品工作包；不恢复 collaboration 目录、固定模板、治理脚本、验证报告索引、Agent 注册表、自动调度或 A/B 独立任务板。评价它是否有效，看隐私暴露、重复 Agent 消耗、共同假设和人的整合成本是否下降，而不是 Agent 调用数量。
+
 ## 使用方式
 
 遇到新问题时，只记录能改变未来判断的事实、取舍、结果和未知。不要为了保持文档整齐而记录每个命令、每个 Agent 动作或每次局部编辑。
