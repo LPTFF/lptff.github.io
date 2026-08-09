@@ -13,15 +13,23 @@ function parseDate(value, label) {
   return timestamp;
 }
 
-function assertPublicHttpsUrl(value, label) {
-  let url;
+export function isPublicHttpsUrl(value) {
   try {
-    url = new URL(value);
+    const url = new URL(value);
+    return url.protocol === "https:" && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
+function assertPublicHttpsUrl(value, label) {
+  try {
+    new URL(value);
   } catch {
     throw new Error(`${label} must be a valid URL`);
   }
 
-  if (url.protocol !== "https:" || url.username || url.password) {
+  if (!isPublicHttpsUrl(value)) {
     throw new Error(`${label} must be a credential-free HTTPS URL`);
   }
 }

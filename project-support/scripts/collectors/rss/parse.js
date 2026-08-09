@@ -1,4 +1,5 @@
 import { XMLParser } from "fast-xml-parser";
+import { isPublicHttpsUrl } from "../lib/validate.js";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -62,5 +63,5 @@ export function parseFeed(xml, sourceName, filteredAt) {
     pubDate: normalizeDate(entry.pubDate ?? entry.published ?? entry.updated),
     source: sourceName,
     filteredAt,
-  })).filter((item) => item.title && item.link && item.pubDate);
+  })).filter((item) => item.title && isPublicHttpsUrl(item.link) && item.pubDate);
 }

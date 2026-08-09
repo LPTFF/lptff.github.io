@@ -12,6 +12,8 @@ import { parseFeed } from "../rss/parse.js";
 const generatedAt = "2026-07-30T12:00:00.000Z";
 const rssFixture = `<?xml version="1.0"?><rss version="2.0"><channel><item><title>Older</title><link>https://example.com/older</link><pubDate>2026-07-29T10:00:00Z</pubDate></item><item><title>Shared</title><link>https://example.com/shared</link><pubDate>2026-07-30T10:00:00Z</pubDate></item></channel></rss>`;
 const atomFixture = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><entry><title>Newest</title><link href="https://example.com/newest" rel="alternate"/><updated>2026-07-30T11:00:00Z</updated></entry><entry><title>Shared duplicate</title><link href="https://example.com/shared"/><updated>2026-07-30T10:00:00Z</updated></entry></feed>`;
+const mixedSafetyRssFixture = `<?xml version="1.0"?><rss version="2.0"><channel><item><title>Safe</title><link>https://example.com/safe</link><pubDate>2026-07-30T11:00:00Z</pubDate></item><item><title>HTTP</title><link>http://example.com/http</link><pubDate>2026-07-30T10:00:00Z</pubDate></item><item><title>Credentials</title><link>https://user:password@example.com/private</link><pubDate>2026-07-30T09:00:00Z</pubDate></item><item><title>Malformed</title><link>not-a-url</link><pubDate>2026-07-30T08:00:00Z</pubDate></item></channel></rss>`;
+const mixedSafetyAtomFixture = `<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom"><entry><title>Safe Atom</title><link href="https://example.com/safe-atom"/><updated>2026-07-30T11:00:00Z</updated></entry><entry><title>HTTP Atom</title><link href="http://example.com/http-atom"/><updated>2026-07-30T10:00:00Z</updated></entry></feed>`;
 
 function validDataset() {
   return buildDataset([
@@ -27,6 +29,17 @@ test("RSS and Atom feeds normalize, deduplicate and sort", () => {
   assert.equal(dataset.items[0].pubDate, "2026-07-30T11:00:00.000Z");
   assert.equal(dataset.items.every((item) => item.filteredAt === generatedAt), true);
   assert.doesNotThrow(() => validateDataset(dataset, { now: new Date(generatedAt) }));
+});
+
+test("RSS and Atom feeds skip unsafe article links", () => {
+  assert.deepEqual(
+    parseFeed(mixedSafetyRssFixture, "Hacker News", generatedAt).map((item) => item.title),
+    ["Safe"],
+  );
+  assert.deepEqual(
+    parseFeed(mixedSafetyAtomFixture, "美团技术团队", generatedAt).map((item) => item.title),
+    ["Safe Atom"],
+  );
 });
 
 test("unsupported and empty feeds fail validation", () => {
@@ -132,6 +145,23 @@ test("invalid output never replaces the previous valid artifact", async () => {
     /item count/,
   );
   assert.equal(await readFile(outputPath, "utf8"), original);
+  await rm(directory, { recursive: true, force: true });
+});
+
+test("collector skips unsafe entries without dropping the source", async () => {
+  const directory = await mkdtemp(path.join(os.tmpdir(), "collector-rss-unsafe-entry-"));
+  const outputPath = path.join(directory, "dataset.json");
+
+  const dataset = await collectRss({
+    fetchFeed: async (source) => source.name === "Hacker News" ? mixedSafetyRssFixture : mixedSafetyAtomFixture,
+    generatedAt,
+    outputPath,
+  });
+
+  assert.deepEqual(dataset.sources.map((source) => source.name), ["Hacker News", "美团技术团队"]);
+  assert.deepEqual(dataset.items.map((item) => item.title), ["Safe", "Safe Atom"]);
+  assert.doesNotThrow(() => validateDataset(dataset, { now: new Date(generatedAt) }));
+  assert.deepEqual(JSON.parse(await readFile(outputPath, "utf8")), dataset);
   await rm(directory, { recursive: true, force: true });
 });
 
