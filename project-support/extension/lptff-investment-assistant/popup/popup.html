@@ -8,10 +8,11 @@
   </head>
   <body>
     <main class="popup">
-      <h1>基金复盘助手</h1>
-      <p>先在天天基金正常登录，再点击一次自动采集。插件会使用当前浏览器登录会话自动打开持仓、基金详情和交易查询页面，不读取或保存 Cookie。</p>
-      <button id="export" type="button">自动采集全部基金数据</button>
-      <div id="status" role="status" aria-live="polite">仅使用当前浏览器登录会话，数据只下载到本地。</div>
+      <h1>LPTFF Investment OS</h1>
+      <p>先在天天基金正常登录，再点击一次同步。插件会按页读取投资事实并写入一次性待导入区，不读取或保存 Cookie、密码和认证令牌。</p>
+      <button id="export" type="button">同步最近投资变化</button>
+      <div id="coverage" aria-live="polite"></div>
+      <div id="status" role="status" aria-live="polite">数据只保存在本地，可继续下载 v1.1 JSON 备份。</div>
     </main>
     <script src="popup.js"></script>
   </body>

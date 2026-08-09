@@ -6,7 +6,7 @@ const stageLabels = {
   single: "正在采集单基金详情…",
   transactions: "正在采集当前和历史交易…",
   downloading: "正在整理并下载…",
-  completed: "自动采集完成，已下载 fund-data.json",
+  completed: "自动采集完成，JSON 备份已下载；等待 Investment OS 导入本批数据",
   error: "自动采集失败",
   idle: "",
 };
@@ -36,6 +36,32 @@ function updateProgress(progress) {
   setStatus(message, kind);
 }
 
+function formatCoverage(staging) {
+  const coverage = staging?.dataset?.coverage || [];
+  if (!coverage.length) return "";
+  return coverage.map((item) => `${item.dataset}：${item.completeness}`).join(" · ");
+}
+
+function updateCoverage(staging) {
+  const element = document.querySelector("#coverage");
+  if (element) element.textContent = formatCoverage(staging);
+}
+
+function updateTransferStatus(status) {
+  if (!status || status.collection?.running) return;
+  if (status.pending) {
+    setStatus("采集完成，等待 Investment OS 读取；JSON 备份与待导入数据均已生成。", "success");
+    return;
+  }
+  if (status.receipt?.status === "imported") {
+    setStatus("最近一批已写入 Investment OS，本次插件暂存已清除；Ledger 数据仍保留。", "success");
+    return;
+  }
+  if (status.receipt?.status === "discarded") {
+    setStatus("最近一批待导入数据已丢弃，可重新同步生成新批次。");
+  }
+}
+
 function request() {
   buttons.forEach((button) => { button.disabled = true; });
   setStatus("正在启动自动采集…");
@@ -48,7 +74,11 @@ function request() {
     if (!response?.ok) {
       buttons.forEach((button) => { button.disabled = false; });
       setStatus(response?.error || "自动采集失败", "error");
+      return;
     }
+    chrome.runtime.sendMessage({ type: "GET_INVESTMENT_STAGING" }, (stagingResponse) => {
+      if (!chrome.runtime.lastError && stagingResponse?.ok) updateCoverage(stagingResponse.staging);
+    });
   });
 }
 
@@ -66,4 +96,7 @@ chrome.runtime.sendMessage({ type: "GET_COLLECTION_STATUS" }, (response) => {
     buttons.forEach((button) => { button.disabled = true; });
     updateProgress(response.status);
   }
+});
+chrome.runtime.sendMessage({ type: "GET_INVESTMENT_STATUS" }, (response) => {
+  if (!chrome.runtime.lastError && response?.ok) updateTransferStatus(response.status);
 });

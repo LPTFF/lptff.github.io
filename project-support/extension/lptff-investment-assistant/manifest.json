@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "LPTFF Investment Assistant",
-  "version": "1.0.0",
-  "description": "在用户主动点击后，从已登录的天天基金页面导出本地基金复盘数据。",
-  "permissions": ["activeTab", "downloads", "tabs"],
+  "version": "2.0.0",
+  "description": "在用户主动点击后，从已登录的天天基金页面获取投资事实并同步到本地 Investment OS。",
+  "permissions": ["activeTab", "downloads", "tabs", "storage"],
   "action": {
     "default_title": "导出基金数据",
     "default_popup": "popup/popup.html"
@@ -20,6 +20,15 @@
       "js": ["content/network-bridge.js"],
       "run_at": "document_start",
       "world": "MAIN"
+    },
+    {
+      "matches": [
+        "http://localhost:8090/investment*",
+        "http://127.0.0.1:8090/investment*",
+        "https://lptff.github.io/investment*"
+      ],
+      "js": ["content/web-bridge.js"],
+      "run_at": "document_start"
     },
     {
       "matches": [

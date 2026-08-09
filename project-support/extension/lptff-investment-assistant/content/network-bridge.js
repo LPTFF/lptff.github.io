@@ -6,6 +6,7 @@
   };
   const captured = { hold: null, single: {}, delegate: [], snapshots: [] };
   const snapshotIndex = new Map();
+  const delegateHeaders = new Map();
   const SENSITIVE_KEY = /^(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|secret)$/i;
   const SENSITIVE_PART = /(?:authorization|access[-_]?token|session|password|secret|token|cookie)/i;
 
@@ -38,24 +39,46 @@
     try {
       return safeValue(JSON.parse(body));
     } catch {
+      try {
+        const params = new URLSearchParams(body);
+        if ([...params.keys()].length && body.includes("=")) {
+          return safeValue(Object.fromEntries(params.entries()));
+        }
+      } catch {
+        // 非 JSON / 表单请求体保留为安全字符串。
+      }
       return safeValue(body);
     }
   }
 
-  function saveResponse(url, method, requestBody, response) {
+  function safeHeaders(headers) {
+    const allowed = new Set(["accept", "content-type", "x-requested-with"]);
+    try {
+      return Object.fromEntries(
+        Array.from(new Headers(headers || {}).entries()).filter(([name]) => allowed.has(name.toLowerCase())),
+      );
+    } catch {
+      return {};
+    }
+  }
+
+  function saveResponse(url, method, requestBody, response, requestHeaders) {
     const info = requestInfo(url);
-    if (!info) return;
-    response.clone().text().then((text) => {
+    if (!info) return Promise.resolve(false);
+    return response.clone().text().then((text) => {
       let payload;
       try {
         payload = JSON.parse(text);
       } catch {
-        return;
+        return false;
       }
       const accepted = (info.key === "hold" || info.key === "single") ? payload?.succeed : payload?.code === 1200;
-      if (!accepted) return;
+      if (!accepted) return false;
       const safePayload = safeValue(payload);
       const request = parseBody(requestBody);
+      if (info.key === "delegate" && request?.timeType !== undefined) {
+        delegateHeaders.set(String(request.timeType), safeHeaders(requestHeaders));
+      }
       const fingerprint = JSON.stringify({ key: info.key, method, query: info.query, request });
       const snapshot = {
         key: info.key,
@@ -78,7 +101,8 @@
         ? { ...captured.single, [request?.dt || "unknown"]: safePayload }
         : safePayload;
       if (info.key === "delegate") captured.delegate = captured.snapshots.filter((item) => item.key === "delegate");
-    }).catch(() => {});
+      return true;
+    }).catch(() => false);
   }
 
   const originalFetch = window.fetch;
@@ -98,15 +122,22 @@
     }
 
     const response = await originalFetch(...args);
-    if (url && requestInfo(url)) saveResponse(url, method, body, response);
+    if (url && requestInfo(url)) saveResponse(url, method, body, response, init.headers || request?.headers);
     return response;
   };
 
   const originalOpen = XMLHttpRequest.prototype.open;
+  const originalSetRequestHeader = XMLHttpRequest.prototype.setRequestHeader;
   const originalSend = XMLHttpRequest.prototype.send;
   XMLHttpRequest.prototype.open = function open(method, url, ...rest) {
     this.__lptffRequest = { method: String(method || "GET").toUpperCase(), url };
     return originalOpen.call(this, method, url, ...rest);
+  };
+  XMLHttpRequest.prototype.setRequestHeader = function setRequestHeader(name, value) {
+    if (this.__lptffRequest) {
+      this.__lptffRequest.headers = { ...(this.__lptffRequest.headers || {}), [name]: value };
+    }
+    return originalSetRequestHeader.call(this, name, value);
   };
   XMLHttpRequest.prototype.send = function send(body) {
     const request = this.__lptffRequest;
@@ -118,18 +149,77 @@
           status: this.status,
           headers: { "content-type": this.getResponseHeader("content-type") || "" },
         });
-        saveResponse(request.url, request.method, body, response);
+        saveResponse(request.url, request.method, body, response, request.headers);
       });
     }
     return originalSend.call(this, body);
   };
 
+  async function fetchDelegatePage(requestId, timeType, pageNum) {
+    const snapshots = captured.delegate || [];
+    const templateSnapshot = [...snapshots].reverse().find((snapshot) =>
+      String(snapshot.requestBody?.timeType) === String(timeType),
+    );
+    if (!templateSnapshot?.requestBody) {
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: "LPTFF_DELEGATE_PAGE_RESULT",
+        requestId,
+        ok: false,
+        error: `交易时间范围 ${timeType} 缺少请求模板`,
+      }, location.origin);
+      return;
+    }
+
+    const requestBody = { ...templateSnapshot.requestBody, pageNum };
+    const templateHeaders = delegateHeaders.get(String(timeType)) || {};
+    const contentType = templateHeaders["content-type"] || "application/json";
+    const body = /application\/x-www-form-urlencoded/i.test(contentType)
+      ? new URLSearchParams(Object.entries(requestBody).map(([name, value]) => [name, String(value)])).toString()
+      : JSON.stringify(requestBody);
+    try {
+      const response = await window.fetch(paths.delegate, {
+        method: "POST",
+        credentials: "include",
+        headers: { ...templateHeaders, "content-type": contentType },
+        body,
+      });
+      const payload = await response.clone().json();
+      const stored = await saveResponse(paths.delegate, "POST", body, response, templateHeaders);
+      const list = payload?.data?.list;
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: "LPTFF_DELEGATE_PAGE_RESULT",
+        requestId,
+        ok: response.ok && payload?.code === 1200 && stored,
+        pageNum,
+        listCount: Array.isArray(list) ? list.length : 0,
+        totalCount: Number(payload?.data?.totalCount) || 0,
+        error: response.ok && payload?.code === 1200 && stored ? "" : `交易接口返回 ${payload?.code || response.status} 或快照未写入`,
+      }, location.origin);
+    } catch (error) {
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: "LPTFF_DELEGATE_PAGE_RESULT",
+        requestId,
+        ok: false,
+        error: error instanceof Error ? error.message : "交易分页请求失败",
+      }, location.origin);
+    }
+  }
+
   window.addEventListener("message", (event) => {
-    if (event.source !== window || event.data?.type !== "LPTFF_GET_NETWORK_DATA") return;
-    window.postMessage({
-      source: "lptff-investment-assistant",
-      type: "LPTFF_NETWORK_DATA",
-      data: captured,
-    }, location.origin);
+    if (event.source !== window || event.origin !== location.origin) return;
+    if (event.data?.type === "LPTFF_GET_NETWORK_DATA") {
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: "LPTFF_NETWORK_DATA",
+        data: captured,
+      }, location.origin);
+      return;
+    }
+    if (event.data?.type === "LPTFF_FETCH_DELEGATE_PAGE") {
+      fetchDelegatePage(event.data.requestId, event.data.timeType, event.data.pageNum);
+    }
   });
 })();

@@ -122,22 +122,48 @@ function clickElement(element) {
   return true;
 }
 
-function queryPageCount() {
-  const text = textOf(document.querySelector("#ui-pager-row .ui-pager-text"));
-  const match = text.match(/共\s*(\d+)\s*页/);
-  return match ? Number(match[1]) : 1;
-}
-
-function hasRangeSnapshot(networkData, timeType) {
-  return (networkData.snapshots || []).some((snapshot) =>
+function delegateSnapshots(networkData, timeType) {
+  return (networkData.snapshots || []).filter((snapshot) =>
     snapshot.key === "delegate" && String(snapshot.requestBody?.timeType) === String(timeType),
   );
+}
+
+function queryCoverage(networkData, timeType) {
+  const snapshots = delegateSnapshots(networkData, timeType);
+  const pageSize = Math.max(...snapshots.map((snapshot) => Number(snapshot.requestBody?.pageSize) || 0), 0);
+  const totalCount = Math.max(...snapshots.map((snapshot) => Number(snapshot.response?.data?.totalCount) || 0), 0);
+  const expectedPages = pageSize > 0 ? Math.ceil(totalCount / pageSize) : 0;
+  const capturedPages = new Set(snapshots.map((snapshot) => Number(snapshot.requestBody?.pageNum) || 0).filter(Boolean));
+  return { pageSize, totalCount, expectedPages, capturedPages };
+}
+
+function requestDelegatePage(timeType, pageNum, timeout = 15000) {
+  return new Promise((resolve) => {
+    const requestId = `delegate:${timeType}:${pageNum}:${Date.now()}`;
+    let settled = false;
+    const finish = (result) => {
+      if (settled) return;
+      settled = true;
+      window.removeEventListener("message", onMessage);
+      resolve(result);
+    };
+    const onMessage = (event) => {
+      if (
+        event.source === window &&
+        event.origin === location.origin &&
+        event.data?.type === "LPTFF_DELEGATE_PAGE_RESULT" &&
+        event.data?.requestId === requestId
+      ) finish(event.data);
+    };
+    window.addEventListener("message", onMessage);
+    window.postMessage({ type: "LPTFF_FETCH_DELEGATE_PAGE", requestId, timeType, pageNum }, location.origin);
+    setTimeout(() => finish({ ok: false, error: `交易时间范围 ${timeType} 第 ${pageNum} 页请求超时` }), timeout);
+  });
 }
 
 async function collectQueryPages(ranges = ["3", "4"]) {
   const warnings = [];
   let networkData = await requestNetworkData();
-  let lastSnapshotCount = snapshotCount(networkData, "delegate");
 
   for (const timeType of ranges) {
     const filter = document.querySelector(`.ulFilter.Delegate.Field li[data-timetype="${timeType}"]`);
@@ -148,32 +174,40 @@ async function collectQueryPages(ranges = ["3", "4"]) {
 
     clickElement(filter);
     const loaded = await waitForNetworkData(
-      (data) => snapshotCount(data, "delegate") > lastSnapshotCount || hasRangeSnapshot(data, timeType),
+      (data) => delegateSnapshots(data, timeType).length > 0,
       12000,
     );
     networkData = loaded;
-    const loadedCount = snapshotCount(loaded, "delegate");
-    if (loadedCount <= lastSnapshotCount && !hasRangeSnapshot(loaded, timeType)) {
+    if (!delegateSnapshots(networkData, timeType).length) {
       warnings.push(`交易时间范围 ${timeType} 未捕获到接口响应`);
       continue;
     }
-    lastSnapshotCount = loadedCount;
 
-    const totalPages = Math.min(queryPageCount(), 200);
-    for (let page = 1; page < totalPages; page += 1) {
-      const next = document.querySelector("#ui-pager-row .ui-pager-next");
-      if (!next || /unable/.test(next.className)) break;
-      clickElement(next);
-      const nextData = await waitForNetworkData(
-        (data) => snapshotCount(data, "delegate") > lastSnapshotCount,
-        12000,
-      );
-      const nextCount = snapshotCount(nextData, "delegate");
-      if (nextCount <= lastSnapshotCount) {
-        warnings.push(`交易时间范围 ${timeType} 第 ${page + 1} 页未捕获到接口响应`);
+    let rangeCoverage = queryCoverage(networkData, timeType);
+    const totalPages = Math.min(rangeCoverage.expectedPages, 200);
+    for (let pageNum = 1; pageNum <= totalPages; pageNum += 1) {
+      if (rangeCoverage.capturedPages.has(pageNum)) continue;
+      const result = await requestDelegatePage(timeType, pageNum);
+      if (!result?.ok) {
+        warnings.push(`交易时间范围 ${timeType} 第 ${pageNum} 页未捕获到接口响应`);
         break;
       }
-      lastSnapshotCount = nextCount;
+      networkData = await waitForNetworkData(
+        (data) => queryCoverage(data, timeType).capturedPages.has(pageNum),
+        5000,
+      );
+      rangeCoverage = queryCoverage(networkData, timeType);
+      if (!rangeCoverage.capturedPages.has(pageNum)) {
+        warnings.push(`交易时间范围 ${timeType} 第 ${pageNum} 页未写入采集快照`);
+        break;
+      }
+    }
+
+    rangeCoverage = queryCoverage(networkData, timeType);
+    if (rangeCoverage.expectedPages > 200) {
+      warnings.push(`交易时间范围 ${timeType} 共 ${rangeCoverage.expectedPages} 页，超过单次采集上限 200 页`);
+    } else if (rangeCoverage.capturedPages.size < rangeCoverage.expectedPages) {
+      warnings.push(`交易时间范围 ${timeType} 分页未完整采集`);
     }
   }
 
@@ -355,8 +389,6 @@ async function collect(fundName) {
     }
     if (Array.isArray(networkData.delegate) && networkData.delegate.length === 1) {
       warnings.push("当前仅捕获到一个交易查询响应；请切换历史时间范围并翻页后重新导出，以获取更多已加载记录");
-    } else if (Array.isArray(networkData.delegate) && networkData.delegate.length > 1) {
-      warnings.push(`已捕获 ${networkData.delegate.length} 个交易查询响应；仅包含页面实际加载的时间范围和分页`);
     }
   }
 

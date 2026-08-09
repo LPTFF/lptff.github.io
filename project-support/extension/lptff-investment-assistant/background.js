@@ -1,3 +1,5 @@
+importScripts("adapter/eastmoney-adapter.js");
+
 const HOLD_URL = "https://trade.1234567.com.cn/myAssets/hold";
 const QUERY_URL = "https://query.1234567.com.cn/";
 const SINGLE_URL = (code) =>
@@ -5,6 +7,8 @@ const SINGLE_URL = (code) =>
 const PAGE_TIMEOUT = 30000;
 const SINGLE_CONCURRENCY = 4;
 const QUERY_RANGES = ["3", "4"];
+const STAGING_KEY = "investmentStaging";
+const RECEIPT_KEY = "investmentTransferReceipt";
 const SENSITIVE_KEY = /(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|secret)/i;
 
 const task = {
@@ -47,9 +51,9 @@ function delay(duration) {
   return new Promise((resolve) => setTimeout(resolve, duration));
 }
 
-function callChrome(method, ...args) {
+function callChrome(target, method, ...args) {
   return new Promise((resolve, reject) => {
-    method(...args, (result) => {
+    method.call(target, ...args, (result) => {
       const error = chrome.runtime.lastError;
       if (error) reject(new Error(error.message));
       else resolve(result);
@@ -61,7 +65,7 @@ async function sendToTab(tabId, message) {
   let lastError;
   for (let attempt = 0; attempt < 12; attempt += 1) {
     try {
-      return await callChrome(chrome.tabs.sendMessage, tabId, message);
+      return await callChrome(chrome.tabs, chrome.tabs.sendMessage, tabId, message);
     } catch (error) {
       lastError = error;
       await delay(500);
@@ -71,14 +75,14 @@ async function sendToTab(tabId, message) {
 }
 
 async function openAndCollect(url, mode, options = {}) {
-  const tab = await callChrome(chrome.tabs.create, { url, active: false });
+  const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url, active: false });
   if (!tab?.id) throw new Error("无法创建采集页面");
   task.tabIds.push(tab.id);
 
   try {
     const started = Date.now();
     while (Date.now() - started < PAGE_TIMEOUT) {
-      const current = await callChrome(chrome.tabs.get, tab.id);
+      const current = await callChrome(chrome.tabs, chrome.tabs.get, tab.id);
       if (current.status === "complete") break;
       await delay(250);
     }
@@ -201,12 +205,76 @@ function mergeFundData(holdResult, singleResults, queryResults) {
   });
 }
 
-async function downloadData(data) {
+async function stageInvestmentDataset(dataset) {
+  await callChrome(chrome.storage.local, chrome.storage.local.set, {
+    [STAGING_KEY]: {
+      protocol: dataset.version,
+      capturedAt: dataset.capturedAt,
+      status: "pending",
+      dataset,
+    },
+    [RECEIPT_KEY]: {
+      protocol: dataset.version,
+      capturedAt: dataset.capturedAt,
+      status: "pending",
+    },
+  });
+}
+
+async function getStaging() {
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, STAGING_KEY);
+  return result?.[STAGING_KEY] || null;
+}
+
+async function getTransferStatus() {
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, [STAGING_KEY, RECEIPT_KEY]);
+  return {
+    pending: Boolean(result?.[STAGING_KEY]),
+    receipt: result?.[RECEIPT_KEY] || null,
+    collection: taskSnapshot(),
+  };
+}
+
+async function acknowledgeStaging() {
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, [STAGING_KEY, RECEIPT_KEY]);
+  const staging = result?.[STAGING_KEY];
+  const receipt = result?.[RECEIPT_KEY];
+  await callChrome(chrome.storage.local, chrome.storage.local.remove, STAGING_KEY);
+  if (staging || receipt) {
+    await callChrome(chrome.storage.local, chrome.storage.local.set, {
+      [RECEIPT_KEY]: {
+        protocol: staging?.protocol || receipt?.protocol || "2.0",
+        capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
+        acknowledgedAt: new Date().toISOString(),
+        status: "imported",
+      },
+    });
+  }
+}
+
+async function discardStaging() {
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, [STAGING_KEY, RECEIPT_KEY]);
+  const staging = result?.[STAGING_KEY];
+  const receipt = result?.[RECEIPT_KEY];
+  await callChrome(chrome.storage.local, chrome.storage.local.remove, STAGING_KEY);
+  if (staging || receipt) {
+    await callChrome(chrome.storage.local, chrome.storage.local.set, {
+      [RECEIPT_KEY]: {
+        protocol: staging?.protocol || receipt?.protocol || "2.0",
+        capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
+        acknowledgedAt: new Date().toISOString(),
+        status: "discarded",
+      },
+    });
+  }
+}
+
+async function downloadData(data, filename = "fund-data.json") {
   const content = JSON.stringify(data, null, 2);
   const url = `data:application/json;charset=utf-8,${encodeURIComponent(content)}`;
-  await callChrome(chrome.downloads.download, {
+  await callChrome(chrome.downloads, chrome.downloads.download, {
     url,
-    filename: "fund-data.json",
+    filename,
     saveAs: true,
     conflictAction: "uniquify",
   });
@@ -217,7 +285,7 @@ async function closeTaskTabs() {
   task.tabIds = [];
   await Promise.all(tabIds.map(async (tabId) => {
     try {
-      await callChrome(chrome.tabs.remove, tabId);
+      await callChrome(chrome.tabs, chrome.tabs.remove, tabId);
     } catch {
       return undefined;
     }
@@ -308,6 +376,8 @@ async function runAutoCollection() {
 
     setStage("downloading");
     const data = mergeFundData(holdResult, singleResults, queryResults);
+    const investmentDataset = globalThis.LPTFFInvestmentAdapter.toInvestmentDataset(data);
+    await stageInvestmentDataset(investmentDataset);
     await downloadData(data);
     setStage("completed", {
       currentFund: "",
@@ -328,7 +398,7 @@ async function runAutoCollection() {
 }
 
 async function exportCurrentPage() {
-  const [tab] = await callChrome(chrome.tabs.query, { active: true, lastFocusedWindow: true });
+  const [tab] = await callChrome(chrome.tabs, chrome.tabs.query, { active: true, lastFocusedWindow: true });
   if (!tab?.id) throw new Error("找不到当前页面");
   const response = await sendToTab(tab.id, { type: "COLLECT_FUND_DATA" });
   if (!response?.ok || !response.data) throw new Error(response?.error || "当前页面未识别到基金数据");
@@ -337,6 +407,26 @@ async function exportCurrentPage() {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "GET_INVESTMENT_STAGING") {
+    getStaging().then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
+  if (message?.type === "ACK_INVESTMENT_STAGING") {
+    acknowledgeStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
+  if (message?.type === "GET_INVESTMENT_STATUS") {
+    getTransferStatus().then((status) => sendResponse({ ok: true, status })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
+  if (message?.type === "DISCARD_INVESTMENT_STAGING") {
+    discardStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
   if (message?.type === "START_AUTO_COLLECTION") {
     runAutoCollection().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;

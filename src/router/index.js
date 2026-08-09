@@ -73,18 +73,30 @@ const routes = [
   {
     path: "/investment",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "基金复盘助手" },
+    meta: { title: "Investment OS" },
     children: [
       {
         path: "",
-        component: () => import("../views/investment/FundLayout.vue"),
+        component: () => import("../views/investment/OSLayout.vue"),
         children: [
-          { path: "", name: "fund-dashboard", component: () => import("../views/investment/FundDashboard.vue") },
-          { path: "import", name: "fund-import", component: () => import("../views/investment/FundImport.vue") },
-          { path: "holding", name: "fund-holding", component: () => import("../views/investment/FundHolding.vue") },
-          { path: "performance", name: "fund-performance", component: () => import("../views/investment/FundPerformance.vue") },
-          { path: "transaction", name: "fund-transaction", component: () => import("../views/investment/FundTransaction.vue") },
-          { path: "review", name: "fund-review", component: () => import("../views/investment/FundReview.vue") },
+          { path: "", name: "os-console", component: () => import("../views/investment/ConsoleView.vue") },
+          { path: "portfolio", name: "os-portfolio", component: () => import("../views/investment/PortfolioView.vue") },
+          { path: "policies", name: "os-policies", component: () => import("../views/investment/PoliciesView.vue") },
+          { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue") },
+          { path: "data", name: "os-data", component: () => import("../views/investment/DataView.vue") },
+          { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "证据" } },
+        ],
+      },
+      {
+        path: "legacy",
+        component: () => import("../views/investment/legacy/LegacyLayout.vue"),
+        children: [
+          { path: "", name: "fund-dashboard", component: () => import("../views/investment/legacy/FundDashboard.vue") },
+          { path: "import", name: "fund-import", component: () => import("../views/investment/legacy/FundImport.vue") },
+          { path: "holding", name: "fund-holding", component: () => import("../views/investment/legacy/FundHolding.vue") },
+          { path: "performance", name: "fund-performance", component: () => import("../views/investment/legacy/FundPerformance.vue") },
+          { path: "transaction", name: "fund-transaction", component: () => import("../views/investment/legacy/FundTransaction.vue") },
+          { path: "review", name: "fund-review", component: () => import("../views/investment/legacy/FundReview.vue") },
         ],
       },
     ],
