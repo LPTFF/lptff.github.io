@@ -30,11 +30,15 @@
 - 维护资料与运行时文件按实际消费者隔离：`agent/` 只供维护者阅读，禁止 `src/`、Vite、npm scripts 或 CI 依赖它；边界与不可移动清单见 `agent/context/project-file-boundaries.md`。
 - `project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/` 和 `project-support/crawl/` 是构建、采集和发布链路。`src/views/investment/investment-assistant.md` 被投资导入页以 `?raw` 编译，也是运行时输入；不要按文件扩展名把它移动进 `agent/`。
 
-## 投资助手采集任务验收
+## Investment OS 与采集任务验收
 
-- 用户已在本地浏览器验证扩展采集流程可用。
-- 静态证据：扩展脚本 `node --check` 通过，`npm run typecheck` 通过，`git diff --check` 通过，`node project-support/scripts/extension/build-zip.js` 可生成 zip。
-- 限制：当前记录不替代每次真实登录会话下的 Network 逐请求核验；导出内容仍受账户授权、站点接口、时间范围和分页实际加载结果限制。
+- Investment Protocol v2.0、本地 Investment Ledger 和扩展一次性 staging 已落地。传输生命周期是 `staging → Ledger import → ACK`：Ledger 写入成功后，即使 ACK 失败也不能回滚已导入事实；刷新页面后应从 Ledger、采集进度和 transfer receipt 恢复状态。
+- 账户事实保持语义分离：当前持仓浮盈只在逐只持仓盈亏均已知时汇总，不能拿历史累计盈亏代替；cash 只在总资产与持仓市值来自同批快照且差值通过容差检查时派生，未知不能按 0 处理。
+- AssetMetadata 按字段记录 `source`、`classified` 或 `unknown` provenance，低质量空值不得覆盖已有高质量标签。风险暴露将已识别与未识别市值分别计量；“未知”不是资产类型或风险结论，不能展示成“未标注 100%”。
+- Investment OS 支持重新采集、读取待导入数据、清除投资事实和完全清空 Ledger。清除投资事实保留用户定义的 Policies/PolicyVersions；只有完全清空才删除规则。
+- 仓库中的 `project-support/extension/lptff-investment-assistant/` 是扩展唯一维护源。真实诊断曾发现 Chrome 加载的是仓库外的解压副本；重载前必须在扩展管理页核对实际加载目录，并以文件清单或哈希确认它与仓库源码一致。
+- 当前真实交易分页仍未完成，Coverage 必须保持 `partial`：timeType 3/4 的成功模板都只确认第 1 页，`pageSize=20`，对应期望页数为 84 和 60；最新脱敏失败分类是 `page_response_missing` 与 `paging_incomplete`。这证明 warning 不是单纯 UI 残留，也不证明后续页请求的根因已经定位。
+- 用户已在真实登录环境验证持仓、单基金详情、staging、Ledger 导入和页面消费链路；脚本语法检查、`npm run typecheck`、构建、`git diff --check` 和扩展 zip 构建也已通过。静态证据不替代每次真实登录会话下的 Network、IndexedDB 和页面操作验收，具体边界见 [`verification/playbook.md`](../verification/playbook.md)。
 
 ## 已知决策与风险
 
