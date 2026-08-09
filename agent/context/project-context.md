@@ -17,7 +17,7 @@
 - 决策模型：目标 → 信息 → 判断 → 行动 → 预期 → 结果 → 错误归因 → 修改规则。
 - 通用聊天壳、普通待办/日报/摘要、无反馈 AI 建议、纯仪表盘和复杂多 Agent 系统不是当前核心方向。
 - 个人数据默认本地优先；云端同步、远程埋点和第三方复用需要单独评估隐私与责任边界。
-- 业务能力和未来规划分别见 `agent/product/business-overview.md`、`agent/product/business-planning.md`，不能把规划假设当成已实现能力。
+- 当前产品方向、优先级和资料入口见 [产品工作台](../product/README.md)；Investment Review 的当前事实、目标和本次分工统一见[人的产品审查正文](../product/investment-review.md)，不能把目标规划当成已实现能力。
 
 ## 数据与发布
 

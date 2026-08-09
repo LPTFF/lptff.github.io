@@ -1,0 +1,380 @@
+# Investment Review 工程附录
+
+> **用途**：服务实现、深度审查和回归验证。产品目的、当前范围、A/B 分工和人的验收以[人的产品审查正文](../investment-review.md)为准；理解产品不需要先读本附录。
+>
+> **状态**：目标工程契约，不代表当前 TypeScript 已实现。本轮只更新资料，不修改 runtime。
+
+## 1. 分层与复用边界
+
+```text
+Source Adapter
+→ Normalized Facts + DataCoverage
+→ InvestmentScope + versioned ex-ante rules/plans
+→ deterministic Judgment Engines
+→ Review findings + resolution/recheck
+→ Performance Measurement
+→ Attribution / Appraisal / Behavior
+→ StrategyHypothesis
+→ optional AI explanation
+```
+
+`deterministic` 指同一有效输入必然得到相同核心结果的普通代码，不由 LLM 自由判断。Core 不读取真实页面 DOM、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；Adapter 可由人工 Mock 完全替换。
+
+### 当前代码中要复用的基础
+
+- `PortfolioSnapshot`、`HoldingSnapshot`、`Transaction`、`PolicyVersion` 和 `Action`；
+- IndexedDB Ledger、同步 receipt、Coverage 和 reload 恢复；
+- `evaluatePolicies` 的版本遍历和 exposure 聚合方式；
+- `detectAbnormalTransactions` 的历史金额偏离信号；
+- Portfolio、Policies、Actions、Data、Evidence 的现有页面模式。
+
+复用不等于现有能力已经完成用户任务：
+
+- 当前 `PolicyRule` 主要支持通用 exposure dimension 和 pause，不能直接表达完整的单基金仓位、移动止损与减仓闭环；
+- 当前 `TransactionStatus` 缺少 submitted/requested、partially confirmed、cancelled 等阶段；
+- 当前“大额主动买入”只是一种统计信号，不能替代计划/规则相对的异常判断；
+- Action `open/closed` 不能证明真实交易已确认或处理后仓位已经恢复；
+- Console 的 `normal` 只能描述当前已计算的健康信号，不能概括尚未覆盖的用户规则。
+
+## 2. P0 目标领域对象
+
+以下对象是未来实现契约；具体命名可在编码前根据现有 idiom 微调，但语义不得折叠。
+
+### `InvestmentScope`
+
+定义一次复盘包含什么：
+
+- `scopeId`、`scopeType: ACCOUNT | DECLARED_PORTFOLIO`；
+- 包含的账户/资产引用和明确排除项；
+- 基准币种；初始 A 股人民币基金通常为 CNY；
+- 仓位分母的来源、估值时间和 Coverage；
+- 有效期与版本。
+
+单只基金是范围内的分析对象，不自动成为仓位分母。未声明的其他资产既不能自动纳入，也不能当作不存在。
+
+### 事前规则与计划
+
+- `InvestmentPolicyVersion`：目标、风险承受、期限、流动性和总体约束；
+- `StrategyRuleVersion`：per-fund position band、regular investment、pause、trailing stop、reduction target 等 variants；
+- `DecisionRecord` / `OperationPlan`：事前对象、方向、金额/份额/比例、允许时间窗、依据、失效条件及 scope/policy/rule refs；
+- `TrailingStopRule`：适用基金、basis、高水位输入口径、回撤阈值和有效期；
+- `ReductionPlan`：触发依据、目标区间、计划量、允许执行窗口和规则版本。
+
+事前核心字段不可被执行或事后解释覆盖；修订创建新版本或追加 annotation。
+
+### 执行与事实
+
+- `Transaction`：保留现有事实，并扩展/映射 `requested | partially_confirmed | confirmed | failed | cancelled | unknown`；
+- `ExecutionLink`：连接计划、来源申请和确认，记录关联方法与置信边界；无法可靠关联时保持 unlinked，不按相近金额自动猜测；
+- `PositionSnapshot`：范围、基金持仓、现金（若适用）、分母、估值时点和 Coverage；
+- `MarketDataSnapshot`：基金 NAV、日期、分红/复权 basis、修订和 Coverage；
+- `DataCoverage`：来源、范围、时间窗、分页、采集时间、完整性、新鲜度、warning 及受影响的 `judgmentIds`。
+
+申请不等于确认。部分确认、失败、撤销、过期和 unlinked 必须作为业务状态持久化。
+
+### P0 确定性输出
+
+- `JudgmentResult<T>`：`judgmentId`、用户问题、状态、结论值、reason、required/missing evidence、仍可回答的问题、next step、规则版本和 evidence refs；
+- `OperationComplianceResult`：计划存在性、对象/方向/数量/时间偏离、pause conflict、execution status；它是 P0 的规则对照，不是需要 Measurement/Attribution 的完整 Performance Appraisal，也不读取最终收益；
+- `PositionJudgment`：分母资格、实际比例、规则区间、deviation 和 limitation；
+- `TrailingStopState`：previous/current high-water mark、stop line、NAV basis、triggered、as-of 和状态；
+- `ReductionProgress`：planned/requested/confirmed/remaining、post-position、restored 与 limitation；
+- `ReviewAction` / resolution history：待人处理、用户处置、来源执行状态和复核状态分开。
+
+### P1–P4 条件性对象
+
+- P1：`ReviewPeriod`、`CashFlow`、`PerformanceSnapshot`、`RiskSnapshot`、独立 Outcome；
+- P2：`BenchmarkVersion`、`AttributionResult`、深化的 `DecisionAppraisal`、`BehaviorFinding`；
+- P3：`StrategyHypothesis`、版本化 evidence status、`RuleUpdateDraft`；
+- P4：`ReviewFinding`，只使用 `FACT | INFERENCE | HYPOTHESIS` 和稳定 evidence refs。
+
+Benchmark 不是 P0 的共同依赖；只有相对表现、Excess Return 或特定归因问题需要它。CashFlow、费用、税、FX 同样按使用它们的判断启用。
+
+## 3. 关系与状态契约
+
+### P0 主关系
+
+```text
+InvestmentScope
+  ├── InvestmentPolicyVersion
+  └── StrategyRuleVersion
+              ↓ as-of
+    DecisionRecord / OperationPlan
+              ↓ link, never overwrite
+ Transaction requests + confirmations
+              ↓
+ PositionSnapshot + MarketDataSnapshot
+              ↓
+ OperationComplianceResult
+ PositionJudgment
+ TrailingStopState
+ ReductionProgress
+              ↓
+ JudgmentResult + ReviewAction
+              ↓ user resolution / new facts
+          post-state recheck
+```
+
+### 状态
+
+通用判断结果可使用：
+
+```text
+VALID
+PARTIAL
+STALE
+INSUFFICIENT_DATA
+FAILED
+UNKNOWN
+```
+
+状态必须属于具体 `judgmentId`。页面不能把若干判断聚合成无条件的全局 `normal`；摘要必须同时给出已检查、违反、unknown 和未覆盖数量。
+
+过程合规使用：
+
+```text
+COMPLIANT
+PARTIAL
+BREACH
+INSUFFICIENT_DATA
+```
+
+Outcome 在 P1 单独使用 `POSITIVE | NEGATIVE | NEUTRAL | INSUFFICIENT_DATA`。不生成 `GOOD_DECISION`、`BAD_DECISION` 或综合 Investment Score。
+
+最小状态机：
+
+```text
+Plan: draft → recorded → linked | unlinked → reviewed
+Execution: requested → partially_confirmed | confirmed | failed | cancelled
+Reduction: planned → requested → partially_confirmed → confirmed
+           → restored | confirmed_not_restored | failed | cancelled
+Review action: open → acknowledged → waiting_execution → waiting_confirmation
+               → waiting_recheck → resolved | dismissed_with_reason
+```
+
+Action 被关闭不能跳过 execution 或 post-state recheck。每个中间态和终止态检查 reload 后持久化。
+
+## 4. 按问题的证据门槛与不变量
+
+### 全局
+
+1. Adapter 输出可由 Mock Adapter 替换；Core 不依赖真实账户。
+2. 缺失、Schema Drift、partial/stale 和 unknown 进入相关判断的 Coverage，不静默猜测。
+3. 同步与重算使用稳定业务键，重复导入幂等。
+4. InvestmentScope、Policy、Rule 和 Decision 按事实发生时的有效版本解析；当前修改不改变历史。
+5. 事前记录与执行事实不可互相覆盖。
+6. 没有用户规则时，不生成合理仓位、止损或减仓阈值。
+7. 一个判断证据不足不自动阻断无依赖关系的判断。
+8. AI、更换模型或关闭 AI 不改变任何 P0–P3 核心状态。
+9. 系统不自动申购、赎回、调仓、转账或交易。
+
+### 操作计划与执行
+
+最小证据：有效计划/规则、来源操作、申请与确认状态、稳定关联依据。
+
+- 无计划操作与计划偏离分开；对象、方向、数量和时间偏离分别输出；
+- 历史金额偏离只能增加一个 `historical_amount_signal`，不能直接产生规则 breach；
+- Transaction 发生后不得补写成“事前计划”；
+- 关联不确定时输出 unlinked/unknown，不以金额或日期相近强行关联；
+- partial、failed、cancelled 不进入 confirmed/post-state restored。
+
+### 仓位
+
+最小证据：InvestmentScope、同一估值边界的分母和基金市值、当时生效的区间规则。
+
+```text
+positionPct = eligibleFundMarketValue / eligibleScopeDenominator
+```
+
+- 分母缺失、范围不一致或估值时点不可比时，PositionJudgment 为 `INSUFFICIENT_DATA` 或 `UNKNOWN`；
+- 不能拿单只基金自身市值作分母后声称仓位 100%；
+- Cash 只有在范围和分母定义要求时参与，未知不能按 0；
+- 仓位 unknown 不阻断只依赖交易/计划或 NAV/止损规则的判断。
+
+### 移动止损
+
+最小证据：适用基金、规则版本、previous state、合格 NAV/date 和一致的分红/复权 basis。
+
+```text
+newHighWaterMark = max(previousHighWaterMark, eligibleCurrentNAV)
+newStopLine = max(previousStopLine, newHighWaterMark × (1 - drawdownPct))
+```
+
+- 创新高时 high-water mark 和 stop line 按规则上移；
+- 未创新高时 stop line 不动，绝不下移；
+- stale、partial、unknown NAV 或 basis 不一致时不推进状态；
+- basis 变化需要可验证转换、新规则版本或停止比较；
+- triggered 只创建复核/减仓事项，不执行交易。
+
+### 减仓与恢复
+
+最小证据：触发依据、用户目标区间、合格分母/持仓、计划量、申请/确认事实和操作后快照。
+
+- 计划量只用于恢复到用户区间，不预测卖点；
+- remaining 依据真实确认量和新 PositionSnapshot 重算；
+- 部分确认保持进行中；
+- 全额确认但仍越界为 `confirmed_not_restored`；
+- 只有确认且新快照回到规则范围才为 `restored`；
+- 赎回费用影响确认量或结果时纳入对应判断，不要求无关场景预先提供通用税费清单。
+
+### P1 绩效与 P2 归因
+
+P1 仍遵守：
+
+- 外部现金流切分 TWR 子期间，不能直接虚增收益；
+- MWR/XIRR 使用带日期现金流和可调和终值；
+- TWR 与 MWR 分别表达策略路径与个人资金体验；
+- Drawdown 使用有资本基数的价值/收益序列，不以累计 DailyPnL 金额差替代；
+- 少于一年只展示期间实绩，不伪装成年化。
+
+Benchmark/Excess gate：相同期间、相同币种或可验证 FX、相同 return type、兼容费用口径、足够 Coverage。任一不满足，只阻断相对表现，不阻断 P0 或可独立计算的绝对结果。
+
+P2 Attribution 只有 Measurement 可信且数据粒度满足时运行。Level 1/Level 2 无法调和时显示 residual 和 limitation，不强制归零，也不由 AI 生成原因故事。
+
+## 5. 场景与 Test Matrix
+
+Agent A 只使用人工构造、不可还原真实账户的 fixture。Agent B 的真实环境验证只产生字段级语义和脱敏结论，不产生可复制的真实 fixture。
+
+### 证据类型
+
+| 证据 | 证明什么 | 不能替代什么 |
+| --- | --- | --- |
+| 确定性 Core Oracle | 公式、不变量、状态转换和失败行为 | 真实来源是否真的提供对应语义 |
+| 来源语义 Oracle | 字段有无、方向、时点、确认含义、Coverage | Core 规则是否正确、页面是否好用 |
+| 真实环境 smoke test | 授权真实 Chrome 中的端到端来源链和 reload | 长期用户价值、自动交易授权 |
+| 人类任务验收 | 用户能否理解偏离、证据和下一步 | 数学正确性或来源真实性 |
+
+### P0 核心场景
+
+| Fixture | 最小构造 | 独立 Oracle |
+| --- | --- | --- |
+| `no-operation-in-bounds` | 完整规则与快照，本期无操作 | 仅已覆盖判断为符合；未覆盖问题不被总结为正常 |
+| `planned-confirmed-operation` | 事前计划、匹配申请与确认 | 计划/实际一致，保留 plan 与 execution 两条事实 |
+| `unplanned-operation` | 交易早于任何计划 | BREACH/待确认，不允许事后补写计划 |
+| `over-plan-operation` | 实际确认量超过计划范围 | 数量偏离独立输出 |
+| `pause-conflict` | 生效 pause rule 期间新增 | 规则冲突引用当时版本 |
+| `historical-amount-only` | 金额为历史中位数三倍但计划内 | 只输出统计信号，不输出计划 breach |
+| `pending-or-duplicate` | 待确认或重复来源记录 | 不进入 confirmed；稳定键去重 |
+| `partial-confirmation` | 计划量大于确认量 | execution 进行中，remaining 可见 |
+| `scope-denominator-missing` | 有基金市值，无可靠总资产 | 仅仓位 unknown；操作/止损可继续 |
+| `position-over-limit` | 同时点分母、持仓和上限 | 手算比例与 deviation 一致 |
+| `scope-mismatch` | 基金市值和分母来自不同范围 | 仓位为 `INSUFFICIENT_DATA`，不拼接 |
+| `stop-new-high` | 合格 NAV 高于历史高点 | high-water mark/stop line 上移 |
+| `stop-no-new-high` | NAV 低于高点且未触发 | stop line 不变 |
+| `stop-ratchet` | 多日高低序列 | stop line 单调不降 |
+| `stale-nav-stop` | NAV 过期 | 不推进高水位，不生成确定性触发 |
+| `nav-basis-unknown` | 分红/复权语义不清 | stop state 为 unknown，历史状态保留 |
+| `reduction-planned` | 越界与目标区间，尚未申请 | 计划量可复算，execution 未开始 |
+| `reduction-requested` | 已提交无确认 | 不标记已减仓 |
+| `partial-reduction` | 只确认部分计划量 | 按确认量和新快照重算 remaining |
+| `confirmed-not-restored` | 已确认但新仓位仍越界 | 状态不 completed/restored |
+| `reduction-restored` | 已确认且新仓位回区间 | restored，保留完整证据链 |
+| `transaction-history-partial` | 当前操作存在，历史分页不完整 | 依赖历史完整性的信号降级；计划对照按自身证据判断 |
+| `profitable-breach` | 正收益且过程违反 | Process = BREACH；Outcome = POSITIVE |
+| `compliant-loss` | 负收益且过程合规 | Process = COMPLIANT；Outcome = NEGATIVE |
+| `benchmark-missing` | P0 事实完整，无 Benchmark | P0 不受阻；仅未来相对表现不可算 |
+| `cny-no-fx-tax` | 单币种普通基金场景 | P0 不要求 FX/通用税字段 |
+
+### 通用状态与韧性
+
+| Fixture | Oracle |
+| --- | --- |
+| `empty` | 无持仓/无操作是合法状态，不伪造问题 |
+| `partial` | 只降级受影响的 judgment |
+| `stale` | 保留旧事实并停止依赖新鲜度的状态推进 |
+| `failed` | 保留 Ledger，显示失败和恢复路径 |
+| `unknown-schema` | 未知枚举进入 unknown，输出 Required change |
+| `version-change` | 当前规则修改不改变历史 Review |
+| `decision-immutable` | 拒绝覆盖事前字段，只追加 annotation |
+| `reload-mid-execution` | reload 后保持 requested/partial 状态和关联 |
+| `duplicate-import` | 重复批次不改变 Ledger、判断或关联 |
+| `large` | 分页、性能和稳定渲染；无静默截断 |
+
+### P1–P4 条件性场景
+
+P1 保留 no-cashflow、external-flow-timing、irregular-cashflows、cash/fee included-vs-omitted、11-month period、drawdown curve、Target/Benchmark 交叉结果和比较口径不匹配场景。
+
+P2 保留 attribution reconciliation/residual、Level 2 数据不足、Disposition 样本门槛、Possible Overtrading 反例和 Strategy Drift 场景。P3 保留 single win/loss 不改变假设状态、mixed/unknown evidence 和不可比较样本。P4 保留 AI disabled、不同模型核心结果不变、missing evidence ref 和 profitable-breach/compliant-loss 叙述不覆盖事实。
+
+### 属性与变形关系
+
+- 重复导入相同批次，Ledger、关联和判断不变；
+- 移除仓位分母只降级 PositionJudgment；
+- 追加低于历史高点的合格 NAV，stop line 不下降；
+- 全额确认改为部分确认，restored 变为进行中并出现 remaining；
+- 修改当前 Policy/Rule，不改变历史 Review；
+- 改变 Outcome 正负，不改变既有 Process classification；
+- 缺少 Benchmark 只移除相对表现；
+- 更换 LLM 只能改变允许变化的 wording，不能改变确定性状态。
+
+## 6. 当前工作包与旧任务追踪
+
+| 当前工作包 | 活动范围 | 可追溯的历史任务 |
+| --- | --- | --- |
+| `WP0-1 投资范围、规则与按问题判定的数据状态` | InvestmentScope、JudgmentResult、Coverage、Ledger migration、来源语义 | `A-FOUND-001`、`B-POSITION-001`、`B-NAV-001` 及相关 Cash/Transaction 字段验证 |
+| `WP0-2 计划操作与真实执行对照` | Decision/OperationPlan、ExecutionLink、状态机、偏离理由 | `A-JOURNAL-001`、`A-EXEC-001`、`B-CASHFLOW-001`、`B-LINK-001`、旧 Behavior 工作 |
+| `WP0-3 仓位、移动止损与减仓恢复` | PositionJudgment、TrailingStopState、ReductionProgress、post-state recheck | `A-STOP-001`、`A-REDUCE-001`、部分 `A-APPRAISE-001` 与 B 的 NAV/position 输入验证 |
+| `WP0-4 一页复盘与真实验收` | Review P0 slice、人类审查、脱敏来源 smoke test | `A-REVIEW-001` P0 slice、`A-UI-001`、`B-REAL-001` |
+| P1（未来） | Performance/Risk、Process/Outcome 分离 | `A-MEAS-001`、`A-BENCH-001`、`A-RISK-001`、`B-BENCH-001`、`B-REAL-MEAS-001` |
+| P2（未来） | Attribution、深化 Appraisal、Behavior | `A-ATTR-001`、`A-BEHAV-001` |
+| P3（未来） | StrategyHypothesis | `A-HYP-001` |
+| P4（未来） | AI Review | `A-AI-001` |
+
+历史 ID 只用于追踪来源，不构成独立活动任务板。当前状态、范围和角色只在[产品正文](../investment-review.md)维护。
+
+## 7. Agent 边界与回传协议
+
+### Agent A
+
+- 只使用源码、人工 fixture 和 B 的脱敏结论；
+- 不访问真实账户、真实资产或交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；
+- 核心判断明确输入、规则版本、Coverage、公式/状态和 unknown 条件；
+- sequence/state 能力包含属性或状态机测试；
+- runtime 不依赖 `agent/`，AI 不作为 Core Oracle。
+
+### Agent B
+
+- 单次只验证一个明确授权的来源能力、场景和目标；
+- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓；
+- 真实登录 Chrome 是验收目标时，隔离 profile 不得替代真实验收；
+- 不能证明时返回 `BLOCKED/unknown` 和 Required change，不猜 mapping；
+- 不输出或保存基金名、真实金额、收益、可组合识别个人的日期金额、Raw JSON/HTML、Cookie、Token、银行卡信息、登录态或完整 Network Logs。
+
+固定回传：
+
+```text
+Task
+Authorization
+Environment
+Result: PASS | FAIL | BLOCKED
+Target capability
+Field presence/absence
+Field semantics
+Coverage
+Unknown
+Required change
+Sensitive data exposed
+Stopped because
+Agent A dependency impact
+```
+
+原始网络材料只在授权浏览器会话临时观察，不复制到仓库、摘要或 fixture。
+
+## 8. Definition of Done
+
+每个 P0 交付项必须同时满足：
+
+1. 目标契约和按问题状态明确；
+2. 人工 fixture 可驱动的确定性实现；
+3. 独立 Oracle；
+4. normal/empty/partial/stale/failed/unknown 覆盖；
+5. migration、round-trip、reload、幂等和历史版本可靠；
+6. UI 从结论下钻到规则、事实、Coverage、limitation 和下一步；
+7. 匹配的 tests、typecheck 和 production build，失败如实记录；
+8. 隐私、真实环境和无自动交易边界；
+9. 对应工作包的人类任务验收；
+10. 实现和证据完成后才升级状态。
+
+P0 还必须证明：一个问题 unknown 不污染其他问题；历史金额信号不等于规则 breach；止损线单调不降；申请/部分确认/确认/恢复分离；Action 关闭不等于完成；无 Benchmark、FX 或通用税字段时，适用的 A 股人民币基金纪律复盘仍可运行。
+
+P1–P4 只有达到[产品正文](../investment-review.md)的启动条件后才展开。P1 的 Measurement、P2 的 Attribution/Appraisal 专业约束仍然有效，但不再作为 P0 纪律任务的错误前置依赖。

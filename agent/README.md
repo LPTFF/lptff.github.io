@@ -4,14 +4,14 @@
 
 ## 按问题使用
 
-- 想了解项目现在是什么：看 `context/project-context.md`。
-- 想知道产品服务谁、解决什么问题：看 `product/business-overview.md`。
-- 想决定下一步做什么：看 `product/business-planning.md`。
-- 想设计页面或交互：看 `product/product-design.md`。
-- 想知道当前 Investment OS 的产品基线和拆解：看 `product/prd/README.md`。
+- 想了解项目现在是什么：看 [context/project-context.md](context/project-context.md)。
+- 想知道当前产品方向和优先级：看 [product/README.md](product/README.md)。
+- 想审查 Investment Review 为什么做、当前差距、本次 P0、A/B 分工和人的验收：直接看 [product/investment-review.md](product/investment-review.md)，不需要再拼接 Agent 任务板。
+- 想设计页面或交互：看 [standards/product-design.md](standards/product-design.md)；工程对象、公式和 fixture 只在深审时看 [product/reference/investment-review-engineering.md](product/reference/investment-review-engineering.md)。
 - 想知道哪些文件属于项目功能、哪些属于工作台：看 `context/project-file-boundaries.md`。
 - 想了解代码放在哪里：看 `standards/code-organization.md`。
 - 想查看已收藏理论或引入新理论：看 `theories/README.md`；想了解当前可执行的 Agent 约定：看 `standards/`。
+- 想分析一个需求背后的业务目的、用户任务、判断与信息成本：看 `standards/business-task-analysis.md`；它用于复杂或信息密集型问题，不要求简单任务套固定模板。
 - 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
 - 想验证一个改动是否真的有效：看 `verification/playbook.md`；需要可信验证原则、证据边界和方法选择时，再看 `standards/trusted-verification.md`。
 - 想研究其他项目：看 `product/research/`。
