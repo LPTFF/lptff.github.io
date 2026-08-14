@@ -31,8 +31,23 @@ const alertType = computed<"success" | "warning" | "error" | "info">(() => {
   if (state.syncPhase === "completed" || state.syncPhase === "up-to-date") return "success";
   return "info";
 });
+const STAGE_LABEL: Record<string, string> = {
+  idle: "待命",
+  hold: "采集持仓",
+  single: "采集单基金详情",
+  transactions: "采集交易记录",
+  downloading: "合并转换数据",
+  completed: "采集完成",
+  error: "采集出错",
+};
+
 const title = computed(() => {
-  if (state.collecting) return "插件正在采集投资事实";
+  if (state.collecting) {
+    const progress = state.collectionProgress;
+    const stageLabel = STAGE_LABEL[progress?.stage ?? "idle"] ?? "采集中";
+    const detail = progress?.stage === "single" && progress.fundTotal ? `（${progress.completedFunds}/${progress.fundTotal} 只基金）` : "";
+    return `插件正在采集投资事实：${stageLabel}${detail}`;
+  }
   if (state.syncing) return "正在导入插件数据";
   if (state.syncPhase === "up-to-date") return "插件与本地 Ledger 已同步";
   if (state.syncPhase === "completed") return "本次操作已完成";
@@ -49,8 +64,10 @@ const stagingLabel = computed(() => {
 const lastImportLabel = computed(() => state.lastImport?.capturedAt ? formatDateTime(state.lastImport.capturedAt) : "尚无导入记录");
 const progressPct = computed(() => {
   const progress = state.collectionProgress;
-  if (!progress || progress.stage !== "single" || !progress.fundTotal) return 0;
-  return Math.round((progress.completedFunds / progress.fundTotal) * 100);
+  if (!progress) return 0;
+  if (progress.stage === "completed") return 100;
+  if (progress.stage === "single" && progress.fundTotal) return Math.round((progress.completedFunds / progress.fundTotal) * 100);
+  return 0;
 });
 const indeterminate = computed(() => !progressPct.value);
 

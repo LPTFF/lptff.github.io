@@ -1,12 +1,48 @@
-importScripts("adapter/eastmoney-adapter.js");
+importScripts("adapter/eastmoney-adapter.js", "collection-policy.js");
+
+// LPTFF 采集配置：外置到 chrome.storage.local，popup「高级设置」可覆盖；默认值与原硬编码一致。
+// 仅读写 storage，不触及真实采集/Cookie/Token/登录态。
+const LPTFF_CONFIG_KEY = "lptffConfig";
+const LPTFFConfig = {
+  defaults: { pageTimeout: 30000, singleConcurrency: 4, queryRanges: ["3", "4"] },
+  async load() {
+    const stored = await chrome.storage.local.get(LPTFF_CONFIG_KEY);
+    const cfg = stored[LPTFF_CONFIG_KEY] || {};
+    return {
+      pageTimeout: cfg.pageTimeout ?? this.defaults.pageTimeout,
+      singleConcurrency: cfg.singleConcurrency ?? this.defaults.singleConcurrency,
+      queryRanges:
+        Array.isArray(cfg.queryRanges) && cfg.queryRanges.length ? cfg.queryRanges.map(String) : this.defaults.queryRanges,
+    };
+  },
+  async save(overrides) {
+    const current = await this.load();
+    const next = {
+      pageTimeout: Number(overrides.pageTimeout) || current.pageTimeout,
+      singleConcurrency: Math.max(1, Math.min(8, Number(overrides.singleConcurrency) || current.singleConcurrency)),
+      queryRanges:
+        Array.isArray(overrides.queryRanges) && overrides.queryRanges.length
+          ? overrides.queryRanges.map(String)
+          : current.queryRanges,
+    };
+    await chrome.storage.local.set({ [LPTFF_CONFIG_KEY]: next });
+    return next;
+  },
+};
 
 const HOLD_URL = "https://trade.1234567.com.cn/myAssets/hold";
 const QUERY_URL = "https://query.1234567.com.cn/";
 const SINGLE_URL = (code) =>
   `https://trade.1234567.com.cn/myassets/single?iv=false&fc=${encodeURIComponent(code)}`;
-const PAGE_TIMEOUT = 30000;
-const SINGLE_CONCURRENCY = 4;
-const QUERY_RANGES = ["3", "4"];
+const PUBLIC_FUND_URL = (code) =>
+  `https://fund.eastmoney.com/${encodeURIComponent(code)}.html`;
+const PUBLIC_PROFILE_URL = (code) =>
+  `https://fundf10.eastmoney.com/jbgk_${encodeURIComponent(code)}.html`;
+const PUBLIC_INDUSTRY_URL = (code) =>
+  `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=`;
+let PAGE_TIMEOUT = 30000;
+let SINGLE_CONCURRENCY = 4;
+let QUERY_RANGES = ["3", "4"];
 const STAGING_KEY = "investmentStaging";
 const RECEIPT_KEY = "investmentTransferReceipt";
 const SENSITIVE_KEY = /(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|secret)/i;
@@ -91,6 +127,7 @@ async function openAndCollect(url, mode, options = {}) {
       mode,
       ranges: options.ranges,
       fundName: options.fundName,
+      fundCode: options.fundCode,
     });
   } catch (error) {
     throw new Error(`${mode} 页面采集失败：${error instanceof Error ? error.message : "未知错误"}`);
@@ -141,8 +178,10 @@ function mergeHolding(base, detail) {
   if (!detail) return base;
   return {
     ...base,
-    shares: detail.shares || base.shares,
-    availableShares: detail.availableShares || base.availableShares,
+    profit: detail.profit ?? base.profit,
+    profitRate: detail.profitRate ?? base.profitRate,
+    shares: detail.shares ?? base.shares,
+    availableShares: detail.availableShares ?? base.availableShares,
     details: { ...(base.details || {}), ...(detail.details || {}) },
   };
 }
@@ -164,7 +203,7 @@ function uniqueTransactions(items) {
   });
 }
 
-function mergeFundData(holdResult, singleResults, queryResults) {
+function mergeFundData(holdResult, singleResults, queryResults, publicDetails = []) {
   const holdData = holdResult.data;
   const queryResultList = Array.isArray(queryResults)
     ? queryResults.filter(Boolean)
@@ -195,6 +234,7 @@ function mergeFundData(holdResult, singleResults, queryResults) {
     account: holdData.account,
     holdings,
     transactions,
+    publicFundDetails: publicDetails,
     raw: {
       capturedAt: new Date().toISOString(),
       pageUrl: HOLD_URL,
@@ -205,7 +245,7 @@ function mergeFundData(holdResult, singleResults, queryResults) {
   });
 }
 
-async function stageInvestmentDataset(dataset) {
+async function stageInvestmentDataset(dataset, summary) {
   await callChrome(chrome.storage.local, chrome.storage.local.set, {
     [STAGING_KEY]: {
       protocol: dataset.version,
@@ -217,6 +257,7 @@ async function stageInvestmentDataset(dataset) {
       protocol: dataset.version,
       capturedAt: dataset.capturedAt,
       status: "pending",
+      summary,
     },
   });
 }
@@ -229,6 +270,7 @@ async function getStaging() {
 async function getTransferStatus() {
   const result = await callChrome(chrome.storage.local, chrome.storage.local.get, [STAGING_KEY, RECEIPT_KEY]);
   return {
+    extensionVersion: chrome.runtime.getManifest().version,
     pending: Boolean(result?.[STAGING_KEY]),
     receipt: result?.[RECEIPT_KEY] || null,
     collection: taskSnapshot(),
@@ -247,6 +289,7 @@ async function acknowledgeStaging() {
         capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
         acknowledgedAt: new Date().toISOString(),
         status: "imported",
+        summary: receipt?.summary,
       },
     });
   }
@@ -264,6 +307,7 @@ async function discardStaging() {
         capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
         acknowledgedAt: new Date().toISOString(),
         status: "discarded",
+        summary: receipt?.summary,
       },
     });
   }
@@ -326,6 +370,86 @@ async function collectSingles(holdings) {
   return results;
 }
 
+async function collectPublicCurrency(code) {
+  const response = await fetch(PUBLIC_FUND_URL(code), { credentials: "omit" });
+  if (!response.ok) throw new Error(`基金详情请求失败（HTTP ${response.status}）`);
+  const html = await response.text();
+  const match = html.match(/\bvar\s+currency\s*=\s*["']([^"']+)["']/i);
+  return match ? String(match[1]).trim() : "";
+}
+
+async function collectPublicIndustry(code) {
+  const response = await fetch(PUBLIC_INDUSTRY_URL(code), {
+    credentials: "omit",
+    headers: { Accept: "application/json" },
+  });
+  if (!response.ok) throw new Error(`行业配置请求失败（HTTP ${response.status}）`);
+  const payload = await response.json();
+  if (payload?.ErrCode !== 0) throw new Error(payload?.ErrMsg || "行业配置未返回有效数据");
+  const latest = Array.isArray(payload?.Data?.QuarterInfos) ? payload.Data.QuarterInfos[0] : null;
+  return {
+    asOf: latest?.JZRQ || undefined,
+    industries: Array.isArray(latest?.HYPZInfo)
+      ? latest.HYPZInfo.map((item) => ({
+          name: String(item?.HYMC || "").trim(),
+          weightPct: Number(item?.ZJZBL),
+        })).filter((item) => item.name && Number.isFinite(item.weightPct) && item.weightPct > 0)
+      : [],
+  };
+}
+
+async function collectPublicDetail(holding) {
+  const code = normalizedCode(holding.code);
+  const profileResult = await openAndCollect(PUBLIC_PROFILE_URL(code), "public-profile", {
+    fundCode: code,
+  });
+  if (!profileResult?.ok || !profileResult.data) {
+    throw new Error(profileResult?.error || "公开基金概况未返回数据");
+  }
+  const optional = await Promise.allSettled([
+    collectPublicCurrency(code),
+    collectPublicIndustry(code),
+  ]);
+  const currency = optional[0].status === "fulfilled" ? optional[0].value : "";
+  const industry = optional[1].status === "fulfilled" ? optional[1].value : { industries: [] };
+  if (optional[0].status === "rejected") {
+    task.warnings.push(`${code}：${optional[0].reason instanceof Error ? optional[0].reason.message : "计价币种采集失败"}`);
+  }
+  if (optional[1].status === "rejected") {
+    task.warnings.push(`${code}：${optional[1].reason instanceof Error ? optional[1].reason.message : "行业配置采集失败"}`);
+  }
+  return { ...profileResult.data, ...industry, currency: currency || undefined };
+}
+
+async function collectPublicDetails(holdings) {
+  const results = [];
+  let nextIndex = 0;
+
+  async function worker() {
+    while (true) {
+      const index = nextIndex;
+      nextIndex += 1;
+      if (index >= holdings.length) return;
+      const holding = holdings[index];
+      const code = normalizedCode(holding.code);
+      task.activeFunds = [...task.activeFunds, code];
+      notifyProgress();
+      try {
+        results.push(await collectPublicDetail(holding));
+      } catch (error) {
+        task.warnings.push(`${code}：${error instanceof Error ? error.message : "公开基金档案采集失败"}`);
+      } finally {
+        task.activeFunds = task.activeFunds.filter((item) => item !== code);
+        task.completedFunds += 1;
+        notifyProgress();
+      }
+    }
+  }
+
+  await Promise.all(Array.from({ length: Math.min(SINGLE_CONCURRENCY, holdings.length) }, worker));
+  return results;
+}
+
 async function collectQueryRange(timeType) {
   try {
     const result = await openAndCollect(QUERY_URL, "query", { ranges: [timeType] });
@@ -340,7 +464,7 @@ async function collectQueryRange(timeType) {
   }
 }
 
-async function runAutoCollection() {
+async function runAutoCollection(options = {}) {
   if (task.running) throw new Error("已有采集任务正在运行");
   task.running = true;
   task.warnings = [];
@@ -352,6 +476,11 @@ async function runAutoCollection() {
   notifyProgress();
 
   try {
+    // 每次采集开始时加载用户配置（popup「高级设置」覆盖默认值），下次采集生效。
+    const cfg = await LPTFFConfig.load();
+    PAGE_TIMEOUT = cfg.pageTimeout;
+    SINGLE_CONCURRENCY = cfg.singleConcurrency;
+    QUERY_RANGES = cfg.queryRanges;
     setStage("hold", { currentFund: "" });
     const holdResult = await openAndCollect(HOLD_URL, "hold");
     if (!holdResult?.ok || !holdResult.data) {
@@ -360,10 +489,11 @@ async function runAutoCollection() {
 
     const holdings = holdResult.data.holdings || [];
     const codes = [...new Set(holdings.map((holding) => normalizedCode(holding.code)).filter(Boolean))];
-    task.fundTotal = codes.length;
+    task.fundTotal = codes.length * 2;
     notifyProgress();
     setStage("single", { currentFund: "", activeFunds: [] });
     const singleResults = await collectSingles(holdings);
+    const publicDetails = await collectPublicDetails(holdings);
 
     setStage("transactions", { currentFund: "", activeFunds: [] });
     const queryResults = await Promise.all(QUERY_RANGES.map(collectQueryRange));
@@ -375,16 +505,21 @@ async function runAutoCollection() {
     notifyProgress();
 
     setStage("downloading");
-    const data = mergeFundData(holdResult, singleResults, queryResults);
+    const data = mergeFundData(holdResult, singleResults, queryResults, publicDetails);
     const investmentDataset = globalThis.LPTFFInvestmentAdapter.toInvestmentDataset(data);
-    await stageInvestmentDataset(investmentDataset);
-    await downloadData(data);
+    const persistence = globalThis.LPTFFCollectionPolicy.persistencePlan(options);
+    const summary = globalThis.LPTFFCollectionPolicy.summarizeDataset(
+      investmentDataset,
+      persistence.downloadBackup,
+    );
+    if (persistence.stageDataset) await stageInvestmentDataset(investmentDataset, summary);
+    if (persistence.downloadBackup) await downloadData(data);
     setStage("completed", {
       currentFund: "",
       activeFunds: [],
       transactionSnapshots: data.raw.snapshots.filter((snapshot) => snapshot.key === "delegate").length,
     });
-    return { ok: true, data };
+    return { ok: true, summary };
   } catch (error) {
     task.warnings.push(error instanceof Error ? error.message : "自动采集失败");
     setStage("error");
@@ -406,7 +541,7 @@ async function exportCurrentPage() {
   return response;
 }
 
-chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "GET_INVESTMENT_STAGING") {
     getStaging().then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
@@ -428,7 +563,22 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
 
   if (message?.type === "START_AUTO_COLLECTION") {
-    runAutoCollection().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    const options = globalThis.LPTFFCollectionPolicy.collectionOptions(
+      message,
+      sender,
+      chrome.runtime.getURL(""),
+    );
+    runAutoCollection(options).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
+  if (message?.type === "GET_CONFIG") {
+    LPTFFConfig.load().then((config) => sendResponse({ ok: true, config })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+
+  if (message?.type === "SAVE_CONFIG") {
+    LPTFFConfig.save(message.config || {}).then((config) => sendResponse({ ok: true, config })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
 

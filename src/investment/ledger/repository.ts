@@ -10,10 +10,18 @@ import type {
   AssetMetadata,
   DataCoverage,
   DailyPnL,
+  DecisionRecord,
   DetectedPattern,
+  ExecutionLink,
+  InvestmentScope,
+  OperationPlan,
   Policy,
   PolicyVersion,
   PortfolioSnapshot,
+  ReductionPlan,
+  ReviewAction,
+  ReviewSnapshot,
+  StrategyRuleVersion,
   Transaction,
 } from "../domain";
 import { dailyPnlKey } from "../sync/keys";
@@ -50,9 +58,25 @@ export interface MockDataCleanupResult {
   derivedRecords: number;
 }
 
+/** 持久化的移动止损状态（跨复盘保留 high-water mark / stop line，保证单调不降）。 */
+export interface StoredTrailingStopState {
+  id: string;
+  scopeId: string;
+  assetId: string;
+  ruleVersionId: string;
+  previousHighWaterMark?: number;
+  currentHighWaterMark?: number;
+  stopLine?: number;
+  navBasis: "nav_adjusted" | "nav_unadjusted" | "unknown";
+  asOf?: string;
+  triggered: boolean;
+}
+
 const MOCK_ASSET_ID = /^F00[1-5]$/;
 const MOCK_SOURCE = /^mock(?:-|$)/;
 const MOCK_WARNING = /^(?:mock|empty|partial|stale|failed|complex|large):/;
+const DEMO_REVIEW_SCOPE_IDS = new Set(["scope:sim", "scope:combined", "scope:demo"]);
+const DEMO_POLICY_IDS = new Set(["policy:demo-us-tech"]);
 
 function isMockAssetId(assetId: unknown): boolean {
   return MOCK_ASSET_ID.test(String(assetId || ""));
@@ -85,6 +109,10 @@ function mergeAssetMetadata(existing: AssetMetadata | undefined, incoming: Asset
     merged.provenance = { ...merged.provenance, assetClass: previousAssetClassQuality } as AssetMetadata["provenance"];
   }
   return merged;
+}
+
+function sameStoredValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
 }
 
 export class InvestmentLedger {
@@ -127,12 +155,18 @@ export class InvestmentLedger {
     await txDone(tx);
   }
 
-  async getLatestPortfolio(): Promise<PortfolioSnapshot | undefined> {
+  async getPortfolioSnapshots(): Promise<PortfolioSnapshot[]> {
     const db = await this.db();
     const tx = db.transaction(StoreName.portfolioSnapshots, "readonly");
-    const all = await reqToPromise(tx.objectStore(StoreName.portfolioSnapshots).getAll());
-    if (!all.length) return undefined;
-    return [...all].sort((a, b) => (b.date > a.date ? 1 : -1))[0] as PortfolioSnapshot;
+    const all = (await reqToPromise(
+      tx.objectStore(StoreName.portfolioSnapshots).getAll(),
+    )) as PortfolioSnapshot[];
+    return all.sort((a, b) => a.date.localeCompare(b.date));
+  }
+
+  async getLatestPortfolio(): Promise<PortfolioSnapshot | undefined> {
+    const all = await this.getPortfolioSnapshots();
+    return all.at(-1);
   }
 
   // ---- Assets ----
@@ -333,6 +367,8 @@ export class InvestmentLedger {
       StoreName.patterns,
       StoreName.actions,
       StoreName.evidence,
+      StoreName.reviewSnapshots,
+      StoreName.reviewActions,
     ];
     const tx = db.transaction(stores as string[], "readwrite");
     const [accounts, portfolios, transactions, dailyPnl, coverage, assets, imports, patterns, actions, evidence] = await Promise.all([
@@ -383,6 +419,9 @@ export class InvestmentLedger {
     tx.objectStore(StoreName.actions).clear();
     tx.objectStore(StoreName.evidence).clear();
     tx.objectStore(StoreName.dataCoverage).clear();
+    // P0 派生复盘结果依赖来源事实，mock facts 清除时一并重置（用户规则类 stores 保留）。
+    tx.objectStore(StoreName.reviewSnapshots).clear();
+    tx.objectStore(StoreName.reviewActions).clear();
 
     const realAccounts = accounts.filter((item) => !mockAccounts.includes(item));
     const realPortfolios = portfolios.filter((item) => !mockPortfolios.includes(item));
@@ -441,6 +480,36 @@ export class InvestmentLedger {
     };
   }
 
+  async removeDemoReviewConfiguration(): Promise<void> {
+    const db = await this.db();
+    const stores = [
+      StoreName.investmentScopes,
+      StoreName.strategyRuleVersions,
+      StoreName.decisionRecords,
+      StoreName.operationPlans,
+      StoreName.trailingStopStates,
+      StoreName.reductionPlans,
+      StoreName.reviewSnapshots,
+      StoreName.reviewActions,
+      StoreName.policies,
+      StoreName.policyVersions,
+    ];
+    const tx = db.transaction(stores as string[], "readwrite");
+    for (const storeName of stores) {
+      const store = tx.objectStore(storeName);
+      const records = await reqToPromise(store.getAll()) as Array<Record<string, unknown>>;
+      for (const record of records) {
+        const belongsToDemoScope = DEMO_REVIEW_SCOPE_IDS.has(String(record.scopeId || ""));
+        const belongsToDemoPolicy = DEMO_POLICY_IDS.has(String(record.id || record.policyId || ""));
+        if (belongsToDemoScope || belongsToDemoPolicy) {
+          const key = store.keyPath && typeof store.keyPath === "string" ? record[store.keyPath] : undefined;
+          if (key !== undefined) store.delete(key as IDBValidKey);
+        }
+      }
+    }
+    await txDone(tx);
+  }
+
   /** 清除来源事实和所有派生结果，保留用户定义的 Policies / PolicyVersions。 */
   async clearImportedFacts(): Promise<void> {
     const db = await this.db();
@@ -455,6 +524,8 @@ export class InvestmentLedger {
       StoreName.patterns,
       StoreName.actions,
       StoreName.evidence,
+      StoreName.reviewSnapshots,
+      StoreName.reviewActions,
     ];
     const tx = db.transaction(stores as string[], "readwrite");
     for (const store of stores) tx.objectStore(store).clear();
@@ -477,6 +548,15 @@ export class InvestmentLedger {
       StoreName.patterns,
       StoreName.actions,
       StoreName.evidence,
+      StoreName.investmentScopes,
+      StoreName.strategyRuleVersions,
+      StoreName.decisionRecords,
+      StoreName.operationPlans,
+      StoreName.executionLinks,
+      StoreName.trailingStopStates,
+      StoreName.reductionPlans,
+      StoreName.reviewSnapshots,
+      StoreName.reviewActions,
     ];
     const tx = db.transaction(stores as string[], "readwrite");
     for (const store of stores) tx.objectStore(store).clear();
@@ -487,5 +567,250 @@ export class InvestmentLedger {
 
   async clearAll(): Promise<void> {
     await this.clearEverything();
+  }
+
+  // ---- P0：InvestmentScope ----
+
+  async putInvestmentScope(scope: InvestmentScope): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.investmentScopes, "readwrite");
+    tx.objectStore(StoreName.investmentScopes).put(scope);
+    await txDone(tx);
+  }
+
+  async getScopes(): Promise<InvestmentScope[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.investmentScopes, "readonly");
+    return (await reqToPromise(tx.objectStore(StoreName.investmentScopes).getAll())) as InvestmentScope[];
+  }
+
+  /** 当时生效的 scope：effectiveFrom <= today 且未过期，取最高版本。 */
+  async getActiveScope(today: string): Promise<InvestmentScope | undefined> {
+    const all = await this.getScopes();
+    const active = all
+      .filter((s) => s.effectiveFrom <= today && (!s.effectiveTo || s.effectiveTo >= today))
+      .sort((a, b) => a.version - b.version);
+    return active[active.length - 1];
+  }
+
+  // ---- P0：StrategyRuleVersion ----
+
+  async putStrategyRuleVersion(version: StrategyRuleVersion): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.strategyRuleVersions, "readwrite");
+    const store = tx.objectStore(StoreName.strategyRuleVersions);
+    const existing = (await reqToPromise(store.get(version.id))) as StrategyRuleVersion | undefined;
+    if (existing && !sameStoredValue(existing, version)) {
+      await txDone(tx);
+      throw new Error(`putStrategyRuleVersion: 规则版本 ${version.id} 已存在且内容不同，不得覆盖历史`);
+    }
+    if (!existing) store.add(version);
+    await txDone(tx);
+  }
+
+  async getStrategyRuleVersions(scopeId: string): Promise<StrategyRuleVersion[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.strategyRuleVersions, "readonly");
+    const index = tx.objectStore(StoreName.strategyRuleVersions).index("byScope");
+    const all = (await reqToPromise(index.getAll(scopeId))) as StrategyRuleVersion[];
+    return all.sort((a, b) => a.version - b.version);
+  }
+
+  async getActiveStrategyRules(scopeId: string, today: string): Promise<StrategyRuleVersion[]> {
+    const all = await this.getStrategyRuleVersions(scopeId);
+    return all.filter((v) => v.effectiveFrom <= today && (!v.effectiveTo || v.effectiveTo >= today));
+  }
+
+  // ---- P0：DecisionRecord / OperationPlan / ExecutionLink ----
+
+  async putDecisionRecord(record: DecisionRecord): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.decisionRecords, "readwrite");
+    tx.objectStore(StoreName.decisionRecords).put(record);
+    await txDone(tx);
+  }
+
+  /** 原子写入事前决策、操作计划与首次计划核对边界。 */
+  async recordDecisionPlan(
+    record: DecisionRecord,
+    plan: OperationPlan,
+    scope: InvestmentScope,
+  ): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(
+      [StoreName.decisionRecords, StoreName.operationPlans, StoreName.investmentScopes],
+      "readwrite",
+    );
+    tx.objectStore(StoreName.decisionRecords).put(record);
+    tx.objectStore(StoreName.operationPlans).put(plan);
+    tx.objectStore(StoreName.investmentScopes).put(scope);
+    await txDone(tx);
+  }
+
+  async getDecisionRecords(scopeId: string): Promise<DecisionRecord[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.decisionRecords, "readonly");
+    const index = tx.objectStore(StoreName.decisionRecords).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as DecisionRecord[];
+  }
+
+  async getDecisionRecord(id: string): Promise<DecisionRecord | undefined> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.decisionRecords, "readonly");
+    return (await reqToPromise(tx.objectStore(StoreName.decisionRecords).get(id))) as DecisionRecord | undefined;
+  }
+
+  async putOperationPlan(plan: OperationPlan): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.operationPlans, "readwrite");
+    tx.objectStore(StoreName.operationPlans).put(plan);
+    await txDone(tx);
+  }
+
+  async getOperationPlans(scopeId: string): Promise<OperationPlan[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.operationPlans, "readonly");
+    const index = tx.objectStore(StoreName.operationPlans).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as OperationPlan[];
+  }
+
+  async putExecutionLink(link: ExecutionLink): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.executionLinks, "readwrite");
+    tx.objectStore(StoreName.executionLinks).put(link);
+    await txDone(tx);
+  }
+
+  async getExecutionLinks(): Promise<ExecutionLink[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.executionLinks, "readonly");
+    return (await reqToPromise(tx.objectStore(StoreName.executionLinks).getAll())) as ExecutionLink[];
+  }
+
+  async getExecutionLinksByTransaction(transactionId: string): Promise<ExecutionLink[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.executionLinks, "readonly");
+    const index = tx.objectStore(StoreName.executionLinks).index("byTransaction");
+    return (await reqToPromise(index.getAll(transactionId))) as ExecutionLink[];
+  }
+
+  // ---- P0：TrailingStopState / ReductionPlan ----
+
+  async putTrailingStopState(state: StoredTrailingStopState): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.trailingStopStates, "readwrite");
+    const store = tx.objectStore(StoreName.trailingStopStates);
+    const existing = (await reqToPromise(store.get(state.id))) as StoredTrailingStopState | undefined;
+
+    if (existing?.asOf && (!state.asOf || state.asOf < existing.asOf)) {
+      await txDone(tx);
+      return;
+    }
+    if (
+      existing?.currentHighWaterMark !== undefined
+      && (state.currentHighWaterMark === undefined || state.currentHighWaterMark < existing.currentHighWaterMark)
+    ) {
+      await txDone(tx);
+      throw new Error(`putTrailingStopState: ${state.id} 的高水位不得下降`);
+    }
+    if (
+      existing?.stopLine !== undefined
+      && (state.stopLine === undefined || state.stopLine < existing.stopLine)
+    ) {
+      await txDone(tx);
+      throw new Error(`putTrailingStopState: ${state.id} 的止损线不得下降`);
+    }
+    if (!existing || !sameStoredValue(existing, state)) store.put(state);
+    await txDone(tx);
+  }
+
+  async getTrailingStopStates(scopeId: string): Promise<StoredTrailingStopState[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.trailingStopStates, "readonly");
+    const index = tx.objectStore(StoreName.trailingStopStates).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as StoredTrailingStopState[];
+  }
+
+  async putReductionPlan(plan: ReductionPlan): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reductionPlans, "readwrite");
+    const store = tx.objectStore(StoreName.reductionPlans);
+    const existing = (await reqToPromise(store.get(plan.id))) as ReductionPlan | undefined;
+    if (existing && !sameStoredValue(existing, plan)) {
+      await txDone(tx);
+      throw new Error(`putReductionPlan: 减仓计划 ${plan.id} 已存在且内容不同，不得覆盖历史`);
+    }
+    if (!existing) store.add(plan);
+    await txDone(tx);
+  }
+
+  async getReductionPlans(scopeId: string): Promise<ReductionPlan[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reductionPlans, "readonly");
+    const index = tx.objectStore(StoreName.reductionPlans).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as ReductionPlan[];
+  }
+
+  // ---- P0：ReviewSnapshot / ReviewAction ----
+
+  async putReviewSnapshot(snapshot: ReviewSnapshot): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reviewSnapshots, "readwrite");
+    const store = tx.objectStore(StoreName.reviewSnapshots);
+    const existing = (await reqToPromise(store.get(snapshot.id))) as ReviewSnapshot | undefined;
+    if (existing && !sameStoredValue(existing, snapshot)) {
+      await txDone(tx);
+      throw new Error(`putReviewSnapshot: 复盘快照 ${snapshot.id} 已存在且内容不同，不得覆盖历史`);
+    }
+    if (!existing) store.add(snapshot);
+    await txDone(tx);
+  }
+
+  async getReviewSnapshots(scopeId: string): Promise<ReviewSnapshot[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reviewSnapshots, "readonly");
+    const index = tx.objectStore(StoreName.reviewSnapshots).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as ReviewSnapshot[];
+  }
+
+  /** 最新一版复盘快照（按 asOf 降序）。 */
+  async getLatestReviewSnapshot(scopeId: string): Promise<ReviewSnapshot | undefined> {
+    const all = await this.getReviewSnapshots(scopeId);
+    return [...all].sort((a, b) => (a.asOf < b.asOf ? 1 : -1))[0];
+  }
+
+  async putReviewAction(action: ReviewAction): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reviewActions, "readwrite");
+    tx.objectStore(StoreName.reviewActions).put(action);
+    await txDone(tx);
+  }
+
+  async getReviewActions(scopeId?: string): Promise<ReviewAction[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.reviewActions, "readonly");
+    if (!scopeId) {
+      return (await reqToPromise(tx.objectStore(StoreName.reviewActions).getAll())) as ReviewAction[];
+    }
+    const index = tx.objectStore(StoreName.reviewActions).index("byScope");
+    return (await reqToPromise(index.getAll(scopeId))) as ReviewAction[];
+  }
+
+  async getOpenReviewActions(scopeId: string): Promise<ReviewAction[]> {
+    return (await this.getReviewActions(scopeId)).filter(
+      (a) => a.kind !== "resolved" && a.kind !== "dismissed_with_reason",
+    );
+  }
+
+  async updateReviewActionStatus(
+    id: string,
+    kind: ReviewAction["kind"],
+    resolvedAt: string,
+    note?: string,
+  ): Promise<void> {
+    const all = await this.getReviewActions();
+    const target = all.find((a) => a.id === id);
+    if (!target) throw new Error(`updateReviewActionStatus: review action ${id} 不存在`);
+    await this.putReviewAction({ ...target, kind, resolvedAt, note: note ?? target.note });
   }
 }

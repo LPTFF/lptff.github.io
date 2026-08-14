@@ -70,14 +70,14 @@
             <p><strong>缺少：</strong>{{ g.missingRanges.join("；") }}</p>
             <p><strong>影响：</strong>{{ g.impact }}</p>
             <p><strong>不影响：</strong>{{ g.notAffected }}</p>
+            <p class="gap-recover"><strong>恢复指引：</strong>{{ g.recover }}</p>
             <el-button
-              v-if="g.dataset === 'transactions'"
               size="small"
               type="primary"
               :loading="state.collecting"
               :disabled="state.syncing"
               @click="startCollection"
-            >重新采集完整交易历史</el-button>
+            >去重新采集</el-button>
           </div>
         </el-alert>
       </div>
@@ -237,5 +237,8 @@ function completenessTag(c: DataCoverage["completeness"]): "success" | "warning"
 .gap-detail p {
   margin: 4px 0;
   font-size: 13px;
+}
+.gap-recover {
+  color: var(--el-color-success);
 }
 </style>

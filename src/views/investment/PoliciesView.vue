@@ -1,105 +1,118 @@
 <template>
   <div class="policies-view">
     <div class="policies-head">
-      <h3>投资规则</h3>
-      <el-button type="primary" size="small" :disabled="!hasRuleData" @click="openCreate">新建规则</el-button>
-    </div>
-
-    <el-alert
-      v-if="!hasRuleData"
-      title="风险元数据尚未识别，暂不能创建配比规则"
-      description="规则只允许选择当前组合中已有可靠来源的风险标签，避免要求你理解或手填内部枚举。请先重新采集基金详情。"
-      type="info"
-      show-icon
-      :closable="false"
-    />
-
-    <el-empty v-if="!state.policies.length" description="规则用于检查你自己设定的范围，不会提供投资建议或自动交易" />
-
-    <div v-else class="policies-body">
-      <el-card shadow="never" class="policy-list">
-        <el-menu :default-active="selectedId" @select="onSelect">
-          <el-menu-item v-for="p in state.policies" :key="p.id" :index="p.id">
-            {{ p.name }}
-            <el-tag size="small" :type="statusTag(p.status)" effect="plain">{{ statusLabel(p.status) }}</el-tag>
-          </el-menu-item>
-        </el-menu>
-      </el-card>
-
-      <div v-if="selected" class="policy-detail">
-        <el-card shadow="never" class="section">
-          <template #header>
-            <div class="detail-head">
-              <span>{{ selected.name }}</span>
-              <el-button size="small" @click="openNewVersion">新增版本</el-button>
-            </div>
-          </template>
-          <p class="objective"><strong>目标：</strong>{{ selected.objective }}</p>
-
-          <h4>当前生效版本规则</h4>
-          <el-table :data="currentRules" size="small" border>
-            <el-table-column label="类型" width="160">
-              <template #default="{ row }">{{ ruleKindLabel(row.kind) }}</template>
-            </el-table-column>
-            <el-table-column label="维度" width="120">
-              <template #default="{ row }">{{ row.dimension ? dimensionLabel(row.dimension) : "—" }}</template>
-            </el-table-column>
-            <el-table-column label="值">
-              <template #default="{ row }">{{ row.value || "—" }}</template>
-            </el-table-column>
-            <el-table-column label="目标/上限">
-              <template #default="{ row }">{{ formatRuleLimits(row) }}</template>
-            </el-table-column>
-          </el-table>
-        </el-card>
-
-        <el-card shadow="never" class="section">
-          <template #header>版本时间线（版本不可覆盖）</template>
-          <el-timeline>
-            <el-timeline-item v-for="v in versions" :key="v.id" :timestamp="formatVersionRange(v)" placement="top">
-              <h4>v{{ v.version }}</h4>
-              <p v-if="v.changeReason">{{ v.changeReason }}</p>
-              <p class="rule-count">{{ v.rules.length }} 条规则</p>
-            </el-timeline-item>
-          </el-timeline>
-        </el-card>
+      <div class="policies-head-left">
+        <h3>投资规则</h3>
+        <span class="policies-head-hint">规则阈值完全由你声明；系统只做确定性检查，不生成默认买卖建议</span>
       </div>
+      <el-button type="primary" size="small" :disabled="!state.activeScope" @click="openCreate">{{ state.strategyRuleVersions.length ? "新建规则" : "建立首版规则" }}</el-button>
     </div>
 
-    <!-- 新建规则对话框 -->
-    <el-dialog v-model="createVisible" title="新建投资规则" width="560px">
-      <el-form label-width="100px" size="small">
-        <el-form-item label="名称" required><el-input v-model="form.name" /></el-form-item>
-        <el-form-item label="目标" required><el-input v-model="form.objective" type="textarea" :rows="2" /></el-form-item>
-        <el-divider>目标配比规则</el-divider>
-        <el-form-item label="维度"><el-select v-model="form.dimension" @change="form.value = ''"><el-option v-for="option in dimensionOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-        <el-form-item label="取值" required><el-select v-model="form.value" placeholder="选择当前已识别风险标签"><el-option v-for="option in exposureOptions(form.dimension)" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-        <el-form-item label="目标 %"><el-input-number v-model="form.targetPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="下限 %"><el-input-number v-model="form.minPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="上限 %"><el-input-number v-model="form.maxPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="变更原因" required><el-input v-model="form.changeReason" type="textarea" :rows="2" /></el-form-item>
+    <el-card v-if="editableStrategyRules.length" shadow="never" class="section strategy-rules">
+      <template #header>
+        <div class="detail-head">
+          <span>当前规则（保存后追加新版本）</span>
+          <el-button size="small" type="primary" @click="saveStrategyRules">保存为新版本</el-button>
+        </div>
+      </template>
+      <p class="strategy-hint">这些规则用于复盘检查仓位、止盈、移动止损和减仓恢复。历史版本不会被覆盖；修改阈值后请说明原因，再保存为新版本。</p>
+      <el-input v-model="changeReason" class="change-reason" placeholder="必填：本次规则变更原因" maxlength="120" show-word-limit />
+      <div v-for="ver in editableStrategyRules" :key="ver.id" class="rule-version">
+        <div v-for="(rule, rIdx) in ver.rules" :key="rIdx" class="rule-row" :class="{ 'is-breached': !!strategyBreachNote(rule) }">
+          <div class="rule-text">
+            <span class="rule-name">{{ strategyRuleLabel(rule) }}</span>
+            <el-tag v-if="strategyBreachNote(rule)" type="danger" size="small" effect="plain">被突破</el-tag>
+            <span v-if="strategyBreachNote(rule)" class="rule-breach">{{ strategyBreachNote(rule) }}</span>
+          </div>
+          <div class="rule-edit">
+            <template v-if="rule.kind === 'position_band'">
+              下限 <el-input-number :model-value="Math.round(rule.minPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.minPct = Number(v ?? 0) / 100)" />%
+              上限 <el-input-number :model-value="Math.round(rule.maxPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.maxPct = Number(v ?? 0) / 100)" />%
+            </template>
+            <template v-else-if="rule.kind === 'trailing_stop'">
+              回撤阈值 <el-input-number :model-value="Math.round(rule.drawdownPct * 100)" :min="1" :max="50" :step="1" size="small" @update:model-value="(v: number | undefined) => (rule.drawdownPct = Number(v ?? 0) / 100)" />%
+              <span class="rule-hint">是否触发请看复盘页（需结合最新净值与历史高水位）</span>
+            </template>
+            <template v-else-if="rule.kind === 'reduction_target'">
+              目标下限 <el-input-number :model-value="Math.round(rule.targetMinPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMinPct = Number(v ?? 0) / 100)" />%
+              目标上限 <el-input-number :model-value="Math.round(rule.targetMaxPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMaxPct = Number(v ?? 0) / 100)" />%
+            </template>
+            <template v-else-if="rule.kind === 'pause_window'">
+              {{ rule.window.start }} ~ {{ rule.window.end }}
+            </template>
+            <template v-else-if="rule.kind === 'take_profit'">
+              目标收益率 <el-input-number :model-value="Math.round(rule.targetReturnPct * 100)" :min="1" :max="200" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetReturnPct = Number(v ?? 0) / 100)" />%
+              <span class="rule-hint">累计收益率达此值触发复核（非自动赎回）</span>
+            </template>
+          </div>
+        </div>
+      </div>
+    </el-card>
+    <el-card v-else shadow="never" class="section strategy-rules-empty">
+      <p class="strategy-hint"><strong>尚未声明复盘规则。</strong>真实账户可以直接建立首版规则，不需要启动模拟器。</p>
+      <p class="strategy-hint">请从一只基金和一个你愿意事前遵守的阈值开始。系统不会替你填写“合理仓位”、止盈或止损值。</p>
+      <el-button size="small" type="primary" :disabled="!state.activeScope" @click="openCreate">建立首版规则</el-button>
+    </el-card>
+
+    <el-card v-if="historicalStrategyRules.length" shadow="never" class="section strategy-history">
+      <template #header>历史规则版本（只读）</template>
+      <div v-for="ver in historicalStrategyRules" :key="ver.id" class="history-version">
+        <strong>v{{ ver.version }} · {{ ver.effectiveFrom }}</strong>
+        <span>{{ ver.changeReason || "未记录变更原因" }}</span>
+        <div v-for="(rule, index) in ver.rules" :key="index" class="history-rule">
+          {{ strategyRuleLabel(rule) }}
+        </div>
+      </div>
+    </el-card>
+
+    <!-- 新建规则对话框：阈值都由用户事前声明，与模拟器/复盘同构 -->
+    <el-dialog v-model="createVisible" :title="state.strategyRuleVersions.length ? '新建规则' : '建立首版规则'" width="460px">
+      <el-alert
+        type="info"
+        title="下面的阈值必须由你事前声明；留空时不能创建，系统不会代填。"
+        :closable="false"
+        show-icon
+        class="create-rule-alert"
+      />
+      <el-form label-width="96px" size="small">
+        <el-form-item label="基金" required>
+          <el-select v-model="form.assetId" placeholder="选择一只基金" style="width: 100%">
+            <el-option v-for="a in scopeAssets" :key="a.assetId" :label="`${a.name}（${a.assetId}）`" :value="a.assetId" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="规则类型" required>
+          <el-radio-group v-model="form.kind">
+            <el-radio-button label="position_band">仓位上限</el-radio-button>
+            <el-radio-button label="trailing_stop">移动止损</el-radio-button>
+            <el-radio-button label="take_profit">目标收益率止盈</el-radio-button>
+            <el-radio-button label="reduction_target">减仓目标</el-radio-button>
+          </el-radio-group>
+        </el-form-item>
+        <el-form-item v-if="form.kind === 'position_band'" label="仓位不超过" required>
+          <el-input-number v-model="form.maxPct" :min="1" :max="100" :step="5" /> %
+          <span class="rule-hint">占总资产比例</span>
+        </el-form-item>
+        <el-form-item v-else-if="form.kind === 'trailing_stop'" label="回撤阈值" required>
+          <el-input-number v-model="form.drawdownPct" :min="1" :max="50" :step="1" /> %
+          <span class="rule-hint">从历史最高净值回撤至此触发复核</span>
+        </el-form-item>
+        <template v-else-if="form.kind === 'reduction_target'">
+          <el-form-item label="目标下限" required>
+            <el-input-number v-model="form.targetMinPct" :min="0" :max="100" :step="5" /> %
+          </el-form-item>
+          <el-form-item label="目标上限" required>
+            <el-input-number v-model="form.targetMaxPct" :min="1" :max="100" :step="5" /> %
+            <span class="rule-hint">系统只跟踪恢复到你声明的区间，不预测卖点</span>
+          </el-form-item>
+        </template>
+        <el-form-item v-else label="目标收益率" required>
+          <el-input-number v-model="form.targetReturnPct" :min="1" :max="200" :step="5" /> %
+          <span class="rule-hint">累计收益率达此值提示复核，不自动赎回</span>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="createVisible = false">取消</el-button>
         <el-button type="primary" @click="submitCreate">创建</el-button>
-      </template>
-    </el-dialog>
-
-    <!-- 新增版本对话框 -->
-    <el-dialog v-model="versionVisible" title="新增规则版本" width="560px">
-      <el-form label-width="100px" size="small">
-        <el-form-item label="生效日期" required><el-date-picker v-model="versionForm.effectiveFrom" type="date" value-format="YYYY-MM-DD" /></el-form-item>
-        <el-divider>目标配比规则</el-divider>
-        <el-form-item label="维度"><el-select v-model="versionForm.dimension" @change="versionForm.value = ''"><el-option v-for="option in dimensionOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-        <el-form-item label="取值" required><el-select v-model="versionForm.value" placeholder="选择当前已识别风险标签"><el-option v-for="option in exposureOptions(versionForm.dimension)" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-        <el-form-item label="目标 %"><el-input-number v-model="versionForm.targetPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="下限 %"><el-input-number v-model="versionForm.minPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="上限 %"><el-input-number v-model="versionForm.maxPct" :min="0" :max="100" />%</el-form-item>
-        <el-form-item label="变更原因" required><el-input v-model="versionForm.changeReason" type="textarea" :rows="2" /></el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="versionVisible = false">取消</el-button>
-        <el-button type="primary" @click="submitVersion">新增版本</el-button>
       </template>
     </el-dialog>
   </div>
@@ -107,142 +120,199 @@
 
 <script setup lang="ts">
 import { computed, reactive, ref, watch } from "vue";
+import { useRoute } from "vue-router";
 import { ElMessage } from "element-plus";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
-import { aggregateExposure } from "../../investment/engines/exposure";
-import type { ExposureDimension, Policy, PolicyStatus, PolicyVersion } from "../../investment/domain";
+import { useInvestmentReview } from "../../investment/composables/use-investment-review";
+import { classifyReviewJudgment } from "../../investment/engines/review/review-orchestrator";
+import type { StrategyRule, StrategyRuleVersion } from "../../investment/domain";
 
-const { state, createPolicy, createPolicyVersion, getVersions } = useInvestmentOS();
+const { state, saveStrategyRuleVersion, addStrategyRule } = useInvestmentOS();
+const reviewState = useInvestmentReview().state;
 
-const selectedId = ref<string>("");
-const selected = computed<Policy | undefined>(() => state.policies.find((p) => p.id === selectedId.value));
-const versions = ref<PolicyVersion[]>([]);
-const dimensionOptions: Array<{ label: string; value: ExposureDimension }> = [
-  { label: "底层指数", value: "index" },
-  { label: "地区", value: "region" },
-  { label: "资产类型", value: "assetClass" },
-  { label: "币种", value: "currency" },
-  { label: "主题/策略", value: "theme" },
-];
-const hasRuleData = computed(() => dimensionOptions.some((option) => exposureOptions(option.value).length > 0));
+const route = useRoute();
 
-function exposureOptions(dimension: ExposureDimension): Array<{ label: string; value: string }> {
-  if (!state.portfolio) return [];
-  return aggregateExposure(state.portfolio.holdings, state.assets, dimension).map((slice) => ({
-    value: slice.value,
-    label: `${slice.value}（当前 ${(slice.pct * 100).toFixed(1)}%）`,
-  }));
-}
+// ---- 仓位 / 止损 / 减仓规则（与复盘对齐）----
+type AnyStrategyRule = { kind: string; assetId?: string; minPct?: number; maxPct?: number; targetPct?: number; drawdownPct?: number; targetReturnPct?: number; targetMinPct?: number; targetMaxPct?: number; window?: { start: string; end: string } };
 
-function dimensionLabel(dimension: ExposureDimension): string {
-  return dimensionOptions.find((option) => option.value === dimension)?.label ?? dimension;
-}
-
-function ruleKindLabel(kind: string): string {
-  return {
-    target_allocation: "目标配比",
-    regular_investment: "定期投入",
-    additional_investment: "额外投入条件",
-    pause: "暂停新增",
-    review: "重新评估",
-  }[kind] ?? kind;
-}
-
-const currentRules = computed(() => {
-  const v = versions.value.find((x) => x.id === selected.value?.currentVersionId);
-  return v?.rules ?? [];
-});
-
+const editableStrategyRules = ref<StrategyRuleVersion[]>([]);
+const changeReason = ref("");
+const historicalStrategyRules = computed(() => state.strategyRuleVersions.slice(0, -1).reverse());
 watch(
-  () => state.policies,
+  () => state.strategyRuleVersions,
   (list) => {
-    if (!selectedId.value && list.length) selectedId.value = list[0].id;
+    const latest = list.at(-1);
+    editableStrategyRules.value = latest
+      ? [{ ...latest, rules: latest.rules.map((rule) => ({ ...rule } as StrategyRule)) }]
+      : [];
+    changeReason.value = "";
   },
   { immediate: true },
 );
 
-watch(selectedId, async (id) => {
-  if (id) versions.value = await getVersions(id);
+function strategyRuleLabel(rule: AnyStrategyRule): string {
+  const scope = rule.assetId ? `基金 ${rule.assetId}` : "整个范围";
+  switch (rule.kind) {
+    case "position_band":
+      return `${scope} 仓位区间`;
+    case "trailing_stop":
+      return `${scope} 移动止损`;
+    case "take_profit":
+      return `${scope} 目标收益率止盈`;
+    case "reduction_target":
+      return `${scope} 减仓目标`;
+    case "pause_window":
+      return `${rule.assetId ? "基金 " + rule.assetId : "全范围"} 暂停窗口`;
+    default:
+      return rule.kind;
+  }
+}
+
+/** 与复盘一致的突破判断：直接读复盘 snapshot 是否把该规则对应判断判为"需处理"。 */
+function strategyBreachNote(rule: AnyStrategyRule): string | undefined {
+  const expectedId =
+    rule.kind === "position_band" ? `position:${rule.assetId ?? "scope"}`
+    : rule.kind === "trailing_stop" ? `trailing_stop:${rule.assetId}`
+    : rule.kind === "take_profit" ? `take_profit:${rule.assetId}`
+    : rule.kind === "reduction_target" ? `reduction:${rule.assetId}`
+    : undefined;
+  if (!expectedId) return undefined;
+  const j = reviewState.snapshot?.judgments.find((x) => x.judgmentId === expectedId);
+  if (j && classifyReviewJudgment(j) === "needs_action") return j.reason;
+  return undefined;
+}
+
+async function saveStrategyRules(): Promise<void> {
+  const latest = state.strategyRuleVersions.at(-1);
+  const edited = editableStrategyRules.value[0];
+  if (!latest || !edited) return;
+  if (!changeReason.value.trim()) {
+    ElMessage.warning("请填写本次规则变更原因");
+    return;
+  }
+  if (JSON.stringify(latest.rules) === JSON.stringify(edited.rules)) {
+    ElMessage.info("规则内容没有变化，无需创建新版本");
+    return;
+  }
+  const version = latest.version + 1;
+  try {
+    await saveStrategyRuleVersion({
+      id: `srv:${latest.scopeId}:v${version}`,
+      scopeId: latest.scopeId,
+      version,
+      effectiveFrom: new Date().toISOString().slice(0, 10),
+      rules: edited.rules,
+      changeReason: changeReason.value.trim(),
+    });
+    ElMessage.success(`规则 v${version} 已追加，历史版本保持只读`);
+  } catch (e) {
+    ElMessage.error(`保存失败：${(e as Error).message}`);
+  }
+}
+
+// ---- 新建单标的规则（仓位上限 / 移动止损 / 目标收益率止盈）----
+const scopeAssets = computed(() => {
+  const ids = state.activeScope?.includedAssetIds ?? [];
+  return state.assets.filter((a) => ids.includes(a.assetId));
 });
 
-function onSelect(id: string) {
-  selectedId.value = id;
-}
-
-const STATUS_TAG: Record<PolicyStatus, "success" | "info" | "warning"> = { draft: "info", active: "success", paused: "warning", retired: "info" };
-
-function statusLabel(s: PolicyStatus): string {
-  return { draft: "草稿", active: "生效", paused: "暂停", retired: "归档" }[s];
-}
-function statusTag(s: PolicyStatus): "success" | "info" | "warning" {
-  return STATUS_TAG[s];
-}
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatRuleLimits(row: any): string {
-  if (row?.kind === "target_allocation") return `目标 ${row.targetPct ?? 0}% / [${row.minPct ?? 0}% ~ ${row.maxPct ?? 0}%]`;
-  if (row?.kind === "pause") return `上限 ${row.maxPct ?? 0}%`;
-  return "—";
-}
-function formatVersionRange(v: PolicyVersion): string {
-  return `${v.effectiveFrom} → ${v.effectiveTo ?? "至今"}`;
-}
-
-// 新建规则
 const createVisible = ref(false);
-const form = reactive({ name: "", objective: "", dimension: "index" as ExposureDimension, value: "", targetPct: 35, minPct: 25, maxPct: 45, changeReason: "" });
+const form = reactive({
+  assetId: "",
+  kind: "position_band" as "position_band" | "trailing_stop" | "take_profit" | "reduction_target",
+  maxPct: undefined as number | undefined,
+  drawdownPct: undefined as number | undefined,
+  targetReturnPct: undefined as number | undefined,
+  targetMinPct: undefined as number | undefined,
+  targetMaxPct: undefined as number | undefined,
+});
 
-function openCreate() {
-  Object.assign(form, { name: "", objective: "", dimension: "index", value: "", targetPct: 35, minPct: 25, maxPct: 45, changeReason: "" });
+function openCreate(): void {
+  const requestedAsset = typeof route.query.assetId === "string" ? route.query.assetId : undefined;
+  const requestedKind = typeof route.query.kind === "string" ? route.query.kind : undefined;
+  form.assetId = requestedAsset && scopeAssets.value.some((asset) => asset.assetId === requestedAsset)
+    ? requestedAsset
+    : scopeAssets.value[0]?.assetId ?? "";
+  form.kind = ["position_band", "trailing_stop", "take_profit", "reduction_target"].includes(requestedKind ?? "")
+    ? requestedKind as typeof form.kind
+    : "position_band";
+  form.maxPct = undefined;
+  form.drawdownPct = undefined;
+  form.targetReturnPct = undefined;
+  form.targetMinPct = undefined;
+  form.targetMaxPct = undefined;
   createVisible.value = true;
 }
 
-async function submitCreate() {
-  if (!form.name || !form.value || !form.changeReason) {
-    ElMessage.warning("名称、取值、变更原因必填");
-    return;
-  }
-  if (form.minPct > form.targetPct || form.targetPct > form.maxPct) {
-    ElMessage.warning("比例必须满足：下限 ≤ 目标 ≤ 上限");
-    return;
-  }
-  await createPolicy({
-    name: form.name,
-    objective: form.objective,
-    effectiveFrom: new Date().toISOString().slice(0, 10),
-    rules: [{ kind: "target_allocation", dimension: form.dimension, value: form.value, targetPct: form.targetPct / 100, minPct: form.minPct / 100, maxPct: form.maxPct / 100 }],
-    changeReason: form.changeReason,
-  });
-  createVisible.value = false;
-  ElMessage.success("规则已创建");
-}
+watch(
+  () => route.query.create,
+  (value) => {
+    if (value === "rule") openCreate();
+  },
+  { immediate: true },
+);
 
-// 新增版本
-const versionVisible = ref(false);
-const versionForm = reactive({ effectiveFrom: "", dimension: "index" as ExposureDimension, value: "", targetPct: 35, minPct: 25, maxPct: 45, changeReason: "" });
-
-function openNewVersion() {
-  if (!selected.value) return;
-  Object.assign(versionForm, { effectiveFrom: new Date().toISOString().slice(0, 10), dimension: "index", value: "", targetPct: 35, minPct: 25, maxPct: 45, changeReason: "" });
-  versionVisible.value = true;
-}
-
-async function submitVersion() {
-  if (!selected.value || !versionForm.value || !versionForm.changeReason) {
-    ElMessage.warning("取值、变更原因必填");
+async function submitCreate(): Promise<void> {
+  if (!form.assetId) {
+    ElMessage.warning("请选择基金");
     return;
   }
-  if (versionForm.minPct > versionForm.targetPct || versionForm.targetPct > versionForm.maxPct) {
-    ElMessage.warning("比例必须满足：下限 ≤ 目标 ≤ 上限");
+  const latest = state.strategyRuleVersions[state.strategyRuleVersions.length - 1];
+  const exists = latest?.rules.some(
+    (r) => r.kind === form.kind && (r as { assetId?: string }).assetId === form.assetId,
+  );
+  if (exists) {
+    ElMessage.warning("该基金已有此类型规则，请直接在上方编辑阈值后保存");
+    createVisible.value = false;
     return;
   }
-  await createPolicyVersion(selected.value.id, {
-    effectiveFrom: versionForm.effectiveFrom,
-    rules: [{ kind: "target_allocation", dimension: versionForm.dimension, value: versionForm.value, targetPct: versionForm.targetPct / 100, minPct: versionForm.minPct / 100, maxPct: versionForm.maxPct / 100 }],
-    changeReason: versionForm.changeReason,
-  });
-  versionVisible.value = false;
-  versions.value = await getVersions(selected.value.id);
-  ElMessage.success("已新增版本，旧版本保留");
+  if (form.kind === "reduction_target") {
+    if (form.targetMinPct === undefined || form.targetMaxPct === undefined || form.targetMinPct >= form.targetMaxPct) {
+      ElMessage.warning("请填写有效的减仓目标区间，且下限必须小于上限");
+      return;
+    }
+  } else {
+    const declaredValue = form.kind === "position_band"
+      ? form.maxPct
+      : form.kind === "trailing_stop"
+        ? form.drawdownPct
+        : form.targetReturnPct;
+    if (!declaredValue || declaredValue <= 0) {
+      ElMessage.warning("请填写你事前声明的规则阈值");
+      return;
+    }
+  }
+  const effectiveFrom = new Date().toISOString().slice(0, 10);
+  let rule: StrategyRule;
+  if (form.kind === "position_band") {
+    rule = { kind: "position_band", assetId: form.assetId, minPct: 0, maxPct: form.maxPct! / 100 };
+  } else if (form.kind === "trailing_stop") {
+    rule = { kind: "trailing_stop", assetId: form.assetId, basis: "nav_adjusted", drawdownPct: form.drawdownPct! / 100, effectiveFrom };
+  } else if (form.kind === "reduction_target") {
+    rule = {
+      kind: "reduction_target",
+      assetId: form.assetId,
+      targetMinPct: form.targetMinPct! / 100,
+      targetMaxPct: form.targetMaxPct! / 100,
+    };
+  } else {
+    rule = { kind: "take_profit", assetId: form.assetId, targetReturnPct: form.targetReturnPct! / 100, effectiveFrom };
+  }
+  const kindLabel = form.kind === "position_band"
+    ? "仓位上限"
+    : form.kind === "trailing_stop"
+      ? "移动止损"
+      : form.kind === "reduction_target"
+        ? "减仓目标"
+        : "目标收益率止盈";
+  const creatingFirstVersion = state.strategyRuleVersions.length === 0;
+  try {
+    await addStrategyRule(rule, `为 ${form.assetId} 新增${kindLabel}规则`);
+    createVisible.value = false;
+    ElMessage.success(creatingFirstVersion ? "首版规则已建立，复盘会自动更新" : "规则已创建，复盘会自动更新");
+  } catch (e) {
+    ElMessage.error(`创建失败：${(e as Error).message}`);
+  }
 }
 </script>
 
@@ -256,41 +326,105 @@ async function submitVersion() {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.policies-head-left {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 .policies-head h3 {
   margin: 0;
 }
-.policies-body {
+.policies-head-hint {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.create-rule-alert {
+  margin-bottom: 12px;
+}
+.strategy-rules {
+  min-width: 0;
+}
+.strategy-rules-empty {
+  border-left: 3px solid var(--el-color-primary);
+}
+.strategy-hint {
+  margin: 0 0 8px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.change-reason {
+  margin-bottom: 12px;
+  max-width: 560px;
+}
+.strategy-history {
+  color: var(--el-text-color-regular);
+}
+.history-version {
   display: grid;
-  grid-template-columns: 260px 1fr;
-  gap: 16px;
+  grid-template-columns: minmax(110px, auto) minmax(180px, 1fr);
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
 }
-.policy-list .el-menu {
-  border-right: none;
+.history-rule {
+  grid-column: 2;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
 }
-.policy-detail {
+.rule-version {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 8px;
+}
+.rule-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 6px 8px;
+  border-radius: 4px;
+  background: var(--el-fill-color-light);
+}
+.rule-row.is-breached {
+  background: var(--el-color-danger-light-9);
+  border-left: 3px solid var(--el-color-danger);
+}
+.rule-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+.rule-name {
+  font-weight: 600;
+}
+.rule-breach {
+  font-size: 12px;
+  color: var(--el-color-danger);
+}
+.rule-edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+.rule-hint {
+  color: var(--el-text-color-secondary);
 }
 .section {
   width: 100%;
+  min-width: 0;
+  overflow-x: auto;
 }
 .detail-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-.objective {
-  color: var(--el-text-color-regular);
-}
-.rule-count {
-  color: var(--el-text-color-secondary);
-  font-size: 12px;
-}
-@media screen and (max-width: 768px) {
-  .policies-body {
-    grid-template-columns: 1fr;
-  }
 }
 </style>

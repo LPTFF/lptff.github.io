@@ -73,6 +73,7 @@
       name: item.name || undefined,
       marketValue: numberOf(item.amount),
       pnl: item.profit === undefined ? undefined : numberOf(item.profit),
+      pnlRate: item.profitRate === undefined ? undefined : numberOf(item.profitRate) / 100,
       weight: typeof item.ratio === "number" ? item.ratio / 100 : undefined,
       shares: item.shares === undefined ? undefined : numberOf(item.shares),
       availableShares: item.availableShares === undefined ? undefined : numberOf(item.availableShares),
@@ -81,21 +82,110 @@
     };
   }
 
-  function mapAsset(item) {
+  function uniqueText(values) {
+    return [...new Set(values.map((value) => String(value || "").trim()).filter(Boolean))];
+  }
+
+  function detailByCode(data) {
+    return new Map(
+      (Array.isArray(data?.publicFundDetails) ? data.publicFundDetails : [])
+        .map((detail) => [codeOf(detail?.fundCode), detail])
+        .filter(([code]) => Boolean(code)),
+    );
+  }
+
+  function sourceIndexes(detail) {
+    const tracked = String(detail?.trackedIndexText || "").trim();
+    if (tracked && !/无跟踪标的|暂无|不适用/.test(tracked)) return [tracked];
+    return [];
+  }
+
+  function classifiedIndexes(detail) {
+    const benchmark = String(detail?.benchmark || "");
+    return uniqueText(
+      benchmark.split(/[+，,；;]/).flatMap((component) => {
+        const normalized = component
+          .replace(/^.*?汇率调整的/, "")
+          .replace(/收益率.*$/, "")
+          .replace(/\*.*$/, "")
+          .trim();
+        const match = normalized.match(/([^*]{2,50}?指数)$/);
+        return match ? [match[1].trim()] : [];
+      }),
+    );
+  }
+
+  function classifiedRegions(detail) {
+    const text = [
+      detail?.investmentScope,
+      detail?.investmentObjective,
+      detail?.fundType,
+      detail?.benchmark,
+      detail?.fundName,
+    ].filter(Boolean).join(" ");
+    const regions = [];
+    if (/美国|美股|纳斯达克|标普/.test(text)) regions.push("美国");
+    if (/香港|港股|恒生/.test(text)) regions.push("中国香港");
+    if (/日本|日经/.test(text)) regions.push("日本");
+    if (/越南/.test(text)) regions.push("越南");
+    if (/印度/.test(text)) regions.push("印度");
+    if (/欧洲|欧元区/.test(text)) regions.push("欧洲");
+    if (/中国境内|内地|A股|沪深|中证|上证|深证|创业板|科创/.test(text)) regions.push("中国内地");
+    if (!regions.length && /全球|环球|境外|QDII/i.test(text)) regions.push("全球");
+    return uniqueText(regions);
+  }
+
+  function classifiedCurrency(detail) {
+    const text = String(detail?.currency || "").trim();
+    if (/^(?:元|人民币|CNY)$/i.test(text)) return ["CNY"];
+    if (/^(?:美元|USD)$/i.test(text)) return ["USD"];
+    if (/^(?:港元|港币|HKD)$/i.test(text)) return ["HKD"];
+    if (/^(?:欧元|EUR)$/i.test(text)) return ["EUR"];
+    return [];
+  }
+
+  function classifiedThemes(detail) {
+    const industries = (Array.isArray(detail?.industries) ? detail.industries : [])
+      .map((industry) => ({ name: String(industry?.name || "").trim(), weightPct: numberOf(industry?.weightPct) }))
+      .filter((industry) => industry.name && industry.weightPct > 0);
+    if (!industries.length) return [];
+    const largestWeight = Math.max(...industries.map((industry) => industry.weightPct));
+    return uniqueText(
+      industries.filter((industry) => industry.weightPct === largestWeight).map((industry) => industry.name),
+    );
+  }
+
+  function classifiedAssetClass(detail) {
+    const text = [detail?.fundType, detail?.fundName, detail?.investmentScope].filter(Boolean).join(" ");
+    if (/货币/.test(text)) return "cash";
+    if (/债券|纯债|固收/.test(text)) return "bond";
+    if (/黄金|商品|原油|贵金属/.test(text)) return "commodity";
+    if (/股票|指数|ETF|联接/.test(text)) return "equity";
+    return "other";
+  }
+
+  function mapAsset(item, details) {
+    const detail = details.get(codeOf(item.code));
+    const directIndexes = sourceIndexes(detail);
+    const indexes = directIndexes.length ? directIndexes : classifiedIndexes(detail);
+    const regions = classifiedRegions(detail);
+    const currencies = classifiedCurrency(detail);
+    const themes = classifiedThemes(detail);
+    const assetClass = classifiedAssetClass(detail);
     return {
       assetId: codeOf(item.code),
-      name: item.name || undefined,
-      assetClass: "other",
-      regions: [],
-      indexes: [],
-      currencies: [],
-      themes: [],
+      name: item.name || detail?.fundName || undefined,
+      assetClass,
+      regions,
+      indexes,
+      currencies,
+      themes,
       provenance: {
-        assetClass: "unknown",
-        regions: "unknown",
-        indexes: "unknown",
-        currencies: "unknown",
-        themes: "unknown",
+        assetClass: assetClass === "other" ? "unknown" : "classified",
+        regions: regions.length ? "classified" : "unknown",
+        indexes: indexes.length ? (directIndexes.length ? "source" : "classified") : "unknown",
+        currencies: currencies.length ? "classified" : "unknown",
+        themes: themes.length ? "classified" : "unknown",
       },
     };
   }
@@ -202,19 +292,25 @@
       : [];
     const dailyPnl = Array.isArray(data?.holdings) ? data.holdings.flatMap(extractDailyPnl) : [];
     const warnings = warningCodes(data);
-    const detailLoaded = holdings.length > 0 && data.holdings.every((item) => {
-      const details = item?.details;
-      return Boolean(details && (details.profitTable || details.shareTable || details.investmentPlanTable || details.nav));
-    });
     const dailyWarnings = dailyPnl.length ? [] : ["eastmoney:daily-pnl-unknown"];
     const transactionPartial = warnings.includes("eastmoney:transactions-partial") || !transactions.length || !transactionPagingComplete(data);
     const transactionWarnings = transactionPartial ? ["eastmoney:transactions-partial"] : [];
+    const publicDetails = detailByCode(data);
+    const detailCount = holdings.filter((holding) => publicDetails.has(holding.assetId)).length;
+    const detailCompleteness = holdings.length && detailCount === holdings.length
+      ? "complete"
+      : detailCount
+        ? "partial"
+        : "unknown";
+    const detailWarnings = detailCompleteness === "complete"
+      ? []
+      : [detailCompleteness === "partial" ? "eastmoney:fund-metadata-partial" : "eastmoney:fund-metadata-unknown"];
     const coverage = [
       coverageEntry("account", account ? [{ start: capturedDate, end: capturedDate }] : [], account ? "complete" : "unknown", capturedAt, []),
       coverageEntry("holdings", holdings.length ? [{ start: capturedDate, end: capturedDate }] : [], holdings.length ? "complete" : "unknown", capturedAt, []),
       coverageEntry("transactions", rangesFromTransactions(transactions), transactionPartial ? "partial" : "complete", capturedAt, transactionWarnings),
       coverageEntry("dailyPnl", rangesFromTransactions(dailyPnl.map((item) => ({ occurredAt: item.date }))), dailyPnl.length ? "complete" : "unknown", capturedAt, dailyWarnings),
-      coverageEntry("fundDetail", detailLoaded ? [{ start: capturedDate, end: capturedDate }] : [], detailLoaded ? "complete" : "unknown", capturedAt, detailLoaded ? [] : ["eastmoney:fund-detail-unknown"]),
+      coverageEntry("fundDetail", detailCount ? [{ start: capturedDate, end: capturedDate }] : [], detailCompleteness, capturedAt, detailWarnings),
     ];
     const portfolio = account ? {
       id: `eastmoney-portfolio:${capturedAt}`,
@@ -235,11 +331,11 @@
       capturedAt,
       account,
       portfolio,
-      assets: Array.isArray(data?.holdings) ? data.holdings.map(mapAsset).filter((item) => item.assetId) : [],
+      assets: Array.isArray(data?.holdings) ? data.holdings.map((item) => mapAsset(item, publicDetails)).filter((item) => item.assetId) : [],
       transactions,
       dailyPnl,
       coverage,
-      warnings: [...new Set([...warnings, ...dailyWarnings, ...transactionWarnings, ...factWarnings])],
+      warnings: [...new Set([...warnings, ...dailyWarnings, ...transactionWarnings, ...detailWarnings, ...factWarnings])],
     };
   }
 

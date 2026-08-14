@@ -28,11 +28,13 @@ export interface ExposureCoverage {
   multiLabel: boolean;
 }
 
-export interface DuplicateExposure {
+export interface SharedExposure {
   dimension: ExposureDimension;
   value: string;
-  marketValue: number;
-  pct: number;
+  /** 与该标签关联的持仓市值；多标签维度之间不可相加。 */
+  associatedMarketValue: number;
+  /** 与该标签关联的仓位比例；不是来源未提供时的底层权重估算。 */
+  associatedPct: number;
   assetIds: string[];
 }
 
@@ -67,8 +69,9 @@ export function aggregateExposure(
   for (const h of holdings) {
     const meta = assetMap.get(h.assetId);
     const values = meta ? dimensionValues(meta, dimension) : [];
-    if (!values.length) continue;
-    for (const v of values) {
+    // 无元数据的 holding 归入“（未标注）”桶，而非静默跳过（PRD §29 不静默 unknown）。
+    const labels = values.length ? values : ["（未标注）"];
+    for (const v of labels) {
       const bucket = buckets.get(v) ?? { marketValue: 0, assetIds: new Set<string>() };
       bucket.marketValue += h.marketValue || 0;
       bucket.assetIds.add(h.assetId);
@@ -117,23 +120,38 @@ export function exposureCoverage(
 }
 
 /**
- * 重复暴露：同一底层 value 被多只不同基金持有（PRD §18.5）。
- * 只报告事实，不自动评价对错。assetClass 维度天然为单值聚合，不参与重复检测。
+ * 共同暴露：至少两只基金关联同一已知标签。未知桶只用于 Coverage，不构成共同暴露。
+ * 币种仅在组合出现多个已知币种时分析，避免把单一 CNY 计价误报为集中风险。
  */
-export function detectDuplicateExposures(
+export function detectSharedExposures(
   holdings: HoldingSnapshot[],
   assets: AssetMetadata[],
-): DuplicateExposure[] {
+): SharedExposure[] {
   const dimensions: ExposureDimension[] = ["index", "region", "currency", "theme"];
-  const out: DuplicateExposure[] = [];
-  for (const dim of dimensions) {
-    const slices = aggregateExposure(holdings, assets, dim);
-    for (const s of slices) {
-      if (s.assetIds.length > 1) out.push({ ...s });
+  const out: SharedExposure[] = [];
+
+  for (const dimension of dimensions) {
+    const knownSlices = aggregateExposure(holdings, assets, dimension)
+      .filter((slice) => slice.value !== "（未标注）");
+    if (dimension === "currency" && knownSlices.length < 2) continue;
+
+    for (const slice of knownSlices) {
+      if (slice.assetIds.length < 2) continue;
+      out.push({
+        dimension,
+        value: slice.value,
+        associatedMarketValue: slice.marketValue,
+        associatedPct: slice.pct,
+        assetIds: slice.assetIds,
+      });
     }
   }
-  return out.sort((a, b) => b.marketValue - a.marketValue);
+
+  return out.sort((a, b) => b.associatedMarketValue - a.associatedMarketValue);
 }
+
+/** @deprecated 使用 detectSharedExposures；保留导出以兼容旧调用。 */
+export const detectDuplicateExposures = detectSharedExposures;
 
 /** 取某维度 top N 暴露，用于控制台风险摘要（PRD §17.3）。 */
 export function topExposures(

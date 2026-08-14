@@ -404,16 +404,13 @@
 
 当前限制：
 
-- 尚无 canonical `/investment/review` 路由；legacy review 不能替代按用户问题组织的新复盘；
-- 尚无明确的用户 InvestmentScope、事前 OperationPlan、计划/实际对照和按问题独立传播的判断状态；
-- 当前 Policy 主要检查通用 exposure，Behavior 主要识别历史大额主动买入，均不能完整回答用户规则相对的操作异常、单基金仓位、移动止损或减仓恢复；
-- 尚无申请、部分确认、撤销、操作后快照等完整执行生命周期；Action 状态变化不等于真实交易已确认或规则已恢复；
+- P0 纪律与执行复盘（WP0-1~WP0-4）已交付：canonical `/investment/review` 路由按“需要你处理 / 等待证据或执行 / 已按计划管理”三栏组织；InvestmentScope、按问题 JudgmentResult、DecisionRecord/OperationPlan/ExecutionLink、仓位/移动止损/减仓恢复四引擎、按问题独立 Coverage 与 unknown 已实现；legacy review 不能替代它；
 - 尚无以现金、费用、外部现金流和估值边界调和的 Absolute/TWR/MWR/XIRR；
 - 尚无事前 BenchmarkVersion、Target/Benchmark 分离和可靠 Excess Return；
 - 当前累计 DailyPnL 金额差不是专业组合百分比回撤；
-- 尚无不可覆盖的 DecisionRecord、Process/Outcome 分离 Appraisal、Attribution、StrategyHypothesis 或可追溯 AI Review。
+- 尚无 Process/Outcome 分离 Appraisal、Attribution、StrategyHypothesis 或可追溯 AI Review（P2~P4 未启动）。
 
-因此当前能力主要降低取数、归一化和查看事实的成本，尚不能完成完整基金复盘。当前差距、目标产品、本次分工和状态统一见 [Investment Review 人的产品审查](../investment-review.md)，不得把目标写成已实现。
+因此当前能力已能完成 P0 纪律与执行复盘（操作异常、仓位边界、移动止损、减仓进度与恢复复核），但绩效测量、归因与 AI 复盘仍为后续阶段。当前差距、目标产品、本次分工和状态统一见 [Investment Review 人的产品审查](../investment-review.md)，不得把目标写成已实现。
 
 ### 7.2 基金买入建议
 
@@ -636,7 +633,7 @@
 | LeetCode | `/leetcode` | 正式使用 | 随机刷题、进入题目/答案 |
 | 面试题 | `/interview` | 正式使用 | 阅读知识树和项目资料 |
 | 博客 | `/blog` | 正式使用 | 浏览、筛选、搜索和阅读文章 |
-| Investment OS | `/investment` | 局部实现 | 同步/查看事实与 Coverage，浏览 Portfolio/Policies/Actions/Data/Evidence；完整复盘未交付 |
+| Investment OS | `/investment` | P0 已交付 | 同步/查看事实与 Coverage，浏览 Portfolio/Policies/Actions/Data/Evidence；`/investment/review` P0 纪律与执行复盘已交付（仓位/操作/止损/减仓 + 按问题 Coverage）；绩效/归因/AI 未交付 |
 | Investment legacy | `/investment/legacy/*` | 历史入口 | 查看旧 Dashboard/Import/Holding/Performance/Transaction/Review |
 | 基金买入建议 | `/message` | 正式使用 | 查看多策略建议、行情和购买入口 |
 | 基金持仓分析 | `/fundHoldInfoMsg` | 正式使用 | 查看持仓和策略、行情和购买入口 |

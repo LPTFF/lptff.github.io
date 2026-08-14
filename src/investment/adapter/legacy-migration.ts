@@ -33,14 +33,16 @@ function mapTxType(type: FundTransaction["type"]): TransactionType {
   }
 }
 
-/** 把旧 status（任意字符串）映射为 v2 TransactionStatus，未知归 UNKNOWN。 */
+/** 把旧 status（任意字符串）映射为 v2 TransactionStatus，未知归 unknown。 */
 function mapTxStatus(status?: string): TransactionStatus {
-  if (!status) return "UNKNOWN";
+  if (!status) return "unknown";
   const s = status.toLowerCase();
-  if (s.includes("confirm") || s.includes("成功") || s === "已确认") return "CONFIRMED";
-  if (s.includes("pending") || s.includes("处理") || s === "未确认") return "PENDING";
-  if (s.includes("fail") || s.includes("失败")) return "FAILED";
-  return "UNKNOWN";
+  if (s.includes("cancel") || s.includes("撤销")) return "cancelled";
+  if (s.includes("partial") || s.includes("部分确认")) return "partially_confirmed";
+  if (s.includes("confirm") || s.includes("成功") || s === "已确认") return "confirmed";
+  if (s.includes("pending") || s.includes("处理") || s === "未确认") return "requested";
+  if (s.includes("fail") || s.includes("失败")) return "failed";
+  return "unknown";
 }
 
 /** 旧数据无法区分单基金底层结构，先用占位 AssetMetadata 收口，Exposure 待补充。 */
@@ -88,6 +90,7 @@ export function migrateLegacyFundData(raw: unknown): InvestmentDataset {
     name: h.name,
     marketValue: h.amount,
     pnl: h.profit,
+    pnlRate: typeof h.profitRate === "number" ? h.profitRate / 100 : undefined,
     weight: typeof h.ratio === "number" ? h.ratio / 100 : undefined,
     shares: h.shares,
     availableShares: h.availableShares,
@@ -96,9 +99,8 @@ export function migrateLegacyFundData(raw: unknown): InvestmentDataset {
   }));
 
   const holdingValue = holdings.reduce((sum, h) => sum + (h.marketValue || 0), 0);
-  const currentHoldingPnl = holdings.length && holdings.every((holding) => holding.pnl !== undefined)
-    ? holdings.reduce((sum, holding) => sum + (holding.pnl ?? 0), 0)
-    : undefined;
+  // 旧协议无法可靠区分当前持仓浮盈，留空并标注（PRD §17.2），不强行从 holding.pnl 推断。
+  const currentHoldingPnl = undefined;
   const cashDifference = fund.account.totalAsset - holdingValue;
   const cashTolerance = Math.max(0.01, Math.abs(fund.account.totalAsset) * 0.0001);
   const cash = cashDifference >= -cashTolerance
@@ -160,7 +162,7 @@ export function migrateLegacyFundData(raw: unknown): InvestmentDataset {
 
   const warnings: string[] = [
     "legacy:migrated-from-v1.1",
-    ...(currentHoldingPnl === undefined ? ["legacy:current-holding-pnl-incomplete"] : []),
+    "legacy:cumulative-pnl-imported-holding-pnl-unknown",
     ...(cash === undefined ? ["legacy:cash-derivation-invalid"] : []),
     "legacy:asset-metadata-pending-exposure-engine",
   ];

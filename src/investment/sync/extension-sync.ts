@@ -1,6 +1,8 @@
-import type { InvestmentDataset } from "../domain";
-import { dedupDailyPnl, dedupTransactions } from "./dedup";
+import type { DataCoverage, InvestmentDataset, InvestmentScope } from "../domain";
+import { migrateLegacyFundData } from "../adapter/legacy-migration";
+import { DatasetSourceAdapter } from "../adapter/InvestmentSourceAdapter";
 import { InvestmentLedger } from "../ledger/repository";
+import { SyncService } from "./sync-service";
 
 export type ExtensionSyncPhase =
   | "checking"
@@ -21,14 +23,27 @@ export interface CollectionProgress {
   warnings: string[];
 }
 
+export interface InvestmentTransferSummary {
+  holdingCount: number;
+  transactionCount: number;
+  backupDownloaded: boolean;
+  coverage: Array<{
+    dataset: string;
+    completeness: "complete" | "partial" | "unknown" | "failed";
+    warningCount: number;
+  }>;
+}
+
 export interface InvestmentTransferReceipt {
   protocol: string;
   capturedAt: string;
   acknowledgedAt?: string;
   status: "pending" | "imported" | "discarded";
+  summary?: InvestmentTransferSummary;
 }
 
 export interface InvestmentExtensionStatus {
+  extensionVersion?: string;
   pending: boolean;
   receipt: InvestmentTransferReceipt | null;
   collection: CollectionProgress;
@@ -137,6 +152,35 @@ const EMPTY_COUNTS = {
   duplicateDailyPnl: 0,
 };
 
+export interface RealAccountScopeInput {
+  includedAssetIds: string[];
+  capturedAt: string;
+  hasAccount: boolean;
+  accountCoverage?: DataCoverage;
+}
+
+/** 合并真实账户范围时保留首次管理与计划核对边界，避免最近同步时间覆盖历史。 */
+export function buildRealAccountScope(
+  existingScope: InvestmentScope | undefined,
+  input: RealAccountScopeInput,
+): InvestmentScope {
+  const capturedDate = input.capturedAt.slice(0, 10);
+  return {
+    ...existingScope,
+    scopeId: "scope:real-account",
+    scopeType: "ACCOUNT",
+    includedAssetIds: [...new Set(input.includedAssetIds)],
+    baseCurrency: existingScope?.baseCurrency ?? "CNY",
+    denominatorSource: input.hasAccount ? "account_total_asset" : "none",
+    denominatorAsOf: input.hasAccount ? capturedDate : undefined,
+    denominatorCoverage: input.accountCoverage,
+    effectiveFrom: existingScope?.effectiveFrom ?? capturedDate,
+    managementStartedAt: existingScope?.managementStartedAt ?? input.capturedAt,
+    operationReviewFrom: existingScope?.operationReviewFrom,
+    version: existingScope?.version ?? 1,
+  };
+}
+
 export async function importInvestmentStaging(
   ledger: InvestmentLedger,
   onProgress?: (progress: ExtensionSyncProgress) => void,
@@ -176,38 +220,34 @@ export async function importInvestmentStaging(
   }
 
   const dataset = staging.dataset;
-  if (dataset.version !== "2.0") throw new Error(`不支持的 Investment Protocol：${dataset.version}`);
+  let normalized: InvestmentDataset;
+  if (dataset.version === "2.0") {
+    normalized = dataset;
+  } else if (dataset.version === "1.1") {
+    // 旧版插件 / JSON 备份：走 legacy 迁移降级为 v2.0（含 coverage + warnings=legacy:*），再统一走 SyncService。
+    normalized = migrateLegacyFundData(dataset as unknown);
+  } else {
+    throw new Error(`不支持的 Investment Protocol：${dataset.version}`);
+  }
 
   onProgress?.({ phase: "importing", message: "正在写入账户、持仓、交易和覆盖范围…" });
   await ledger.removeMockData();
-  if (dataset.account) await ledger.putAccount(dataset.account);
-  if (dataset.portfolio) await ledger.putPortfolio(dataset.portfolio);
-  if (dataset.assets.length) await ledger.putAssets(dataset.assets);
-
-  const existingTransactions = await ledger.getAllTransactions();
-  const transactionResult = dedupTransactions(existingTransactions, dataset.transactions);
-  if (transactionResult.added.length) await ledger.putTransactions(transactionResult.added);
-
-  const existingDailyPnl = await ledger.getAllDailyPnl();
-  const dailyResult = dedupDailyPnl(existingDailyPnl, dataset.dailyPnl);
-  if (dailyResult.added.length) await ledger.putDailyPnl(dailyResult.added);
-
-  const existingCoverage = await ledger.getCoverage();
-  const incomingDatasets = new Set(dataset.coverage.map((item) => item.dataset));
-  const retainedCoverage = existingCoverage.filter((item) => !incomingDatasets.has(item.dataset));
-  await ledger.putCoverage([...retainedCoverage, ...dataset.coverage]);
-  await ledger.addImport({
-    id: `import:extension:${dataset.capturedAt}:${Date.now()}`,
-    capturedAt: dataset.capturedAt,
-    source: dataset.source,
-    addedTransactions: transactionResult.added.length,
-    duplicateTransactions: transactionResult.duplicates,
-    addedDailyPnl: dailyResult.added.length,
-    duplicateDailyPnl: dailyResult.duplicates,
-    failures: [],
-    warnings: dataset.warnings,
-    status: "ok",
-  });
+  await ledger.removeDemoReviewConfiguration();
+  // 委托 SyncService 统一去重 / coverage 保守合并 / 审计 / health，与 loadDemoData 同路径。
+  const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), ledger).run();
+  const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
+  if (includedAssetIds.length) {
+    const accountCoverage = normalized.coverage.find((item) => item.dataset === "account");
+    const existingScope = (await ledger.getScopes()).find(
+      (scope) => scope.scopeId === "scope:real-account",
+    );
+    await ledger.putInvestmentScope(buildRealAccountScope(existingScope, {
+      includedAssetIds,
+      capturedAt: normalized.capturedAt,
+      hasAccount: Boolean(normalized.account),
+      accountCoverage,
+    }));
+  }
 
   onProgress?.({ phase: "acknowledging", message: "数据已写入 Ledger，正在确认清除插件一次性暂存…" });
   const failures: string[] = [];
@@ -230,13 +270,13 @@ export async function importInvestmentStaging(
   });
   return {
     outcome: "imported",
-    capturedAt: dataset.capturedAt,
-    addedTransactions: transactionResult.added.length,
-    duplicateTransactions: transactionResult.duplicates,
-    addedDailyPnl: dailyResult.added.length,
-    duplicateDailyPnl: dailyResult.duplicates,
-    warnings: [...dataset.warnings],
-    failures,
+    capturedAt: syncResult.capturedAt,
+    addedTransactions: syncResult.addedTransactions,
+    duplicateTransactions: syncResult.duplicateTransactions,
+    addedDailyPnl: syncResult.addedDailyPnl,
+    duplicateDailyPnl: syncResult.duplicateDailyPnl,
+    warnings: syncResult.warnings,
+    failures: [...failures, ...syncResult.failures],
     status: extensionStatus,
   };
 }

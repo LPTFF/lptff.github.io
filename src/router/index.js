@@ -80,6 +80,7 @@ const routes = [
         component: () => import("../views/investment/OSLayout.vue"),
         children: [
           { path: "", name: "os-console", component: () => import("../views/investment/ConsoleView.vue") },
+          { path: "review", name: "os-review", component: () => import("../views/investment/ReviewView.vue"), meta: { title: "复盘" } },
           { path: "portfolio", name: "os-portfolio", component: () => import("../views/investment/PortfolioView.vue") },
           { path: "policies", name: "os-policies", component: () => import("../views/investment/PoliciesView.vue") },
           { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue") },

@@ -1,11 +1,9 @@
 (() => {
-  const allowedOrigins = new Set([
-    "http://localhost:8090",
-    "http://127.0.0.1:8090",
-    "https://lptff.github.io",
-  ]);
+  const isAllowedOrigin =
+    location.protocol === "http:" && ["localhost", "127.0.0.1"].includes(location.hostname)
+    || location.origin === "https://lptff.github.io";
 
-  if (!allowedOrigins.has(location.origin)) return;
+  if (!isAllowedOrigin) return;
 
   function forward(message, responseType) {
     chrome.runtime.sendMessage(message, (response) => {
@@ -37,7 +35,12 @@
       forward({ type: "DISCARD_INVESTMENT_STAGING", requestId: event.data.requestId }, "LPTFF_INVESTMENT_STAGING_DISCARDED");
     }
     if (event.data?.type === "LPTFF_INVESTMENT_START_COLLECTION") {
-      forward({ type: "START_AUTO_COLLECTION", requestId: event.data.requestId }, "LPTFF_INVESTMENT_COLLECTION_STARTED");
+      // 网站同步只生成一次性 staging；只有用户从扩展 popup 明确导出时才允许落盘备份。
+      forward({
+        type: "START_AUTO_COLLECTION",
+        requestId: event.data.requestId,
+        downloadBackup: false,
+      }, "LPTFF_INVESTMENT_COLLECTION_STARTED");
     }
   });
 

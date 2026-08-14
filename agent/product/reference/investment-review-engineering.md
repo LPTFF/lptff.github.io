@@ -2,7 +2,7 @@
 
 > **用途**：服务实现、深度审查和回归验证。产品目的、当前范围、A/B 分工和人的验收以[人的产品审查正文](../investment-review.md)为准；理解产品不需要先读本附录。
 >
-> **状态**：目标工程契约，不代表当前 TypeScript 已实现。本轮只更新资料，不修改 runtime。
+> **状态（2026-08-14）**：P0 纪律与执行复盘（WP0-1~WP0-4）的运行时已实现；真实来源未提供的 requested/partial/failed/cancelled 等语义继续保持 unknown。P1~P4 仍为目标工程契约，未启动。
 
 ## 1. 分层与复用边界
 
@@ -20,25 +20,25 @@ Source Adapter
 
 `deterministic` 指同一有效输入必然得到相同核心结果的普通代码，不由 LLM 自由判断。Core 不读取真实页面 DOM、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；Adapter 可由人工 Mock 完全替换。
 
-### 当前代码中要复用的基础
+### 当前运行时基础
 
-- `PortfolioSnapshot`、`HoldingSnapshot`、`Transaction`、`PolicyVersion` 和 `Action`；
-- IndexedDB Ledger、同步 receipt、Coverage 和 reload 恢复；
-- `evaluatePolicies` 的版本遍历和 exposure 聚合方式；
-- `detectAbnormalTransactions` 的历史金额偏离信号；
-- Portfolio、Policies、Actions、Data、Evidence 的现有页面模式。
+- `InvestmentScope`、`PortfolioSnapshot`、`HoldingSnapshot`、`Transaction` 与按问题传播的 Coverage；
+- `InvestmentPolicyVersion`、`StrategyRuleVersion`、不可变 `DecisionRecord` / `OperationPlan` 与 `ExecutionLink`；
+- IndexedDB Ledger、同步 receipt、ReviewAction、ReductionPlan 和 reload 恢复；
+- operation/position/trailing-stop/take-profit/reduction 确定性引擎及 review orchestrator；
+- Portfolio、Policies、Actions、Data、Evidence 和 canonical Review 页面。
 
-复用不等于现有能力已经完成用户任务：
+运行时存在不等于所有外部事实都已被证明：
 
-- 当前 `PolicyRule` 主要支持通用 exposure dimension 和 pause，不能直接表达完整的单基金仓位、移动止损与减仓闭环；
-- 当前 `TransactionStatus` 缺少 submitted/requested、partially confirmed、cancelled 等阶段；
-- 当前“大额主动买入”只是一种统计信号，不能替代计划/规则相对的异常判断；
-- Action `open/closed` 不能证明真实交易已确认或处理后仓位已经恢复；
-- Console 的 `normal` 只能描述当前已计算的健康信号，不能概括尚未覆盖的用户规则。
+- “大额主动买入”仍只是一种统计信号，不能替代计划/规则相对的异常判断；
+- ReviewAction 的关闭或等待状态不能证明真实交易已确认或处理后仓位已经恢复；
+- 真实来源只有日期时，同日计划不能自动证明事前性；
+- 来源分页 partial、NAV stale 或 basis 不清时，只降级依赖它们的判断；
+- 来源没有提供 requested、partially_confirmed、cancelled 等阶段时，对应判断保持 unknown。
 
-## 2. P0 目标领域对象
+## 2. P0 已实现领域对象
 
-以下对象是未来实现契约；具体命名可在编码前根据现有 idiom 微调，但语义不得折叠。
+以下对象已进入 P0 运行时契约；P1–P4 对象仍是后续目标，命名可在进入实现前根据现有 idiom 微调，但语义不得折叠。
 
 ### `InvestmentScope`
 
@@ -48,7 +48,11 @@ Source Adapter
 - 包含的账户/资产引用和明确排除项；
 - 基准币种；初始 A 股人民币基金通常为 CNY；
 - 仓位分母的来源、估值时间和 Coverage；
-- 有效期与版本。
+- 有效期与版本；
+- `managementStartedAt`：首次由系统管理该范围的稳定时间，后续同步不得覆盖；
+- `operationReviewFrom`：用户启用事前计划核对的起始日，缺省表示尚未启用。
+
+真实来源只有日期而没有可信交易时刻时，基线当日归入历史背景，`operationReviewFrom` 最早为事前记录保存后的下一日。既有数据升级时以当前采集建立管理基线，不从历史交易反推过去何时开始管理。
 
 单只基金是范围内的分析对象，不自动成为仓位分母。未声明的其他资产既不能自动纳入，也不能当作不存在。
 
@@ -167,14 +171,17 @@ Action 被关闭不能跳过 execution 或 post-state recheck。每个中间态�
 7. 一个判断证据不足不自动阻断无依赖关系的判断。
 8. AI、更换模型或关闭 AI 不改变任何 P0–P3 核心状态。
 9. 系统不自动申购、赎回、调仓、转账或交易。
+10. `managementStartedAt` 和 `operationReviewFrom` 是稳定边界；新采集只能追加事实，不能把边界移动到最近同步日。
+11. 管理基线之前及来源只有日期的启用当日操作不产生计划 breach；缺少历史计划 Coverage 不等于确定“无计划”。
 
 ### 操作计划与执行
 
 最小证据：有效计划/规则、来源操作、申请与确认状态、稳定关联依据。
 
-- 无计划操作与计划偏离分开；对象、方向、数量和时间偏离分别输出；
+- 计划核对未启用或交易早于 `operationReviewFrom` 时，只保留为历史基线，不产生计划合规 Judgment；
+- 核对生效后的无记录操作与已有计划但未关联分开；前者是管理流程记录缺口，后者等待用户显式关联，两者都不等于投资结果错误；
 - 历史金额偏离只能增加一个 `historical_amount_signal`，不能直接产生规则 breach；
-- Transaction 发生后不得补写成“事前计划”；
+- Transaction 发生后不得补写成“事前计划”；来源只有日期时，同日记录不能证明在先，因此拒绝关联；
 - 关联不确定时输出 unlinked/unknown，不以金额或日期相近强行关联；
 - partial、failed、cancelled 不进入 confirmed/post-state restored。
 
@@ -250,7 +257,9 @@ Agent A 只使用人工构造、不可还原真实账户的 fixture。Agent B �
 | --- | --- | --- |
 | `no-operation-in-bounds` | 完整规则与快照，本期无操作 | 仅已覆盖判断为符合；未覆盖问题不被总结为正常 |
 | `planned-confirmed-operation` | 事前计划、匹配申请与确认 | 计划/实际一致，保留 plan 与 execution 两条事实 |
-| `unplanned-operation` | 交易早于任何计划 | BREACH/待确认，不允许事后补写计划 |
+| `historical-baseline-operation` | 首次导入或计划核对启用前的交易 | 只计入历史基线，不生成计划 breach |
+| `unplanned-operation` | `operationReviewFrom` 之后的已确认交易，完整来源 Coverage，且交易前不存在 DecisionRecord | BREACH 表示计划记录流程缺口；不允许事后补写，也不评价投资结果 |
+| `unlinked-prior-plan` | 交易前已有合法 DecisionRecord，但没有声明 ExecutionLink | 等待用户显式关联；系统不自动匹配 |
 | `over-plan-operation` | 实际确认量超过计划范围 | 数量偏离独立输出 |
 | `pause-conflict` | 生效 pause rule 期间新增 | 规则冲突引用当时版本 |
 | `historical-amount-only` | 金额为历史中位数三倍但计划内 | 只输出统计信号，不输出计划 breach |

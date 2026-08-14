@@ -13,6 +13,13 @@
       <button id="export" type="button">同步最近投资变化</button>
       <div id="coverage" aria-live="polite"></div>
       <div id="status" role="status" aria-live="polite">数据只保存在本地，可继续下载 v1.1 JSON 备份。</div>
+      <details class="advanced">
+        <summary>高级设置</summary>
+        <label>页面超时(ms) <input id="cfg-timeout" type="number" min="5000" step="1000" /></label>
+        <label>并行数(1-8) <input id="cfg-concurrency" type="number" min="1" max="8" /></label>
+        <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3,4" /></label>
+        <button id="cfg-save" type="button">保存设置</button>
+      </details>
     </main>
     <script src="popup.js"></script>
   </body>

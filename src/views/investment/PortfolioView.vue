@@ -18,17 +18,20 @@
       <!-- Fund Holdings -->
       <el-card shadow="never" class="section">
         <template #header>基金持仓</template>
-        <el-table :data="holdings" size="small" border>
+        <el-table :data="sortedHoldings" size="small" border :default-sort="{ prop: 'marketValue', order: 'descending' }" @sort-change="onSortChange">
           <el-table-column prop="assetId" label="基金" width="120" />
           <el-table-column prop="name" label="名称" min-width="160" />
-          <el-table-column label="市值" width="120">
+          <el-table-column prop="marketValue" label="市值" width="120" sortable="custom">
             <template #default="{ row }">{{ fmt(row.marketValue) }}</template>
           </el-table-column>
-          <el-table-column label="持仓盈亏" width="120">
-            <template #default="{ row }">{{ row.pnl === undefined ? "—" : `${fmt(row.pnl)}` }}</template>
+          <el-table-column prop="pnl" label="持仓盈亏" width="120" sortable="custom">
+            <template #default="{ row }"><span :class="profitClass(row.pnl)">{{ row.pnl === undefined ? "—" : fmt(row.pnl) }}</span></template>
           </el-table-column>
-          <el-table-column label="仓位" width="90">
-            <template #default="{ row }">{{ (row.weight * 100).toFixed(1) }}%</template>
+          <el-table-column prop="pnlRate" label="持仓收益率" width="120" sortable="custom">
+            <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate) }}</span></template>
+          </el-table-column>
+          <el-table-column prop="weight" label="仓位" width="90" sortable="custom">
+            <template #default="{ row }">{{ fmtPct(row.weight) }}</template>
           </el-table-column>
           <el-table-column label="底层指数" min-width="120">
             <template #default="{ row }">{{ row.indexes.join(" / ") || "待识别" }}</template>
@@ -51,14 +54,23 @@
           <div class="exposure-head">
             <span>风险暴露</span>
             <el-radio-group v-model="dimension" size="small">
-              <el-radio-button label="index">指数</el-radio-button>
-              <el-radio-button label="region">地区</el-radio-button>
-              <el-radio-button label="assetClass">资产类型</el-radio-button>
-              <el-radio-button label="currency">币种</el-radio-button>
-              <el-radio-button label="theme">主题</el-radio-button>
+              <el-radio-button v-for="m in meaningfulDims" :key="m.dim" :label="m.dim">{{ dimensionLabel(m.dim) }}</el-radio-button>
             </el-radio-group>
           </div>
         </template>
+        <el-alert
+          v-if="singleValueDims.length"
+          type="info"
+          :closable="false"
+          show-icon
+          class="single-alert"
+        >
+          <template #title>以下维度当前无暴露差异</template>
+          <div v-for="s in singleValueDims" :key="s.dim" class="single-row">
+            {{ dimensionLabel(s.dim) }}：全部 {{ s.knownSlices[0].value }}（{{ (s.knownSlices[0].pct * 100).toFixed(0) }}%）
+          </div>
+        </el-alert>
+        <el-empty v-if="!meaningfulDims.length" description="当前组合风险暴露单一，无显著维度差异" />
         <el-alert
           v-if="currentExposure.unknownPct > 0"
           type="info"
@@ -78,21 +90,27 @@
         </div>
       </el-card>
 
-      <!-- 重复暴露（只报告事实，PRD §18.5） -->
-      <el-card v-if="duplicateExposures.length" shadow="never" class="section">
-        <template #header>重复暴露</template>
+      <!-- 共同暴露：按当前采集元数据动态生成，只报告标签关联，不推断底层权重 -->
+      <el-card v-if="sharedExposures.length" shadow="never" class="section">
+        <template #header>共同暴露与集中度</template>
         <el-alert
-          v-for="d in duplicateExposures"
-          :key="`${d.dimension}-${d.value}`"
+          type="info"
+          :closable="false"
+          description="以下结果由当前持仓和已识别元数据动态生成。同一持仓可关联多个标签，因此跨标签百分比不可相加；关联仓位占比不等于来源未提供的精确底层权重。"
+          class="shared-note"
+        />
+        <el-alert
+          v-for="exposure in sharedExposures"
+          :key="`${exposure.dimension}-${exposure.value}`"
           type="info"
           show-icon
           :closable="false"
           class="dup-alert"
         >
           <template #title>
-            {{ dimensionLabel(d.dimension) }}：{{ d.value }} 实际总暴露 {{ (d.pct * 100).toFixed(1) }}%
+            {{ dimensionLabel(exposure.dimension) }}：{{ exposure.value }} 关联仓位占比 {{ (exposure.associatedPct * 100).toFixed(1) }}%
           </template>
-          <div class="dup-funds">涉及基金：{{ d.assetIds.join("、") }}</div>
+          <div class="dup-funds">涉及基金：{{ exposure.assetIds.join("、") }}</div>
         </el-alert>
       </el-card>
     </template>
@@ -100,16 +118,56 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
-import { buildPortfolioHoldings } from "../../investment/composables/selectors";
-import { aggregateExposure, detectDuplicateExposures, exposureCoverage } from "../../investment/engines/exposure";
+import { buildPortfolioHoldings, sortPortfolioHoldings, type PortfolioNumericSortKey, type SortOrder } from "../../investment/composables/selectors";
+import { aggregateExposure, detectSharedExposures, exposureCoverage } from "../../investment/engines/exposure";
 import type { ExposureDimension } from "../../investment/domain";
 
 const { state } = useInvestmentOS();
 
 const holdings = computed(() => buildPortfolioHoldings(state.portfolio, state.assets));
+const sortState = ref<{ key: PortfolioNumericSortKey; order: SortOrder }>({ key: "marketValue", order: "descending" });
+const sortedHoldings = computed(() => sortPortfolioHoldings(holdings.value, sortState.value.key, sortState.value.order));
+
+function onSortChange({ prop, order }: { prop: string | null; order: SortOrder | null }): void {
+  if (!prop || !order || !["marketValue", "pnl", "pnlRate", "weight"].includes(prop)) {
+    sortState.value = { key: "marketValue", order: "descending" };
+    return;
+  }
+  sortState.value = { key: prop as PortfolioNumericSortKey, order };
+}
+
+const ALL_DIMS: ExposureDimension[] = ["index", "region", "assetClass", "currency", "theme"];
+
+// 每个维度的 coverage + 已知切片数（排除"（未标注）"桶）。
+// 产品原则：币种/FX 等维度仅在跨币种时才有意义；初始人民币 A 股基金范围不作 P0 前置。
+// 故按"已知切片数"判断区分度，≥2 才作为可切换 tab，单一值折叠到"无暴露差异"汇总。
+const allCoverages = computed(() =>
+  state.portfolio
+    ? ALL_DIMS.map((d) => {
+        const cov = exposureCoverage(state.portfolio!.holdings, state.assets, d);
+        const knownSlices = cov.slices.filter((s) => s.value !== "（未标注）");
+        return { dim: d, cov, knownSlices };
+      })
+    : [],
+);
+
+// 有区分度：≥2 个已知切片 → 作为可切换 tab
+const meaningfulDims = computed(() => allCoverages.value.filter((c) => c.knownSlices.length >= 2));
+
+// 单一值：恰好 1 个已知切片（如纯 A 股组合的计价币种全 CNY）→ 折叠到"无暴露差异"汇总
+const singleValueDims = computed(() => allCoverages.value.filter((c) => c.knownSlices.length === 1));
+
 const dimension = ref<ExposureDimension>("index");
+watch(
+  () => meaningfulDims.value,
+  (list) => {
+    if (!list.some((c) => c.dim === dimension.value) && list.length) dimension.value = list[0].dim;
+  },
+  { immediate: true },
+);
+
 const currentExposure = computed(() =>
   state.portfolio
     ? exposureCoverage(state.portfolio.holdings, state.assets, dimension.value)
@@ -118,12 +176,21 @@ const currentExposure = computed(() =>
 const exposureSlices = computed(() =>
   state.portfolio ? aggregateExposure(state.portfolio.holdings, state.assets, dimension.value) : [],
 );
-const duplicateExposures = computed(() =>
-  state.portfolio ? detectDuplicateExposures(state.portfolio.holdings, state.assets) : [],
+const sharedExposures = computed(() =>
+  state.portfolio ? detectSharedExposures(state.portfolio.holdings, state.assets) : [],
 );
 
 function dimensionLabel(d: ExposureDimension): string {
-  return { index: "指数", region: "地区", assetClass: "资产类型", currency: "币种", theme: "主题" }[d];
+  return { index: "底层指数", region: "投资市场", assetClass: "底层资产类型", currency: "计价币种", theme: "行业主题" }[d];
+}
+
+function fmtPct(value: number | undefined): string {
+  return value === undefined ? "—" : `${(value * 100).toFixed(2)}%`;
+}
+
+function profitClass(value: number | undefined): string {
+  if (value === undefined || value === 0) return "";
+  return value > 0 ? "profit-positive" : "profit-negative";
 }
 
 function fmt(n: number): string {
@@ -158,6 +225,15 @@ function fmt(n: number): string {
   font-size: 18px;
   font-weight: 600;
 }
+.shared-note {
+  margin-bottom: 12px;
+}
+.profit-positive {
+  color: var(--el-color-danger);
+}
+.profit-negative {
+  color: var(--el-color-success);
+}
 .exposure-head {
   display: flex;
   align-items: center;
@@ -167,6 +243,14 @@ function fmt(n: number): string {
 }
 .coverage-alert {
   margin-bottom: 12px;
+}
+.single-alert {
+  margin-bottom: 12px;
+}
+.single-row {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  margin: 2px 0;
 }
 .exposure-list {
   display: flex;

@@ -34,13 +34,19 @@ async function requestJson(path, options) {
   return response.json();
 }
 
+function optionalNumber(value) {
+  if (value === undefined || value === null || String(value).trim() === "") return undefined;
+  const parsed = Number(String(value).replace(/,/g, "").replace(/%$/, ""));
+  return Number.isFinite(parsed) ? parsed : undefined;
+}
+
 function mapHolding(item) {
   return {
     code: item.fundCode,
     name: item.fundName || `基金${item.fundCode}`,
     amount: Number(item.assetValue) || 0,
-    profit: Number(item.profitValue) || 0,
-    profitRate: Number(item.profitPercent) || 0,
+    profit: optionalNumber(item.profitValue),
+    profitRate: optionalNumber(item.profitPercent),
     ratio: 0,
     nav: Number(item.nav) || 0,
     navDate: item.navdate || "",
@@ -310,8 +316,6 @@ async function collectSinglePage(networkData, fundName) {
     code: fundCode,
     name: resolvedFundName,
     amount: detail.value,
-    profit: 0,
-    profitRate: 0,
     ratio: 100,
     shares: detail.shares,
     availableShares: detail.availableShares,
@@ -330,7 +334,7 @@ async function collectSinglePage(networkData, fundName) {
   };
   return {
     holdings: [holding],
-    account: { totalAsset: detail.value, totalProfit: holding.profit, profitRate: holding.profitRate },
+    account: { totalAsset: detail.value },
     warnings,
   };
 }

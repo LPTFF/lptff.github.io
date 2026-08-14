@@ -260,9 +260,9 @@ function complexDataset(): InvestmentDataset {
     // 异常金额（明显高于历史正常）
     makeTransaction({ occurredAt: "2026-08-01", assetId: "F004", type: "BUY", amount: 12000, sourceTransactionId: "manual-3", sourceType: "manual_import" }),
     // 未确认交易
-    makeTransaction({ occurredAt: "2026-08-05", assetId: "F002", type: "BUY", amount: 800, status: "PENDING", sourceTransactionId: "pending-1" }),
+    makeTransaction({ occurredAt: "2026-08-05", assetId: "F002", type: "BUY", amount: 800, status: "requested", sourceTransactionId: "pending-1" }),
     // 失败交易
-    makeTransaction({ occurredAt: "2026-08-06", assetId: "F002", type: "BUY", amount: 800, status: "FAILED", sourceTransactionId: "failed-1" }),
+    makeTransaction({ occurredAt: "2026-08-06", assetId: "F002", type: "BUY", amount: 800, status: "failed", sourceTransactionId: "failed-1" }),
   ];
   return makeDataset({
     source: "mock-complex",

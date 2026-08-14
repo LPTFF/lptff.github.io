@@ -60,7 +60,7 @@ const dailyPnl = computed(() => [...state.dailyPnl]);
 const coverage = computed(() => [...state.coverage]);
 const policies = computed(() => [...state.policies]);
 const investedAmount = computed(() => transactions.value
-  .filter((tx) => tx.type === "BUY" && tx.status !== "FAILED")
+  .filter((tx) => tx.type === "BUY" && tx.status !== "failed" && tx.status !== "cancelled")
   .reduce((sum, tx) => sum + (tx.confirmedAmount ?? tx.amount), 0));
 const pnl = computed(() => dailyPnl.value.reduce((sum, point) => sum + point.pnl, 0));
 const ruleDeviations = computed(() => state.actions.filter((action) =>

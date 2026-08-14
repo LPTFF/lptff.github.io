@@ -50,7 +50,12 @@ function updateCoverage(staging) {
 function updateTransferStatus(status) {
   if (!status || status.collection?.running) return;
   if (status.pending) {
-    setStatus("采集完成，等待 Investment OS 读取；JSON 备份与待导入数据均已生成。", "success");
+    setStatus(
+      status.receipt?.summary?.backupDownloaded
+        ? "采集完成，等待 Investment OS 读取；JSON 备份与待导入数据均已生成。"
+        : "采集完成，等待 Investment OS 读取；网站采集未下载原始 JSON 备份。",
+      "success",
+    );
     return;
   }
   if (status.receipt?.status === "imported") {
@@ -65,7 +70,7 @@ function updateTransferStatus(status) {
 function request() {
   buttons.forEach((button) => { button.disabled = true; });
   setStatus("正在启动自动采集…");
-  chrome.runtime.sendMessage({ type: "START_AUTO_COLLECTION" }, (response) => {
+  chrome.runtime.sendMessage({ type: "START_AUTO_COLLECTION", downloadBackup: true }, (response) => {
     if (chrome.runtime.lastError) {
       buttons.forEach((button) => { button.disabled = false; });
       setStatus(chrome.runtime.lastError.message || "扩展通信失败", "error");
@@ -99,4 +104,27 @@ chrome.runtime.sendMessage({ type: "GET_COLLECTION_STATUS" }, (response) => {
 });
 chrome.runtime.sendMessage({ type: "GET_INVESTMENT_STATUS" }, (response) => {
   if (!chrome.runtime.lastError && response?.ok) updateTransferStatus(response.status);
+});
+
+// 高级设置：加载当前采集配置并填充输入框
+chrome.runtime.sendMessage({ type: "GET_CONFIG" }, (response) => {
+  if (chrome.runtime.lastError || !response?.ok || !response.config) return;
+  document.querySelector("#cfg-timeout").value = response.config.pageTimeout;
+  document.querySelector("#cfg-concurrency").value = response.config.singleConcurrency;
+  document.querySelector("#cfg-ranges").value = (response.config.queryRanges || []).join(",");
+});
+
+document.querySelector("#cfg-save")?.addEventListener("click", () => {
+  const config = {
+    pageTimeout: Number(document.querySelector("#cfg-timeout").value),
+    singleConcurrency: Number(document.querySelector("#cfg-concurrency").value),
+    queryRanges: document.querySelector("#cfg-ranges").value.split(",").map((s) => s.trim()).filter(Boolean),
+  };
+  chrome.runtime.sendMessage({ type: "SAVE_CONFIG", config }, (response) => {
+    if (!chrome.runtime.lastError && response?.ok) {
+      setStatus("采集设置已保存，下次采集生效。", "success");
+    } else {
+      setStatus(response?.error || "保存设置失败", "error");
+    }
+  });
 });

@@ -69,7 +69,7 @@ export function classifyTransactions(transactions: Transaction[]): BehaviorAssig
 
   return sorted.map((tx) => {
     let behaviorType: BehaviorType;
-    if (tx.status === "FAILED" || tx.status === "PENDING") {
+    if (tx.status === "failed" || tx.status === "requested" || tx.status === "cancelled") {
       behaviorType = "UNKNOWN";
     } else if (systematicIds.has(tx.id)) {
       behaviorType = "SYSTEMATIC_INVESTMENT";
@@ -179,7 +179,7 @@ export function buildBehaviorActions(transactions: Transaction[], today: string)
 
   const assignmentMap = new Map(assignments.map((a) => [a.txId, a.behaviorType]));
   for (const tx of transactions) {
-    if (tx.status === "FAILED") continue;
+    if (tx.status === "failed" || tx.status === "cancelled") continue;
     if (assignmentMap.get(tx.id) === "UNKNOWN") {
       actions.push({
         id: `act:unclassified:${tx.id}:${today}`,

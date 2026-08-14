@@ -1,9 +1,14 @@
 {
   "manifest_version": 3,
   "name": "LPTFF Investment Assistant",
-  "version": "2.0.0",
-  "description": "在用户主动点击后，从已登录的天天基金页面获取投资事实并同步到本地 Investment OS。",
+  "version": "2.2.0",
+  "description": "在用户主动点击后，从已登录的天天基金页面获取投资事实，并用公开基金档案补齐资产元数据后同步到本地 Investment OS。",
   "permissions": ["activeTab", "downloads", "tabs", "storage"],
+  "host_permissions": [
+    "https://fund.eastmoney.com/*",
+    "https://fundf10.eastmoney.com/*",
+    "https://api.fund.eastmoney.com/*"
+  ],
   "action": {
     "default_title": "导出基金数据",
     "default_popup": "popup/popup.html"
@@ -23,8 +28,8 @@
     },
     {
       "matches": [
-        "http://localhost:8090/investment*",
-        "http://127.0.0.1:8090/investment*",
+        "http://localhost/investment*",
+        "http://127.0.0.1/investment*",
         "https://lptff.github.io/investment*"
       ],
       "js": ["content/web-bridge.js"],
@@ -36,6 +41,13 @@
         "https://query.1234567.com.cn/*"
       ],
       "js": ["content/collector.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://fundf10.eastmoney.com/jbgk_*.html"
+      ],
+      "js": ["content/public-fund-profile.js"],
       "run_at": "document_idle"
     }
   ]
