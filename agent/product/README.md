@@ -16,6 +16,8 @@
 
 若要回答“这次为什么做、做什么、谁做、怎样验收、是否对人友好”，只读[人的产品审查正文](investment-review.md)，不要从工程附录、source 或 archive 开始。
 
+**待审查新诉求（2026-08-15）**：[基金复盘助手：核心产品定义](source/fund-review-assistant-product-definition.md) 已作为上游输入入库，尚未与当前 Investment Review 主线合并审查。它强调“账户状态 + 投资纪律 + 异常检测”、四层模型与 LLM escalation；是否调整当前 P0 主线，按[业务任务分析规范](../standards/business-task-analysis.md)核对后再决定。
+
 ## 站点产品组合
 
 | 方向 | 定位 | 当前优先级 | 启动或继续条件 |
