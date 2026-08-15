@@ -7,7 +7,8 @@
 ## 1. 分层与复用边界
 
 ```text
-Source Adapter
+Comprehensive Source Capture
+→ Page Consumption Adapter
 → Normalized Facts + DataCoverage
 → InvestmentScope + versioned ex-ante rules/plans
 → deterministic Judgment Engines
@@ -19,6 +20,15 @@ Source Adapter
 ```
 
 `deterministic` 指同一有效输入必然得到相同核心结果的普通代码，不由 LLM 自由判断。Core 不读取真实页面 DOM、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；Adapter 可由人工 Mock 完全替换。
+
+### 来源采集层与页面消费层
+
+天天基金链路明确分成两个稳定边界：
+
+1. **全面来源采集层**输出 `eastmoney-source-capture/1.0`。它保留账户/持仓来源字段、单基金份额/盈亏/定投表格、按时间范围和页码组织的交易记录、公开基金全部键值字段与章节，以及 Coverage、warning 和聚合性能指标。它不按当前页面需要裁剪字段，也不生成领域判断。
+2. **页面消费加工层**在网站侧把来源采集包投影为 `InvestmentDataset 2.0`。账户、持仓、交易状态、每日盈亏、资产分类和 Coverage 的产品语义都在 Adapter 中形成；页面或领域模型变化只调整这一层，不反向修改已观察来源事实。
+
+扩展 staging 保存来源采集包并维持一次性 ACK 生命周期；读取端继续兼容旧 `InvestmentDataset 2.0` 和 `1.1` 备份。仓库内允许保留一份结构完整、数组受限、跨表标识一致替换的脱敏来源样本作为产品设计输入；真实采集包、认证字段、真实基金标识和投资值不得写入仓库。提交样本前运行 `node project-support/scripts/investment/validate-source-sample.js`，只以协议、字段路径、数组上限、固定样本值和敏感键规则作为自检依据。
 
 ### 当前运行时基础
 

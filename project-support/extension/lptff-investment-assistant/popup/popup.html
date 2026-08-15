@@ -9,16 +9,20 @@
   <body>
     <main class="popup">
       <h1>LPTFF Investment OS</h1>
-      <p>先在天天基金正常登录，再点击一次同步。插件会按页读取投资事实并写入一次性待导入区，不读取或保存 Cookie、密码和认证令牌。</p>
-      <button id="export" type="button">同步最近投资变化</button>
+      <p>复用一个账户页和一个交易页并行采集全面来源事实，再交给 Investment OS 按页面需要加工。插件不读取或保存 Cookie、密码和认证令牌。</p>
+      <button id="collect" type="button">开始高效采集</button>
+      <div id="branches" class="branches" aria-live="polite"></div>
       <div id="coverage" aria-live="polite"></div>
-      <div id="status" role="status" aria-live="polite">数据只保存在本地，可继续下载 v1.1 JSON 备份。</div>
+      <div id="status" role="status" aria-live="polite">数据只保存在本地，采集完成后可导入页面或另行导出。</div>
       <details class="advanced">
-        <summary>高级设置</summary>
+        <summary>采集与开发设置</summary>
         <label>页面超时(ms) <input id="cfg-timeout" type="number" min="5000" step="1000" /></label>
-        <label>并行数(1-8) <input id="cfg-concurrency" type="number" min="1" max="8" /></label>
-        <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3,4" /></label>
-        <button id="cfg-save" type="button">保存设置</button>
+        <label>基金详情并行数(1-8) <input id="cfg-concurrency" type="number" min="1" max="8" /></label>
+        <label>交易分页并行数(1-8) <input id="cfg-query-concurrency" type="number" min="1" max="8" /></label>
+        <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3" title="0=近1周, 1=近1月, 2=近3月, 3=近1年；4为自定义日期需手动查询，默认 3" /></label>
+        <button id="cfg-save" type="button" class="secondary">保存设置</button>
+        <button id="backup" type="button" class="secondary" disabled>下载完整本地备份</button>
+        <button id="sample" type="button" class="secondary" disabled>下载脱敏开发样本</button>
       </details>
     </main>
     <script src="popup.js"></script>

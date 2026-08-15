@@ -8,7 +8,7 @@
   const snapshotIndex = new Map();
   const delegateHeaders = new Map();
   const SENSITIVE_KEY = /^(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|secret)$/i;
-  const SENSITIVE_PART = /(?:authorization|access[-_]?token|session|password|secret|token|cookie)/i;
+  const SENSITIVE_PART = /(?:authorization|access[-_]?token|session|password|secret|token|cookie|bank(?:card)?|cardNo|phone|mobile|email|identity|idCard|cert(?:ificate)?(?:No|Id)?|(?:user|customer|account)(?:Name|No|Id))/i;
 
   function requestInfo(url) {
     try {
@@ -64,16 +64,16 @@
 
   function saveResponse(url, method, requestBody, response, requestHeaders) {
     const info = requestInfo(url);
-    if (!info) return Promise.resolve(false);
+    if (!info) return Promise.resolve(null);
     return response.clone().text().then((text) => {
       let payload;
       try {
         payload = JSON.parse(text);
       } catch {
-        return false;
+        return null;
       }
       const accepted = (info.key === "hold" || info.key === "single") ? payload?.succeed : payload?.code === 1200;
-      if (!accepted) return false;
+      if (!accepted) return null;
       const safePayload = safeValue(payload);
       const request = parseBody(requestBody);
       if (info.key === "delegate" && request?.timeType !== undefined) {
@@ -101,11 +101,11 @@
         ? { ...captured.single, [request?.dt || "unknown"]: safePayload }
         : safePayload;
       if (info.key === "delegate") captured.delegate = captured.snapshots.filter((item) => item.key === "delegate");
-      return true;
-    }).catch(() => false);
+      return snapshot;
+    }).catch(() => null);
   }
 
-  const originalFetch = window.fetch;
+  const originalFetch = window.fetch.bind(window);
   window.fetch = async (...args) => {
     const request = args[0];
     const init = args[1] || {};
@@ -178,24 +178,24 @@
       ? new URLSearchParams(Object.entries(requestBody).map(([name, value]) => [name, String(value)])).toString()
       : JSON.stringify(requestBody);
     try {
-      const response = await window.fetch(paths.delegate, {
+      const response = await originalFetch(paths.delegate, {
         method: "POST",
         credentials: "include",
         headers: { ...templateHeaders, "content-type": contentType },
         body,
       });
-      const payload = await response.clone().json();
-      const stored = await saveResponse(paths.delegate, "POST", body, response, templateHeaders);
-      const list = payload?.data?.list;
+      const snapshot = await saveResponse(paths.delegate, "POST", body, response, templateHeaders);
+      const list = snapshot?.response?.data?.list;
       window.postMessage({
         source: "lptff-investment-assistant",
         type: "LPTFF_DELEGATE_PAGE_RESULT",
         requestId,
-        ok: response.ok && payload?.code === 1200 && stored,
+        ok: Boolean(response.ok && snapshot),
         pageNum,
+        snapshot,
         listCount: Array.isArray(list) ? list.length : 0,
-        totalCount: Number(payload?.data?.totalCount) || 0,
-        error: response.ok && payload?.code === 1200 && stored ? "" : `交易接口返回 ${payload?.code || response.status} 或快照未写入`,
+        totalCount: Number(snapshot?.response?.data?.totalCount) || 0,
+        error: response.ok && snapshot ? "" : `交易接口返回 ${response.status} 或快照未写入`,
       }, location.origin);
     } catch (error) {
       window.postMessage({

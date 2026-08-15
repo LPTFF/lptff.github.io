@@ -1,54 +1,55 @@
 (() => {
-  const SAFE_COVERAGE_DATASETS = new Set([
-    "account",
-    "portfolio",
-    "holdings",
-    "transactions",
-    "dailyPnl",
-    "assets",
-    "nav",
-    "fundDetail",
-  ]);
+  const SAFE_COVERAGE_DATASETS = new Set(["account", "fundDetails", "publicFunds", "transactions"]);
 
-  function collectionOptions(message, sender, extensionOrigin) {
+  function collectionOptions(_message, sender, extensionOrigin) {
     const popupUrl = `${extensionOrigin}popup/popup.html`;
-    return {
-      downloadBackup: Boolean(
-        message?.downloadBackup === true
-        && !sender?.tab
-        && sender?.url === popupUrl,
-      ),
-    };
+    const senderUrl = typeof sender?.url === "string" ? sender.url : "";
+    const fromPopup = !sender?.tab && senderUrl === popupUrl;
+    let fromInvestmentPage = false;
+    if (sender?.tab && senderUrl) {
+      try {
+        fromInvestmentPage = /\/(?:investment)(?:\/|$)/.test(new URL(senderUrl).pathname);
+      } catch {
+        fromInvestmentPage = false;
+      }
+    }
+    if (!fromPopup && !fromInvestmentPage) throw new Error("只能从插件 popup 或 Investment 页面启动采集");
+    return { fromPopup, fromInvestmentPage };
   }
 
-  function persistencePlan(options) {
-    return {
-      stageDataset: true,
-      downloadBackup: options?.downloadBackup === true,
+  function summarizeCapture(capture) {
+    const warningCounts = {
+      account: 0,
+      fundDetails: Array.isArray(capture?.fundDetails)
+        ? capture.fundDetails.reduce((sum, item) => sum + (Array.isArray(item?.warnings) ? item.warnings.length : 0), 0)
+        : 0,
+      publicFunds: Array.isArray(capture?.publicFunds)
+        ? capture.publicFunds.reduce((sum, item) => sum + (Array.isArray(item?.warnings) ? item.warnings.length : 0), 0)
+        : 0,
+      transactions: Array.isArray(capture?.transactionRanges)
+        ? capture.transactionRanges.reduce((sum, item) => sum + (Array.isArray(item?.warnings) ? item.warnings.length : 0), 0)
+        : 0,
     };
-  }
-
-  function summarizeDataset(dataset, backupDownloaded) {
-    const coverage = Array.isArray(dataset?.coverage)
-      ? dataset.coverage.map((item) => ({
+    const coverage = Array.isArray(capture?.coverage)
+      ? capture.coverage.map((item) => ({
           dataset: SAFE_COVERAGE_DATASETS.has(item?.dataset) ? item.dataset : "other",
-          completeness: ["complete", "partial", "unknown", "failed"].includes(item?.completeness)
+          completeness: ["complete", "partial", "unknown"].includes(item?.completeness)
             ? item.completeness
             : "unknown",
-          warningCount: Array.isArray(item?.warningCodes) ? item.warningCodes.length : 0,
+          warningCount: warningCounts[item?.dataset] || 0,
         }))
       : [];
+    const transactionCount = Array.isArray(capture?.transactionRanges)
+      ? capture.transactionRanges.reduce((sum, range) => sum + (range.pages || []).reduce((pageSum, page) => pageSum + (page.records || []).length, 0), 0)
+      : 0;
     return {
-      holdingCount: Array.isArray(dataset?.portfolio?.holdings) ? dataset.portfolio.holdings.length : 0,
-      transactionCount: Array.isArray(dataset?.transactions) ? dataset.transactions.length : 0,
+      holdingCount: Array.isArray(capture?.holdings) ? capture.holdings.length : 0,
+      transactionCount,
       coverage,
-      backupDownloaded: backupDownloaded === true,
+      totalMs: Number(capture?.metrics?.totalMs) || 0,
+      temporaryTabPeak: Number(capture?.metrics?.temporaryTabPeak) || 0,
     };
   }
 
-  globalThis.LPTFFCollectionPolicy = Object.freeze({
-    collectionOptions,
-    persistencePlan,
-    summarizeDataset,
-  });
+  globalThis.LPTFFCollectionPolicy = Object.freeze({ collectionOptions, summarizeCapture });
 })();

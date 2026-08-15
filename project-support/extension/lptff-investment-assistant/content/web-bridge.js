@@ -35,11 +35,9 @@
       forward({ type: "DISCARD_INVESTMENT_STAGING", requestId: event.data.requestId }, "LPTFF_INVESTMENT_STAGING_DISCARDED");
     }
     if (event.data?.type === "LPTFF_INVESTMENT_START_COLLECTION") {
-      // 网站同步只生成一次性 staging；只有用户从扩展 popup 明确导出时才允许落盘备份。
       forward({
         type: "START_AUTO_COLLECTION",
         requestId: event.data.requestId,
-        downloadBackup: false,
       }, "LPTFF_INVESTMENT_COLLECTION_STARTED");
     }
   });

@@ -1,29 +1,29 @@
-importScripts("adapter/eastmoney-adapter.js", "collection-policy.js");
+importScripts("source-capture.js", "collection-policy.js");
 
-// LPTFF 采集配置：外置到 chrome.storage.local，popup「高级设置」可覆盖；默认值与原硬编码一致。
-// 仅读写 storage，不触及真实采集/Cookie/Token/登录态。
 const LPTFF_CONFIG_KEY = "lptffConfig";
 const LPTFFConfig = {
-  defaults: { pageTimeout: 30000, singleConcurrency: 4, queryRanges: ["3", "4"] },
+  defaults: { pageTimeout: 30000, singleConcurrency: 4, queryConcurrency: 4, queryRanges: ["3"] },
   async load() {
     const stored = await chrome.storage.local.get(LPTFF_CONFIG_KEY);
     const cfg = stored[LPTFF_CONFIG_KEY] || {};
     return {
       pageTimeout: cfg.pageTimeout ?? this.defaults.pageTimeout,
       singleConcurrency: cfg.singleConcurrency ?? this.defaults.singleConcurrency,
-      queryRanges:
-        Array.isArray(cfg.queryRanges) && cfg.queryRanges.length ? cfg.queryRanges.map(String) : this.defaults.queryRanges,
+      queryConcurrency: cfg.queryConcurrency ?? this.defaults.queryConcurrency,
+      queryRanges: Array.isArray(cfg.queryRanges) && cfg.queryRanges.length
+        ? cfg.queryRanges.map(String)
+        : this.defaults.queryRanges,
     };
   },
   async save(overrides) {
     const current = await this.load();
     const next = {
       pageTimeout: Number(overrides.pageTimeout) || current.pageTimeout,
-      singleConcurrency: Math.max(1, Math.min(8, Number(overrides.singleConcurrency) || current.singleConcurrency)),
-      queryRanges:
-        Array.isArray(overrides.queryRanges) && overrides.queryRanges.length
-          ? overrides.queryRanges.map(String)
-          : current.queryRanges,
+      singleConcurrency: boundedConcurrency(overrides.singleConcurrency, current.singleConcurrency),
+      queryConcurrency: boundedConcurrency(overrides.queryConcurrency, current.queryConcurrency),
+      queryRanges: Array.isArray(overrides.queryRanges) && overrides.queryRanges.length
+        ? overrides.queryRanges.map(String)
+        : current.queryRanges,
     };
     await chrome.storage.local.set({ [LPTFF_CONFIG_KEY]: next });
     return next;
@@ -32,54 +32,50 @@ const LPTFFConfig = {
 
 const HOLD_URL = "https://trade.1234567.com.cn/myAssets/hold";
 const QUERY_URL = "https://query.1234567.com.cn/";
-const SINGLE_URL = (code) =>
-  `https://trade.1234567.com.cn/myassets/single?iv=false&fc=${encodeURIComponent(code)}`;
-const PUBLIC_FUND_URL = (code) =>
-  `https://fund.eastmoney.com/${encodeURIComponent(code)}.html`;
-const PUBLIC_PROFILE_URL = (code) =>
-  `https://fundf10.eastmoney.com/jbgk_${encodeURIComponent(code)}.html`;
-const PUBLIC_INDUSTRY_URL = (code) =>
-  `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=`;
-let PAGE_TIMEOUT = 30000;
-let SINGLE_CONCURRENCY = 4;
-let QUERY_RANGES = ["3", "4"];
 const STAGING_KEY = "investmentStaging";
 const RECEIPT_KEY = "investmentTransferReceipt";
-const SENSITIVE_KEY = /(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|secret)/i;
+const OFFSCREEN_PATH = "offscreen/offscreen.html";
+let PAGE_TIMEOUT = 30000;
+
+function boundedConcurrency(value, fallback = 4) {
+  return Math.max(1, Math.min(8, Number(value) || fallback));
+}
+
+function emptyBranch(label) {
+  return { label, status: "pending", completed: 0, total: 0, durationMs: 0 };
+}
 
 const task = {
   running: false,
   stage: "idle",
-  currentFund: "",
-  fundTotal: 0,
-  completedFunds: 0,
-  transactionSnapshots: 0,
-  activeFunds: [],
   warnings: [],
   tabIds: [],
+  tabPeak: 0,
+  requestCounts: { hold: 0, privateDetails: 0, publicFunds: 0, transactions: 0 },
+  branches: {
+    privateDetails: emptyBranch("账户内基金详情"),
+    publicFunds: emptyBranch("公开基金档案"),
+    transactions: emptyBranch("交易分页"),
+  },
+  metrics: { startedAt: "", totalMs: 0, requestCount: 0, transactionPages: 0, stagingBytes: 0, temporaryTabPeak: 0 },
 };
 
 function taskSnapshot() {
   return {
     running: task.running,
     stage: task.stage,
-    currentFund: task.currentFund,
-    fundTotal: task.fundTotal,
-    completedFunds: task.completedFunds,
-    transactionSnapshots: task.transactionSnapshots,
-    activeFunds: [...task.activeFunds],
     warnings: [...task.warnings],
+    branches: Object.fromEntries(Object.entries(task.branches).map(([name, branch]) => [name, { ...branch }])),
+    metrics: { ...task.metrics, elapsedMs: task.running && task.metrics.startedAt ? Date.now() - Date.parse(task.metrics.startedAt) : task.metrics.totalMs },
   };
 }
 
 function notifyProgress(extra = {}) {
-  const message = { type: "COLLECTION_PROGRESS", ...taskSnapshot(), ...extra };
-  chrome.runtime.sendMessage(message).catch(() => {});
+  chrome.runtime.sendMessage({ type: "COLLECTION_PROGRESS", ...taskSnapshot(), ...extra }).catch(() => {});
 }
 
-function setStage(stage, extra = {}) {
+function setStage(stage) {
   task.stage = stage;
-  Object.assign(task, extra);
   notifyProgress();
 }
 
@@ -110,152 +106,139 @@ async function sendToTab(tabId, message) {
   throw lastError || new Error("页面脚本未响应");
 }
 
-async function openAndCollect(url, mode, options = {}) {
+async function openCollectorTab(url) {
   const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url, active: false });
   if (!tab?.id) throw new Error("无法创建采集页面");
   task.tabIds.push(tab.id);
+  task.tabPeak = Math.max(task.tabPeak, task.tabIds.length);
+  task.metrics.temporaryTabPeak = task.tabPeak;
+  notifyProgress();
+  const started = Date.now();
+  while (Date.now() - started < PAGE_TIMEOUT) {
+    const current = await callChrome(chrome.tabs, chrome.tabs.get, tab.id);
+    if (current.status === "complete") return tab.id;
+    await delay(200);
+  }
+  throw new Error(`采集页面加载超时：${url}`);
+}
 
+async function closeCollectorTab(tabId) {
+  task.tabIds = task.tabIds.filter((id) => id !== tabId);
   try {
-    const started = Date.now();
-    while (Date.now() - started < PAGE_TIMEOUT) {
-      const current = await callChrome(chrome.tabs, chrome.tabs.get, tab.id);
-      if (current.status === "complete") break;
-      await delay(250);
-    }
-    return await sendToTab(tab.id, {
-      type: "AUTO_COLLECT_PAGE",
-      mode,
-      ranges: options.ranges,
-      fundName: options.fundName,
-      fundCode: options.fundCode,
+    await callChrome(chrome.tabs, chrome.tabs.remove, tabId);
+  } catch {
+    return;
+  }
+}
+
+async function closeTaskTabs() {
+  const tabIds = [...task.tabIds];
+  task.tabIds = [];
+  await Promise.all(tabIds.map((tabId) => closeCollectorTab(tabId)));
+}
+
+async function ensureOffscreenDocument() {
+  const url = chrome.runtime.getURL(OFFSCREEN_PATH);
+  if (chrome.runtime.getContexts) {
+    const contexts = await chrome.runtime.getContexts({ contextTypes: ["OFFSCREEN_DOCUMENT"], documentUrls: [url] });
+    if (contexts.length) return;
+  } else if (await chrome.offscreen.hasDocument()) {
+    return;
+  }
+  await chrome.offscreen.createDocument({
+    url: OFFSCREEN_PATH,
+    reasons: ["DOM_PARSER"],
+    justification: "并发解析公开基金概况 HTML，避免为每只基金打开完整标签页",
+  });
+}
+
+async function closeOffscreenDocument() {
+  try {
+    if (!chrome.offscreen.hasDocument || await chrome.offscreen.hasDocument()) await chrome.offscreen.closeDocument();
+  } catch {
+    return;
+  }
+}
+
+async function collectPublicFunds(holdings, concurrency) {
+  await ensureOffscreenDocument();
+  try {
+    const response = await callChrome(chrome.runtime, chrome.runtime.sendMessage, {
+      type: "OFFSCREEN_COLLECT_PUBLIC_FUNDS",
+      holdings,
+      concurrency,
     });
-  } catch (error) {
-    throw new Error(`${mode} 页面采集失败：${error instanceof Error ? error.message : "未知错误"}`);
+    if (!response?.ok) throw new Error(response?.error || "公开基金档案未返回数据");
+    return response.items || [];
+  } finally {
+    await closeOffscreenDocument();
   }
 }
 
-function safeValue(value, key = "") {
-  if (SENSITIVE_KEY.test(key)) return undefined;
-  if (Array.isArray(value)) {
-    return value.map((item) => safeValue(item)).filter((item) => item !== undefined);
-  }
-  if (value && typeof value === "object") {
-    return Object.fromEntries(
-      Object.entries(value)
-        .map(([name, item]) => [name, safeValue(item, name)])
-        .filter(([, item]) => item !== undefined),
-    );
-  }
-  return value;
+function startBranch(name, total = 0) {
+  task.branches[name] = { ...task.branches[name], status: "running", completed: 0, total, durationMs: 0 };
+  notifyProgress();
+  return Date.now();
 }
 
-function snapshotFingerprint(snapshot) {
-  return JSON.stringify({
-    key: snapshot.key,
-    method: snapshot.method,
-    path: snapshot.path,
-    query: snapshot.query,
-    requestBody: snapshot.requestBody,
-  });
-}
-
-function mergeSnapshots(results) {
-  const seen = new Set();
-  return results.flatMap((result) => result?.data?.raw?.snapshots || []).filter((snapshot) => {
-    const fingerprint = snapshotFingerprint(snapshot);
-    if (seen.has(fingerprint)) return false;
-    seen.add(fingerprint);
-    return true;
-  });
-}
-
-function normalizedCode(value) {
-  const match = String(value || "").match(/\b\d{6}\b/);
-  return match ? match[0] : "";
-}
-
-function mergeHolding(base, detail) {
-  if (!detail) return base;
-  return {
-    ...base,
-    profit: detail.profit ?? base.profit,
-    profitRate: detail.profitRate ?? base.profitRate,
-    shares: detail.shares ?? base.shares,
-    availableShares: detail.availableShares ?? base.availableShares,
-    details: { ...(base.details || {}), ...(detail.details || {}) },
+function finishBranch(name, startedAt, status = "completed") {
+  const branch = task.branches[name];
+  task.branches[name] = {
+    ...branch,
+    status,
+    completed: status === "completed" ? Math.max(branch.completed, branch.total) : branch.completed,
+    durationMs: Date.now() - startedAt,
   };
+  notifyProgress();
 }
 
-function uniqueTransactions(items) {
-  const seen = new Set();
-  return items.filter((item) => {
-    const key = item?.details?.id || [
-      item?.date,
-      item?.fundCode,
-      item?.type,
-      item?.amount,
-      item?.confirmedAmount,
-      item?.status,
-    ].join("|");
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
+function markBranchPartial(name, partial) {
+  if (!partial || task.branches[name].status !== "completed") return;
+  task.branches[name] = { ...task.branches[name], status: "partial" };
+  notifyProgress();
 }
 
-function mergeFundData(holdResult, singleResults, queryResults, publicDetails = []) {
-  const holdData = holdResult.data;
-  const queryResultList = Array.isArray(queryResults)
-    ? queryResults.filter(Boolean)
-    : queryResults
-      ? [queryResults]
-      : [];
-  const detailByCode = new Map(
-    singleResults
-      .map((result) => result?.data?.holdings?.[0])
-      .filter(Boolean)
-      .map((holding) => [normalizedCode(holding.code), holding]),
-  );
-  const holdings = (holdData.holdings || []).map((holding) =>
-    mergeHolding(holding, detailByCode.get(normalizedCode(holding.code))),
-  );
-  const transactions = uniqueTransactions(queryResultList.flatMap((result) => result?.data?.transactions || []));
-  const warnings = [
-    ...(holdResult.data.collectionWarnings || []),
-    ...singleResults.flatMap((result) => result?.data?.collectionWarnings || []),
-    ...queryResultList.flatMap((result) => result?.data?.collectionWarnings || []),
-    ...task.warnings,
+async function runBranch(name, total, operation, fallback, warningLabel) {
+  const startedAt = startBranch(name, total);
+  try {
+    const result = await operation();
+    finishBranch(name, startedAt);
+    return result;
+  } catch (error) {
+    const message = `${warningLabel}：${error instanceof Error ? error.message : "采集失败"}`;
+    task.warnings.push(message);
+    finishBranch(name, startedAt, "partial");
+    return fallback;
+  }
+}
+
+function buildCoverage(holdings, fundDetails, publicFunds, transactionRanges, capturedAt) {
+  const completeCount = (items) => items.filter((item) => !(item.warnings || []).length).length;
+  const pagedRanges = transactionRanges.filter((range) => range.skipReason !== "custom-date-dialog");
+  const transactionPages = pagedRanges.reduce((sum, range) => sum + (range.pages || []).length, 0);
+  const transactionExpected = pagedRanges.reduce((sum, range) => {
+    const expectedPages = Math.min(range.expectedPages || 0, 200);
+    return sum + (expectedPages > 0 ? expectedPages : (range.pages || []).length ? 1 : 0);
+  }, 0);
+  return [
+    { dataset: "account", completeness: "complete", observedCount: holdings.length, capturedAt },
+    { dataset: "fundDetails", completeness: completeCount(fundDetails) === holdings.length ? "complete" : fundDetails.length ? "partial" : "unknown", observedCount: fundDetails.length, expectedCount: holdings.length, capturedAt },
+    { dataset: "publicFunds", completeness: completeCount(publicFunds) === holdings.length ? "complete" : publicFunds.length ? "partial" : "unknown", observedCount: publicFunds.length, expectedCount: holdings.length, capturedAt },
+    { dataset: "transactions", completeness: transactionExpected > 0 && transactionPages === transactionExpected ? "complete" : transactionPages ? "partial" : "unknown", observedCount: transactionPages, expectedCount: transactionExpected, capturedAt },
   ];
-
-  return safeValue({
-    version: "1.1",
-    source: "1234567",
-    updateTime: new Date().toISOString().slice(0, 10),
-    account: holdData.account,
-    holdings,
-    transactions,
-    publicFundDetails: publicDetails,
-    raw: {
-      capturedAt: new Date().toISOString(),
-      pageUrl: HOLD_URL,
-      snapshots: mergeSnapshots([holdResult, ...singleResults, ...queryResultList]),
-      collectionWarnings: [...new Set(warnings)],
-    },
-    collectionWarnings: [...new Set(warnings)],
-  });
 }
 
-async function stageInvestmentDataset(dataset, summary) {
+async function stageSourceCapture(capture, summary) {
   await callChrome(chrome.storage.local, chrome.storage.local.set, {
     [STAGING_KEY]: {
-      protocol: dataset.version,
-      capturedAt: dataset.capturedAt,
+      protocol: capture.protocol,
+      capturedAt: capture.capturedAt,
       status: "pending",
-      dataset,
+      capture,
     },
     [RECEIPT_KEY]: {
-      protocol: dataset.version,
-      capturedAt: dataset.capturedAt,
+      protocol: capture.protocol,
+      capturedAt: capture.capturedAt,
       status: "pending",
       summary,
     },
@@ -285,7 +268,7 @@ async function acknowledgeStaging() {
   if (staging || receipt) {
     await callChrome(chrome.storage.local, chrome.storage.local.set, {
       [RECEIPT_KEY]: {
-        protocol: staging?.protocol || receipt?.protocol || "2.0",
+        protocol: staging?.protocol || receipt?.protocol || globalThis.LPTFFSourceCapture.PROTOCOL,
         capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
         acknowledgedAt: new Date().toISOString(),
         status: "imported",
@@ -303,7 +286,7 @@ async function discardStaging() {
   if (staging || receipt) {
     await callChrome(chrome.storage.local, chrome.storage.local.set, {
       [RECEIPT_KEY]: {
-        protocol: staging?.protocol || receipt?.protocol || "2.0",
+        protocol: staging?.protocol || receipt?.protocol || globalThis.LPTFFSourceCapture.PROTOCOL,
         capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
         acknowledgedAt: new Date().toISOString(),
         status: "discarded",
@@ -313,284 +296,235 @@ async function discardStaging() {
   }
 }
 
-async function downloadData(data, filename = "fund-data.json") {
+async function downloadData(data, filename, saveAs) {
   const content = JSON.stringify(data, null, 2);
   const url = `data:application/json;charset=utf-8,${encodeURIComponent(content)}`;
   await callChrome(chrome.downloads, chrome.downloads.download, {
     url,
     filename,
-    saveAs: true,
-    conflictAction: "uniquify",
+    saveAs,
+    conflictAction: "overwrite",
   });
 }
 
-async function closeTaskTabs() {
-  const tabIds = [...task.tabIds];
-  task.tabIds = [];
-  await Promise.all(tabIds.map(async (tabId) => {
-    try {
-      await callChrome(chrome.tabs, chrome.tabs.remove, tabId);
-    } catch {
-      return undefined;
-    }
-    return undefined;
-  }));
+async function exportSourceBackup() {
+  const staging = await getStaging();
+  if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");
+  await downloadData(staging.capture, "lptff-investment-source-capture.json", true);
+  return { ok: true };
 }
 
-async function collectSingles(holdings) {
-  const results = [];
-  let nextIndex = 0;
-
-  async function worker() {
-    while (true) {
-      const index = nextIndex;
-      nextIndex += 1;
-      if (index >= holdings.length) return;
-      const holding = holdings[index];
-      const code = normalizedCode(holding.code);
-      task.activeFunds = [...task.activeFunds, code];
-      notifyProgress();
-      try {
-        const result = await openAndCollect(SINGLE_URL(code), "single", {
-          fundName: holding.name,
-        });
-        if (result?.ok && result.data) results.push(result);
-        else task.warnings.push(`${code}：${result?.error || "单基金详情未返回数据"}`);
-      } catch (error) {
-        task.warnings.push(`${code}：${error instanceof Error ? error.message : "单基金详情采集失败"}`);
-      } finally {
-        task.activeFunds = task.activeFunds.filter((item) => item !== code);
-        task.completedFunds += 1;
-        notifyProgress();
-      }
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(SINGLE_CONCURRENCY, holdings.length) }, worker));
-  return results;
+async function exportDevelopmentSample() {
+  const staging = await getStaging();
+  if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");
+  const sample = globalThis.LPTFFSourceCapture.createDevelopmentSample(staging.capture);
+  const validation = globalThis.LPTFFSourceCapture.validateDevelopmentSample(sample);
+  if (!validation.ok) throw new Error(`脱敏开发样本自检失败（${validation.errors.length} 项）`);
+  await downloadData(sample, "eastmoney-source-sample.json", false);
+  return { ok: true, summary: { fieldCount: validation.fieldCount, bytes: JSON.stringify(sample).length } };
 }
 
-async function collectPublicCurrency(code) {
-  const response = await fetch(PUBLIC_FUND_URL(code), { credentials: "omit" });
-  if (!response.ok) throw new Error(`基金详情请求失败（HTTP ${response.status}）`);
-  const html = await response.text();
-  const match = html.match(/\bvar\s+currency\s*=\s*["']([^"']+)["']/i);
-  return match ? String(match[1]).trim() : "";
-}
-
-async function collectPublicIndustry(code) {
-  const response = await fetch(PUBLIC_INDUSTRY_URL(code), {
-    credentials: "omit",
-    headers: { Accept: "application/json" },
-  });
-  if (!response.ok) throw new Error(`行业配置请求失败（HTTP ${response.status}）`);
-  const payload = await response.json();
-  if (payload?.ErrCode !== 0) throw new Error(payload?.ErrMsg || "行业配置未返回有效数据");
-  const latest = Array.isArray(payload?.Data?.QuarterInfos) ? payload.Data.QuarterInfos[0] : null;
-  return {
-    asOf: latest?.JZRQ || undefined,
-    industries: Array.isArray(latest?.HYPZInfo)
-      ? latest.HYPZInfo.map((item) => ({
-          name: String(item?.HYMC || "").trim(),
-          weightPct: Number(item?.ZJZBL),
-        })).filter((item) => item.name && Number.isFinite(item.weightPct) && item.weightPct > 0)
-      : [],
-  };
-}
-
-async function collectPublicDetail(holding) {
-  const code = normalizedCode(holding.code);
-  const profileResult = await openAndCollect(PUBLIC_PROFILE_URL(code), "public-profile", {
-    fundCode: code,
-  });
-  if (!profileResult?.ok || !profileResult.data) {
-    throw new Error(profileResult?.error || "公开基金概况未返回数据");
-  }
-  const optional = await Promise.allSettled([
-    collectPublicCurrency(code),
-    collectPublicIndustry(code),
-  ]);
-  const currency = optional[0].status === "fulfilled" ? optional[0].value : "";
-  const industry = optional[1].status === "fulfilled" ? optional[1].value : { industries: [] };
-  if (optional[0].status === "rejected") {
-    task.warnings.push(`${code}：${optional[0].reason instanceof Error ? optional[0].reason.message : "计价币种采集失败"}`);
-  }
-  if (optional[1].status === "rejected") {
-    task.warnings.push(`${code}：${optional[1].reason instanceof Error ? optional[1].reason.message : "行业配置采集失败"}`);
-  }
-  return { ...profileResult.data, ...industry, currency: currency || undefined };
-}
-
-async function collectPublicDetails(holdings) {
-  const results = [];
-  let nextIndex = 0;
-
-  async function worker() {
-    while (true) {
-      const index = nextIndex;
-      nextIndex += 1;
-      if (index >= holdings.length) return;
-      const holding = holdings[index];
-      const code = normalizedCode(holding.code);
-      task.activeFunds = [...task.activeFunds, code];
-      notifyProgress();
-      try {
-        results.push(await collectPublicDetail(holding));
-      } catch (error) {
-        task.warnings.push(`${code}：${error instanceof Error ? error.message : "公开基金档案采集失败"}`);
-      } finally {
-        task.activeFunds = task.activeFunds.filter((item) => item !== code);
-        task.completedFunds += 1;
-        notifyProgress();
-      }
-    }
-  }
-
-  await Promise.all(Array.from({ length: Math.min(SINGLE_CONCURRENCY, holdings.length) }, worker));
-  return results;
-}
-
-async function collectQueryRange(timeType) {
-  try {
-    const result = await openAndCollect(QUERY_URL, "query", { ranges: [timeType] });
-    if (!result?.ok && !result?.data) {
-      task.warnings.push(`交易时间范围 ${timeType}：${result?.error || "未返回数据"}`);
-      return null;
-    }
-    return result;
-  } catch (error) {
-    task.warnings.push(`交易时间范围 ${timeType}：${error instanceof Error ? error.message : "交易查询采集失败"}`);
-    return null;
-  }
-}
-
-async function runAutoCollection(options = {}) {
+async function runAutoCollection() {
   if (task.running) throw new Error("已有采集任务正在运行");
+  const existing = await getStaging();
+  if (existing?.status === "pending") throw new Error("已有一批数据等待导入或丢弃，请先处理后再重新采集");
+
   task.running = true;
+  task.stage = "preparing";
   task.warnings = [];
-  task.currentFund = "";
-  task.fundTotal = 0;
-  task.completedFunds = 0;
-  task.transactionSnapshots = 0;
-  task.activeFunds = [];
+  task.tabIds = [];
+  task.tabPeak = 0;
+  task.requestCounts = { hold: 0, privateDetails: 0, publicFunds: 0, transactions: 0 };
+  task.branches = {
+    privateDetails: emptyBranch("账户内基金详情"),
+    publicFunds: emptyBranch("公开基金档案"),
+    transactions: emptyBranch("交易分页"),
+  };
+  task.metrics = { startedAt: new Date().toISOString(), totalMs: 0, requestCount: 0, transactionPages: 0, stagingBytes: 0, temporaryTabPeak: 0 };
   notifyProgress();
 
+  let holdTabId;
   try {
-    // 每次采集开始时加载用户配置（popup「高级设置」覆盖默认值），下次采集生效。
     const cfg = await LPTFFConfig.load();
     PAGE_TIMEOUT = cfg.pageTimeout;
-    SINGLE_CONCURRENCY = cfg.singleConcurrency;
-    QUERY_RANGES = cfg.queryRanges;
-    setStage("hold", { currentFund: "" });
-    const holdResult = await openAndCollect(HOLD_URL, "hold");
-    if (!holdResult?.ok || !holdResult.data) {
-      throw new Error(holdResult?.error || "未读取到持仓数据，请确认已登录天天基金");
-    }
+    setStage("hold");
+    holdTabId = await openCollectorTab(HOLD_URL);
+    const holdResponse = await sendToTab(holdTabId, { type: "AUTO_COLLECT_PAGE", mode: "hold" });
+    if (!holdResponse?.ok || !holdResponse.data) throw new Error(holdResponse?.error || "未读取到持仓数据，请确认已登录天天基金");
+    const holdings = holdResponse.data.holdings || [];
+    task.requestCounts.hold = Number(holdResponse.data.requestCount || 0);
+    task.metrics.requestCount = task.requestCounts.hold;
+    const capturedAt = new Date().toISOString();
+    task.branches.privateDetails.total = holdings.length;
+    task.branches.publicFunds.total = holdings.length;
+    setStage("collecting");
 
-    const holdings = holdResult.data.holdings || [];
-    const codes = [...new Set(holdings.map((holding) => normalizedCode(holding.code)).filter(Boolean))];
-    task.fundTotal = codes.length * 2;
-    notifyProgress();
-    setStage("single", { currentFund: "", activeFunds: [] });
-    const singleResults = await collectSingles(holdings);
-    const publicDetails = await collectPublicDetails(holdings);
-
-    setStage("transactions", { currentFund: "", activeFunds: [] });
-    const queryResults = await Promise.all(QUERY_RANGES.map(collectQueryRange));
-    task.transactionSnapshots = queryResults
-      .filter(Boolean)
-      .flatMap((result) => result.data?.raw?.snapshots || [])
-      .filter((snapshot) => snapshot.key === "delegate")
-      .length;
-    notifyProgress();
-
-    setStage("downloading");
-    const data = mergeFundData(holdResult, singleResults, queryResults, publicDetails);
-    const investmentDataset = globalThis.LPTFFInvestmentAdapter.toInvestmentDataset(data);
-    const persistence = globalThis.LPTFFCollectionPolicy.persistencePlan(options);
-    const summary = globalThis.LPTFFCollectionPolicy.summarizeDataset(
-      investmentDataset,
-      persistence.downloadBackup,
+    const privatePromise = runBranch(
+      "privateDetails",
+      holdings.length,
+      async () => {
+        try {
+          const response = await sendToTab(holdTabId, {
+            type: "AUTO_COLLECT_PAGE",
+            mode: "fund-details",
+            holdings,
+            concurrency: cfg.singleConcurrency,
+          });
+          if (!response?.ok) throw new Error(response?.error || "账户内基金详情未返回数据");
+          return response.data || { items: [], requestCount: 0 };
+        } finally {
+          await closeCollectorTab(holdTabId);
+          holdTabId = undefined;
+        }
+      },
+      { items: [], requestCount: 0 },
+      "账户内基金详情不完整",
     );
-    if (persistence.stageDataset) await stageInvestmentDataset(investmentDataset, summary);
-    if (persistence.downloadBackup) await downloadData(data);
-    setStage("completed", {
-      currentFund: "",
-      activeFunds: [],
-      transactionSnapshots: data.raw.snapshots.filter((snapshot) => snapshot.key === "delegate").length,
+    const publicPromise = runBranch(
+      "publicFunds",
+      holdings.length,
+      async () => ({ items: await collectPublicFunds(holdings, cfg.singleConcurrency), requestCount: holdings.length * 3 }),
+      { items: [], requestCount: 0 },
+      "公开基金档案不完整",
+    );
+    const transactionPromise = runBranch(
+      "transactions",
+      0,
+      async () => {
+        const queryTabId = await openCollectorTab(QUERY_URL);
+        try {
+          const response = await sendToTab(queryTabId, {
+            type: "AUTO_COLLECT_PAGE",
+            mode: "transactions",
+            ranges: cfg.queryRanges,
+            concurrency: cfg.queryConcurrency,
+          });
+          if (!response?.ok) throw new Error(response?.error || "交易分页未返回数据");
+          return response.data || { ranges: [], requestCount: 0 };
+        } finally {
+          await closeCollectorTab(queryTabId);
+        }
+      },
+      { ranges: [], requestCount: 0 },
+      "交易分页不完整",
+    );
+
+    const [privateDetails, publicFunds, transactions] = await Promise.all([privatePromise, publicPromise, transactionPromise]);
+    markBranchPartial(
+      "privateDetails",
+      privateDetails.items.length !== holdings.length || privateDetails.items.some((item) => (item.warnings || []).length),
+    );
+    markBranchPartial(
+      "publicFunds",
+      publicFunds.items.length !== holdings.length || publicFunds.items.some((item) => (item.warnings || []).length),
+    );
+    markBranchPartial(
+      "transactions",
+      transactions.ranges.length !== cfg.queryRanges.length || transactions.ranges.some((range) => (range.warnings || []).length),
+    );
+    setStage("processing");
+    task.metrics.requestCount = Number(holdResponse.data.requestCount || 0)
+      + Number(privateDetails.requestCount || 0)
+      + Number(publicFunds.requestCount || 0)
+      + Number(transactions.requestCount || 0);
+    task.metrics.transactionPages = (transactions.ranges || []).reduce((sum, range) => sum + (range.pages || []).length, 0);
+    const metrics = {
+      totalMs: Date.now() - Date.parse(task.metrics.startedAt),
+      requestCount: task.metrics.requestCount,
+      transactionPages: task.metrics.transactionPages,
+      temporaryTabPeak: task.tabPeak,
+      branches: Object.fromEntries(Object.entries(task.branches).map(([name, branch]) => [name, { durationMs: branch.durationMs, status: branch.status }])),
+    };
+    const capture = globalThis.LPTFFSourceCapture.buildCapture({
+      capturedAt,
+      account: holdResponse.data.account,
+      holdings,
+      fundDetails: privateDetails.items,
+      publicFunds: publicFunds.items,
+      transactionRanges: transactions.ranges,
+      coverage: buildCoverage(holdings, privateDetails.items, publicFunds.items, transactions.ranges, capturedAt),
+      warnings: task.warnings,
+      metrics,
     });
+    task.metrics.stagingBytes = JSON.stringify(capture).length;
+    const summary = globalThis.LPTFFCollectionPolicy.summarizeCapture(capture);
+    await stageSourceCapture(capture, summary);
+    task.metrics.totalMs = Date.now() - Date.parse(task.metrics.startedAt);
+    setStage("completed");
     return { ok: true, summary };
   } catch (error) {
     task.warnings.push(error instanceof Error ? error.message : "自动采集失败");
     setStage("error");
     return { ok: false, error: task.warnings[task.warnings.length - 1], warnings: [...task.warnings] };
   } finally {
+    if (holdTabId) await closeCollectorTab(holdTabId);
     await closeTaskTabs();
+    await closeOffscreenDocument();
     task.running = false;
-    if (task.stage !== "completed" && task.stage !== "error") task.stage = "idle";
+    task.metrics.totalMs = task.metrics.startedAt ? Date.now() - Date.parse(task.metrics.startedAt) : 0;
     notifyProgress();
   }
 }
 
-async function exportCurrentPage() {
-  const [tab] = await callChrome(chrome.tabs, chrome.tabs.query, { active: true, lastFocusedWindow: true });
-  if (!tab?.id) throw new Error("找不到当前页面");
-  const response = await sendToTab(tab.id, { type: "COLLECT_FUND_DATA" });
-  if (!response?.ok || !response.data) throw new Error(response?.error || "当前页面未识别到基金数据");
-  await downloadData(response.data);
-  return response;
-}
-
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "SOURCE_BRANCH_PROGRESS") {
+    const branch = task.branches[message.branch];
+    if (branch) {
+      branch.completed = Number(message.completed) || 0;
+      branch.total = Math.max(branch.total, Number(message.total) || 0);
+      const multiplier = message.branch === "transactions" ? 1 : 3;
+      task.requestCounts[message.branch] = branch.completed * multiplier;
+      task.metrics.requestCount = Object.values(task.requestCounts).reduce((sum, count) => sum + count, 0);
+      if (message.branch === "transactions") task.metrics.transactionPages = branch.completed;
+      notifyProgress();
+    }
+    return false;
+  }
   if (message?.type === "GET_INVESTMENT_STAGING") {
     getStaging().then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "ACK_INVESTMENT_STAGING") {
     acknowledgeStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "GET_INVESTMENT_STATUS") {
     getTransferStatus().then((status) => sendResponse({ ok: true, status })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "DISCARD_INVESTMENT_STAGING") {
     discardStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "START_AUTO_COLLECTION") {
-    const options = globalThis.LPTFFCollectionPolicy.collectionOptions(
-      message,
-      sender,
-      chrome.runtime.getURL(""),
-    );
-    runAutoCollection(options).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    try {
+      globalThis.LPTFFCollectionPolicy.collectionOptions(message, sender, chrome.runtime.getURL(""));
+    } catch (error) {
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : "无权启动采集" });
+      return false;
+    }
+    runAutoCollection().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
+  if (message?.type === "EXPORT_SOURCE_BACKUP") {
+    exportSourceBackup().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_DEVELOPMENT_SAMPLE") {
+    exportDevelopmentSample().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
   if (message?.type === "GET_CONFIG") {
     LPTFFConfig.load().then((config) => sendResponse({ ok: true, config })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "SAVE_CONFIG") {
     LPTFFConfig.save(message.config || {}).then((config) => sendResponse({ ok: true, config })).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
-
   if (message?.type === "GET_COLLECTION_STATUS") {
     sendResponse({ ok: true, status: taskSnapshot() });
     return false;
   }
-
-  if (message?.type === "EXPORT_CURRENT_PAGE") {
-    exportCurrentPage().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
-
   return undefined;
 });

@@ -358,16 +358,20 @@ const stopCollectionProgressListener = typeof window === "undefined"
   : listenInvestmentCollectionProgress((progress) => {
     state.collectionProgress = progress;
     state.collecting = progress.running;
+    const activeBranches = Object.values(progress.branches ?? {})
+      .filter((branch) => branch.status === "running")
+      .map((branch) => branch.total ? `${branch.label} ${branch.completed}/${branch.total}` : branch.label)
+      .join("、");
     const labels: Record<CollectionProgress["stage"], string> = {
       idle: "等待采集",
-      hold: "正在采集全部持仓…",
-      single: `正在采集基金详情（${progress.completedFunds}/${progress.fundTotal}）…`,
-      transactions: `正在采集当前和历史交易（已捕获 ${progress.transactionSnapshots} 个分页请求）…`,
-      downloading: "正在整理待导入数据…",
-      completed: "采集完成，新批次等待导入",
+      preparing: "正在准备高效采集环境…",
+      hold: "正在读取账户与全部持仓…",
+      collecting: activeBranches ? `正在并行采集：${activeBranches}` : "正在并行采集基金详情、公开档案和交易分页…",
+      processing: "正在构建全面来源采集包…",
+      completed: "全面来源采集完成，新批次等待导入",
       error: "插件采集失败",
     };
-    state.syncMessage = labels[progress.stage];
+    state.syncMessage = labels[progress.stage] ?? "插件正在采集数据…";
     if (progress.stage === "completed") state.syncPhase = "completed";
     if (progress.stage === "error") state.syncPhase = "failed";
   });

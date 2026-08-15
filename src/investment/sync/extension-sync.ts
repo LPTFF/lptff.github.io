@@ -1,6 +1,11 @@
 import type { DataCoverage, InvestmentDataset, InvestmentScope } from "../domain";
 import { migrateLegacyFundData } from "../adapter/legacy-migration";
 import { DatasetSourceAdapter } from "../adapter/InvestmentSourceAdapter";
+import {
+  EASTMONEY_SOURCE_CAPTURE_PROTOCOL,
+  toInvestmentDataset,
+  type EastmoneySourceCapture,
+} from "../adapter/EastmoneySourceCaptureAdapter";
 import { InvestmentLedger } from "../ledger/repository";
 import { SyncService } from "./sync-service";
 
@@ -13,20 +18,35 @@ export type ExtensionSyncPhase =
   | "up-to-date"
   | "failed";
 
+export interface CollectionBranchProgress {
+  label: string;
+  status: "pending" | "running" | "completed" | "partial";
+  completed: number;
+  total: number;
+  durationMs: number;
+}
+
 export interface CollectionProgress {
   running: boolean;
-  stage: "idle" | "hold" | "single" | "transactions" | "downloading" | "completed" | "error";
-  fundTotal: number;
-  completedFunds: number;
-  transactionSnapshots: number;
-  activeFunds: string[];
+  stage: "idle" | "preparing" | "hold" | "collecting" | "processing" | "completed" | "error";
   warnings: string[];
+  branches: Record<"privateDetails" | "publicFunds" | "transactions", CollectionBranchProgress>;
+  metrics: {
+    startedAt: string;
+    elapsedMs?: number;
+    totalMs: number;
+    requestCount: number;
+    transactionPages: number;
+    stagingBytes: number;
+    temporaryTabPeak: number;
+  };
 }
 
 export interface InvestmentTransferSummary {
   holdingCount: number;
   transactionCount: number;
-  backupDownloaded: boolean;
+  totalMs?: number;
+  temporaryTabPeak?: number;
   coverage: Array<{
     dataset: string;
     completeness: "complete" | "partial" | "unknown" | "failed";
@@ -66,9 +86,17 @@ export interface ExtensionSyncResult {
   status: InvestmentExtensionStatus;
 }
 
+interface InvestmentStagingBatch {
+  protocol: string;
+  capturedAt: string;
+  status: string;
+  capture?: EastmoneySourceCapture;
+  dataset?: InvestmentDataset | ({ version: "1.1" } & Record<string, unknown>);
+}
+
 interface StagingResponse {
   ok: boolean;
-  staging?: { protocol: string; capturedAt: string; status: string; dataset: InvestmentDataset } | null;
+  staging?: InvestmentStagingBatch | null;
   status?: InvestmentExtensionStatus;
   error?: string;
 }
@@ -199,7 +227,7 @@ export async function importInvestmentStaging(
 
   onProgress?.({ phase: "reading", message: "正在读取插件待导入数据…" });
   const staging = await readInvestmentStaging();
-  if (!staging?.dataset) {
+  if (!staging?.dataset && !staging?.capture) {
     const imports = await ledger.getImports();
     const latestImport = [...imports].filter((item) => !item.source.startsWith("mock")).sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
     const imported = extensionStatus.receipt?.status === "imported" || Boolean(latestImport);
@@ -219,15 +247,19 @@ export async function importInvestmentStaging(
     };
   }
 
-  const dataset = staging.dataset;
   let normalized: InvestmentDataset;
-  if (dataset.version === "2.0") {
-    normalized = dataset;
-  } else if (dataset.version === "1.1") {
+  if (staging.capture) {
+    if (staging.capture.protocol !== EASTMONEY_SOURCE_CAPTURE_PROTOCOL) {
+      throw new Error(`不支持的来源采集协议：${staging.capture.protocol}`);
+    }
+    normalized = toInvestmentDataset(staging.capture);
+  } else if (staging.dataset?.version === "2.0") {
+    normalized = staging.dataset;
+  } else if (staging.dataset?.version === "1.1") {
     // 旧版插件 / JSON 备份：走 legacy 迁移降级为 v2.0（含 coverage + warnings=legacy:*），再统一走 SyncService。
-    normalized = migrateLegacyFundData(dataset as unknown);
+    normalized = migrateLegacyFundData(staging.dataset as unknown);
   } else {
-    throw new Error(`不支持的 Investment Protocol：${dataset.version}`);
+    throw new Error(`不支持的 Investment Protocol：${staging.protocol}`);
   }
 
   onProgress?.({ phase: "importing", message: "正在写入账户、持仓、交易和覆盖范围…" });

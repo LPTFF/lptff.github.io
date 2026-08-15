@@ -47,11 +47,19 @@ export class SyncService {
 
     // 2. Holdings → 组合快照
     const holdings = await this.adapter.getHoldings();
+    const holdingValue = holdings.reduce((s, h: HoldingSnapshot) => s + (h.marketValue || 0), 0);
+    const cashDifference = account.totalAsset - holdingValue;
+    const cashTolerance = Math.max(0.01, Math.abs(account.totalAsset) * 0.0001);
+    const cash = cashDifference >= -cashTolerance
+      ? Math.abs(cashDifference) <= cashTolerance ? 0 : cashDifference
+      : undefined;
     const portfolio: PortfolioSnapshot = {
       id: `portfolio:${capturedAt}`,
       date: capturedAt.slice(0, 10),
       totalAsset: account.totalAsset,
-      holdingValue: holdings.reduce((s, h: HoldingSnapshot) => s + (h.marketValue || 0), 0),
+      holdingValue,
+      ...(cash === undefined ? {} : { cash }),
+      ...(account.currentHoldingPnl === undefined ? {} : { currentHoldingPnl: account.currentHoldingPnl }),
       holdings,
     };
     await this.ledger.putPortfolio(portfolio);
