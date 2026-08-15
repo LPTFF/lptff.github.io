@@ -67,7 +67,7 @@
         >
           <template #title>以下维度当前无暴露差异</template>
           <div v-for="s in singleValueDims" :key="s.dim" class="single-row">
-            {{ dimensionLabel(s.dim) }}：全部 {{ s.knownSlices[0].value }}（{{ (s.knownSlices[0].pct * 100).toFixed(0) }}%）
+            {{ dimensionLabel(s.dim) }}：全部 {{ sliceValueLabel(s.dim, s.knownSlices[0].value) }}（{{ (s.knownSlices[0].pct * 100).toFixed(0) }}%）
           </div>
         </el-alert>
         <el-empty v-if="!meaningfulDims.length" description="当前组合风险暴露单一，无显著维度差异" />
@@ -83,7 +83,7 @@
         <el-empty v-if="!exposureSlices.length" description="当前维度尚无可靠资产元数据" />
         <div v-else class="exposure-list">
           <div v-for="s in exposureSlices" :key="s.value" class="exposure-row">
-            <span class="exposure-value">{{ s.value }}</span>
+            <span class="exposure-value">{{ sliceValueLabel(s.dimension, s.value) }}</span>
             <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="14" class="exposure-bar" />
             <span class="exposure-pct">{{ (s.pct * 100).toFixed(1) }}%</span>
           </div>
@@ -108,7 +108,7 @@
           class="dup-alert"
         >
           <template #title>
-            {{ dimensionLabel(exposure.dimension) }}：{{ exposure.value }} 关联仓位占比 {{ (exposure.associatedPct * 100).toFixed(1) }}%
+            {{ dimensionLabel(exposure.dimension) }}：{{ sliceValueLabel(exposure.dimension, exposure.value) }} 关联仓位占比 {{ (exposure.associatedPct * 100).toFixed(1) }}%
           </template>
           <div class="dup-funds">涉及基金：{{ exposure.assetIds.join("、") }}</div>
         </el-alert>
@@ -182,6 +182,27 @@ const sharedExposures = computed(() =>
 
 function dimensionLabel(d: ExposureDimension): string {
   return { index: "底层指数", region: "投资市场", assetClass: "底层资产类型", currency: "计价币种", theme: "行业主题" }[d];
+}
+
+const ASSET_CLASS_LABEL: Record<string, string> = {
+  equity: "股票",
+  bond: "债券",
+  commodity: "商品",
+  cash: "货币",
+  other: "其他",
+};
+
+const CURRENCY_LABEL: Record<string, string> = {
+  CNY: "人民币",
+  USD: "美元",
+  HKD: "港币",
+  EUR: "欧元",
+};
+
+function sliceValueLabel(dimension: ExposureDimension, value: string): string {
+  if (dimension === "assetClass") return ASSET_CLASS_LABEL[value] ?? value;
+  if (dimension === "currency") return CURRENCY_LABEL[value] ?? value;
+  return value;
 }
 
 function fmtPct(value: number | undefined): string {
