@@ -28,7 +28,7 @@
 - 天天基金采集插件已采用接口优先的本地导出边界：持仓、单基金详情和交易记录来自真实页面成功发出的业务接口响应；接口快照递归脱敏后才进入 `fund-data.json`，页面 DOM 仅用于触发筛选和分页，不作为业务字段来源。
 - 插件自动采集使用最多 4 路单基金详情并发、当前/历史交易独立页面并发；未实际加载的历史范围或分页不视为已采集。名称以 `/request/hold` 的 `fundName` 为准，避免 single 页面名称回退覆盖持仓接口字段。
 - 维护资料与运行时文件按实际消费者隔离：`agent/` 只供维护者阅读，禁止 `src/`、Vite、npm scripts 或 CI 依赖它；边界与不可移动清单见 `agent/context/project-file-boundaries.md`。
-- `project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/` 和 `project-support/crawl/` 是构建、采集和发布链路。`src/views/investment/investment-assistant.md` 被投资导入页以 `?raw` 编译，也是运行时输入；不要按文件扩展名把它移动进 `agent/`。
+- `project-support/extension/lptff-investment-assistant/` 是项目功能；`project-support/scripts/` 和 `project-support/crawl/` 是构建、采集和发布链路。
 
 ## Investment OS 与采集任务验收
 

@@ -391,8 +391,6 @@
 └── evidence
 ```
 
-另有 `/investment/legacy/*`，包括 dashboard、import、holding、performance、transaction 和 review 历史页面。
-
 当前可确认的 OS 基础包括：
 
 - 来源 Adapter/扩展同步后的部分标准化 Portfolio、Holding、Transaction、DailyPnL 和 Coverage；
@@ -634,7 +632,6 @@
 | 面试题 | `/interview` | 正式使用 | 阅读知识树和项目资料 |
 | 博客 | `/blog` | 正式使用 | 浏览、筛选、搜索和阅读文章 |
 | Investment OS | `/investment` | P0 已交付 | 同步/查看事实与 Coverage，浏览 Portfolio/Policies/Actions/Data/Evidence；`/investment/review` P0 纪律与执行复盘已交付（仓位/操作/止损/减仓 + 按问题 Coverage）；绩效/归因/AI 未交付 |
-| Investment legacy | `/investment/legacy/*` | 历史入口 | 查看旧 Dashboard/Import/Holding/Performance/Transaction/Review |
 | 基金买入建议 | `/message` | 正式使用 | 查看多策略建议、行情和购买入口 |
 | 基金持仓分析 | `/fundHoldInfoMsg` | 正式使用 | 查看持仓和策略、行情和购买入口 |
 | 基金分析 Plus | `/fundPilotPlus` | 正式使用 | 表格筛选、选择、跳转、导出 |

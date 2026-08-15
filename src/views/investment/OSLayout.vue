@@ -33,7 +33,6 @@
       <el-menu-item index="/investment/actions">行动</el-menu-item>
       <el-menu-item index="/investment/data">数据</el-menu-item>
       <el-menu-item index="/investment/evidence">证据</el-menu-item>
-      <el-menu-item index="/investment/legacy">旧版复盘</el-menu-item>
     </el-menu>
 
     <div class="os-body">

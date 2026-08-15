@@ -88,18 +88,6 @@ const routes = [
           { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "证据" } },
         ],
       },
-      {
-        path: "legacy",
-        component: () => import("../views/investment/legacy/LegacyLayout.vue"),
-        children: [
-          { path: "", name: "fund-dashboard", component: () => import("../views/investment/legacy/FundDashboard.vue") },
-          { path: "import", name: "fund-import", component: () => import("../views/investment/legacy/FundImport.vue") },
-          { path: "holding", name: "fund-holding", component: () => import("../views/investment/legacy/FundHolding.vue") },
-          { path: "performance", name: "fund-performance", component: () => import("../views/investment/legacy/FundPerformance.vue") },
-          { path: "transaction", name: "fund-transaction", component: () => import("../views/investment/legacy/FundTransaction.vue") },
-          { path: "review", name: "fund-review", component: () => import("../views/investment/legacy/FundReview.vue") },
-        ],
-      },
     ],
   },
   { path: "/", name: "home", component: () => import("../views/home/index.vue") },

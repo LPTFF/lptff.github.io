@@ -44,7 +44,7 @@ project-support/ → 构建、CI、扩展发布和静态资源
 - `project-support/crawl/**`、`project-support/build.sh`
 - `project-support/public/**`
 - `src/data/**`、`src/assets/**`
-- `src/views/Blog/articles/**`、`src/views/home/findJob/full.md`、`src/views/home/findJob/chain.md`、`src/views/investment/investment-assistant.md`
+- `src/views/Blog/articles/**`、`src/views/home/findJob/full.md`、`src/views/home/findJob/chain.md`
 - `vite.config.ts`、`package.json`、`.github/workflows/ci.yml`
 
 这些路径被页面、Vite、package scripts 或 CI 调用。变更前先做调用图检查，不按目录名称判断能否迁移。
