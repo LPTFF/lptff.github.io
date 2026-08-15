@@ -1,6 +1,6 @@
 const PROFILE_URL = (code) => `https://fundf10.eastmoney.com/jbgk_${encodeURIComponent(code)}.html`;
 const CURRENCY_URL = (code) => `https://fund.eastmoney.com/${encodeURIComponent(code)}.html`;
-const INDUSTRY_URL = (code) => `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=`;
+const INDUSTRY_URL = (code) => `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=${new Date().getFullYear()}`;
 
 function textOf(node) {
   return String(node?.textContent || "").replace(/\s+/g, " ").trim();

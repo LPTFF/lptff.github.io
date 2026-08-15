@@ -1,14 +1,23 @@
 {
   "manifest_version": 3,
   "name": "LPTFF Investment Assistant",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "从已登录的天天基金页面高效采集全面来源事实，再由本地 Investment OS 按产品需要加工消费。",
-  "permissions": ["activeTab", "downloads", "offscreen", "tabs", "storage"],
+  "permissions": ["activeTab", "downloads", "offscreen", "tabs", "storage", "declarativeNetRequest"],
   "host_permissions": [
     "https://fund.eastmoney.com/*",
     "https://fundf10.eastmoney.com/*",
     "https://api.fund.eastmoney.com/*"
   ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "eastmoney_referer",
+        "enabled": true,
+        "path": "rules/eastmoney-referer.json"
+      }
+    ]
+  },
   "action": {
     "default_title": "高效采集投资来源数据",
     "default_popup": "popup/popup.html"

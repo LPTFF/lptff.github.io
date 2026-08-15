@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "referer", "operation": "set", "value": "https://fundf10.eastmoney.com/" }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||api.fund.eastmoney.com/",
+      "resourceTypes": ["xmlhttprequest"]
+    }
+  }
+]
