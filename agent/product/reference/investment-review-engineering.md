@@ -28,7 +28,7 @@ Comprehensive Source Capture
 1. **全面来源采集层**输出 `eastmoney-source-capture/1.0`。它保留账户/持仓来源字段、单基金份额/盈亏/定投表格、按时间范围和页码组织的交易记录、公开基金全部键值字段与章节，以及 Coverage、warning 和聚合性能指标。它不按当前页面需要裁剪字段，也不生成领域判断。
 2. **页面消费加工层**在网站侧把来源采集包投影为 `InvestmentDataset 2.0`。账户、持仓、交易状态、每日盈亏、资产分类和 Coverage 的产品语义都在 Adapter 中形成；页面或领域模型变化只调整这一层，不反向修改已观察来源事实。
 
-扩展 staging 保存来源采集包并维持一次性 ACK 生命周期；读取端继续兼容旧 `InvestmentDataset 2.0` 和 `1.1` 备份。仓库内允许保留一份结构完整、数组受限、跨表标识一致替换的脱敏来源样本作为产品设计输入；真实采集包、认证字段、真实基金标识和投资值不得写入仓库。提交样本前运行 `node project-support/scripts/investment/validate-source-sample.js`，只以协议、字段路径、数组上限、固定样本值和敏感键规则作为自检依据。
+扩展 staging 保存来源采集包并维持一次性 ACK 生命周期；读取端继续兼容旧 `InvestmentDataset 2.0` 和 `1.1` 备份。仓库内允许保留两类来源脱敏产物：一是结构完整、数组受限、跨表标识一致替换的**合成样本**（`eastmoney-source-sample.json`），用于零真实数据的结构设计输入，提交前运行 `node project-support/scripts/investment/validate-source-sample.js`；二是**法律关键脱敏快照**（`eastmoney-source-desensitized.json`），保留真实基金代码/名称/净值/金额/日期等非个人识别数据，仅掩盖个人金融账户、银行卡尾号、交易与追踪标识，用于沙箱产品推演，由 `node project-support/scripts/investment/desensitize-source.js <真实采集包路径>` 生成并自检。真实采集包、认证字段和真实个人账户/银行卡号/交易追踪标识不得写入仓库。
 
 ### 当前运行时基础
 
