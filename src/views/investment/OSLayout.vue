@@ -14,13 +14,8 @@
 
     <InvestmentSyncStatus />
 
-    <el-alert v-if="state.lastFailures.length"
-      type="warning"
-      :title="`上次同步部分失败：${state.lastFailures.join('；')}`"
-      show-icon
-      :closable="false"
-      class="os-alert"
-    />
+    <el-alert v-if="state.lastFailures.length" type="warning" :title="`上次同步部分失败：${state.lastFailures.join('；')}`"
+      show-icon :closable="false" class="os-alert" />
 
     <div v-if="fromReview" class="review-back-bar">
       <span>你从复盘页跳来处理这条问题，处理完点右侧返回继续复盘。</span>
@@ -80,7 +75,7 @@ const statusBar = computed<{ text: string; type: StatusBarType }>(() => {
   if (!state.loaded) return { text: "尚未读取账本", type: "info" };
   const driftBreaches = state.portfolio
     ? buildAllocationDrift(state.activeVersions, state.strategyRuleVersions, state.portfolio, state.assets)
-        .filter((d) => d.direction !== "within").length
+      .filter((d) => d.direction !== "within").length
     : 0;
   if (driftBreaches > 0) return { text: `${driftBreaches} 项目标配置偏离待复盘`, type: "warning" };
   switch (state.health?.level) {
@@ -136,6 +131,7 @@ function goToReview(): void {
 .os-layout {
   padding: 8px 0 32px;
 }
+
 .os-header {
   display: flex;
   align-items: center;
@@ -144,17 +140,21 @@ function goToReview(): void {
   flex-wrap: wrap;
   margin-bottom: 8px;
 }
+
 .os-title {
   display: flex;
   align-items: center;
   gap: 10px;
 }
+
 .os-name {
   font-weight: 600;
 }
+
 .os-alert {
   margin: 8px 0;
 }
+
 .review-back-bar {
   display: flex;
   align-items: center;
@@ -169,6 +169,7 @@ function goToReview(): void {
   font-size: 13px;
   color: var(--el-text-color-regular);
 }
+
 .review-entry-bar {
   display: flex;
   align-items: center;
@@ -183,10 +184,13 @@ function goToReview(): void {
   font-size: 13px;
   color: var(--el-text-color-regular);
 }
+
 .os-menu {
   border-bottom: 1px solid var(--el-border-color);
 }
+
 .os-body {
   padding-top: 16px;
+  padding-right: 20px;
 }
 </style>
