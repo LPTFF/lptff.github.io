@@ -2,12 +2,14 @@
   <div class="os-layout">
     <div class="os-header">
       <div class="os-title">
-        <span class="os-name">LPTFF Investment OS</span>
-        <el-tag :type="healthTag" effect="plain" size="small">{{ healthText }}</el-tag>
+        <span class="os-name">基金复盘助手</span>
+        <el-tag :type="statusBar.type" effect="plain" size="small">{{ statusBar.text }}</el-tag>
       </div>
-      <div class="os-actions">
-        <el-button type="primary" size="small" :loading="state.syncing" :disabled="state.collecting" @click="syncFromExtension">读取待导入数据</el-button>
-      </div>
+    </div>
+
+    <div v-if="needReviewLink" class="review-entry-bar">
+      <span>{{ statusBar.text }}。复盘可展开查看具体偏离、证据与下一步。</span>
+      <el-button size="small" type="primary" @click="goToReview">去复盘 →</el-button>
     </div>
 
     <InvestmentSyncStatus />
@@ -45,48 +47,88 @@
 import { computed, onMounted } from "vue";
 import { RouterView, useRoute, useRouter } from "vue-router";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
+import { useInvestmentReview } from "../../investment/composables/use-investment-review";
 import { useInvestmentSimulator } from "../../investment/composables/use-investment-simulator";
+import { buildAllocationDrift } from "../../investment/composables/selectors";
 import InvestmentSyncStatus from "./components/InvestmentSyncStatus.vue";
 
 const route = useRoute();
 const router = useRouter();
-const { state, syncFromExtension, loadFromLedger, refreshExtensionStatus } = useInvestmentOS();
+const { state, loadFromLedger, refreshExtensionStatus, loadRealFixtureSnapshot, clearEverything } = useInvestmentOS();
 const simulator = useInvestmentSimulator();
+const review = useInvestmentReview();
 
-const healthTag = computed<"success" | "warning" | "danger" | "info">(() => {
+type StatusBarType = "success" | "warning" | "danger" | "info";
+
+// 克制系统状态条（Layer 3 Monitor 前置）：
+// 优先消费复盘管理状态（今日无需操作 / N 项需复盘 / 等待证据 / 准备中）；
+// 复盘未加载时退化为数据健康 + 目标配置偏离计数，不制造无依据的"系统正常"。
+const statusBar = computed<{ text: string; type: StatusBarType }>(() => {
+  if (review.state.loaded) {
+    const m = review.conclusions.value.management;
+    switch (m.state) {
+      case "complete":
+        return { text: "今日无需操作", type: "success" };
+      case "needs_action":
+        return { text: m.title, type: "warning" };
+      case "waiting":
+        return { text: m.title, type: "info" };
+      default:
+        return { text: m.title, type: "info" };
+    }
+  }
+  if (!state.loaded) return { text: "尚未读取账本", type: "info" };
+  const driftBreaches = state.portfolio
+    ? buildAllocationDrift(state.activeVersions, state.strategyRuleVersions, state.portfolio, state.assets)
+        .filter((d) => d.direction !== "within").length
+    : 0;
+  if (driftBreaches > 0) return { text: `${driftBreaches} 项目标配置偏离待复盘`, type: "warning" };
   switch (state.health?.level) {
     case "normal":
-      return "success";
+      return { text: "今日无需操作", type: "success" };
     case "needs_attention":
-      return "warning";
+      return { text: state.health.summary, type: "warning" };
     case "blocked":
-      return "danger";
+      return { text: state.health.summary, type: "danger" };
     default:
-      return "info";
+      return { text: state.health?.summary ?? "未知状态", type: "info" };
   }
 });
 
-const healthText = computed(() => {
-  if (!state.loaded) return "尚未读取账本";
-  return state.health?.summary ?? "未知状态";
-});
+const needReviewLink = computed(() => state.loaded && statusBar.value.type === "warning");
 
 onMounted(async () => {
   await loadFromLedger();
-  // 只在 Ledger 真正为空时创建模拟数据；已有 sim 数据则恢复内存状态，绝不覆盖用户规则或事实。
-  const ledgerIsEmpty = !state.account
-    && !state.activeScope
-    && !state.transactions.length
-    && !state.assets.length;
-  if (state.account?.source === "sim" || (ledgerIsEmpty && !state.demoMode)) {
+  // source=sim：真实持仓演练续演；旧虚构残留（simulator 拒绝恢复 initialized=false）则清除并加载真实。
+  if (state.account?.source === "sim") {
     await simulator.init();
+    if (!simulator.state.initialized) {
+      await clearEverything();
+      await loadRealFixtureSnapshot();
+    }
+  } else {
+    const ledgerIsEmpty = !state.account
+      && !state.activeScope
+      && !state.transactions.length
+      && !state.assets.length;
+    // Ledger 为空且未显式清空时，默认加载真实采集快照供页面审查。
+    if (ledgerIsEmpty && !state.demoMode && localStorage.getItem("investment-manual-clear") !== "1") {
+      await loadRealFixtureSnapshot();
+    }
   }
   await refreshExtensionStatus();
+  // 触发复盘 Core，供克制状态条消费管理状态；无 scope 时静默退化为健康/偏离视角。
+  if (!review.state.loaded && !review.state.running) {
+    await review.loadReviewFromLedger(new Date().toISOString().slice(0, 10));
+  }
 });
 
 const fromReview = computed(() => route.query.from === "review");
 function goBackToReview(): void {
   router.push("/investment/review");
+}
+function goToReview(): void {
+  router.push({ path: "/investment/review", query: { from: "portfolio" } });
 }
 </script>
 
@@ -110,11 +152,6 @@ function goBackToReview(): void {
 .os-name {
   font-weight: 600;
 }
-.os-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
 .os-alert {
   margin: 8px 0;
 }
@@ -128,6 +165,20 @@ function goBackToReview(): void {
   padding: 8px 12px;
   background: var(--el-color-primary-light-9);
   border-left: 3px solid var(--el-color-primary);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+}
+.review-entry-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 8px 0;
+  padding: 8px 12px;
+  background: var(--el-color-warning-light-9);
+  border-left: 3px solid var(--el-color-warning);
   border-radius: 4px;
   font-size: 13px;
   color: var(--el-text-color-regular);

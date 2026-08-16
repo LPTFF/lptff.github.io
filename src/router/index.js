@@ -73,19 +73,19 @@ const routes = [
   {
     path: "/investment",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "Investment OS" },
+    meta: { title: "基金复盘助手", product: "基金复盘助手" },
     children: [
       {
         path: "",
         component: () => import("../views/investment/OSLayout.vue"),
         children: [
-          { path: "", name: "os-console", component: () => import("../views/investment/ConsoleView.vue") },
-          { path: "review", name: "os-review", component: () => import("../views/investment/ReviewView.vue"), meta: { title: "复盘" } },
-          { path: "portfolio", name: "os-portfolio", component: () => import("../views/investment/PortfolioView.vue") },
-          { path: "policies", name: "os-policies", component: () => import("../views/investment/PoliciesView.vue") },
-          { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue") },
-          { path: "data", name: "os-data", component: () => import("../views/investment/DataView.vue") },
-          { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "证据" } },
+          { path: "", name: "os-console", component: () => import("../views/investment/ConsoleView.vue"), meta: { title: "控制台", product: "基金复盘助手" } },
+          { path: "review", name: "os-review", component: () => import("../views/investment/ReviewView.vue"), meta: { title: "复盘", product: "基金复盘助手" } },
+          { path: "portfolio", name: "os-portfolio", component: () => import("../views/investment/PortfolioView.vue"), meta: { title: "组合", product: "基金复盘助手" } },
+          { path: "policies", name: "os-policies", component: () => import("../views/investment/PoliciesView.vue"), meta: { title: "规则", product: "基金复盘助手" } },
+          { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue"), meta: { title: "行动", product: "基金复盘助手" } },
+          { path: "data", name: "os-data", component: () => import("../views/investment/DataView.vue"), meta: { title: "数据", product: "基金复盘助手" } },
+          { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "证据", product: "基金复盘助手" } },
         ],
       },
     ],
@@ -102,6 +102,11 @@ const router = createRouter({
     if (to.hash) return { el: to.hash, behavior: "smooth" };
     return { top: 0 };
   },
+});
+
+router.afterEach((to) => {
+  if (!to.meta?.title) { document.title = "随风而逝"; return; }
+  document.title = `${to.meta.title} · ${to.meta.product ?? "随风而逝"}`;
 });
 
 export default router;

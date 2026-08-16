@@ -259,22 +259,43 @@ function sourceIndexes(detail: SourceRecord): string[] {
 }
 
 function classifiedIndexes(detail: SourceRecord): string[] {
+  // 优先用真实跟踪标的（指数基金精确）；主动基金无跟踪标的时才退回 benchmark 推断。
+  const tracked = sourceIndexes(detail);
+  if (tracked.length) return tracked;
   const benchmark = textOf(detail.benchmark ?? fieldsOf(detail)["业绩比较基准"]);
-  return uniqueText(benchmark.split(/[+，,；;]/).flatMap((component) => {
-    const normalized = component.replace(/^.*?汇率调整的/, "").replace(/收益率.*$/, "").replace(/\*.*$/, "").trim();
-    const match = normalized.match(/([^*]{2,50}?指数)$/);
-    return match ? [match[1].trim()] : [];
-  }));
+  const items = benchmark.split(/[+，,；;]/).map((component) => {
+    const normalized = component
+      .replace(/^.*?汇率调整的/, "")
+      .replace(/收益率.*$/, "")
+      .replace(/\*.*$/, "")
+      .replace(/^人民币计价的/, "")
+      .trim();
+    const weightMatch = normalized.match(/(\d+(?:\.\d+)?)\s*%\s*[×x*]/);
+    const weight = weightMatch ? Number(weightMatch[1]) : 0;
+    const cleaned = normalized.replace(/^\d+(?:\.\d+)?%?\s*[×x*]\s*/, "").trim();
+    const match = cleaned.match(/([^*]{2,50}?指数)$/);
+    return { weight, name: match ? match[1].trim() : "" };
+  }).filter((it) => it.name);
+  if (!items.length) return [];
+  // 取基准里权重最大的成分作为主风格代表（并列最大者都取），避免把 benchmark 全部复合成分
+  // （如「45%×沪深300 + 45%×恒生 + 10%×中证全债」）平铺成多个指数标签污染底层暴露。
+  const maxWeight = Math.max(...items.map((it) => it.weight));
+  const mains = maxWeight === 0 ? [items[0]] : items.filter((it) => it.weight === maxWeight);
+  return uniqueText(mains.map((it) => it.name));
 }
 
-function classificationText(detail: SourceRecord): string {
+/** 地区归类只看基金实际跟踪的标的/基准/名称/类型，不看投资范围里"可投"品种列举，
+ *  以免"美国存托凭证""港股通"等宽泛可投文本污染地区（如恒生科技被误归美国）。 */
+function regionSourceText(detail: SourceRecord): string {
   const fields = fieldsOf(detail);
-  return [detail.investmentScope, detail.investmentObjective, detail.fundType, detail.benchmark, detail.fundName,
-    fields["投资范围"], fields["基金类型"], fields["业绩比较基准"], fields["基金简称"]].map(textOf).filter(Boolean).join(" ");
+  return [
+    detail.trackedIndexText, detail.benchmark, detail.fundName, detail.fundType,
+    fields["跟踪标的"], fields["业绩比较基准"], fields["基金简称"], fields["基金类型"],
+  ].map(textOf).filter(Boolean).join(" ");
 }
 
 function classifiedRegions(detail: SourceRecord): string[] {
-  const text = classificationText(detail);
+  const text = regionSourceText(detail);
   const regions: string[] = [];
   if (/美国|美股|纳斯达克|标普/.test(text)) regions.push("美国");
   if (/香港|港股|恒生/.test(text)) regions.push("中国香港");
@@ -284,6 +305,8 @@ function classifiedRegions(detail: SourceRecord): string[] {
   if (/欧洲|欧元区/.test(text)) regions.push("欧洲");
   if (/中国境内|内地|A股|沪深|中证|上证|深证|创业板|科创/.test(text)) regions.push("中国内地");
   if (!regions.length && /全球|环球|境外|QDII/i.test(text)) regions.push("全球");
+  // 商品类资产（黄金/原油等）无地理地区时归"全球"，便于组合页暴露统计。
+  if (!regions.length && classifiedAssetClass(detail) === "commodity") regions.push("全球");
   return uniqueText(regions);
 }
 
@@ -300,9 +323,22 @@ function classifiedThemes(detail: SourceRecord): string[] {
   const industries = arrayOf(detail.industries).map(recordOf)
     .map((industry) => ({ name: textOf(industry.HYMC ?? industry.name), weight: numberOf(industry.ZJZBL ?? industry.weightPct) }))
     .filter((industry) => industry.name && industry.weight > 0);
-  if (!industries.length) return [];
-  const largest = Math.max(...industries.map((industry) => industry.weight));
-  return uniqueText(industries.filter((industry) => industry.weight === largest).map((industry) => industry.name));
+  if (industries.length) {
+    const largest = Math.max(...industries.map((industry) => industry.weight));
+    return uniqueText(industries.filter((industry) => industry.weight === largest).map((industry) => industry.name));
+  }
+  // 商品类资产（黄金/原油/贵金属）无行业配置时，按跟踪标的给主题，避免组合页"待识别"。
+  if (classifiedAssetClass(detail) === "commodity") {
+    const fields = fieldsOf(detail);
+    const text = [detail.trackedIndexText, detail.benchmark, detail.fundName, fields["跟踪标的"]]
+      .map(textOf).filter(Boolean).join(" ");
+    const themes: string[] = [];
+    if (/黄金|Au9999|贵金属/.test(text)) themes.push("黄金");
+    if (/原油|石油/.test(text)) themes.push("原油");
+    if (!themes.length && /商品/.test(text)) themes.push("商品");
+    return uniqueText(themes);
+  }
+  return [];
 }
 
 function classifiedAssetClass(detail: SourceRecord): AssetMetadata["assetClass"] {

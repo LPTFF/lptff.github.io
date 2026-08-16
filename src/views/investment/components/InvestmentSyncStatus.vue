@@ -1,5 +1,6 @@
 <template>
   <el-alert
+    v-if="visible"
     :type="alertType"
     :title="title"
     :description="description"
@@ -17,7 +18,7 @@
       </div>
     </div>
     <div class="status-meta">
-      <span>插件暂存：{{ stagingLabel }}</span>
+      <span>插件待导入：{{ stagingLabel }}</span>
       <span>最近导入：{{ lastImportLabel }}</span>
       <span v-if="collectionMetricLabel">{{ collectionMetricLabel }}</span>
       <span v-if="state.lastImport">交易新增 {{ state.lastImport.addedTransactions }}，重复 {{ state.lastImport.duplicateTransactions }}</span>
@@ -32,10 +33,19 @@ import { useInvestmentOS } from "../../../investment/composables/use-investment-
 const { state } = useInvestmentOS();
 
 const busy = computed(() => state.syncing || state.collecting);
+// 只在有可展示/可操作状态时渲染：进行中 / 有待导入数据 / 失败或有错误。
+// idle（无待导入、无操作）、up-to-date 与 completed（导入后已同步的常态）都不显示，
+// 避免常驻的"成功"横幅噪音；瞬时反馈由按钮 toast 承担。
+const visible = computed(() =>
+  state.syncing
+  || state.collecting
+  || state.syncPhase === "failed"
+  || Boolean(state.extensionStatus?.pending)
+  || Boolean(state.error)
+);
 const alertType = computed<"success" | "warning" | "error" | "info">(() => {
   if (state.syncPhase === "failed") return "error";
   if (state.lastFailures.length) return "warning";
-  if (state.syncPhase === "completed" || state.syncPhase === "up-to-date") return "success";
   return "info";
 });
 const STAGE_LABEL: Record<string, string> = {
@@ -87,12 +97,11 @@ const title = computed(() => {
     const progress = state.collectionProgress;
     const stageLabel = STAGE_LABEL[progress?.stage ?? "idle"] ?? "采集中";
     const detail = activeBranchLabel.value ? `（${activeBranchLabel.value}）` : "";
-    return `插件正在采集全面来源事实：${stageLabel}${detail}`;
+    return `插件正在采集完整来源数据：${stageLabel}${detail}`;
   }
   if (state.syncing) return "正在导入插件数据";
-  if (state.syncPhase === "up-to-date") return "插件与本地 Ledger 已同步";
-  if (state.syncPhase === "completed") return "本次操作已完成";
   if (state.syncPhase === "failed") return "本次操作失败";
+  if (state.extensionStatus?.pending) return "有一批采集数据等待导入";
   return "插件数据传输状态";
 });
 const description = computed(() => state.error || state.syncMessage);

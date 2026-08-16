@@ -1,13 +1,15 @@
 /**
- * A 股基金牛熊周期模拟器 composable。
+ * 牛熊周期模拟器 composable（真实持仓演练）。
  *
- * 管理模拟时钟（24 期月度）、持仓、止损历史状态，逐期推进：市场净值演变 → 行为模型生成交易 →
- * 更新持仓快照 → 写 Ledger → 触发复盘重跑。用户在规则页改规则、行动页处置后，下一轮复盘信号
- * 减少，体现"持续亏损 → 小亏 → 小赚 → 稳定盈利"的改善路径。全部虚构，不自动交易。
+ * 用真实持仓（导入的采集快照或插件采集数据）+ 通过 normalizeIndexId 映射到 IndexId 净值曲线
+ * 逐期推进，行为模型生成交易，观察真实组合在牛熊周期的市值/规则偏离演变。
+ * 演练用 clearImportedFacts 保留 rules/assets/scope；结束可一键 loadRealFixtureSnapshot 恢复真实。
+ * 不再支持 F001-F007 虚构沙盒。
  */
 import { reactive, computed } from "vue";
 import type {
   AccountSnapshot,
+  AssetMetadata,
   DataCoverage,
   DecisionRecord,
   ExecutionLink,
@@ -23,15 +25,17 @@ import type {
 import { InvestmentLedger, type StoredTrailingStopState } from "../ledger/repository";
 import {
   MARKET_ASSET_IDS,
-  MARKET_ASSETS,
   PHASE_LABEL,
   TOTAL_PERIODS,
   dateOf,
-  navRow as navRowOf,
+  marketAssetForIndex,
+  navOf,
+  navByIndexId,
   phaseOf,
   type MarketAssetId,
 } from "../__fixtures__/review/market";
-import { generateActions, defaultToggles, type BehaviorLogEntry, type BehaviorToggles } from "../engines/review/simulator-behavior";
+import { normalizeIndexId, type IndexId } from "../engines/scenario/historical-cycles";
+import { generateActions, defaultToggles, type BehaviorLogEntry, type BehaviorToggles, type SimBehaviorHolding } from "../engines/review/simulator-behavior";
 import { advanceTrailingStop } from "../engines/review/trailing-stop";
 import { makeStoredTrailingStopState, makeCoverage } from "../__fixtures__/review/builders";
 import { useInvestmentReview } from "./use-investment-review";
@@ -54,6 +58,14 @@ interface SimulatorState {
   initialized: boolean;
   running: boolean;
   holdings: Record<string, SimHolding>;
+  /** 每只持仓（assetId）对应的 IndexId（净值曲线键），由 normalizeIndexId 从真实指数名映射。 */
+  holdingIndex: Record<string, IndexId>;
+  /** 真实持仓中文名（写 Ledger holding.name 用）。 */
+  holdingNames: Record<string, string | undefined>;
+  /** 规律定投标的 assetId。 */
+  regularInvestAssetId: string | undefined;
+  /** 演练开始前各基金最近真实交易日期（YYYY-MM-DD），供发现同时展示真实日期供核实。 */
+  realTransactionsByAsset: Record<string, string>;
 }
 
 type MarketPhase = ReturnType<typeof phaseOf>;
@@ -67,6 +79,10 @@ const state = reactive<SimulatorState>({
   initialized: false,
   running: false,
   holdings: {},
+  holdingIndex: {},
+  holdingNames: {},
+  regularInvestAssetId: undefined,
+  realTransactionsByAsset: {},
 });
 
 let ledger: InvestmentLedger | null = null;
@@ -81,34 +97,76 @@ const os = useInvestmentOS();
 const phaseLabel = computed(() => PHASE_LABEL[state.phase]);
 const isLastRound = computed(() => state.round >= TOTAL_PERIODS - 1);
 
+function round2(n: number): number { return Math.round(n * 100) / 100; }
+function round4(n: number): number { return Math.round(n * 10000) / 10000; }
+
+/** 取某资产某期 NAV：holdingIndex→marketAssetForIndex→navOf；未匹配返回 1（净值不变，不伪造）。 */
+function navOfAsset(assetId: string, period: number): number {
+  const ix = state.holdingIndex[assetId];
+  if (ix) {
+    const maid = marketAssetForIndex(ix);
+    if (maid) return navOf(maid, period);
+    return 1;
+  }
+  return 1;
+}
+
+/** 真实持仓 asset → IndexId：normalizeIndexId 优先，无匹配取 indexes[0] 兜底。 */
+function resolveIndexFromMeta(meta: AssetMetadata | undefined): IndexId {
+  if (!meta || !meta.indexes.length) return "CSI300";
+  for (const ix of meta.indexes) {
+    const nid = normalizeIndexId(ix);
+    if (nid) return nid;
+  }
+  return meta.indexes[0] as IndexId;
+}
+
+/** 定投标的：优先 CSI300（沪深300）下首只，否则首只持仓。 */
+function pickRegularInvestAsset(): string | undefined {
+  const assetIds = Object.keys(state.holdings).filter((aid) => (state.holdings[aid]?.shares ?? 0) > 0);
+  if (!assetIds.length) return undefined;
+  const csi = assetIds.find((aid) => state.holdingIndex[aid] === "CSI300");
+  return csi ?? assetIds[0];
+}
+
+/** 从 Ledger 恢复演练状态：真实持仓演练续；旧虚构残留（F001-F007）拒绝恢复（由 OSLayout 清除）。 */
 function restoreFromLedgerState(): boolean {
   if (os.state.account?.source !== "sim" || !os.state.portfolio) return false;
+  if (os.state.portfolio.holdings.some((h) => MARKET_ASSET_IDS.includes(h.assetId as MarketAssetId))) return false;
   const asOf = os.state.account.capturedAt.slice(0, 10);
   const round = Array.from({ length: TOTAL_PERIODS }, (_, index) => dateOf(index)).indexOf(asOf);
   if (round < 0) return false;
   const holdings: Record<string, SimHolding> = {};
+  const holdingIndex: Record<string, IndexId> = {};
+  const holdingNames: Record<string, string | undefined> = {};
   for (const holding of os.state.portfolio.holdings) {
     holdings[holding.assetId] = {
       shares: holding.shares ?? 0,
       costValue: holding.costValue ?? holding.marketValue,
     };
+    const meta = os.state.assets.find((a) => a.assetId === holding.assetId);
+    holdingIndex[holding.assetId] = resolveIndexFromMeta(meta);
+    holdingNames[holding.assetId] = holding.name ?? meta?.name;
   }
   state.round = round;
   state.asOf = asOf;
   state.phase = phaseOf(round);
   state.holdings = holdings;
+  state.holdingIndex = holdingIndex;
+  state.holdingNames = holdingNames;
+  state.regularInvestAssetId = pickRegularInvestAsset();
   state.behaviorLog = [];
   state.initialized = true;
   state.running = false;
   return true;
 }
 
-function buildSimRules(): StrategyRule[] {
+function buildSimRules(assetIds: string[]): StrategyRule[] {
   const rules: StrategyRule[] = [];
-  for (const aid of MARKET_ASSET_IDS) {
+  for (const aid of assetIds) {
     rules.push({ kind: "position_band", assetId: aid, minPct: 0, maxPct: 0.25, targetPct: 0.15 });
   }
-  for (const aid of MARKET_ASSET_IDS) {
+  for (const aid of assetIds) {
     rules.push({ kind: "trailing_stop", assetId: aid, basis: "nav_adjusted", drawdownPct: 0.1, effectiveFrom: "2024-01-01" });
     rules.push({ kind: "reduction_target", assetId: aid, targetMinPct: 0.1, targetMaxPct: 0.2 });
   }
@@ -132,48 +190,69 @@ const stubCoverage: PerJudgmentCoverage = {
   affectedJudgmentIds: [],
 };
 
-function toHoldings(holdings: Record<string, SimHolding>, navRow: Record<MarketAssetId, number>): HoldingSnapshot[] {
-  return MARKET_ASSET_IDS.filter((aid) => (holdings[aid]?.shares ?? 0) > 0).map((aid) => {
+function holdingName(aid: string): string | undefined {
+  return state.holdingNames[aid];
+}
+
+function toHoldings(holdings: Record<string, SimHolding>, period: number): HoldingSnapshot[] {
+  return Object.keys(holdings).filter((aid) => (holdings[aid]?.shares ?? 0) > 0).map((aid) => {
     const h = holdings[aid];
-    const nav = navRow[aid];
+    const nav = navOfAsset(aid, period);
     return {
       assetId: aid,
-      name: MARKET_ASSETS.find((a) => a.assetId === aid)?.name,
-      shares: Math.round(h.shares * 10000) / 10000,
-      availableShares: Math.round(h.shares * 10000) / 10000,
-      marketValue: Math.round(h.shares * nav * 100) / 100,
-      costValue: Math.round(h.costValue * 100) / 100,
+      name: holdingName(aid),
+      shares: round4(h.shares),
+      availableShares: round4(h.shares),
+      marketValue: round2(h.shares * nav),
+      costValue: round2(h.costValue),
       nav,
       navDate: dateOf(state.round),
     };
   });
 }
 
-function buildRecentNavs(period: number): Partial<Record<MarketAssetId, number[]>> {
-  const out: Partial<Record<MarketAssetId, number[]>> = {};
-  for (const aid of MARKET_ASSET_IDS) {
+function toBehaviorHoldings(period: number): SimBehaviorHolding[] {
+  return Object.keys(state.holdings).filter((aid) => (state.holdings[aid]?.shares ?? 0) > 0).map((aid) => {
+    const h = state.holdings[aid];
+    const nav = navOfAsset(aid, period);
+    return {
+      assetId: aid,
+      indexId: state.holdingIndex[aid],
+      shares: h.shares,
+      costValue: h.costValue,
+      marketValue: h.shares * nav,
+      name: holdingName(aid),
+    };
+  });
+}
+
+function buildRecentNavsByIndex(period: number): Partial<Record<IndexId, number[]>> {
+  const out: Partial<Record<IndexId, number[]>> = {};
+  const indexes = new Set<IndexId>(Object.values(state.holdingIndex));
+  for (const ix of indexes) {
+    const maid = marketAssetForIndex(ix);
+    if (!maid) continue;
     const arr: number[] = [];
-    for (let k = Math.max(0, period - 3); k <= period; k++) arr.push(navRowOf(k)[aid]);
-    out[aid] = arr;
+    for (let k = Math.max(0, period - 3); k <= period; k++) arr.push(navOf(maid, k));
+    out[ix] = arr;
   }
   return out;
 }
 
-function buildCostNav(holdings: Record<string, SimHolding>): Partial<Record<MarketAssetId, number>> {
-  const out: Partial<Record<MarketAssetId, number>> = {};
-  for (const aid of MARKET_ASSET_IDS) {
-    const h = holdings[aid];
+function buildCostNavByAsset(): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const aid of Object.keys(state.holdings)) {
+    const h = state.holdings[aid];
     if (h && h.shares > 0) out[aid] = h.costValue / h.shares;
   }
   return out;
 }
 
-async function writeFactsToLedger(period: number, holdings: Record<string, SimHolding>): Promise<void> {
+async function writeFactsToLedger(period: number, holdings: Record<string, SimHolding>, realAssets: AssetMetadata[]): Promise<void> {
   const l = getLedger();
-  const navRow = navRowOf(period);
-  const holdingSnapshots = toHoldings(holdings, navRow);
+  const holdingSnapshots = toHoldings(holdings, period);
   const holdingValue = holdingSnapshots.reduce((s, h) => s + h.marketValue, 0);
-  const totalAsset = Math.round(holdingValue * 100) / 100;
+  const totalAsset = round2(holdingValue);
   const account: AccountSnapshot = {
     id: `acct:sim:${dateOf(period)}`,
     source: "sim",
@@ -189,21 +268,20 @@ async function writeFactsToLedger(period: number, holdings: Record<string, SimHo
   };
   await l.putAccount(account);
   await l.putPortfolio(portfolio);
-  await l.putAssets(MARKET_ASSETS);
+  await l.putAssets(realAssets);
   await l.putCoverage(fullCoverage());
 }
 
-function applyTx(tx: Transaction, navRow: Record<MarketAssetId, number>): void {
-  const aid = tx.assetId as MarketAssetId;
-  if (!MARKET_ASSET_IDS.includes(aid)) return;
-  const nav = navRow[aid];
-  const h = state.holdings[aid] ?? { shares: 0, costValue: 0 };
+function applyTx(tx: Transaction, period: number): void {
+  const aid = tx.assetId;
+  const h = state.holdings[aid];
+  if (!h) return;
+  const nav = navOfAsset(aid, period);
   if (tx.type === "BUY") {
-    const buyShares = tx.amount / nav;
     h.costValue += tx.amount;
-    h.shares += buyShares;
+    h.shares += nav > 0 ? tx.amount / nav : 0;
   } else if (tx.type === "SELL") {
-    const sellShares = tx.amount / nav;
+    const sellShares = nav > 0 ? tx.amount / nav : 0;
     const ratio = h.shares > 0 ? Math.min(1, sellShares / h.shares) : 0;
     h.costValue = h.costValue * (1 - ratio);
     h.shares = Math.max(0, h.shares - sellShares);
@@ -211,71 +289,74 @@ function applyTx(tx: Transaction, navRow: Record<MarketAssetId, number>): void {
   state.holdings[aid] = h;
 }
 
-async function init(forceReset = false): Promise<void> {
+function navOfAssetByIndex(ix: IndexId, period: number): number {
+  const maid = marketAssetForIndex(ix);
+  return maid ? navOf(maid, period) : 1;
+}
+
+/**
+ * 启动真实持仓演练。forceReset=true 强制重开；options.useRealHoldings=true 用当前真实持仓。
+ * 无 options 调用时仅尝试恢复已有演练（OSLayout 刷新续演）；恢复失败返回不初始化。
+ */
+async function init(forceReset = false, options?: { useRealHoldings?: boolean }): Promise<void> {
   if (!forceReset && restoreFromLedgerState()) {
     await review.loadReviewFromLedger(state.asOf);
     return;
   }
-  const simulatorScopeActive = os.state.activeScope?.scopeId === SCOPE_ID;
-  const hasUserManagedData = Boolean(
-    (os.state.account && os.state.account.source !== "sim")
-    || (os.state.activeScope && !simulatorScopeActive)
-    || (!simulatorScopeActive && (os.state.transactions.length || os.state.assets.length)),
-  );
-  if (hasUserManagedData) {
-    throw new Error("检测到已有投资数据，模拟器不会覆盖；请先在数据页明确清空后再启动");
+  const useReal = Boolean(options?.useRealHoldings && os.state.portfolio && os.state.portfolio.holdings.length > 0);
+  if (!useReal) return;
+  // 演练开始前捕获各基金最近真实交易日期，供演练发现同时展示"模拟日期 + 真实交易日期"供核实。
+  const realTxByAsset: Record<string, string> = {};
+  for (const t of os.state.transactions ?? []) {
+    const d = (t.occurredAt ?? "").slice(0, 10);
+    if (t.assetId && d && (!realTxByAsset[t.assetId] || d > realTxByAsset[t.assetId])) realTxByAsset[t.assetId] = d;
   }
+  state.realTransactionsByAsset = realTxByAsset;
   const l = getLedger();
-  await l.clearEverything();
-  const startHoldings: Record<string, SimHolding> = {
-    F001: { shares: 1100, costValue: 1100 },
-    F002: { shares: 1100, costValue: 1100 },
-    F003: { shares: 900, costValue: 900 },
-    F005: { shares: 700, costValue: 700 },
-    F006: { shares: 700, costValue: 700 },
-  };
-  state.holdings = startHoldings;
-  state.round = 0;
-  state.asOf = dateOf(0);
-  state.phase = phaseOf(0);
-  state.toggles = defaultToggles();
-  state.behaviorLog = [];
+  // 真实持仓演练：clearImportedFacts 保留 rules/assets/scope；reactive 对象需深拷贝为 plain 再写 IndexedDB。
+  const realAssets: AssetMetadata[] = JSON.parse(JSON.stringify(os.state.assets));
+  const realUserRulesRaw = os.state.strategyRuleVersions.at(-1)?.rules;
+  const realUserRules = realUserRulesRaw ? (JSON.parse(JSON.stringify(realUserRulesRaw)) as StrategyRule[]) : undefined;
+  await l.clearImportedFacts();
+  const holdings: Record<string, SimHolding> = {};
+  const holdingIndex: Record<string, IndexId> = {};
+  const holdingNames: Record<string, string | undefined> = {};
+  for (const h of os.state.portfolio!.holdings) {
+    const meta = realAssets.find((a) => a.assetId === h.assetId);
+    const ix = resolveIndexFromMeta(meta);
+    const nav0 = navOfAssetByIndex(ix, 0);
+    const shares = h.shares ?? (nav0 > 0 ? h.marketValue / nav0 : 0);
+    const costValue = h.costValue ?? (h.marketValue - (h.pnl ?? 0));
+    holdings[h.assetId] = { shares, costValue: costValue > 0 ? costValue : h.marketValue };
+    holdingIndex[h.assetId] = ix;
+    holdingNames[h.assetId] = h.name ?? meta?.name;
+  }
+  state.holdings = holdings;
+  state.holdingIndex = holdingIndex;
+  state.holdingNames = holdingNames;
+  state.regularInvestAssetId = pickRegularInvestAsset();
+  const assetIds = Object.keys(holdings);
   const scope: InvestmentScope = {
-    scopeId: SCOPE_ID,
-    scopeType: "DECLARED_PORTFOLIO",
-    includedAssetIds: MARKET_ASSET_IDS,
-    baseCurrency: "CNY",
-    denominatorSource: "account_total_asset",
-    denominatorAsOf: dateOf(0),
+    scopeId: SCOPE_ID, scopeType: "DECLARED_PORTFOLIO", includedAssetIds: assetIds, baseCurrency: "CNY",
+    denominatorSource: "account_total_asset", denominatorAsOf: dateOf(0),
     denominatorCoverage: makeCoverage({ dataset: "account", knownRanges: [{ start: "2024-01-01", end: dateOf(0) }], completeness: "complete" }),
-    effectiveFrom: "2024-01-01",
-    version: 1,
+    effectiveFrom: "2024-01-01", version: 1,
   };
   await l.putInvestmentScope(scope);
   const ruleVersion: StrategyRuleVersion = {
-    id: RULE_VERSION_ID,
-    scopeId: SCOPE_ID,
-    version: 1,
-    effectiveFrom: "2024-01-01",
-    rules: buildSimRules(),
-    changeReason: "模拟器初始规则",
+    id: RULE_VERSION_ID, scopeId: SCOPE_ID, version: 1, effectiveFrom: "2024-01-01",
+    rules: realUserRules?.length ? realUserRules : buildSimRules(assetIds),
+    changeReason: "真实持仓演练初始规则",
   };
   await l.putStrategyRuleVersion(ruleVersion);
-  await writeFactsToLedger(0, startHoldings);
-  for (const aid of MARKET_ASSET_IDS) {
-    await l.putTrailingStopState(
-      makeStoredTrailingStopState({
-        id: `tss:${SCOPE_ID}:${aid}`,
-        scopeId: SCOPE_ID,
-        assetId: aid,
-        ruleVersionId: RULE_VERSION_ID,
-        previousHighWaterMark: 1.0,
-        currentHighWaterMark: 1.0,
-        stopLine: 0.9,
-        navBasis: "nav_adjusted",
-        asOf: dateOf(0),
-      }),
-    );
+  state.round = 0; state.asOf = dateOf(0); state.phase = phaseOf(0);
+  state.toggles = defaultToggles(); state.behaviorLog = [];
+  await writeFactsToLedger(0, state.holdings, realAssets);
+  for (const aid of assetIds) {
+    await l.putTrailingStopState(makeStoredTrailingStopState({
+      id: `tss:${SCOPE_ID}:${aid}`, scopeId: SCOPE_ID, assetId: aid, ruleVersionId: RULE_VERSION_ID,
+      previousHighWaterMark: 1.0, currentHighWaterMark: 1.0, stopLine: 0.9, navBasis: "nav_adjusted", asOf: dateOf(0),
+    }));
   }
   state.initialized = true;
   await os.loadFromLedger();
@@ -290,51 +371,45 @@ async function advance(): Promise<void> {
   try {
     const l = getLedger();
     const period = newRound;
-    const navRow = navRowOf(period);
-    const prevNavRow = navRowOf(period - 1);
-    const recentNavs = buildRecentNavs(period);
-    const holdingsSnapshot = toHoldings(state.holdings, prevNavRow);
-    const costNav = buildCostNav(state.holdings);
+    const navByIndex = navByIndexId(period);
+    const prevNavByIndex = navByIndexId(period - 1);
+    const recentNavsByIndex = buildRecentNavsByIndex(period);
+    const behaviorHoldings = toBehaviorHoldings(period - 1);
+    const costNavByAsset = buildCostNavByAsset();
     const out = generateActions({
       period,
       scopeId: SCOPE_ID,
-      navRow,
-      prevNavRow,
-      recentNavs,
-      holdings: holdingsSnapshot,
-      costNav,
+      navByIndex,
+      prevNavByIndex,
+      recentNavsByIndex,
+      holdings: behaviorHoldings,
+      costNavByAsset,
       toggles: state.toggles,
+      regularInvestAssetId: state.regularInvestAssetId,
     });
-    for (const tx of out.transactions) applyTx(tx, navRow);
+    for (const tx of out.transactions) applyTx(tx, period);
     for (const d of out.decisions) await l.putDecisionRecord(d);
     for (const lk of out.links) await l.putExecutionLink(lk);
     if (out.transactions.length) await l.putTransactions(out.transactions);
-    // 累积移动止损历史状态（每标的用上期 state + 当期 nav 推进）。
-    const trailingRules = buildSimRules().filter((r) => r.kind === "trailing_stop") as TrailingStopRule[];
-    for (const aid of MARKET_ASSET_IDS) {
+    const assetIds = Object.keys(state.holdings);
+    const trailingRules = buildSimRules(assetIds).filter((r): r is TrailingStopRule => r.kind === "trailing_stop");
+    for (const aid of assetIds) {
       const states = (await l.getTrailingStopStates(SCOPE_ID)).filter((s) => s.assetId === aid);
       const prev = states[states.length - 1];
       const rule = trailingRules.find((r) => r.assetId === aid);
       if (!rule) continue;
       const res = advanceTrailingStop({
-        scopeId: SCOPE_ID,
-        assetId: aid,
-        rule,
-        ruleVersionId: RULE_VERSION_ID,
-        previousState: prev,
-        currentNav: navRow[aid],
-        navAsOf: dateOf(period),
-        navFresh: true,
-        coverage: { ...stubCoverage, judgmentId: `trailing_stop:${aid}` },
-        asOf: dateOf(period),
+        scopeId: SCOPE_ID, assetId: aid, rule, ruleVersionId: RULE_VERSION_ID,
+        previousState: prev, currentNav: navOfAsset(aid, period), navAsOf: dateOf(period),
+        navFresh: true, coverage: { ...stubCoverage, judgmentId: `trailing_stop:${aid}` }, asOf: dateOf(period),
       });
       await l.putTrailingStopState(res.nextState);
     }
-    // 先更新模拟时钟，使 writeFacts 的 holding.navDate 用本期日期（否则复盘把 NAV 判为陈旧）。
     state.round = period;
     state.asOf = dateOf(period);
     state.phase = phaseOf(period);
-    await writeFactsToLedger(period, state.holdings);
+    const realAssets: AssetMetadata[] = JSON.parse(JSON.stringify(os.state.assets));
+    await writeFactsToLedger(period, state.holdings, realAssets);
     state.behaviorLog = out.logs;
     await os.loadFromLedger();
     await review.loadReviewFromLedger(dateOf(period));
@@ -344,7 +419,7 @@ async function advance(): Promise<void> {
 }
 
 async function reset(): Promise<void> {
-  await init(true);
+  await init(true, { useRealHoldings: true });
 }
 
 function toggleBehavior(name: keyof BehaviorToggles): void {

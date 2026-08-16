@@ -1,20 +1,9 @@
 <template>
   <div class="portfolio-view">
-    <el-empty v-if="!state.portfolio" description="尚无持仓快照，请先同步数据" />
+    <el-empty v-if="!state.portfolio" description="尚无持仓快照，请先同步数据或在数据页启动模拟" />
+    <el-alert v-else-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停组合页" description="组合页展示真实持仓与风险暴露；当前为演练模拟持仓，数据已隔离。请先到复盘页「结束演练 / 恢复真实」后再查看。" />
 
     <template v-else>
-      <!-- Account -->
-      <el-card shadow="never" class="section">
-        <template #header>账户</template>
-        <div class="metric-grid">
-          <div class="metric"><span class="metric-label">总资产</span><span class="metric-value">{{ fmt(state.portfolio.totalAsset) }}</span></div>
-          <div class="metric"><span class="metric-label">持仓市值</span><span class="metric-value">{{ fmt(state.portfolio.holdingValue) }}</span></div>
-          <div class="metric"><span class="metric-label">现金</span><span class="metric-value">{{ state.portfolio.cash === undefined ? "—" : `${fmt(state.portfolio.cash)}` }}</span></div>
-          <div class="metric"><span class="metric-label">当前持仓浮盈</span><span class="metric-value">{{ state.portfolio.currentHoldingPnl === undefined ? "—" : `${fmt(state.portfolio.currentHoldingPnl)}` }}</span></div>
-          <div class="metric"><span class="metric-label">历史累计盈亏</span><span class="metric-value">{{ state.account?.cumulativePnl === undefined ? "—" : `${fmt(state.account.cumulativePnl)}` }}</span></div>
-        </div>
-      </el-card>
-
       <!-- Fund Holdings -->
       <el-card shadow="never" class="section">
         <template #header>基金持仓</template>
@@ -58,18 +47,6 @@
             </el-radio-group>
           </div>
         </template>
-        <el-alert
-          v-if="singleValueDims.length"
-          type="info"
-          :closable="false"
-          show-icon
-          class="single-alert"
-        >
-          <template #title>以下维度当前无暴露差异</template>
-          <div v-for="s in singleValueDims" :key="s.dim" class="single-row">
-            {{ dimensionLabel(s.dim) }}：全部 {{ sliceValueLabel(s.dim, s.knownSlices[0].value) }}（{{ (s.knownSlices[0].pct * 100).toFixed(0) }}%）
-          </div>
-        </el-alert>
         <el-empty v-if="!meaningfulDims.length" description="当前组合风险暴露单一，无显著维度差异" />
         <el-alert
           v-if="currentExposure.unknownPct > 0"
@@ -82,7 +59,7 @@
         />
         <el-empty v-if="!exposureSlices.length" description="当前维度尚无可靠资产元数据" />
         <div v-else class="exposure-list">
-          <div v-for="s in exposureSlices" :key="s.value" class="exposure-row">
+          <div v-for="s in displaySlices" :key="s.value" class="exposure-row">
             <span class="exposure-value">{{ sliceValueLabel(s.dimension, s.value) }}</span>
             <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="14" class="exposure-bar" />
             <span class="exposure-pct">{{ (s.pct * 100).toFixed(1) }}%</span>
@@ -91,7 +68,7 @@
       </el-card>
 
       <!-- 共同暴露：按当前采集元数据动态生成，只报告标签关联，不推断底层权重 -->
-      <el-card v-if="sharedExposures.length" shadow="never" class="section">
+      <el-card v-if="focusSharedExposures.length" shadow="never" class="section">
         <template #header>共同暴露与集中度</template>
         <el-alert
           type="info"
@@ -100,7 +77,7 @@
           class="shared-note"
         />
         <el-alert
-          v-for="exposure in sharedExposures"
+          v-for="exposure in focusSharedExposures"
           :key="`${exposure.dimension}-${exposure.value}`"
           type="info"
           show-icon
@@ -120,11 +97,12 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
-import { buildPortfolioHoldings, sortPortfolioHoldings, type PortfolioNumericSortKey, type SortOrder } from "../../investment/composables/selectors";
+import { buildPortfolioHoldings, sortPortfolioHoldings, DIMENSION_LABEL, CONTEXT_ASSET_CLASS_LABEL, CONTEXT_CURRENCY_LABEL, type PortfolioNumericSortKey, type SortOrder } from "../../investment/composables/selectors";
 import { aggregateExposure, detectSharedExposures, exposureCoverage } from "../../investment/engines/exposure";
 import type { ExposureDimension } from "../../investment/domain";
 
 const { state } = useInvestmentOS();
+const isSimulator = computed(() => state.account?.source === "sim");
 
 const holdings = computed(() => buildPortfolioHoldings(state.portfolio, state.assets));
 const sortState = ref<{ key: PortfolioNumericSortKey; order: SortOrder }>({ key: "marketValue", order: "descending" });
@@ -140,9 +118,6 @@ function onSortChange({ prop, order }: { prop: string | null; order: SortOrder |
 
 const ALL_DIMS: ExposureDimension[] = ["index", "region", "assetClass", "currency", "theme"];
 
-// 每个维度的 coverage + 已知切片数（排除"（未标注）"桶）。
-// 产品原则：币种/FX 等维度仅在跨币种时才有意义；初始人民币 A 股基金范围不作 P0 前置。
-// 故按"已知切片数"判断区分度，≥2 才作为可切换 tab，单一值折叠到"无暴露差异"汇总。
 const allCoverages = computed(() =>
   state.portfolio
     ? ALL_DIMS.map((d) => {
@@ -153,10 +128,7 @@ const allCoverages = computed(() =>
     : [],
 );
 
-// 有区分度：≥2 个已知切片 → 作为可切换 tab
 const meaningfulDims = computed(() => allCoverages.value.filter((c) => c.knownSlices.length >= 2));
-
-// 单一值：恰好 1 个已知切片（如纯 A 股组合的计价币种全 CNY）→ 折叠到"无暴露差异"汇总
 const singleValueDims = computed(() => allCoverages.value.filter((c) => c.knownSlices.length === 1));
 
 const dimension = ref<ExposureDimension>("index");
@@ -176,32 +148,32 @@ const currentExposure = computed(() =>
 const exposureSlices = computed(() =>
   state.portfolio ? aggregateExposure(state.portfolio.holdings, state.assets, dimension.value) : [],
 );
+// 暴露切片精简：仅展示 ≥3% 的主要切片，其余聚合为「其他」，避免长尾脏标签堆砌、降低管理成本。
+const displaySlices = computed(() => {
+  const slices = exposureSlices.value;
+  const main = slices.filter((s) => s.pct >= 0.10 || s.value === "（未标注）");
+  const rest = slices.filter((s) => s.pct < 0.10 && s.value !== "（未标注）");
+  if (rest.length) {
+    const restPct = rest.reduce((a, b) => a + b.pct, 0);
+    main.push({ dimension: dimension.value, value: `其他（${rest.length} 项，合计 ${(restPct * 100).toFixed(1)}%）`, marketValue: rest.reduce((a, b) => a + b.marketValue, 0), pct: restPct, assetIds: [] });
+  }
+  return main;
+});
 const sharedExposures = computed(() =>
   state.portfolio ? detectSharedExposures(state.portfolio.holdings, state.assets) : [],
 );
+// 共同暴露只展示关联仓位 ≥20% 的高集中度风险，其余剔除——降低管理成本，只看需要关注的。
+const focusSharedExposures = computed(() =>
+  sharedExposures.value.filter((e) => e.associatedPct >= 0.20),
+);
 
 function dimensionLabel(d: ExposureDimension): string {
-  return { index: "底层指数", region: "投资市场", assetClass: "底层资产类型", currency: "计价币种", theme: "行业主题" }[d];
+  return DIMENSION_LABEL[d];
 }
 
-const ASSET_CLASS_LABEL: Record<string, string> = {
-  equity: "股票",
-  bond: "债券",
-  commodity: "商品",
-  cash: "货币",
-  other: "其他",
-};
-
-const CURRENCY_LABEL: Record<string, string> = {
-  CNY: "人民币",
-  USD: "美元",
-  HKD: "港币",
-  EUR: "欧元",
-};
-
 function sliceValueLabel(dimension: ExposureDimension, value: string): string {
-  if (dimension === "assetClass") return ASSET_CLASS_LABEL[value] ?? value;
-  if (dimension === "currency") return CURRENCY_LABEL[value] ?? value;
+  if (dimension === "assetClass") return CONTEXT_ASSET_CLASS_LABEL[value] ?? value;
+  if (dimension === "currency") return CONTEXT_CURRENCY_LABEL[value] ?? value;
   return value;
 }
 
@@ -227,27 +199,6 @@ function fmt(n: number): string {
 }
 .section {
   width: 100%;
-}
-.metric-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-  gap: 16px;
-}
-.metric {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-.metric-label {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.metric-value {
-  font-size: 18px;
-  font-weight: 600;
-}
-.shared-note {
-  margin-bottom: 12px;
 }
 .profit-positive {
   color: var(--el-color-danger);
@@ -296,6 +247,9 @@ function fmt(n: number): string {
   text-align: right;
   color: var(--el-text-color-regular);
   font-size: 13px;
+}
+.shared-note {
+  margin-bottom: 12px;
 }
 .dup-alert {
   margin-bottom: 8px;

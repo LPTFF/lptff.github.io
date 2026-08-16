@@ -32,6 +32,12 @@ import { InvestmentLedger, type ImportRecord } from "../ledger/repository";
 import { DatasetSourceAdapter } from "../adapter/InvestmentSourceAdapter";
 import { SyncService } from "../sync/sync-service";
 import {
+  EASTMONEY_SOURCE_CAPTURE_PROTOCOL,
+  toInvestmentDataset,
+  type EastmoneySourceCapture,
+} from "../adapter/EastmoneySourceCaptureAdapter";
+import {
+  buildRealAccountScope,
   discardInvestmentStaging,
   importInvestmentStaging,
   listenInvestmentCollectionProgress,
@@ -56,7 +62,7 @@ import { assertDecisionImmutable } from "../engines/review/operation-compliance"
 import { calculateReductionQuantity } from "../engines/review/reduction";
 import { getReviewScenario } from "../__fixtures__/review";
 
-interface InvestmentOsState {
+export interface InvestmentOsState {
   loaded: boolean;
   syncing: boolean;
   collecting: boolean;
@@ -248,7 +254,7 @@ async function refreshExtensionStatus(): Promise<InvestmentExtensionStatus | und
         state.syncMessage = "插件中有一批采集完成的数据等待导入";
       } else if (state.extensionStatus.receipt?.status === "imported" || state.lastImport) {
         state.syncPhase = "up-to-date";
-        state.syncMessage = "最近一批已写入本地 Ledger，插件一次性暂存已清除";
+        state.syncMessage = "最近一批已写入本地账本，插件一次性待导入数据已清除";
       } else {
         state.syncMessage = "插件尚未生成待导入数据";
       }
@@ -299,10 +305,11 @@ async function syncFromExtension(): Promise<ExtensionSyncResult | undefined> {
 
 async function startCollection(): Promise<boolean> {
   if (state.syncing || state.collecting) return false;
-  if (!state.extensionStatus) await refreshExtensionStatus();
+  // 每次都刷新插件状态，确保 pending 判断基于最新暂存，而非上次采集完成时的陈旧快照。
+  await refreshExtensionStatus();
   if (state.extensionStatus?.pending) {
     state.syncPhase = "completed";
-    state.syncMessage = "插件中已有一批数据等待导入，请先读取或在数据页清除后重新录入";
+    state.syncMessage = "插件中已有一批数据等待导入，请先读取待导入，或重新采集时丢弃这批数据";
     return false;
   }
   state.collecting = true;
@@ -325,32 +332,40 @@ async function startCollection(): Promise<boolean> {
   }
 }
 
+/** 丢弃插件里已采集但未导入的暂存数据，用于"待导入数据阻塞重新采集"时清场后重采。 */
+async function discardStaging(): Promise<void> {
+  await discardInvestmentStaging();
+  await refreshExtensionStatus();
+  state.syncPhase = "idle";
+  state.syncMessage = "已丢弃插件待导入数据，可重新采集";
+}
+
 async function clearImportedFacts(): Promise<void> {
   state.error = undefined;
   state.demoMode = false;
   state.demoScenario = undefined;
-  await discardInvestmentStaging();
+  // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）；扩展暂存由扩展自身管理。
   await getLedger().clearImportedFacts();
   resetFactState();
   await loadFromLedger();
   state.syncPhase = "idle";
-  state.syncMessage = "投资事实已清除，用户规则已保留；可重新采集";
-  await refreshExtensionStatus();
+  state.syncMessage = "投资数据已清除，规则已保留；可重新采集";
 }
 
 async function clearEverything(): Promise<void> {
   state.error = undefined;
   state.demoMode = false;
   state.demoScenario = undefined;
-  await discardInvestmentStaging();
+  // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）。
   await getLedger().clearEverything();
   resetFactState();
   state.policies = [];
   state.activeVersions = [];
   await loadFromLedger();
   state.syncPhase = "idle";
-  state.syncMessage = "Investment Ledger 已全部清空，可重新采集";
-  await refreshExtensionStatus();
+  state.syncMessage = "本地账本已全部清空，可重新采集或导入快照";
+  // 标记用户显式清空：阻止 OSLayout 下次刷新自动加载真实快照，保持空态等用户主动选择数据源。
+  try { localStorage.setItem("investment-manual-clear", "1"); } catch { /* localStorage 不可用忽略 */ }
 }
 
 const stopCollectionProgressListener = typeof window === "undefined"
@@ -566,7 +581,7 @@ async function createReductionPlan(input: CreateReductionPlanInput): Promise<Red
   const portfolio = state.portfolio;
   if (!scope || !portfolio) throw new Error("尚无可复算的投资范围与组合快照");
   if (scope.denominatorSource !== "account_total_asset" || !Number.isFinite(portfolio.totalAsset) || portfolio.totalAsset <= 0) {
-    throw new Error("当前仓位分母不可用，不能计算减仓计划量");
+    throw new Error("当前账户总额不可用，不能计算减仓计划量");
   }
   const holding = portfolio.holdings.find((item) => item.assetId === input.assetId);
   if (!holding) throw new Error("当前范围内没有这只基金的持仓");
@@ -695,17 +710,76 @@ async function loadDemoData(scenario: string = "review-demo-combined"): Promise<
   state.syncMessage = `已加载演示数据（${scenario}），仅供页面审查；真实采集前请清除`;
 }
 
+/**
+ * 加载真实脱敏快照到 Ledger，供页面审查。数据源是天天基金扩展采集的脱敏 JSON（协议
+ * eastmoney-source-capture/1.0），通过 fetch public 副本读取后复用 toInvestmentDataset
+ * 转换，再走与插件导入完全相同的 SyncService → scope:real-account 路径写入。
+ * OSLayout 在 Ledger 为空时默认调用本函数；fetch 失败则回退模拟器。
+ */
+async function loadRealFixtureSnapshot(): Promise<boolean> {
+  state.syncing = true;
+  state.error = undefined;
+  state.lastFailures = [];
+  // 显式加载真实快照覆盖"已清空"意图，清除标记。
+  try { localStorage.removeItem("investment-manual-clear"); } catch { /* ignore */ }
+  try {
+    const res = await fetch("/fixtures/investment/eastmoney-source-desensitized.json");
+    if (!res.ok) throw new Error(`读取采集快照失败：HTTP ${res.status}`);
+    const capture = await res.json() as EastmoneySourceCapture;
+    if (capture.protocol !== EASTMONEY_SOURCE_CAPTURE_PROTOCOL) {
+      throw new Error(`采集快照协议不匹配：${capture.protocol}`);
+    }
+    const normalized = toInvestmentDataset(capture);
+    const l = getLedger();
+    state.demoMode = false;
+    state.demoScenario = undefined;
+    await l.clearImportedFacts();
+    await l.removeMockData();
+    await l.removeDemoReviewConfiguration();
+    // 委托 SyncService 统一去重 / coverage 保守合并 / 审计，与插件导入和 loadDemoData 同路径。
+    const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), l).run();
+    const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
+    if (includedAssetIds.length) {
+      const accountCoverage = normalized.coverage.find((item) => item.dataset === "account");
+      const existingScope = (await l.getScopes()).find((scope) => scope.scopeId === "scope:real-account");
+      await l.putInvestmentScope(buildRealAccountScope(existingScope, {
+        includedAssetIds,
+        capturedAt: normalized.capturedAt,
+        hasAccount: Boolean(normalized.account),
+        accountCoverage,
+      }));
+    }
+    await loadFromLedger();
+    await evaluateAndPersistActions();
+    state.lastSyncStatus = syncResult.failures.length ? "partial" : "ok";
+    state.lastFailures = syncResult.failures;
+    state.syncPhase = "up-to-date";
+    state.syncMessage = "已加载真实脱敏快照（天天基金采集 2026-08-16），仅供页面审查";
+    return true;
+  } catch (e) {
+    state.error = (e as Error).message;
+    state.syncPhase = "failed";
+    state.syncMessage = "加载真实脱敏快照失败";
+    state.lastSyncStatus = "failed";
+    return false;
+  } finally {
+    state.syncing = false;
+  }
+}
+
 export function useInvestmentOS() {
   return {
     state,
     syncFromExtension,
     startCollection,
+    discardStaging,
     refreshExtensionStatus,
     loadFromLedger,
     clearImportedFacts,
     clearEverything,
     clearAll,
     loadDemoData,
+    loadRealFixtureSnapshot,
     createPolicy,
     createPolicyVersion,
     evaluateAndPersistActions,

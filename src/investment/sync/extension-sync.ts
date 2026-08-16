@@ -110,7 +110,7 @@ function requestBridge<T>(type: string, responseType: string, timeoutDuration = 
     const id = requestId();
     const timeout = window.setTimeout(() => {
       window.removeEventListener("message", onMessage);
-      reject(new Error("Investment 插件未响应。请确认扩展已重新加载，并刷新当前 Investment OS 页面"));
+      reject(new Error("采集插件未响应。请确认扩展已重新加载，并刷新当前基金复盘助手页面"));
     }, timeoutDuration);
     function onMessage(event: MessageEvent) {
       if (
@@ -131,19 +131,19 @@ function requestBridge<T>(type: string, responseType: string, timeoutDuration = 
 
 export async function readInvestmentStaging(): Promise<StagingResponse["staging"]> {
   const response = await requestBridge<StagingResponse>("LPTFF_INVESTMENT_GET_STAGING", "LPTFF_INVESTMENT_STAGING");
-  if (!response.ok) throw new Error(response.error || "Investment 插件未响应，请在 chrome://extensions 刷新插件后重试");
+  if (!response.ok) throw new Error(response.error || "采集插件未响应，请在 chrome://extensions 刷新插件后重试");
   return response.staging || null;
 }
 
 export async function readInvestmentExtensionStatus(): Promise<InvestmentExtensionStatus> {
   const response = await requestBridge<StagingResponse>("LPTFF_INVESTMENT_GET_STATUS", "LPTFF_INVESTMENT_STATUS");
-  if (!response.ok || !response.status) throw new Error(response.error || "无法读取 Investment 插件状态");
+  if (!response.ok || !response.status) throw new Error(response.error || "无法读取采集插件状态");
   return response.status;
 }
 
 async function acknowledgeInvestmentStaging(): Promise<void> {
   const response = await requestBridge<StagingResponse>("LPTFF_INVESTMENT_ACK_STAGING", "LPTFF_INVESTMENT_STAGING_ACKNOWLEDGED");
-  if (!response.ok) throw new Error(response.error || "Investment 插件确认失败，请在 chrome://extensions 刷新插件后重试");
+  if (!response.ok) throw new Error(response.error || "采集插件确认失败，请在 chrome://extensions 刷新插件后重试");
 }
 
 export async function discardInvestmentStaging(): Promise<void> {
@@ -157,7 +157,7 @@ export async function startInvestmentCollection(): Promise<void> {
     "LPTFF_INVESTMENT_COLLECTION_STARTED",
     30 * 60 * 1000,
   );
-  if (!response.ok) throw new Error(response.error || "Investment 插件采集失败");
+  if (!response.ok) throw new Error(response.error || "采集插件采集失败");
 }
 
 export function listenInvestmentCollectionProgress(listener: (progress: CollectionProgress) => void): () => void {

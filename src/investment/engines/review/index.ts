@@ -25,4 +25,4 @@ export { advanceTrailingStop, type TrailingStopInput, type TrailingStopResult } 
 export { evaluateTakeProfit, type TakeProfitInput } from "./take-profit";
 export { computeReductionProgress, type ReductionInput } from "./reduction";
 export { runReview, classifyReviewJudgment, type ReviewInput, type ReviewVerdict, type PostReductionSnapshot } from "./review-orchestrator";
-export { generateActions, defaultToggles, resetBehaviorSeq, type BehaviorInput, type BehaviorOutput, type BehaviorToggles, type BehaviorLogEntry } from "./simulator-behavior";
+export { generateActions, defaultToggles, resetBehaviorSeq, type BehaviorInput, type BehaviorOutput, type BehaviorToggles, type BehaviorLogEntry, type SimBehaviorHolding } from "./simulator-behavior";

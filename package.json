@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "preview": "vite preview",
-    "serve": "node ./project-support/scripts/sync-findJob-summary.js && vite --host 0.0.0.0 --port 8090 --strictPort",
+    "sync:fixture": "node ./project-support/scripts/sync-investment-fixture.js",
+    "serve": "node ./project-support/scripts/sync-investment-fixture.js && node ./project-support/scripts/sync-findJob-summary.js && vite --host 0.0.0.0 --port 8090 --strictPort",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
-    "build": "node ./project-support/scripts/sync-findJob-summary.js && npm run typecheck && vite build && node ./project-support/scripts/copy-404.js",
+    "build": "node ./project-support/scripts/sync-investment-fixture.js && node ./project-support/scripts/sync-findJob-summary.js && npm run typecheck && vite build && node ./project-support/scripts/copy-404.js",
     "collect:rss": "node ./project-support/scripts/collectors/rss/collect.js",
     "collect:rss:site": "node ./project-support/scripts/collectors/rss/collect.js --output ./project-support/public/data/recommendArticleData.json",
     "collect:rss:fixture": "node ./project-support/scripts/collectors/rss/collect.js --fixture",

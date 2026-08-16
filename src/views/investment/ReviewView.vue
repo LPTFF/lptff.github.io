@@ -1,277 +1,441 @@
 <template>
   <div class="review-view">
-    <el-card v-if="isSimulator" shadow="never" class="sim-bar">
-      <div class="sim-head">
-        <div class="sim-meta">
-          <strong>A 股牛熊周期模拟器</strong>
-          <el-tag :type="phaseTag" effect="dark" size="small">{{ simPhaseLabel }}</el-tag>
-          <span class="sim-round">第 {{ sim.state.round }} / 23 期 · {{ sim.state.asOf }}</span>
+    <!-- 第一性结论 -->
+    <el-card shadow="never" class="section verdict-card" :class="`verdict-${verdictLevel}`">
+      <div class="verdict-kicker">复盘结论</div>
+      <h2>{{ verdictTitle }}</h2>
+      <p>{{ verdictDesc }}</p>
+    </el-card>
+
+    <!-- 需处理项：配置偏离（默认只列超界，区间内折叠）-->
+    <el-card shadow="never" class="section drift-card">
+      <template #header>
+        <div class="exposure-head">
+          <span>{{ driftCardTitle }}</span>
+          <span class="drift-hint">{{ driftCardHint }}</span>
         </div>
-        <div class="sim-actions">
-          <el-button size="small" :disabled="simIsLastRound || sim.state.running" :loading="sim.state.running" type="primary" @click="sim.advance">下一轮 →</el-button>
-          <el-button size="small" @click="sim.reset">重置</el-button>
+      </template>
+      <div v-if="!allDriftsCount" class="drift-empty">
+            <p class="drift-empty-desc">{{ driftEmptyDesc }}</p>
+            <div class="drift-empty-actions">
+              <el-button size="small" type="primary" :loading="osState.syncing" @click="adoptDefaultsFromReview">一键采纳默认规则集</el-button>
+              <el-button size="small" @click="goPolicies">去规则页自定义</el-button>
+            </div>
+          </div>
+      <div v-else-if="!visibleDrifts.length" class="all-within">
+        <el-tag type="success" effect="plain">当前 {{ allDriftsCount }} 项均在区间内</el-tag>
+        <el-button size="small" text type="primary" @click="showAllDrifts = true">查看全部</el-button>
+      </div>
+      <template v-else>
+        <div v-for="d in visibleDrifts" :key="`${d.scope}-${d.label}`" class="drift-item">
+          <div :class="driftRowClass(d.direction)">
+            <span class="drift-label">{{ d.label }}</span>
+            <span class="drift-actual">{{ fmtPct(d.actualPct) }}</span>
+            <el-progress :percentage="Math.min(Math.round(d.actualPct * 100), 100)" :stroke-width="12" :show-text="false" class="drift-bar" />
+            <span class="drift-target">{{ driftTargetLabel }} {{ fmtPct(d.targetPct) }}，区间 [{{ fmtPct(d.minPct) }}, {{ fmtPct(d.maxPct) }}]</span>
+            <el-popover v-if="d.rationale" trigger="hover" width="320" placement="top">
+              <template #reference><el-button text size="small" class="rationale-btn">依据</el-button></template>
+              <div class="rationale-pop">
+                <p><strong>意图：</strong>{{ d.rationale.intent }}</p>
+                <p><strong>理论：</strong>{{ d.rationale.theoryRef }}<span class="rationale-doc">（{{ d.rationale.theoryDoc }}）</span></p>
+                <p><strong>阈值依据：</strong>{{ d.rationale.thresholdBasis }}</p>
+              </div>
+            </el-popover>
+            <el-tag v-if="d.direction !== 'within'" size="small" type="warning">⚠ {{ driftDirText(d.direction) }}</el-tag>
+            <el-tag v-else size="small" type="success" effect="plain">区间内</el-tag>
+          </div>
+          <div v-if="d.direction !== 'within' && !driftAck(d)" class="drift-actions">
+            <el-button size="small" type="primary" plain @click="acknowledgeDrift(d)">认可偏离</el-button>
+            <el-button size="small" text type="primary" @click="deepAnalyzeDrift(d)">深度分析→GPT</el-button>
+          </div>
+          <div v-else-if="driftAck(d)" class="drift-acked">
+            <el-tag type="success" effect="plain" size="small">✓ 已认可</el-tag>
+            <span class="drift-ack-reason">{{ driftAck(d)?.reason || "（未填理由）" }}</span>
+            <el-button size="small" text @click="revokeDriftAck(d)">撤销</el-button>
+          </div>
         </div>
-        <div class="sim-toggles">
+        <div class="show-all-row">
+          <el-button v-if="breachedDrifts.length && allDriftsCount > breachedDrifts.length && !showAllDrifts" size="small" text type="primary" @click="showAllDrifts = true">查看其余 {{ allDriftsCount - breachedDrifts.length }} 项区间内</el-button>
+          <el-button v-else-if="showAllDrifts" size="small" text type="primary" @click="showAllDrifts = false">只看超界</el-button>
+        </div>
+      </template>
+    </el-card>
+
+    <!-- 场景工具：历史周期压力测试（默认折叠）-->
+    <el-collapse v-model="stressActiveNames">
+      <el-collapse-item title="历史周期压力测试（可选：把当前组合放进历史市场风格）" name="stress">
+        <p class="tool-disclaimer">示意性历史风格，非精确回测；以当前市值为基准平移，不模拟交易、不预测未来。</p>
+        <p class="tool-disclaimer">未覆盖市场：组合中跟踪全球配置/QDII（无单一基准）、日本/越南/印度/欧洲等市场的基金，在历史周期中无对应基准，末态市值不变、不参与回撤；可在下方各周期详情核验「（无该周期基准）」项。</p>
+        <el-empty v-if="!osState.portfolio" description="尚无持仓，请先采集数据或在下方启动模拟器" />
+        <template v-else>
+          <el-alert v-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停历史周期压力测试" description="历史周期压力测试需基于真实持仓；当前为演练模拟持仓，数据已隔离。请先「结束演练 / 恢复真实」后再使用本卡。" />
+          <div v-if="!isSimulator && allCyclesResult.hasHoldings && allCyclesResult.summaries.length" class="all-cycles">
+            <div class="all-cycles-verdict">
+              最脆弱场景：<strong>{{ allCyclesResult.worstCycle?.cycleLabel }}</strong>（回撤 {{ fmtPct(allCyclesResult.worstCycle?.maxDrawdownPct) }}）；最稳健：<strong>{{ allCyclesResult.bestCycle?.cycleLabel }}</strong>（回撤 {{ fmtPct(allCyclesResult.bestCycle?.maxDrawdownPct) }}）
+            </div>
+            <div class="all-cycles-list">
+              <div v-for="s in allCyclesResult.summaries" :key="s.cycleId" class="all-cycles-row">
+                <span class="ac-name">{{ s.cycleLabel }}</span>
+                <span class="ac-dd">回撤 {{ fmtPct(s.maxDrawdownPct) }}</span>
+                <span class="ac-end">末态 {{ fmtMoney(s.endTotalAsset) }} 元</span>
+                <el-tag size="small" :type="s.breachedCount ? 'warning' : 'success'" effect="plain">{{ s.breachedCount }} 项偏离</el-tag>
+                <div v-if="s.breachedDrift.length" class="ac-drifts">
+                  <span v-for="d in s.breachedDrift" :key="d.label" class="ac-drift">⚠ {{ d.label }}：实际 {{ fmtPct(d.actualPct) }}，声明区间 [{{ fmtPct(d.minPct) }}, {{ fmtPct(d.maxPct) }}]，{{ driftDirText(d.direction) }}</span>
+                </div>
+              </div>
+            </div>
+            <p v-if="stressFindings.length" class="stress-findings-note">以下为基于历史市场风格的推断提示，与规则机械检查结论性质不同。</p>
+            <div v-if="stressFindings.length" class="stress-findings">
+            <div v-for="(f, i) in stressFindings" :key="i" class="sim-finding" :class="`is-${f.level}`">
+              <span class="sim-finding-title">{{ f.title }}</span>
+              <span class="sim-finding-detail">{{ f.detail }}</span>
+            </div>
+          </div>
+          </div>
+          <div v-if="!isSimulator" class="stress-controls">
+            <el-select v-model="selectedCycleId" size="small" style="width: 280px">
+              <el-option-group v-for="m in (['CN','HK','US','commodity'] as CycleMarket[])" :key="m" :label="marketLabel(m)">
+                <el-option v-for="c in cycleGroups[m]" :key="c.id" :label="c.label" :value="c.id" />
+              </el-option-group>
+            </el-select>
+          </div>
+          <div v-if="!isSimulator && stressVerdict" class="stress-verdict">
+            <span>{{ stressVerdict }}</span>
+            <el-button size="small" text type="primary" @click="showStressDetail = !showStressDetail">{{ showStressDetail ? "收起详细" : "查看详细" }}</el-button>
+          </div>
+          <div v-if="!isSimulator && showStressDetail && stressResult" class="stress-detail">
+            <p class="stress-desc">{{ stressResult.description }}</p>
+            <div class="stress-metrics">
+              <div class="metric"><span class="metric-label">起始总资产</span><strong>{{ fmtMoney(stressResult.startTotalAsset) }} 元</strong></div>
+              <div class="metric"><span class="metric-label">末态总资产</span><strong>{{ fmtMoney(stressResult.endTotalAsset) }} 元</strong></div>
+              <div class="metric"><span class="metric-label">最大回撤</span><strong>{{ fmtMoney(stressResult.maxDrawdown) }} 元（{{ fmtPct(stressResult.maxDrawdownPct) }}）</strong></div>
+            </div>
+            <div class="stress-sub-title">各资产末态涨跌</div>
+            <el-table :data="stressResult.assetResults" size="small" border>
+              <el-table-column prop="name" label="基金" min-width="140" />
+              <el-table-column label="基准指数" width="140">
+                <template #default="{ row }">{{ row.matched ? row.indexId : "（无该周期基准）" }}</template>
+              </el-table-column>
+              <el-table-column label="起始市值" width="110">
+                <template #default="{ row }">{{ fmtMoney(row.startMarketValue) }}</template>
+              </el-table-column>
+              <el-table-column label="末态市值" width="110">
+                <template #default="{ row }">{{ fmtMoney(row.endMarketValue) }}</template>
+              </el-table-column>
+              <el-table-column label="收益率" width="90">
+                <template #default="{ row }">
+                  <span :class="row.endReturnPct === undefined ? '' : (row.endReturnPct > 0 ? 'profit-positive' : 'profit-negative')">
+                    {{ row.endReturnPct === undefined ? "—" : fmtPct(row.endReturnPct) }}
+                  </span>
+                </template>
+              </el-table-column>
+            </el-table>
+            <div v-if="stressResult.endExposureSlices.length" class="stress-section">
+              <div class="stress-sub-title">末态风险暴露（底层指数）</div>
+              <div v-for="s in stressResult.endExposureSlices" :key="s.value" class="exposure-row">
+                <span class="exposure-value">{{ s.value }}</span>
+                <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="12" class="exposure-bar" />
+                <span class="exposure-pct">{{ (s.pct * 100).toFixed(1) }}%</span>
+              </div>
+            </div>
+            <div v-if="stressResult.endDrift.length" class="stress-section">
+              <div class="stress-sub-title">末态配置偏离</div>
+              <div v-for="d in stressResult.endDrift" :key="`stress-${d.label}`" class="drift-item">
+                <div :class="driftRowClass(d.direction)">
+                  <span class="drift-label">{{ d.label }}</span>
+                  <span class="drift-actual">{{ fmtPct(d.actualPct) }}</span>
+                  <el-progress :percentage="Math.min(Math.round(d.actualPct * 100), 100)" :stroke-width="12" :show-text="false" class="drift-bar" />
+                  <span class="drift-target">{{ driftTargetLabel }} {{ fmtPct(d.targetPct) }}，区间 [{{ fmtPct(d.minPct) }}, {{ fmtPct(d.maxPct) }}]</span>
+                  <el-tag v-if="d.direction !== 'within'" size="small" type="warning">⚠ {{ driftDirText(d.direction) }}</el-tag>
+                  <el-tag v-else size="small" type="success" effect="plain">区间内</el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
+        </template>
+      </el-collapse-item>
+    </el-collapse>
+
+    <!-- 场景工具：牛熊周期演练（真实持仓逐期推进）-->
+    <el-collapse v-model="simActiveNames">
+      <el-collapse-item title="牛熊周期演练（可选：真实持仓逐期推进）" name="sim">
+        <p class="sim-intro">用当前真实持仓逐期推进（按基金指数净值曲线模拟牛熊），生成行为交易并观察规则偏离；演练中账户临时为模拟值，结束可一键恢复真实数据。</p>
+        <div class="sim-controls">
+          <span class="sim-meta" v-if="isSimulator">第 {{ sim.state.round }} / 23 期 · {{ sim.state.asOf }} · {{ simPhaseLabel }}</span>
+          <span class="sim-meta" v-else>尚未启动</span>
+          <div class="sim-actions">
+            <el-button v-if="!isSimulator" size="small" type="primary" :disabled="!hasRealHoldings" @click="simInitReal">用真实持仓演练</el-button>
+            <template v-else>
+              <el-button size="small" type="primary" :loading="runningFullSim" :disabled="simIsLastRound || sim.state.running" @click="runFullSimCycle">一键跑完整周期</el-button>
+              <el-button size="small" :disabled="simIsLastRound || sim.state.running" :loading="sim.state.running" @click="simAdvance">下一轮 →</el-button>
+              <el-button size="small" type="warning" :loading="osState.syncing" @click="simExitReal">结束演练 / 恢复真实</el-button>
+            </template>
+            <el-button v-if="isSimulator" size="small" @click="simReset">重置</el-button>
+          </div>
+        </div>
+        <div v-if="isSimulator" class="sim-toggles">
           <el-switch v-model="sim.state.toggles.regularInvest" inline-prompt active-text="规律定投" inactive-text="规律定投" />
           <el-switch v-model="sim.state.toggles.chaseTrend" inline-prompt active-text="追涨杀跌" inactive-text="追涨杀跌" />
           <el-switch v-model="sim.state.toggles.heavyPosition" inline-prompt active-text="重仓猛干" inactive-text="重仓猛干" />
           <el-switch v-model="sim.state.toggles.profitAdd" inline-prompt active-text="浮盈加仓" inactive-text="浮盈加仓" />
         </div>
-      </div>
-      <div v-if="sim.state.behaviorLog.length" class="sim-log">
-        <span class="sim-log-title">本期发生了：</span>
-        <el-tag v-for="(log, i) in sim.state.behaviorLog" :key="i" size="small" effect="plain" class="sim-log-tag">
-          【{{ log.behavior }}】{{ log.text }}
-        </el-tag>
-      </div>
-    </el-card>
-
-    <el-card shadow="never" class="scope-banner">
-      <div class="scope-head">
-        <span class="scope-label">正在管理的投资范围</span>
-        <strong>{{ scopeLabel }}</strong>
-        <el-tag effect="plain" size="small">基准币种 CNY</el-tag>
-      </div>
-      <p class="scope-note">
-        这里只检查你声明的规则、事前计划、来源事实和后续复核是否闭环；不评价基金好坏，不根据盈亏倒推过程，也不会执行任何交易。
-      </p>
-      <div v-if="managementSummary" class="boundary-line">
-        <span v-if="managementSummary.managementStartedAt">事实管理起点：{{ managementSummary.managementStartedAt.slice(0, 10) }}</span>
-        <span>计划核对：{{ managementSummary.operationReviewEnabled ? `从 ${managementSummary.operationReviewFrom} 开始` : "尚未启用" }}</span>
-        <span>历史基线：{{ managementSummary.historicalBaselineTransactions }} 笔操作不做计划合规判定</span>
-      </div>
-    </el-card>
-
-    <el-card v-if="state.snapshot" shadow="never" class="management-card" :class="`management-${management.state}`">
-      <div class="management-content">
-        <div>
-          <div class="management-kicker">基金管理状态</div>
-          <h2>{{ management.title }}</h2>
-          <p>{{ management.description }}</p>
-          <p class="management-limitation">{{ management.limitation }}</p>
+        <p v-if="isSimulator && simScenario" class="sim-scenario">{{ simScenario }}</p>
+        <div v-if="isSimulator && sim.state.behaviorLog.length" class="sim-log">
+          <span class="sim-log-title">本期 {{ sim.state.behaviorLog.length }} 笔操作</span>
+          <el-tag v-for="(log, i) in sim.state.behaviorLog" :key="i" size="small" effect="plain" class="sim-log-tag">{{ log.behavior }}：{{ log.text }}</el-tag>
         </div>
-        <el-button
-          v-if="management.primaryActionLabel"
-          type="primary"
-          @click="runManagementAction"
-        >
-          {{ management.primaryActionLabel }} →
-        </el-button>
-      </div>
-    </el-card>
+        <div v-if="isSimulator && simFindings.length" class="sim-findings">
+          <div v-for="(f, i) in simFindings" :key="i" class="sim-finding" :class="`is-${f.level}`">
+            <span class="sim-finding-title">{{ f.title }}</span>
+            <span class="sim-finding-detail">{{ f.detail }}</span>
+          </div>
+        </div>
+        <p v-if="isSimulator" class="sim-hint">以上为基于历史市场风格的推断提示（非规则机械检查结论）；交易为演练模拟、日期属演练日历（{{ sim.state.asOf }} 所在期）非真实记录；末态回撤可在上方「历史周期压力测试」选对应周期复算。</p>
+      </el-collapse-item>
+    </el-collapse>
 
-    <el-alert v-if="state.error" type="error" :title="state.error" show-icon :closable="false" />
-    <el-empty v-if="!state.snapshot && !state.running" description="尚未运行复盘，请导入事实或推进模拟器" />
-
-    <template v-if="state.snapshot">
-      <div class="review-summary">
-        <el-tag type="danger" effect="plain">需要处理 {{ summary.breached }}</el-tag>
-        <el-tag type="warning" effect="plain">等待证据或执行 {{ summary.unknown }}</el-tag>
-        <el-tag type="success" effect="plain">已按计划管理 {{ summary.conforming }}</el-tag>
-        <span class="summary-note">共检查 {{ summary.checked }} 项；未检查和历史基线不会被一个“正常”结论覆盖。</span>
-      </div>
-
-      <div class="review-columns">
-        <el-card id="needs-action" shadow="never" class="review-col review-col-needy">
-          <template #header><span class="col-title">需要你处理</span></template>
-          <el-empty v-if="!conclusions.needsActionGroups.length" description="本期没有已确认的管理流程缺口" :image-size="40" />
-          <section v-for="group in conclusions.needsActionGroups" :key="group.key" class="conclusion-group">
-            <div class="group-title">
-              <strong>{{ group.title }}</strong>
-              <el-tag size="small" type="danger" effect="plain">{{ group.items.length }} 项</el-tag>
-            </div>
-            <ConclusionCard
-              v-for="item in group.items"
-              :key="item.judgmentId"
-              :conclusion="item"
-              needy
-              :on-resolve="onResolve"
-              :on-primary-action="runConclusionAction"
-              :on-rerun="rerun"
-            />
-          </section>
-        </el-card>
-
-        <el-card shadow="never" class="review-col review-col-unknown">
-          <template #header><span class="col-title">等待证据或执行</span></template>
-          <el-empty v-if="!conclusions.undeterminedGroups.length" description="当前没有等待中的判断" :image-size="40" />
-          <section v-for="group in conclusions.undeterminedGroups" :key="group.key" class="conclusion-group">
-            <div class="group-title">
-              <strong>{{ group.title }}</strong>
-              <el-tag size="small" type="warning" effect="plain">{{ group.items.length }} 项</el-tag>
-            </div>
-            <ConclusionCard
-              v-for="item in group.items"
-              :key="item.judgmentId"
-              :conclusion="item"
-              :on-resolve="onResolve"
-              :on-primary-action="runConclusionAction"
-              :on-rerun="rerun"
-            />
-          </section>
-        </el-card>
-
-        <el-card shadow="never" class="review-col review-col-ok">
-          <template #header><span class="col-title">已按计划管理</span></template>
-          <el-empty v-if="!conclusions.conformingGroups.length" description="尚无证据充分且完成核对的判断" :image-size="40" />
-          <section v-for="group in conclusions.conformingGroups" :key="group.key" class="conclusion-group">
-            <div class="group-title">
-              <strong>{{ group.title }}</strong>
-              <el-tag size="small" type="success" effect="plain">{{ group.items.length }} 项</el-tag>
-            </div>
-            <ConclusionCard v-for="item in group.items" :key="item.judgmentId" :conclusion="item" />
-          </section>
-        </el-card>
-      </div>
-    </template>
+    <el-dialog v-model="focusedCtx.visible" :title="focusedCtx.label" width="720px">
+      <el-input v-model="focusedCtx.text" type="textarea" :rows="20" readonly class="focused-text" />
+      <template #footer>
+        <el-button @click="copyFocused">复制</el-button>
+        <el-button type="primary" @click="openChatGptFocused">一键跳转 ChatGPT</el-button>
+        <el-button @click="focusedCtx.visible = false">关闭</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, watch } from "vue";
+import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
-import { useInvestmentReview } from "../../investment/composables/use-investment-review";
+import { ElMessage, ElMessageBox } from "element-plus";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { useInvestmentSimulator } from "../../investment/composables/use-investment-simulator";
-import { resolveActiveStrategyRuleVersion } from "../../investment/engines/review/review-orchestrator";
-import type { ReviewConclusionView } from "../../investment/composables/selectors";
-import ConclusionCard from "./components/review/ConclusionCard.vue";
+import { buildAllocationDrift, buildSimFindings, buildStressFindings, type AllocationDrift, type SimFinding } from "../../investment/composables/selectors";
+import { useFocusedContext, buildContextInput, directionText as driftDirText } from "../../investment/composables/use-focused-context";
+import { HISTORICAL_CYCLES, getCycle, type CycleMarket } from "../../investment/engines/scenario/historical-cycles";
+import { buildHistoricalStressTest, buildAllCyclesStressTest, type StressTestResult, type AllCyclesResult } from "../../investment/engines/scenario/stress-test";
+import { buildDefaultStrategyRules } from "../../investment/engines/policy/rule-rationale";
 
 const router = useRouter();
-const { state, conclusions, loadReviewFromLedger, resolveReviewAction } = useInvestmentReview();
-const osState = useInvestmentOS().state;
+const investmentOS = useInvestmentOS();
+const osState = investmentOS.state;
 const sim = useInvestmentSimulator();
 
-async function rerun(): Promise<void> {
-  await loadReviewFromLedger(reviewAsOf.value);
-}
-
-async function onResolve(actionId: string, kind: "acknowledged" | "waiting_execution" | "waiting_confirmation" | "waiting_recheck" | "resolved" | "dismissed_with_reason", note?: string): Promise<void> {
-  await resolveReviewAction(actionId, kind, note);
-}
-
-function runManagementAction(): void {
-  switch (management.value.primaryAction) {
-    case "create_rule":
-      router.push({ path: "/investment/policies", query: { from: "review", create: "rule" } });
-      break;
-    case "create_plan":
-      router.push({ path: "/investment/actions", query: { from: "review", tab: "plans", create: "plan" } });
-      break;
-    case "handle_review":
-      document.getElementById("needs-action")?.scrollIntoView({ behavior: "smooth", block: "start" });
-      break;
-    case "sync_data":
-      router.push({ path: "/investment/data", query: { from: "review" } });
-      break;
-  }
-}
-
-function runConclusionAction(conclusion: ReviewConclusionView): void {
-  switch (conclusion.primaryAction) {
-    case "link_plan":
-      router.push({
-        path: "/investment/actions",
-        query: { from: "review", tab: "plans", transactionId: conclusion.transactionId },
-      });
-      break;
-    case "sync_data":
-      router.push({ path: "/investment/data", query: { from: "review" } });
-      break;
-    case "manage_rule":
-      router.push({ path: "/investment/policies", query: { from: "review" } });
-      break;
-    case "create_reduction_plan": {
-      const activeRuleVersion = osState.activeScope
-        ? resolveActiveStrategyRuleVersion(
-            osState.strategyRuleVersions,
-            osState.activeScope.scopeId,
-            reviewAsOf.value,
-          )
-        : undefined;
-      const hasReductionTarget = activeRuleVersion?.rules.some(
-        (rule) => rule.kind === "reduction_target" && rule.assetId === conclusion.assetId,
-      );
-      router.push(hasReductionTarget
-        ? {
-            path: "/investment/actions",
-            query: {
-              from: "review",
-              tab: "reductions",
-              create: "reduction",
-              assetId: conclusion.assetId,
-              judgmentId: conclusion.judgmentId,
-            },
-          }
-        : {
-            path: "/investment/policies",
-            query: {
-              from: "review",
-              create: "rule",
-              kind: "reduction_target",
-              assetId: conclusion.assetId,
-            },
-          });
-      break;
-    }
-    case "track_portfolio":
-      router.push({ path: "/investment/portfolio", query: { from: "review" } });
-      break;
-  }
-}
-
-const summary = computed(() => conclusions.value.summary);
-const management = computed(() => conclusions.value.management);
-const managementSummary = computed(() => state.snapshot?.managementSummary);
+// 牛熊演练（真实持仓逐期推进）
 const isSimulator = computed(() => osState.account?.source === "sim");
-const hasRealAccount = computed(() => Boolean(
-  osState.account
-  && osState.account.source !== "sim"
-  && !osState.account.source.startsWith("mock"),
-));
-const reviewAsOf = computed(() => isSimulator.value
-  ? sim.state.asOf
-  : osState.account?.capturedAt.slice(0, 10) ?? state.snapshot?.asOf ?? new Date().toISOString().slice(0, 10));
-const scopeLabel = computed(() => {
-  if (isSimulator.value) return "牛熊周期模拟组合";
-  if (hasRealAccount.value && osState.activeScope?.scopeType === "ACCOUNT") return "真实账户范围";
-  return state.snapshot ? "声明组合" : "（未运行）";
-});
+const hasRealHoldings = computed(() => osState.account?.source !== "sim" && Boolean(osState.portfolio) && (osState.portfolio?.holdings.length ?? 0) > 0);
 const simPhaseLabel = computed(() => sim.phaseLabel.value);
 const simIsLastRound = computed(() => sim.isLastRound.value);
+const PHASE_SCENARIO: Record<string, string> = {
+  bull: "牛市：成长板块领涨，仓位与集中度上升，留意是否越过目标上限。",
+  top: "见顶：成长转跌、黄金避险走强，配置开始偏离。",
+  bear: "熊市：普跌且成长跌幅最大，回撤扩大。",
+  bottom: "触底：组合接近周期最大回撤。",
+  rebound: "反弹：成长板反弹最猛，仓位结构变化。",
+  range: "震荡：小幅波动，配置相对稳定。",
+};
+const simScenario = computed(() => PHASE_SCENARIO[sim.state.phase] ?? "");
+const simFindings = computed<SimFinding[]>(() => {
+  if (!isSimulator.value) return [];
+  const drift = osState.portfolio
+    ? buildAllocationDrift(osState.activeVersions, osState.strategyRuleVersions, osState.portfolio, osState.assets)
+    : [];
+  return buildSimFindings(sim.state.phase, sim.state.asOf, sim.state.behaviorLog, drift, sim.state.holdingIndex, sim.state.realTransactionsByAsset);
+});
+const simActiveNames = ref<string[]>([]);
+const runningFullSim = ref(false);
 
-const phaseTag = computed<"success" | "warning" | "danger" | "info">(() => {
-  switch (sim.state.phase) {
-    case "bull": return "success";
-    case "top": return "warning";
-    case "bear": return "danger";
-    case "bottom": return "info";
-    case "rebound": return "success";
-    default: return "info";
+async function simInitReal(): Promise<void> {
+  try {
+    await sim.init(false, { useRealHoldings: true });
+    ElMessage.success("已用真实持仓启动演练，逐期推进观察规则偏离；结束可一键恢复真实");
+  } catch (e) {
+    ElMessage.error((e as Error).message);
   }
+}
+async function simExitReal(): Promise<void> {
+  try {
+    const ok = await investmentOS.loadRealFixtureSnapshot();
+    if (ok) ElMessage.success("已恢复真实采集快照");
+    else ElMessage.error(osState.error || "恢复真实数据失败");
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  }
+}
+async function simAdvance(): Promise<void> {
+  try {
+    await sim.advance();
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  }
+}
+async function simReset(): Promise<void> {
+  try {
+    await sim.reset();
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  }
+}
+async function runFullSimCycle(): Promise<void> {
+  if (runningFullSim.value || !isSimulator.value) return;
+  runningFullSim.value = true;
+  try {
+    while (!sim.isLastRound.value && !sim.state.running) {
+      await sim.advance();
+    }
+    ElMessage.success("完整牛熊周期演练完成，上方结论与配置偏离已更新为末态");
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  } finally {
+    runningFullSim.value = false;
+  }
+}
+function goPolicies(): void {
+  router.push("/investment/policies");
+}
+/** 复盘页快捷采纳默认规则集：免去跳规则页才能机械复盘的额外步骤。 */
+async function adoptDefaultsFromReview(): Promise<void> {
+  if (!osState.activeScope) { ElMessage.warning("尚无投资范围，请先导入数据"); return; }
+  try {
+    const assetIds = osState.activeScope.includedAssetIds;
+    const latest = osState.strategyRuleVersions.at(-1);
+    const version = latest ? latest.version + 1 : 1;
+    const today = new Date().toISOString().slice(0, 10);
+    await investmentOS.saveStrategyRuleVersion({
+      id: `srv:${osState.activeScope.scopeId}:v${version}`,
+      scopeId: osState.activeScope.scopeId,
+      version,
+      effectiveFrom: today,
+      rules: buildDefaultStrategyRules(assetIds, today),
+      changeReason: "复盘页快捷采纳默认规则集",
+    });
+    ElMessage.success("默认规则集已采纳，复盘将按默认阈值检查偏离");
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  }
+}
+
+// 历史周期压力测试
+const selectedCycleId = ref(HISTORICAL_CYCLES[0].id);
+const cycleGroups = computed<Record<CycleMarket, typeof HISTORICAL_CYCLES>>(() => {
+  const groups: Record<CycleMarket, typeof HISTORICAL_CYCLES> = { CN: [], HK: [], US: [], commodity: [] };
+  for (const c of HISTORICAL_CYCLES) groups[c.market].push(c);
+  return groups;
+});
+const stressResult = computed<StressTestResult | undefined>(() => {
+  if (!osState.portfolio) return undefined;
+  const cycle = getCycle(selectedCycleId.value);
+  if (!cycle) return undefined;
+  return buildHistoricalStressTest(osState.portfolio.holdings, osState.assets, cycle, osState.activeVersions, osState.strategyRuleVersions);
+});
+// 一键全部历史周期压力测试：一次跑完 6 段，返回最脆弱/最稳健汇总。
+const allCyclesResult = computed<AllCyclesResult>(() => buildAllCyclesStressTest(osState.portfolio?.holdings ?? [], osState.assets, osState.activeVersions, osState.strategyRuleVersions));
+const realDateByAsset = computed<Record<string, string>>(() => {
+  const m: Record<string, string> = {};
+  for (const t of osState.transactions ?? []) {
+    const d = (t.occurredAt ?? "").slice(0, 10);
+    if (t.assetId && d && (!m[t.assetId] || d > m[t.assetId])) m[t.assetId] = d;
+  }
+  return m;
+});
+const stressFindings = computed<SimFinding[]>(() => buildStressFindings(allCyclesResult.value, osState.assets, realDateByAsset.value));
+function marketLabel(m: CycleMarket): string {
+  return { CN: "A股", HK: "港股", US: "美股", commodity: "商品" }[m];
+}
+function fmtMoney(n: number): string {
+  return n.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// 第一性结论：复盘页只回答"有没有问题 + 怎么处理"。需处理项平铺，工具/细节折叠。
+const allocationDrift = computed(() => buildAllocationDrift(osState.activeVersions, osState.strategyRuleVersions, osState.portfolio, osState.assets));
+const dimensionDrifts = computed(() => allocationDrift.value.filter((d) => d.scope === "dimension"));
+const assetDrifts = computed(() => allocationDrift.value.filter((d) => d.scope === "asset"));
+const driftCardTitle = computed(() => "目标配置 vs 实际");
+const driftCardHint = computed(() => "仅对照你已声明的目标/区间；系统不发明合理仓位");
+const driftTargetLabel = computed(() => "目标");
+const driftEmptyDesc = computed(() => "暂未声明目标配置；可一键采纳默认规则集，或去规则页自定义");
+
+function driftRowClass(direction: AllocationDrift["direction"]): string {
+  return direction === "within" ? "drift-row within" : "drift-row breached";
+}
+function fmtPct(v: number | undefined): string {
+  return v === undefined ? "—" : `${(v * 100).toFixed(2)}%`;
+}
+
+const breachedDrifts = computed(() => [...dimensionDrifts.value, ...assetDrifts.value].filter((d) => d.direction !== "within"));
+const allDriftsCount = computed(() => dimensionDrifts.value.length + assetDrifts.value.length);
+const showAllDrifts = ref(false);
+const visibleDrifts = computed(() => showAllDrifts.value ? [...dimensionDrifts.value, ...assetDrifts.value] : breachedDrifts.value);
+// 第一性结论区分三种态：无声明规则（无法机械复盘）/ 有规则且均在区间内 / 有超界偏离。
+// 仅靠 drift 空判断会把"无规则"误判成"均在区间内"，与规则页"尚未采纳规则集"矛盾。
+const hasDeclaredRules = computed(() => osState.activeVersions.length > 0 || osState.strategyRuleVersions.length > 0);
+const verdictTitle = computed(() => {
+  if (!hasDeclaredRules.value) return "暂无规则，无法机械复盘";
+  return breachedDrifts.value.length === 0 ? "今日无需操作" : `${breachedDrifts.value.length} 项配置偏离待复盘`;
+});
+const verdictDesc = computed(() => {
+  if (!hasDeclaredRules.value) return "先到规则页声明目标配置与区间，系统才能机械检查偏离；当前只呈现事实与暴露。";
+  return breachedDrifts.value.length === 0
+    ? "当前已声明规则均在区间内。可展开下方场景工具做历史周期压力测试。"
+    : "下方列出超界项，可认可、调整规则或深度分析外包。";
+});
+const verdictLevel = computed<"ok" | "warn">(() => {
+  if (!hasDeclaredRules.value) return "warn";
+  return breachedDrifts.value.length === 0 ? "ok" : "warn";
 });
 
-watch(
-  () => osState.account,
-  async (account) => {
-    if (!account) return;
-    await loadReviewFromLedger(reviewAsOf.value);
-  },
-  { immediate: true },
-);
+const stressActiveNames = ref<string[]>([]);
+const showStressDetail = ref(false);
+const stressVerdict = computed(() => {
+  if (!stressResult.value) return undefined;
+  const r = stressResult.value;
+  const breached = r.endDrift.filter((d) => d.direction !== "within").length;
+  return `${r.cycleLabel}：最大回撤 ${fmtPct(r.maxDrawdownPct)}（${fmtMoney(r.maxDrawdown)} 元），末态 ${breached} 项偏离。`;
+});
 
-watch(
-  () => [
-    osState.strategyRuleVersions.length,
-    osState.decisionRecords.length,
-    osState.executionLinks.length,
-    osState.reductionPlans.length,
-  ],
-  async () => {
-    if (!osState.account) return;
-    await loadReviewFromLedger(reviewAsOf.value);
-  },
-);
+interface DriftAck { reason: string; at: string; }
+const ackVersion = ref(0);
+function driftAckKey(d: AllocationDrift): string {
+  const target = d.scope === "asset" ? (d.assetId ?? "") : `${d.dimension ?? ""}:${d.value ?? ""}`;
+  return `${d.ruleSource}:${target}:${d.minPct}:${d.maxPct}`;
+}
+function driftAck(d: AllocationDrift): DriftAck | undefined {
+  void ackVersion.value;
+  try {
+    const raw = localStorage.getItem(`inv-drift-ack:${driftAckKey(d)}`);
+    return raw ? (JSON.parse(raw) as DriftAck) : undefined;
+  } catch {
+    return undefined;
+  }
+}
+function todayStr(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+async function acknowledgeDrift(d: AllocationDrift): Promise<void> {
+  let reason = "";
+  try {
+    const result = await ElMessageBox.prompt(
+      "你认可这个偏离为合理。请记录理由（仅本地保存，用于下次复盘追溯，不改变真实交易）。",
+      "认可偏离",
+      { confirmButtonText: "确认认可", cancelButtonText: "取消" },
+    );
+    reason = (result?.value ?? "").trim();
+  } catch {
+    return;
+  }
+  localStorage.setItem(`inv-drift-ack:${driftAckKey(d)}`, JSON.stringify({ reason, at: todayStr() }));
+  ackVersion.value++;
+}
+function revokeDriftAck(d: AllocationDrift): void {
+  localStorage.removeItem(`inv-drift-ack:${driftAckKey(d)}`);
+  ackVersion.value++;
+}
+// 单偏离深度分析：共享 useFocusedContext 弹窗（聚焦），不跳行动页带全量。
+const { fc: focusedCtx, openFocused, copy: copyFocused, openChatGpt: openChatGptFocused } = useFocusedContext();
+function deepAnalyzeDrift(d: AllocationDrift): void {
+  openFocused(d, buildContextInput(osState, allocationDrift.value));
+}
 </script>
 
 <style scoped>
@@ -280,118 +444,337 @@ watch(
   flex-direction: column;
   gap: 12px;
 }
-.sim-bar {
+.section {
+  width: 100%;
+}
+.verdict-card {
+  border-left: 4px solid var(--el-color-success);
+}
+.verdict-warn {
+  border-left-color: var(--el-color-warning);
+}
+.verdict-kicker {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.verdict-card h2 {
+  margin: 4px 0 6px;
+  font-size: 20px;
+}
+.verdict-card p {
+  margin: 0;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
+.drift-card {
   border-left: 3px solid var(--el-color-primary);
 }
-.sim-head,
-.sim-meta,
-.sim-actions,
-.sim-toggles,
-.sim-log,
-.scope-head,
-.boundary-line,
-.review-summary,
-.group-title {
+.exposure-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.drift-hint {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.all-within {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.show-all-row {
+  margin-top: 8px;
+}
+.drift-item {
+  margin-bottom: 8px;
+}
+.drift-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.drift-row.breached .drift-actual {
+  color: var(--el-color-danger);
+  font-weight: 600;
+}
+.drift-label {
+  width: 180px;
+  flex-shrink: 0;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
+.drift-actual {
+  width: 64px;
+  flex-shrink: 0;
+  text-align: right;
+  color: var(--el-text-color-regular);
+}
+.drift-bar {
+  flex: 1;
+  min-width: 120px;
+}
+.drift-target {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  white-space: nowrap;
+}
+.rationale-btn {
+  font-size: 12px;
+  color: var(--el-color-primary);
+  padding: 0 4px;
+}
+.rationale-pop p {
+  margin: 4px 0;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--el-text-color-regular);
+}
+.rationale-doc {
+  color: var(--el-text-color-secondary);
+}
+.drift-actions {
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+  margin-top: 6px;
+  padding-left: 4px;
 }
-.sim-head {
-  gap: 16px;
-}
-.sim-round,
-.sim-log-title,
-.scope-note,
-.summary-note,
-.management-kicker,
-.management-limitation {
-  font-size: 12px;
-  color: var(--el-text-color-secondary);
-}
-.sim-log {
-  margin-top: 10px;
-}
-.scope-label {
-  margin-right: 6px;
-  color: var(--el-text-color-secondary);
-}
-.scope-note {
-  margin: 8px 0 0;
-}
-.boundary-line {
-  margin-top: 8px;
-  font-size: 12px;
-}
-.boundary-line span {
-  padding: 4px 8px;
+.drift-acked {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+  padding: 6px 10px;
+  background: var(--el-color-success-light-9);
   border-radius: 4px;
+  font-size: 12px;
+}
+.drift-ack-reason {
+  color: var(--el-text-color-regular);
+}
+.tool-disclaimer {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.all-cycles {
+  margin-bottom: 14px;
+  padding: 10px 12px;
   background: var(--el-fill-color-light);
+  border-radius: 4px;
 }
-.management-card {
-  border-left: 4px solid var(--el-color-primary);
+.all-cycles-verdict {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  margin-bottom: 10px;
+  line-height: 1.6;
 }
-.management-needs_action {
-  border-left-color: var(--el-color-danger);
+.all-cycles-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
-.management-waiting {
-  border-left-color: var(--el-color-warning);
+.all-cycles-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: var(--el-text-color-regular);
 }
-.management-complete {
-  border-left-color: var(--el-color-success);
+.ac-name {
+  width: 180px;
+  flex-shrink: 0;
 }
-.management-content {
+.ac-dd {
+  color: var(--el-color-danger);
+}
+.ac-end {
+  color: var(--el-text-color-secondary);
+}
+.ac-drifts {
+  width: 100%;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.ac-drift {
+  font-size: 12px;
+  color: var(--el-color-warning);
+}
+.all-cycles-hint {
+  margin: 10px 0 0;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  line-height: 1.6;
+}
+.stress-controls {
+  margin-bottom: 12px;
+}
+.stress-verdict {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  background: var(--el-fill-color-light);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+}
+.stress-detail {
+  margin-top: 12px;
+}
+.stress-desc {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  line-height: 1.6;
+}
+.stress-metrics {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.stress-metrics .metric {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.stress-metrics .metric-label {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.stress-sub-title {
+  font-size: 13px;
+  color: var(--el-text-color-secondary);
+  margin: 12px 0 8px;
+}
+.stress-section {
+  margin-top: 8px;
+}
+.exposure-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.exposure-value {
+  width: 120px;
+  flex-shrink: 0;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
+.exposure-bar {
+  flex: 1;
+}
+.exposure-pct {
+  width: 64px;
+  text-align: right;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
+.profit-positive {
+  color: var(--el-color-danger);
+}
+.profit-negative {
+  color: var(--el-color-success);
+}
+.sim-controls {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-}
-.management-content h2 {
-  margin: 3px 0 6px;
-  font-size: 20px;
-}
-.management-content p {
-  margin: 3px 0;
-}
-.review-columns {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
-  align-items: start;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
-.review-col :deep(.el-card__body) {
-  padding: 10px;
-}
-.col-title,
-.group-title strong {
-  font-weight: 600;
-}
-.group-title {
-  justify-content: space-between;
-  margin: 4px 2px 8px;
+.sim-meta {
   font-size: 13px;
+  color: var(--el-text-color-regular);
 }
-.conclusion-group + .conclusion-group {
-  margin-top: 14px;
-  padding-top: 10px;
-  border-top: 1px solid var(--el-border-color-lighter);
+.sim-actions {
+  display: flex;
+  gap: 8px;
 }
-.review-col-needy {
-  border-top: 3px solid var(--el-color-danger);
+.sim-toggles {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
-.review-col-unknown {
-  border-top: 3px solid var(--el-color-warning);
+.sim-scenario {
+  margin: 0 0 12px;
+  padding: 8px 12px;
+  background: var(--el-fill-color-light);
+  border-radius: 4px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  line-height: 1.6;
 }
-.review-col-ok {
-  border-top: 3px solid var(--el-color-success);
+.sim-log {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-bottom: 12px;
 }
-@media (max-width: 960px) {
-  .review-columns {
-    grid-template-columns: 1fr;
-  }
-  .management-content {
-    align-items: flex-start;
-    flex-direction: column;
-  }
+.sim-log-title {
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+}
+.sim-log-tag {
+  font-size: 12px;
+}
+.sim-findings {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sim-finding {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.sim-finding.is-risk {
+  background: var(--el-color-warning-light-9);
+  border-left: 3px solid var(--el-color-warning);
+}
+.sim-finding.is-info {
+  background: var(--el-color-info-light-9);
+  border-left: 3px solid var(--el-color-info);
+}
+.sim-finding-title {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+.sim-finding-detail {
+  color: var(--el-text-color-regular);
+}
+.sim-hint {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.stress-findings-note {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+}
+.focused-text :deep(textarea) {
+  font-family: var(--el-font-family-mono, monospace);
+  font-size: 12px;
+  line-height: 1.6;
 }
 </style>
