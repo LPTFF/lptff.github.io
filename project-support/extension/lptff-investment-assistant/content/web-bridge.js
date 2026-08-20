@@ -5,26 +5,79 @@
 
   if (!isAllowedOrigin) return;
 
+  const CONTEXT_INVALIDATED_MESSAGE = "采集插件已更新或重新加载，当前页面中的旧连接已失效。请刷新当前基金复盘页面后重试";
+  let contextInvalidated = false;
+
+  try {
+    const lifecyclePort = chrome.runtime.connect({ name: "lptff-web-bridge-lifecycle" });
+    lifecyclePort.onDisconnect.addListener(() => {
+      contextInvalidated = true;
+    });
+  } catch {
+    contextInvalidated = true;
+  }
+
+  function postResponse(message, responseType, response) {
+    window.postMessage({
+      source: "lptff-investment-assistant",
+      type: responseType,
+      requestId: message.requestId,
+      response,
+    }, location.origin);
+  }
+
+  function hasRuntimeContext() {
+    if (contextInvalidated) return false;
+    try {
+      if (chrome.runtime?.id) return true;
+    } catch {
+      // An extension reload invalidates the old content-script context.
+    }
+    contextInvalidated = true;
+    return false;
+  }
+
   function forward(message, responseType, attempt = 0) {
-    chrome.runtime.sendMessage(message, (response) => {
-      const runtimeError = chrome.runtime.lastError;
-      const missingReceiver = /Could not establish connection|Receiving end does not exist/i.test(runtimeError?.message || "");
-      if (missingReceiver && attempt < 4) {
-        setTimeout(() => forward(message, responseType, attempt + 1), 150 * (attempt + 1));
-        return;
-      }
-      window.postMessage({
-        source: "lptff-investment-assistant",
-        type: responseType,
-        requestId: message.requestId,
-        response: response || {
+    if (!hasRuntimeContext()) {
+      postResponse(message, responseType, { ok: false, error: CONTEXT_INVALIDATED_MESSAGE });
+      return;
+    }
+
+    try {
+      chrome.runtime.sendMessage(message, (response) => {
+        let runtimeError;
+        try {
+          runtimeError = chrome.runtime.lastError;
+        } catch {
+          contextInvalidated = true;
+          postResponse(message, responseType, { ok: false, error: CONTEXT_INVALIDATED_MESSAGE });
+          return;
+        }
+
+        const missingReceiver = /Could not establish connection|Receiving end does not exist/i.test(runtimeError?.message || "");
+        if (missingReceiver && attempt < 4) {
+          setTimeout(() => forward(message, responseType, attempt + 1), 150 * (attempt + 1));
+          return;
+        }
+        postResponse(message, responseType, response || {
           ok: false,
           error: missingReceiver
             ? "采集插件后台尚未连接。请在 chrome://extensions 重新加载插件，并刷新当前基金复盘页面"
             : runtimeError?.message || "Investment 插件后台未响应，请在 chrome://extensions 重新加载插件后刷新本页面",
-        },
-      }, location.origin);
-    });
+        });
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error || "");
+      if (/Extension context invalidated/i.test(errorMessage) || !hasRuntimeContext()) {
+        contextInvalidated = true;
+        postResponse(message, responseType, { ok: false, error: CONTEXT_INVALIDATED_MESSAGE });
+        return;
+      }
+      postResponse(message, responseType, {
+        ok: false,
+        error: errorMessage || "Investment 插件通信失败，请刷新当前基金复盘页面后重试",
+      });
+    }
   }
 
   window.addEventListener("message", (event) => {

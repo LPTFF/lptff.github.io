@@ -34,6 +34,8 @@ const HOLD_URL = "https://trade.1234567.com.cn/myAssets/hold";
 const QUERY_URL = "https://query.1234567.com.cn/";
 const STAGING_KEY = "investmentStaging";
 const RECEIPT_KEY = "investmentTransferReceipt";
+const WEB_BRIDGE_LIFECYCLE_PORT = "lptff-web-bridge-lifecycle";
+const webBridgePorts = new Set();
 const OFFSCREEN_PATH = "offscreen/offscreen.html";
 let PAGE_TIMEOUT = 30000;
 
@@ -519,6 +521,12 @@ async function runAutoCollection() {
     notifyProgress();
   }
 }
+
+chrome.runtime.onConnect.addListener((port) => {
+  if (port.name !== WEB_BRIDGE_LIFECYCLE_PORT) return;
+  webBridgePorts.add(port);
+  port.onDisconnect.addListener(() => webBridgePorts.delete(port));
+});
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "SOURCE_BRANCH_PROGRESS") {
