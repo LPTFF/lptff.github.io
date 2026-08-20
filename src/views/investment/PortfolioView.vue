@@ -11,31 +11,31 @@
         <el-table class="holdings-table" :data="sortedHoldings" size="small" border table-layout="fixed"
           :default-sort="{ prop: 'marketValue', order: 'descending' }" @sort-change="onSortChange">
           <el-table-column prop="assetId" label="基金" width="64" />
-          <el-table-column prop="name" label="名称" min-width="126" />
-          <el-table-column prop="marketValue" label="市值" width="72" sortable="custom">
+          <el-table-column prop="name" label="名称" min-width="100" />
+          <el-table-column prop="marketValue" label="市值" width="88" sortable="custom">
             <template #default="{ row }">{{ fmt(row.marketValue) }}</template>
           </el-table-column>
-          <el-table-column prop="pnl" label="持仓盈亏" width="76" sortable="custom">
+          <el-table-column prop="pnl" label="持仓盈亏" width="92" sortable="custom">
             <template #default="{ row }"><span :class="profitClass(row.pnl)">{{ row.pnl === undefined ? "—" :
               fmt(row.pnl) }}</span></template>
           </el-table-column>
-          <el-table-column prop="pnlRate" label="持仓收益率" width="82" sortable="custom">
+          <el-table-column prop="pnlRate" label="持仓收益率" width="100" sortable="custom">
             <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate)
             }}</span></template>
           </el-table-column>
-          <el-table-column prop="weight" label="仓位" width="60" sortable="custom">
+          <el-table-column prop="weight" label="仓位" width="72" sortable="custom">
             <template #default="{ row }">{{ fmtPct(row.weight) }}</template>
           </el-table-column>
-          <el-table-column label="指数依据" width="84">
+          <el-table-column label="指数依据" width="180">
             <template #default="{ row }">{{ row.indexes.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="地区" width="64">
+          <el-table-column label="地区" width="84">
             <template #default="{ row }">{{ row.regions.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="策略" width="64">
+          <el-table-column label="策略" width="78">
             <template #default="{ row }">{{ row.strategy || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="字段依据" width="94">
+          <el-table-column label="字段依据" width="126">
             <template #default="{ row }">
               <div class="metadata-details">
                 <div v-for="detail in row.metadataDetails" :key="detail.label" class="metadata-detail">

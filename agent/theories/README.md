@@ -8,6 +8,7 @@
 | --- | --- | --- | --- |
 | [Agent 业务任务分析协议](agent-business-task-analysis.md) | Cognitive Work Analysis、Task–Technology Fit、Sensemaking、Information Foraging、Human-Centred Design | 已转化，验证中 | [业务任务分析执行规范](../standards/business-task-analysis.md)、[产品设计标准](../standards/product-design.md)、[产品工作台](../product/README.md) |
 | [投资绩效与决策复盘](investment-performance-and-decision-review.md) | Performance Measurement/Attribution/Appraisal、IPS、Outcome Bias、Disposition、Overtrading、Sharpe | 已转化，部分来源复核中 | [Investment Review 人的产品审查](../product/investment-review.md)、[工程附录](../product/reference/investment-review-engineering.md) |
+| [软件可信验证原则](software-trusted-verification.md) | Verification & Validation、软件测试、可靠性与形式化方法 | 理论收藏，执行边界已收敛 | [真实环境验收规范](../standards/trusted-verification.md)、[验收清单](../verification/playbook.md) |
 
 ## 理论卡片与执行规范的边界
 

@@ -68,7 +68,7 @@ jobs:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Notify crawl result
         continue-on-error: true
-        run: python ./project-support/crawl/sendNotify.py
+        run: python -B ./project-support/crawl/sendNotify.py
         env:
           QYWX_KEY: ${{ secrets.QYWX_KEY }}
       - name: Build
