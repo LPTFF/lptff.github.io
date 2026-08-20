@@ -44,8 +44,6 @@ jobs:
         run: |
           npm install
           python -m pip install --requirement project-support/requirements-crawl.txt
-      - name: Test public data collectors
-        run: npm run test:collectors
       - name: Collect public RSS for Pages
         run: npm run collect:rss:site
       - name: Crawl and validate site data

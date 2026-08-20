@@ -71,24 +71,18 @@ npm run build
 3. 执行 Vite 生产构建；
 4. 生成 `dist/404.html`。
 
-## 公共数据采集验证
+## 公共数据采集与验收
 
-项目提供一套本地与 GitHub Actions 共用的 Node.js 公共数据采集实现。先用离线 fixture 验证采集边界：
-
-```bash
-npm run test:collectors
-npm run collect:rss:fixture
-```
-
-离线 fixture 命令会验证 RSS/Atom 解析、域名和 HTTPS 边界、数据结构、非空/大小限制及失败不覆盖，并把候选结果写入被 Git 忽略的 `.artifacts/`。离线验证通过后，还必须执行真实数据和浏览器闭环：
+项目通过真实白名单 RSS 来源生成站点数据：
 
 ```bash
-npm run verify:rss:local
+npm run collect:rss:site
+npm run build
 ```
 
-该命令依次运行 collector 测试、访问白名单真实 RSS 来源、通过与 CI 共用的 `collect:rss:site` 生成 `project-support/public/data/recommendArticleData.json`、执行生产构建，再用 `vite preview` 打开项目已有的资讯页面 `http://localhost:4173/newsArticle`。页面请求 `/data/recommendArticleData.json`；维护者需确认生成时间、来源和文章列表正常，JSON 网络请求为 200、控制台无错误。原始 RSS 没有 AI 阅读评分和推荐理由，页面不会伪造这些字段。只运行 fixture、直接打开 JSON 或新增平行验证页面不能视为现有业务功能闭环。验证结束后按 `Ctrl+C` 停止预览，并删除本地生成的 `project-support/public/data/recommendArticleData.json`，避免将动态数据误提交。
+这些命令只负责真实采集和构建，不能单独作为验收通过依据。发布后必须在实际站点的资讯页面操作并观察 `/data/recommendArticleData.json`、生成时间、来源、文章列表、失败状态和控制台，只有目标部署环境的结果符合预期才能通过验收。原始 RSS 没有 AI 阅读评分和推荐理由，页面不得伪造这些字段。
 
-正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下自动运行同一组 collector 测试与 `collect:rss:site`，随后执行原有 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `project-support/public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署。
+正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下访问真实来源执行 `collect:rss:site`，随后执行 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `project-support/public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署；最终验收仍以 Pages 目标页面的真实操作结果为准。
 
 本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](agent/product/research/qinglong-backup-assessment.md)。
 

@@ -33,16 +33,23 @@ import {
   navByIndexId,
   phaseOf,
   type MarketAssetId,
-} from "../__fixtures__/review/market";
+} from "../simulation/market";
 import { normalizeIndexId, type IndexId } from "../engines/scenario/historical-cycles";
 import { generateActions, defaultToggles, type BehaviorLogEntry, type BehaviorToggles, type SimBehaviorHolding } from "../engines/review/simulator-behavior";
 import { advanceTrailingStop } from "../engines/review/trailing-stop";
-import { makeStoredTrailingStopState, makeCoverage } from "../__fixtures__/review/builders";
 import { useInvestmentReview } from "./use-investment-review";
 import { useInvestmentOS } from "./use-investment-os";
 
 const SCOPE_ID = "scope:sim";
 const RULE_VERSION_ID = "srv:sim:v1";
+
+function simulationCoverage(input: Pick<DataCoverage, "dataset" | "knownRanges" | "completeness">): DataCoverage {
+  return { ...input, lastSyncedAt: `${input.knownRanges.at(-1)?.end ?? "2024-01-01"}T15:00:00+08:00`, warningCodes: [] };
+}
+
+function simulationTrailingStop(input: StoredTrailingStopState): StoredTrailingStopState {
+  return input;
+}
 
 interface SimHolding {
   shares: number;
@@ -175,11 +182,11 @@ function buildSimRules(assetIds: string[]): StrategyRule[] {
 
 function fullCoverage(): DataCoverage[] {
   return [
-    makeCoverage({ dataset: "account", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
-    makeCoverage({ dataset: "holdings", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
-    makeCoverage({ dataset: "dailyPnl", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
-    makeCoverage({ dataset: "transactions", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
-    makeCoverage({ dataset: "fundDetail", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
+    simulationCoverage({ dataset: "account", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
+    simulationCoverage({ dataset: "holdings", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
+    simulationCoverage({ dataset: "dailyPnl", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
+    simulationCoverage({ dataset: "transactions", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
+    simulationCoverage({ dataset: "fundDetail", knownRanges: [{ start: "2024-01-01", end: dateOf(state.round) }], completeness: "complete" }),
   ];
 }
 
@@ -339,7 +346,7 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
   const scope: InvestmentScope = {
     scopeId: SCOPE_ID, scopeType: "DECLARED_PORTFOLIO", includedAssetIds: assetIds, baseCurrency: "CNY",
     denominatorSource: "account_total_asset", denominatorAsOf: dateOf(0),
-    denominatorCoverage: makeCoverage({ dataset: "account", knownRanges: [{ start: "2024-01-01", end: dateOf(0) }], completeness: "complete" }),
+    denominatorCoverage: simulationCoverage({ dataset: "account", knownRanges: [{ start: "2024-01-01", end: dateOf(0) }], completeness: "complete" }),
     effectiveFrom: "2024-01-01", version: 1,
   };
   await l.putInvestmentScope(scope);
@@ -353,9 +360,9 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
   state.toggles = defaultToggles(); state.behaviorLog = [];
   await writeFactsToLedger(0, state.holdings, realAssets);
   for (const aid of assetIds) {
-    await l.putTrailingStopState(makeStoredTrailingStopState({
+    await l.putTrailingStopState(simulationTrailingStop({
       id: `tss:${SCOPE_ID}:${aid}`, scopeId: SCOPE_ID, assetId: aid, ruleVersionId: RULE_VERSION_ID,
-      previousHighWaterMark: 1.0, currentHighWaterMark: 1.0, stopLine: 0.9, navBasis: "nav_adjusted", asOf: dateOf(0),
+      previousHighWaterMark: 1.0, currentHighWaterMark: 1.0, stopLine: 0.9, navBasis: "nav_adjusted", asOf: dateOf(0), triggered: false,
     }));
   }
   state.initialized = true;

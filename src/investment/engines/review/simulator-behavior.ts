@@ -7,9 +7,8 @@
  * 交易只写 Ledger 供复盘判定，不自动下单。
  */
 import type { IndexId } from "../../engines/scenario/historical-cycles";
-import { MARKET_INDEX_IDS, dateOf } from "../../__fixtures__/review/market";
+import { MARKET_INDEX_IDS, dateOf } from "../../simulation/market";
 import type { DecisionRecord, ExecutionLink, Transaction } from "../../domain";
-import { makeTransaction, makeDecisionRecord, makeExecutionLink } from "../../__fixtures__/review/builders";
 
 export interface BehaviorToggles {
   chaseTrend: boolean;
@@ -74,12 +73,22 @@ export function defaultToggles(): BehaviorToggles {
 let txSeq = 0;
 function makeTx(assetId: string, type: "BUY" | "SELL", amount: number, period: number, sid?: string): Transaction {
   const occurredAt = dateOf(period);
-  const base = makeTransaction({ occurredAt, assetId, type, amount, sourceTransactionId: sid ?? `sim-${period}-${assetId}-${type}-${txSeq + 1}`, status: "confirmed" });
   txSeq++;
-  return { ...base, id: `sim-tx:${period}:${txSeq}:${assetId}:${type}:${amount}` };
+  return {
+    id: `sim-tx:${period}:${txSeq}:${assetId}:${type}:${amount}`,
+    sourceTransactionId: sid ?? `sim-${period}-${assetId}-${type}-${txSeq}`,
+    occurredAt,
+    assetId,
+    type,
+    amount,
+    amountUnit: "CNY",
+    status: "confirmed",
+    sourceType: "auto_collect",
+    behaviorType: null,
+  };
 }
 
-/** 重置内部交易序号（测试用）。 */
+/** 重置产品演练会话的内部交易序号。 */
 export function resetBehaviorSeq(): void {
   txSeq = 0;
 }
@@ -168,7 +177,7 @@ export function generateActions(input: BehaviorInput): BehaviorOutput {
       const amt = 1000;
       const tx = makeTx(target.assetId, "BUY", amt, period, `sim-dingtou-${period}`);
       transactions.push(tx);
-      const dec = makeDecisionRecord({
+      const dec: DecisionRecord = {
         id: `dec:sim:dingtou:${period}`,
         scopeId,
         direction: "BUY",
@@ -177,9 +186,18 @@ export function generateActions(input: BehaviorInput): BehaviorOutput {
         allowedWindow: { start: dateOf(period), end: dateOf(period) },
         decidedAt: dateOf(period),
         rationale: `月度定投 ${nameOf(target)}`,
-      });
+        status: "recorded",
+        annotations: [],
+        immutable: true,
+      };
       decisions.push(dec);
-      links.push(makeExecutionLink({ transactionId: tx.id, decisionRecordId: dec.id, linkMethod: "declared", confidence: "high" }));
+      links.push({
+        id: `link:${tx.id}:${dec.id}`,
+        transactionId: tx.id,
+        decisionRecordId: dec.id,
+        linkMethod: "declared",
+        confidence: "high",
+      });
       logs.push({ behavior: "规律定投", text: `按计划定投 ${nameOf(target)} ${amt} 元`, assetId: target.assetId });
     }
   }

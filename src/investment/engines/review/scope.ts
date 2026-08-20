@@ -5,7 +5,7 @@
  * 资产或可投资资金。单只基金是范围内的分析对象，不自动成为分母。一个问题缺数据只降级该
  * 问题的判断，不阻断无依赖关系的判断（工程附录 §4 全局不变量 2/7）。
  *
- * 纯函数：不读 DOM / 真实来源 / Cookie / Token；可由人工 fixture 完全驱动。
+ * 纯函数：不直接读取 DOM、Cookie 或 Token，只消费 Ledger 中的真实来源标准化事实。
  */
 import type {
   AccountSnapshot,
@@ -20,7 +20,7 @@ import type {
   Transaction,
 } from "../../domain";
 
-/** 复盘输入事实：来自 Ledger / Mock Adapter 的标准化事实。 */
+/** 复盘输入事实：来自 Ledger 的真实来源标准化事实。 */
 export interface ReviewFacts {
   account?: AccountSnapshot;
   portfolio?: PortfolioSnapshot;

@@ -1,3 +1,5 @@
+"""在真实 Eastmoney 网络环境中诊断基金排行接口，不作为项目验收替代。"""
+
 from __future__ import annotations
 
 import json

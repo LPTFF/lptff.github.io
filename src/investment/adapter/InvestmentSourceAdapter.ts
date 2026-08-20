@@ -1,11 +1,9 @@
 /**
  * InvestmentSourceAdapter（PRD §36）
  *
- * 把来源数据转换为标准 Domain 事实的抽象。Core 只依赖这个接口；真实环境由
- * EastmoneyInvestmentSourceAdapter 实现（Agent B 领地），Agent A 只用 Mock。
- *
- * 接口必须可被 Mock Adapter 完全替换（shared/00 不变量 1）。部分成功 / 字段缺失
- * 必须通过 Coverage + warnings 显式表达，而不是抛出或静默补全。
+ * 把真实来源数据转换为标准 Domain 事实的抽象。Core 只依赖这个接口，天天基金来源由
+ * EastmoneySourceCaptureAdapter 实现。部分成功 / 字段缺失必须通过 Coverage + warnings
+ * 显式表达，而不是抛出或静默补全。
  */
 import type {
   AccountSnapshot,
@@ -41,8 +39,8 @@ export interface InvestmentSourceAdapter {
 
 /**
  * DatasetSourceAdapter：把一次性 InvestmentDataset 包装为 InvestmentSourceAdapter，
- * 使 importInvestmentStaging（插件 staging）与 loadDemoData（fixture）都能复用 SyncService 的
- * 去重 / coverage 保守合并 / 审计 / health 逻辑，避免三套写入路径行为不一致。
+ * 使插件 staging 与真实脱敏快照都能复用 SyncService 的去重、coverage 保守合并、审计和
+ * health 逻辑，避免多套写入路径行为不一致。
  */
 export class DatasetSourceAdapter implements InvestmentSourceAdapter {
   readonly source: string;

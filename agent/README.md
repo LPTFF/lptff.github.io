@@ -7,7 +7,7 @@
 - 想了解项目现在是什么：看 [context/project-context.md](context/project-context.md)。
 - 想知道当前产品方向和优先级：看 [product/README.md](product/README.md)。
 - 想审查 Investment Review 为什么做、当前差距、本次 P0、A/B 分工和人的验收：直接看 [product/investment-review.md](product/investment-review.md)，不需要再拼接 Agent 任务板。
-- 想设计页面或交互：看 [standards/product-design.md](standards/product-design.md)；工程对象、公式和 fixture 只在深审时看 [product/reference/investment-review-engineering.md](product/reference/investment-review-engineering.md)。
+- 想设计页面或交互：看 [standards/product-design.md](standards/product-design.md)；工程对象、公式、真实来源与验收边界只在深审时看 [product/reference/investment-review-engineering.md](product/reference/investment-review-engineering.md)。
 - 想知道哪些文件属于项目功能、哪些属于工作台：看 `context/project-file-boundaries.md`。
 - 想了解代码放在哪里：看 `standards/code-organization.md`。
 - 想查看已收藏理论或引入新理论：看 `theories/README.md`；想了解当前可执行的 Agent 约定：看 `standards/`。
@@ -26,7 +26,9 @@
 
 Agent 应以项目内已有资料、当前代码和实际检查结果为行动依据，不得把外部工具的默认惯例或未经验证的推测当作项目要求。执行每一步前，应先找到与当前问题直接相关的依据；项目没有明确规定、现有证据不足或规则发生冲突时，应说明已知事实、未知与拟采用的判断，涉及范围、风险或外部状态变化的选择须交由人确认。
 
-涉及私人真实环境时，默认由一个主力 Agent 完成需求、实现、自测和非私人验证；只有剩余主张必须访问用户授权的私人数据或真实登录环境才能证明时，才启用范围更窄的授权验证 Agent。这是最小权限升级，不是复杂任务默认增加第二 Agent，具体见[协作标准](standards/main-agent-authorized-validation.md)。
+项目验收的唯一完成依据，是目标真实环境中的实际操作结果符合人的预期。源码阅读、类型检查、构建、脱敏快照、模拟数据、Mock、人工 fixture、单元测试以及 Agent 自设的 Oracle、测试工具或验证方案，只能暴露局部问题，不能替代真实环境验收，也不得据此宣称功能正确或任务完成。没有取得真实操作证据时，结论必须保持“未验收”“无法验证”或“未知”；不得为了获得绿色结果而创建、保留或扩展脱离真实环境的测试体系。
+
+涉及私人真实环境时，默认由一个主力 Agent 完成需求、实现和静态排错；只有完成主张必须访问用户授权的私人数据或真实登录环境才能证明时，才启用范围更窄的授权验证 Agent。这是最小权限升级，不是复杂任务默认增加第二 Agent，具体见[协作标准](standards/main-agent-authorized-validation.md)。
 
 好的记录应该让未来的人少走弯路：写清楚事实、判断、依据、未知和下一步；不要为了让某个工具更容易解析而堆砌格式。
 

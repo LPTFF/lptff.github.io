@@ -19,7 +19,7 @@ Comprehensive Source Capture
 → optional AI explanation
 ```
 
-`deterministic` 指同一有效输入必然得到相同核心结果的普通代码，不由 LLM 自由判断。Core 不读取真实页面 DOM、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；Adapter 可由人工 Mock 完全替换。
+`deterministic` 指同一有效输入必然得到相同核心结果的普通代码，不由 LLM 自由判断。Core 不读取真实页面 DOM、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；Adapter 只转换已观察的真实来源事实。
 
 ### 来源采集层与页面消费层
 
@@ -28,7 +28,7 @@ Comprehensive Source Capture
 1. **全面来源采集层**输出 `eastmoney-source-capture/1.0`。它保留账户/持仓来源字段、单基金份额/盈亏/定投表格、按时间范围和页码组织的交易记录、公开基金全部键值字段与章节，以及 Coverage、warning 和聚合性能指标。它不按当前页面需要裁剪字段，也不生成领域判断。
 2. **页面消费加工层**在网站侧把来源采集包投影为 `InvestmentDataset 2.0`。账户、持仓、交易状态、每日盈亏、资产分类和 Coverage 的产品语义都在 Adapter 中形成；页面或领域模型变化只调整这一层，不反向修改已观察来源事实。
 
-扩展 staging 保存来源采集包并维持一次性 ACK 生命周期；读取端继续兼容旧 `InvestmentDataset 2.0` 和 `1.1` 备份。仓库内允许保留两类来源脱敏产物：一是结构完整、数组受限、跨表标识一致替换的**合成样本**（`eastmoney-source-sample.json`），用于零真实数据的结构设计输入，提交前运行 `node project-support/scripts/investment/validate-source-sample.js`；二是**法律关键脱敏快照**（`eastmoney-source-desensitized.json`），保留真实基金代码/名称/净值/金额/日期等非个人识别数据，仅掩盖个人金融账户、银行卡尾号、交易与追踪标识，用于沙箱产品推演，由 `node project-support/scripts/investment/desensitize-source.js <真实采集包路径>` 生成并自检。真实采集包、认证字段和真实个人账户/银行卡号/交易追踪标识不得写入仓库。
+扩展 staging 保存来源采集包并维持一次性 ACK 生命周期；读取端继续兼容旧 `InvestmentDataset 2.0` 和 `1.1` 备份。仓库内只保留由用户真实采集包生成的**法律关键脱敏快照**（`eastmoney-source-desensitized.json`）：保留真实基金代码/名称/净值/金额/日期等非个人识别数据，仅掩盖个人金融账户、银行卡尾号、交易与追踪标识，由 `node project-support/scripts/investment/desensitize-source.js <真实采集包路径>` 生成并自检。该快照可用于开发时观察数据结构和页面消费，但不能替代真实 Chrome、真实扩展和实际登录来源下的验收。真实采集包、认证字段和真实个人账户/银行卡号/交易追踪标识不得写入仓库。
 
 ### 当前运行时基础
 
@@ -172,7 +172,7 @@ Action 被关闭不能跳过 execution 或 post-state recheck。每个中间态�
 
 ### 全局
 
-1. Adapter 输出可由 Mock Adapter 替换；Core 不依赖真实账户。
+1. Adapter 输出来自真实来源的标准化事实；Core 不直接依赖来源页面或账户凭据。
 2. 缺失、Schema Drift、partial/stale 和 unknown 进入相关判断的 Coverage，不静默猜测。
 3. 同步与重算使用稳定业务键，重复导入幂等。
 4. InvestmentScope、Policy、Rule 和 Decision 按事实发生时的有效版本解析；当前修改不改变历史。
@@ -248,83 +248,11 @@ Benchmark/Excess gate：相同期间、相同币种或可验证 FX、相同 retu
 
 P2 Attribution 只有 Measurement 可信且数据粒度满足时运行。Level 1/Level 2 无法调和时显示 residual 和 limitation，不强制归零，也不由 AI 生成原因故事。
 
-## 5. 场景与 Test Matrix
+## 5. 真实环境验收
 
-Agent A 只使用人工构造、不可还原真实账户的 fixture。Agent B 的真实环境验证只产生字段级语义和脱敏结论，不产生可复制的真实 fixture。
+验收必须在用户实际使用的 Chrome、已加载的仓库扩展、真实天天基金登录态、真实分页接口、本地 Ledger 和实际 Investment OS 页面中完成。需要实际观察采集进度、来源字段、失败原因、一次性暂存、导入确认、刷新后状态、页面结论、Network 与 Console；静态公式、人工场景、fixture、Mock、Test Matrix 或 Agent 自设 Oracle 都不能替代这些结果。
 
-### 证据类型
-
-| 证据 | 证明什么 | 不能替代什么 |
-| --- | --- | --- |
-| 确定性 Core Oracle | 公式、不变量、状态转换和失败行为 | 真实来源是否真的提供对应语义 |
-| 来源语义 Oracle | 字段有无、方向、时点、确认含义、Coverage | Core 规则是否正确、页面是否好用 |
-| 真实环境 smoke test | 授权真实 Chrome 中的端到端来源链和 reload | 长期用户价值、自动交易授权 |
-| 人类任务验收 | 用户能否理解偏离、证据和下一步 | 数学正确性或来源真实性 |
-
-### P0 核心场景
-
-| Fixture | 最小构造 | 独立 Oracle |
-| --- | --- | --- |
-| `no-operation-in-bounds` | 完整规则与快照，本期无操作 | 仅已覆盖判断为符合；未覆盖问题不被总结为正常 |
-| `planned-confirmed-operation` | 事前计划、匹配申请与确认 | 计划/实际一致，保留 plan 与 execution 两条事实 |
-| `historical-baseline-operation` | 首次导入或计划核对启用前的交易 | 只计入历史基线，不生成计划 breach |
-| `unplanned-operation` | `operationReviewFrom` 之后的已确认交易，完整来源 Coverage，且交易前不存在 DecisionRecord | BREACH 表示计划记录流程缺口；不允许事后补写，也不评价投资结果 |
-| `unlinked-prior-plan` | 交易前已有合法 DecisionRecord，但没有声明 ExecutionLink | 等待用户显式关联；系统不自动匹配 |
-| `over-plan-operation` | 实际确认量超过计划范围 | 数量偏离独立输出 |
-| `pause-conflict` | 生效 pause rule 期间新增 | 规则冲突引用当时版本 |
-| `historical-amount-only` | 金额为历史中位数三倍但计划内 | 只输出统计信号，不输出计划 breach |
-| `pending-or-duplicate` | 待确认或重复来源记录 | 不进入 confirmed；稳定键去重 |
-| `partial-confirmation` | 计划量大于确认量 | execution 进行中，remaining 可见 |
-| `scope-denominator-missing` | 有基金市值，无可靠总资产 | 仅仓位 unknown；操作/止损可继续 |
-| `position-over-limit` | 同时点分母、持仓和上限 | 手算比例与 deviation 一致 |
-| `scope-mismatch` | 基金市值和分母来自不同范围 | 仓位为 `INSUFFICIENT_DATA`，不拼接 |
-| `stop-new-high` | 合格 NAV 高于历史高点 | high-water mark/stop line 上移 |
-| `stop-no-new-high` | NAV 低于高点且未触发 | stop line 不变 |
-| `stop-ratchet` | 多日高低序列 | stop line 单调不降 |
-| `stale-nav-stop` | NAV 过期 | 不推进高水位，不生成确定性触发 |
-| `nav-basis-unknown` | 分红/复权语义不清 | stop state 为 unknown，历史状态保留 |
-| `reduction-planned` | 越界与目标区间，尚未申请 | 计划量可复算，execution 未开始 |
-| `reduction-requested` | 已提交无确认 | 不标记已减仓 |
-| `partial-reduction` | 只确认部分计划量 | 按确认量和新快照重算 remaining |
-| `confirmed-not-restored` | 已确认但新仓位仍越界 | 状态不 completed/restored |
-| `reduction-restored` | 已确认且新仓位回区间 | restored，保留完整证据链 |
-| `transaction-history-partial` | 当前操作存在，历史分页不完整 | 依赖历史完整性的信号降级；计划对照按自身证据判断 |
-| `profitable-breach` | 正收益且过程违反 | Process = BREACH；Outcome = POSITIVE |
-| `compliant-loss` | 负收益且过程合规 | Process = COMPLIANT；Outcome = NEGATIVE |
-| `benchmark-missing` | P0 事实完整，无 Benchmark | P0 不受阻；仅未来相对表现不可算 |
-| `cny-no-fx-tax` | 单币种普通基金场景 | P0 不要求 FX/通用税字段 |
-
-### 通用状态与韧性
-
-| Fixture | Oracle |
-| --- | --- |
-| `empty` | 无持仓/无操作是合法状态，不伪造问题 |
-| `partial` | 只降级受影响的 judgment |
-| `stale` | 保留旧事实并停止依赖新鲜度的状态推进 |
-| `failed` | 保留 Ledger，显示失败和恢复路径 |
-| `unknown-schema` | 未知枚举进入 unknown，输出 Required change |
-| `version-change` | 当前规则修改不改变历史 Review |
-| `decision-immutable` | 拒绝覆盖事前字段，只追加 annotation |
-| `reload-mid-execution` | reload 后保持 requested/partial 状态和关联 |
-| `duplicate-import` | 重复批次不改变 Ledger、判断或关联 |
-| `large` | 分页、性能和稳定渲染；无静默截断 |
-
-### P1–P4 条件性场景
-
-P1 保留 no-cashflow、external-flow-timing、irregular-cashflows、cash/fee included-vs-omitted、11-month period、drawdown curve、Target/Benchmark 交叉结果和比较口径不匹配场景。
-
-P2 保留 attribution reconciliation/residual、Level 2 数据不足、Disposition 样本门槛、Possible Overtrading 反例和 Strategy Drift 场景。P3 保留 single win/loss 不改变假设状态、mixed/unknown evidence 和不可比较样本。P4 保留 AI disabled、不同模型核心结果不变、missing evidence ref 和 profitable-breach/compliant-loss 叙述不覆盖事实。
-
-### 属性与变形关系
-
-- 重复导入相同批次，Ledger、关联和判断不变；
-- 移除仓位分母只降级 PositionJudgment；
-- 追加低于历史高点的合格 NAV，stop line 不下降；
-- 全额确认改为部分确认，restored 变为进行中并出现 remaining；
-- 修改当前 Policy/Rule，不改变历史 Review；
-- 改变 Outcome 正负，不改变既有 Process classification；
-- 缺少 Benchmark 只移除相对表现；
-- 更换 LLM 只能改变允许变化的 wording，不能改变确定性状态。
+真实来源暂时没有出现某种状态时，该状态保持“未验收”或“未知”，不得为了覆盖它而制造输入并据此宣布通过。
 
 ## 6. 当前工作包与旧任务追踪
 
@@ -347,8 +275,8 @@ P2 保留 attribution reconciliation/residual、Level 2 数据不足、Dispositi
 
 ### Agent A
 
-- 负责需求细化、目标契约、Core 公式和状态机、migration、人工 fixture、Property/Invariant、测试、UI、构建、修复与非私人环境验证；不能因为技术复杂而转交 B；
-- 只使用源码、人工 fixture 和 B 的脱敏结论；
+- 负责需求细化、目标契约、Core 公式和状态机、migration、UI、构建、静态排错与修复；不能因为技术复杂而转交 B；
+- 只使用源码、已观察的公开来源事实和 B 的脱敏真实环境结论；
 - 不访问真实账户、真实资产或交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；
 - 核心判断明确输入、规则版本、Coverage、公式/状态和 unknown 条件；
 - sequence/state 能力包含属性或状态机测试；
@@ -356,10 +284,10 @@ P2 保留 attribution reconciliation/residual、Level 2 数据不足、Dispositi
 
 ### Agent B
 
-只有 A 已完成可由源码、Mock、fixture 和普通环境完成的工作，剩余主张被收敛为可观察问题，且维护者明确批准目标、数据、动作和停止条件时，才启用 B：
+只有 A 已完成源码实现和静态排错，剩余主张被收敛为必须在私人真实环境观察的问题，且维护者明确批准目标、数据、动作和停止条件时，才启用 B：
 
 - 单次只验证一个明确授权的来源能力、场景和目标；
-- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓，也不接管 A 的实现、自测或普通验证；
+- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓，也不接管 A 的实现或静态排错；
 - 真实登录 Chrome 是验收目标时，隔离 profile 不得替代真实验收；
 - 不能证明时返回 `BLOCKED/unknown` 和 Required change，不猜 mapping；
 - 不输出或保存基金名、真实金额、收益、可组合识别个人的日期金额、Raw JSON/HTML、Cookie、Token、银行卡信息、登录态或完整 Network Logs。
@@ -389,14 +317,14 @@ Agent A dependency impact
 每个 P0 交付项必须同时满足：
 
 1. 目标契约和按问题状态明确；
-2. 人工 fixture 可驱动的确定性实现；
-3. 独立 Oracle；
-4. normal/empty/partial/stale/failed/unknown 覆盖；
-5. migration、round-trip、reload、幂等和历史版本可靠；
+2. 只消费真实来源标准化事实的确定性实现；
+3. 在目标真实环境观察关键来源状态和页面消费结果；
+4. 实际出现的 normal/empty/partial/stale/failed/unknown 状态如实展示；
+5. migration、round-trip、reload、幂等和历史版本在真实账本操作中可靠；
 6. UI 从结论下钻到规则、事实、Coverage、limitation 和下一步；
-7. 匹配的 tests、typecheck 和 production build，失败如实记录；
+7. typecheck 和 production build 仅用于开发排错，不作为验收结论；
 8. 隐私、真实环境和无自动交易边界；
-9. 对应工作包的人类任务验收；
+9. 对应工作包在目标页面完成真实操作验收；
 10. 实现和证据完成后才升级状态。
 
 P0 还必须证明：一个问题 unknown 不污染其他问题；历史金额信号不等于规则 breach；止损线单调不降；申请/部分确认/确认/恢复分离；Action 关闭不等于完成；无 Benchmark、FX 或通用税字段时，适用的 A 股人民币基金纪律复盘仍可运行。

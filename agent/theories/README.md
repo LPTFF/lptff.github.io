@@ -8,14 +8,13 @@
 | --- | --- | --- | --- |
 | [Agent 业务任务分析协议](agent-business-task-analysis.md) | Cognitive Work Analysis、Task–Technology Fit、Sensemaking、Information Foraging、Human-Centred Design | 已转化，验证中 | [业务任务分析执行规范](../standards/business-task-analysis.md)、[产品设计标准](../standards/product-design.md)、[产品工作台](../product/README.md) |
 | [投资绩效与决策复盘](investment-performance-and-decision-review.md) | Performance Measurement/Attribution/Appraisal、IPS、Outcome Bias、Disposition、Overtrading、Sharpe | 已转化，部分来源复核中 | [Investment Review 人的产品审查](../product/investment-review.md)、[工程附录](../product/reference/investment-review-engineering.md) |
-| [软件可信验证原则](software-trusted-verification.md) | Verification & Validation、软件测试、可靠性与形式化方法 | 已转化，持续验证 | [可信验证执行规范](../standards/trusted-verification.md)、[验收清单](../verification/playbook.md) |
 
 ## 理论卡片与执行规范的边界
 
 - **理论收藏层**：记录来源、原始主张、适用条件、限制、项目关联、反例和未知；允许保留尚未采纳的思想。
 - **执行规范层**：只记录项目已经明确采纳、会实际影响 Agent 判断的最小规则。
 - **验证层**：检查这些规则是否改善证据质量、真实运行结果或人的判断；不因规则写得完整就默认有效。
-- **产品与代码层**：只有在项目判断和对应验证支持后，才把理论影响转化为具体实现或产品决策；领域理论必须经过 deterministic contract、独立 Oracle 和真实数据语义验证，不能直接变成金融规则。
+- **产品与代码层**：只有在项目判断和目标真实环境操作结果支持后，才把理论影响转化为具体实现或产品决策；领域理论必须由真实来源语义和实际页面结果约束，不能直接变成金融规则。
 
 理论卡片不是规范的重复副本。规范发生变化时，应回到理论卡片确认依据、适用范围和未知项；理论卡片发生变化时，也必须重新判断是否需要更新规范，不得静默扩展 Agent 的强制流程。
 

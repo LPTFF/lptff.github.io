@@ -1,7 +1,7 @@
 /**
  * Investment OS Domain Model（Protocol v2.0）
  *
- * 这些类型是 Agent A Core 层的统一契约。Adapter（真实或 Mock）把来源数据转换成这些
+ * 这些类型是 Core 层的统一契约。Adapter 把已观察的真实来源数据转换成这些
  * 标准化事实，Sensor/Sync/Ledger/Engines 只消费这些类型，不感知天天基金原始字段。
  *
  * 分层（PRD §32）：Raw Source → Adapter → Normalized Fact（这里是这一层）→ Inference → Decision。
@@ -367,7 +367,7 @@ export interface Evidence {
 }
 
 // ---------------------------------------------------------------------------
-// 一次性同步数据集（Adapter 整体返回，便于 Mock Fixture 表达完整场景）
+// 一次性同步数据集（Adapter 整体返回真实来源标准化事实）
 // ---------------------------------------------------------------------------
 
 export interface InvestmentDataset {
@@ -386,7 +386,7 @@ export interface InvestmentDataset {
 
 // ---------------------------------------------------------------------------
 // P0 纪律与执行复盘（Investment Review WP0-1 ~ WP0-3）
-// 工程附录 §2-4。这些类型是 Agent A 在人工 fixture 上驱动的确定性 Core 契约；
+// 工程附录 §2-4。这些类型是由真实来源标准化事实驱动的 Core 契约；
 // Core 不读取真实页面 DOM / Cookie / Token / Raw Snapshot / 登录态或完整 Network Logs。
 // ---------------------------------------------------------------------------
 

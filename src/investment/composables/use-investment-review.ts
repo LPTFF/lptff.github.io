@@ -2,7 +2,7 @@
  * useInvestmentReview：Investment Review P0 一页复盘的响应式入口（WP0-4）。
  *
  * 单例 reactive state。Core 由 computeReview 纯函数计算，UI 只消费 snapshot / conclusions，
- * 不重算 Core。支持从 Ledger 加载用户范围与规则，也支持在没有本地数据时加载交互式模拟组合。
+ * 不重算 Core。只从 Ledger 加载真实来源事实、用户范围与规则。
  */
 import { computed, reactive } from "vue";
 import type {
@@ -13,7 +13,6 @@ import type {
   ReviewAction,
   ReviewActionKind,
   ReviewSnapshot,
-  StrategyRuleVersion,
   Transaction,
 } from "../domain";
 import { InvestmentLedger } from "../ledger/repository";
@@ -26,7 +25,6 @@ import {
   type ReviewInput,
 } from "../engines/review/review-orchestrator";
 import { buildReviewConclusions, type ReviewConclusions } from "./selectors";
-import { getReviewScenario } from "../__fixtures__/review";
 import { useInvestmentOS } from "./use-investment-os";
 
 interface InvestmentReviewState {
@@ -234,50 +232,7 @@ async function persistReviewComputation(
   return reconciled;
 }
 
-/** 用模拟组合运行复盘，供没有 Ledger 数据的用户直接体验完整页面。 */
-async function runDemoReview(scenarioName: string, rulesOverride?: StrategyRuleVersion[]): Promise<void> {
-  if (state.running) return;
-  state.running = true;
-  state.error = undefined;
-  try {
-    const sc = getReviewScenario(scenarioName);
-    let rules = rulesOverride ?? sc.rules;
-    const l = getLedger();
-    await l.putInvestmentScope(sc.scope);
-    const existing = await l.getStrategyRuleVersions(sc.scope.scopeId);
-    if (rulesOverride) {
-      for (const version of rules) await l.putStrategyRuleVersion(version);
-    } else if (existing.length) {
-      rules = existing;
-    } else {
-      for (const version of rules) await l.putStrategyRuleVersion(version);
-    }
-    for (const plan of sc.reductionPlans ?? []) await l.putReductionPlan(plan);
-    await useInvestmentOS().loadFromLedger();
-
-    const existingActions = await l.getReviewActions(sc.scope.scopeId);
-    const computation = computeReview({
-      scope: sc.scope,
-      facts: sc.facts,
-      rules,
-      decisions: sc.decisions,
-      plans: sc.plans,
-      links: sc.executionLinks,
-      previousTrailingStops: sc.previousTrailingStops,
-      reductionPlans: sc.reductionPlans,
-      asOf: sc.asOf,
-    });
-    state.snapshot = await persistReviewComputation(l, computation, existingActions);
-    state.scenarioName = scenarioName;
-    state.loaded = true;
-  } catch (e) {
-    state.error = (e as Error).message;
-  } finally {
-    state.running = false;
-  }
-}
-
-/** 从 Ledger 真实范围与规则运行复盘。无 scope 时返回 false，调用方可改用 demo。 */
+/** 从 Ledger 真实范围与规则运行复盘。无 scope 时返回 false。 */
 async function loadReviewFromLedger(today: string): Promise<boolean> {
   if (state.running) return false;
   state.running = true;
@@ -427,7 +382,6 @@ export function useInvestmentReview() {
   return {
     state,
     conclusions,
-    runDemoReview,
     loadReviewFromLedger,
     resolveReviewAction,
   };

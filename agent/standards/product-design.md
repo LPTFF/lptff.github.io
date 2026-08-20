@@ -98,4 +98,4 @@ Normalized Facts + Coverage
 - 验收覆盖用户的目标任务或判断，而不只覆盖数据可见、文件可下载、接口成功或组件可操作。
 - 能说明技术交付与用户最终需要之间的 outcome gap；若声称改善总任务效率，应有对应的真实使用证据。
 
-详细证据等级和报告格式见[自测与验收手册](../verification/playbook.md)。
+详细证据边界和结论状态见[真实环境验收手册](../verification/playbook.md)。

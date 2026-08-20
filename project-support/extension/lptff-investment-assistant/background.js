@@ -150,6 +150,23 @@ async function openCollectorTab(url) {
   throw new Error(`采集页面加载超时：${url}`);
 }
 
+async function assertCollectorPage(tabId, expectedHostname) {
+  const tab = await callChrome(chrome.tabs, chrome.tabs.get, tabId);
+  const currentUrl = tab?.url || "";
+  let hostname = "";
+  try {
+    hostname = new URL(currentUrl).hostname;
+  } catch {
+    // The URL check below reports the actionable collection error.
+  }
+  if (hostname === "login.1234567.com.cn") {
+    throw new Error("天天基金登录状态已失效，请先登录天天基金并确认可以打开持仓页面，然后重新采集");
+  }
+  if (hostname !== expectedHostname) {
+    throw new Error(`采集页面跳转到了非预期地址：${currentUrl || "未知地址"}`);
+  }
+}
+
 async function closeCollectorTab(tabId) {
   task.tabIds = task.tabIds.filter((id) => id !== tabId);
   try {
@@ -359,16 +376,6 @@ async function exportSourceBackup() {
   return { ok: true };
 }
 
-async function exportDevelopmentSample() {
-  const staging = await getStaging();
-  if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");
-  const sample = globalThis.LPTFFSourceCapture.createDevelopmentSample(staging.capture);
-  const validation = globalThis.LPTFFSourceCapture.validateDevelopmentSample(sample);
-  if (!validation.ok) throw new Error(`脱敏开发样本自检失败（${validation.errors.length} 项）`);
-  await downloadData(sample, "eastmoney-source-sample.json", false);
-  return { ok: true, summary: { fieldCount: validation.fieldCount, bytes: JSON.stringify(sample).length } };
-}
-
 async function runAutoCollection() {
   if (task.running) throw new Error("已有采集任务正在运行");
   const existing = await getStaging();
@@ -394,6 +401,7 @@ async function runAutoCollection() {
     PAGE_TIMEOUT = cfg.pageTimeout;
     setStage("hold");
     holdTabId = await openCollectorTab(HOLD_URL);
+    await assertCollectorPage(holdTabId, "trade.1234567.com.cn");
     const holdResponse = await sendToTab(holdTabId, { type: "AUTO_COLLECT_PAGE", mode: "hold" });
     if (!holdResponse?.ok || !holdResponse.data) throw new Error(holdResponse?.error || "未读取到持仓数据，请确认已登录天天基金");
     const holdings = holdResponse.data.holdings || [];
@@ -438,6 +446,7 @@ async function runAutoCollection() {
       async () => {
         const queryTabId = await openCollectorTab(QUERY_URL);
         try {
+          await assertCollectorPage(queryTabId, "query.1234567.com.cn");
           const response = await sendToTab(queryTabId, {
             type: "AUTO_COLLECT_PAGE",
             mode: "transactions",
@@ -553,10 +562,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message?.type === "EXPORT_SOURCE_BACKUP") {
     exportSourceBackup().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
-    return true;
-  }
-  if (message?.type === "EXPORT_DEVELOPMENT_SAMPLE") {
-    exportDevelopmentSample().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
   if (message?.type === "GET_CONFIG") {

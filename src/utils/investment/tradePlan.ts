@@ -76,15 +76,5 @@ export function importPlans(json: string): void {
   savePlans(arr as TradePlan[]);
 }
 
-// mock 持仓数据：Cryptocurrency.json 缺失时演示标的下拉。
-// 真实投资数据链路恢复后，可由 fetch Cryptocurrency.json 持仓替换；手动输入始终可用。
-export const MOCK_HOLDINGS: { symbol: string; name: string }[] = [
-  { symbol: "BTC", name: "比特币" },
-  { symbol: "ETH", name: "以太坊" },
-  { symbol: "AAPL", name: "苹果" },
-  { symbol: "510300", name: "沪深300ETF" },
-  { symbol: "600519", name: "贵州茅台" },
-];
-
 // 复用类型，便于组件 ref 标注
 export type PlansRef = Ref<TradePlan[]>;

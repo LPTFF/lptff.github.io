@@ -2,7 +2,6 @@ const statusElement = document.querySelector("#status");
 const branchElement = document.querySelector("#branches");
 const collectButton = document.querySelector("#collect");
 const backupButton = document.querySelector("#backup");
-const sampleButton = document.querySelector("#sample");
 
 const stageLabels = {
   preparing: "正在准备采集环境…",
@@ -104,7 +103,6 @@ function updateStaging(staging) {
   document.querySelector("#coverage").textContent = formatCoverage(staging);
   const available = Boolean(staging?.capture);
   backupButton.disabled = !available;
-  sampleButton.disabled = !available;
 }
 
 function updateTransferStatus(status) {
@@ -153,7 +151,6 @@ async function exportData(type, successMessage) {
 
 collectButton.addEventListener("click", startCollection);
 backupButton.addEventListener("click", () => exportData("EXPORT_SOURCE_BACKUP", "完整本地备份已生成。"));
-sampleButton.addEventListener("click", () => exportData("EXPORT_DEVELOPMENT_SAMPLE", "脱敏开发样本已生成。"));
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "COLLECTION_PROGRESS") updateProgress(message);

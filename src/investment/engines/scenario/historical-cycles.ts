@@ -4,7 +4,7 @@
  * 边界（investment-review.md 第 12.4 节）：
  * - 月度涨幅为基于公开历史的**近似值**，用于呈现"市场风格"，非精确回测；
  * - 每段周期带 disclaimer，页面显著标注；
- * - IndexId 对齐 __fixtures__/review/market.ts 的 indexes 约定，便于复用现有 asset 元数据。
+ * - IndexId 对齐 simulation/market.ts 的 indexes 约定，供产品演练复用 asset 元数据。
  */
 export type IndexId = "CSI300" | "SSE" | "ChiNext" | "STAR50" | "SP500" | "NASDAQ100" | "GOLD" | "HSI" | "HSTECH";
 

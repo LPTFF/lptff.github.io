@@ -1,6 +1,6 @@
 # 人类验收清单
 
-验证不是为了让工具显示绿色，而是让维护者知道改动是否真的改善了目标结果。具体验证方法应遵循 [`standards/trusted-verification.md`](../standards/trusted-verification.md)；理论来源、适用边界和未知项见 [`theories/software-trusted-verification.md`](../theories/software-trusted-verification.md)。结论必须由与要求匹配的客观证据支持，证据不足时保持未知。
+验收不是为了让工具显示绿色，而是确认目标真实环境中的实际操作结果是否符合人的预期。具体验收方法应遵循 [`standards/trusted-verification.md`](../standards/trusted-verification.md)。源码阅读、类型检查、构建、脱敏快照、模拟数据、Mock、人工 fixture、单元测试和 Agent 自设 Oracle 均不能替代真实环境验收；证据不足时保持未验收、无法验证或未知。
 
 ## 项目区与工作台隔离
 
@@ -56,4 +56,4 @@
 - 下一步是修复、缩小范围、保留现状、继续观察还是停止？
 - 只有当这次认识会帮助未来的人，才把它写入 `agent/context/` 或产品资料；不必为每次改动生成日志或报告。
 
-截图、日志、测试和构建都是证据的一部分，但没有哪一种证据天然等于成功。证据不足时，明确写“未知”或“未完成”。
+真实目标环境中的页面、网络、存储、接口和部署结果可以成为验收证据。静态检查和构建只能用于定位实现问题，不能形成完成结论；证据不足时，明确写“未验收”“无法验证”或“未知”。

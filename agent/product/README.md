@@ -59,7 +59,7 @@
 ## 资料边界
 
 - [investment-review.md](investment-review.md)：当前需求、当前事实、分工、状态和人的验收的唯一 owner。
-- [reference/investment-review-engineering.md](reference/investment-review-engineering.md)：领域对象、公式、不变量、fixture、隐私协议和历史任务映射；不维护另一份产品状态。
+- [reference/investment-review-engineering.md](reference/investment-review-engineering.md)：领域对象、公式、不变量、真实环境验收、隐私协议和历史任务映射；不维护另一份产品状态。
 - [reference/site-capability-inventory.md](reference/site-capability-inventory.md)：基于源码的站点级能力清单，不描述未来规划。
 - [source/](source/)：用户输入和历史来源，只用于追溯。
 - [archive/](archive/)：已被替代的 PRD 和文档体系，不参与当前任务解析。

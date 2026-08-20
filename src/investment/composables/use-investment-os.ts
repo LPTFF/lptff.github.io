@@ -15,7 +15,6 @@ import type {
   DetectedPattern,
   ExecutionLink,
   InvestmentScope,
-  InvestmentDataset,
   OperationPlan,
   PlanDirection,
   PlanValueUnit,
@@ -59,7 +58,6 @@ import {
 import { buildBehaviorActions } from "../engines/behavior";
 import { assertDecisionImmutable } from "../engines/review/operation-compliance";
 import { calculateReductionQuantity } from "../engines/review/reduction";
-import { getReviewScenario } from "../__fixtures__/review";
 
 export interface InvestmentOsState {
   loaded: boolean;
@@ -92,9 +90,6 @@ export interface InvestmentOsState {
   lastSyncStatus?: "ok" | "partial" | "failed";
   lastFailures: string[];
   error?: string;
-  /** 演示模式：用人工 fixture 灌满 Ledger 供页面审查；真实采集时关闭。 */
-  demoMode: boolean;
-  demoScenario?: string;
 }
 
 const state = reactive<InvestmentOsState>({
@@ -120,7 +115,6 @@ const state = reactive<InvestmentOsState>({
   patterns: [],
   pendingActions: 0,
   lastFailures: [],
-  demoMode: false,
 });
 
 let ledger: InvestmentLedger | null = null;
@@ -190,9 +184,8 @@ export function buildStrategyRuleVersionWithRule(
 
 async function loadFromLedger(): Promise<void> {
   const l = getLedger();
-  // 演示模式下保留 mock 事实供页面审查；真实采集流程会先退出演示模式再清理。
-  if (!state.demoMode) await l.removeMockData();
-  // mock 清理后再压缩，避免较新的演示记录抢占并删除真实账户；每次会话只做一次。
+  // 清理旧版本可能遗留的演示事实，再压缩真实采集历史；每次会话只做一次。
+  await l.removeMockData();
   if (!ledgerCompaction) ledgerCompaction = l.compactCollectionHistory();
   await ledgerCompaction;
   const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, scopes] = await Promise.all([
@@ -345,8 +338,6 @@ async function discardStaging(): Promise<void> {
 
 async function clearImportedFacts(): Promise<void> {
   state.error = undefined;
-  state.demoMode = false;
-  state.demoScenario = undefined;
   // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）；扩展暂存由扩展自身管理。
   await getLedger().clearImportedFacts();
   resetFactState();
@@ -357,8 +348,6 @@ async function clearImportedFacts(): Promise<void> {
 
 async function clearEverything(): Promise<void> {
   state.error = undefined;
-  state.demoMode = false;
-  state.demoScenario = undefined;
   // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）。
   await getLedger().clearEverything();
   resetFactState();
@@ -391,7 +380,10 @@ const stopCollectionProgressListener = typeof window === "undefined"
     };
     state.syncMessage = labels[progress.stage] ?? "插件正在采集数据…";
     if (progress.stage === "completed") state.syncPhase = "completed";
-    if (progress.stage === "error") state.syncPhase = "failed";
+    if (progress.stage === "error") {
+      state.syncPhase = "failed";
+      state.error = progress.warnings.filter(Boolean).join("；") || "插件采集失败，请检查天天基金登录状态后重试";
+    }
   });
 void stopCollectionProgressListener;
 
@@ -658,60 +650,6 @@ async function linkDecisionToTransaction(
 }
 
 /**
- * 加载人工演示数据到 Ledger，供页面审查。以 review-demo-combined 为唯一 demo 源：
- * 先把投资范围 + 仓位/止损/减仓规则（规则页独立管理）+ 事实 + 决策/计划/关联 + 止损历史状态 +
- * 配比规则一起灌入，使规则页打开就有规则，复盘页消费这些规则与事实，业务顺序自洽。
- * 真实采集前应先 clearEverything 退出演示模式。
- */
-async function loadDemoData(scenario: string = "review-demo-combined"): Promise<void> {
-  const l = getLedger();
-  state.demoMode = true;
-  state.demoScenario = scenario;
-  await l.clearImportedFacts();
-  const sc = getReviewScenario(scenario);
-  await l.putInvestmentScope(sc.scope);
-  for (const v of sc.rules) await l.putStrategyRuleVersion(v);
-  // 委托 SyncService 写入事实（去重 / coverage 合并 / 审计），与插件导入同路径，统一行为。
-  const demoDataset: InvestmentDataset = {
-    version: "2.0",
-    source: "mock",
-    capturedAt: sc.facts.account?.capturedAt ?? today(),
-    account: sc.facts.account,
-    portfolio: sc.facts.portfolio,
-    assets: sc.facts.assets,
-    transactions: sc.facts.transactions,
-    dailyPnl: sc.facts.dailyPnl,
-    coverage: sc.facts.coverage,
-    warnings: [],
-  };
-  await new SyncService(new DatasetSourceAdapter(demoDataset), l).run();
-  for (const d of sc.decisions ?? []) await l.putDecisionRecord(d);
-  for (const p of sc.plans ?? []) await l.putOperationPlan(p);
-  for (const p of sc.reductionPlans ?? []) await l.putReductionPlan(p);
-  for (const lk of sc.executionLinks ?? []) await l.putExecutionLink(lk);
-  for (const t of sc.previousTrailingStops ?? []) await l.putTrailingStopState(t);
-  // 配比规则（PolicyRule 体系，规则页"配比规则"区 + 控制台 POLICY_TRIGGER 用）。
-  const { policy, version } = createInitialPolicy({
-    id: "policy:demo-us-tech",
-    name: "美股科技配置",
-    objective: "控制纳斯达克100 暴露并按计划定投",
-    effectiveFrom: "2026-01-01",
-    rules: [
-      { kind: "target_allocation", dimension: "index", value: "NASDAQ100", targetPct: 0.3, minPct: 0, maxPct: 0.4 },
-      { kind: "regular_investment", description: "F001 月度定投 600", cadence: "monthly", amount: 600 },
-      { kind: "pause", dimension: "index", value: "NASDAQ100", maxPct: 0.6 },
-    ],
-    changeReason: "演示用初始规则",
-  });
-  await l.putPolicy(policy);
-  await l.putPolicyVersion(version);
-  await loadFromLedger();
-  await evaluateAndPersistActions();
-  state.syncPhase = "up-to-date";
-  state.syncMessage = `已加载演示数据（${scenario}），仅供页面审查；真实采集前请清除`;
-}
-
-/**
  * 加载脱敏采集快照到 Ledger，供页面结构审查。数据源是天天基金扩展采集的脱敏 JSON（协议
  * eastmoney-source-capture/1.0），通过 fetch public 副本读取后复用 toInvestmentDataset
  * 转换，再走与插件导入完全相同的 SyncService → scope:real-account 路径写入。
@@ -732,12 +670,10 @@ async function loadRealFixtureSnapshot(): Promise<boolean> {
     }
     const normalized = toInvestmentDataset(capture);
     const l = getLedger();
-    state.demoMode = false;
-    state.demoScenario = undefined;
     await l.clearImportedFacts();
     await l.removeMockData();
     await l.removeDemoReviewConfiguration();
-    // 委托 SyncService 统一去重 / coverage 保守合并 / 审计，与插件导入和 loadDemoData 同路径。
+    // 委托 SyncService 统一去重 / coverage 保守合并 / 审计。
     const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), l).run();
     const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
     if (includedAssetIds.length) {
@@ -779,7 +715,6 @@ export function useInvestmentOS() {
     clearImportedFacts,
     clearEverything,
     clearAll,
-    loadDemoData,
     loadRealFixtureSnapshot,
     createPolicy,
     createPolicyVersion,

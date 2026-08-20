@@ -176,7 +176,7 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 - 仓位判断、移动止损状态、减仓计划与恢复进度；
 - 每个判断独立的 Coverage、unknown 原因和证据下钻；
 - `/investment/review` 的 P0 产品切片与可运行三栏闭环；
-- 人工 fixture 与确定性 Oracle。
+- 目标真实环境中的实际操作证据与可核实来源锚点。
 
 ### 本次不把哪些能力塞进 P0
 
@@ -191,7 +191,7 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 
 这里采用[主力 Agent—授权验证 Agent—人类裁决者协作标准](../standards/main-agent-authorized-validation.md)的非对称分工：
 
-- **Agent A = 主力交付 Agent**：拥有每个工作包的纵向结果，完成需求细化、产品/工程契约、Core、迁移、人工 fixture、测试、UI、自测、修复和非私人环境验证，常态承担 80% 以上工作；
+- **Agent A = 主力交付 Agent**：拥有每个工作包的纵向结果，完成需求细化、产品/工程契约、Core、迁移、UI、静态排错和修复，常态承担 80% 以上工作；
 - **Agent B = 授权真实来源验证 Agent**：不是通用 reviewer。只有 A 已完成上述工作，且一个关键主张仍只能由天天基金真实登录环境或私人来源事实证明时，才由维护者授权 B 做一次窄范围、只读、脱敏验证；
 - **维护者 = 授权者与裁决者**：定义 InvestmentScope 和个人规则，决定是否以及如何授权 B，并完成人的任务验收。
 
@@ -203,11 +203,11 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 
 | 角色 | 工作 |
 | --- | --- |
-| Agent A | 定义 InvestmentScope、规则适用范围、JudgmentResult、按问题 Coverage 和 Ledger migration 边界；只用人工 fixture，旧记录无法无损迁移时先提交迁移决策，不清库。 |
+| Agent A | 定义 InvestmentScope、规则适用范围、JudgmentResult、按问题 Coverage 和 Ledger migration 边界；只依据已观察的来源事实，旧记录无法无损迁移时先提交迁移决策，不清库。 |
 | Agent B（仅存在授权证据缺口时） | A 完成字段契约和人工场景后，如持仓、总资产/可投资分母、净值或交易状态的真实字段仍只能在授权来源中确认，则分目标验证其有无、日期、方向、确认语义、范围和 Coverage；只回传脱敏结论。 |
 | 维护者 | 选择默认投资范围，定义个人规则语义和可接受的 unknown；不需要提供真实值给 Agent A。 |
 
-**交接物**：A 先完成字段契约、人工 fixture、迁移和测试；若仍存在授权证据缺口，B 才将 field presence/absence、semantic mapping、Coverage、unknown 和 Required change 脱敏回传给 A。任何阶段都不通过真实账户值交接。
+**交接物**：A 先完成字段契约、迁移和静态排错；若仍存在授权证据缺口，B 才将真实环境观察到的 field presence/absence、semantic mapping、Coverage、unknown 和 Required change 脱敏回传给 A。任何阶段都不通过真实账户值交接。
 
 **人的验收问题**：总资产未知时，我能否看见“仓位暂不能判断”，同时继续判断计划操作和移动止损？
 
@@ -220,10 +220,10 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 | 角色 | 工作 |
 | --- | --- |
 | Agent A | 定义版本化 DecisionRecord/OperationPlan、不可覆盖的事前快照、execution lifecycle 和偏离维度；复用 Transaction、PolicyVersion、Ledger、Action，但不把 Action status 当成真实执行。 |
-| Agent B（仅存在授权证据缺口时） | A 完成 execution mapping 和人工状态场景后，如真实来源能否区分申请与确认、确认日期/金额/份额、失败/撤销/分页仍无法在非私人环境证明，才验证这些语义；不判断操作是否合理。 |
+| Agent B（仅存在授权证据缺口时） | A 完成 execution mapping 后，如真实来源能否区分申请与确认、确认日期/金额/份额、失败/撤销/分页仍无法在非私人环境证明，才在授权的目标真实环境验证这些语义；不判断操作是否合理。 |
 | 维护者 | 用人工计划场景确认“异常”理由是否符合自己的规则，而不是接受系统替其设定偏好。 |
 
-**交接物**：来源状态能力 → execution mapping；计划与交易 fixture → 确定性对照结果 → 页面理由和证据引用。
+**交接物**：真实来源状态能力 → execution mapping → 目标页面的理由与可核实证据引用。
 
 **人的验收问题**：我能否准确说出某操作为何被标记——无计划、超计划、违反暂停规则，还是只有历史金额信号？
 
@@ -235,8 +235,8 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 
 | 角色 | 工作 |
 | --- | --- |
-| Agent A | 建立可复算的 PositionJudgment、TrailingStopRule/State、ReductionPlan/Progress；实现分母 gate、止损线单调不降、陈旧 NAV 降级、部分确认和操作后恢复复算的人工 fixtures。 |
-| Agent B（仅存在授权证据缺口时） | A 完成全部规则、计算和人工 fixtures 后，如净值日期及分红/复权语义、真实持仓/份额与确认状态仍是输入资格的关键未知，才验证来源能力；只报告能力与缺口，不设计阈值、不评价是否该减仓。 |
+| Agent A | 建立可复算的 PositionJudgment、TrailingStopRule/State、ReductionPlan/Progress；实现分母 gate、止损线单调不降、陈旧 NAV 降级、部分确认和操作后恢复复算。 |
+| Agent B（仅存在授权证据缺口时） | A 完成规则、计算和静态排错后，如净值日期及分红/复权语义、真实持仓/份额与确认状态仍是输入资格的关键未知，才在目标真实环境验证来源能力；只报告能力与缺口，不设计阈值、不评价是否该减仓。 |
 | 维护者 | 事前定义仓位区间、止损阈值和减仓目标区间，并确认触发只表示待人处理，不是自动交易指令。 |
 
 **交接物**：规则版本 + 人工事实 → 确定性状态和计算解释；真实来源能力只决定输入资格，不成为业务规则 Oracle。
@@ -307,7 +307,7 @@ P0 已形成可运行闭环，但“运行时存在”不等于外部来源已�
 每个当前工作包都必须同时满足：
 
 1. 输入、版本、Coverage、输出和失败状态有明确契约；
-2. Core 可由不可还原真实账户的人工 fixture 完全驱动，不依赖 LLM；
+2. Core 只消费真实来源标准化事实，不依赖 LLM；其正确性须由目标真实环境的最终页面结果验收；
 3. expected 来自手算、独立公式、性质/不变量或状态转换；
 4. `normal/empty/partial/stale/failed/unknown` 有按问题可见的行为；
 5. migration、reload、幂等和历史版本不丢失；
@@ -328,7 +328,7 @@ P0 至少覆盖这些人工反例：
 - 正收益但过程违规、负收益但过程合规；
 - Benchmark 缺失不阻断 P0；跨币种/税务不适用时不进入前置清单。
 
-详细对象、不变量和 fixture matrix 在[工程附录](reference/investment-review-engineering.md)中；它不是理解本次需求的前置材料。
+详细对象、不变量和真实环境验收边界在[工程附录](reference/investment-review-engineering.md)中；它不是理解本次需求的前置材料。
 
 ## 10. 不可违反的边界
 
@@ -344,7 +344,7 @@ P0 至少覆盖这些人工反例：
 10. Attribution 必须匹配数据能力；证据不足显示 residual/limitation，不制造 allocation、selection 或心理原因。
 11. 行为 Finding 需要样本、阈值、反例和替代解释，不构成心理诊断。
 12. AI 不计算核心指标、不预测市场、不改变规则或状态；重要陈述必须引用确定性证据。
-13. Agent A 是主力交付角色，必须先完成契约、Core、迁移、人工 fixture、测试、UI、自测、修复和非私人环境验证，不得把这些工作转交 Agent B；同时不得访问真实账户、真实资产、交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs。
+13. Agent A 是主力交付角色，必须先完成契约、Core、迁移、UI、静态排错和修复，不得把这些工作转交 Agent B；完成结论必须来自经授权的目标真实环境操作，同时不得把真实账户、真实资产、交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs写入仓库或交接材料。
 14. Agent B 不是通用 reviewer，只在 A 已完成可完成工作、仍存在明确授权证据缺口且维护者单独授权时进入真实环境；它只输出脱敏 `PASS | FAIL | BLOCKED`、字段有无、Coverage、unknown、语义映射、Required change 和 Sensitive data exposed，不设计 Core 规则、不评价仓位或减仓、不执行账户操作，也不输出基金名、真实金额、收益、原始 JSON/HTML、Cookie、Token、银行卡信息、登录态或完整 Network Logs。
 15. 真实登录环境是验收目标时，隔离 profile 不能替代用户真实 Chrome。
 16. 系统不自动买入、卖出、申购、赎回、调仓、转账或交易。
@@ -372,7 +372,7 @@ P0 至少覆盖这些人工反例：
 
 **新增能力（均不替用户发明阈值、不替用户判断、不自动交易、不触碰真实账户/Cookie）**：
 
-- **组合页「目标配置 vs 实际」**（Layer 1 State 强化）：只对照用户已声明的 `TargetAllocationRule`（维度配比）与 `PositionBandRule`（单基金仓位区间），用既有 `aggregateExposure` 实际占比对比 `[minPct, maxPct]`，超区间标 ⚠。无规则时显示 unknown，不伪造"合理配置"。新增 `buildAllocationDrift` 纯函数，可由人工 fixture 完全驱动。
+- **组合页「目标配置 vs 实际」**（Layer 1 State 强化）：只对照用户已声明的 `TargetAllocationRule`（维度配比）与 `PositionBandRule`（单基金仓位区间），用既有 `aggregateExposure` 实际占比对比 `[minPct, maxPct]`，超区间标 ⚠。无规则时显示 unknown，不伪造"合理配置"。`buildAllocationDrift` 的最终结果必须在真实组合页面验收。
 - **OSLayout 克制系统状态条**（Layer 3 Monitor 前置）：消费既有 `useInvestmentReview().conclusions.management` 四态（preparing/needs_action/waiting/complete），首层呈现"今日无需操作 / N 项需复盘 / 等待证据 / 准备中"；复盘未加载时退化为数据健康 + 配置偏离计数，不制造无依据的"系统正常"。
 - **证据页 Investment Context Package**（Layer 4 Think escalation 提前引入非计算部分）：一键装配上下文文本（用户目标/当前组合/目标配置/本次异常/历史操作/原始投资逻辑/相关纪律/待判断问题 + 固定提示语），由用户主动复制或下载后交由 GPT 等通用模型。**不调 LLM、不计算指标、不替判断、不自动外传**，与第 10 节第 12 条边界一致——产品卖的是高质量 Context，不是自己的模型能力。
 - **数据页缺口呈现三段化**：把既有 `buildCoverageGaps` 的 impact/notAffected/recover 重排为"缺什么 / 不能回答 / 仍能回答 / 如何补救"，逻辑不变。
@@ -384,7 +384,7 @@ P0 至少覆盖这些人工反例：
 - **规则理论依据可追溯**：新增 `engines/policy/rule-rationale.ts`，每类规则关联 [投资绩效与决策复盘理论框架](../theories/investment-performance-and-decision-review.md) 领域的理论概念（集中度风险/再平衡/移动止损/处置效应/过度交易/IPS 限额），并诚实标注阈值数值为风控惯例示例值；组合页每条配置参考可下钻"依据"（意图/理论/阈值依据），证据页设"规则与理论依据"卡，Context Package 规则段附依据。理论提供原则、不给具体阈值，与第 10 节"系统不发明合理仓位"边界一致。
 - **组合页配置偏离决策闭环**：偏离项（超上限/低下限）不再止于提示，加三条决策路径闭合"看见→处理"——**认可偏离**（记录理由，localStorage 持久；认可 key 含规则区间参数，规则改后 key 变、旧认可自动失效，强制对新规则重新决策）、**调整规则**（单基金跳规则页带 `assetId/kind` 预填编辑区间、保存新版本）、**深度分析→GPT**（跳证据页生成 Context Package，该偏离一并带入）；认可后 ⚠ 降级为 ✓ 已认可+理由+可撤销。提示只降低认知成本，决策路径不断。
 
-**未改变**：P0 纪律与执行复盘（操作合规、仓位、移动止损、减仓恢复）运行时状态；复盘路由与 ReviewView；规则/行动视图代码（保留，仅移出主导航）；第 10 节全部边界。新增 selector 已配人工 fixture 单测（`tests/investment/allocation-context.test.ts`），不引入真实账户值。
+**未改变**：P0 纪律与执行复盘（操作合规、仓位、移动止损、减仓恢复）运行时状态；复盘路由与 ReviewView；规则/行动视图代码（保留，仅移出主导航）；第 10 节全部边界。相关 selector 的完成状态只以真实组合页面的实际结果为准。
 
 ### 12.1 七入口内容重分配（2026-08-15，本轮）
 
@@ -421,5 +421,5 @@ P0 至少覆盖这些人工反例：
 - `engines/scenario/historical-cycles.ts`：6 段示意性周期，月度涨幅为基于公开历史的近似值，每段带 disclaimer。
 - `engines/scenario/stress-test.ts`：`buildHistoricalStressTest` 以当前市值为基准平移（不模拟交易），重算回撤与末态暴露/偏离；未匹配周期基准的持仓（如 A 股资产在美股周期下）市值不变、标注 matched=false，不伪造收益。复用 `aggregateExposure`/`buildAllocationDrift`。
 - 边界：示意性历史风格，**非精确回测**；平移非预测；不触碰真实账户（纯本地内存计算）。与第 10 节边界一致。
-- 单测 `tests/investment/scenario.test.ts` 覆盖 navOfCycle 累乘、未登记 index 不伪造、匹配/未匹配持仓、maxDrawdown、末态 drift 复用。
+- 该卡片必须在实际部署页面用真实持仓操作，核对匹配/未匹配持仓、回撤、末态 drift、免责声明和失败状态；示意周期计算或构建成功不能替代验收。
 - **一键操作反馈**：历史周期加 `buildAllCyclesStressTest` 一次跑完 6 段返回"最脆弱/最稳健场景"汇总（各周期回撤+末态偏离+最差资产）；牛熊演练加"一键跑完整周期"自动推进到末态。把"手动选周期/逐轮推进 + 逐层下钻"转为"一键运行 + 直接返回结论反馈"，降低操作与审查成本。

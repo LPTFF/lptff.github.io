@@ -10,32 +10,32 @@
         <template #header>基金持仓</template>
         <el-table class="holdings-table" :data="sortedHoldings" size="small" border table-layout="fixed"
           :default-sort="{ prop: 'marketValue', order: 'descending' }" @sort-change="onSortChange">
-          <el-table-column prop="assetId" label="基金" width="76" />
-          <el-table-column prop="name" label="名称" min-width="140" />
-          <el-table-column prop="marketValue" label="市值" width="88" sortable="custom">
+          <el-table-column prop="assetId" label="基金" width="64" />
+          <el-table-column prop="name" label="名称" min-width="126" />
+          <el-table-column prop="marketValue" label="市值" width="72" sortable="custom">
             <template #default="{ row }">{{ fmt(row.marketValue) }}</template>
           </el-table-column>
-          <el-table-column prop="pnl" label="持仓盈亏" width="92" sortable="custom">
+          <el-table-column prop="pnl" label="持仓盈亏" width="76" sortable="custom">
             <template #default="{ row }"><span :class="profitClass(row.pnl)">{{ row.pnl === undefined ? "—" :
               fmt(row.pnl) }}</span></template>
           </el-table-column>
-          <el-table-column prop="pnlRate" label="持仓收益率" width="100" sortable="custom">
+          <el-table-column prop="pnlRate" label="持仓收益率" width="82" sortable="custom">
             <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate)
             }}</span></template>
           </el-table-column>
-          <el-table-column prop="weight" label="仓位" width="72" sortable="custom">
+          <el-table-column prop="weight" label="仓位" width="60" sortable="custom">
             <template #default="{ row }">{{ fmtPct(row.weight) }}</template>
           </el-table-column>
-          <el-table-column label="指数依据" min-width="110">
+          <el-table-column label="指数依据" width="84">
             <template #default="{ row }">{{ row.indexes.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="地区" width="84">
+          <el-table-column label="地区" width="64">
             <template #default="{ row }">{{ row.regions.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="策略" width="78">
+          <el-table-column label="策略" width="64">
             <template #default="{ row }">{{ row.strategy || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="字段依据" width="126">
+          <el-table-column label="字段依据" width="94">
             <template #default="{ row }">
               <div class="metadata-details">
                 <div v-for="detail in row.metadataDetails" :key="detail.label" class="metadata-detail">
@@ -60,7 +60,7 @@
           <div class="exposure-head">
             <span>风险暴露</span>
             <el-radio-group v-model="dimension" size="small">
-              <el-radio-button v-for="m in meaningfulDims" :key="m.dim" :label="m.dim">{{ dimensionLabel(m.dim)
+              <el-radio-button v-for="m in meaningfulDims" :key="m.dim" :value="m.dim">{{ dimensionLabel(m.dim)
               }}</el-radio-button>
             </el-radio-group>
           </div>

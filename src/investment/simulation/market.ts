@@ -1,13 +1,16 @@
 /**
- * 基金牛熊周期模拟器：市场数据（人工虚构）。
+ * 基金牛熊周期模拟器的产品演练数据。
  *
  * 9 个指数标的（沪深300/上证/创业板/科创50/国际黄金/标普500/纳斯达克100/恒生指数/恒生科技），24 期月度净值
  * （2024-01 → 2025-12），涵盖牛→顶→熊→底→反弹→震荡完整周期。净值由固定月度涨幅累乘得到，
- * 不随机、可断言。全部虚构，不引用任何真实基金名 / 净值 / 金额。
+ * 不随机。全部虚构，不引用任何真实基金名 / 净值 / 金额，也不得作为项目验收证据。
  */
-import type { AssetMetadata } from "../../domain";
-import type { IndexId } from "../../engines/scenario/historical-cycles";
-import { makeAsset } from "../builders";
+import type { AssetMetadata } from "../domain";
+import type { IndexId } from "../engines/scenario/historical-cycles";
+
+function makeAsset(asset: AssetMetadata): AssetMetadata {
+  return asset;
+}
 
 export type MarketAssetId = "F001" | "F002" | "F003" | "F004" | "F005" | "F006" | "F007" | "F008" | "F009";
 

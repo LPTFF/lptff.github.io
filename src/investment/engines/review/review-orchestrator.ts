@@ -48,7 +48,7 @@ export interface ReviewInput {
   reductionTransactions?: Transaction[];
   /** 减仓操作后快照（用于恢复复核）；缺省则对应资产减仓判断的 postEligible=false。 */
   postSnapshots?: PostReductionSnapshot[];
-  /** 真实账户的管理边界；fixture 未传时沿用既有全量判断。 */
+  /** 真实账户的管理边界；未传 scope 时沿用既有全量判断。 */
   management?: {
     operationReviewEnabled: boolean;
     historicalBaselineTransactions: number;

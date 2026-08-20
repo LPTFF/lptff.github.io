@@ -265,7 +265,7 @@ export async function importInvestmentStaging(
   onProgress?.({ phase: "importing", message: "正在写入账户、持仓、交易和覆盖范围…" });
   await ledger.removeMockData();
   await ledger.removeDemoReviewConfiguration();
-  // 委托 SyncService 统一去重 / coverage 保守合并 / 审计 / health，与 loadDemoData 同路径。
+  // 委托 SyncService 统一去重 / coverage 保守合并 / 审计 / health。
   const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), ledger).run();
   const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
   if (includedAssetIds.length) {

@@ -1,4 +1,3 @@
-import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchText } from "../lib/http.js";
@@ -10,19 +9,15 @@ import { parseFeed } from "./parse.js";
 const currentDirectory = path.dirname(fileURLToPath(import.meta.url));
 const repositoryRoot = path.resolve(currentDirectory, "../../../../");
 const defaultOutputPath = path.join(repositoryRoot, ".artifacts/collectors/rss/public-rss-articles.json");
-const fixtureDirectory = path.join(repositoryRoot, "project-support/scripts/collectors/fixtures/rss");
 
 function parseArguments(argumentsList) {
   const options = {
-    fixture: false,
     outputPath: defaultOutputPath,
   };
 
   for (let index = 0; index < argumentsList.length; index += 1) {
     const argument = argumentsList[index];
-    if (argument === "--fixture") {
-      options.fixture = true;
-    } else if (argument === "--output") {
+    if (argument === "--output") {
       options.outputPath = path.resolve(argumentsList[index + 1]);
       index += 1;
     } else {
@@ -31,11 +26,6 @@ function parseArguments(argumentsList) {
   }
 
   return options;
-}
-
-async function loadFixture(source) {
-  const fileName = source.name === "Hacker News" ? "rss.xml" : "atom.xml";
-  return readFile(path.join(fixtureDirectory, fileName), "utf8");
 }
 
 export function buildDataset(
@@ -96,7 +86,6 @@ export async function collectRss({
 async function main() {
   const options = parseArguments(process.argv.slice(2));
   const dataset = await collectRss({
-    fetchFeed: options.fixture ? loadFixture : undefined,
     outputPath: options.outputPath,
   });
   console.info(`Collected ${dataset.items.length} RSS items from ${dataset.sources.length} sources.`);
