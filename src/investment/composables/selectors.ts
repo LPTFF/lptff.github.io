@@ -81,7 +81,16 @@ export interface PortfolioHoldingRow {
   indexes: string[];
   regions: string[];
   strategy?: string;
-  metadataSource: "采集来源" | "归类" | "待识别";
+  metadataSource: "采集来源" | "原文提取" | "来源推导" | "待识别";
+  metadataSourceUrl?: string;
+  metadataAsOf?: string;
+  metadataDetails: Array<{
+    label: "指数" | "地区" | "主题";
+    source: "字段采集" | "行业采集" | "跟踪标的" | "基准提取" | "档案提取" | "规则推导" | "待识别";
+    sourceUrl?: string;
+    asOf?: string;
+    sourceSection?: string;
+  }>;
 }
 
 export function buildPortfolioHoldings(
@@ -94,6 +103,37 @@ export function buildPortfolioHoldings(
   return portfolio.holdings.map((h) => {
     const meta = assetMap.get(h.assetId);
     const weight = h.weight ?? (h.marketValue || 0) / totalValue;
+    const evidenceEntries = meta?.evidence ? Object.entries(meta.evidence) : [];
+    const sourceEvidence = evidenceEntries.find(([dimension]) =>
+      meta?.provenance?.[dimension as keyof NonNullable<typeof meta.provenance>] === "source",
+    )?.[1] ?? evidenceEntries.find(([dimension]) =>
+      meta?.provenance?.[dimension as keyof NonNullable<typeof meta.provenance>] === "extracted",
+    )?.[1];
+    const metadataDetails: PortfolioHoldingRow["metadataDetails"] = [
+      ["指数", "indexes"],
+      ["地区", "regions"],
+      ["主题", "themes"],
+    ].map(([label, dimension]) => {
+      const key = dimension as "indexes" | "regions" | "themes";
+      const quality = meta?.provenance?.[key] ?? "unknown";
+      const evidence = meta?.evidence?.[key];
+      const source = quality === "source"
+        ? evidence?.sourceField === "tracked-index"
+          ? "跟踪标的"
+          : evidence?.sourceField === "industry-allocation"
+            ? "行业采集"
+            : "字段采集"
+        : quality === "extracted"
+          ? evidence?.sourceField === "benchmark" ? "基准提取" : "档案提取"
+          : quality === "classified" ? "规则推导" : "待识别";
+      return {
+        label: label as "指数" | "地区" | "主题",
+        source,
+        ...(evidence?.sourceUrl ? { sourceUrl: evidence.sourceUrl } : {}),
+        ...(evidence?.asOf ? { asOf: evidence.asOf } : {}),
+        ...(evidence?.sourceSection ? { sourceSection: evidence.sourceSection } : {}),
+      };
+    });
     return {
       assetId: h.assetId,
       name: h.name ?? meta?.name,
@@ -106,9 +146,14 @@ export function buildPortfolioHoldings(
       strategy: meta?.themes?.join(" / ") || undefined,
       metadataSource: Object.values(meta?.provenance ?? {}).includes("source")
         ? "采集来源"
-        : Object.values(meta?.provenance ?? {}).includes("classified")
-          ? "归类"
-          : "待识别",
+        : Object.values(meta?.provenance ?? {}).includes("extracted")
+          ? "原文提取"
+          : Object.values(meta?.provenance ?? {}).includes("classified")
+            ? "来源推导"
+            : "待识别",
+      metadataSourceUrl: sourceEvidence?.sourceUrl,
+      metadataAsOf: sourceEvidence?.asOf,
+      metadataDetails,
     };
   });
 }
@@ -152,7 +197,7 @@ const DATASET_IMPACT: Record<CoverageDataset, { impact: string; notAffected: str
   transactions: {
     impact: "无法可靠计算该时期的主动交易策略收益。",
     notAffected: "不影响当前持仓风险分析。",
-    recover: "点「重新采集投资数据」，插件采集时选择历史时间范围以拉全交易分页。",
+    recover: "下载或重新加载 3.0.2 版插件，再点「重新采集投资数据」；完成后读取待导入数据。",
   },
   dailyPnl: {
     impact: "无法生成完整的每日盈亏曲线与最大回撤。",
@@ -191,7 +236,22 @@ export function buildCoverageGaps(coverage: DataCoverage[]): CoverageGapView[] {
 
 function summarizeMissingRanges(c: DataCoverage): string[] {
   if (c.completeness === "unknown") return ["全部范围未知"];
-  return c.warningCodes.length ? c.warningCodes : ["存在未加载分页或历史范围"];
+  const pageWarning = c.warningCodes.find((warning) => warning.startsWith("eastmoney:transactions-pages:"));
+  if (pageWarning) {
+    const [observed = "0", expected = "?"] = pageWarning.slice("eastmoney:transactions-pages:".length).split("/");
+    return [`交易分页只采集 ${observed}/${expected} 页`];
+  }
+  const recordWarning = c.warningCodes.find((warning) => warning.startsWith("eastmoney:transactions-records:"));
+  if (recordWarning) {
+    const [observed = "0", expected = "?"] = recordWarning.slice("eastmoney:transactions-records:".length).split("/");
+    return [`交易记录只采集 ${observed}/${expected} 笔`];
+  }
+  const labels: Record<string, string> = {
+    "eastmoney:transactions-partial": "存在未加载的交易分页",
+    "eastmoney:transactions-source-warning": "交易来源接口返回异常",
+  };
+  const translated = c.warningCodes.map((warning) => labels[warning] || warning);
+  return translated.length ? translated : ["存在未加载分页或历史范围"];
 }
 
 export interface RecentChangesView {
@@ -723,7 +783,7 @@ export function buildReviewConclusions(
 // 与 P0 边界一致：阈值必须由用户事前声明。
 
 export const DIMENSION_LABEL: Record<ExposureDimension, string> = {
-  index: "底层指数",
+  index: "指数依据",
   region: "投资市场",
   assetClass: "底层资产类型",
   currency: "计价币种",
@@ -901,6 +961,7 @@ const TX_TYPE_TEXT: Record<Transaction["type"], string> = {
   SELL: "卖出",
   DIVIDEND: "分红",
   FEE: "费用",
+  TRANSFER: "账户转账",
   OTHER: "其他",
 };
 

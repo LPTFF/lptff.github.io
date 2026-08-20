@@ -1,4 +1,6 @@
 (() => {
+  if (globalThis.__LPTFF_NETWORK_BRIDGE_READY__) return;
+  globalThis.__LPTFF_NETWORK_BRIDGE_READY__ = true;
   const paths = {
     hold: "/request/hold",
     single: "/http/single/get",
@@ -62,6 +64,18 @@
     }
   }
 
+  function replayHeaders(headers) {
+    try {
+      return Object.fromEntries(
+        Array.from(new Headers(headers || {}).entries()).filter(([name]) =>
+          !/^(?:cookie|set-cookie|content-length|host|origin|referer)$/i.test(name),
+        ),
+      );
+    } catch {
+      return {};
+    }
+  }
+
   function saveResponse(url, method, requestBody, response, requestHeaders) {
     const info = requestInfo(url);
     if (!info) return Promise.resolve(null);
@@ -77,7 +91,8 @@
       const safePayload = safeValue(payload);
       const request = parseBody(requestBody);
       if (info.key === "delegate" && request?.timeType !== undefined) {
-        delegateHeaders.set(String(request.timeType), safeHeaders(requestHeaders));
+        // 认证头只保留在当前页面内存中用于同源分页重放；快照仍只写入 safeHeaders 处理后的数据。
+        delegateHeaders.set(String(request.timeType), replayHeaders(requestHeaders));
       }
       const fingerprint = JSON.stringify({ key: info.key, method, query: info.query, request });
       const snapshot = {
@@ -195,7 +210,9 @@
         snapshot,
         listCount: Array.isArray(list) ? list.length : 0,
         totalCount: Number(snapshot?.response?.data?.totalCount) || 0,
-        error: response.ok && snapshot ? "" : `交易接口返回 ${response.status} 或快照未写入`,
+        error: response.ok && snapshot
+          ? ""
+          : `交易接口 HTTP ${response.status}，但业务响应未成功（可能是认证头失效）`,
       }, location.origin);
     } catch (error) {
       window.postMessage({

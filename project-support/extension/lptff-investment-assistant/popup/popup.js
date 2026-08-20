@@ -14,11 +14,20 @@ const stageLabels = {
   idle: "",
 };
 
-function send(message) {
+function send(message, attempt = 0) {
   return new Promise((resolve, reject) => {
     chrome.runtime.sendMessage(message, (response) => {
-      if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message || "扩展通信失败"));
-      else resolve(response);
+      const runtimeError = chrome.runtime.lastError;
+      const missingReceiver = /Could not establish connection|Receiving end does not exist/i.test(runtimeError?.message || "");
+      if (missingReceiver && attempt < 4) {
+        setTimeout(() => send(message, attempt + 1).then(resolve, reject), 150 * (attempt + 1));
+        return;
+      }
+      if (runtimeError) {
+        reject(new Error(missingReceiver
+          ? "插件后台尚未连接，请在 chrome://extensions 重新加载插件后重试"
+          : runtimeError.message || "扩展通信失败"));
+      } else resolve(response);
     });
   });
 }

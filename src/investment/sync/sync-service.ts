@@ -12,7 +12,7 @@ import type {
 } from "../domain";
 import type { InvestmentSourceAdapter } from "../adapter/InvestmentSourceAdapter";
 import type { InvestmentLedger, ImportRecord } from "../ledger/repository";
-import { dedupDailyPnl, dedupTransactions } from "./dedup";
+import { dailyPnlKey, transactionKey } from "./keys";
 import { mergeCoverage, deriveHealth, type SensorHealth } from "../sensor/coverage";
 
 export interface SyncResult {
@@ -73,11 +73,16 @@ export class SyncService {
     let duplicateTransactions = 0;
     try {
       const batch = await this.adapter.getTransactions();
-      const existing = await this.ledger.getAllTransactions();
-      const { added } = dedupTransactions(existing, batch.transactions);
+      const uniqueIncoming = new Map(batch.transactions.map((transaction) => [transactionKey(transaction), transaction]));
+      const existingKeys = await this.ledger.getExistingTransactionKeys([...uniqueIncoming.keys()]);
+      const added = [...uniqueIncoming.entries()]
+        .filter(([key]) => !existingKeys.has(key))
+        .map(([, transaction]) => transaction);
       addedTransactions = added.length;
       duplicateTransactions = batch.transactions.length - added.length;
-      if (added.length) await this.ledger.putTransactions(added);
+      // 即使稳定流水已存在，也允许来源把“待确认”更新为“成功”，或应用新版规范化映射。
+      // put 使用稳定主键覆盖，不会增加重复存储。
+      if (uniqueIncoming.size) await this.ledger.putTransactions([...uniqueIncoming.values()]);
       if (!batch.pagingComplete) warnings.push("sync:transactions-paging-incomplete");
     } catch (e) {
       failures.push(`transactions:${(e as Error).message}`);
@@ -87,7 +92,6 @@ export class SyncService {
     let addedDailyPnl = 0;
     let duplicateDailyPnl = 0;
     try {
-      const existingPnl = await this.ledger.getAllDailyPnl();
       const incoming: { assetId: string; date: string; pnl: number }[] = [];
       for (const h of holdings) {
         try {
@@ -97,7 +101,12 @@ export class SyncService {
           failures.push(`dailyPnl:${h.assetId}:${(e as Error).message}`);
         }
       }
-      const { added, duplicates } = dedupDailyPnl(existingPnl, incoming);
+      const uniqueIncoming = new Map(incoming.map((point) => [dailyPnlKey(point), point]));
+      const existingKeys = await this.ledger.getExistingDailyPnlKeys([...uniqueIncoming.keys()]);
+      const added = [...uniqueIncoming.entries()]
+        .filter(([key]) => !existingKeys.has(key))
+        .map(([, point]) => point);
+      const duplicates = incoming.length - added.length;
       addedDailyPnl = added.length;
       duplicateDailyPnl = duplicates;
       if (added.length) await this.ledger.putDailyPnl(added);

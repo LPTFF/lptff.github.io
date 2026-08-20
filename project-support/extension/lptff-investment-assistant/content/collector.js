@@ -1,3 +1,7 @@
+(() => {
+if (globalThis.__LPTFF_COLLECTOR_READY__) return;
+globalThis.__LPTFF_COLLECTOR_READY__ = true;
+
 const DATE_RE = /(20\d{2})[年./-](\d{1,2})[月./-](\d{1,2})/;
 const HOLD_PATH = "/request/hold";
 const SINGLE_PATH = "/http/single/get";
@@ -227,6 +231,27 @@ function transactionPage(snapshot) {
   };
 }
 
+function dedupeTransactionPages(snapshots) {
+  const seen = new Set();
+  let duplicateCount = 0;
+  const pages = [...queryCoverage(snapshots).pages.values()]
+    .map(transactionPage)
+    .sort((a, b) => a.pageNum - b.pageNum)
+    .map((page) => ({
+      ...page,
+      records: page.records.filter((record) => {
+        const key = String(record?.id || record?.traceNo || JSON.stringify(record));
+        if (seen.has(key)) {
+          duplicateCount += 1;
+          return false;
+        }
+        seen.add(key);
+        return true;
+      }),
+    }));
+  return { pages, duplicateCount };
+}
+
 async function collectTransactionRange(timeType, concurrency, progress) {
   const warnings = [];
   const filter = document.querySelector(`.ulFilter.Delegate.Field li[data-timetype="${timeType}"]`);
@@ -275,14 +300,20 @@ async function collectTransactionRange(timeType, concurrency, progress) {
   });
   const snapshots = [...initialSnapshots, ...fetched.filter(Boolean)];
   const finalCoverage = queryCoverage(snapshots);
+  const deduped = dedupeTransactionPages(snapshots);
   if (range.expectedPages > 200) warnings.push(`交易时间范围 ${timeType} 共 ${range.expectedPages} 页，超过单次采集上限 200 页`);
   else if (finalCoverage.pages.size < range.expectedPages) warnings.push(`交易时间范围 ${timeType} 分页未完整采集`);
+  if (deduped.duplicateCount > 0) warnings.push(`交易分页发现 ${deduped.duplicateCount} 条跨页重复记录，结果需重新采集`);
+  const recordCount = deduped.pages.reduce((sum, page) => sum + page.records.length, 0);
+  if (range.expectedPages <= 200 && finalCoverage.pages.size === range.expectedPages && recordCount !== range.totalCount) {
+    warnings.push(`交易分页记录数 ${recordCount}/${range.totalCount}，与接口总数不一致`);
+  }
   return {
     timeType: String(timeType),
     pageSize: range.pageSize,
     totalCount: range.totalCount,
     expectedPages: range.expectedPages,
-    pages: [...finalCoverage.pages.values()].map(transactionPage).sort((a, b) => a.pageNum - b.pageNum),
+    pages: deduped.pages,
     warnings,
   };
 }
@@ -312,6 +343,10 @@ async function automatePage(message) {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "LPTFF_COLLECTOR_PING") {
+    sendResponse({ ok: true, url: location.href });
+    return false;
+  }
   if (message?.type === "COLLECT_FUND_DATA") {
     const mode = /query\.1234567\.com\.cn/.test(location.hostname) ? "transactions" : "hold";
     automatePage({ mode }).then(sendResponse).catch((error) => {
@@ -327,3 +362,4 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   }
   return undefined;
 });
+})();

@@ -93,6 +93,24 @@ function callChrome(target, method, ...args) {
   });
 }
 
+function isMissingReceiverError(error) {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /Could not establish connection|Receiving end does not exist/i.test(message);
+}
+
+async function injectCollectorReceiver(tabId) {
+  await callChrome(chrome.scripting, chrome.scripting.executeScript, {
+    target: { tabId },
+    world: "MAIN",
+    files: ["content/network-bridge.js"],
+  });
+  await callChrome(chrome.scripting, chrome.scripting.executeScript, {
+    target: { tabId },
+    world: "ISOLATED",
+    files: ["content/collector.js"],
+  });
+}
+
 async function sendToTab(tabId, message) {
   let lastError;
   for (let attempt = 0; attempt < 12; attempt += 1) {
@@ -100,10 +118,20 @@ async function sendToTab(tabId, message) {
       return await callChrome(chrome.tabs, chrome.tabs.sendMessage, tabId, message);
     } catch (error) {
       lastError = error;
+      if (attempt === 1 && isMissingReceiverError(error)) {
+        try {
+          await injectCollectorReceiver(tabId);
+        } catch (injectError) {
+          lastError = injectError;
+        }
+      }
       await delay(500);
     }
   }
-  throw lastError || new Error("页面脚本未响应");
+  if (isMissingReceiverError(lastError)) {
+    throw new Error("天天基金采集脚本未连接。请确认页面已登录并完成加载，然后重新采集");
+  }
+  throw lastError || new Error("天天基金采集页面未响应");
 }
 
 async function openCollectorTab(url) {
@@ -152,6 +180,22 @@ async function ensureOffscreenDocument() {
   });
 }
 
+async function waitForOffscreenReceiver() {
+  let lastError;
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    try {
+      const response = await callChrome(chrome.runtime, chrome.runtime.sendMessage, { type: "OFFSCREEN_PING" });
+      if (response?.ok) return;
+    } catch (error) {
+      lastError = error;
+    }
+    await delay(100);
+  }
+  throw new Error(isMissingReceiverError(lastError)
+    ? "公开基金采集服务尚未就绪，请重新采集"
+    : `公开基金采集服务启动失败：${lastError instanceof Error ? lastError.message : "未知错误"}`);
+}
+
 async function closeOffscreenDocument() {
   try {
     if (!chrome.offscreen.hasDocument || await chrome.offscreen.hasDocument()) await chrome.offscreen.closeDocument();
@@ -163,6 +207,7 @@ async function closeOffscreenDocument() {
 async function collectPublicFunds(holdings, concurrency) {
   await ensureOffscreenDocument();
   try {
+    await waitForOffscreenReceiver();
     const response = await callChrome(chrome.runtime, chrome.runtime.sendMessage, {
       type: "OFFSCREEN_COLLECT_PUBLIC_FUNDS",
       holdings,

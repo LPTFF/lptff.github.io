@@ -49,7 +49,7 @@ import InvestmentSyncStatus from "./components/InvestmentSyncStatus.vue";
 
 const route = useRoute();
 const router = useRouter();
-const { state, loadFromLedger, refreshExtensionStatus, loadRealFixtureSnapshot, clearEverything } = useInvestmentOS();
+const { state, loadFromLedger, refreshExtensionStatus, clearImportedFacts, clearEverything, evaluateAndPersistActions } = useInvestmentOS();
 const simulator = useInvestmentSimulator();
 const review = useInvestmentReview();
 
@@ -94,23 +94,25 @@ const needReviewLink = computed(() => state.loaded && statusBar.value.type === "
 
 onMounted(async () => {
   await loadFromLedger();
-  // source=sim：真实持仓演练续演；旧虚构残留（simulator 拒绝恢复 initialized=false）则清除并加载真实。
+  // 旧内置脱敏快照只采到交易 1/73 页。它不是用户真实采集；精确命中该批次时清除来源事实，
+  // 保留用户规则，避免刷新后继续把审查样本误当作当前数据。
+  const bundledPartialCapture = state.lastImport?.capturedAt === "2026-08-16T04:15:09.663Z"
+    && state.coverage.some((coverage) =>
+      coverage.dataset === "transactions"
+      && coverage.completeness === "partial"
+      && coverage.warningCodes.includes("eastmoney:transactions-partial"),
+    );
+  if (bundledPartialCapture) await clearImportedFacts();
+
+  // source=sim：真实持仓演练续演；旧虚构残留（simulator 拒绝恢复 initialized=false）则清除。
   if (state.account?.source === "sim") {
     await simulator.init();
     if (!simulator.state.initialized) {
       await clearEverything();
-      await loadRealFixtureSnapshot();
-    }
-  } else {
-    const ledgerIsEmpty = !state.account
-      && !state.activeScope
-      && !state.transactions.length
-      && !state.assets.length;
-    // Ledger 为空且未显式清空时，默认加载真实采集快照供页面审查。
-    if (ledgerIsEmpty && !state.demoMode && localStorage.getItem("investment-manual-clear") !== "1") {
-      await loadRealFixtureSnapshot();
     }
   }
+  // 自动行动是可重新计算的派生数据。进入页面即与当前事实对账，清除旧版本留下的误报。
+  if (state.portfolio) await evaluateAndPersistActions();
   await refreshExtensionStatus();
   // 触发复盘 Core，供克制状态条消费管理状态；无 scope 时静默退化为健康/偏离视角。
   if (!review.state.loaded && !review.state.running) {

@@ -26,6 +26,7 @@ import type {
 } from "../domain";
 import { dailyPnlKey } from "../sync/keys";
 import { transactionKey } from "../sync/keys";
+import { explicitThemesFromSourceText } from "../metadata/themes";
 import {
   openInvestmentDB,
   reqToPromise,
@@ -77,6 +78,7 @@ const MOCK_SOURCE = /^mock(?:-|$)/;
 const MOCK_WARNING = /^(?:mock|empty|partial|stale|failed|complex|large):/;
 const DEMO_REVIEW_SCOPE_IDS = new Set(["scope:sim", "scope:combined", "scope:demo"]);
 const DEMO_POLICY_IDS = new Set(["policy:demo-us-tech"]);
+const IMPORT_RETENTION_COUNT = 20;
 
 function isMockAssetId(assetId: unknown): boolean {
   return MOCK_ASSET_ID.test(String(assetId || ""));
@@ -89,9 +91,19 @@ function dateRange(values: string[]): Array<{ start: string; end: string }> {
 
 function mergeAssetMetadata(existing: AssetMetadata | undefined, incoming: AssetMetadata): AssetMetadata {
   if (!existing) return incoming;
-  const qualityRank = { unknown: 0, classified: 1, source: 2 } as const;
+  const qualityRank = { unknown: 0, classified: 1, extracted: 2, source: 3 } as const;
   const dimensions = ["regions", "indexes", "currencies", "themes"] as const;
-  const merged: AssetMetadata = { ...existing, ...incoming };
+  const merged: AssetMetadata = {
+    ...existing,
+    ...incoming,
+    evidence: { ...existing.evidence, ...incoming.evidence },
+    industryAllocations: incoming.industryAllocations?.length
+      ? incoming.industryAllocations
+      : existing.industryAllocations,
+    industryEvidence: incoming.industryAllocations?.length
+      ? incoming.industryEvidence
+      : existing.industryEvidence,
+  };
 
   for (const dimension of dimensions) {
     const previousQuality = existing.provenance?.[dimension] ?? "unknown";
@@ -99,6 +111,7 @@ function mergeAssetMetadata(existing: AssetMetadata | undefined, incoming: Asset
     if (!incoming[dimension].length || qualityRank[incomingQuality] < qualityRank[previousQuality]) {
       merged[dimension] = existing[dimension];
       merged.provenance = { ...merged.provenance, [dimension]: previousQuality } as AssetMetadata["provenance"];
+      merged.evidence = { ...merged.evidence, [dimension]: existing.evidence?.[dimension] };
     }
   }
 
@@ -109,6 +122,48 @@ function mergeAssetMetadata(existing: AssetMetadata | undefined, incoming: Asset
     merged.provenance = { ...merged.provenance, assetClass: previousAssetClassQuality } as AssetMetadata["provenance"];
   }
   return merged;
+}
+
+/**
+ * 兼容 2026-08-20 之前的适配结果：当时 HYPZ 接口直接返回的行业名称被误标为 classified。
+ * 旧版只有非商品类六位天天基金代码会走这条行业配置分支；商品主题仍保留为来源推导。
+ * 旧账本没有保存披露日期，升级读取时只补可核实页面锚点，不伪造日期。
+ */
+function migrateLegacyEastmoneyThemeProvenance(asset: AssetMetadata): AssetMetadata {
+  const explicitThemes = /^\d{6}$/.test(asset.assetId)
+    ? explicitThemesFromSourceText([asset.name, ...asset.indexes])
+    : [];
+  if (explicitThemes.length) {
+    return {
+      ...asset,
+      themes: explicitThemes,
+      provenance: { ...asset.provenance!, themes: "extracted" },
+      evidence: {
+        ...asset.evidence,
+        themes: {
+          sourceUrl: `https://fundf10.eastmoney.com/jbgk_${asset.assetId}.html`,
+          sourceField: "fund-profile",
+        },
+      },
+    };
+  }
+  const isLegacyDirectIndustry = /^\d{6}$/.test(asset.assetId)
+    && asset.assetClass !== "commodity"
+    && Boolean(asset.themes.length)
+    && asset.provenance?.themes === "classified"
+    && !asset.evidence?.themes;
+  if (!isLegacyDirectIndustry) return asset;
+  return {
+    ...asset,
+    provenance: { ...asset.provenance!, themes: "source" },
+    evidence: {
+      ...asset.evidence,
+      themes: {
+        sourceUrl: `https://fundf10.eastmoney.com/hytz_${asset.assetId}.html`,
+        sourceField: "industry-allocation",
+      },
+    },
+  };
 }
 
 function sameStoredValue(left: unknown, right: unknown): boolean {
@@ -136,7 +191,10 @@ export class InvestmentLedger {
   async putAccount(account: AccountSnapshot): Promise<void> {
     const db = await this.db();
     const tx = db.transaction(StoreName.accounts, "readwrite");
-    tx.objectStore(StoreName.accounts).put(account);
+    const store = tx.objectStore(StoreName.accounts);
+    // 账户是当前状态，不承担历史分析；固定只保留最新采集，避免按点击次数增长。
+    store.clear();
+    store.put(account);
     await txDone(tx);
   }
 
@@ -151,7 +209,11 @@ export class InvestmentLedger {
   async putPortfolio(snapshot: PortfolioSnapshot): Promise<void> {
     const db = await this.db();
     const tx = db.transaction(StoreName.portfolioSnapshots, "readwrite");
-    tx.objectStore(StoreName.portfolioSnapshots).put(snapshot);
+    const store = tx.objectStore(StoreName.portfolioSnapshots);
+    const sameDayKeys = await reqToPromise(store.index("byDate").getAllKeys(snapshot.date));
+    for (const key of sameDayKeys) store.delete(key);
+    // 日级快照足以支持仓位/减仓复核；同一天重复采集覆盖，不按采集次数累积。
+    store.put(snapshot);
     await txDone(tx);
   }
 
@@ -185,7 +247,8 @@ export class InvestmentLedger {
   async getAssets(): Promise<AssetMetadata[]> {
     const db = await this.db();
     const tx = db.transaction(StoreName.assets, "readonly");
-    return (await reqToPromise(tx.objectStore(StoreName.assets).getAll())) as AssetMetadata[];
+    const assets = (await reqToPromise(tx.objectStore(StoreName.assets).getAll())) as AssetMetadata[];
+    return assets.map(migrateLegacyEastmoneyThemeProvenance);
   }
 
   // ---- Transactions ----
@@ -209,6 +272,21 @@ export class InvestmentLedger {
       .sort((a, b) => (a.occurredAt < b.occurredAt ? -1 : 1));
   }
 
+  /** 只查询传入稳定键是否已存在，避免同步时把全部交易对象读入内存。 */
+  async getExistingTransactionKeys(keys: string[]): Promise<Set<string>> {
+    const unique = [...new Set(keys)];
+    if (!unique.length) return new Set();
+    const db = await this.db();
+    const tx = db.transaction(StoreName.transactions, "readonly");
+    const index = tx.objectStore(StoreName.transactions).index("byDedupKey");
+    const found = await Promise.all(unique.map(async (key) => ({
+      key,
+      primaryKey: await reqToPromise(index.getKey(key)),
+    })));
+    await txDone(tx);
+    return new Set(found.filter((item) => item.primaryKey !== undefined).map((item) => item.key));
+  }
+
   // ---- DailyPnL ----
 
   async putDailyPnl(list: DailyPnL[]): Promise<void> {
@@ -226,6 +304,21 @@ export class InvestmentLedger {
     const tx = db.transaction(StoreName.dailyPnl, "readonly");
     const all = (await reqToPromise(tx.objectStore(StoreName.dailyPnl).getAll())) as Array<DailyPnL & { id?: string }>;
     return all.map(({ id: _id, ...rest }) => rest).sort((a, b) => (a.date < b.date ? -1 : 1));
+  }
+
+  /** DailyPnL 的主键就是 assetId+date，只读取键存在性，不加载历史对象。 */
+  async getExistingDailyPnlKeys(keys: string[]): Promise<Set<string>> {
+    const unique = [...new Set(keys)];
+    if (!unique.length) return new Set();
+    const db = await this.db();
+    const tx = db.transaction(StoreName.dailyPnl, "readonly");
+    const store = tx.objectStore(StoreName.dailyPnl);
+    const found = await Promise.all(unique.map(async (key) => ({
+      key,
+      primaryKey: await reqToPromise(store.getKey(key)),
+    })));
+    await txDone(tx);
+    return new Set(found.filter((item) => item.primaryKey !== undefined).map((item) => item.key));
   }
 
   // ---- Coverage ----
@@ -249,7 +342,55 @@ export class InvestmentLedger {
   async addImport(record: ImportRecord): Promise<void> {
     const db = await this.db();
     const tx = db.transaction(StoreName.imports, "readwrite");
-    tx.objectStore(StoreName.imports).put(record);
+    const store = tx.objectStore(StoreName.imports);
+    store.put(record);
+    const all = (await reqToPromise(store.getAll())) as ImportRecord[];
+    const expired = all
+      .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt) || b.id.localeCompare(a.id))
+      .slice(IMPORT_RETENTION_COUNT);
+    for (const item of expired) store.delete(item.id);
+    await txDone(tx);
+  }
+
+  /**
+   * 压缩旧版本按采集次数累积的数据。保留最新账户、每天最新组合及最近导入摘要；
+   * 交易、DailyPnL、规则和行动均不删除。重复调用幂等。
+   */
+  async compactCollectionHistory(): Promise<void> {
+    const db = await this.db();
+    const stores = [StoreName.accounts, StoreName.portfolioSnapshots, StoreName.imports];
+    const tx = db.transaction(stores as string[], "readwrite");
+    const accountStore = tx.objectStore(StoreName.accounts);
+    const portfolioStore = tx.objectStore(StoreName.portfolioSnapshots);
+    const importStore = tx.objectStore(StoreName.imports);
+    const [accounts, portfolios, imports] = await Promise.all([
+      reqToPromise(accountStore.getAll()) as Promise<AccountSnapshot[]>,
+      reqToPromise(portfolioStore.getAll()) as Promise<PortfolioSnapshot[]>,
+      reqToPromise(importStore.getAll()) as Promise<ImportRecord[]>,
+    ]);
+
+    const latestAccount = [...accounts].sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
+    for (const account of accounts) {
+      if (account.id !== latestAccount?.id) accountStore.delete(account.id);
+    }
+
+    const latestPortfolioByDate = new Map<string, PortfolioSnapshot>();
+    for (const portfolio of portfolios) {
+      const existing = latestPortfolioByDate.get(portfolio.date);
+      if (!existing || portfolio.id.localeCompare(existing.id) > 0) latestPortfolioByDate.set(portfolio.date, portfolio);
+    }
+    const keptPortfolioIds = new Set([...latestPortfolioByDate.values()].map((item) => item.id));
+    for (const portfolio of portfolios) {
+      if (!keptPortfolioIds.has(portfolio.id)) portfolioStore.delete(portfolio.id);
+    }
+
+    const keptImportIds = new Set([...imports]
+      .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt) || b.id.localeCompare(a.id))
+      .slice(0, IMPORT_RETENTION_COUNT)
+      .map((item) => item.id));
+    for (const item of imports) {
+      if (!keptImportIds.has(item.id)) importStore.delete(item.id);
+    }
     await txDone(tx);
   }
 
@@ -311,6 +452,38 @@ export class InvestmentLedger {
     const db = await this.db();
     const tx = db.transaction(StoreName.actions, "readwrite");
     tx.objectStore(StoreName.actions).put(action);
+    await txDone(tx);
+  }
+
+  /**
+   * 让自动派生的待办与当前事实保持一致：移除已经不再成立的 open 项，并避免把用户
+   * 已处理/忽略的同一交易重新打开。规则、异常和未分类行动都属于可重新计算的派生数据。
+   */
+  async reconcileDerivedActions(incoming: Action[]): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.actions, "readwrite");
+    const store = tx.objectStore(StoreName.actions);
+    const existing = (await reqToPromise(store.getAll())) as Action[];
+    const isDerived = (action: Action): boolean =>
+      action.id.startsWith("act:policy:")
+      || action.id.startsWith("act:abnormal:")
+      || action.id.startsWith("act:unclassified:");
+    const identity = (action: Action): string =>
+      action.transactionId
+        ? `${action.type}:transaction:${action.transactionId}`
+        : action.id;
+    const incomingIdentities = new Set(incoming.map(identity));
+    const existingIdentities = new Set(existing.map(identity));
+
+    for (const action of existing) {
+      if (isDerived(action) && action.status === "open" && !incomingIdentities.has(identity(action))) {
+        store.delete(action.id);
+      }
+    }
+    for (const action of incoming) {
+      // 任一状态的同源行动都算已存在；用户处理过的项目不能在下次复盘时被重新打开。
+      if (!existingIdentities.has(identity(action))) store.put(action);
+    }
     await txDone(tx);
   }
 
@@ -763,6 +936,10 @@ export class InvestmentLedger {
       throw new Error(`putReviewSnapshot: 复盘快照 ${snapshot.id} 已存在且内容不同，不得覆盖历史`);
     }
     if (!existing) store.add(snapshot);
+    const sameScope = (await reqToPromise(store.index("byScope").getAll(snapshot.scopeId))) as ReviewSnapshot[];
+    for (const item of sameScope) {
+      if (item.asOf === snapshot.asOf && item.id !== snapshot.id) store.delete(item.id);
+    }
     await txDone(tx);
   }
 

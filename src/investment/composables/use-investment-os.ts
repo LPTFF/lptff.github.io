@@ -52,7 +52,6 @@ import { deriveHealth, type SensorHealth } from "../sensor/coverage";
 import {
   buildPolicyVersion,
   createInitialPolicy,
-  diffActions,
   evaluatePolicies,
   nextVersionNumber,
   supersede,
@@ -125,6 +124,7 @@ const state = reactive<InvestmentOsState>({
 });
 
 let ledger: InvestmentLedger | null = null;
+let ledgerCompaction: Promise<void> | null = null;
 
 function getLedger(): InvestmentLedger {
   if (!ledger) ledger = new InvestmentLedger();
@@ -192,6 +192,9 @@ async function loadFromLedger(): Promise<void> {
   const l = getLedger();
   // 演示模式下保留 mock 事实供页面审查；真实采集流程会先退出演示模式再清理。
   if (!state.demoMode) await l.removeMockData();
+  // mock 清理后再压缩，避免较新的演示记录抢占并删除真实账户；每次会话只做一次。
+  if (!ledgerCompaction) ledgerCompaction = l.compactCollectionHistory();
+  await ledgerCompaction;
   const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, scopes] = await Promise.all([
     l.getLatestAccount(),
     l.getLatestPortfolio(),
@@ -404,9 +407,7 @@ async function evaluateAndPersistActions(): Promise<void> {
   });
   const { actions: behaviorActions, patterns } = buildBehaviorActions(state.transactions, today());
   const incoming = [...policyActions, ...behaviorActions];
-  const existing = await l.getActions();
-  const toAdd = diffActions(existing, incoming);
-  for (const a of toAdd) await l.putAction(a);
+  await l.reconcileDerivedActions(incoming);
   for (const p of patterns) await l.putPattern(p);
   await loadFromLedger();
 }
@@ -711,10 +712,10 @@ async function loadDemoData(scenario: string = "review-demo-combined"): Promise<
 }
 
 /**
- * 加载真实脱敏快照到 Ledger，供页面审查。数据源是天天基金扩展采集的脱敏 JSON（协议
+ * 加载脱敏采集快照到 Ledger，供页面结构审查。数据源是天天基金扩展采集的脱敏 JSON（协议
  * eastmoney-source-capture/1.0），通过 fetch public 副本读取后复用 toInvestmentDataset
  * 转换，再走与插件导入完全相同的 SyncService → scope:real-account 路径写入。
- * OSLayout 在 Ledger 为空时默认调用本函数；fetch 失败则回退模拟器。
+ * 该快照由用户显式导入，不作为当前账户默认数据。
  */
 async function loadRealFixtureSnapshot(): Promise<boolean> {
   state.syncing = true;
@@ -754,7 +755,7 @@ async function loadRealFixtureSnapshot(): Promise<boolean> {
     state.lastSyncStatus = syncResult.failures.length ? "partial" : "ok";
     state.lastFailures = syncResult.failures;
     state.syncPhase = "up-to-date";
-    state.syncMessage = "已加载真实脱敏快照（天天基金采集 2026-08-16），仅供页面审查";
+    state.syncMessage = "已加载脱敏采集快照（天天基金采集 2026-08-20，交易 72/72 页），仅供结构审查";
     return true;
   } catch (e) {
     state.error = (e as Error).message;

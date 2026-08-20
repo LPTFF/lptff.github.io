@@ -131,7 +131,7 @@
               </el-table-column>
             </el-table>
             <div v-if="stressResult.endExposureSlices.length" class="stress-section">
-              <div class="stress-sub-title">末态风险暴露（底层指数）</div>
+              <div class="stress-sub-title">末态风险暴露（指数依据）</div>
               <div v-for="s in stressResult.endExposureSlices" :key="s.value" class="exposure-row">
                 <span class="exposure-value">{{ s.value }}</span>
                 <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="12" class="exposure-bar" />
@@ -257,7 +257,7 @@ async function simInitReal(): Promise<void> {
 async function simExitReal(): Promise<void> {
   try {
     const ok = await investmentOS.loadRealFixtureSnapshot();
-    if (ok) ElMessage.success("已恢复真实采集快照");
+    if (ok) ElMessage.success("已恢复脱敏采集快照（交易 72/72 页）");
     else ElMessage.error(osState.error || "恢复真实数据失败");
   } catch (e) {
     ElMessage.error((e as Error).message);

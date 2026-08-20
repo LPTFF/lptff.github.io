@@ -1,38 +1,55 @@
 <template>
   <div class="portfolio-view">
     <el-empty v-if="!state.portfolio" description="尚无持仓快照，请先同步数据或在数据页启动模拟" />
-    <el-alert v-else-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停组合页" description="组合页展示真实持仓与风险暴露；当前为演练模拟持仓，数据已隔离。请先到复盘页「结束演练 / 恢复真实」后再查看。" />
+    <el-alert v-else-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停组合页"
+      description="组合页展示真实持仓与风险暴露；当前为演练模拟持仓，数据已隔离。请先到复盘页「结束演练 / 恢复真实」后再查看。" />
 
     <template v-else>
       <!-- Fund Holdings -->
       <el-card shadow="never" class="section">
         <template #header>基金持仓</template>
-        <el-table :data="sortedHoldings" size="small" border :default-sort="{ prop: 'marketValue', order: 'descending' }" @sort-change="onSortChange">
-          <el-table-column prop="assetId" label="基金" width="120" />
-          <el-table-column prop="name" label="名称" min-width="160" />
-          <el-table-column prop="marketValue" label="市值" width="120" sortable="custom">
+        <el-table class="holdings-table" :data="sortedHoldings" size="small" border table-layout="fixed"
+          :default-sort="{ prop: 'marketValue', order: 'descending' }" @sort-change="onSortChange">
+          <el-table-column prop="assetId" label="基金" width="76" />
+          <el-table-column prop="name" label="名称" min-width="140" />
+          <el-table-column prop="marketValue" label="市值" width="88" sortable="custom">
             <template #default="{ row }">{{ fmt(row.marketValue) }}</template>
           </el-table-column>
-          <el-table-column prop="pnl" label="持仓盈亏" width="120" sortable="custom">
-            <template #default="{ row }"><span :class="profitClass(row.pnl)">{{ row.pnl === undefined ? "—" : fmt(row.pnl) }}</span></template>
+          <el-table-column prop="pnl" label="持仓盈亏" width="92" sortable="custom">
+            <template #default="{ row }"><span :class="profitClass(row.pnl)">{{ row.pnl === undefined ? "—" :
+              fmt(row.pnl) }}</span></template>
           </el-table-column>
-          <el-table-column prop="pnlRate" label="持仓收益率" width="120" sortable="custom">
-            <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate) }}</span></template>
+          <el-table-column prop="pnlRate" label="持仓收益率" width="100" sortable="custom">
+            <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate)
+            }}</span></template>
           </el-table-column>
-          <el-table-column prop="weight" label="仓位" width="90" sortable="custom">
+          <el-table-column prop="weight" label="仓位" width="72" sortable="custom">
             <template #default="{ row }">{{ fmtPct(row.weight) }}</template>
           </el-table-column>
-          <el-table-column label="底层指数" min-width="120">
+          <el-table-column label="指数依据" min-width="110">
             <template #default="{ row }">{{ row.indexes.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="地区" min-width="100">
+          <el-table-column label="地区" width="84">
             <template #default="{ row }">{{ row.regions.join(" / ") || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="策略" min-width="100">
+          <el-table-column label="策略" width="78">
             <template #default="{ row }">{{ row.strategy || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="元数据来源" width="110">
-            <template #default="{ row }"><el-tag size="small" effect="plain">{{ row.metadataSource }}</el-tag></template>
+          <el-table-column label="字段依据" width="126">
+            <template #default="{ row }">
+              <div class="metadata-details">
+                <div v-for="detail in row.metadataDetails" :key="detail.label" class="metadata-detail">
+                  <span>{{ detail.label }}：</span>
+                  <a v-if="detail.sourceUrl" class="metadata-source-link" :href="detail.sourceUrl" target="_blank"
+                    rel="noopener noreferrer" :title="detail.asOf
+                      ? `打开来源页面（披露日期 ${detail.asOf}）`
+                      : detail.sourceSection
+                        ? `打开来源页面（栏目：${detail.sourceSection}）`
+                        : '打开来源页面'">{{ detail.source }}</a>
+                  <span v-else>{{ detail.source }}</span>
+                </div>
+              </div>
+            </template>
           </el-table-column>
         </el-table>
       </el-card>
@@ -43,20 +60,15 @@
           <div class="exposure-head">
             <span>风险暴露</span>
             <el-radio-group v-model="dimension" size="small">
-              <el-radio-button v-for="m in meaningfulDims" :key="m.dim" :label="m.dim">{{ dimensionLabel(m.dim) }}</el-radio-button>
+              <el-radio-button v-for="m in meaningfulDims" :key="m.dim" :label="m.dim">{{ dimensionLabel(m.dim)
+              }}</el-radio-button>
             </el-radio-group>
           </div>
         </template>
         <el-empty v-if="!meaningfulDims.length" description="当前组合风险暴露单一，无显著维度差异" />
-        <el-alert
-          v-if="currentExposure.unknownPct > 0"
-          type="info"
+        <el-alert v-if="currentExposure.unknownPct > 0" type="info"
           :title="`已识别 ${(currentExposure.knownPct * 100).toFixed(1)}%，元数据未识别 ${(currentExposure.unknownPct * 100).toFixed(1)}%`"
-          description="元数据未识别不是风险类别或风险结论；需通过基金详情来源补齐后才能参与规则评估。"
-          show-icon
-          :closable="false"
-          class="coverage-alert"
-        />
+          description="元数据未识别不是风险类别或风险结论；需通过基金详情来源补齐后才能参与规则评估。" show-icon :closable="false" class="coverage-alert" />
         <el-empty v-if="!exposureSlices.length" description="当前维度尚无可靠资产元数据" />
         <div v-else class="exposure-list">
           <div v-for="s in displaySlices" :key="s.value" class="exposure-row">
@@ -70,22 +82,13 @@
       <!-- 共同暴露：按当前采集元数据动态生成，只报告标签关联，不推断底层权重 -->
       <el-card v-if="focusSharedExposures.length" shadow="never" class="section">
         <template #header>共同暴露与集中度</template>
-        <el-alert
-          type="info"
-          :closable="false"
-          description="以下结果由当前持仓和已识别元数据动态生成。同一持仓可关联多个标签，因此跨标签百分比不可相加；关联仓位占比不等于来源未提供的精确底层权重。"
-          class="shared-note"
-        />
-        <el-alert
-          v-for="exposure in focusSharedExposures"
-          :key="`${exposure.dimension}-${exposure.value}`"
-          type="info"
-          show-icon
-          :closable="false"
-          class="dup-alert"
-        >
+        <el-alert type="info" :closable="false"
+          description="以下结果由当前持仓和已识别元数据动态生成。同一持仓可关联多个标签，因此跨标签百分比不可相加；关联仓位占比不等于来源未提供的精确底层权重。" class="shared-note" />
+        <el-alert v-for="exposure in focusSharedExposures" :key="`${exposure.dimension}-${exposure.value}`" type="info"
+          show-icon :closable="false" class="dup-alert">
           <template #title>
-            {{ dimensionLabel(exposure.dimension) }}：{{ sliceValueLabel(exposure.dimension, exposure.value) }} 关联仓位占比 {{ (exposure.associatedPct * 100).toFixed(1) }}%
+            {{ dimensionLabel(exposure.dimension) }}：{{ sliceValueLabel(exposure.dimension, exposure.value) }} 关联仓位占比 {{
+              (exposure.associatedPct * 100).toFixed(1) }}%
           </template>
           <div class="dup-funds">涉及基金：{{ exposure.assetIds.join("、") }}</div>
         </el-alert>
@@ -121,10 +124,10 @@ const ALL_DIMS: ExposureDimension[] = ["index", "region", "assetClass", "currenc
 const allCoverages = computed(() =>
   state.portfolio
     ? ALL_DIMS.map((d) => {
-        const cov = exposureCoverage(state.portfolio!.holdings, state.assets, d);
-        const knownSlices = cov.slices.filter((s) => s.value !== "（未标注）");
-        return { dim: d, cov, knownSlices };
-      })
+      const cov = exposureCoverage(state.portfolio!.holdings, state.assets, d);
+      const knownSlices = cov.slices.filter((s) => s.value !== "（未标注）");
+      return { dim: d, cov, knownSlices };
+    })
     : [],
 );
 
@@ -196,16 +199,55 @@ function fmt(n: number): string {
   display: flex;
   flex-direction: column;
   gap: 16px;
+  min-width: 0;
 }
+
 .section {
   width: 100%;
+  min-width: 0;
 }
+
+.holdings-table {
+  width: 100%;
+  font-size: 12px;
+}
+
+:deep(.holdings-table .cell) {
+  padding: 0 6px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
 .profit-positive {
   color: var(--el-color-danger);
 }
+
 .profit-negative {
   color: var(--el-color-success);
 }
+
+.metadata-details {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  color: var(--el-text-color-regular);
+  font-size: 12px;
+}
+
+.metadata-detail {
+  white-space: normal;
+}
+
+.metadata-source-link {
+  color: var(--el-color-primary);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .exposure-head {
   display: flex;
   align-items: center;
@@ -213,47 +255,58 @@ function fmt(n: number): string {
   gap: 12px;
   flex-wrap: wrap;
 }
+
 .coverage-alert {
   margin-bottom: 12px;
 }
+
 .single-alert {
   margin-bottom: 12px;
 }
+
 .single-row {
   font-size: 13px;
   color: var(--el-text-color-regular);
   margin: 2px 0;
 }
+
 .exposure-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
 .exposure-row {
   display: flex;
   align-items: center;
   gap: 12px;
 }
+
 .exposure-value {
   width: 120px;
   flex-shrink: 0;
   color: var(--el-text-color-regular);
 }
+
 .exposure-bar {
   flex: 1;
 }
+
 .exposure-pct {
   width: 64px;
   text-align: right;
   color: var(--el-text-color-regular);
   font-size: 13px;
 }
+
 .shared-note {
   margin-bottom: 12px;
 }
+
 .dup-alert {
   margin-bottom: 8px;
 }
+
 .dup-funds {
   font-size: 13px;
   color: var(--el-text-color-regular);

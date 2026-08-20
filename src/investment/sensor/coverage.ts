@@ -1,8 +1,9 @@
 /**
  * Sensor：Data Coverage 合并与健康汇总（PRD §11、§17、§29）。
  *
- * 合并策略保守：任一方 partial/unknown 不得被升级为 complete（PRD §15）。
- * knownRanges 取并集（允许重叠）；lastSyncedAt 取较新；warningCodes 取并集。
+ * 合并策略保留“最后有效事实”：一次完整采集可以修复旧 partial/unknown；后续失败或
+ * partial 也不能抹掉已经验证完整的数据（PRD §15）。knownRanges 取并集（允许重叠）；
+ * lastSyncedAt 取较新。升级为更强 Coverage 时同时丢弃旧批次的过期 warning。
  */
 import type { CoverageCompleteness, DataCoverage } from "../domain";
 
@@ -11,11 +12,6 @@ const COMPLETENESS_RANK: Record<CoverageCompleteness, number> = {
   partial: 1,
   unknown: 0,
 };
-
-/** 取两者中较弱的 completeness，保证不静默升级。 */
-function weaker(a: CoverageCompleteness, b: CoverageCompleteness): CoverageCompleteness {
-  return COMPLETENESS_RANK[a] <= COMPLETENESS_RANK[b] ? a : b;
-}
 
 function newer(a?: string, b?: string): string | undefined {
   if (!a) return b;
@@ -35,12 +31,18 @@ export function mergeCoverageEntry(a: DataCoverage, b: DataCoverage): DataCovera
     seen.add(key);
     return true;
   });
+  const aRank = COMPLETENESS_RANK[a.completeness];
+  const bRank = COMPLETENESS_RANK[b.completeness];
+  const strongest = bRank > aRank ? b : a;
+  const warningCodes = aRank === bRank
+    ? Array.from(new Set([...a.warningCodes, ...b.warningCodes]))
+    : [...strongest.warningCodes];
   return {
     dataset: a.dataset,
     knownRanges,
-    completeness: weaker(a.completeness, b.completeness),
-    lastSyncedAt: newer(a.lastSyncedAt, b.lastSyncedAt),
-    warningCodes: Array.from(new Set([...a.warningCodes, ...b.warningCodes])),
+    completeness: strongest.completeness,
+    lastSyncedAt: aRank === bRank ? newer(a.lastSyncedAt, b.lastSyncedAt) : strongest.lastSyncedAt,
+    warningCodes,
   };
 }
 

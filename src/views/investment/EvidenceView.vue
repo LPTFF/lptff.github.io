@@ -127,6 +127,8 @@ const factsActive = ref<string[]>([]);
 const allocationDrift = computed(() =>
   state.portfolio ? buildAllocationDrift(state.activeVersions, state.strategyRuleVersions, state.portfolio, state.assets) : [],
 );
+const transactionById = computed(() => new Map(transactions.value.map((tx) => [tx.id, tx])));
+const assetNameById = computed(() => new Map(state.assets.map((asset) => [asset.assetId, asset.name || asset.assetId])));
 const riskFindingEntries = computed(() => {
   const out: { title: string; detail: string }[] = [];
   for (const d of allocationDrift.value.filter((x) => x.direction !== "within")) {
@@ -138,7 +140,14 @@ const riskFindingEntries = computed(() => {
     });
   }
   for (const a of state.actions.filter((x) => x.status === "open")) {
-    out.push({ title: `待处理事项：${a.title || a.type}`, detail: `事实：类型 ${a.type}，状态 ${a.status}；可去行动页处理。` });
+    const tx = a.transactionId ? transactionById.value.get(a.transactionId) : undefined;
+    const anchor = tx
+      ? `锚点：${tx.occurredAt.slice(0, 10)}，${assetNameById.value.get(tx.assetId) || tx.assetId}，${tx.type} ${formatMoney(tx.amount)} ${tx.amountUnit}，流水 ${tx.sourceTransactionId || tx.id}`
+      : "";
+    out.push({
+      title: `待处理事项：${a.title || a.type}`,
+      detail: [`事实：类型 ${a.type}，状态 ${a.status}`, a.detail, anchor, "可去行动页处理。"].filter(Boolean).join("；"),
+    });
   }
   return out;
 });

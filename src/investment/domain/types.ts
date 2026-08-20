@@ -37,7 +37,13 @@ export type ExposureDimension =
   | "currency"
   | "theme";
 
-export type MetadataQuality = "source" | "classified" | "unknown";
+/**
+ * source: 来源接口/字段直接给出的标准值；
+ * extracted: 从已采集的档案原文或复合字段中确定性提取并标准化；
+ * classified: 来源没有直接表达该维度，按规则归类；
+ * unknown: 当前来源不足以判断。
+ */
+export type MetadataQuality = "source" | "extracted" | "classified" | "unknown";
 
 export interface AssetMetadataProvenance {
   assetClass: MetadataQuality;
@@ -45,6 +51,26 @@ export interface AssetMetadataProvenance {
   indexes: MetadataQuality;
   currencies: MetadataQuality;
   themes: MetadataQuality;
+}
+
+/** 可核实的来源锚点；只保存短 URL 和披露日期，不保存网页或 Network 快照。 */
+export interface AssetMetadataEvidence {
+  sourceUrl: string;
+  asOf?: string;
+  /** 仅保存短字段标识，不复制网页正文，避免元数据存储随采集内容膨胀。 */
+  sourceField?:
+    | "tracked-index"
+    | "benchmark"
+    | "fund-profile"
+    | "industry-allocation"
+    | "currency";
+  /** 档案页中的短栏目名，例如“投资目标”；不保存栏目正文。 */
+  sourceSection?: string;
+}
+
+export interface AssetIndustryAllocation {
+  name: string;
+  weight: number;
 }
 
 export interface AssetMetadata {
@@ -56,6 +82,10 @@ export interface AssetMetadata {
   currencies: string[];
   themes: string[];
   provenance?: AssetMetadataProvenance;
+  evidence?: Partial<Record<keyof AssetMetadataProvenance, AssetMetadataEvidence>>;
+  /** 来源披露的行业配置，与“主题/策略”分开保存，避免把最大行业误当成基金策略。 */
+  industryAllocations?: AssetIndustryAllocation[];
+  industryEvidence?: AssetMetadataEvidence;
 }
 
 // ---------------------------------------------------------------------------
@@ -107,7 +137,7 @@ export interface HoldingSnapshot {
 // Transaction / DailyPnL（PRD §31）
 // ---------------------------------------------------------------------------
 
-export type TransactionType = "BUY" | "SELL" | "DIVIDEND" | "FEE" | "OTHER";
+export type TransactionType = "BUY" | "SELL" | "DIVIDEND" | "FEE" | "TRANSFER" | "OTHER";
 
 /**
  * 申请与确认分离（WP0-2 / 工程附录 §2）。
@@ -148,6 +178,8 @@ export interface Transaction {
   confirmedAmount?: number;
   status: TransactionStatus;
   sourceType?: TransactionSourceType;
+  /** 来源业务名称确实没有映射时标记；不能仅凭 OTHER 推断为异常。 */
+  classificationWarning?: "unmapped_transaction_type";
   /** 由 Behavior Engine 填充，未分类为 null / 省略。 */
   behaviorType?: BehaviorType | null;
   /** 关联的 Policy，由用户确认或规则匹配填充。 */

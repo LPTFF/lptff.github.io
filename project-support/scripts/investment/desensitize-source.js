@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import "../../extension/lptff-investment-assistant/source-capture.js";
+import "../../extension/lptff-investment-assistant/public-fund-metadata.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, "../../..");
@@ -20,9 +21,11 @@ if (!inputPath) {
 
 const validator = globalThis.LPTFFSourceCapture;
 if (!validator?.desensitizeSource) throw new Error("来源采集脱敏器未加载");
+const metadata = globalThis.LPTFFPublicFundMetadata;
+if (!metadata?.enrichCapture) throw new Error("公开基金元数据升级器未加载");
 
 const raw = JSON.parse(fs.readFileSync(path.resolve(inputPath), "utf8"));
-const output = validator.desensitizeSource(raw);
+const output = validator.desensitizeSource(metadata.enrichCapture(raw));
 
 const text = JSON.stringify(output);
 const residual = [];

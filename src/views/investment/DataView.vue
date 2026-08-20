@@ -88,9 +88,9 @@
     <!-- 折叠：从采集快照导入（脱敏样本，不依赖插件） -->
     <el-collapse v-model="snapshotActive">
       <el-collapse-item title="从采集快照导入" name="snapshot">
-        <p class="guide-copy">不依赖浏览器插件，直接从本地采集快照导入真实账户数据用于审查。会覆盖当前模拟器或旧数据，保留你定义的规则。</p>
+        <p class="guide-copy">这是一份用于结构审查的脱敏采集快照，交易分页为 72/72 页、共 1427 笔。导入会覆盖当前模拟器或旧数据，并保留你定义的规则。</p>
         <div class="guide-actions">
-          <el-button type="primary" plain :loading="state.syncing" @click="importSnapshot">导入天天基金采集快照（2026-08-16）</el-button>
+          <el-button type="primary" plain :loading="state.syncing" @click="importSnapshot">导入脱敏采集快照（2026-08-20，交易完整）</el-button>
         </div>
       </el-collapse-item>
     </el-collapse>
@@ -150,7 +150,7 @@ const snapshotActive = ref<string[]>(["snapshot"]);
 
 async function importSnapshot(): Promise<void> {
   const ok = await loadRealFixtureSnapshot();
-  if (ok) ElMessage.success("已加载真实采集快照，可审查真实账户");
+  if (ok) ElMessage.success("已加载脱敏采集快照（交易 72/72 页）");
   else ElMessage.error(state.error || "加载真实快照失败");
 }
 

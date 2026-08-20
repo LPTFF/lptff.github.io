@@ -7,6 +7,7 @@ import type {
   InvestmentDataset,
   Transaction,
 } from "../domain";
+import { explicitThemesFromSourceText } from "../metadata/themes";
 
 export const EASTMONEY_SOURCE_CAPTURE_PROTOCOL = "eastmoney-source-capture/1.0" as const;
 
@@ -156,6 +157,7 @@ function mapHolding(item: SourceRecord, detail: SourceRecord | undefined, totalA
 
 function transactionType(value: unknown): Transaction["type"] {
   const text = textOf(value);
+  if (/转入投资账户|转出投资账户/.test(text)) return "TRANSFER";
   if (/卖出|赎回/.test(text)) return "SELL";
   if (/分红|红利/.test(text)) return "DIVIDEND";
   if (/买入|申购|定投/.test(text)) return "BUY";
@@ -223,6 +225,7 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
     ...(confirmedAmount === undefined ? {} : { confirmedAmount }),
     status,
     sourceType: transactionSourceType(item),
+    ...(type === "OTHER" ? { classificationWarning: "unmapped_transaction_type" as const } : {}),
   };
 }
 
@@ -253,15 +256,16 @@ function fieldsOf(detail: SourceRecord): SourceRecord {
   return recordOf(detail.fields);
 }
 
+function sectionsOf(detail: SourceRecord): SourceRecord {
+  return recordOf(detail.sections);
+}
+
 function sourceIndexes(detail: SourceRecord): string[] {
   const tracked = textOf(detail.trackedIndexText ?? fieldsOf(detail)["跟踪标的"]);
   return tracked && !/无跟踪标的|暂无|不适用/.test(tracked) ? [tracked] : [];
 }
 
-function classifiedIndexes(detail: SourceRecord): string[] {
-  // 优先用真实跟踪标的（指数基金精确）；主动基金无跟踪标的时才退回 benchmark 推断。
-  const tracked = sourceIndexes(detail);
-  if (tracked.length) return tracked;
+function benchmarkIndexes(detail: SourceRecord): string[] {
   const benchmark = textOf(detail.benchmark ?? fieldsOf(detail)["业绩比较基准"]);
   const items = benchmark.split(/[+，,；;]/).map((component) => {
     const normalized = component
@@ -284,6 +288,19 @@ function classifiedIndexes(detail: SourceRecord): string[] {
   return uniqueText(mains.map((it) => it.name));
 }
 
+function indexesOf(detail: SourceRecord): {
+  values: string[];
+  quality: "source" | "extracted" | "unknown";
+  sourceField?: "tracked-index" | "benchmark";
+} {
+  const tracked = sourceIndexes(detail);
+  if (tracked.length) return { values: tracked, quality: "source", sourceField: "tracked-index" };
+  const benchmark = benchmarkIndexes(detail);
+  return benchmark.length
+    ? { values: benchmark, quality: "extracted", sourceField: "benchmark" }
+    : { values: [], quality: "unknown" };
+}
+
 /** 地区归类只看基金实际跟踪的标的/基准/名称/类型，不看投资范围里"可投"品种列举，
  *  以免"美国存托凭证""港股通"等宽泛可投文本污染地区（如恒生科技被误归美国）。 */
 function regionSourceText(detail: SourceRecord): string {
@@ -292,6 +309,31 @@ function regionSourceText(detail: SourceRecord): string {
     detail.trackedIndexText, detail.benchmark, detail.fundName, detail.fundType,
     fields["跟踪标的"], fields["业绩比较基准"], fields["基金简称"], fields["基金类型"],
   ].map(textOf).filter(Boolean).join(" ");
+}
+
+/**
+ * 只从档案页明确描述“主要投资市场”的句子提取地区。
+ * 不扫描宽泛的投资范围品种列表，避免把“可投资美国存托凭证”等许可范围误当实际地区暴露。
+ */
+function sourceRegions(detail: SourceRecord): string[] {
+  const collected = arrayOf(detail.marketEvidence)
+    .map(recordOf)
+    .map((item) => textOf(item.region))
+    .filter(Boolean);
+  if (collected.length) return uniqueText(collected);
+  const sections = sectionsOf(detail);
+  const text = [
+    detail.investmentObjective,
+    sections["投资目标"],
+    sections["投资范围"],
+    sections["风险收益特征"],
+  ].map(textOf).filter(Boolean).join(" ");
+  const regions: string[] = [];
+  if (/主要投资(?:的境外市场)?(?:于|为)美国(?:证券)?市场|主要投资美国纳斯达克交易所|主要投资于美国证券市场/.test(text)) regions.push("美国");
+  if (/主要投资(?:的境外市场)?(?:于|为)(?:中国)?香港(?:证券)?市场|主要投资于港股/.test(text)) regions.push("中国香港");
+  if (/主要投资于(?:中国)?境内证券市场|主要投资于A股市场/.test(text)) regions.push("中国内地");
+  if (/主要投资于全球(?:证券)?市场/.test(text)) regions.push("全球");
+  return uniqueText(regions);
 }
 
 function classifiedRegions(detail: SourceRecord): string[] {
@@ -310,6 +352,26 @@ function classifiedRegions(detail: SourceRecord): string[] {
   return uniqueText(regions);
 }
 
+function regionsOf(detail: SourceRecord): {
+  values: string[];
+  quality: "extracted" | "classified" | "unknown";
+  sourceSection?: string;
+} {
+  const extracted = sourceRegions(detail);
+  if (extracted.length) {
+    const sourceSection = textOf(recordOf(arrayOf(detail.marketEvidence)[0]).sourceField);
+    return {
+      values: extracted,
+      quality: "extracted",
+      ...(sourceSection ? { sourceSection } : {}),
+    };
+  }
+  const classified = classifiedRegions(detail);
+  return classified.length
+    ? { values: classified, quality: "classified" }
+    : { values: [], quality: "unknown" };
+}
+
 function classifiedCurrency(detail: SourceRecord): string[] {
   const text = textOf(detail.currency);
   if (/^(?:元|人民币|CNY)$/i.test(text)) return ["CNY"];
@@ -319,26 +381,39 @@ function classifiedCurrency(detail: SourceRecord): string[] {
   return [];
 }
 
-function classifiedThemes(detail: SourceRecord): string[] {
-  const industries = arrayOf(detail.industries).map(recordOf)
+function sourceIndustries(detail: SourceRecord): Array<{ name: string; weight: number }> {
+  return arrayOf(detail.industries).map(recordOf)
     .map((industry) => ({ name: textOf(industry.HYMC ?? industry.name), weight: numberOf(industry.ZJZBL ?? industry.weightPct) }))
     .filter((industry) => industry.name && industry.weight > 0);
+}
+
+function themesOf(detail: SourceRecord): {
+  values: string[];
+  quality: "source" | "extracted" | "unknown";
+  evidenceKind?: "profile" | "industry";
+} {
+  const fields = fieldsOf(detail);
+  // 只看标题型来源字段；投资范围/策略正文会列举“银行存款”等可投工具，不能当主题。
+  const explicitThemes = explicitThemesFromSourceText([
+    detail.fundName,
+    detail.trackedIndexText,
+    fields["基金简称"],
+    fields["跟踪标的"],
+  ]);
+  if (explicitThemes.length) {
+    return { values: explicitThemes, quality: "extracted", evidenceKind: "profile" };
+  }
+
+  const industries = sourceIndustries(detail);
   if (industries.length) {
     const largest = Math.max(...industries.map((industry) => industry.weight));
-    return uniqueText(industries.filter((industry) => industry.weight === largest).map((industry) => industry.name));
+    return {
+      values: uniqueText(industries.filter((industry) => industry.weight === largest).map((industry) => industry.name)),
+      quality: "source",
+      evidenceKind: "industry",
+    };
   }
-  // 商品类资产（黄金/原油/贵金属）无行业配置时，按跟踪标的给主题，避免组合页"待识别"。
-  if (classifiedAssetClass(detail) === "commodity") {
-    const fields = fieldsOf(detail);
-    const text = [detail.trackedIndexText, detail.benchmark, detail.fundName, fields["跟踪标的"]]
-      .map(textOf).filter(Boolean).join(" ");
-    const themes: string[] = [];
-    if (/黄金|Au9999|贵金属/.test(text)) themes.push("黄金");
-    if (/原油|石油/.test(text)) themes.push("原油");
-    if (!themes.length && /商品/.test(text)) themes.push("商品");
-    return uniqueText(themes);
-  }
-  return [];
+  return { values: [], quality: "unknown" };
 }
 
 function classifiedAssetClass(detail: SourceRecord): AssetMetadata["assetClass"] {
@@ -366,27 +441,59 @@ function classifiedAssetClass(detail: SourceRecord): AssetMetadata["assetClass"]
 function mapAsset(holding: SourceRecord, detail: SourceRecord): AssetMetadata | null {
   const assetId = codeOf(holding.fundCode ?? holding.code);
   if (!assetId) return null;
-  const directIndexes = sourceIndexes(detail);
-  const indexes = directIndexes.length ? directIndexes : classifiedIndexes(detail);
-  const regions = classifiedRegions(detail);
+  const indexes = indexesOf(detail);
+  const regions = regionsOf(detail);
   const currencies = classifiedCurrency(detail);
-  const themes = classifiedThemes(detail);
+  const themes = themesOf(detail);
   const assetClass = classifiedAssetClass(detail);
+  const profileSourceUrl = textOf(detail.sourceUrl);
+  const industrySourceUrl = textOf(detail.industrySourceUrl)
+    || (sourceIndustries(detail).length ? `https://fundf10.eastmoney.com/hytz_${assetId}.html` : "");
+  const industryAsOf = dateOf(detail.industryAsOf);
+  const industries = sourceIndustries(detail);
+  const themeSourceUrl = themes.evidenceKind === "profile" ? profileSourceUrl : industrySourceUrl;
   return {
     assetId,
     name: textOf(holding.fundName ?? holding.name ?? detail.fundName) || undefined,
     assetClass,
-    regions,
-    indexes,
+    regions: regions.values,
+    indexes: indexes.values,
     currencies,
-    themes,
+    themes: themes.values,
     provenance: {
       assetClass: assetClass === "other" ? "unknown" : "classified",
-      regions: regions.length ? "classified" : "unknown",
-      indexes: indexes.length ? (directIndexes.length ? "source" : "classified") : "unknown",
+      regions: regions.quality,
+      indexes: indexes.quality,
       currencies: currencies.length ? "classified" : "unknown",
-      themes: themes.length ? "classified" : "unknown",
+      themes: themes.quality,
     },
+    evidence: {
+      ...(indexes.values.length && profileSourceUrl ? {
+        indexes: { sourceUrl: profileSourceUrl, sourceField: indexes.sourceField },
+      } : {}),
+      ...(regions.values.length && profileSourceUrl ? {
+        regions: {
+          sourceUrl: profileSourceUrl,
+          sourceField: "fund-profile",
+          ...(regions.sourceSection ? { sourceSection: regions.sourceSection } : {}),
+        },
+      } : {}),
+      ...(themes.quality !== "unknown" && themeSourceUrl
+        ? { themes: {
+            sourceUrl: themeSourceUrl,
+            sourceField: themes.evidenceKind === "industry" ? "industry-allocation" : "fund-profile",
+            ...(themes.evidenceKind === "industry" && industryAsOf ? { asOf: industryAsOf } : {}),
+          } }
+        : {}),
+    },
+    industryAllocations: industries,
+    ...(industrySourceUrl ? {
+      industryEvidence: {
+        sourceUrl: industrySourceUrl,
+        sourceField: "industry-allocation",
+        ...(industryAsOf ? { asOf: industryAsOf } : {}),
+      },
+    } : {}),
   };
 }
 
@@ -398,10 +505,36 @@ function transactionCoverageComplete(capture: EastmoneySourceCapture): boolean {
     if (arrayOf(range.warnings).length) return false;
     const expected = numberOf(range.expectedPages);
     const totalCount = numberOf(range.totalCount);
-    const pages = arrayOf(range.pages).map((page) => numberOf(recordOf(page).pageNum));
-    if (expected === 0) return totalCount === 0 && pages.includes(1);
-    return expected <= 200 && Array.from({ length: expected }, (_, index) => index + 1).every((page) => pages.includes(page));
+    const pageSize = numberOf(range.pageSize);
+    const rawPages = arrayOf(range.pages).map(recordOf);
+    const pages = rawPages.map((page) => numberOf(page.pageNum));
+    const recordCount = rawPages.reduce((sum, page) => sum + arrayOf(page.records).length, 0);
+    if (expected === 0) return totalCount === 0 && pages.includes(1) && recordCount === 0;
+    return expected <= 200
+      && pageSize > 0
+      && expected === Math.ceil(totalCount / pageSize)
+      && recordCount === totalCount
+      && Array.from({ length: expected }, (_, index) => index + 1).every((page) => pages.includes(page));
   });
+}
+
+function transactionCoverageWarnings(capture: EastmoneySourceCapture): string[] {
+  const warnings: string[] = [];
+  for (const rawRange of capture.transactionRanges) {
+    const range = recordOf(rawRange);
+    if (range.skipReason === "custom-date-dialog") continue;
+    const expected = numberOf(range.expectedPages);
+    const rawPages = arrayOf(range.pages).map(recordOf);
+    const pageNums = new Set(rawPages.map((page) => numberOf(page.pageNum)).filter(Boolean));
+    const recordCount = rawPages.reduce((sum, page) => sum + arrayOf(page.records).length, 0);
+    const totalCount = numberOf(range.totalCount);
+    if (expected > pageNums.size) {
+      warnings.push(`eastmoney:transactions-pages:${pageNums.size}/${expected}`);
+    }
+    if (recordCount !== totalCount) warnings.push(`eastmoney:transactions-records:${recordCount}/${totalCount}`);
+    if (arrayOf(range.warnings).length) warnings.push("eastmoney:transactions-source-warning");
+  }
+  return [...new Set(warnings)];
 }
 
 function rangesFromDates(dates: string[]): Array<{ start: string; end: string }> {
@@ -439,12 +572,16 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
   const tolerance = Math.max(0.01, Math.abs(totalAsset) * 0.0001);
   const cash = difference >= -tolerance ? Math.abs(difference) <= tolerance ? 0 : difference : undefined;
   const transactionComplete = transactionCoverageComplete(capture);
+  const transactionWarnings = transactionComplete ? [] : [
+    "eastmoney:transactions-partial",
+    ...transactionCoverageWarnings(capture),
+  ];
   const detailComplete = !holdings.length || holdings.every((holding) => detailFullyObserved(details.get(holding.assetId)));
   const dailyPnlComplete = !holdings.length || holdings.every((holding) => hasDetailResponse(details.get(holding.assetId), "yingkui"));
   const publicComplete = !holdings.length || holdings.every((holding) => publicDetailFullyObserved(publicDetails.get(holding.assetId)));
   const warnings = [...new Set([
     ...(capture.warnings || []).map(() => "eastmoney:source-warning"),
-    ...(transactionComplete ? [] : ["eastmoney:transactions-partial"]),
+    ...transactionWarnings,
     ...(dailyPnlComplete ? [] : ["eastmoney:daily-pnl-unknown"]),
     ...(detailComplete ? [] : ["eastmoney:fund-detail-partial"]),
     ...(publicComplete ? [] : ["eastmoney:fund-metadata-partial"]),
@@ -482,7 +619,7 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
     coverage: [
       coverageEntry("account", account ? [capturedDate] : [], account ? "complete" : "unknown", capturedAt, []),
       coverageEntry("holdings", hasAccount ? [capturedDate] : [], hasAccount ? "complete" : "unknown", capturedAt, []),
-      coverageEntry("transactions", transactions.map((item) => item.occurredAt.slice(0, 10)), transactionComplete ? "complete" : transactions.length ? "partial" : "unknown", capturedAt, transactionComplete ? [] : ["eastmoney:transactions-partial"]),
+      coverageEntry("transactions", transactions.map((item) => item.occurredAt.slice(0, 10)), transactionComplete ? "complete" : transactions.length ? "partial" : "unknown", capturedAt, transactionWarnings),
       coverageEntry("dailyPnl", dailyPnlRecords.map((item) => item.date), dailyPnlComplete ? "complete" : dailyPnlRecords.length ? "partial" : "unknown", capturedAt, dailyPnlComplete ? [] : ["eastmoney:daily-pnl-unknown"]),
       coverageEntry("fundDetail", hasAccount ? [capturedDate] : [], hasAccount ? detailComplete && publicComplete ? "complete" : "partial" : "unknown", capturedAt, detailComplete && publicComplete ? [] : ["eastmoney:fund-metadata-partial"]),
     ],

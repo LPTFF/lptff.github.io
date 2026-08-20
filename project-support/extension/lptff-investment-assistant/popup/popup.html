@@ -9,7 +9,7 @@
   <body>
     <main class="popup">
       <h1>LPTFF Investment OS</h1>
-      <p>复用一个账户页和一个交易页并行采集全面来源事实，再交给 Investment OS 按页面需要加工。插件不读取或保存 Cookie、密码和认证令牌。</p>
+      <p>复用一个账户页和一个交易页并行采集全面来源事实，再交给 Investment OS 按页面需要加工。分页所需认证信息只在来源页面内存中临时复用，不写入采集包或本地存储。</p>
       <button id="collect" type="button">开始高效采集</button>
       <div id="branches" class="branches" aria-live="polite"></div>
       <div id="coverage" aria-live="polite"></div>
@@ -21,8 +21,9 @@
         <label>交易分页并行数(1-8) <input id="cfg-query-concurrency" type="number" min="1" max="8" /></label>
         <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3" title="0=近1周, 1=近1月, 2=近3月, 3=近1年；4为自定义日期需手动查询，默认 3" /></label>
         <button id="cfg-save" type="button" class="secondary">保存设置</button>
-        <button id="backup" type="button" class="secondary" disabled>下载完整本地备份</button>
-        <button id="sample" type="button" class="secondary" disabled>下载脱敏开发样本</button>
+        <button id="backup" type="button" class="secondary" aria-describedby="download-hint" disabled>下载完整本地备份</button>
+        <button id="sample" type="button" class="secondary" aria-describedby="download-hint" disabled>下载脱敏开发样本</button>
+        <p id="download-hint" class="action-hint">完成一次采集后，下载按钮会由灰色变为蓝色并可点击。</p>
       </details>
     </main>
     <script src="popup.js"></script>

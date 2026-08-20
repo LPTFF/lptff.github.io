@@ -1,6 +1,9 @@
 const PROFILE_URL = (code) => `https://fundf10.eastmoney.com/jbgk_${encodeURIComponent(code)}.html`;
 const CURRENCY_URL = (code) => `https://fund.eastmoney.com/${encodeURIComponent(code)}.html`;
-const INDUSTRY_URL = (code) => `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=${new Date().getFullYear()}`;
+const INDUSTRY_PAGE_URL = (code) => `https://fundf10.eastmoney.com/hytz_${encodeURIComponent(code)}.html`;
+// 与基金档案页的真实请求保持一致：year 留空，由来源返回最新已披露季度。
+// 若强制传当前年份，年初尚未披露当年报告时可能错误得到空行业配置。
+const INDUSTRY_URL = (code) => `https://api.fund.eastmoney.com/f10/HYPZ/?fundCode=${encodeURIComponent(code)}&year=`;
 
 function textOf(node) {
   return String(node?.textContent || "").replace(/\s+/g, " ").trim();
@@ -64,6 +67,7 @@ async function collectProfile(code) {
     const documentNode = new DOMParser().parseFromString(html, "text/html");
     const fields = fieldMap(documentNode);
     const sections = sectionMap(documentNode);
+    const marketEvidence = globalThis.LPTFFPublicFundMetadata?.marketEvidenceFromSections(sections) || [];
     if (Object.keys(fields).length || Object.keys(sections).length) {
       return {
         fields,
@@ -74,6 +78,7 @@ async function collectProfile(code) {
         trackedIndexText: fields["跟踪标的"] || undefined,
         investmentObjective: sections["投资目标"] || undefined,
         investmentScope: sections["投资范围"] || undefined,
+        marketEvidence,
         sourceUrl: PROFILE_URL(code),
       };
     }
@@ -103,6 +108,8 @@ async function collectIndustry(code) {
         return {
           asOf: latest?.JZRQ || undefined,
           industries: Array.isArray(latest?.HYPZInfo) ? latest.HYPZInfo : [],
+          sourceUrl: INDUSTRY_PAGE_URL(code),
+          availability: Array.isArray(latest?.HYPZInfo) && latest.HYPZInfo.length ? "available" : "not-applicable",
         };
       }
     }
@@ -122,7 +129,7 @@ async function collectFund(holding) {
   const warnings = [];
   const profile = settled[0].status === "fulfilled" ? settled[0].value : {};
   const currency = settled[1].status === "fulfilled" ? settled[1].value : "";
-  const industry = settled[2].status === "fulfilled" ? settled[2].value : { industries: [] };
+  const industry = settled[2].status === "fulfilled" ? settled[2].value : { industries: [], availability: "unknown" };
   if (settled[0].status === "rejected") warnings.push(`${fundCode}：${settled[0].reason?.message || "基金概况采集失败"}`);
   if (settled[1].status === "rejected") warnings.push(`${fundCode}：${settled[1].reason?.message || "计价币种采集失败"}`);
   if (settled[2].status === "rejected") warnings.push(`${fundCode}：${settled[2].reason?.message || "行业配置采集失败"}`);
@@ -132,6 +139,8 @@ async function collectFund(holding) {
     currency: currency || undefined,
     industryAsOf: industry.asOf,
     industries: industry.industries,
+    industrySourceUrl: industry.sourceUrl,
+    industryAvailability: industry.availability,
     warnings,
   };
 }
@@ -161,6 +170,10 @@ async function collectPublicFunds(holdings, concurrency, onProgress) {
 }
 
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "OFFSCREEN_PING") {
+    sendResponse({ ok: true });
+    return false;
+  }
   if (message?.type !== "OFFSCREEN_COLLECT_PUBLIC_FUNDS") return undefined;
   collectPublicFunds(message.holdings || [], message.concurrency || 4)
     .then((items) => sendResponse({ ok: true, items }))

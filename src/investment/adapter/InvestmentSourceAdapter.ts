@@ -65,8 +65,11 @@ export class DatasetSourceAdapter implements InvestmentSourceAdapter {
   }
 
   async getTransactions(): Promise<TransactionBatch> {
-    // 一次性 dataset 已含全部交易，分页默认完成；若来源已知不完整应由 coverage 标 partial。
-    return { transactions: this.dataset.transactions, pagingComplete: true };
+    const coverage = this.dataset.coverage.find((item) => item.dataset === "transactions");
+    return {
+      transactions: this.dataset.transactions,
+      pagingComplete: coverage?.completeness === "complete",
+    };
   }
 
   async getDailyPnL(assetId: string): Promise<DailyPnL[]> {

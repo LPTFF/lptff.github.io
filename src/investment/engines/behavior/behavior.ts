@@ -167,7 +167,7 @@ export function buildBehaviorActions(transactions: Transaction[], today: string)
 
   for (const tx of abnormal) {
     actions.push({
-      id: `act:abnormal:${tx.id}:${today}`,
+      id: `act:abnormal:${tx.id}`,
       type: "ABNORMAL_TRANSACTION",
       status: "open",
       createdAt: today,
@@ -179,10 +179,17 @@ export function buildBehaviorActions(transactions: Transaction[], today: string)
 
   const assignmentMap = new Map(assignments.map((a) => [a.txId, a.behaviorType]));
   for (const tx of transactions) {
-    if (tx.status === "failed" || tx.status === "cancelled") continue;
-    if (assignmentMap.get(tx.id) === "UNKNOWN") {
+    // 只有来源确实无法解释、且已形成事实的 OTHER 才需要用户确认。
+    // 待确认申请以及转账、分红、费用都是已知语义，不属于“无法分类的新行为”。
+    const isFinalFact = tx.status === "confirmed" || tx.status === "partially_confirmed";
+    if (
+      isFinalFact
+      && tx.type === "OTHER"
+      && tx.classificationWarning === "unmapped_transaction_type"
+      && assignmentMap.get(tx.id) === "UNKNOWN"
+    ) {
       actions.push({
-        id: `act:unclassified:${tx.id}:${today}`,
+        id: `act:unclassified:${tx.id}`,
         type: "UNCLASSIFIED_TRANSACTION",
         status: "open",
         createdAt: today,

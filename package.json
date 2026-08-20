@@ -14,6 +14,7 @@
     "collect:rss:fixture": "node ./project-support/scripts/collectors/rss/collect.js --fixture",
     "verify:rss:local": "npm run test:collectors && npm run collect:rss:site && npm run build && vite preview --open /newsArticle",
     "test:collectors": "node --test ./project-support/scripts/collectors/tests/*.test.js",
+    "test:investment": "node --experimental-strip-types --test ./project-support/scripts/investment/tests/*.test.mjs",
     "test:crawlers": "python -m unittest discover -s project-support/crawl/tests -v",
     "crawl": "python project-support/crawl/run_collectors.py",
     "crawl:full": "python project-support/crawl/run_collectors.py --full"
