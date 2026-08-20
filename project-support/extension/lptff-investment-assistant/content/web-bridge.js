@@ -7,15 +7,37 @@
 
   const CONTEXT_INVALIDATED_MESSAGE = "采集插件已更新或重新加载，当前页面中的旧连接已失效。请刷新当前基金复盘页面后重试";
   let contextInvalidated = false;
+  let lifecyclePort = null;
 
-  try {
-    const lifecyclePort = chrome.runtime.connect({ name: "lptff-web-bridge-lifecycle" });
-    lifecyclePort.onDisconnect.addListener(() => {
+  function connectLifecyclePort() {
+    if (lifecyclePort || contextInvalidated) return;
+
+    try {
+      const port = chrome.runtime.connect({ name: "lptff-web-bridge-lifecycle" });
+      lifecyclePort = port;
+      port.onDisconnect.addListener(() => {
+        let disconnectMessage = "";
+        try {
+          // Reading lastError prevents Chrome from reporting an unchecked error.
+          disconnectMessage = chrome.runtime.lastError?.message || "";
+        } catch {
+          contextInvalidated = true;
+        }
+
+        if (lifecyclePort === port) lifecyclePort = null;
+        if (/back\/forward cache/i.test(disconnectMessage)) return;
+        contextInvalidated = true;
+      });
+    } catch {
       contextInvalidated = true;
-    });
-  } catch {
-    contextInvalidated = true;
+    }
   }
+
+  connectLifecyclePort();
+
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) connectLifecyclePort();
+  });
 
   function postResponse(message, responseType, response) {
     window.postMessage({

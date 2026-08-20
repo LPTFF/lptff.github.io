@@ -548,7 +548,12 @@ async function runAutoCollection() {
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== WEB_BRIDGE_LIFECYCLE_PORT) return;
   webBridgePorts.add(port);
-  port.onDisconnect.addListener(() => webBridgePorts.delete(port));
+  port.onDisconnect.addListener(() => {
+    // Chrome closes extension ports when their page enters the back/forward cache.
+    // Reading lastError keeps that expected lifecycle event out of the error log.
+    void chrome.runtime.lastError;
+    webBridgePorts.delete(port);
+  });
 });
 
 chrome.tabs.onRemoved.addListener((tabId) => preservedLoginTabIds.delete(tabId));
