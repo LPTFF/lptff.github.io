@@ -36,8 +36,18 @@ const STAGING_KEY = "investmentStaging";
 const RECEIPT_KEY = "investmentTransferReceipt";
 const WEB_BRIDGE_LIFECYCLE_PORT = "lptff-web-bridge-lifecycle";
 const webBridgePorts = new Set();
+const preservedLoginTabIds = new Set();
 const OFFSCREEN_PATH = "offscreen/offscreen.html";
 let PAGE_TIMEOUT = 30000;
+
+class LoginRequiredError extends Error {
+  constructor(tabId) {
+    super("已为你保留并打开天天基金登录页。请先完成登录，再回到基金复盘页面点击“重新采集”");
+    this.name = "LoginRequiredError";
+    this.reason = "login-required";
+    this.tabId = tabId;
+  }
+}
 
 function boundedConcurrency(value, fallback = 4) {
   return Math.max(1, Math.min(8, Number(value) || fallback));
@@ -162,7 +172,10 @@ async function assertCollectorPage(tabId, expectedHostname) {
     // The URL check below reports the actionable collection error.
   }
   if (hostname === "login.1234567.com.cn") {
-    throw new Error("天天基金登录状态已失效，请先登录天天基金并确认可以打开持仓页面，然后重新采集");
+    task.tabIds = task.tabIds.filter((id) => id !== tabId);
+    preservedLoginTabIds.add(tabId);
+    await callChrome(chrome.tabs, chrome.tabs.update, tabId, { active: true });
+    throw new LoginRequiredError(tabId);
   }
   if (hostname !== expectedHostname) {
     throw new Error(`采集页面跳转到了非预期地址：${currentUrl || "未知地址"}`);
@@ -171,6 +184,7 @@ async function assertCollectorPage(tabId, expectedHostname) {
 
 async function closeCollectorTab(tabId) {
   task.tabIds = task.tabIds.filter((id) => id !== tabId);
+  if (preservedLoginTabIds.has(tabId)) return;
   try {
     await callChrome(chrome.tabs, chrome.tabs.remove, tabId);
   } catch {
@@ -269,6 +283,7 @@ async function runBranch(name, total, operation, fallback, warningLabel) {
     finishBranch(name, startedAt);
     return result;
   } catch (error) {
+    if (error instanceof LoginRequiredError) throw error;
     const message = `${warningLabel}：${error instanceof Error ? error.message : "采集失败"}`;
     task.warnings.push(message);
     finishBranch(name, startedAt, "partial");
@@ -398,6 +413,7 @@ async function runAutoCollection() {
   notifyProgress();
 
   let holdTabId;
+  let queryTabId;
   try {
     const cfg = await LPTFFConfig.load();
     PAGE_TIMEOUT = cfg.pageTimeout;
@@ -412,6 +428,8 @@ async function runAutoCollection() {
     const capturedAt = new Date().toISOString();
     task.branches.privateDetails.total = holdings.length;
     task.branches.publicFunds.total = holdings.length;
+    queryTabId = await openCollectorTab(QUERY_URL);
+    await assertCollectorPage(queryTabId, "query.1234567.com.cn");
     setStage("collecting");
 
     const privatePromise = runBranch(
@@ -446,9 +464,7 @@ async function runAutoCollection() {
       "transactions",
       0,
       async () => {
-        const queryTabId = await openCollectorTab(QUERY_URL);
         try {
-          await assertCollectorPage(queryTabId, "query.1234567.com.cn");
           const response = await sendToTab(queryTabId, {
             type: "AUTO_COLLECT_PAGE",
             mode: "transactions",
@@ -459,6 +475,7 @@ async function runAutoCollection() {
           return response.data || { ranges: [], requestCount: 0 };
         } finally {
           await closeCollectorTab(queryTabId);
+          queryTabId = undefined;
         }
       },
       { ranges: [], requestCount: 0 },
@@ -511,9 +528,15 @@ async function runAutoCollection() {
   } catch (error) {
     task.warnings.push(error instanceof Error ? error.message : "自动采集失败");
     setStage("error");
-    return { ok: false, error: task.warnings[task.warnings.length - 1], warnings: [...task.warnings] };
+    return {
+      ok: false,
+      error: task.warnings[task.warnings.length - 1],
+      reason: error instanceof LoginRequiredError ? error.reason : undefined,
+      warnings: [...task.warnings],
+    };
   } finally {
     if (holdTabId) await closeCollectorTab(holdTabId);
+    if (queryTabId) await closeCollectorTab(queryTabId);
     await closeTaskTabs();
     await closeOffscreenDocument();
     task.running = false;
@@ -527,6 +550,8 @@ chrome.runtime.onConnect.addListener((port) => {
   webBridgePorts.add(port);
   port.onDisconnect.addListener(() => webBridgePorts.delete(port));
 });
+
+chrome.tabs.onRemoved.addListener((tabId) => preservedLoginTabIds.delete(tabId));
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "SOURCE_BRANCH_PROGRESS") {

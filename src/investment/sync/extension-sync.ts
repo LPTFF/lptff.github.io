@@ -99,6 +99,14 @@ interface StagingResponse {
   staging?: InvestmentStagingBatch | null;
   status?: InvestmentExtensionStatus;
   error?: string;
+  reason?: "login-required";
+}
+
+export class InvestmentCollectionRequestError extends Error {
+  constructor(message: string, readonly reason?: StagingResponse["reason"]) {
+    super(message);
+    this.name = "InvestmentCollectionRequestError";
+  }
 }
 
 function requestId(): string {
@@ -152,12 +160,14 @@ export async function discardInvestmentStaging(): Promise<void> {
 }
 
 export async function startInvestmentCollection(): Promise<void> {
-  const response = await requestBridge<{ ok: boolean; error?: string }>(
+  const response = await requestBridge<StagingResponse>(
     "LPTFF_INVESTMENT_START_COLLECTION",
     "LPTFF_INVESTMENT_COLLECTION_STARTED",
     30 * 60 * 1000,
   );
-  if (!response.ok) throw new Error(response.error || "采集插件采集失败");
+  if (!response.ok) {
+    throw new InvestmentCollectionRequestError(response.error || "采集插件采集失败", response.reason);
+  }
 }
 
 export function listenInvestmentCollectionProgress(listener: (progress: CollectionProgress) => void): () => void {

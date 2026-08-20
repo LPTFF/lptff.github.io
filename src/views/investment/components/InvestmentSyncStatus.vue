@@ -3,11 +3,11 @@
     v-if="visible"
     :type="alertType"
     :title="title"
-    :description="description"
     show-icon
     :closable="false"
     class="sync-status"
   >
+    <p v-if="description" class="status-description">{{ description }}</p>
     <div v-if="busy" class="progress-row">
       <el-progress :percentage="progressPct" :indeterminate="indeterminate" :duration="2" />
     </div>
@@ -19,9 +19,10 @@
     </div>
     <div class="status-meta">
       <span>插件待导入：{{ stagingLabel }}</span>
-      <span>最近导入：{{ lastImportLabel }}</span>
+      <span v-if="collectionAttemptFailed">现有账本：未受本次重采影响</span>
+      <span>最近成功导入：{{ lastImportLabel }}</span>
       <span v-if="collectionMetricLabel">{{ collectionMetricLabel }}</span>
-      <span v-if="state.lastImport">交易新增 {{ state.lastImport.addedTransactions }}，重复 {{ state.lastImport.duplicateTransactions }}</span>
+      <span v-if="state.lastImport">最近成功导入交易：新增 {{ state.lastImport.addedTransactions }}，重复 {{ state.lastImport.duplicateTransactions }}</span>
     </div>
   </el-alert>
 </template>
@@ -32,7 +33,16 @@ import { useInvestmentOS } from "../../../investment/composables/use-investment-
 
 const { state } = useInvestmentOS();
 
-const busy = computed(() => state.syncing || state.collecting);
+const collectionAttemptFailed = computed(() =>
+  state.collectionRecovery === "login-required"
+  || state.syncPhase === "failed"
+  || state.collectionProgress?.stage === "error"
+);
+const collectionInProgress = computed(() =>
+  state.collecting
+  && !["completed", "error"].includes(state.collectionProgress?.stage ?? "idle")
+);
+const busy = computed(() => state.syncing || collectionInProgress.value);
 // 只在有可展示/可操作状态时渲染：进行中 / 有待导入数据 / 失败或有错误。
 // idle（无待导入、无操作）、up-to-date 与 completed（导入后已同步的常态）都不显示，
 // 避免常驻的"成功"横幅噪音；瞬时反馈由按钮 toast 承担。
@@ -44,7 +54,8 @@ const visible = computed(() =>
   || Boolean(state.error)
 );
 const alertType = computed<"success" | "warning" | "error" | "info">(() => {
-  if (state.syncPhase === "failed") return "error";
+  if (state.collectionRecovery === "login-required") return "warning";
+  if (collectionAttemptFailed.value) return "error";
   if (state.lastFailures.length) return "warning";
   return "info";
 });
@@ -55,7 +66,7 @@ const STAGE_LABEL: Record<string, string> = {
   collecting: "并行采集基金详情、公开档案和交易分页",
   processing: "构建全面来源采集包",
   completed: "采集完成",
-  error: "采集出错",
+  error: "采集未完成",
 };
 
 const BRANCH_STATUS: Record<string, string> = {
@@ -93,18 +104,23 @@ const activeBranchLabel = computed(() => {
 });
 
 const title = computed(() => {
-  if (state.collecting) {
+  if (state.collectionRecovery === "login-required") return "等待天天基金登录";
+  if (state.syncing) return "正在导入插件数据";
+  if (collectionAttemptFailed.value) return "本次重新采集未完成";
+  if (collectionInProgress.value) {
     const progress = state.collectionProgress;
     const stageLabel = STAGE_LABEL[progress?.stage ?? "idle"] ?? "采集中";
     const detail = activeBranchLabel.value ? `（${activeBranchLabel.value}）` : "";
-    return `插件正在采集完整来源数据：${stageLabel}${detail}`;
+    return `正在采集投资来源数据：${stageLabel}${detail}`;
   }
-  if (state.syncing) return "正在导入插件数据";
-  if (state.syncPhase === "failed") return "本次操作失败";
   if (state.extensionStatus?.pending) return "有一批采集数据等待导入";
   return "插件数据传输状态";
 });
-const description = computed(() => state.error || state.syncMessage);
+const description = computed(() => {
+  const message = state.error || state.syncMessage;
+  if (!collectionAttemptFailed.value || !state.lastImport) return message;
+  return `${message}；本次重新采集没有覆盖现有账本数据。`;
+});
 const stagingLabel = computed(() => {
   if (state.extensionStatus?.pending) return "有一批数据等待导入";
   if (state.extensionStatus?.receipt?.status === "imported") return "已在导入后清除";
@@ -113,6 +129,7 @@ const stagingLabel = computed(() => {
 });
 const lastImportLabel = computed(() => state.lastImport?.capturedAt ? formatDateTime(state.lastImport.capturedAt) : "尚无导入记录");
 const collectionMetricLabel = computed(() => {
+  if (collectionAttemptFailed.value) return "";
   const metrics = state.collectionProgress?.metrics;
   if (!metrics || (!state.collecting && !metrics.totalMs)) return "";
   const elapsed = metrics.elapsedMs ?? metrics.totalMs;
@@ -157,6 +174,11 @@ function formatDateTime(value: string): string {
 }
 .progress-row {
   margin: 10px 0 4px;
+}
+.status-description {
+  margin: 2px 0 8px;
+  color: var(--el-text-color-regular);
+  line-height: 1.6;
 }
 .branch-list {
   display: flex;

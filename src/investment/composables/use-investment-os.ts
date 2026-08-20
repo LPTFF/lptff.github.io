@@ -39,6 +39,7 @@ import {
   buildRealAccountScope,
   discardInvestmentStaging,
   importInvestmentStaging,
+  InvestmentCollectionRequestError,
   listenInvestmentCollectionProgress,
   readInvestmentExtensionStatus,
   startInvestmentCollection,
@@ -90,6 +91,7 @@ export interface InvestmentOsState {
   lastSyncStatus?: "ok" | "partial" | "failed";
   lastFailures: string[];
   error?: string;
+  collectionRecovery?: "login-required";
 }
 
 const state = reactive<InvestmentOsState>({
@@ -245,6 +247,20 @@ async function refreshExtensionStatus(): Promise<InvestmentExtensionStatus | und
     state.extensionStatus = await readInvestmentExtensionStatus();
     state.collectionProgress = state.extensionStatus.collection;
     state.collecting = state.extensionStatus.collection.running;
+    const latestCollectionSucceeded =
+      state.extensionStatus.collection.stage === "completed"
+      && !state.extensionStatus.collection.running
+      && state.extensionStatus.collection.warnings.length === 0;
+    if (latestCollectionSucceeded) {
+      state.error = undefined;
+      state.collectionRecovery = undefined;
+      if (state.syncPhase === "failed") {
+        state.syncPhase = state.extensionStatus.pending ? "completed" : "up-to-date";
+        state.syncMessage = state.extensionStatus.pending
+          ? "全面来源采集完成，新批次等待导入"
+          : "最近一次采集已完成，当前没有待导入数据";
+      }
+    }
     if (state.syncPhase === "idle") {
       if (state.extensionStatus.pending) {
         state.syncMessage = "插件中有一批采集完成的数据等待导入";
@@ -310,6 +326,7 @@ async function startCollection(): Promise<boolean> {
   }
   state.collecting = true;
   state.error = undefined;
+  state.collectionRecovery = undefined;
   state.syncPhase = "checking";
   state.syncMessage = "正在启动插件采集…";
   try {
@@ -321,8 +338,11 @@ async function startCollection(): Promise<boolean> {
     return true;
   } catch (e) {
     state.collecting = false;
-    state.syncPhase = "failed";
-    state.syncMessage = "插件采集失败";
+    state.collectionRecovery = e instanceof InvestmentCollectionRequestError ? e.reason : undefined;
+    state.syncPhase = state.collectionRecovery === "login-required" ? "idle" : "failed";
+    state.syncMessage = state.collectionRecovery === "login-required"
+      ? "等待天天基金登录，完成后请重新采集"
+      : "插件采集失败";
     state.error = (e as Error).message;
     return false;
   }
@@ -364,7 +384,7 @@ const stopCollectionProgressListener = typeof window === "undefined"
   ? () => undefined
   : listenInvestmentCollectionProgress((progress) => {
     state.collectionProgress = progress;
-    state.collecting = progress.running;
+    state.collecting = progress.running && !["completed", "error"].includes(progress.stage);
     const activeBranches = Object.values(progress.branches ?? {})
       .filter((branch) => branch.status === "running")
       .map((branch) => branch.total ? `${branch.label} ${branch.completed}/${branch.total}` : branch.label)
@@ -379,7 +399,18 @@ const stopCollectionProgressListener = typeof window === "undefined"
       error: "插件采集失败",
     };
     state.syncMessage = labels[progress.stage] ?? "插件正在采集数据…";
-    if (progress.stage === "completed") state.syncPhase = "completed";
+    if (["preparing", "hold", "collecting", "processing"].includes(progress.stage)) {
+      state.error = undefined;
+      state.collectionRecovery = undefined;
+      state.syncPhase = "checking";
+    }
+    if (progress.stage === "completed") {
+      state.syncPhase = "completed";
+      if (progress.warnings.length === 0) {
+        state.error = undefined;
+        state.collectionRecovery = undefined;
+      }
+    }
     if (progress.stage === "error") {
       state.syncPhase = "failed";
       state.error = progress.warnings.filter(Boolean).join("；") || "插件采集失败，请检查天天基金登录状态后重试";

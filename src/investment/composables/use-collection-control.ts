@@ -36,6 +36,8 @@ export function useCollectionControl() {
       ElMessage.success("采集完成，新批次等待导入");
     } else if (state.extensionStatus?.pending) {
       ElMessage.warning(state.syncMessage || "插件中仍有一批待导入数据，请先读取或丢弃");
+    } else if (state.collectionRecovery === "login-required") {
+      ElMessage.warning(state.error || "请先在已打开的天天基金页面完成登录，再回到本页重新采集");
     } else {
       ElMessage.error(state.error || state.syncMessage || "采集失败，请确认插件已安装并登录天天基金");
     }
