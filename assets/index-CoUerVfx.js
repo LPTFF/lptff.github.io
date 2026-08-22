@@ -1,0 +1,1 @@
+import{j as s}from"./dayjs.min-D0rMPtc7.js";import{z as o,s as t,u as r}from"./vue-vendor-CPL9WsH-.js";const a=["","default","small","large"],c=s({type:String,values:a,required:!1}),i=Symbol("size"),l=()=>{const e=o(i,{});return t(()=>r(e.size)||"")};export{i as S,l as a,a as c,c as u};
