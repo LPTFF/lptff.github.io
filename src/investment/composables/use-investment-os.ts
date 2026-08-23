@@ -59,6 +59,7 @@ import {
 import { buildBehaviorActions } from "../engines/behavior";
 import { assertDecisionImmutable } from "../engines/review/operation-compliance";
 import { calculateReductionQuantity } from "../engines/review/reduction";
+import bundledSnapshotUrl from "../../../project-support/fixtures/investment/eastmoney-source-desensitized.json?url";
 
 export interface InvestmentOsState {
   loaded: boolean;
@@ -814,13 +815,13 @@ function failCaptureImport(error: unknown, message: string): false {
 
 /**
  * 加载脱敏采集快照到 Ledger，供页面结构审查。数据源是天天基金扩展采集的脱敏 JSON（协议
- * eastmoney-source-capture/1.0），通过 fetch public 副本读取后走 importSourceCapture。
+ * eastmoney-source-capture/1.0），由 Vite 从仓库内唯一 fixture 生成资源 URL 后走 importSourceCapture。
  * 该快照由用户显式导入，不作为当前账户默认数据。
  */
 async function loadRealFixtureSnapshot(): Promise<boolean> {
   beginCaptureImport("bundled-snapshot", "内置脱敏快照", "正在读取内置脱敏快照…");
   try {
-    const res = await fetch("/fixtures/investment/eastmoney-source-desensitized.json");
+    const res = await fetch(bundledSnapshotUrl);
     if (!res.ok) throw new Error(`读取采集快照失败：HTTP ${res.status}`);
     const capture = await res.json() as EastmoneySourceCapture;
     return await importSourceCapture(capture, "已加载脱敏采集快照（天天基金采集 2026-08-20，交易 72/72 页），仅供结构审查");

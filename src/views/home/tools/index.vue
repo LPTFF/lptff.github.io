@@ -10,7 +10,9 @@
             shadow="hover">
             <el-link :href="item.url" target="_blank" class="website-link" underline="never"
               @click.prevent="gotoNewsWebsite(item)">
-              <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)" />
+              <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)">
+                <span class="icon-fallback" :style="{ backgroundColor: fallbackColor(item.name) }">{{ fallbackChar(item.name) }}</span>
+              </el-avatar>
               {{ item.name }}
             </el-link>
           </el-card>
@@ -91,18 +93,29 @@ export default defineComponent({
       ];
       return colors[parentIndex % 5]; // 每5次循环一次
     };
+    // 图标地址在 websiteGroups.json 中显式指向目标站点的官方 favicon 或官方 CDN；
+    // 官方资源失败时由 el-avatar 默认 slot 显示首字符色块
     const resolveIcon = (icon: string) => {
       if (icon === "InternalWebsite") {
         return logoImageUrl; // 替换为实际路径
       }
       return icon;
     };
+    const fallbackPalette = ["#5b8ff9", "#5ad8a6", "#f6bd16", "#e8684a", "#6dc8ec", "#9270ca"];
+    const fallbackChar = (name: string) => (name || "?").trim().charAt(0);
+    const fallbackColor = (name: string) => {
+      let hash = 0;
+      for (const char of name || "") hash = (hash * 31 + char.charCodeAt(0)) % 997;
+      return fallbackPalette[hash % fallbackPalette.length];
+    };
     return {
       websiteSource,
       gotoNewsWebsite,
       websiteTransformType,
       getBackgroundColor,
-      resolveIcon
+      resolveIcon,
+      fallbackChar,
+      fallbackColor
     };
   },
   components: {
@@ -128,5 +141,16 @@ export default defineComponent({
 
 .website-link {
   margin: 10px;
+}
+
+.icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
 }
 </style>

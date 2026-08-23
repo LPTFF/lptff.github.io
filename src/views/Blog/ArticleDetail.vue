@@ -129,7 +129,9 @@ onBeforeUnmount(() => observer?.disconnect());
   overflow: hidden;
 }
 
-.markdown-body :deep(img) {
+/* 非 scoped 样式中 :deep() 不会被编译转换（产出非法选择器被浏览器丢弃），
+   markdown 组件渲染在本容器内，直接用 .markdown-body 前缀即可 */
+.markdown-body img {
   display: block;
   max-width: 100%;
   height: auto;
@@ -138,7 +140,7 @@ onBeforeUnmount(() => observer?.disconnect());
   cursor: zoom-in;
 }
 
-.markdown-body :deep(pre) {
+.markdown-body pre {
   overflow: auto;
   padding: 16px;
   background: #1f2937;
@@ -146,23 +148,32 @@ onBeforeUnmount(() => observer?.disconnect());
   border-radius: 8px;
 }
 
-.markdown-body :deep(code) {
+.markdown-body code {
   font-family: Consolas, monospace;
 }
 
-.markdown-body :deep(table) {
+.markdown-body table {
   display: block;
   overflow: auto;
   border-collapse: collapse;
+  margin: 14px auto;
 }
 
-.markdown-body :deep(th),
-.markdown-body :deep(td) {
+.markdown-body th,
+.markdown-body td {
   padding: 7px 12px;
   border: 1px solid #dcdfe6;
 }
 
-.markdown-body :deep(blockquote) {
+.markdown-body th {
+  background: #f5f7fa;
+}
+
+.markdown-body tr:nth-child(2n) {
+  background: #fafafa;
+}
+
+.markdown-body blockquote {
   margin-left: 0;
   padding-left: 16px;
   border-left: 4px solid #b3e19d;

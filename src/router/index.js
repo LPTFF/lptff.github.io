@@ -26,13 +26,26 @@ const routes = [
   { path: "/about", redirect: "/blog/about" },
   { path: "/study/notebook/:pathMatch(.*)*", component: () => import("../views/Blog/LegacyBlogRedirect.vue") },
   { path: "/:year(2018|2019)/:month/:day/:pathMatch(.*)*", component: () => import("../views/Blog/LegacyBlogRedirect.vue") },
-  { path: "/message", name: "message", component: () => import("../views/Message/index.vue") },
+  {
+    path: "/message",
+    redirect: "/blog/articles/fund-tools-evolution",
+  },
   { path: "/fundHoldInfoMsg", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") },
   { path: "/newsArticle", name: "newsArticle", component: () => import("../views/Message/NewsArticle.vue") },
   { path: "/loginFund", name: "loginFund", component: () => import("../views/Login/FundLogin.vue") },
-  { path: "/fundPilot", name: "fundPilot", component: () => import("../views/Message/FundPilot.vue") },
-  { path: "/fundPilotPlus", name: "fundPilotPlus", component: () => import("../views/Message/FundPilotPlus.vue") },
-  { path: "/fundPilotV1", name: "fundPilotV1", component: () => import("../views/Message/FundPilotV1.vue") },
+  // 旧版基金工具（买入建议/三代持仓分析）已归档，详见博客 fund-tools-evolution
+{
+  path: "/fundPilot",
+  redirect: "/blog/articles/fund-tools-evolution",
+},
+{
+  path: "/fundPilotPlus",
+  redirect: "/blog/articles/fund-tools-evolution",
+},
+{
+  path: "/fundPilotV1",
+  redirect: "/blog/articles/fund-tools-evolution",
+},
   { path: "/cryptocurrency", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") },
   {
     path: "/welfare",
@@ -86,6 +99,74 @@ const routes = [
           { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue"), meta: { title: "待办", product: "基金复盘助手" } },
           { path: "data", name: "os-data", component: () => import("../views/investment/DataView.vue"), meta: { title: "采集", product: "基金复盘助手" } },
           { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "明细", product: "基金复盘助手" } },
+        ],
+      },
+    ],
+  },
+  {
+    path: "/boss-zhipin",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "BOSS直聘" },
+    children: [
+      {
+        path: "",
+        name: "boss-zhipin",
+        component: () => import("../views/home/bossZhipin/index.vue"),
+      },
+    ],
+  },
+  {
+    path: "/pending",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "功能待完善" },
+    children: [
+      {
+        path: "",
+        name: "pending-feature",
+        component: () => import("../views/home/pendingFeature/index.vue"),
+      },
+    ],
+  },
+  {
+    path: "/live2d",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "看板娘" },
+    children: [
+      {
+        path: "",
+        name: "live2d",
+        component: () => import("../views/home/live2d/index.vue"),
+      },
+    ],
+  },
+  {
+    path: "/devtools",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "开发工具" },
+    children: [
+      {
+        path: "",
+        component: () => import("../views/home/devtools/index.vue"),
+        children: [
+          { path: "", redirect: "/devtools/text-compress" },
+          {
+            path: "text-compress",
+            name: "devtools-text-compress",
+            component: () => import("../views/home/devtools/TextCompress.vue"),
+            meta: { title: "文本压缩", product: "开发工具" },
+          },
+          {
+            path: "qr-code-gen",
+            name: "devtools-qr-code-gen",
+            component: () => import("../views/home/devtools/QrCodeGen.vue"),
+            meta: { title: "文本转二维码", product: "开发工具" },
+          },
+          {
+            path: "json-formatter",
+            name: "devtools-json-formatter",
+            component: () => import("../views/home/devtools/JsonFormatter.vue"),
+            meta: { title: "JSON 格式化", product: "开发工具" },
+          },
         ],
       },
     ],

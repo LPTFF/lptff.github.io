@@ -12,7 +12,7 @@
 
 只有对应真实环境中的关键路径和预期结果都已实际观察，才能标记 `PASS` 或“已验收”。
 
-页面和扩展验收的标准接管工具是 Chrome DevTools MCP。它必须连接用户实际 Chrome，并用 Elements、Network、Console 和运行时状态证明结果；如果该 MCP 不可用、选中的不是目标 profile，或无法访问实际扩展页面与登录态，则保持 `BLOCKED` 或“未验收”，不得用其他浏览器工具或静态材料补成 `PASS`。
+页面和扩展验收的唯一允许工具是 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）。它必须连接用户实际 Chrome，并用 Elements、Network、Console 和运行时状态证明结果。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器及其他页面测试工具一律不得用于项目验收；如果该 MCP 不可用、选中的不是目标 profile，或无法访问实际扩展页面与登录态，则保持 `BLOCKED` 或“未验收”，不得换用其他工具或静态材料补成 `PASS`。
 
 ## 不能作为验收的材料
 

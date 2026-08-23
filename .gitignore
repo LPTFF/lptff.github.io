@@ -24,16 +24,17 @@ __pycache__/
 *.py[cod]
 /project-support/crawl/**/__pycache__/
 
+# 旧版图标本地化缓存仅为本机生成物；当前运行时不读取该目录
+/project-support/public/icons/
 # Local research repositories and generated collector/verification artifacts
 /agent/product/research/qinglongBackup/
+# dev-tools 参考项目仓库（复刻来源，仅本地保留，不进入代码变更）
+/agent/product/research/dev-tools/
 /agent/verification/reports/
 # Compatibility guard for verification tools used before the agent/ migration.
 /docs/verification-reports/
 /.artifacts/
 /project-support/public/data/recommendArticleData.json
-# 投资脱敏快照的构建副本：源在 project-support/fixtures/（已入库），public/ 下由 sync-investment-fixture.js 在 serve/build 前从源拷贝生成，勿提交副本。
-/project-support/public/fixtures/
-
 /tests/
 /src/investment/__fixtures__/
 /src/investment/adapter/MockInvestmentSourceAdapter.ts

@@ -4,11 +4,11 @@
 
 ## 常用命令
 
-- `npm run serve`：同步面试摘要并在 8090 启动开发服务器。
+- `npm run serve`：直接在 8090 启动 Vite，不执行同步或联网准备。
 - `npm run preview`：预览生产构建。
 - `npm run typecheck`：运行 Vue/TypeScript 类型检查。
-- `npm run build`：同步生成文件、类型检查、生产构建并生成 404 页面。
-- `npm run crawl` / `npm run crawl:full`：运行对应范围的采集任务；只有确实需要时再运行。
+- `npm run build`：只执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由原 CI 步骤生成。
+- Python 采集按需直接运行 `project-support/crawl/run_collectors.py` 或 `project-support/build.sh`，不再通过 package scripts 转发。
 
 命令是给维护者选择的工具，不是每次改动都必须执行的仪式。根据改动影响选择最能证明结果的检查。
 
@@ -16,7 +16,7 @@
 
 - 页面在 `src/views/`，路由在 `src/router/`，跨页面纯逻辑在 `src/utils/`。
 - 页面使用的 Markdown 内容直接放在对应页面目录：博客文章在 `src/views/Blog/articles/`，面试资料在 `src/views/home/findJob/`，投资协议在 `src/views/investment/`；应用数据在 `src/data/`；项目支持静态资源在 `project-support/public/`。
-- `project-support/public/findJob-summary/`、`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。
+- `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试 Markdown 只保留 `src/views/home/findJob/` 下的唯一源文件，投资脱敏快照只保留 `project-support/fixtures/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。
 - 除非任务确实涉及爬虫或部署，不运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
@@ -30,12 +30,13 @@
 
 项目验收只以目标真实环境中的实际操作结果符合预期为准。静态检查、构建、脱敏快照、模拟数据、Mock、人工 fixture 和自设测试工具都不能替代验收，也不能据此宣称功能完成；未完成真实操作时必须标记为未验收、无法验证或未知。
 
-## Chrome DevTools MCP 验收基准
+## Chrome DevTools MCP 唯一验收基准
 
-- 页面、路由、浏览器存储和浏览器扩展变更，默认使用 Chrome DevTools MCP 接管用户实际 Chrome 验收。
+- 页面、路由、浏览器存储和浏览器扩展变更，只允许使用 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome 验收。
 - 验收环境必须是用户实际 profile、实际加载目录、真实登录态、真实来源和实际消费者页面；必须观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。
-- 不能用其他浏览器控制器、隔离 profile、截图、源码阅读或构建结果替代 Chrome DevTools MCP 的真实浏览器结果。
-- Chrome DevTools MCP 无法接管目标环境时，保持 `BLOCKED` 或“未验收”，不得降级成更容易通过的替代方案后宣布完成。
+- 禁止使用 Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器或任何其他页面自动化工具执行项目页面验收。
+- 截图、HTTP 请求、源码阅读、类型检查和构建结果只能辅助定位，不能替代 Chrome DevTools MCP 的真实浏览器结果，也不能单独支持 `PASS`。
+- Chrome DevTools MCP 无法接管目标环境时，必须保持 `BLOCKED` 或“未验收”；不得切换到其他浏览器或页面测试工具继续验收，不得以任何降级方案宣布完成。
 
 ## 提交与推送审核卡点
 

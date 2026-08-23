@@ -1,13 +1,13 @@
 <template>
   <div class="standalone-page">
     <header class="standalone-header">
-      <RouterLink to="/" class="brand-link">
+      <a href="/" class="brand-link">
         <img :src="logoUrl" alt="作者" class="logo-img" />
         <span class="brand-title">tangff</span>
-      </RouterLink>
+      </a>
       <div class="page-heading">
         <h1>{{ pageTitle }}</h1>
-        <RouterLink to="/" class="back-link">返回首页</RouterLink>
+        <a href="/" class="back-link">返回首页</a>
       </div>
     </header>
     <main class="standalone-content">
@@ -18,7 +18,7 @@
 
 <script setup lang="ts">
 import { computed, watchEffect } from "vue";
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { RouterView, useRoute } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
 
 const route = useRoute();

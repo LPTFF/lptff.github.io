@@ -38,8 +38,6 @@ project-support/ → 构建、CI、扩展发布和静态资源
 
 - `project-support/extension/lptff-investment-assistant/**`
 - `project-support/scripts/extension/build-zip.js`
-- `project-support/scripts/sync-findJob-summary.js`
-- `project-support/scripts/copy-404.js`
 - `project-support/scripts/collectors/**`
 - `project-support/crawl/**`、`project-support/build.sh`
 - `project-support/public/**`

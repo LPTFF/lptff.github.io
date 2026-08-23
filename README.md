@@ -40,6 +40,8 @@ Excel 导出使用浏览器端 `write-excel-file`，仅在用户执行导出时�
 npm install
 ```
 
+Live2D 模型包已纳入 devDependencies 和锁文件。开发服务器由 Vite 直接从已安装的 `node_modules` 提供模型，生产构建由同一 Vite 插件写入 `dist/live2dw/models/`；不维护 `public` 缓存，也没有安装后或启动前脚本。导航图标直接使用目标站点的官方 favicon 或官方 CDN，加载失败时显示首字符色块，不参与资源准备。
+
 启动开发服务器（端口 8090）：
 
 ```bash
@@ -64,12 +66,7 @@ npm run preview
 npm run build
 ```
 
-构建命令会依次：
-
-1. 从 `src/views/home/findJob/` 同步面试摘要到 `project-support/public/findJob-summary/`；
-2. 运行 `vue-tsc --noEmit` 类型检查；
-3. 执行 Vite 生产构建；
-4. 生成 `dist/404.html`。
+本地 `build` 只执行 Vite 生产构建；面试 Markdown、投资脱敏快照和 Live2D 模型均由 Vite 从唯一来源生成构建资源，不做启动前复制。GitHub Pages 的 `404.html` 继续由原有 CI 步骤生成。
 
 ## 公共数据采集与验收
 

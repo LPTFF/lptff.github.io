@@ -8,7 +8,7 @@
 - 入口：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
 - 页面位于 `src/views/`，页面内容与唯一消费者放在一起：博客文章位于 `src/views/Blog/articles/`，面试资料位于 `src/views/home/findJob/`，投资协议位于 `src/views/investment/`；应用数据位于 `src/data/`，应用资源位于 `src/assets/`；项目支持区位于 `project-support/`。
 - Element Plus 是默认 UI 基础；新增或重构页面优先复用现有组件和页面模式。
-- `project-support/public/findJob-summary/`、`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 由源文件或构建过程生成。
+- 面试 Markdown 与投资脱敏快照由 Vite 直接从各自唯一源文件生成构建资源，不维护 `public` 副本；`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 由构建或开发工具生成。
 
 ## 产品与业务
 
@@ -21,7 +21,7 @@
 
 ## 数据与发布
 
-- `npm run serve` 在 8090 启动开发服务器；开发环境的 `/data` 可代理到家庭服务器，生产预览不使用该代理。
+- Live2D 模型是锁文件管理的开发依赖，Vite 在开发时直接提供并在构建时写入产物；`npm run serve` 和 `npm run build` 不执行额外脚本或资源下载。CI 保持既有安装、采集、构建、404 和部署流程。开发环境的 `/data` 可代理到家庭服务器，生产预览不使用该代理。
 - 采集器和生成链的成功不能只由退出码、HTTP 200 或 JSON 可解析证明；需要确认真实产物和现有页面消费者。
 - 来源暂时不可采时，优先保留产品目标与历史合同，明确 `preserved`、`skipped` 或 `blocked`，不伪造新鲜数据或绕过授权边界。
 - 账号态、凭据和个人宿主配置不属于项目资料，不写入仓库。

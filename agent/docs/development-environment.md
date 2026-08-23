@@ -17,6 +17,7 @@
 ```
 
 - 本地前端由 Vite 严格固定在 `8090` 端口提供，启动命令是 `npm run serve`；端口被占用时会直接启动失败，不会自动切换到 `8091`、`8092` 等端口。
+- Live2D 模型包由 devDependencies 和锁文件管理。`npm install` 只需安装依赖；Vite 在开发时直接从 `node_modules` 提供模型，在生产构建时写入 `dist/live2dw/models/`，不维护 `project-support/public/live2dw/models/` 缓存，也没有安装后或启动前准备脚本。`npm run serve` 只启动 Vite；面试 Markdown 和投资脱敏快照同样由 Vite 直接读取唯一源文件。导航图标直连目标站点的官方 favicon 或官方 CDN，失败时显示首字符色块。
 - Vite 开发服务器在 `vite.config.ts` 中将 `/data` 请求代理到 `http://192.168.1.100:5000`。
 - 远程 HTTP 服务的工作目录是 `/root/Test`，因此 URL `/data/fundHoldData.json` 对应服务器文件 `/root/Test/data/fundHoldData.json`。
 - 例如，基金持仓页面 [src/views/Message/FundHoldInfo.vue](../../src/views/Message/FundHoldInfo.vue) 使用 `fetch('/data/fundHoldData.json?...')`，开发时应通过 Vite 代理访问，不要在组件中写入远程绝对地址。

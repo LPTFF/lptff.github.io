@@ -63,9 +63,9 @@ const menuConfig = [
     component: defineAsyncComponent(() => import("./tools/index.vue")),
   },
   {
-    key: "boss-zhipin",
-    label: "Boss直聘",
-    component: defineAsyncComponent(() => import("./bossZhipin/index.vue")),
+    key: "github-trending",
+    label: "GitHub Trending",
+    component: defineAsyncComponent(() => import("./githubTrending/index.vue")),
   },
   {
     key: "douban",
