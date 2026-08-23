@@ -19,7 +19,7 @@
             <p class="drift-empty-desc">{{ driftEmptyDesc }}</p>
             <div class="drift-empty-actions">
               <el-button size="small" type="primary" :loading="osState.syncing" @click="adoptDefaultsFromReview">一键采纳默认规则集</el-button>
-              <el-button size="small" @click="goPolicies">去规则页自定义</el-button>
+              <el-button size="small" @click="goPolicies">去纪律页自定义</el-button>
             </div>
           </div>
       <div v-else-if="!visibleDrifts.length" class="all-within">
@@ -31,7 +31,7 @@
           <div :class="driftRowClass(d.direction)">
             <span class="drift-label">{{ d.label }}</span>
             <span class="drift-actual">{{ fmtPct(d.actualPct) }}</span>
-            <el-progress :percentage="Math.min(Math.round(d.actualPct * 100), 100)" :stroke-width="12" :show-text="false" class="drift-bar" />
+            <DriftBulletChart :drift="d" class="drift-bar" />
             <span class="drift-target">{{ driftTargetLabel }} {{ fmtPct(d.targetPct) }}，区间 [{{ fmtPct(d.minPct) }}, {{ fmtPct(d.maxPct) }}]</span>
             <el-popover v-if="d.rationale" trigger="hover" width="320" placement="top">
               <template #reference><el-button text size="small" class="rationale-btn">依据</el-button></template>
@@ -68,11 +68,13 @@
         <p class="tool-disclaimer">未覆盖市场：组合中跟踪全球配置/QDII（无单一基准）、日本/越南/印度/欧洲等市场的基金，在历史周期中无对应基准，末态市值不变、不参与回撤；可在下方各周期详情核验「（无该周期基准）」项。</p>
         <el-empty v-if="!osState.portfolio" description="尚无持仓，请先采集数据或在下方启动模拟器" />
         <template v-else>
-          <el-alert v-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停历史周期压力测试" description="历史周期压力测试需基于真实持仓；当前为演练模拟持仓，数据已隔离。请先「结束演练 / 恢复真实」后再使用本卡。" />
-          <div v-if="!isSimulator && allCyclesResult.hasHoldings && allCyclesResult.summaries.length" class="all-cycles">
+          <el-alert v-if="isSimulator" type="info" :closable="false" show-icon title="演练模式：当前按演练持仓计算历史周期回撤"
+            :description="`演练接管了全局数据，本卡输入为演练第 ${sim.state.round} 期持仓（${simPhaseLabel}）——正好用于复算演练末态回撤；真实持仓的压力测试请在结束演练后进行。`" />
+          <div v-if="allCyclesResult.hasHoldings && allCyclesResult.summaries.length" class="all-cycles">
             <div class="all-cycles-verdict">
               最脆弱场景：<strong>{{ allCyclesResult.worstCycle?.cycleLabel }}</strong>（回撤 {{ fmtPct(allCyclesResult.worstCycle?.maxDrawdownPct) }}）；最稳健：<strong>{{ allCyclesResult.bestCycle?.cycleLabel }}</strong>（回撤 {{ fmtPct(allCyclesResult.bestCycle?.maxDrawdownPct) }}）
             </div>
+            <DrawdownBars :summaries="allCyclesResult.summaries" height="320px" class="all-cycles-chart" />
             <div class="all-cycles-list">
               <div v-for="s in allCyclesResult.summaries" :key="s.cycleId" class="all-cycles-row">
                 <span class="ac-name">{{ s.cycleLabel }}</span>
@@ -92,19 +94,21 @@
             </div>
           </div>
           </div>
-          <div v-if="!isSimulator" class="stress-controls">
+          <div class="stress-controls">
             <el-select v-model="selectedCycleId" size="small" style="width: 280px">
               <el-option-group v-for="m in (['CN','HK','US','commodity'] as CycleMarket[])" :key="m" :label="marketLabel(m)">
                 <el-option v-for="c in cycleGroups[m]" :key="c.id" :label="c.label" :value="c.id" />
               </el-option-group>
             </el-select>
           </div>
-          <div v-if="!isSimulator && stressVerdict" class="stress-verdict">
+          <div v-if="stressVerdict" class="stress-verdict">
             <span>{{ stressVerdict }}</span>
             <el-button size="small" text type="primary" @click="showStressDetail = !showStressDetail">{{ showStressDetail ? "收起详细" : "查看详细" }}</el-button>
           </div>
-          <div v-if="!isSimulator && showStressDetail && stressResult" class="stress-detail">
+          <div v-if="showStressDetail && stressResult" class="stress-detail">
             <p class="stress-desc">{{ stressResult.description }}</p>
+            <div class="stress-sub-title">周期总资产净值曲线（当前市值平移，非真实回测）</div>
+            <CycleNavChart :period-series="stressResult.periodSeries" class="stress-nav-chart" />
             <div class="stress-metrics">
               <div class="metric"><span class="metric-label">起始总资产</span><strong>{{ fmtMoney(stressResult.startTotalAsset) }} 元</strong></div>
               <div class="metric"><span class="metric-label">末态总资产</span><strong>{{ fmtMoney(stressResult.endTotalAsset) }} 元</strong></div>
@@ -144,7 +148,7 @@
                 <div :class="driftRowClass(d.direction)">
                   <span class="drift-label">{{ d.label }}</span>
                   <span class="drift-actual">{{ fmtPct(d.actualPct) }}</span>
-                  <el-progress :percentage="Math.min(Math.round(d.actualPct * 100), 100)" :stroke-width="12" :show-text="false" class="drift-bar" />
+                  <DriftBulletChart :drift="d" class="drift-bar" />
                   <span class="drift-target">{{ driftTargetLabel }} {{ fmtPct(d.targetPct) }}，区间 [{{ fmtPct(d.minPct) }}, {{ fmtPct(d.maxPct) }}]</span>
                   <el-tag v-if="d.direction !== 'within'" size="small" type="warning">⚠ {{ driftDirText(d.direction) }}</el-tag>
                   <el-tag v-else size="small" type="success" effect="plain">区间内</el-tag>
@@ -156,23 +160,42 @@
       </el-collapse-item>
     </el-collapse>
 
-    <!-- 场景工具：牛熊周期演练（真实持仓逐期推进）-->
-    <el-collapse v-model="simActiveNames">
-      <el-collapse-item title="牛熊周期演练（可选：真实持仓逐期推进）" name="sim">
-        <p class="sim-intro">用当前真实持仓逐期推进（按基金指数净值曲线模拟牛熊），生成行为交易并观察规则偏离；演练中账户临时为模拟值，结束可一键恢复真实数据。</p>
+    <!-- 场景工具：牛熊周期演练（真实持仓逐期推进）。外观复用 el-collapse 同名类与上方压力测试保持一致；
+         内容用 v-show 切换，避开 collapse transition 与逐期回放高频更新冲突导致的 patch 报错。-->
+    <div class="el-collapse el-collapse-icon-position-right">
+      <div class="el-collapse-item" :class="{ 'is-active': simPanelOpen }">
+        <div class="el-collapse-item__header" :class="{ 'is-active': simPanelOpen }" role="button" @click="simPanelOpen = !simPanelOpen">
+          <span class="el-collapse-item__title">牛熊周期演练（可选：真实持仓逐期推进）</span>
+          <el-icon class="el-collapse-item__arrow" :class="{ 'is-active': simPanelOpen }"><ArrowRight /></el-icon>
+        </div>
+        <div v-show="simPanelOpen" class="el-collapse-item__wrap">
+          <div class="el-collapse-item__content">
+        <p class="sim-intro">用当前真实持仓逐期推进（按基金指数净值曲线模拟牛熊），生成行为交易并观察规则偏离。演练期间系统全局数据为模拟值：复盘/待办围绕演练运转（这正是演练目的），持仓页暂停（需真实数据），上方压力测试切换为按演练持仓计算；结束可一键恢复真实数据。</p>
         <div class="sim-controls">
           <span class="sim-meta" v-if="isSimulator">第 {{ sim.state.round }} / 23 期 · {{ sim.state.asOf }} · {{ simPhaseLabel }}</span>
           <span class="sim-meta" v-else>尚未启动</span>
           <div class="sim-actions">
             <el-button v-if="!isSimulator" size="small" type="primary" :disabled="!hasRealHoldings" @click="simInitReal">用真实持仓演练</el-button>
             <template v-else>
-              <el-button size="small" type="primary" :loading="runningFullSim" :disabled="simIsLastRound || sim.state.running" @click="runFullSimCycle">一键跑完整周期</el-button>
-              <el-button size="small" :disabled="simIsLastRound || sim.state.running" :loading="sim.state.running" @click="simAdvance">下一轮 →</el-button>
-              <el-button size="small" type="warning" :loading="osState.syncing" @click="simExitReal">结束演练 / 恢复真实</el-button>
+              <el-button v-if="runningFullSim" size="small" type="warning" plain @click="stopFullSimCycle">⏸ 停止回放</el-button>
+              <el-button v-else size="small" type="primary" :disabled="simIsLastRound || sim.state.running" @click="runFullSimCycle">一键跑完整周期（逐期回放）</el-button>
+              <!-- 刷新续演后快照栈丢失不可回退，tooltip 说明灰因避免误以为按钮故障。 -->
+              <el-tooltip :disabled="sim.state.canRewind || sim.state.round === 0" content="回退依赖本次演练的内存快照，页面刷新后不可用">
+                <span>
+                  <el-button size="small" :disabled="!sim.state.canRewind || sim.state.running || runningFullSim" :loading="sim.state.running" @click="simRewind">← 上一轮</el-button>
+                </span>
+              </el-tooltip>
+              <el-button size="small" :disabled="simIsLastRound || sim.state.running || runningFullSim" :loading="sim.state.running" @click="simAdvance">下一轮 →</el-button>
+              <el-button size="small" type="warning" :disabled="runningFullSim" :loading="osState.syncing" @click="simExitReal">结束演练 / 恢复真实</el-button>
             </template>
-            <el-button v-if="isSimulator" size="small" @click="simReset">重置</el-button>
+            <el-button v-if="isSimulator" size="small" :disabled="runningFullSim" @click="simReset">重置</el-button>
           </div>
         </div>
+        <div v-if="isSimulator && sim.state.assetHistory.length >= 1" class="sim-chart">
+          <div class="sim-chart-title">演练总资产曲线（阶段底色为示意，非规则结论）</div>
+          <SimAssetLine :history="sim.state.assetHistory" />
+        </div>
+        <p v-if="isSimulator && sim.state.assetHistory.length === 0" class="sim-hint">演练尚未启动。</p>
         <div v-if="isSimulator" class="sim-toggles">
           <el-switch v-model="sim.state.toggles.regularInvest" inline-prompt active-text="规律定投" inactive-text="规律定投" />
           <el-switch v-model="sim.state.toggles.chaseTrend" inline-prompt active-text="追涨杀跌" inactive-text="追涨杀跌" />
@@ -191,8 +214,10 @@
           </div>
         </div>
         <p v-if="isSimulator" class="sim-hint">以上为基于历史市场风格的推断提示（非规则机械检查结论）；交易为演练模拟、日期属演练日历（{{ sim.state.asOf }} 所在期）非真实记录；末态回撤可在上方「历史周期压力测试」选对应周期复算。</p>
-      </el-collapse-item>
-    </el-collapse>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <el-dialog v-model="focusedCtx.visible" :title="focusedCtx.label" width="720px">
       <el-input v-model="focusedCtx.text" type="textarea" :rows="20" readonly class="focused-text" />
@@ -209,6 +234,7 @@
 import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { ArrowRight } from "@element-plus/icons-vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { useInvestmentSimulator } from "../../investment/composables/use-investment-simulator";
 import { buildAllocationDrift, buildSimFindings, buildStressFindings, type AllocationDrift, type SimFinding } from "../../investment/composables/selectors";
@@ -216,6 +242,10 @@ import { useFocusedContext, buildContextInput, directionText as driftDirText } f
 import { HISTORICAL_CYCLES, getCycle, type CycleMarket } from "../../investment/engines/scenario/historical-cycles";
 import { buildHistoricalStressTest, buildAllCyclesStressTest, type StressTestResult, type AllCyclesResult } from "../../investment/engines/scenario/stress-test";
 import { buildDefaultStrategyRules } from "../../investment/engines/policy/rule-rationale";
+import DriftBulletChart from "../../investment/charts/DriftBulletChart.vue";
+import DrawdownBars from "../../investment/charts/DrawdownBars.vue";
+import CycleNavChart from "../../investment/charts/CycleNavChart.vue";
+import SimAssetLine from "../../investment/charts/SimAssetLine.vue";
 
 const router = useRouter();
 const investmentOS = useInvestmentOS();
@@ -243,8 +273,11 @@ const simFindings = computed<SimFinding[]>(() => {
     : [];
   return buildSimFindings(sim.state.phase, sim.state.asOf, sim.state.behaviorLog, drift, sim.state.holdingIndex, sim.state.realTransactionsByAsset);
 });
-const simActiveNames = ref<string[]>([]);
+const simPanelOpen = ref(false);
 const runningFullSim = ref(false);
+const stopFullSimRequested = ref(false);
+/** 逐期回放节奏：每期间隔，让曲线逐点生长、进度可见，而不是一次性同步跑完卡住。 */
+const SIM_PLAYBACK_INTERVAL_MS = 320;
 
 async function simInitReal(): Promise<void> {
   try {
@@ -270,6 +303,19 @@ async function simAdvance(): Promise<void> {
     ElMessage.error((e as Error).message);
   }
 }
+async function simRewind(): Promise<void> {
+  if (!sim.state.canRewind || sim.state.running) return;
+  const before = sim.state.round;
+  try {
+    await sim.rewind();
+    // rewind 内部快照栈不足时静默返回（如刷新续演后无基线），此时不弹误导性提示。
+    if (sim.state.round !== before) {
+      ElMessage.info(`已回退到第 ${sim.state.round} 期（${sim.state.asOf}），可调行为开关后重新推进`);
+    }
+  } catch (e) {
+    ElMessage.error((e as Error).message);
+  }
+}
 async function simReset(): Promise<void> {
   try {
     await sim.reset();
@@ -280,21 +326,32 @@ async function simReset(): Promise<void> {
 async function runFullSimCycle(): Promise<void> {
   if (runningFullSim.value || !isSimulator.value) return;
   runningFullSim.value = true;
+  stopFullSimRequested.value = false;
   try {
     while (!sim.isLastRound.value && !sim.state.running) {
       await sim.advance();
+      if (sim.isLastRound.value || stopFullSimRequested.value) break;
+      await new Promise((resolve) => setTimeout(resolve, SIM_PLAYBACK_INTERVAL_MS));
     }
-    ElMessage.success("完整牛熊周期演练完成，上方结论与配置偏离已更新为末态");
+    if (stopFullSimRequested.value && !sim.isLastRound.value) {
+      ElMessage.info(`回放已暂停在第 ${sim.state.round} 期，可继续逐轮推进或再次一键跑完`);
+    } else {
+      ElMessage.success("完整牛熊周期演练完成，上方结论与配置偏离已更新为末态");
+    }
   } catch (e) {
     ElMessage.error((e as Error).message);
   } finally {
     runningFullSim.value = false;
+    stopFullSimRequested.value = false;
   }
+}
+function stopFullSimCycle(): void {
+  stopFullSimRequested.value = true;
 }
 function goPolicies(): void {
   router.push("/investment/policies");
 }
-/** 复盘页快捷采纳默认规则集：免去跳规则页才能机械复盘的额外步骤。 */
+/** 复盘页快捷采纳默认规则集：免去跳纪律页才能机械复盘的额外步骤。 */
 async function adoptDefaultsFromReview(): Promise<void> {
   if (!osState.activeScope) { ElMessage.warning("尚无投资范围，请先导入数据"); return; }
   try {
@@ -354,7 +411,7 @@ const assetDrifts = computed(() => allocationDrift.value.filter((d) => d.scope =
 const driftCardTitle = computed(() => "目标配置 vs 实际");
 const driftCardHint = computed(() => "仅对照你已声明的目标/区间；系统不发明合理仓位");
 const driftTargetLabel = computed(() => "目标");
-const driftEmptyDesc = computed(() => "暂未声明目标配置；可一键采纳默认规则集，或去规则页自定义");
+const driftEmptyDesc = computed(() => "暂未声明目标配置；可一键采纳默认规则集，或去纪律页自定义");
 
 function driftRowClass(direction: AllocationDrift["direction"]): string {
   return direction === "within" ? "drift-row within" : "drift-row breached";
@@ -368,14 +425,14 @@ const allDriftsCount = computed(() => dimensionDrifts.value.length + assetDrifts
 const showAllDrifts = ref(false);
 const visibleDrifts = computed(() => showAllDrifts.value ? [...dimensionDrifts.value, ...assetDrifts.value] : breachedDrifts.value);
 // 第一性结论区分三种态：无声明规则（无法机械复盘）/ 有规则且均在区间内 / 有超界偏离。
-// 仅靠 drift 空判断会把"无规则"误判成"均在区间内"，与规则页"尚未采纳规则集"矛盾。
+// 仅靠 drift 空判断会把"无规则"误判成"均在区间内"，与纪律页"尚未采纳规则集"矛盾。
 const hasDeclaredRules = computed(() => osState.activeVersions.length > 0 || osState.strategyRuleVersions.length > 0);
 const verdictTitle = computed(() => {
   if (!hasDeclaredRules.value) return "暂无规则，无法机械复盘";
   return breachedDrifts.value.length === 0 ? "今日无需操作" : `${breachedDrifts.value.length} 项配置偏离待复盘`;
 });
 const verdictDesc = computed(() => {
-  if (!hasDeclaredRules.value) return "先到规则页声明目标配置与区间，系统才能机械检查偏离；当前只呈现事实与暴露。";
+  if (!hasDeclaredRules.value) return "先到纪律页声明目标配置与区间，系统才能机械检查偏离；当前只呈现事实与暴露。";
   return breachedDrifts.value.length === 0
     ? "当前已声明规则均在区间内。可展开下方场景工具做历史周期压力测试。"
     : "下方列出超界项，可认可、调整规则或深度分析外包。";
@@ -431,7 +488,7 @@ function revokeDriftAck(d: AllocationDrift): void {
   localStorage.removeItem(`inv-drift-ack:${driftAckKey(d)}`);
   ackVersion.value++;
 }
-// 单偏离深度分析：共享 useFocusedContext 弹窗（聚焦），不跳行动页带全量。
+// 单偏离深度分析：共享 useFocusedContext 弹窗（聚焦），不跳待办页带全量。
 const { fc: focusedCtx, openFocused, copy: copyFocused, openChatGpt: openChatGptFocused } = useFocusedContext();
 function deepAnalyzeDrift(d: AllocationDrift): void {
   openFocused(d, buildContextInput(osState, allocationDrift.value));
@@ -574,6 +631,9 @@ function deepAnalyzeDrift(d: AllocationDrift): void {
   margin-bottom: 10px;
   line-height: 1.6;
 }
+.all-cycles-chart {
+  margin-bottom: 10px;
+}
 .all-cycles-list {
   display: flex;
   flex-direction: column;
@@ -687,6 +747,26 @@ function deepAnalyzeDrift(d: AllocationDrift): void {
 .profit-negative {
   color: var(--el-color-success);
 }
+.sim-chart {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: var(--el-fill-color-light);
+  border-radius: 4px;
+}
+.sim-intro {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--el-text-color-regular);
+  line-height: 1.7;
+}
+.sim-chart-title {
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  margin-bottom: 6px;
+}
+.stress-nav-chart {
+  margin-bottom: 16px;
+}
 .sim-controls {
   display: flex;
   align-items: center;
@@ -701,7 +781,12 @@ function deepAnalyzeDrift(d: AllocationDrift): void {
 }
 .sim-actions {
   display: flex;
-  gap: 8px;
+  gap: 12px;
+  /* 「← 上一轮」外包 el-tooltip 的 span 后，.el-button + .el-button 相邻选择器不再命中，
+     统一改纯 gap 布局，避免按钮间距不一致。 */
+}
+.sim-actions :deep(.el-button + .el-button) {
+  margin-left: 0;
 }
 .sim-toggles {
   display: flex;

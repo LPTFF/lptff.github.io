@@ -1,8 +1,8 @@
 <template>
   <div class="portfolio-view">
-    <el-empty v-if="!state.portfolio" description="尚无持仓快照，请先同步数据或在数据页启动模拟" />
-    <el-alert v-else-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，已暂停组合页"
-      description="组合页展示真实持仓与风险暴露；当前为演练模拟持仓，数据已隔离。请先到复盘页「结束演练 / 恢复真实」后再查看。" />
+    <el-empty v-if="!state.portfolio" description="尚无持仓快照，请先同步数据或在采集页启动模拟" />
+    <el-alert v-else-if="isSimulator" type="warning" :closable="false" show-icon title="牛熊演练进行中，本页已暂停"
+      description="演练会接管系统全局数据（真实数据已退出，结束可一键恢复），本页只展示真实持仓，模拟持仓冒充真实会误导。当前演练持仓与偏离可在复盘页的「牛熊周期演练」卡查看；历史周期压力测试也已切换为按演练持仓计算。" />
 
     <template v-else>
       <!-- Fund Holdings -->
@@ -70,13 +70,7 @@
           :title="`已识别 ${(currentExposure.knownPct * 100).toFixed(1)}%，元数据未识别 ${(currentExposure.unknownPct * 100).toFixed(1)}%`"
           description="元数据未识别不是风险类别或风险结论；需通过基金详情来源补齐后才能参与规则评估。" show-icon :closable="false" class="coverage-alert" />
         <el-empty v-if="!exposureSlices.length" description="当前维度尚无可靠资产元数据" />
-        <div v-else class="exposure-list">
-          <div v-for="s in displaySlices" :key="s.value" class="exposure-row">
-            <span class="exposure-value">{{ sliceValueLabel(s.dimension, s.value) }}</span>
-            <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="14" class="exposure-bar" />
-            <span class="exposure-pct">{{ (s.pct * 100).toFixed(1) }}%</span>
-          </div>
-        </div>
+        <ExposureDonut v-else :slices="displaySlices" height="280px" />
       </el-card>
 
       <!-- 共同暴露：按当前采集元数据动态生成，只报告标签关联，不推断底层权重 -->
@@ -102,6 +96,7 @@ import { computed, ref, watch } from "vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { buildPortfolioHoldings, sortPortfolioHoldings, DIMENSION_LABEL, CONTEXT_ASSET_CLASS_LABEL, CONTEXT_CURRENCY_LABEL, type PortfolioNumericSortKey, type SortOrder } from "../../investment/composables/selectors";
 import { aggregateExposure, detectSharedExposures, exposureCoverage } from "../../investment/engines/exposure";
+import ExposureDonut from "../../investment/charts/ExposureDonut.vue";
 import type { ExposureDimension } from "../../investment/domain";
 
 const { state } = useInvestmentOS();

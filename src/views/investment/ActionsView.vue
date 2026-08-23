@@ -9,22 +9,22 @@
       class="section-alert"
     />
 
-    <el-empty v-if="!state.portfolio" description="尚无组合数据，请先同步或在数据页启动模拟" />
+    <el-empty v-if="!state.portfolio" description="尚无组合数据，请先同步或在采集页启动模拟" />
 
     <el-card v-else-if="todoCount" shadow="never" class="section todo-card">
-      <template #header><span>待办汇总（来自复盘 / 规则 / 数据 / 证据）· {{ todoCount }} 项</span></template>
+      <template #header><span>待办汇总（来自复盘 / 纪律 / 采集 / 明细）· {{ todoCount }} 项</span></template>
       <el-alert type="info" :closable="false" show-icon class="todo-note"
         description="以下为各页需要你处理的事项，每条附去向按钮；处理完一条可回对应页复核。系统只汇总事实，不替你判断怎么处理。"
       />
       <div v-if="hasNoRules" class="todo-group">
-        <span class="todo-source">规则</span>
-        <div class="todo-item">尚未声明投资纪律，机械检查无法运行。<el-button size="small" type="primary" @click="goPolicies">去规则页声明</el-button></div>
+        <span class="todo-source">纪律</span>
+        <div class="todo-item">尚未声明投资纪律，机械检查无法运行。<el-button size="small" type="primary" @click="goPolicies">去纪律页声明</el-button></div>
       </div>
       <div v-if="coverageGaps.length" class="todo-group">
-        <span class="todo-source">数据</span>
+        <span class="todo-source">采集</span>
         <div v-for="g in coverageGaps" :key="g.dataset" class="todo-item">
           {{ DATASET_LABEL[g.dataset] ?? g.dataset }} 覆盖{{ COMPLETENESS_LABEL[g.completeness] ?? g.completeness }}，需补采集。
-          <el-button size="small" @click="goData">去数据页补采集</el-button>
+          <el-button size="small" @click="goData">去采集页补采集</el-button>
         </div>
       </div>
       <div v-if="breachedDrift.length" class="todo-group">
@@ -36,10 +36,10 @@
         </div>
       </div>
       <div v-if="openActions.length" class="todo-group">
-        <span class="todo-source">证据 · 待处理事项</span>
+        <span class="todo-source">明细 · 待处理事项</span>
         <div v-for="a in openActions" :key="a.id ?? a.type + (a.title ?? '')" class="todo-item">
           {{ a.title || a.type }}
-          <el-button size="small" @click="goEvidence">去证据页看事实</el-button>
+          <el-button size="small" @click="goEvidence">去明细页看事实</el-button>
         </div>
       </div>
     </el-card>
@@ -75,7 +75,7 @@ const { state } = useInvestmentOS();
 const allocationDrift = computed(() => buildAllocationDrift(state.activeVersions, state.strategyRuleVersions, state.portfolio, state.assets));
 const { fc: contextCtx, openFull, copy: copyContext, openChatGpt: openChatGptContext } = useFocusedContext();
 
-// 待办汇总：把复盘 / 规则 / 数据 / 证据里需要处理的事项集中到行动页，统一处理、降低横跳成本。
+// 待办汇总：把复盘 / 纪律 / 采集 / 明细里需要处理的事项集中到待办页，统一处理、降低横跳成本。
 const breachedDrift = computed(() => allocationDrift.value.filter((d) => d.direction !== "within"));
 const openActions = computed(() => state.actions.filter((a) => a.status === "open"));
 const coverageGaps = computed(() => state.coverage.filter((c) => c.completeness !== "complete"));

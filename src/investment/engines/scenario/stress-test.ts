@@ -31,6 +31,8 @@ export interface StressTestResult {
   maxDrawdown: number;
   /** 最大回撤占峰值比例，0-1。 */
   maxDrawdownPct: number;
+  /** 周期内逐期总资产序列（第 0 期为基准），供净值曲线绘制；不另行外推。 */
+  periodSeries: { date: string; totalAsset: number }[];
   assetResults: StressTestAssetResult[];
   endExposureSlices: ExposureSlice[];
   endDrift: AllocationDrift[];
@@ -122,6 +124,7 @@ export function buildHistoricalStressTest(
     endTotalAsset,
     maxDrawdown: Math.round(maxDrawdown * 100) / 100,
     maxDrawdownPct: Math.round(maxDrawdownPct * 10000) / 10000,
+    periodSeries: series.map((totalAsset, k) => ({ date: cycle.dates[k] ?? `${cycle.start}+${k}`, totalAsset })),
     assetResults,
     endExposureSlices: aggregateExposure(endHoldings, assets, "index"),
     endDrift: buildAllocationDrift(activeVersions, strategyRuleVersions, endPortfolio, assets),

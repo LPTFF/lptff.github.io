@@ -156,7 +156,8 @@ function mapHolding(item: SourceRecord, detail: SourceRecord | undefined, totalA
 }
 
 function transactionType(value: unknown): Transaction["type"] {
-  const text = textOf(value);
+  // 来源文本可能带排版空格（如“转入投 资账户”），匹配前先压缩空白。
+  const text = textOf(value).replace(/\s+/g, "");
   if (/转入投资账户|转出投资账户/.test(text)) return "TRANSFER";
   if (/卖出|赎回/.test(text)) return "SELL";
   if (/分红|红利/.test(text)) return "DIVIDEND";
@@ -165,9 +166,10 @@ function transactionType(value: unknown): Transaction["type"] {
 }
 
 function transactionStatus(value: unknown): Transaction["status"] {
-  const text = textOf(value).toLowerCase();
+  // 来源文本可能带排版空格；「已撤单」不含「撤销」二字，需单列。
+  const text = textOf(value).toLowerCase().replace(/\s+/g, "");
   if (!text) return "unknown";
-  if (/撤销|取消|cancel/.test(text)) return "cancelled";
+  if (/撤销|撤单|取消|cancel/.test(text)) return "cancelled";
   if (/失败|fail|拒绝/.test(text)) return "failed";
   if (/部分|partial/.test(text)) return "partially_confirmed";
   if (/处理中|待确认|pending|申请/.test(text)) return "requested";
@@ -211,6 +213,9 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
   const type = transactionType(item.businessTypeText1 ?? item.type);
   const amount = numberOf(item.applyCount ?? item.amount);
   const status = transactionStatus(item.appStateText ?? item.status);
+  // 来源原文透传（业务类型/状态）：逐笔核对以原文为准，系统翻译仅作展示色与聚合口径。
+  const businessTypeText = textOf(item.businessTypeText1) || undefined;
+  const statusText = textOf(item.appStateText) || undefined;
   const id = transactionId(item, index, occurredAt, assetId, type, amount);
   const stable = textOf(item.sourceTransactionId ?? item.transactionId ?? item.id);
   const confirmedAmount = optionalNumber(item.confirmCount ?? item.confirmedAmount);
@@ -224,6 +229,8 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
     amountUnit: textOf(item.applyCountUnit ?? item.amountUnit) || "CNY",
     ...(confirmedAmount === undefined ? {} : { confirmedAmount }),
     status,
+    ...(businessTypeText ? { businessTypeText } : {}),
+    ...(statusText ? { statusText } : {}),
     sourceType: transactionSourceType(item),
     ...(type === "OTHER" ? { classificationWarning: "unmapped_transaction_type" as const } : {}),
   };
@@ -347,7 +354,7 @@ function classifiedRegions(detail: SourceRecord): string[] {
   if (/欧洲|欧元区/.test(text)) regions.push("欧洲");
   if (/中国境内|内地|A股|沪深|中证|上证|深证|创业板|科创/.test(text)) regions.push("中国内地");
   if (!regions.length && /全球|环球|境外|QDII/i.test(text)) regions.push("全球");
-  // 商品类资产（黄金/原油等）无地理地区时归"全球"，便于组合页暴露统计。
+  // 商品类资产（黄金/原油等）无地理地区时归"全球"，便于持仓页暴露统计。
   if (!regions.length && classifiedAssetClass(detail) === "commodity") regions.push("全球");
   return uniqueText(regions);
 }
@@ -560,9 +567,18 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
   const holdings = capture.holdings
     .map((holding) => mapHolding(holding, details.get(codeOf(holding.fundCode ?? holding.code)), totalAsset))
     .filter((holding): holding is HoldingSnapshot => Boolean(holding));
-  const transactions = transactionRecords(capture)
+  const txSourceRecords = transactionRecords(capture);
+  const transactions = txSourceRecords
     .map(mapTransaction)
     .filter((transaction): transaction is Transaction => Boolean(transaction));
+  // 历史交易中出现但已无持仓（无详情页采集）的基金，assets 表缺失会使名称映射断裂（展示为纯代码）：
+  // 从交易记录自身携带的 productName 补“仅名称”骨架元数据，分类字段全 unknown，不伪造分类。
+  const nameFromTransactions = new Map<string, string>();
+  for (const item of txSourceRecords) {
+    const code = codeOf(item.productCode ?? item.fundCode);
+    const name = textOf(item.productName ?? item.productShowName);
+    if (code && name && !nameFromTransactions.has(code)) nameFromTransactions.set(code, name);
+  }
   const dailyPnlRecords = capture.fundDetails.flatMap(dailyPnl);
   const currentHoldingPnl = holdings.every((holding) => holding.pnl !== undefined)
     ? holdings.reduce((sum, holding) => sum + (holding.pnl || 0), 0)
@@ -611,9 +627,27 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
     capturedAt,
     account,
     portfolio,
-    assets: capture.holdings
-      .map((holding) => mapAsset(holding, publicDetails.get(codeOf(holding.fundCode ?? holding.code)) || {}))
-      .filter((asset): asset is AssetMetadata => Boolean(asset)),
+    assets: (() => {
+      const held = capture.holdings
+        .map((holding) => mapAsset(holding, publicDetails.get(codeOf(holding.fundCode ?? holding.code)) || {}))
+        .filter((asset): asset is AssetMetadata => Boolean(asset));
+      const heldIds = new Set(held.map((asset) => asset.assetId));
+      const extras: AssetMetadata[] = [];
+      for (const [code, name] of nameFromTransactions) {
+        if (heldIds.has(code)) continue;
+        extras.push({
+          assetId: code,
+          name,
+          assetClass: "other",
+          regions: [],
+          indexes: [],
+          currencies: [],
+          themes: [],
+          provenance: { assetClass: "unknown", regions: "unknown", indexes: "unknown", currencies: "unknown", themes: "unknown" },
+        });
+      }
+      return [...held, ...extras];
+    })(),
     transactions,
     dailyPnl: dailyPnlRecords,
     coverage: [

@@ -17,7 +17,7 @@
         <span class="branch-value">{{ branch.text }}</span>
       </div>
     </div>
-    <div class="status-meta">
+    <div v-if="!state.syncing && !state.collecting && !importFailed" class="status-meta">
       <span>插件待导入：{{ stagingLabel }}</span>
       <span v-if="collectionAttemptFailed">现有账本：未受本次重采影响</span>
       <span>最近成功导入：{{ lastImportLabel }}</span>
@@ -33,16 +33,19 @@ import { useInvestmentOS } from "../../../investment/composables/use-investment-
 
 const { state } = useInvestmentOS();
 
+const importFailed = computed(() =>
+  state.syncPhase === "failed" && Boolean(state.importContext)
+);
 const collectionAttemptFailed = computed(() =>
   state.collectionRecovery === "login-required"
-  || state.syncPhase === "failed"
   || state.collectionProgress?.stage === "error"
+  || (state.syncPhase === "failed" && !state.importContext)
 );
 const collectionInProgress = computed(() =>
   state.collecting
   && !["completed", "error"].includes(state.collectionProgress?.stage ?? "idle")
 );
-const busy = computed(() => state.syncing || collectionInProgress.value);
+const busy = computed(() => state.syncing || state.collecting);
 // 只在有可展示/可操作状态时渲染：进行中 / 有待导入数据 / 失败或有错误。
 // idle（无待导入、无操作）、up-to-date 与 completed（导入后已同步的常态）都不显示，
 // 避免常驻的"成功"横幅噪音；瞬时反馈由按钮 toast 承担。
@@ -77,6 +80,8 @@ const BRANCH_STATUS: Record<string, string> = {
 };
 
 const branchRows = computed(() => {
+  if (state.syncing || importFailed.value) return [];
+  if (state.collecting && !collectionInProgress.value) return [];
   const branches = state.collectionProgress?.branches;
   if (!branches) return [];
   const active = Object.values(branches).some(
@@ -105,7 +110,8 @@ const activeBranchLabel = computed(() => {
 
 const title = computed(() => {
   if (state.collectionRecovery === "login-required") return "等待天天基金登录";
-  if (state.syncing) return "正在导入插件数据";
+  if (state.syncing) return `正在导入：${state.importContext?.label ?? "采集数据"}`;
+  if (importFailed.value) return `导入失败：${state.importContext?.label ?? "采集数据"}`;
   if (collectionAttemptFailed.value) return "本次重新采集未完成";
   if (collectionInProgress.value) {
     const progress = state.collectionProgress;
@@ -113,6 +119,7 @@ const title = computed(() => {
     const detail = activeBranchLabel.value ? `（${activeBranchLabel.value}）` : "";
     return `正在采集投资来源数据：${stageLabel}${detail}`;
   }
+  if (state.collecting) return "正在启动投资来源采集";
   if (state.extensionStatus?.pending) return "有一批采集数据等待导入";
   return "插件数据传输状态";
 });
@@ -138,6 +145,8 @@ const collectionMetricLabel = computed(() => {
   return `采集 ${formatDuration(elapsed)} · 请求 ${metrics.requestCount} · 交易页 ${metrics.transactionPages}${tabPeak}${stagingSize}`;
 });
 const progressPct = computed(() => {
+  if (state.syncing) return 0;
+  if (state.collecting && !collectionInProgress.value) return 0;
   const progress = state.collectionProgress;
   if (!progress) return 0;
   if (progress.stage === "completed") return 100;

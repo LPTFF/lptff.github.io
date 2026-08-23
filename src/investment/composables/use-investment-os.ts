@@ -66,6 +66,10 @@ export interface InvestmentOsState {
   collecting: boolean;
   syncPhase: ExtensionSyncPhase | "idle";
   syncMessage: string;
+  importContext?: {
+    kind: "plugin-staging" | "bundled-snapshot" | "local-file";
+    label: string;
+  };
   extensionStatus?: InvestmentExtensionStatus;
   collectionProgress?: CollectionProgress;
   lastImport?: ImportRecord;
@@ -121,6 +125,8 @@ const state = reactive<InvestmentOsState>({
 
 let ledger: InvestmentLedger | null = null;
 let ledgerCompaction: Promise<void> | null = null;
+let captureImportStartedAt = 0;
+const MIN_IMPORT_FEEDBACK_MS = 1200;
 
 function getLedger(): InvestmentLedger {
   if (!ledger) ledger = new InvestmentLedger();
@@ -281,6 +287,7 @@ async function refreshExtensionStatus(): Promise<InvestmentExtensionStatus | und
 async function syncFromExtension(): Promise<ExtensionSyncResult | undefined> {
   if (state.syncing || state.collecting) return undefined;
   state.syncing = true;
+  state.importContext = { kind: "plugin-staging", label: "插件待导入批次" };
   state.error = undefined;
   state.lastFailures = [];
   try {
@@ -312,11 +319,13 @@ async function syncFromExtension(): Promise<ExtensionSyncResult | undefined> {
     state.lastSyncStatus = "failed";
   } finally {
     state.syncing = false;
+    if (state.syncPhase !== "failed") state.importContext = undefined;
   }
 }
 
 async function startCollection(): Promise<boolean> {
   if (state.syncing || state.collecting) return false;
+  state.importContext = undefined;
   // 每次都刷新插件状态，确保 pending 判断基于最新暂存，而非上次采集完成时的陈旧快照。
   await refreshExtensionStatus();
   if (state.extensionStatus?.pending) {
@@ -514,7 +523,7 @@ async function clearAll(): Promise<void> {
   await clearEverything();
 }
 
-/** 保存一条策略规则版本（仓位区间/移动止损/减仓目标），用于规则页编辑后写回 Ledger。 */
+/** 保存一条策略规则版本（仓位区间/移动止损/减仓目标），用于纪律页编辑后写回 Ledger。 */
 async function saveStrategyRuleVersion(version: StrategyRuleVersion): Promise<void> {
   await getLedger().putStrategyRuleVersion(version);
   await loadFromLedger();
@@ -681,26 +690,23 @@ async function linkDecisionToTransaction(
 }
 
 /**
- * 加载脱敏采集快照到 Ledger，供页面结构审查。数据源是天天基金扩展采集的脱敏 JSON（协议
- * eastmoney-source-capture/1.0），通过 fetch public 副本读取后复用 toInvestmentDataset
- * 转换，再走与插件导入完全相同的 SyncService → scope:real-account 路径写入。
- * 该快照由用户显式导入，不作为当前账户默认数据。
+ * 导入一份来源采集包（协议 eastmoney-source-capture/1.0）到 Ledger：校验协议后复用
+ * toInvestmentDataset 转换，再走与插件导入完全相同的 SyncService → scope:real-account 路径。
+ * 内置脱敏快照（fetch）与本地 JSON 文件导入共用此链路。
  */
-async function loadRealFixtureSnapshot(): Promise<boolean> {
-  state.syncing = true;
-  state.error = undefined;
-  state.lastFailures = [];
-  // 显式加载真实快照覆盖"已清空"意图，清除标记。
+async function importSourceCapture(capture: EastmoneySourceCapture, successMessage: string): Promise<boolean> {
+  // 显式导入真实采集包覆盖"已清空"意图，清除标记。
   try { localStorage.removeItem("investment-manual-clear"); } catch { /* ignore */ }
   try {
-    const res = await fetch("/fixtures/investment/eastmoney-source-desensitized.json");
-    if (!res.ok) throw new Error(`读取采集快照失败：HTTP ${res.status}`);
-    const capture = await res.json() as EastmoneySourceCapture;
     if (capture.protocol !== EASTMONEY_SOURCE_CAPTURE_PROTOCOL) {
-      throw new Error(`采集快照协议不匹配：${capture.protocol}`);
+      throw new Error(`采集包协议不匹配：${capture.protocol ?? "（缺失）"}，当前支持 ${EASTMONEY_SOURCE_CAPTURE_PROTOCOL}`);
     }
+    state.syncPhase = "checking";
+    state.syncMessage = "正在校验采集协议和数据完整性…";
     const normalized = toInvestmentDataset(capture);
     const l = getLedger();
+    state.syncPhase = "importing";
+    state.syncMessage = "正在写入账户、持仓、交易和覆盖范围…";
     await l.clearImportedFacts();
     await l.removeMockData();
     await l.removeDemoReviewConfiguration();
@@ -719,20 +725,87 @@ async function loadRealFixtureSnapshot(): Promise<boolean> {
     }
     await loadFromLedger();
     await evaluateAndPersistActions();
+    if (state.extensionStatus?.pending) {
+      state.syncPhase = "acknowledging";
+      state.syncMessage = "数据已写入，正在清除未采用的插件待导入批次…";
+      await discardInvestmentStaging();
+      await refreshExtensionStatus();
+    }
     state.lastSyncStatus = syncResult.failures.length ? "partial" : "ok";
     state.lastFailures = syncResult.failures;
     state.syncPhase = "up-to-date";
-    state.syncMessage = "已加载脱敏采集快照（天天基金采集 2026-08-20，交易 72/72 页），仅供结构审查";
+    state.syncMessage = successMessage;
     return true;
   } catch (e) {
     state.error = (e as Error).message;
     state.syncPhase = "failed";
-    state.syncMessage = "加载真实脱敏快照失败";
+    state.syncMessage = "导入采集包失败";
     state.lastSyncStatus = "failed";
     return false;
   } finally {
+    const feedbackRemaining = MIN_IMPORT_FEEDBACK_MS - (Date.now() - captureImportStartedAt);
+    if (feedbackRemaining > 0) {
+      await new Promise((resolve) => window.setTimeout(resolve, feedbackRemaining));
+    }
     state.syncing = false;
+    if (state.syncPhase !== "failed") state.importContext = undefined;
   }
+}
+
+function beginCaptureImport(
+  kind: NonNullable<InvestmentOsState["importContext"]>["kind"],
+  label: string,
+  message: string,
+): void {
+  captureImportStartedAt = Date.now();
+  state.syncing = true;
+  state.importContext = { kind, label };
+  state.error = undefined;
+  state.lastFailures = [];
+  state.syncPhase = "reading";
+  state.syncMessage = message;
+}
+
+function failCaptureImport(error: unknown, message: string): false {
+  state.error = error instanceof Error ? error.message : String(error);
+  state.syncPhase = "failed";
+  state.syncMessage = message;
+  state.lastSyncStatus = "failed";
+  state.syncing = false;
+  return false;
+}
+
+/**
+ * 加载脱敏采集快照到 Ledger，供页面结构审查。数据源是天天基金扩展采集的脱敏 JSON（协议
+ * eastmoney-source-capture/1.0），通过 fetch public 副本读取后走 importSourceCapture。
+ * 该快照由用户显式导入，不作为当前账户默认数据。
+ */
+async function loadRealFixtureSnapshot(): Promise<boolean> {
+  beginCaptureImport("bundled-snapshot", "内置脱敏快照", "正在读取内置脱敏快照…");
+  try {
+    const res = await fetch("/fixtures/investment/eastmoney-source-desensitized.json");
+    if (!res.ok) throw new Error(`读取采集快照失败：HTTP ${res.status}`);
+    const capture = await res.json() as EastmoneySourceCapture;
+    return await importSourceCapture(capture, "已加载脱敏采集快照（天天基金采集 2026-08-20，交易 72/72 页），仅供结构审查");
+  } catch (e) {
+    return failCaptureImport(e, "加载真实脱敏快照失败");
+  }
+}
+
+/**
+ * 从本地 JSON 文件导入插件导出的采集包（popup「下载完整本地备份」或「下载脱敏快照」产物），
+ * 不依赖插件运行时；换浏览器/换电脑时无需重新采集。协议与链路同内置快照。
+ */
+async function importCaptureFile(file: File): Promise<boolean> {
+  beginCaptureImport("local-file", `本地 JSON 文件（${file.name}）`, `正在读取本地文件 ${file.name}…`);
+  let capture: EastmoneySourceCapture;
+  try {
+    capture = JSON.parse(await file.text()) as EastmoneySourceCapture;
+  } catch {
+    return failCaptureImport(new Error(`文件 ${file.name} 不是合法 JSON，无法导入`), "导入采集文件失败");
+  }
+  const capturedAt = (capture.capturedAt ?? "").slice(0, 10) || "未知时间";
+  return importSourceCapture(capture, `已导入采集包 ${file.name}（采集于 ${capturedAt}）`);
 }
 
 export function useInvestmentOS() {
@@ -747,6 +820,7 @@ export function useInvestmentOS() {
     clearEverything,
     clearAll,
     loadRealFixtureSnapshot,
+    importCaptureFile,
     createPolicy,
     createPolicyVersion,
     evaluateAndPersistActions,

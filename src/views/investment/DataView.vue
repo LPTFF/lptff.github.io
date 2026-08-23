@@ -85,12 +85,22 @@
       </el-collapse-item>
     </el-collapse>
 
-    <!-- 折叠：从采集快照导入（脱敏样本，不依赖插件） -->
+    <!-- 折叠：从采集 JSON 导入（内置脱敏快照 / 插件导出文件，均不依赖插件运行时） -->
     <el-collapse v-model="snapshotActive">
-      <el-collapse-item title="从采集快照导入" name="snapshot">
-        <p class="guide-copy">这是一份用于结构审查的脱敏采集快照，交易分页为 72/72 页、共 1427 笔。导入会覆盖当前模拟器或旧数据，并保留你定义的规则。</p>
-        <div class="guide-actions">
-          <el-button type="primary" plain :loading="state.syncing" @click="importSnapshot">导入脱敏采集快照（2026-08-20，交易完整）</el-button>
+      <el-collapse-item title="从采集 JSON 导入（内置脱敏快照 / 插件导出文件）" name="snapshot">
+        <p class="guide-copy">选择任一入口即采用该来源；导入成功后会清除同时存在但未采用的插件待导入批次。</p>
+        <div class="import-entry">
+          <p class="guide-copy">入口一：内置脱敏采集快照，交易分页为 72/72 页、共 1427 笔，用于结构审查。导入会覆盖当前模拟器或旧数据，并保留你定义的规则。</p>
+          <div class="guide-actions">
+            <el-button type="primary" plain :loading="state.syncing" @click="importSnapshot">导入内置脱敏快照（2026-08-20，交易完整）</el-button>
+          </div>
+        </div>
+        <div class="import-entry">
+          <p class="guide-copy">入口二：插件 popup「下载完整本地备份」或「下载脱敏快照」导出的 JSON 文件（协议 eastmoney-source-capture/1.0）。换浏览器或换电脑时无需重新采集，选择文件即可导入。</p>
+          <div class="guide-actions">
+            <input ref="captureFileInput" type="file" accept=".json,application/json" hidden @change="onCaptureFileChange" />
+            <el-button type="primary" plain :loading="state.syncing" @click="captureFileInput?.click()">选择插件导出的 JSON 文件导入</el-button>
+          </div>
         </div>
       </el-collapse-item>
     </el-collapse>
@@ -118,7 +128,7 @@ import { usePluginGuide } from "../../investment/composables/use-plugin-guide";
 import { buildCoverageGaps } from "../../investment/composables/selectors";
 import type { CoverageDataset, DataCoverage } from "../../investment/domain";
 
-const { state, clearEverything, loadRealFixtureSnapshot } = useInvestmentOS();
+const { state, clearEverything, loadRealFixtureSnapshot, importCaptureFile } = useInvestmentOS();
 const { collect, sync } = useCollectionControl();
 const { pluginHint, downloadPlugin } = usePluginGuide();
 
@@ -152,6 +162,18 @@ async function importSnapshot(): Promise<void> {
   const ok = await loadRealFixtureSnapshot();
   if (ok) ElMessage.success("已加载脱敏采集快照（交易 72/72 页）");
   else ElMessage.error(state.error || "加载真实快照失败");
+}
+
+const captureFileInput = ref<HTMLInputElement>();
+/** 文件导入后清空 input value，保证同一文件可重复选择（change 不重复触发的经典坑）。 */
+async function onCaptureFileChange(event: Event): Promise<void> {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file) return;
+  const ok = await importCaptureFile(file);
+  if (ok) ElMessage.success(`已导入 ${file.name}`);
+  else ElMessage.error(state.error || "导入采集文件失败");
 }
 
 async function confirmClearEverything(): Promise<void> {
@@ -321,6 +343,10 @@ function completenessTag(c: DataCoverage["completeness"]): "success" | "warning"
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
+}
+/* 双入口分组：组间距大于组内“说明→按钮”间距，避免入口一按钮与入口二说明文字贴住 */
+.import-entry + .import-entry {
+  margin-top: 18px;
 }
 .install-steps {
   margin: 8px 0 0;

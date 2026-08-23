@@ -177,6 +177,10 @@ export interface Transaction {
   amountUnit: string;
   confirmedAmount?: number;
   status: TransactionStatus;
+  /** 来源业务类型原文（如「银行卡定投」）；逐笔核对时与来源 App 对齐的错点，系统翻译不应覆盖它。 */
+  businessTypeText?: string;
+  /** 来源状态原文（如「已受理(支付完成)」）；翻译只作展示色，原文才是核对错点。 */
+  statusText?: string;
   sourceType?: TransactionSourceType;
   /** 来源业务名称确实没有映射时标记；不能仅凭 OTHER 推断为异常。 */
   classificationWarning?: "unmapped_transaction_type";

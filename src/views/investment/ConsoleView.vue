@@ -2,7 +2,7 @@
   <div class="console-view">
     <el-card v-if="!state.account" shadow="never" class="empty-card">
       <el-empty description="尚未导入投资数据" />
-      <p class="empty-intro">可通过本地浏览器插件从天天基金采集后导入本地账本，或去数据页加载本地采集快照。</p>
+      <p class="empty-intro">可通过本地浏览器插件从天天基金采集后导入本地账本，或去采集页加载本地采集快照。</p>
       <div class="guide-actions">
         <el-button type="primary" :loading="state.collecting" :disabled="state.syncing" @click="collect">开始采集投资数据</el-button>
         <el-button :loading="state.syncing" :disabled="state.collecting" @click="sync">读取待导入数据</el-button>
@@ -18,6 +18,9 @@
     </el-card>
 
     <template v-else>
+      <!-- 演练接管全局数据：总览指标与曲线为演练模拟值，须标注防误导 -->
+      <el-alert v-if="isSimulator" type="info" :closable="false" show-icon title="牛熊演练进行中：本页指标与曲线为演练模拟值"
+        description="演练接管了系统全局数据（真实数据已退出，结束可一键恢复）；本页总资产/盈亏曲线/资金曲线均按演练持仓与演练交易计算，不代表真实账户。演练详情在复盘页「牛熊周期演练」卡。" class="section-alert" />
       <el-card shadow="never" class="section">
         <template #header>
           <div class="card-head-row">
@@ -34,6 +37,30 @@
           <div class="metric"><span class="metric-label">交易频率</span><span class="metric-value">{{ recent.transactionCount === 0 ? "—" : `近 ${recent.transactionCount} 笔` }}</span></div>
         </div>
       </el-card>
+
+      <!-- 累计盈亏曲线：控制台的“一眼”信息，缺口如实断线，不插值不补零 -->
+      <el-card shadow="never" class="section">
+        <template #header>
+          <div class="card-head-row">
+            <span>累计盈亏曲线</span>
+            <span class="head-hint">红底区间为回撤中；虚线为历史峰值</span>
+          </div>
+        </template>
+        <CumulativePnlChart v-if="pnlSeries.length" :series="pnlSeries" height="280px" />
+        <el-empty v-else description="暂无每日盈亏数据，曲线待采集后绘制" :image-size="60" />
+      </el-card>
+
+      <!-- 资金投入与流出：月度买卖金额对照，口径与明细页买入金额一致 -->
+      <el-card shadow="never" class="section">
+        <template #header>
+          <div class="card-head-row">
+            <span>资金投入与流出</span>
+            <span class="head-hint">红=投入（买入）、绿=流出（卖出）；失败/撤销不计入，悬停查看当月明细</span>
+          </div>
+        </template>
+        <CashflowChart v-if="cashflowSeries.length" :series="cashflowSeries" height="280px" />
+        <el-empty v-else description="暂无交易记录，资金曲线待采集后绘制" :image-size="60" />
+      </el-card>
     </template>
   </div>
 </template>
@@ -43,15 +70,20 @@ import { computed, ref } from "vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { useCollectionControl } from "../../investment/composables/use-collection-control";
 import { usePluginGuide } from "../../investment/composables/use-plugin-guide";
-import { buildAccountMetrics, buildRecentChanges } from "../../investment/composables/selectors";
+import { buildAccountMetrics, buildRecentChanges, buildCumulativePnlSeries, buildMonthlyCashflow } from "../../investment/composables/selectors";
+import CumulativePnlChart from "../../investment/charts/CumulativePnlChart.vue";
+import CashflowChart from "../../investment/charts/CashflowChart.vue";
 
 const { state } = useInvestmentOS();
+const isSimulator = computed(() => state.account?.source === "sim");
 const { collect, sync } = useCollectionControl();
 const { pluginHint, downloadPlugin } = usePluginGuide();
 const showInstallSteps = ref(false);
 
 const metrics = computed(() => buildAccountMetrics(state.account, state.portfolio, state.dailyPnl));
 const recent = computed(() => buildRecentChanges([...state.transactions]));
+const pnlSeries = computed(() => buildCumulativePnlSeries([...state.dailyPnl]));
+const cashflowSeries = computed(() => buildMonthlyCashflow([...state.transactions]));
 
 function fmt(n: number): string {
   return n.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -63,6 +95,9 @@ function fmt(n: number): string {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+.section-alert {
+  margin-bottom: 4px;
 }
 .section {
   width: 100%;

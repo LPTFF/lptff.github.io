@@ -8,6 +8,7 @@
     "sync:fixture": "node ./project-support/scripts/sync-investment-fixture.js",
     "serve": "node ./project-support/scripts/sync-investment-fixture.js && node ./project-support/scripts/sync-findJob-summary.js && vite --host 0.0.0.0 --port 8090 --strictPort",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
+    "test": "vitest run",
     "build": "node ./project-support/scripts/sync-investment-fixture.js && node ./project-support/scripts/sync-findJob-summary.js && npm run typecheck && vite build && node ./project-support/scripts/copy-404.js",
     "collect:rss": "node ./project-support/scripts/collectors/rss/collect.js",
     "collect:rss:site": "node ./project-support/scripts/collectors/rss/collect.js --output ./project-support/public/data/recommendArticleData.json",
@@ -17,6 +18,7 @@
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
     "archiver": "^8.0.0",
+    "echarts": "^6.1.0",
     "element-plus": "^2.14.2",
     "jsencrypt": "^3.3.2",
     "marked": "^11.1.1",
@@ -31,6 +33,7 @@
     "@vitejs/plugin-vue": "^5.2.4",
     "axios": "^1.18.1",
     "eruda": "3.0.0",
+    "fake-indexeddb": "^6.2.5",
     "fast-xml-parser": "^5.10.1",
     "openai": "^4.104.0",
     "postcss": "^8.5.26",
@@ -41,6 +44,7 @@
     "unplugin-vue-markdown": "^0.26.3",
     "vite": "^6.4.3",
     "vite-plugin-compression": "^0.5.1",
+    "vitest": "^3.2.7",
     "vue-tsc": "^3.3.8"
   }
 }

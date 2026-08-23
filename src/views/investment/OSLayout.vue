@@ -22,14 +22,15 @@
       <el-button size="small" type="primary" @click="goBackToReview">← 返回复盘</el-button>
     </div>
 
+    <!-- 2026-08-23 改名：直白化导航（组合→持仓、规则→纪律、行动→待办、证据→明细、数据→采集）；路由路径不变 -->
     <el-menu mode="horizontal" router :default-active="route.path" class="os-menu">
-      <el-menu-item index="/investment">控制台</el-menu-item>
+      <el-menu-item index="/investment">总览</el-menu-item>
       <el-menu-item index="/investment/review">复盘</el-menu-item>
-      <el-menu-item index="/investment/portfolio">组合</el-menu-item>
-      <el-menu-item index="/investment/policies">规则</el-menu-item>
-      <el-menu-item index="/investment/actions">行动</el-menu-item>
-      <el-menu-item index="/investment/data">数据</el-menu-item>
-      <el-menu-item index="/investment/evidence">证据</el-menu-item>
+      <el-menu-item index="/investment/portfolio">持仓</el-menu-item>
+      <el-menu-item index="/investment/policies">纪律</el-menu-item>
+      <el-menu-item index="/investment/actions">待办</el-menu-item>
+      <el-menu-item index="/investment/evidence">明细</el-menu-item>
+      <el-menu-item index="/investment/data">采集</el-menu-item>
     </el-menu>
 
     <div class="os-body">

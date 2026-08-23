@@ -22,7 +22,8 @@
         <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3" title="0=近1周, 1=近1月, 2=近3月, 3=近1年；4为自定义日期需手动查询，默认 3" /></label>
         <button id="cfg-save" type="button" class="secondary">保存设置</button>
         <button id="backup" type="button" class="secondary" aria-describedby="download-hint" disabled>下载完整本地备份</button>
-        <p id="download-hint" class="action-hint">完成一次采集后，下载按钮会由灰色变为蓝色并可点击。</p>
+        <button id="desensitize" type="button" class="secondary" aria-describedby="download-hint" disabled>下载脱敏快照</button>
+        <p id="download-hint" class="action-hint">完成一次采集后，两个下载按钮会变为可点击，并直接保存到浏览器默认下载目录：「完整本地备份」含个人识别信息，仅限本地使用；「脱敏快照」只掩盖账户/银行卡/交易追踪标识，文件名与仓库 fixture 一致（eastmoney-source-desensitized.json），采集逻辑更新后可直接替换仓库内的同名文件。导出不影响待导入状态。</p>
       </details>
     </main>
     <script src="popup.js"></script>

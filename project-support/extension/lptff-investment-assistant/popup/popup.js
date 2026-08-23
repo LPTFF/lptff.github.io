@@ -2,6 +2,9 @@ const statusElement = document.querySelector("#status");
 const branchElement = document.querySelector("#branches");
 const collectButton = document.querySelector("#collect");
 const backupButton = document.querySelector("#backup");
+const desensitizeButton = document.querySelector("#desensitize");
+let exportAvailable = false;
+let exportRunning = false;
 
 const stageLabels = {
   preparing: "正在准备采集环境…",
@@ -101,8 +104,9 @@ function formatCoverage(staging) {
 
 function updateStaging(staging) {
   document.querySelector("#coverage").textContent = formatCoverage(staging);
-  const available = Boolean(staging?.capture);
-  backupButton.disabled = !available;
+  exportAvailable = Boolean(staging?.capture);
+  backupButton.disabled = !exportAvailable || exportRunning;
+  desensitizeButton.disabled = !exportAvailable || exportRunning;
 }
 
 function updateTransferStatus(status) {
@@ -139,6 +143,11 @@ async function startCollection() {
 }
 
 async function exportData(type, successMessage) {
+  if (exportRunning) return;
+  exportRunning = true;
+  backupButton.disabled = true;
+  desensitizeButton.disabled = true;
+  setStatus(type === "EXPORT_DESENSITIZED_SNAPSHOT" ? "正在脱敏并执行残留自检…" : "正在生成完整本地备份…");
   try {
     const response = await send({ type });
     if (!response?.ok) throw new Error(response?.error || "导出失败");
@@ -146,11 +155,16 @@ async function exportData(type, successMessage) {
     setStatus(`${successMessage}${detail}`, "success");
   } catch (error) {
     setStatus(error instanceof Error ? error.message : "导出失败", "error");
+  } finally {
+    exportRunning = false;
+    backupButton.disabled = !exportAvailable;
+    desensitizeButton.disabled = !exportAvailable;
   }
 }
 
 collectButton.addEventListener("click", startCollection);
 backupButton.addEventListener("click", () => exportData("EXPORT_SOURCE_BACKUP", "完整本地备份已生成。"));
+desensitizeButton.addEventListener("click", () => exportData("EXPORT_DESENSITIZED_SNAPSHOT", "脱敏快照已生成，可安全提交或替换仓库 fixture。"));
 
 chrome.runtime.onMessage.addListener((message) => {
   if (message?.type === "COLLECTION_PROGRESS") updateProgress(message);

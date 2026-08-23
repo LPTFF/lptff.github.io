@@ -833,6 +833,16 @@ export class InvestmentLedger {
     return (await reqToPromise(tx.objectStore(StoreName.decisionRecords).get(id))) as DecisionRecord | undefined;
   }
 
+  /** 按 scope 删除事前决策记录（演练回退重放前清场用）。 */
+  async deleteDecisionRecordsByScope(scopeId: string): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.decisionRecords, "readwrite");
+    const index = tx.objectStore(StoreName.decisionRecords).index("byScope");
+    const keys = (await reqToPromise(index.getAllKeys(scopeId))) as IDBValidKey[];
+    for (const key of keys) tx.objectStore(StoreName.decisionRecords).delete(key);
+    await txDone(tx);
+  }
+
   async putOperationPlan(plan: OperationPlan): Promise<void> {
     const db = await this.db();
     const tx = db.transaction(StoreName.operationPlans, "readwrite");
@@ -865,6 +875,16 @@ export class InvestmentLedger {
     const tx = db.transaction(StoreName.executionLinks, "readonly");
     const index = tx.objectStore(StoreName.executionLinks).index("byTransaction");
     return (await reqToPromise(index.getAll(transactionId))) as ExecutionLink[];
+  }
+
+  /** 按 id 批量删除执行链接（ExecutionLink 无 scope 字段，调用方自行持有 id 列表）。 */
+  async deleteExecutionLinks(ids: string[]): Promise<void> {
+    if (!ids.length) return;
+    const db = await this.db();
+    const tx = db.transaction(StoreName.executionLinks, "readwrite");
+    const store = tx.objectStore(StoreName.executionLinks);
+    for (const id of ids) store.delete(id);
+    await txDone(tx);
   }
 
   // ---- P0：TrailingStopState / ReductionPlan ----
@@ -902,6 +922,16 @@ export class InvestmentLedger {
     const tx = db.transaction(StoreName.trailingStopStates, "readonly");
     const index = tx.objectStore(StoreName.trailingStopStates).index("byScope");
     return (await reqToPromise(index.getAll(scopeId))) as StoredTrailingStopState[];
+  }
+
+  /** 按 scope 删除止损状态（演练回退重放前清场：高水位防回退保护要求重放前先清空）。 */
+  async deleteTrailingStopStatesByScope(scopeId: string): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.trailingStopStates, "readwrite");
+    const index = tx.objectStore(StoreName.trailingStopStates).index("byScope");
+    const keys = (await reqToPromise(index.getAllKeys(scopeId))) as IDBValidKey[];
+    for (const key of keys) tx.objectStore(StoreName.trailingStopStates).delete(key);
+    await txDone(tx);
   }
 
   async putReductionPlan(plan: ReductionPlan): Promise<void> {

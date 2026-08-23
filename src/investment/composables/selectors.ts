@@ -71,6 +71,174 @@ export function computeMaxDrawdown(dailyPnl: DailyPnL[]): number | undefined {
   return maxDd;
 }
 
+// ---- 图表与明细核对 selector（investment-review.md 12.5）：只消费既有事实，不新增业务结论 ----
+
+/** 累计盈亏逐日序列：按日聚合全部资产 pnl 后累加；日期缺口如实跳过，不插值不补零。 */
+export interface CumulativePnlPoint {
+  date: string;
+  /** 当日全组合 pnl 合计（元）。 */
+  pnl: number;
+  /** 截至当日累计 pnl（元）。 */
+  cumulative: number;
+  /** 截至当日的历史峰值累计（回撤着色用，与 computeMaxDrawdown 同一口径）。 */
+  runningPeak: number;
+}
+
+export function buildCumulativePnlSeries(dailyPnl: DailyPnL[]): CumulativePnlPoint[] {
+  const byDate = new Map<string, number>();
+  for (const p of dailyPnl) {
+    byDate.set(p.date, (byDate.get(p.date) ?? 0) + p.pnl);
+  }
+  const dates = [...byDate.keys()].sort();
+  let cumulative = 0;
+  let peak = 0;
+  return dates.map((date) => {
+    const pnl = Math.round((byDate.get(date) ?? 0) * 100) / 100;
+    cumulative = Math.round((cumulative + pnl) * 100) / 100;
+    if (cumulative > peak) peak = cumulative;
+    return { date, pnl, cumulative, runningPeak: peak };
+  });
+}
+
+/** 月度资金投入/流出序列（总览页）：买入=投入、卖出=流出；失败/撤销不计入，金额取确认优先。
+ * 口径与明细页「买入金额」指标一致，投入合计可直接对账。 */
+export interface MonthlyCashflowPoint {
+  /** YYYY-MM。 */
+  month: string;
+  /** 当月投入（买入）金额合计（元）。 */
+  buyAmount: number;
+  /** 当月流出（卖出）金额合计（元）。 */
+  sellAmount: number;
+}
+
+export function buildMonthlyCashflow(transactions: Transaction[]): MonthlyCashflowPoint[] {
+  const byMonth = new Map<string, MonthlyCashflowPoint>();
+  for (const t of transactions) {
+    if (t.status === "failed" || t.status === "cancelled") continue;
+    if (t.type !== "BUY" && t.type !== "SELL") continue;
+    const month = (t.occurredAt ?? "").slice(0, 7);
+    if (!/^\d{4}-\d{2}$/.test(month)) continue;
+    const bucket = byMonth.get(month) ?? { month, buyAmount: 0, sellAmount: 0 };
+    const value = t.confirmedAmount ?? t.amount;
+    if (t.type === "BUY") bucket.buyAmount = Math.round((bucket.buyAmount + value) * 100) / 100;
+    else bucket.sellAmount = Math.round((bucket.sellAmount + value) * 100) / 100;
+    byMonth.set(month, bucket);
+  }
+  return [...byMonth.values()].sort((a, b) => (a.month < b.month ? -1 : 1));
+}
+
+/** 交易明细核对行：逐笔翻译为可对账的只读行，不加任何“异常”标记（behaviorType 仅是信号）。 */
+export interface TransactionLedgerRow {
+  id: string;
+  /** YYYY-MM-DD。 */
+  date: string;
+  assetId: string;
+  assetName: string;
+  type: Transaction["type"];
+  amount: number;
+  confirmedAmount?: number;
+  status: Transaction["status"];
+  /** 来源业务类型原文（逐笔核对锚点）；旧数据无原文时缺省，展示层回退系统翻译。 */
+  businessTypeText?: string;
+  /** 来源状态原文（逐笔核对锚点）；旧数据无原文时缺省，展示层回退系统翻译。 */
+  statusText?: string;
+  sourceType?: Transaction["sourceType"];
+  behaviorType?: string;
+  sourceTransactionId?: string;
+}
+
+/** 按月笔数分布（对账锚点：拿着来源 App 按月核对，不必逐页翻）。 */
+export interface TransactionMonthBucket {
+  month: string;
+  count: number;
+  buyCount: number;
+  sellCount: number;
+}
+
+export interface TransactionLedgerView {
+  /** 按日期升序的逐笔行。 */
+  rows: TransactionLedgerRow[];
+  total: number;
+  /** 去重升序（过滤下拉用）。 */
+  assetIds: string[];
+  firstDate?: string;
+  lastDate?: string;
+  /** 按月升序。 */
+  months: TransactionMonthBucket[];
+}
+
+export function buildTransactionLedger(transactions: Transaction[], assets: AssetMetadata[]): TransactionLedgerView {
+  const nameById = new Map(assets.map((a) => [a.assetId, a.name ?? a.assetId]));
+  const rows: TransactionLedgerRow[] = [...transactions]
+    .sort((a, b) => (a.occurredAt < b.occurredAt ? -1 : a.occurredAt > b.occurredAt ? 1 : 0))
+    .map((t) => ({
+      id: t.id,
+      date: (t.occurredAt ?? "").slice(0, 10),
+      assetId: t.assetId,
+      assetName: nameById.get(t.assetId) ?? t.assetId,
+      type: t.type,
+      amount: t.amount,
+      confirmedAmount: t.confirmedAmount,
+      status: t.status,
+      businessTypeText: t.businessTypeText,
+      statusText: t.statusText,
+      sourceType: t.sourceType,
+      behaviorType: t.behaviorType ?? undefined,
+      sourceTransactionId: t.sourceTransactionId,
+    }));
+  const monthMap = new Map<string, TransactionMonthBucket>();
+  for (const r of rows) {
+    const month = r.date.slice(0, 7);
+    const bucket = monthMap.get(month) ?? { month, count: 0, buyCount: 0, sellCount: 0 };
+    bucket.count += 1;
+    if (r.type === "BUY") bucket.buyCount += 1;
+    if (r.type === "SELL") bucket.sellCount += 1;
+    monthMap.set(month, bucket);
+  }
+  return {
+    rows,
+    total: rows.length,
+    assetIds: [...new Set(rows.map((r) => r.assetId))].sort(),
+    firstDate: rows[0]?.date,
+    lastDate: rows.at(-1)?.date,
+    months: [...monthMap.values()].sort((a, b) => (a.month < b.month ? -1 : 1)),
+  };
+}
+
+/** 每日盈亏核对：范围、资产数与连续缺口区间；缺口只陈述“这些日期无记录”，不断言漏采。 */
+export interface DailyPnlAuditView {
+  firstDate?: string;
+  lastDate?: string;
+  pointCount: number;
+  assetCount: number;
+  /** 连续无记录天数超过阈值的区间（不含端点）。 */
+  gaps: { from: string; to: string; days: number }[];
+}
+
+export function buildDailyPnlAudit(dailyPnl: DailyPnL[], gapThreshold = 3): DailyPnlAuditView {
+  const dates = [...new Set(dailyPnl.map((p) => p.date))].sort();
+  if (!dates.length) return { pointCount: 0, assetCount: 0, gaps: [] };
+  const gaps: { from: string; to: string; days: number }[] = [];
+  const dayMs = 24 * 60 * 60 * 1000;
+  for (let i = 1; i < dates.length; i++) {
+    const prev = Date.parse(`${dates[i - 1]}T00:00:00Z`);
+    const next = Date.parse(`${dates[i]}T00:00:00Z`);
+    const missingDays = Math.round((next - prev) / dayMs) - 1;
+    if (missingDays > gapThreshold) {
+      const from = new Date(prev + dayMs).toISOString().slice(0, 10);
+      const to = new Date(next - dayMs).toISOString().slice(0, 10);
+      gaps.push({ from, to, days: missingDays });
+    }
+  }
+  return {
+    firstDate: dates[0],
+    lastDate: dates.at(-1),
+    pointCount: dailyPnl.length,
+    assetCount: new Set(dailyPnl.map((p) => p.assetId)).size,
+    gaps,
+  };
+}
+
 export interface PortfolioHoldingRow {
   assetId: string;
   name?: string;

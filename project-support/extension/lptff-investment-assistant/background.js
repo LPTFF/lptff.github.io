@@ -375,13 +375,15 @@ async function discardStaging() {
   }
 }
 
-async function downloadData(data, filename, saveAs) {
+async function downloadData(data, filename) {
   const content = JSON.stringify(data, null, 2);
   const url = `data:application/json;charset=utf-8,${encodeURIComponent(content)}`;
   await callChrome(chrome.downloads, chrome.downloads.download, {
     url,
     filename,
-    saveAs,
+    // 扩展 popup 会在“另存为”窗口获得焦点时关闭，继而销毁 sendMessage
+    // 响应端口。直接交给浏览器下载可让后台回调在 popup 生命周期内完成。
+    saveAs: false,
     conflictAction: "overwrite",
   });
 }
@@ -389,7 +391,27 @@ async function downloadData(data, filename, saveAs) {
 async function exportSourceBackup() {
   const staging = await getStaging();
   if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");
-  await downloadData(staging.capture, "lptff-investment-source-capture.json", true);
+  await downloadData(staging.capture, "lptff-investment-source-capture.json");
+  return { ok: true };
+}
+
+// 脱敏导出：复用 source-capture.js 的 desensitizeSource（只掩盖能定位到账户/银行卡/交易的
+// 个人识别信息，其余字段保留真实值），并照搬 desensitize-source.js 的残留自检——
+// 32 位交易/追踪 ID 与银行卡尾号不允许残留，宁可失败也不生成假脱敏文件。
+// 文件名与仓库 fixture 一致（eastmoney-source-desensitized.json），采集逻辑变更后可直接替换
+// project-support/fixtures/investment/ 下的同名文件（serve/build 会同步到 public）。
+async function exportDesensitizedSnapshot() {
+  const staging = await getStaging();
+  if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");
+  const desensitized = globalThis.LPTFFSourceCapture.desensitizeSource(staging.capture);
+  const text = JSON.stringify(desensitized);
+  const residual = [];
+  const hex32 = text.match(/\b[0-9a-f]{32}\b/g) || [];
+  if (hex32.length) residual.push(`残留 32 位交易/追踪 ID ${hex32.length} 个`);
+  const bankTail = text.match(/\|\s*\d{4,}\b/g) || [];
+  if (bankTail.length) residual.push(`残留银行卡尾号 ${bankTail.length} 处`);
+  if (residual.length) throw new Error(`脱敏自检失败：${residual.join("；")}，请改用「下载完整本地备份」并在仓库外用 desensitize-source.js 人工处理`);
+  await downloadData(desensitized, "eastmoney-source-desensitized.json");
   return { ok: true };
 }
 
@@ -600,6 +622,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message?.type === "EXPORT_SOURCE_BACKUP") {
     exportSourceBackup().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_DESENSITIZED_SNAPSHOT") {
+    exportDesensitizedSnapshot().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
   if (message?.type === "GET_CONFIG") {

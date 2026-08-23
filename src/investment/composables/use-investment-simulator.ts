@@ -56,6 +56,13 @@ interface SimHolding {
   costValue: number;
 }
 
+export interface SimAssetPoint {
+  round: number;
+  asOf: string;
+  phase: MarketPhase;
+  totalAsset: number;
+}
+
 interface SimulatorState {
   round: number;
   asOf: string;
@@ -73,6 +80,10 @@ interface SimulatorState {
   regularInvestAssetId: string | undefined;
   /** 演练开始前各基金最近真实交易日期（YYYY-MM-DD），供发现同时展示真实日期供核实。 */
   realTransactionsByAsset: Record<string, string>;
+  /** 逐期总资产轨迹（演练内存态，不持久化；刷新续演只保留恢复点）。 */
+  assetHistory: SimAssetPoint[];
+  /** 是否可回退上一轮（依赖内存快照栈；刷新续演后为 false，只能向前推进）。 */
+  canRewind: boolean;
 }
 
 type MarketPhase = ReturnType<typeof phaseOf>;
@@ -90,7 +101,24 @@ const state = reactive<SimulatorState>({
   holdingNames: {},
   regularInvestAssetId: undefined,
   realTransactionsByAsset: {},
+  assetHistory: [],
+  canRewind: false,
 });
+
+/** 每期推进后的完整快照（回退用）：内存态 + 当期写入 Ledger 的增量。 */
+interface SimRoundSnapshot {
+  round: number;
+  holdings: Record<string, SimHolding>;
+  behaviorLog: BehaviorLogEntry[];
+  assetHistory: SimAssetPoint[];
+  transactions: Transaction[];
+  decisions: DecisionRecord[];
+  links: ExecutionLink[];
+  trailingStates: StoredTrailingStopState[];
+}
+
+/** 回退快照栈（模块级内存态，不持久化）：栈底为第 0 期初始态，栈顶为最近完成期。 */
+let rewindStack: SimRoundSnapshot[] = [];
 
 let ledger: InvestmentLedger | null = null;
 function getLedger(): InvestmentLedger {
@@ -163,6 +191,12 @@ function restoreFromLedgerState(): boolean {
   state.holdingNames = holdingNames;
   state.regularInvestAssetId = pickRegularInvestAsset();
   state.behaviorLog = [];
+  // 刷新续演：逐期历史无法从 Ledger 恢复，以当前期为新起点（曲线从恢复点开始记录）。
+  state.assetHistory = [];
+  recordAssetHistory();
+  // 快照栈同为内存态：刷新后丢失，回退不可用，只能向前推进。
+  rewindStack = [];
+  state.canRewind = false;
   state.initialized = true;
   state.running = false;
   return true;
@@ -301,6 +335,23 @@ function navOfAssetByIndex(ix: IndexId, period: number): number {
   return maid ? navOf(maid, period) : 1;
 }
 
+/** 轨迹维护（纯函数，便于单测）：同 round 重复推进时覆盖末点，否则追加；返回新数组不改入参。 */
+export function upsertSimAssetPoint(history: SimAssetPoint[], point: SimAssetPoint): SimAssetPoint[] {
+  const last = history.at(-1);
+  if (last && last.round === point.round) return [...history.slice(0, -1), point];
+  return [...history, point];
+}
+
+/** 逐期总资产轨迹记录：演练曲线数据源（内存态，不持久化）；同 round 重复推进时覆盖末点。 */
+function recordAssetHistory(): void {
+  const totalAsset = round2(Object.keys(state.holdings)
+    .filter((aid) => (state.holdings[aid]?.shares ?? 0) > 0)
+    .reduce((s, aid) => s + state.holdings[aid].shares * navOfAsset(aid, state.round), 0));
+  state.assetHistory = upsertSimAssetPoint(state.assetHistory, {
+    round: state.round, asOf: state.asOf, phase: state.phase, totalAsset,
+  });
+}
+
 /**
  * 启动真实持仓演练。forceReset=true 强制重开；options.useRealHoldings=true 用当前真实持仓。
  * 无 options 调用时仅尝试恢复已有演练（OSLayout 刷新续演）；恢复失败返回不初始化。
@@ -358,13 +409,30 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
   await l.putStrategyRuleVersion(ruleVersion);
   state.round = 0; state.asOf = dateOf(0); state.phase = phaseOf(0);
   state.toggles = defaultToggles(); state.behaviorLog = [];
+  state.assetHistory = [];
+  recordAssetHistory();
   await writeFactsToLedger(0, state.holdings, realAssets);
+  const initialTrailingStates: StoredTrailingStopState[] = [];
   for (const aid of assetIds) {
-    await l.putTrailingStopState(simulationTrailingStop({
+    const initial = simulationTrailingStop({
       id: `tss:${SCOPE_ID}:${aid}`, scopeId: SCOPE_ID, assetId: aid, ruleVersionId: RULE_VERSION_ID,
       previousHighWaterMark: 1.0, currentHighWaterMark: 1.0, stopLine: 0.9, navBasis: "nav_adjusted", asOf: dateOf(0), triggered: false,
-    }));
+    });
+    initialTrailingStates.push(initial);
+    await l.putTrailingStopState(initial);
   }
+  // 栈底压入第 0 期初始快照：回退到第 0 期时仍可恢复初始持仓与止损状态。
+  rewindStack = [{
+    round: 0,
+    holdings: JSON.parse(JSON.stringify(state.holdings)),
+    behaviorLog: [],
+    assetHistory: [...state.assetHistory],
+    transactions: [],
+    decisions: [],
+    links: [],
+    trailingStates: initialTrailingStates,
+  }];
+  state.canRewind = false;
   state.initialized = true;
   await os.loadFromLedger();
   await review.loadReviewFromLedger(dateOf(0));
@@ -400,6 +468,7 @@ async function advance(): Promise<void> {
     if (out.transactions.length) await l.putTransactions(out.transactions);
     const assetIds = Object.keys(state.holdings);
     const trailingRules = buildSimRules(assetIds).filter((r): r is TrailingStopRule => r.kind === "trailing_stop");
+    const roundTrailingStates: StoredTrailingStopState[] = [];
     for (const aid of assetIds) {
       const states = (await l.getTrailingStopStates(SCOPE_ID)).filter((s) => s.assetId === aid);
       const prev = states[states.length - 1];
@@ -411,15 +480,68 @@ async function advance(): Promise<void> {
         navFresh: true, coverage: { ...stubCoverage, judgmentId: `trailing_stop:${aid}` }, asOf: dateOf(period),
       });
       await l.putTrailingStopState(res.nextState);
+      roundTrailingStates.push(res.nextState);
     }
     state.round = period;
     state.asOf = dateOf(period);
     state.phase = phaseOf(period);
+    recordAssetHistory();
     const realAssets: AssetMetadata[] = JSON.parse(JSON.stringify(os.state.assets));
     await writeFactsToLedger(period, state.holdings, realAssets);
     state.behaviorLog = out.logs;
+    // 压入本期完整快照，供回退时恢复内存态与重放 Ledger 增量。
+    rewindStack.push({
+      round: period,
+      holdings: JSON.parse(JSON.stringify(state.holdings)),
+      behaviorLog: [...out.logs],
+      assetHistory: [...state.assetHistory],
+      transactions: out.transactions,
+      decisions: out.decisions,
+      links: out.links,
+      trailingStates: roundTrailingStates,
+    });
+    // 续演场景栈内无第 0 期基线（首次推进后栈长为 1），同样不可回退。
+    state.canRewind = rewindStack.length > 1;
     await os.loadFromLedger();
     await review.loadReviewFromLedger(dateOf(period));
+  } finally {
+    state.running = false;
+  }
+}
+
+/**
+ * 回退上一轮：恢复上一期完整状态（持仓/行为日志/资产轨迹），并重放 Ledger 至该期——
+ * account/portfolio/coverage 逐期重写，决策/止损状态先按 scope 清场再重放
+ * （高水位防回退保护不允许降级写入）；行为开关不回退，便于换行为重跑同一期。
+ */
+async function rewind(): Promise<void> {
+  if (state.running || rewindStack.length <= 1) return;
+  const popped = rewindStack.pop()!;
+  const target = rewindStack[rewindStack.length - 1];
+  state.running = true;
+  try {
+    const l = getLedger();
+    await l.clearImportedFacts();
+    await l.deleteDecisionRecordsByScope(SCOPE_ID);
+    await l.deleteExecutionLinks(popped.links.map((lk) => lk.id));
+    await l.deleteTrailingStopStatesByScope(SCOPE_ID);
+    const realAssets: AssetMetadata[] = JSON.parse(JSON.stringify(os.state.assets));
+    for (const snap of rewindStack) {
+      if (snap.transactions.length) await l.putTransactions(snap.transactions);
+      for (const d of snap.decisions) await l.putDecisionRecord(d);
+      for (const lk of snap.links) await l.putExecutionLink(lk);
+      for (const ts of snap.trailingStates) await l.putTrailingStopState(ts);
+      await writeFactsToLedger(snap.round, snap.holdings, realAssets);
+    }
+    state.round = target.round;
+    state.asOf = dateOf(target.round);
+    state.phase = phaseOf(target.round);
+    state.holdings = JSON.parse(JSON.stringify(target.holdings));
+    state.behaviorLog = [...target.behaviorLog];
+    state.assetHistory = [...target.assetHistory];
+    state.canRewind = rewindStack.length > 1;
+    await os.loadFromLedger();
+    await review.loadReviewFromLedger(state.asOf);
   } finally {
     state.running = false;
   }
@@ -440,6 +562,7 @@ export function useInvestmentSimulator() {
     isLastRound,
     init,
     advance,
+    rewind,
     reset,
     toggleBehavior,
   };
