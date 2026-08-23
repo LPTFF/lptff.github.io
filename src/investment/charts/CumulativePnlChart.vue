@@ -43,6 +43,7 @@ const { container } = useChart(() => {
     grid: { left: 8, right: 12, top: 12, bottom: 24, containLabel: true },
     tooltip: {
       trigger: "axis",
+      appendTo: "body",
       formatter: (params: Array<{ dataIndex: number }>) => {
         const p = props.series[params[0]?.dataIndex ?? 0];
         if (!p) return "";

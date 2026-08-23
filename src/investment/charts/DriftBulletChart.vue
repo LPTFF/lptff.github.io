@@ -30,6 +30,8 @@ const { container } = useChart(() => {
     yAxis: { type: "category", data: [""], show: false },
     tooltip: {
       trigger: "item",
+      // 图表仅 32px 高，Element Plus 卡片又会裁切溢出内容；挂到 body 才能完整显示两行提示。
+      appendTo: "body",
       formatter: () =>
         `实际 ${pct(d.actualPct)} · 目标 ${d.targetPct === undefined ? "未声明" : pct(d.targetPct)} · 区间 [${pct(d.minPct)}, ${pct(d.maxPct)}]` +
         (within ? "" : `<br/>${d.direction === "over" ? "超上限" : "低于下限"} ${(gap * 100).toFixed(1)} 个百分点`),

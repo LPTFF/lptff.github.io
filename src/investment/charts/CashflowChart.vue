@@ -23,6 +23,7 @@ const { container } = useChart(() => {
     legend: { top: 0, itemWidth: 12, itemHeight: 8, textStyle: { color: muted, fontSize: 12 } },
     tooltip: {
       trigger: "axis",
+      appendTo: "body",
       formatter: (params: Array<{ dataIndex: number }>) => {
         const p = props.series[params[0]?.dataIndex ?? 0];
         if (!p) return "";

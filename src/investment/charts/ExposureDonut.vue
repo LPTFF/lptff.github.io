@@ -26,6 +26,7 @@ const { container } = useChart(() => {
   return {
     tooltip: {
       trigger: "item",
+      appendTo: "body",
       formatter: (p: { dataIndex: number }) => {
         const s = props.slices[p.dataIndex];
         if (!s) return "";

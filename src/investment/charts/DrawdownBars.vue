@@ -27,6 +27,7 @@ const { container } = useChart(() => {
     grid: { left: 8, right: 56, top: 8, bottom: 8, containLabel: true },
     tooltip: {
       trigger: "item",
+      appendTo: "body",
       formatter: (p: { dataIndex: number }) => {
         const s = sorted.value[p.dataIndex];
         if (!s) return "";
