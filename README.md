@@ -73,13 +73,13 @@ npm run build
 项目通过真实白名单 RSS 来源生成站点数据：
 
 ```bash
-npm run collect:rss:site
+node ./project-support/scripts/collectors/rss/collect.js --output ./project-support/public/data/recommendArticleData.json
 npm run build
 ```
 
 这些命令只负责真实采集和构建，不能单独作为验收通过依据。发布后必须在实际站点的资讯页面操作并观察 `/data/recommendArticleData.json`、生成时间、来源、文章列表、失败状态和控制台，只有目标部署环境的结果符合预期才能通过验收。原始 RSS 没有 AI 阅读评分和推荐理由，页面不得伪造这些字段。
 
-正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下访问真实来源执行 `collect:rss:site`，随后执行 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `project-support/public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署；最终验收仍以 Pages 目标页面的真实操作结果为准。
+正式 `.github/workflows/ci.yml` 在 `master` push、手动触发和每日北京时间 06:17 的定时触发下直接运行 RSS 采集脚本，随后执行 Python crawl、生产构建和 Pages 发布。采集器会独立处理白名单来源：单个来源临时失败时记录警告并使用其余成功来源；全部来源失败、最终数据为空或校验不通过时停止本次发布，避免上线缺失或无效 JSON。构建后还会校验 `project-support/public/data/recommendArticleData.json` 已原样进入 `dist/data/recommendArticleData.json`，然后才执行现有部署；最终验收仍以 Pages 目标页面的真实操作结果为准。
 
 本地动态 JSON 不随源码提交；CI 每次在 Runner 工作区重新生成。线上第一次自动运行仍需在 Actions 和 Pages 中核验，因为本地网络与 GitHub Runner 网络并不等价。参考项目的能力分类与禁用边界见 [qinglongBackup 数据能力评估](agent/product/research/qinglong-backup-assessment.md)。
 

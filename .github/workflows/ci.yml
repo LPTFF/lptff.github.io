@@ -45,7 +45,7 @@ jobs:
           npm install
           python -m pip install --requirement project-support/requirements-crawl.txt
       - name: Collect public RSS for Pages
-        run: npm run collect:rss:site
+        run: node ./project-support/scripts/collectors/rss/collect.js --output ./project-support/public/data/recommendArticleData.json
       - name: Crawl and validate site data
         run: |
           chmod +x project-support/build.sh
