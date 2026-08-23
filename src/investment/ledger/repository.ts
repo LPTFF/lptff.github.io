@@ -48,6 +48,15 @@ export interface ImportRecord {
   status: "ok" | "partial" | "failed";
 }
 
+/** 原始采集事实档案：完整保留插件交付对象，标准化账本和深度分析均不得取代它。 */
+export interface SourceCaptureArchive {
+  id: string;
+  capturedAt: string;
+  protocol: string;
+  source: string;
+  payload: unknown;
+}
+
 export interface MockDataCleanupResult {
   cleaned: boolean;
   accounts: number;
@@ -122,6 +131,47 @@ function mergeAssetMetadata(existing: AssetMetadata | undefined, incoming: Asset
     merged.provenance = { ...merged.provenance, assetClass: previousAssetClassQuality } as AssetMetadata["provenance"];
   }
   return merged;
+}
+
+/**
+ * 兼容行业权重单位修复前的账本：旧 Adapter 把 56.61% 保存成 56.61，新模型保存为 0.5661。
+ * 旧记录没有 scale 标记；显式标记避免用数值猜单位，也能覆盖行业合计不足 1% 的基金。
+ */
+function migrateLegacyIndustryAllocationScale(asset: AssetMetadata): AssetMetadata {
+  const allocations = asset.industryAllocations;
+  if (!allocations?.length || asset.industryAllocationScale === "ratio") return asset;
+  return {
+    ...asset,
+    industryAllocations: allocations.map((item) => ({ ...item, weight: item.weight / 100 })),
+    industryAllocationScale: "ratio",
+  };
+}
+
+/** 旧账本只有 indexes；按已保存的来源锚点拆回跟踪标的或业绩基准，不凭名称猜测。 */
+function migrateLegacyIndexSemantics(asset: AssetMetadata): AssetMetadata {
+  if (asset.trackingIndexes || asset.benchmarkIndexes) return asset;
+  const sourceField = asset.evidence?.indexes?.sourceField;
+  if (sourceField === "tracked-index") {
+    return {
+      ...asset,
+      trackingIndexes: asset.indexes,
+      benchmarkIndexes: [],
+      trackingIndexQuality: asset.provenance?.indexes ?? "source",
+      benchmarkIndexQuality: "unknown",
+      trackingIndexEvidence: asset.evidence?.indexes,
+    };
+  }
+  if (sourceField === "benchmark") {
+    return {
+      ...asset,
+      trackingIndexes: [],
+      benchmarkIndexes: asset.indexes,
+      trackingIndexQuality: "unknown",
+      benchmarkIndexQuality: asset.provenance?.indexes ?? "extracted",
+      benchmarkIndexEvidence: asset.evidence?.indexes,
+    };
+  }
+  return { ...asset, trackingIndexes: [], benchmarkIndexes: [] };
 }
 
 /**
@@ -223,7 +273,16 @@ export class InvestmentLedger {
     const all = (await reqToPromise(
       tx.objectStore(StoreName.portfolioSnapshots).getAll(),
     )) as PortfolioSnapshot[];
-    return all.sort((a, b) => a.date.localeCompare(b.date));
+    return all
+      .map((portfolio) => portfolio.id.startsWith("eastmoney-portfolio:") ? {
+        ...portfolio,
+        holdings: portfolio.holdings.map((holding) => holding.pnlRate === undefined || holding.pnlRateBasis ? holding : {
+          ...holding,
+          pnlRateBasis: "source_reported" as const,
+          pnlRateSourceField: "profitPercent",
+        }),
+      } : portfolio)
+      .sort((a, b) => a.date.localeCompare(b.date));
   }
 
   async getLatestPortfolio(): Promise<PortfolioSnapshot | undefined> {
@@ -248,7 +307,10 @@ export class InvestmentLedger {
     const db = await this.db();
     const tx = db.transaction(StoreName.assets, "readonly");
     const assets = (await reqToPromise(tx.objectStore(StoreName.assets).getAll())) as AssetMetadata[];
-    return assets.map(migrateLegacyEastmoneyThemeProvenance);
+    return assets
+      .map(migrateLegacyIndustryAllocationScale)
+      .map(migrateLegacyEastmoneyThemeProvenance)
+      .map(migrateLegacyIndexSemantics);
   }
 
   // ---- Transactions ----
@@ -268,7 +330,27 @@ export class InvestmentLedger {
     const tx = db.transaction(StoreName.transactions, "readonly");
     const all = (await reqToPromise(tx.objectStore(StoreName.transactions).getAll())) as Array<Transaction & { dedupKey?: string }>;
     return all
-      .map(({ dedupKey: _dedupKey, ...rest }) => rest)
+      .map(({ dedupKey: _dedupKey, ...rest }) => ({
+        ...rest,
+        ...(/已受理/.test(rest.statusText ?? "") ? { status: "requested" as const } : {}),
+        ...(!rest.captureMethod ? {
+          captureMethod: rest.id.startsWith("eastmoney-tx:")
+            ? "extension_capture" as const
+            : rest.sourceType === "manual_import"
+              ? "manual_import" as const
+              : "unknown" as const,
+        } : {}),
+        ...(!rest.executionMethod ? {
+          executionMethod: rest.sourceType === "bank_auto_invest" ? "bank_auto_invest" as const : "unknown" as const,
+        } : {}),
+        ...(rest.confirmedAmount === undefined || rest.confirmedAmountUnit
+          ? {}
+          : { confirmedAmountUnit: rest.type === "BUY" && /^(?:元|人民币|CNY|RMB)$/i.test(rest.amountUnit)
+              ? "份"
+              : rest.type === "SELL" && /^(?:份|份额|shares?)$/i.test(rest.amountUnit)
+                ? "元"
+                : rest.amountUnit }),
+      }))
       .sort((a, b) => (a.occurredAt < b.occurredAt ? -1 : 1));
   }
 
@@ -335,6 +417,26 @@ export class InvestmentLedger {
     const db = await this.db();
     const tx = db.transaction(StoreName.dataCoverage, "readonly");
     return (await reqToPromise(tx.objectStore(StoreName.dataCoverage).getAll())) as DataCoverage[];
+  }
+
+  // ---- Raw source capture archives ----
+
+  async putSourceCaptureArchive(record: SourceCaptureArchive): Promise<void> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.sourceCaptures, "readwrite");
+    tx.objectStore(StoreName.sourceCaptures).put(record);
+    await txDone(tx);
+  }
+
+  async getSourceCaptureArchives(): Promise<SourceCaptureArchive[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.sourceCaptures, "readonly");
+    const records = await reqToPromise(tx.objectStore(StoreName.sourceCaptures).getAll()) as SourceCaptureArchive[];
+    return records.sort((a, b) => b.capturedAt.localeCompare(a.capturedAt) || b.id.localeCompare(a.id));
+  }
+
+  async getLatestSourceCaptureArchive(): Promise<SourceCaptureArchive | undefined> {
+    return (await this.getSourceCaptureArchives())[0];
   }
 
   // ---- Imports 审计 ----
@@ -721,6 +823,7 @@ export class InvestmentLedger {
       StoreName.patterns,
       StoreName.actions,
       StoreName.evidence,
+      StoreName.sourceCaptures,
       StoreName.investmentScopes,
       StoreName.strategyRuleVersions,
       StoreName.decisionRecords,

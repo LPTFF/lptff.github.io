@@ -20,14 +20,18 @@
               fmt(row.pnl) }}</span></template>
           </el-table-column>
           <el-table-column prop="pnlRate" label="持仓收益率" width="100" sortable="custom">
-            <template #default="{ row }"><span :class="profitClass(row.pnlRate)">{{ fmtPct(row.pnlRate)
-            }}</span></template>
+            <template #default="{ row }"><span :class="profitClass(row.pnlRate)" :title="returnBasisText(row)">{{
+              fmtPct(row.pnlRate)
+                }}</span></template>
           </el-table-column>
           <el-table-column prop="weight" label="仓位" width="72" sortable="custom">
             <template #default="{ row }">{{ fmtPct(row.weight) }}</template>
           </el-table-column>
-          <el-table-column label="指数依据" width="180">
-            <template #default="{ row }">{{ row.indexes.join(" / ") || "待识别" }}</template>
+          <el-table-column label="跟踪指数" width="150">
+            <template #default="{ row }">{{ row.trackingIndexes.join(" / ") || "无明确跟踪标的" }}</template>
+          </el-table-column>
+          <el-table-column label="业绩基准指数" width="150">
+            <template #default="{ row }">{{ row.benchmarkIndexes.join(" / ") || "待识别" }}</template>
           </el-table-column>
           <el-table-column label="地区" width="84">
             <template #default="{ row }">{{ row.regions.join(" / ") || "待识别" }}</template>
@@ -35,7 +39,7 @@
           <el-table-column label="策略" width="78">
             <template #default="{ row }">{{ row.strategy || "待识别" }}</template>
           </el-table-column>
-          <el-table-column label="字段依据" width="126">
+          <el-table-column label="字段依据" width="150">
             <template #default="{ row }">
               <div class="metadata-details">
                 <div v-for="detail in row.metadataDetails" :key="detail.label" class="metadata-detail">
@@ -182,6 +186,12 @@ function fmtPct(value: number | undefined): string {
 function profitClass(value: number | undefined): string {
   if (value === undefined || value === 0) return "";
   return value > 0 ? "profit-positive" : "profit-negative";
+}
+
+function returnBasisText(row: { pnlRateBasis?: string; pnlRateSourceField?: string }): string {
+  if (row.pnlRateBasis === "source_reported") return `来源展示字段：${row.pnlRateSourceField ?? "未记录"}；来源未披露计算公式`;
+  if (row.pnlRateBasis === "derived_from_cost") return "本地按（当前市值－持仓成本）÷持仓成本计算";
+  return "收益率计算口径未知";
 }
 
 function fmt(n: number): string {

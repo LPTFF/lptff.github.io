@@ -70,6 +70,7 @@ export interface AssetMetadataEvidence {
 
 export interface AssetIndustryAllocation {
   name: string;
+  /** 0–1 比例；来源若使用百分数数值，必须由 Adapter 标准化。 */
   weight: number;
 }
 
@@ -79,12 +80,22 @@ export interface AssetMetadata {
   assetClass: AssetClass;
   regions: string[];
   indexes: string[];
+  /** 来源明确披露的跟踪标的；主动基金通常为空，不能用业绩基准冒充。 */
+  trackingIndexes?: string[];
+  /** 从业绩比较基准中提取的主要指数成分，与跟踪标的分开保存。 */
+  benchmarkIndexes?: string[];
+  trackingIndexQuality?: MetadataQuality;
+  benchmarkIndexQuality?: MetadataQuality;
+  trackingIndexEvidence?: AssetMetadataEvidence;
+  benchmarkIndexEvidence?: AssetMetadataEvidence;
   currencies: string[];
   themes: string[];
   provenance?: AssetMetadataProvenance;
   evidence?: Partial<Record<keyof AssetMetadataProvenance, AssetMetadataEvidence>>;
   /** 来源披露的行业配置，与“主题/策略”分开保存，避免把最大行业误当成基金策略。 */
   industryAllocations?: AssetIndustryAllocation[];
+  /** 行业权重存储口径；缺失表示单位修复前的旧账本百分数口径。 */
+  industryAllocationScale?: "ratio";
   industryEvidence?: AssetMetadataEvidence;
 }
 
@@ -98,6 +109,9 @@ export interface AccountSnapshot {
   source: SourceId;
   capturedAt: string;
   totalAsset: number;
+  /** 总资产是来源字段还是在来源缺失时由完整持仓市值求和得到；旧账本缺失表示未知。 */
+  totalAssetBasis?: "source_named" | "source_positioned" | "derived_holding_sum";
+  /** 兼容字段名：当前实现为 Σ holding.pnl；若 pnl 来自无标签 profitValue，其业务语义同样未验证。 */
   currentHoldingPnl?: number;
   cumulativePnl?: number;
 }
@@ -107,8 +121,11 @@ export interface PortfolioSnapshot {
   id: string;
   date: string;
   totalAsset: number;
+  totalAssetBasis?: AccountSnapshot["totalAssetBasis"];
   holdingValue: number;
+  /** 账户总资产减持仓市值的非负残差派生值；不是来源直接披露的现金字段。 */
   cash?: number;
+  /** 兼容字段名：当前实现为 Σ holding.pnl；不能提升底层 profitValue 的语义证据。 */
   currentHoldingPnl?: number;
   holdings: HoldingSnapshot[];
 }
@@ -119,10 +136,16 @@ export interface HoldingSnapshot {
   name?: string;
   /** 当前市值（元）。 */
   marketValue: number;
-  /** 持仓浮动盈亏（元），未知省略。 */
+  /** 来源持仓收益/盈亏金额的标准化槽位；具体业务语义由 pnlBasis 约束，未知省略。 */
   pnl?: number;
+  /** `profitValue` 原字段没有标签证据时必须保持语义未验证，不得直接称为浮盈亏。 */
+  pnlBasis?: "source_profit_value_semantics_unverified" | "source_labeled_pnl" | "derived_from_cost";
+  pnlSourceField?: string;
   /** 持仓收益率（0-1），仅在来源明确提供时写入，未知省略。 */
   pnlRate?: number;
+  /** 收益率是来源展示值还是本地计算值；不披露公式时不得假装可重算。 */
+  pnlRateBasis?: "source_reported" | "derived_from_cost" | "unknown";
+  pnlRateSourceField?: string;
   /** 仓位比例（0-1）。 */
   weight?: number;
   /** 投入成本（元），未知省略。 */
@@ -162,6 +185,9 @@ export type TransactionSourceType =
   | "bank_auto_invest"
   | "unknown";
 
+export type TransactionCaptureMethod = "extension_capture" | "manual_import" | "simulator" | "unknown";
+export type TransactionExecutionMethod = "bank_auto_invest" | "unknown";
+
 /**
  * 已标准化的交易事实（PRD §31）。
  * 去重首选 `sourceTransactionId`，缺失时退回 fingerprint（见 sync 模块）。
@@ -176,18 +202,71 @@ export interface Transaction {
   amount: number;
   amountUnit: string;
   confirmedAmount?: number;
+  /** 确认值的独立单位；买入通常“申请元→确认份”，卖出通常“申请份→确认元”。 */
+  confirmedAmountUnit?: string;
   status: TransactionStatus;
   /** 来源业务类型原文（如「银行卡定投」）；逐笔核对时与来源 App 对齐的错点，系统翻译不应覆盖它。 */
   businessTypeText?: string;
   /** 来源状态原文（如「已受理(支付完成)」）；翻译只作展示色，原文才是核对错点。 */
   statusText?: string;
   sourceType?: TransactionSourceType;
+  /** 数据进入账本的路径，与交易是手动下单还是银行卡定投分开表达。 */
+  captureMethod?: TransactionCaptureMethod;
+  /** 来源能直接确认的执行方式；普通“买入”不足以证明是手动下单。 */
+  executionMethod?: TransactionExecutionMethod;
   /** 来源业务名称确实没有映射时标记；不能仅凭 OTHER 推断为异常。 */
   classificationWarning?: "unmapped_transaction_type";
   /** 由 Behavior Engine 填充，未分类为 null / 省略。 */
   behaviorType?: BehaviorType | null;
   /** 关联的 Policy，由用户确认或规则匹配填充。 */
   policyId?: string;
+}
+
+/** 将来源单位归一为可比较口径；无法识别时保留清洗后的原文。 */
+export function normalizeTransactionValueUnit(unit: string | undefined): string {
+  const value = String(unit ?? "").trim().toLowerCase();
+  if (/^(?:元|人民币|cny|rmb)$/.test(value)) return "CNY";
+  if (/^(?:份|份额|share|shares)$/.test(value)) return "shares";
+  return value;
+}
+
+/** 兼容单位字段落库前的旧交易。 */
+export function confirmedUnitOf(transaction: Transaction): string | undefined {
+  if (transaction.confirmedAmount === undefined) return undefined;
+  if (transaction.confirmedAmountUnit) return transaction.confirmedAmountUnit;
+  const requestedUnit = normalizeTransactionValueUnit(transaction.amountUnit);
+  if (transaction.type === "BUY" && requestedUnit === "CNY") return "份";
+  if (transaction.type === "SELL" && requestedUnit === "shares") return "元";
+  return transaction.amountUnit;
+}
+
+/** 同单位的确认值才可替换申请值。 */
+export function comparableTransactionValue(transaction: Transaction): number {
+  const confirmedUnit = confirmedUnitOf(transaction);
+  return transaction.confirmedAmount !== undefined
+    && normalizeTransactionValueUnit(confirmedUnit) === normalizeTransactionValueUnit(transaction.amountUnit)
+    ? transaction.confirmedAmount
+    : transaction.amount;
+}
+
+/** 已确认交易的人民币现金口径；无法确定现金字段时返回 undefined，不猜算。 */
+export function transactionCashAmount(transaction: Transaction): number | undefined {
+  if (transaction.status !== "confirmed" && transaction.status !== "partially_confirmed") return undefined;
+  const confirmedUnit = confirmedUnitOf(transaction);
+  if (transaction.confirmedAmount !== undefined && normalizeTransactionValueUnit(confirmedUnit) === "CNY") {
+    return transaction.confirmedAmount;
+  }
+  if (transaction.status === "confirmed" && normalizeTransactionValueUnit(transaction.amountUnit) === "CNY") return transaction.amount;
+  return undefined;
+}
+
+/** 买入汇总专用：只取全额确认订单的人民币申请金额，不用确认份额或部分确认值替代。 */
+export function confirmedBuyOrderRequestedAmount(transaction: Transaction): number | undefined {
+  return transaction.type === "BUY"
+    && transaction.status === "confirmed"
+    && normalizeTransactionValueUnit(transaction.amountUnit) === "CNY"
+    ? transaction.amount
+    : undefined;
 }
 
 /** 每日盈亏时序记录，去重键 `assetId + date`（PRD §10）。 */
@@ -217,6 +296,16 @@ export interface DataCoverage {
   dataset: CoverageDataset;
   knownRanges: DateRange[];
   completeness: CoverageCompleteness;
+  /** 最近一次同步任务状态；completeness 仍表示账本中保留的最强可用证据。 */
+  latestSyncStatus?: CoverageCompleteness;
+  /** 同步任务实际完成量，例如交易分页 72/72、基金详情 17/17。 */
+  syncObservedCount?: number;
+  syncExpectedCount?: number;
+  /** 当前账本实际观察到的事实条数；与同步任务是否完成是两件事。 */
+  observedCount?: number;
+  observationUnit?: "snapshot" | "holding" | "transaction" | "daily_pnl" | "fund";
+  /** 解释已知范围的边界，避免把“同步完成”误读成逐日连续覆盖。 */
+  observationNote?: string;
   lastSyncedAt?: string;
   warningCodes: string[];
 }
@@ -265,6 +354,8 @@ export interface PolicyVersion {
   id: string;
   policyId: string;
   version: number;
+  /** 版本记录实际创建时点；旧账本缺失时不得用 effectiveFrom 反推。 */
+  createdAt?: string;
   effectiveFrom: string;
   effectiveTo?: string;
   rules: PolicyRule[];
@@ -416,7 +507,7 @@ export interface InvestmentScope {
   excludedAssetIds?: AssetId[];
   baseCurrency: string;
   denominatorSource: DenominatorSource;
-  /** 分母估值时点（YYYY-MM-DD）。 */
+  /** 账户总资产或声明分母的快照日（YYYY-MM-DD）；不是各底层持仓的净值日。 */
   denominatorAsOf?: string;
   /** 分母自身的 Coverage：分母数据不完整时只降级仓位判断。 */
   denominatorCoverage?: DataCoverage;
@@ -460,7 +551,10 @@ export interface TrailingStopRule {
   effectiveTo?: string;
 }
 
-/** 减仓目标区间：触发后用户希望回到的仓位范围。系统只按此计算恢复量，不预测卖点。 */
+/**
+ * 减仓后的仓位目标区间（“减到多少”，不是“卖出多少”）。
+ * 系统以 targetMaxPct 计算回到区间所需的最小计划量，不预测卖点。
+ */
 export interface ReductionTargetRule {
   kind: "reduction_target";
   assetId: AssetId;
@@ -469,7 +563,9 @@ export interface ReductionTargetRule {
   allowedWindow?: DateRange;
 }
 
-/** 减仓计划：触发依据 + 目标区间 + 计划量，跨复盘保留以跟踪进度。 */
+export type ReductionProceedsTreatment = "remain_in_scope_as_cash" | "leave_scope";
+
+/** 减仓计划：触发依据 + 目标区间 + 估算计划量，跨复盘保留以跟踪进度。 */
 export interface ReductionPlan {
   id: string;
   scopeId: string;
@@ -478,6 +574,10 @@ export interface ReductionPlan {
   targetBand: { minPct: number; maxPct: number };
   planned: number;
   unit: PlanValueUnit;
+  /** 估算时对赎回款的分母假设；旧计划缺失时不得猜测。 */
+  proceedsTreatment?: ReductionProceedsTreatment;
+  /** 生成估算所用组合快照日；成交值不能用该估算替代。 */
+  estimateAsOf?: string;
   ruleVersionRefs: string[];
   createdAt: string;
 }
@@ -491,7 +591,9 @@ export interface PauseWindowRule {
 }
 
 /**
- * 目标收益率止盈规则：累计收益率（持仓成本→当前市值）达阈值时触发复核（不自动交易）。
+ * 目标收益率止盈规则：当前持仓成本收益率
+ * = (当前持仓市值 - 可确认的当前持仓成本) / 可确认的当前持仓成本。
+ * 不以来源展示收益率替代；成本缺失时保持 unknown。达到阈值只触发复核（不自动交易）。
  * 阈值由用户事前声明，系统不发明"合理止盈点"——与 position_band / trailing_stop 同属用户规则。
  * 主流机构对止盈不替用户决定，仅提供工具；本规则只生成待复核事项。
  */
@@ -509,6 +611,8 @@ export interface StrategyRuleVersion {
   id: string;
   scopeId: string;
   version: number;
+  /** 版本记录实际创建时点；与规则生效日分开，防止事后创建规则被误读为历史规则。 */
+  createdAt?: string;
   effectiveFrom: string;
   effectiveTo?: string;
   rules: StrategyRule[];

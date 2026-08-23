@@ -13,15 +13,18 @@ export function buildContextInput(state: InvestmentOsState, allocationDrift: All
   return {
     policies: state.policies,
     scope: state.activeScope,
+    account: state.account,
     portfolio: state.portfolio,
     assets: state.assets,
     allocationDrift,
     actions: state.actions,
     transactions: state.transactions,
+    dailyPnl: state.dailyPnl,
     decisionRecords: state.decisionRecords,
     activeVersions: state.activeVersions,
     strategyRuleVersions: state.strategyRuleVersions,
     coverage: state.coverage,
+    sourceCapture: state.latestSourceCapture?.payload,
     asOf: new Date().toISOString().slice(0, 10),
     isSimulator: state.account?.source === "sim",
   };
@@ -52,10 +55,16 @@ export function useFocusedContext() {
       ElMessage.warning("复制失败，请在弹窗内手动选中复制");
     }
   }
-  function openChatGpt(): void {
-    const encoded = encodeURIComponent(fc.text);
-    if (encoded.length > 6000) ElMessage.warning("上下文较长，ChatGPT 可能截断；若被截断请改用复制粘贴");
-    window.open(`https://chatgpt.com/?q=${encoded}`, "_blank", "noopener");
+  async function openChatGpt(): Promise<void> {
+    // 不通过 URL 参数传递投资上下文：既避免长度/编码兼容问题，也避免敏感内容进入 URL 与浏览器历史。
+    // 先同步打开页面，避免 await clipboard 后被浏览器判定为非用户手势而拦截弹窗。
+    window.open("https://chatgpt.com/", "_blank", "noopener");
+    try {
+      await navigator.clipboard.writeText(fc.text);
+      ElMessage.success("完整上下文已复制并打开 ChatGPT，请直接粘贴发送");
+    } catch {
+      ElMessage.warning("已打开 ChatGPT；自动复制失败，请在弹窗内手动复制后粘贴发送");
+    }
   }
 
   return { fc, openFocused, openFull, copy, openChatGpt };

@@ -21,6 +21,7 @@ import type {
   StrategyRuleVersion,
   Transaction,
 } from "../../domain";
+import { comparableTransactionValue } from "../../domain";
 import { classifyTransactions, detectAbnormalTransactions } from "../behavior";
 
 export interface OperationComplianceInput {
@@ -159,7 +160,7 @@ function computeDeviations(
         note: "缺少同一估值边界的可靠换算依据",
       });
     } else {
-      const actual = tx.confirmedAmount ?? tx.amount;
+      const actual = comparableTransactionValue(tx);
       if (Math.abs(actual - planned.value) > AMOUNT_TOLERANCE) {
         deviations.push({
           dimension: quantityDimension(planned.unit),
@@ -300,7 +301,7 @@ export function evaluateOperationCompliance(input: OperationComplianceInput): Op
       decisionRecordId: decision?.id,
       transactionId: tx.id,
       assetId: tx.assetId,
-      amount: tx.confirmedAmount ?? tx.amount,
+      amount: comparableTransactionValue(tx),
       occurredAt: tx.occurredAt,
       direction: txDirection(tx) ?? undefined,
       priorDecisionRecordIds: priorDecisionRecordIds.length

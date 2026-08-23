@@ -12,11 +12,13 @@
 import type {
   PerJudgmentCoverage,
   ReductionPlan,
+  ReductionProceedsTreatment,
   ReductionProgressJudgment,
   ReductionProgressValue,
   ReductionState,
   Transaction,
 } from "../../domain";
+import { comparableTransactionValue } from "../../domain";
 
 export interface ReductionInput {
   scopeId: string;
@@ -39,17 +41,29 @@ export interface ReductionQuantityInput {
   marketValue: number;
   denominatorValue: number;
   targetMaxPct: number;
+  /** 赎回款留在范围内则分母不变；转出范围则持仓和分母同步减少。 */
+  proceedsTreatment: ReductionProceedsTreatment;
   unit: "CNY" | "shares";
   nav?: number;
 }
 
-/** 按用户目标上限计算最小减仓量；只做当前估值边界下的确定性换算。 */
+/**
+ * 按用户目标上限估算最小减仓量：
+ * - 赎回款留在范围内：x = M - tD；
+ * - 赎回款离开范围：x = (M - tD) / (1 - t)。
+ * 结果只是快照估算，成交后必须用新持仓和新分母复核。
+ */
 export function calculateReductionQuantity(input: ReductionQuantityInput): number {
-  const { marketValue, denominatorValue, targetMaxPct, unit, nav } = input;
+  const { marketValue, denominatorValue, targetMaxPct, proceedsTreatment, unit, nav } = input;
   if (!Number.isFinite(marketValue) || marketValue < 0) throw new Error("基金市值必须是非负有限数");
   if (!Number.isFinite(denominatorValue) || denominatorValue <= 0) throw new Error("仓位分母必须大于 0");
   if (!Number.isFinite(targetMaxPct) || targetMaxPct < 0 || targetMaxPct > 1) throw new Error("目标仓位上限必须在 0 到 1 之间");
-  const amount = Math.max(0, marketValue - denominatorValue * targetMaxPct);
+  if (proceedsTreatment !== "remain_in_scope_as_cash" && proceedsTreatment !== "leave_scope") {
+    throw new Error("必须明确赎回款留在当前投资范围还是转出范围");
+  }
+  if (proceedsTreatment === "leave_scope" && targetMaxPct >= 1) throw new Error("资金转出范围时目标仓位上限必须小于 100%");
+  const excess = Math.max(0, marketValue - denominatorValue * targetMaxPct);
+  const amount = proceedsTreatment === "leave_scope" ? excess / (1 - targetMaxPct) : excess;
   if (unit === "CNY") return Math.round(amount * 100) / 100;
   if (!Number.isFinite(nav) || nav === undefined || nav <= 0) throw new Error("按份额规划时需要有效净值");
   return Math.round((amount / nav) * 10000) / 10000;
@@ -81,10 +95,10 @@ export function computeReductionProgress(input: ReductionInput): ReductionProgre
     .reduce((s, t) => s + t.amount, 0);
   const confirmed = comparableSellTxs
     .filter((t) => t.status === "confirmed" || t.status === "partially_confirmed")
-    .reduce((s, t) => s + (t.confirmedAmount ?? t.amount), 0);
+    .reduce((s, t) => s + comparableTransactionValue(t), 0);
   const fullyConfirmed = comparableSellTxs
     .filter((t) => t.status === "confirmed")
-    .reduce((s, t) => s + (t.confirmedAmount ?? t.amount), 0);
+    .reduce((s, t) => s + comparableTransactionValue(t), 0);
   const failedAny = comparableSellTxs.some((t) => t.status === "failed");
   const cancelledAny = comparableSellTxs.some((t) => t.status === "cancelled");
   const remaining = Math.max(0, planned - confirmed);
@@ -98,8 +112,8 @@ export function computeReductionProgress(input: ReductionInput): ReductionProgre
   if (!plan || planned <= 0) {
     state = "planned";
     status = "UNKNOWN";
-    reason = "尚未确认可复算的减仓计划量，系统不预测卖点";
-    limitation = "需要先由人确认目标区间和系统按合格分母计算的计划量";
+    reason = "尚未确认可复算的减仓估算计划量，系统不预测卖点";
+    limitation = "需要先由人确认目标区间、赎回款是否离开投资范围，以及系统按当前快照估算的计划量";
     nextStep = "确认并保存减仓计划";
   } else if (incompatibleExecution) {
     state = "requested";
@@ -131,7 +145,7 @@ export function computeReductionProgress(input: ReductionInput): ReductionProgre
   } else if (confirmed > 0) {
     state = "partially_confirmed";
     status = "PARTIAL";
-    reason = `部分确认 ${confirmed}/${planned}，减仓进行中，remaining=${remaining}`;
+        reason = `部分确认 ${confirmed}/${planned}（计划量为快照估算），减仓进行中，remaining=${remaining}`;
     nextStep = "等待剩余份额确认并复核仓位";
   } else if (requested > 0) {
     state = "requested";
@@ -151,7 +165,7 @@ export function computeReductionProgress(input: ReductionInput): ReductionProgre
   } else {
     state = "planned";
     status = "VALID";
-    reason = "已有减仓计划，尚未申请或确认";
+    reason = "已有基于快照的减仓估算计划，尚未申请或确认；成交后仍须用新持仓和新分母复核";
     nextStep = "由人提交减仓申请";
   }
 

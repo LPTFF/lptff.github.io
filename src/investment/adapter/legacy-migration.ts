@@ -114,10 +114,12 @@ export function migrateLegacyFundData(raw: unknown): InvestmentDataset {
     assetId: tx.fundCode,
     type: mapTxType(tx.type),
     amount: tx.amount,
-    amountUnit: tx.amountUnit || "CNY",
+    amountUnit: tx.amountUnit || "UNKNOWN",
     confirmedAmount: tx.confirmedAmount,
     status: mapTxStatus(tx.status),
     sourceType: "manual_import",
+    captureMethod: "manual_import",
+    executionMethod: "unknown",
   }));
 
   const coverage: DataCoverage[] = [

@@ -15,6 +15,7 @@ import type {
 import { aggregateExposure } from "../exposure/exposure";
 
 export interface NewVersionInput {
+  createdAt?: string;
   effectiveFrom: string;
   rules: PolicyRule[];
   changeReason?: string;
@@ -33,6 +34,7 @@ export function buildPolicyVersion(
     id: `${policyId}:v${version}`,
     policyId,
     version,
+    createdAt: input.createdAt,
     effectiveFrom: input.effectiveFrom,
     rules: input.rules,
     changeReason: input.changeReason,
@@ -49,6 +51,7 @@ export function createInitialPolicy(input: {
   name: string;
   objective: string;
   effectiveFrom: string;
+  createdAt?: string;
   rules: PolicyRule[];
   changeReason?: string;
 }): { policy: Policy; version: PolicyVersion } {
@@ -56,6 +59,7 @@ export function createInitialPolicy(input: {
     id: `${input.id}:v1`,
     policyId: input.id,
     version: 1,
+    createdAt: input.createdAt,
     effectiveFrom: input.effectiveFrom,
     rules: input.rules,
     changeReason: input.changeReason,
@@ -66,6 +70,7 @@ export function createInitialPolicy(input: {
     objective: input.objective,
     status: "active",
     currentVersionId: version.id,
+    createdAt: input.createdAt,
   };
   return { policy, version };
 }

@@ -43,7 +43,10 @@ function numberOf(value: unknown): number {
 
 function optionalNumber(value: unknown): number | undefined {
   if (value === undefined || value === null || String(value).trim() === "") return undefined;
-  const parsed = numberOf(value);
+  if (typeof value === "number") return Number.isFinite(value) ? value : undefined;
+  const match = String(value).replace(/,/g, "").match(/[-+]?\d+(?:\.\d+)?/);
+  if (!match) return undefined;
+  const parsed = Number(match[0]);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
 
@@ -137,7 +140,8 @@ function mapHolding(item: SourceRecord, detail: SourceRecord | undefined, totalA
   const assetId = codeOf(item.fundCode ?? item.code);
   if (!assetId) return null;
   const share = shareFacts(detail);
-  const marketValue = optionalNumber(item.assetValue ?? item.amount) ?? share.marketValue ?? 0;
+  const marketValue = optionalNumber(item.assetValue ?? item.amount) ?? share.marketValue;
+  if (marketValue === undefined) return null;
   const pnl = optionalNumber(item.profitValue ?? item.profit);
   const pnlRate = optionalNumber(item.profitPercent ?? item.profitRate);
   const nav = optionalNumber(item.nav);
@@ -145,8 +149,16 @@ function mapHolding(item: SourceRecord, detail: SourceRecord | undefined, totalA
     assetId,
     name: textOf(item.fundName ?? item.name) || undefined,
     marketValue,
-    ...(pnl === undefined ? {} : { pnl }),
-    ...(pnlRate === undefined ? {} : { pnlRate: pnlRate / 100 }),
+    ...(pnl === undefined ? {} : {
+      pnl,
+      pnlBasis: "source_profit_value_semantics_unverified" as const,
+      pnlSourceField: item.profitValue !== undefined ? "profitValue" : "profit",
+    }),
+    ...(pnlRate === undefined ? {} : {
+      pnlRate: pnlRate / 100,
+      pnlRateBasis: "source_reported" as const,
+      pnlRateSourceField: "profitPercent",
+    }),
     ...(totalAsset > 0 ? { weight: marketValue / totalAsset } : {}),
     ...(share.shares === undefined ? {} : { shares: share.shares }),
     ...(share.availableShares === undefined ? {} : { availableShares: share.availableShares }),
@@ -172,12 +184,14 @@ function transactionStatus(value: unknown): Transaction["status"] {
   if (/撤销|撤单|取消|cancel/.test(text)) return "cancelled";
   if (/失败|fail|拒绝/.test(text)) return "failed";
   if (/部分|partial/.test(text)) return "partially_confirmed";
-  if (/处理中|待确认|pending|申请/.test(text)) return "requested";
+  // 「已受理(支付完成)」只表示申购申请的支付环节完成，尚不是基金份额确认。
+  // 必须先于末尾的「完成」匹配，否则会被误判为 confirmed。
+  if (/已受理|处理中|待确认|pending|申请/.test(text)) return "requested";
   if (/成功|已确认|confirm|完成/.test(text)) return "confirmed";
   return "unknown";
 }
 
-function transactionSourceType(item: SourceRecord): Transaction["sourceType"] {
+function transactionExecutionMethod(item: SourceRecord): Transaction["executionMethod"] {
   return /银行卡定投|银行定投|自动定投/.test(JSON.stringify(item)) ? "bank_auto_invest" : "unknown";
 }
 
@@ -211,7 +225,8 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
   const occurredAt = dateOf(item.strikeStartDate ?? item.date);
   if (!assetId || !occurredAt) return null;
   const type = transactionType(item.businessTypeText1 ?? item.type);
-  const amount = numberOf(item.applyCount ?? item.amount);
+  const amount = optionalNumber(item.applyCount ?? item.amount);
+  if (amount === undefined) return null;
   const status = transactionStatus(item.appStateText ?? item.status);
   // 来源原文透传（业务类型/状态）：逐笔核对以原文为准，系统翻译仅作展示色与聚合口径。
   const businessTypeText = textOf(item.businessTypeText1) || undefined;
@@ -219,6 +234,9 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
   const id = transactionId(item, index, occurredAt, assetId, type, amount);
   const stable = textOf(item.sourceTransactionId ?? item.transactionId ?? item.id);
   const confirmedAmount = optionalNumber(item.confirmCount ?? item.confirmedAmount);
+  const confirmedAmountUnit = confirmedAmount === undefined
+    ? undefined
+    : textOf(item.confirmCountUnit ?? item.confirmedAmountUnit) || undefined;
   return {
     id,
     ...(stable ? { sourceTransactionId: stable } : {}),
@@ -226,12 +244,16 @@ function mapTransaction(item: SourceRecord, index: number): Transaction | null {
     assetId,
     type,
     amount,
-    amountUnit: textOf(item.applyCountUnit ?? item.amountUnit) || "CNY",
+    amountUnit: textOf(item.applyCountUnit ?? item.amountUnit) || "UNKNOWN",
     ...(confirmedAmount === undefined ? {} : { confirmedAmount }),
+    ...(confirmedAmountUnit ? { confirmedAmountUnit } : {}),
     status,
     ...(businessTypeText ? { businessTypeText } : {}),
     ...(statusText ? { statusText } : {}),
-    sourceType: transactionSourceType(item),
+    // sourceType 是旧版混合字段：普通交易继续保持 unknown，避免把“插件采集”误当作“执行方式”。
+    sourceType: transactionExecutionMethod(item) === "bank_auto_invest" ? "bank_auto_invest" : "unknown",
+    captureMethod: "extension_capture",
+    executionMethod: transactionExecutionMethod(item),
     ...(type === "OTHER" ? { classificationWarning: "unmapped_transaction_type" as const } : {}),
   };
 }
@@ -250,11 +272,14 @@ function dailyPnl(detail: SourceRecord): DailyPnL[] {
     const pnlText = rowValue(table, row, [/盈亏|收益额|收益金额|损益/i]);
     if (!date || pnlText === "") return null;
     const dailyReturnText = rowValue(table, row, [/收益率|回报率/i]);
+    const pnl = optionalNumber(pnlText);
+    if (pnl === undefined) return null;
+    const dailyReturn = dailyReturnText === "" ? undefined : optionalNumber(dailyReturnText);
     return {
       assetId,
       date,
-      pnl: numberOf(pnlText),
-      ...(dailyReturnText === "" ? {} : { dailyReturn: numberOf(dailyReturnText) / 100 }),
+      pnl,
+      ...(dailyReturn === undefined ? {} : { dailyReturn: dailyReturn / 100 }),
     };
   }).filter((item): item is DailyPnL => Boolean(item));
 }
@@ -390,7 +415,8 @@ function classifiedCurrency(detail: SourceRecord): string[] {
 
 function sourceIndustries(detail: SourceRecord): Array<{ name: string; weight: number }> {
   return arrayOf(detail.industries).map(recordOf)
-    .map((industry) => ({ name: textOf(industry.HYMC ?? industry.name), weight: numberOf(industry.ZJZBL ?? industry.weightPct) }))
+    // 东方财富 ZJZBL / weightPct 使用百分数数值（56.61 表示 56.61%）；领域模型统一保存 0–1 比例。
+    .map((industry) => ({ name: textOf(industry.HYMC ?? industry.name), weight: numberOf(industry.ZJZBL ?? industry.weightPct) / 100 }))
     .filter((industry) => industry.name && industry.weight > 0);
 }
 
@@ -449,6 +475,8 @@ function mapAsset(holding: SourceRecord, detail: SourceRecord): AssetMetadata | 
   const assetId = codeOf(holding.fundCode ?? holding.code);
   if (!assetId) return null;
   const indexes = indexesOf(detail);
+  const trackingIndexes = sourceIndexes(detail);
+  const benchmarks = benchmarkIndexes(detail);
   const regions = regionsOf(detail);
   const currencies = classifiedCurrency(detail);
   const themes = themesOf(detail);
@@ -465,6 +493,10 @@ function mapAsset(holding: SourceRecord, detail: SourceRecord): AssetMetadata | 
     assetClass,
     regions: regions.values,
     indexes: indexes.values,
+    trackingIndexes,
+    benchmarkIndexes: benchmarks,
+    trackingIndexQuality: trackingIndexes.length ? "source" : "unknown",
+    benchmarkIndexQuality: benchmarks.length ? "extracted" : "unknown",
     currencies,
     themes: themes.values,
     provenance: {
@@ -493,7 +525,14 @@ function mapAsset(holding: SourceRecord, detail: SourceRecord): AssetMetadata | 
           } }
         : {}),
     },
+    ...(trackingIndexes.length && profileSourceUrl ? {
+      trackingIndexEvidence: { sourceUrl: profileSourceUrl, sourceField: "tracked-index" as const },
+    } : {}),
+    ...(benchmarks.length && profileSourceUrl ? {
+      benchmarkIndexEvidence: { sourceUrl: profileSourceUrl, sourceField: "benchmark" as const },
+    } : {}),
     industryAllocations: industries,
+    ...(industries.length ? { industryAllocationScale: "ratio" as const } : {}),
     ...(industrySourceUrl ? {
       industryEvidence: {
         sourceUrl: industrySourceUrl,
@@ -549,8 +588,23 @@ function rangesFromDates(dates: string[]): Array<{ start: string; end: string }>
   return sorted.length ? [{ start: sorted[0], end: sorted[sorted.length - 1] }] : [];
 }
 
-function coverageEntry(dataset: DataCoverage["dataset"], dates: string[], completeness: DataCoverage["completeness"], capturedAt: string, warningCodes: string[]): DataCoverage {
-  return { dataset, knownRanges: rangesFromDates(dates), completeness, lastSyncedAt: capturedAt, warningCodes: [...new Set(warningCodes)] };
+function coverageEntry(
+  dataset: DataCoverage["dataset"],
+  dates: string[],
+  completeness: DataCoverage["completeness"],
+  capturedAt: string,
+  warningCodes: string[],
+  detail: Pick<DataCoverage, "syncObservedCount" | "syncExpectedCount" | "observedCount" | "observationUnit" | "observationNote">,
+): DataCoverage {
+  return {
+    dataset,
+    knownRanges: rangesFromDates(dates),
+    completeness,
+    latestSyncStatus: completeness,
+    lastSyncedAt: capturedAt,
+    warningCodes: [...new Set(warningCodes)],
+    ...detail,
+  };
 }
 
 export function toInvestmentDataset(capture: EastmoneySourceCapture): InvestmentDataset {
@@ -562,10 +616,22 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
   const accountSource = recordOf(capture.account);
   const hasAccount = Boolean(capture.account && typeof capture.account === "object" && !Array.isArray(capture.account));
   const assetTotals = arrayOf(accountSource.assetTotal).map(recordOf);
-  const fallbackHoldingValue = capture.holdings.reduce((sum, item) => sum + numberOf(item.assetValue ?? item.amount), 0);
-  const totalAsset = numberOf(assetTotals[0]?.oldValue ?? accountSource.totalAsset) || fallbackHoldingValue;
+  const positionedTotalAsset = optionalNumber(assetTotals[0]?.oldValue);
+  const namedTotalAsset = optionalNumber(accountSource.totalAsset);
+  const rawHoldingValues = capture.holdings.map((item) => optionalNumber(item.assetValue ?? item.amount));
+  const fallbackHoldingValue = rawHoldingValues.length && rawHoldingValues.every((value) => value !== undefined)
+    ? rawHoldingValues.reduce((sum, value) => sum + (value ?? 0), 0)
+    : undefined;
+  const totalAsset = positionedTotalAsset ?? namedTotalAsset ?? fallbackHoldingValue;
+  const totalAssetBasis = positionedTotalAsset !== undefined
+    ? "source_positioned" as const
+    : namedTotalAsset !== undefined
+      ? "source_named" as const
+      : fallbackHoldingValue !== undefined
+        ? "derived_holding_sum" as const
+        : undefined;
   const holdings = capture.holdings
-    .map((holding) => mapHolding(holding, details.get(codeOf(holding.fundCode ?? holding.code)), totalAsset))
+    .map((holding) => mapHolding(holding, details.get(codeOf(holding.fundCode ?? holding.code)), totalAsset ?? 0))
     .filter((holding): holding is HoldingSnapshot => Boolean(holding));
   const txSourceRecords = transactionRecords(capture);
   const transactions = txSourceRecords
@@ -580,42 +646,55 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
     if (code && name && !nameFromTransactions.has(code)) nameFromTransactions.set(code, name);
   }
   const dailyPnlRecords = capture.fundDetails.flatMap(dailyPnl);
-  const currentHoldingPnl = holdings.every((holding) => holding.pnl !== undefined)
+  const currentHoldingPnl = holdings.length && holdings.every((holding) => holding.pnl !== undefined)
     ? holdings.reduce((sum, holding) => sum + (holding.pnl || 0), 0)
     : undefined;
   const holdingValue = holdings.reduce((sum, holding) => sum + holding.marketValue, 0);
-  const difference = totalAsset - holdingValue;
-  const tolerance = Math.max(0.01, Math.abs(totalAsset) * 0.0001);
-  const cash = difference >= -tolerance ? Math.abs(difference) <= tolerance ? 0 : difference : undefined;
-  const transactionComplete = transactionCoverageComplete(capture);
+  const difference = totalAsset === undefined ? undefined : totalAsset - holdingValue;
+  const tolerance = totalAsset === undefined ? undefined : Math.max(0.01, Math.abs(totalAsset) * 0.0001);
+  // 来源没有独立现金字段；这里只保存“账户总资产 - 当前持仓市值合计”的非负残差。
+  // 0 表示本次快照在容差内无正残差，不证明账户产品语义上的现金余额为 0。
+  const cash = difference !== undefined && tolerance !== undefined && difference >= -tolerance ? Math.abs(difference) <= tolerance ? 0 : difference : undefined;
+  const transactionMappingComplete = transactions.length === txSourceRecords.length;
+  const transactionComplete = transactionCoverageComplete(capture) && transactionMappingComplete;
+  const transactionSyncExpected = capture.transactionRanges.reduce((sum, range) => sum + numberOf(range.expectedPages), 0);
+  const transactionSyncObserved = capture.transactionRanges.reduce((sum, range) => sum + new Set(arrayOf(range.pages).map((page) => numberOf(recordOf(page).pageNum))).size, 0);
   const transactionWarnings = transactionComplete ? [] : [
     "eastmoney:transactions-partial",
     ...transactionCoverageWarnings(capture),
+    ...(transactionMappingComplete ? [] : ["eastmoney:transaction-amount-unparseable"]),
   ];
-  const detailComplete = !holdings.length || holdings.every((holding) => detailFullyObserved(details.get(holding.assetId)));
-  const dailyPnlComplete = !holdings.length || holdings.every((holding) => hasDetailResponse(details.get(holding.assetId), "yingkui"));
-  const publicComplete = !holdings.length || holdings.every((holding) => publicDetailFullyObserved(publicDetails.get(holding.assetId)));
+  const holdingMappingComplete = holdings.length === capture.holdings.length;
+  const detailComplete = holdingMappingComplete && (!holdings.length || holdings.every((holding) => detailFullyObserved(details.get(holding.assetId))));
+  const dailyPnlComplete = holdingMappingComplete && (!holdings.length || holdings.every((holding) => hasDetailResponse(details.get(holding.assetId), "yingkui")));
+  const publicComplete = holdingMappingComplete && (!holdings.length || holdings.every((holding) => publicDetailFullyObserved(publicDetails.get(holding.assetId))));
   const warnings = [...new Set([
     ...(capture.warnings || []).map(() => "eastmoney:source-warning"),
     ...transactionWarnings,
     ...(dailyPnlComplete ? [] : ["eastmoney:daily-pnl-unknown"]),
     ...(detailComplete ? [] : ["eastmoney:fund-detail-partial"]),
     ...(publicComplete ? [] : ["eastmoney:fund-metadata-partial"]),
+    ...(holdingMappingComplete ? [] : ["eastmoney:holding-value-unparseable"]),
+    ...(totalAsset === undefined ? ["eastmoney:account-total-asset-missing"] : []),
+    ...(totalAssetBasis === "derived_holding_sum" ? ["eastmoney:account-total-asset-derived"] : []),
     ...(currentHoldingPnl === undefined ? ["eastmoney:current-holding-pnl-incomplete"] : []),
     ...(cash === undefined ? ["eastmoney:cash-derivation-invalid"] : []),
   ])];
-  const account = hasAccount ? {
+  const cumulativePnl = optionalNumber(assetTotals[2]?.oldValue ?? accountSource.totalProfit);
+  const account = hasAccount && totalAsset !== undefined ? {
     id: `eastmoney-account:${capturedAt}`,
     source: capture.source || "1234567",
     capturedAt,
     totalAsset,
+    ...(totalAssetBasis ? { totalAssetBasis } : {}),
     ...(currentHoldingPnl === undefined ? {} : { currentHoldingPnl }),
-    cumulativePnl: numberOf(assetTotals[2]?.oldValue ?? accountSource.totalProfit),
+    ...(cumulativePnl === undefined ? {} : { cumulativePnl }),
   } : undefined;
   const portfolio = account ? {
     id: `eastmoney-portfolio:${capturedAt}`,
     date: capturedDate,
-    totalAsset,
+    totalAsset: account.totalAsset,
+    ...(totalAssetBasis ? { totalAssetBasis } : {}),
     holdingValue,
     ...(cash === undefined ? {} : { cash }),
     ...(currentHoldingPnl === undefined ? {} : { currentHoldingPnl }),
@@ -651,11 +730,28 @@ export function toInvestmentDataset(capture: EastmoneySourceCapture): Investment
     transactions,
     dailyPnl: dailyPnlRecords,
     coverage: [
-      coverageEntry("account", account ? [capturedDate] : [], account ? "complete" : "unknown", capturedAt, []),
-      coverageEntry("holdings", hasAccount ? [capturedDate] : [], hasAccount ? "complete" : "unknown", capturedAt, []),
-      coverageEntry("transactions", transactions.map((item) => item.occurredAt.slice(0, 10)), transactionComplete ? "complete" : transactions.length ? "partial" : "unknown", capturedAt, transactionWarnings),
-      coverageEntry("dailyPnl", dailyPnlRecords.map((item) => item.date), dailyPnlComplete ? "complete" : dailyPnlRecords.length ? "partial" : "unknown", capturedAt, dailyPnlComplete ? [] : ["eastmoney:daily-pnl-unknown"]),
-      coverageEntry("fundDetail", hasAccount ? [capturedDate] : [], hasAccount ? detailComplete && publicComplete ? "complete" : "partial" : "unknown", capturedAt, detailComplete && publicComplete ? [] : ["eastmoney:fund-metadata-partial"]),
+      coverageEntry("account", account ? [capturedDate] : [], account ? totalAssetBasis === "derived_holding_sum" ? "partial" : "complete" : "unknown", capturedAt, totalAssetBasis === "derived_holding_sum" ? ["eastmoney:account-total-asset-derived"] : [], {
+        syncObservedCount: account ? 1 : 0, syncExpectedCount: 1, observedCount: account ? 1 : 0,
+        observationUnit: "snapshot", observationNote: totalAssetBasis === "derived_holding_sum" ? "来源未提供账户总资产；当前值由完整持仓市值求和，仅作为派生分母。" : "账户时点快照；同步完成不代表连续历史覆盖。",
+      }),
+      coverageEntry("holdings", hasAccount ? [capturedDate] : [], hasAccount ? holdingMappingComplete ? "complete" : "partial" : "unknown", capturedAt, holdingMappingComplete ? [] : ["eastmoney:holding-value-unparseable"], {
+        syncObservedCount: hasAccount ? 1 : 0, syncExpectedCount: 1, observedCount: holdings.length,
+        observationUnit: "holding", observationNote: "当前持仓时点记录。",
+      }),
+      coverageEntry("transactions", transactions.map((item) => item.occurredAt.slice(0, 10)), transactionComplete ? "complete" : transactions.length ? "partial" : "unknown", capturedAt, transactionWarnings, {
+        syncObservedCount: transactionSyncObserved, syncExpectedCount: transactionSyncExpected, observedCount: transactions.length,
+        observationUnit: "transaction", observationNote: "日期范围是已采集交易的最早/最晚日期，不证明区间内每天都有交易。",
+      }),
+      coverageEntry("dailyPnl", dailyPnlRecords.map((item) => item.date), dailyPnlComplete ? "complete" : dailyPnlRecords.length ? "partial" : "unknown", capturedAt, dailyPnlComplete ? [] : ["eastmoney:daily-pnl-unknown"], {
+        syncObservedCount: holdings.filter((holding) => hasDetailResponse(details.get(holding.assetId), "yingkui")).length,
+        syncExpectedCount: holdings.length, observedCount: dailyPnlRecords.length, observationUnit: "daily_pnl",
+        observationNote: "同步完成仅表示每只当前持仓的盈亏接口已响应；实际日期可能不连续。",
+      }),
+      coverageEntry("fundDetail", hasAccount ? [capturedDate] : [], hasAccount ? detailComplete && publicComplete ? "complete" : "partial" : "unknown", capturedAt, detailComplete && publicComplete ? [] : ["eastmoney:fund-metadata-partial"], {
+        syncObservedCount: holdings.filter((holding) => detailFullyObserved(details.get(holding.assetId)) && publicDetailFullyObserved(publicDetails.get(holding.assetId))).length,
+        syncExpectedCount: holdings.length, observedCount: holdings.length, observationUnit: "fund",
+        observationNote: "覆盖当前持仓基金档案；不代表历史已清仓基金均有完整档案。",
+      }),
     ],
     warnings,
   };

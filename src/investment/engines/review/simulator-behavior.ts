@@ -84,6 +84,8 @@ function makeTx(assetId: string, type: "BUY" | "SELL", amount: number, period: n
     amountUnit: "CNY",
     status: "confirmed",
     sourceType: "auto_collect",
+    captureMethod: "simulator",
+    executionMethod: "unknown",
     behaviorType: null,
   };
 }

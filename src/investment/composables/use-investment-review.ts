@@ -15,6 +15,7 @@ import type {
   ReviewSnapshot,
   Transaction,
 } from "../domain";
+import { comparableTransactionValue } from "../domain";
 import { InvestmentLedger } from "../ledger/repository";
 import {
   classifyReviewJudgment,
@@ -80,7 +81,7 @@ export function buildPostReductionSnapshots(
       && normalizedPlanUnit(transaction.amountUnit) === plan.unit,
     );
     const confirmed = confirmedExecutions.reduce(
-      (sum, transaction) => sum + (transaction.confirmedAmount ?? transaction.amount),
+      (sum, transaction) => sum + comparableTransactionValue(transaction),
       0,
     );
     if (confirmed < plan.planned) {

@@ -34,6 +34,7 @@ export function mergeCoverageEntry(a: DataCoverage, b: DataCoverage): DataCovera
   const aRank = COMPLETENESS_RANK[a.completeness];
   const bRank = COMPLETENESS_RANK[b.completeness];
   const strongest = bRank > aRank ? b : a;
+  const latest = !a.lastSyncedAt || (b.lastSyncedAt && b.lastSyncedAt >= a.lastSyncedAt) ? b : a;
   const warningCodes = aRank === bRank
     ? Array.from(new Set([...a.warningCodes, ...b.warningCodes]))
     : [...strongest.warningCodes];
@@ -41,6 +42,12 @@ export function mergeCoverageEntry(a: DataCoverage, b: DataCoverage): DataCovera
     dataset: a.dataset,
     knownRanges,
     completeness: strongest.completeness,
+    latestSyncStatus: latest.latestSyncStatus ?? latest.completeness,
+    syncObservedCount: latest.syncObservedCount,
+    syncExpectedCount: latest.syncExpectedCount,
+    observedCount: latest.observedCount,
+    observationUnit: latest.observationUnit,
+    observationNote: latest.observationNote,
     lastSyncedAt: aRank === bRank ? newer(a.lastSyncedAt, b.lastSyncedAt) : strongest.lastSyncedAt,
     warningCodes,
   };
@@ -85,7 +92,7 @@ export function deriveHealth(coverage: DataCoverage[], warnings: string[]): Sens
 
   const summary =
     level === "normal"
-      ? "数据完整，无需操作"
+      ? "同步任务完成；实际观测覆盖需单独核对"
       : level === "blocked"
         ? "账户或持仓数据缺失，无法判断"
         : gaps.length > 0

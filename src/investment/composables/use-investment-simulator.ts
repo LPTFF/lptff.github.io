@@ -402,7 +402,7 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
   };
   await l.putInvestmentScope(scope);
   const ruleVersion: StrategyRuleVersion = {
-    id: RULE_VERSION_ID, scopeId: SCOPE_ID, version: 1, effectiveFrom: "2024-01-01",
+    id: RULE_VERSION_ID, scopeId: SCOPE_ID, version: 1, createdAt: "2024-01-01T00:00:00.000Z", effectiveFrom: "2024-01-01",
     rules: realUserRules?.length ? realUserRules : buildSimRules(assetIds),
     changeReason: "真实持仓演练初始规则",
   };

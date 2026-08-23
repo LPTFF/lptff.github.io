@@ -27,7 +27,7 @@ import type {
   StrategyRuleVersion,
   Transaction,
 } from "../domain";
-import { InvestmentLedger, type ImportRecord } from "../ledger/repository";
+import { InvestmentLedger, type ImportRecord, type SourceCaptureArchive } from "../ledger/repository";
 import { DatasetSourceAdapter } from "../adapter/InvestmentSourceAdapter";
 import { SyncService } from "../sync/sync-service";
 import {
@@ -73,6 +73,8 @@ export interface InvestmentOsState {
   extensionStatus?: InvestmentExtensionStatus;
   collectionProgress?: CollectionProgress;
   lastImport?: ImportRecord;
+  latestSourceCapture?: SourceCaptureArchive;
+  sourceCaptureArchiveCount: number;
   account?: AccountSnapshot;
   portfolio?: PortfolioSnapshot;
   transactions: Transaction[];
@@ -108,6 +110,7 @@ const state = reactive<InvestmentOsState>({
   dailyPnl: [],
   coverage: [],
   assets: [],
+  sourceCaptureArchiveCount: 0,
   warnings: [],
   policies: [],
   activeVersions: [],
@@ -163,12 +166,14 @@ export function buildStrategyRuleVersionWithRule(
   newRule: StrategyRule,
   effectiveFrom: string,
   changeReason?: string,
+  createdAt?: string,
 ): StrategyRuleVersion {
   if (!versions.length) {
     return {
       id: `srv:${scope.scopeId}:v1`,
       scopeId: scope.scopeId,
       version: 1,
+      createdAt,
       effectiveFrom,
       rules: [newRule],
       changeReason: changeReason ?? `建立首版 ${newRule.kind} 规则`,
@@ -184,6 +189,7 @@ export function buildStrategyRuleVersionWithRule(
     id: `srv:${scope.scopeId}:v${version}`,
     scopeId: scope.scopeId,
     version,
+    createdAt,
     effectiveFrom,
     rules: [...kept, newRule],
     changeReason: changeReason ?? `新增 ${newRule.kind} 规则`,
@@ -196,7 +202,7 @@ async function loadFromLedger(): Promise<void> {
   await l.removeMockData();
   if (!ledgerCompaction) ledgerCompaction = l.compactCollectionHistory();
   await ledgerCompaction;
-  const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, scopes] = await Promise.all([
+  const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, sourceCaptures, scopes] = await Promise.all([
     l.getLatestAccount(),
     l.getLatestPortfolio(),
     l.getAllTransactions(),
@@ -208,6 +214,7 @@ async function loadFromLedger(): Promise<void> {
     l.getActions(),
     l.getPatterns(),
     l.getImports(),
+    l.getSourceCaptureArchives(),
     l.getScopes(),
   ]);
   const activeScope = scopes
@@ -223,14 +230,31 @@ async function loadFromLedger(): Promise<void> {
         l.getExecutionLinks(),
       ])
     : [[], [], [], [], []];
+  const lastImport = [...imports]
+    .filter((item) => !item.source.startsWith("mock"))
+    .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
   state.account = account;
+  // 原始档案可保留多批，但分析只能绑定当前标准化账本对应的导入批次，禁止拿历史原档核查当前数据。
+  state.latestSourceCapture = lastImport
+    ? sourceCaptures.find((capture) => capture.capturedAt === lastImport.capturedAt)
+    : undefined;
+  state.sourceCaptureArchiveCount = sourceCaptures.length;
   state.portfolio = portfolio;
   state.transactions = transactions;
   state.dailyPnl = dailyPnl;
-  state.coverage = coverage;
+  // 旧账本只有“完整/部分”同步标记；读取时补实际观察到的事实数量，但不反推旧同步任务完成量。
+  state.coverage = coverage.map((item) => {
+    switch (item.dataset) {
+      case "account": return { ...item, observedCount: account ? 1 : 0, observationUnit: "snapshot" as const, observationNote: "账户时点快照；同步完成不代表连续历史覆盖。" };
+      case "holdings": return { ...item, observedCount: portfolio?.holdings.length ?? 0, observationUnit: "holding" as const, observationNote: "当前持仓时点记录。" };
+      case "transactions": return { ...item, observedCount: transactions.length, observationUnit: "transaction" as const, observationNote: "日期范围是已采集交易的最早/最晚日期，不证明区间内每天都有交易。" };
+      case "dailyPnl": return { ...item, observedCount: dailyPnl.length, observationUnit: "daily_pnl" as const, observationNote: "实际日期可能不连续；同步完成不等于逐日连续覆盖。" };
+      case "fundDetail": return { ...item, observedCount: portfolio?.holdings.length ?? 0, observationUnit: "fund" as const, observationNote: "覆盖当前持仓基金档案；不代表历史已清仓基金均有完整档案。" };
+    }
+  });
   state.assets = assets;
-  state.warnings = coverage.flatMap((c) => c.warningCodes);
-  state.health = deriveHealth(coverage, state.warnings);
+  state.warnings = state.coverage.flatMap((c) => c.warningCodes);
+  state.health = deriveHealth(state.coverage, state.warnings);
   state.policies = policies;
   state.activeVersions = activeVersions;
   state.activeScope = activeScope;
@@ -242,9 +266,7 @@ async function loadFromLedger(): Promise<void> {
   state.actions = actions;
   state.patterns = patterns;
   state.pendingActions = actions.filter((a) => a.status === "open").length;
-  state.lastImport = [...imports]
-    .filter((item) => !item.source.startsWith("mock"))
-    .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt))[0];
+  state.lastImport = lastImport;
   state.loaded = true;
 }
 
@@ -455,6 +477,7 @@ interface CreatePolicyInput {
 async function createPolicy(input: CreatePolicyInput): Promise<void> {
   const l = getLedger();
   const id = `policy:${input.name}:${Date.now()}`;
+  const createdAt = new Date().toISOString();
   const { policy, version } = createInitialPolicy({
     id,
     name: input.name,
@@ -462,6 +485,7 @@ async function createPolicy(input: CreatePolicyInput): Promise<void> {
     effectiveFrom: input.effectiveFrom,
     rules: input.rules,
     changeReason: input.changeReason,
+    createdAt,
   });
   await l.putPolicy(policy);
   await l.putPolicyVersion(version);
@@ -478,7 +502,7 @@ async function createPolicyVersion(
   const versions = await l.getPolicyVersions(policyId);
   const latest = versions[versions.length - 1];
   const num = nextVersionNumber(versions);
-  const newVersion = buildPolicyVersion(policyId, num, input);
+  const newVersion = buildPolicyVersion(policyId, num, { ...input, createdAt: new Date().toISOString() });
   if (latest) {
     await l.putPolicyVersion(supersede(latest, newVersion.effectiveFrom));
   }
@@ -542,6 +566,7 @@ async function addStrategyRule(newRule: StrategyRule, changeReason?: string): Pr
     newRule,
     today(),
     changeReason,
+    new Date().toISOString(),
   ));
 }
 
@@ -606,6 +631,8 @@ export interface CreateReductionPlanInput {
   assetId: string;
   triggerJudgmentId: string;
   unit: "CNY" | "shares";
+  /** 必须由人确认赎回款是否仍属于当前投资范围，不能由历史交易方式推断。 */
+  proceedsTreatment: "remain_in_scope_as_cash" | "leave_scope";
 }
 
 /** 用当前合格分母和用户事前减仓目标计算并保存计划；只写本地，不提交交易。 */
@@ -632,6 +659,7 @@ async function createReductionPlan(input: CreateReductionPlanInput): Promise<Red
     marketValue: holding.marketValue,
     denominatorValue: portfolio.totalAsset,
     targetMaxPct: rule.targetMaxPct,
+    proceedsTreatment: input.proceedsTreatment,
     unit: input.unit,
     nav: holding.nav,
   });
@@ -647,6 +675,8 @@ async function createReductionPlan(input: CreateReductionPlanInput): Promise<Red
     targetBand: { minPct: rule.targetMinPct, maxPct: rule.targetMaxPct },
     planned,
     unit: input.unit,
+    proceedsTreatment: input.proceedsTreatment,
+    estimateAsOf: portfolio.date,
     ruleVersionRefs: [version.id],
     createdAt,
   };
@@ -712,6 +742,13 @@ async function importSourceCapture(capture: EastmoneySourceCapture, successMessa
     await l.removeDemoReviewConfiguration();
     // 委托 SyncService 统一去重 / coverage 保守合并 / 审计。
     const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), l).run();
+    await l.putSourceCaptureArchive({
+      id: `source-capture:${normalized.capturedAt}`,
+      capturedAt: normalized.capturedAt,
+      protocol: capture.protocol,
+      source: normalized.source,
+      payload: capture,
+    });
     const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
     if (includedAssetIds.length) {
       const accountCoverage = normalized.coverage.find((item) => item.dataset === "account");

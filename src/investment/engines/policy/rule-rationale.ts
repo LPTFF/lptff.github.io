@@ -34,7 +34,7 @@ export const RULE_RATIONALE: Record<string, RuleRationale> = {
     thresholdBasis: "回撤阈值为常见止损惯例示例；净值复权口径不清时降级 unknown，不制造触发",
   },
   reduction_target: {
-    intent: "触发后回到可控仓位的减仓目标，只计算计划量，不预测卖点",
+    intent: "触发后把仓位减到声明的目标区间；区间表示减仓后的仓位，不是卖出比例，只计算回到目标上限的最小计划量，不预测卖点",
     theoryRef: "处置效应（Disposition）/ 纪律化执行",
     theoryDoc: "投资绩效与决策复盘理论框架",
     thresholdBasis: "目标区间为示例，须你事前声明；真实确认与操作后恢复须分别验证",
@@ -52,7 +52,7 @@ export const RULE_RATIONALE: Record<string, RuleRationale> = {
     thresholdBasis: "上限为示例，须你声明；触发只生成待处理事项，不自动交易",
   },
   take_profit: {
-    intent: "累计收益率达目标后触发复核，不自动交易",
+    intent: "当前持仓成本收益率〔(当前市值－可确认的当前持仓成本)/可确认的当前持仓成本〕达目标后触发复核，不自动交易",
     theoryRef: "纪律化止盈 + 处置效应（Disposition）",
     theoryDoc: "投资绩效与决策复盘理论框架",
     thresholdBasis: "目标收益率为示例，须你声明；达标只表示待人复核，不代表必须赎回",

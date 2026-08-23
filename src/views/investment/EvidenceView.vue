@@ -40,7 +40,7 @@
       />
       <div v-else class="metric-grid">
         <div class="metric">
-          <span class="metric-label">买入金额</span>
+          <span class="metric-label">已确认订单申请金额</span>
           <strong>{{ formatMoney(investedAmount) }}</strong>
           <el-button text size="small" class="metric-link" @click="toggleAuditDetails">{{ allAuditDetailsExpanded ? "收起全部" : "展开全部" }}</el-button>
         </div>
@@ -112,11 +112,11 @@
                   <el-tag size="small" :type="row.type === 'BUY' ? 'danger' : row.type === 'SELL' ? 'success' : 'info'" effect="plain">{{ row.businessTypeText ?? TYPE_LABEL[row.type as TransactionTypeKey] ?? row.type }}</el-tag>
                 </template>
               </el-table-column>
-              <el-table-column label="金额" width="110" align="right">
-                <template #default="{ row }">{{ formatMoney(row.amount) }}</template>
+              <el-table-column label="申请值" width="130" align="right">
+                <template #default="{ row }">{{ formatValue(row.amount, row.amountUnit) }}</template>
               </el-table-column>
-              <el-table-column label="确认金额" width="110" align="right">
-                <template #default="{ row }">{{ row.confirmedAmount === undefined ? "—" : formatMoney(row.confirmedAmount) }}</template>
+              <el-table-column label="确认值" width="130" align="right">
+                <template #default="{ row }">{{ row.confirmedAmount === undefined ? "—" : formatValue(row.confirmedAmount, row.confirmedAmountUnit) }}</template>
               </el-table-column>
               <el-table-column label="状态" width="150">
                 <template #default="{ row }">
@@ -140,9 +140,9 @@
             />
           </el-collapse-item>
 
-          <!-- 二级折叠：买入金额构成（聚合黑盒变白盒；筛选与分页同逐笔核对） -->
-          <el-collapse-item title="买入金额构成（聚合口径可追溯）" name="buy">
-            <p class="buy-formula">买入金额 = 全部「买入」交易中状态非「失败 / 已撤销」的金额合计；有确认金额时优先取确认金额。下表列出每笔的参与情况。</p>
+          <!-- 二级折叠：已确认订单申请金额构成（聚合黑盒变白盒；筛选与分页同逐笔核对） -->
+          <el-collapse-item title="已确认订单申请金额构成（聚合口径可追溯）" name="buy">
+            <p class="buy-formula">已确认订单申请金额 = 全额确认且申请单位为人民币的买入订单申请值合计。部分确认、仅受理、失败和撤销订单均不纳入；确认份额只证明成交数量，不作为金额。</p>
             <div class="tx-filters">
               <el-select v-model="buyFilterAsset" clearable placeholder="全部基金" size="small" filterable style="width: 300px">
                 <el-option v-for="a in buyAssetIds" :key="a" :label="assetOptionLabel(a)" :value="a" />
@@ -231,7 +231,7 @@
 import { computed, ref, watch } from "vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { buildAllocationDrift, buildTransactionLedger, buildDailyPnlAudit, type TransactionLedgerRow } from "../../investment/composables/selectors";
-import type { CoverageDataset, DataCoverage, EvidenceStrength } from "../../investment/domain";
+import { confirmedBuyOrderRequestedAmount, type CoverageDataset, type DataCoverage, type EvidenceStrength } from "../../investment/domain";
 
 const { state } = useInvestmentOS();
 const isSimulator = computed(() => state.account?.source === "sim");
@@ -241,8 +241,8 @@ const dailyPnl = computed(() => [...state.dailyPnl]);
 const coverage = computed(() => [...state.coverage]);
 const policies = computed(() => [...state.policies]);
 const investedAmount = computed(() => transactions.value
-  .filter((tx) => tx.type === "BUY" && tx.status !== "failed" && tx.status !== "cancelled")
-  .reduce((sum, tx) => sum + (tx.confirmedAmount ?? tx.amount), 0));
+  .filter((tx) => tx.type === "BUY")
+  .reduce((sum, tx) => sum + (confirmedBuyOrderRequestedAmount(tx) ?? 0), 0));
 const pnl = computed(() => dailyPnl.value.reduce((sum, point) => sum + point.pnl, 0));
 const ruleDeviations = computed(() => state.actions.filter((action) =>
   action.type === "ABNORMAL_TRANSACTION" || action.type === "UNCLASSIFIED_TRANSACTION",
@@ -343,12 +343,14 @@ const buyComposition = computed<BuyCompositionRow[]>(() => ledger.value.rows
   .filter((r) => r.type === "BUY")
   .reverse()
   .map((r) => {
-    const excluded = r.status === "failed" || r.status === "cancelled";
+    const source = transactions.value.find((tx) => tx.id === r.id);
+    const cashValue = source ? confirmedBuyOrderRequestedAmount(source) : undefined;
+    const excluded = cashValue === undefined;
     return {
       assetId: r.assetId,
       date: r.date,
       assetName: r.assetName,
-      usedValue: excluded ? 0 : (r.confirmedAmount ?? r.amount),
+      usedValue: cashValue ?? 0,
       included: !excluded,
       status: r.status,
       statusText: r.statusText,
@@ -424,6 +426,9 @@ const riskFindingEntries = computed(() => {
 
 function formatMoney(value: number): string {
   return value.toLocaleString("zh-CN", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function formatValue(value: number, unit?: string): string {
+  return `${formatMoney(value)}${unit ? ` ${unit}` : ""}`;
 }
 function datasetLabel(dataset: CoverageDataset): string {
   return { account: "账户", holdings: "持仓", dailyPnl: "每日盈亏", transactions: "交易历史", fundDetail: "基金详情" }[dataset];

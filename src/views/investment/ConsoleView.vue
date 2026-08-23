@@ -31,7 +31,7 @@
         <div class="metric-grid">
           <div class="metric"><span class="metric-label">总资产</span><span class="metric-value">{{ fmt(metrics.totalAsset) }}</span></div>
           <div class="metric"><span class="metric-label">持仓市值</span><span class="metric-value">{{ state.portfolio ? fmt(state.portfolio.holdingValue) : "—" }}</span></div>
-          <div class="metric"><span class="metric-label">当前持仓浮盈</span><span class="metric-value">{{ metrics.currentHoldingPnl === undefined ? "—" : `${fmt(metrics.currentHoldingPnl)}` }}</span></div>
+          <div class="metric"><span class="metric-label">持仓收益金额槽位合计</span><span class="metric-value">{{ metrics.currentHoldingPnl === undefined ? "—" : `${fmt(metrics.currentHoldingPnl)}` }}</span></div>
           <div class="metric"><span class="metric-label">历史累计盈亏</span><span class="metric-value">{{ metrics.cumulativePnl === undefined ? "—" : `${fmt(metrics.cumulativePnl)}` }}</span></div>
           <div class="metric"><span class="metric-label">最大回撤</span><span class="metric-value">{{ metrics.maxDrawdown === undefined ? "—" : `${fmt(metrics.maxDrawdown)}` }}</span></div>
           <div class="metric"><span class="metric-label">交易频率</span><span class="metric-value">{{ recent.transactionCount === 0 ? "—" : `近 ${recent.transactionCount} 笔` }}</span></div>

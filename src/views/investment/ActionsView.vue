@@ -5,7 +5,7 @@
       :closable="false"
       show-icon
       title="深度分析外包给通用大模型"
-      description="把账户状态、历史、投资逻辑、当前异常和规则整理成完整上下文，复制或一键跳转 ChatGPT 交由通用模型深度分析。本系统不调 AI、不计算指标、不替你判断，也不自动外传。"
+      description="把历史快照、规则、实际观测记录、来源分层和数据缺口整理成事实包，复制或跳转 ChatGPT，由外部模型结合最新市场信息独立分析。本系统不预设分析结论、不调 AI、不替你判断，也不自动外传。"
       class="section-alert"
     />
 
@@ -49,7 +49,7 @@
 
     <el-card v-if="state.portfolio" shadow="never" class="section">
       <template #header>深度分析上下文</template>
-      <p class="hint">点击生成一段可复制的上下文文本，包含八段：用户目标 / 当前投资组合 / 资产配置规则 / 本次异常 / 历史操作 / 原始投资逻辑 / 相关投资纪律 / 需要判断的问题，并附分析提示语。产品卖的是高质量上下文，不是自己的模型能力。</p>
+      <p class="hint">生成内容是“历史事实快照＋来源分层＋数据缺口”，不是站内分析报告。外部模型需要自行补充并注明最新行情、基金公告和市场环境；缺失字段必须保持未知。</p>
       <el-button type="primary" @click="openContextDialog">生成深度分析上下文</el-button>
       <el-dialog v-model="contextCtx.visible" :title="contextCtx.label" width="720px">
         <el-input v-model="contextCtx.text" type="textarea" :rows="22" readonly class="focused-text" />

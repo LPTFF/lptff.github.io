@@ -277,6 +277,17 @@ export async function importInvestmentStaging(
   await ledger.removeDemoReviewConfiguration();
   // 委托 SyncService 统一去重 / coverage 保守合并 / 审计 / health。
   const syncResult = await new SyncService(new DatasetSourceAdapter(normalized), ledger).run();
+  if (staging.capture) {
+    // 在确认清除插件一次性暂存前，先把完整原始采集对象写入本地事实档案。
+    // 标准化失败会阻止走到这里；写档案失败同样不 ACK，避免原始信息不可逆丢失。
+    await ledger.putSourceCaptureArchive({
+      id: `source-capture:${normalized.capturedAt}`,
+      capturedAt: normalized.capturedAt,
+      protocol: staging.capture.protocol,
+      source: normalized.source,
+      payload: staging.capture,
+    });
+  }
   const includedAssetIds = normalized.portfolio?.holdings.map((holding) => holding.assetId) ?? [];
   if (includedAssetIds.length) {
     const accountCoverage = normalized.coverage.find((item) => item.dataset === "account");

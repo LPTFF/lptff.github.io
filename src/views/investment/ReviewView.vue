@@ -117,7 +117,7 @@
             <div class="stress-sub-title">各资产末态涨跌</div>
             <el-table :data="stressResult.assetResults" size="small" border>
               <el-table-column prop="name" label="基金" min-width="140" />
-              <el-table-column label="基准指数" width="140">
+              <el-table-column label="情景映射指数" width="140">
                 <template #default="{ row }">{{ row.matched ? row.indexId : "（无该周期基准）" }}</template>
               </el-table-column>
               <el-table-column label="起始市值" width="110">
@@ -135,7 +135,7 @@
               </el-table-column>
             </el-table>
             <div v-if="stressResult.endExposureSlices.length" class="stress-section">
-              <div class="stress-sub-title">末态风险暴露（指数依据）</div>
+              <div class="stress-sub-title">末态风险暴露（情景映射指数）</div>
               <div v-for="s in stressResult.endExposureSlices" :key="s.value" class="exposure-row">
                 <span class="exposure-value">{{ s.value }}</span>
                 <el-progress :percentage="Math.round(s.pct * 100)" :stroke-width="12" class="exposure-bar" />
@@ -358,11 +358,13 @@ async function adoptDefaultsFromReview(): Promise<void> {
     const assetIds = osState.activeScope.includedAssetIds;
     const latest = osState.strategyRuleVersions.at(-1);
     const version = latest ? latest.version + 1 : 1;
-    const today = new Date().toISOString().slice(0, 10);
+    const createdAt = new Date().toISOString();
+    const today = createdAt.slice(0, 10);
     await investmentOS.saveStrategyRuleVersion({
       id: `srv:${osState.activeScope.scopeId}:v${version}`,
       scopeId: osState.activeScope.scopeId,
       version,
+      createdAt,
       effectiveFrom: today,
       rules: buildDefaultStrategyRules(assetIds, today),
       changeReason: "复盘页快捷采纳默认规则集",

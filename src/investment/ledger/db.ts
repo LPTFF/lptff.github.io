@@ -8,7 +8,7 @@ import type { Transaction, TransactionStatus } from "../domain";
 import { transactionKey } from "../sync/keys";
 
 export const INVESTMENT_DB_NAME = "investment-db";
-export const INVESTMENT_DB_VERSION = 2;
+export const INVESTMENT_DB_VERSION = 3;
 
 export const StoreName = {
   // v1
@@ -24,6 +24,8 @@ export const StoreName = {
   patterns: "patterns",
   actions: "actions",
   evidence: "evidence",
+  // v3：完整原始采集事实档案；仅本地保存，不作为计算模型直接输入。
+  sourceCaptures: "sourceCaptures",
   // v2：P0 纪律与执行复盘（Investment Review WP0-1~WP0-3）
   investmentScopes: "investmentScopes",
   strategyRuleVersions: "strategyRuleVersions",
@@ -129,6 +131,13 @@ function createV2Stores(db: IDBDatabase): void {
   }
 }
 
+function createV3Stores(db: IDBDatabase): void {
+  if (!db.objectStoreNames.contains(StoreName.sourceCaptures)) {
+    const store = db.createObjectStore(StoreName.sourceCaptures, { keyPath: "id" });
+    store.createIndex("byCapturedAt", "capturedAt", { unique: false });
+  }
+}
+
 /**
  * 迁移 v1 旧 TransactionStatus 值到 v2 新枚举，并重建 dedupKey（fingerprint 含 status，
  * 不重建会导致同一笔交易旧/新 fingerprint 不匹配，重复导入时双倍记账）。
@@ -153,6 +162,7 @@ export async function migrateTransactionStatusIfNeeded(db: IDBDatabase): Promise
 function upgrade(db: IDBDatabase, oldVersion: number): void {
   if (oldVersion < 1) createV1Stores(db);
   if (oldVersion < 2) createV2Stores(db);
+  if (oldVersion < 3) createV3Stores(db);
 }
 
 /** 打开 Investment Ledger，自动执行结构迁移；status 数据迁移在打开成功后幂等执行。 */
@@ -162,17 +172,28 @@ export function openInvestmentDB(
 ): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(dbName, version);
+    let blocked = false;
     request.onupgradeneeded = (event) => {
       const db = request.result;
       upgrade(db, event.oldVersion);
     };
     request.onsuccess = () => {
       const db = request.result;
+      if (blocked) {
+        db.close();
+        return;
+      }
+      // 允许同一版本的其他标签页在下一次 schema 升级时自动释放连接。
+      db.onversionchange = () => db.close();
       migrateTransactionStatusIfNeeded(db)
         .then(() => resolve(db))
         .catch((err) => reject(err));
     };
     request.onerror = () => reject(request.error ?? new Error("indexedDB.open failed"));
+    request.onblocked = () => {
+      blocked = true;
+      reject(new Error("本地账本升级被其他同站点页面占用，请关闭旧的基金复盘助手标签页后刷新重试"));
+    };
   });
 }
 

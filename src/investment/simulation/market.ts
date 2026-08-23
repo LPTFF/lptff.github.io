@@ -9,7 +9,13 @@ import type { AssetMetadata } from "../domain";
 import type { IndexId } from "../engines/scenario/historical-cycles";
 
 function makeAsset(asset: AssetMetadata): AssetMetadata {
-  return asset;
+  return {
+    ...asset,
+    trackingIndexes: asset.indexes,
+    benchmarkIndexes: [],
+    trackingIndexQuality: "source",
+    benchmarkIndexQuality: "unknown",
+  };
 }
 
 export type MarketAssetId = "F001" | "F002" | "F003" | "F004" | "F005" | "F006" | "F007" | "F008" | "F009";

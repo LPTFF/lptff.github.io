@@ -14,6 +14,21 @@
       <el-alert v-if="pluginHint" :type="pluginHint.type" :title="pluginHint.title" :description="pluginHint.desc" show-icon :closable="false" class="guide-hint" />
     </el-card>
 
+    <el-card shadow="never" class="section source-archive-card">
+      <template #header>
+        <div class="archive-header">
+          <span>原始采集事实档案</span>
+          <el-tag v-if="state.latestSourceCapture" type="success" size="small" effect="plain">本地已留存 {{ state.sourceCaptureArchiveCount }} 批</el-tag>
+          <el-tag v-else type="warning" size="small" effect="plain">当前数据无对应原档</el-tag>
+        </div>
+      </template>
+      <template v-if="state.latestSourceCapture">
+        <p class="archive-summary">最新采集 {{ formatCapturedAt(state.latestSourceCapture.capturedAt) }} · {{ state.latestSourceCapture.protocol }}</p>
+        <p class="archive-boundary">完整原始对象只保存在本浏览器 IndexedDB，作为来源核查事实；标准化账本负责指标和规则计算；深度分析只附带与问题相关且已脱敏的原字段，不作为核心数据源，也不会覆盖原档。</p>
+      </template>
+      <p v-else class="archive-boundary">当前账本可能来自旧版本，尚不能反查完整采集字段。下次重新采集或导入采集 JSON 时，会先保留完整原始对象，再用于标准化和深度分析附件。{{ state.sourceCaptureArchiveCount ? `本地另有 ${state.sourceCaptureArchiveCount} 批历史原档，但不会错配给当前账本。` : "" }}</p>
+    </el-card>
+
     <!-- 需关注：数据缺口（只列 partial/unknown）-->
     <el-card v-if="gaps.length" shadow="never" class="section gap-card">
       <template #header><span>数据缺口（{{ gaps.length }} 个）</span></template>
@@ -45,29 +60,32 @@
       </div>
     </el-card>
 
-    <!-- 折叠：数据健康详情 -->
+    <!-- 折叠：同步任务状态；与实际观测覆盖分开，避免“完成”被读成连续历史齐全。 -->
     <el-collapse v-model="healthActive">
-      <el-collapse-item :title="`数据健康详情（${state.coverage.length} 个数据集）`" name="health">
+      <el-collapse-item :title="`同步任务状态（${state.coverage.length} 个数据集）`" name="health">
         <el-empty v-if="!state.coverage.length" description="尚无数据覆盖记录，请先同步" />
         <div v-else class="health-list">
           <div v-for="c in state.coverage" :key="c.dataset" class="health-row">
             <span class="dataset-label">{{ datasetLabel(c.dataset) }}</span>
-            <el-progress :percentage="completenessPct(c.completeness)" :status="progressStatus(c.completeness)" :stroke-width="14" class="health-bar" />
-            <el-tag :type="completenessTag(c.completeness)" size="small" effect="plain">{{ completenessLabel(c.completeness) }}</el-tag>
+            <el-progress :percentage="completenessPct(c.latestSyncStatus ?? c.completeness)" :status="progressStatus(c.latestSyncStatus ?? c.completeness)" :stroke-width="14" class="health-bar" />
+            <el-tag :type="completenessTag(c.latestSyncStatus ?? c.completeness)" size="small" effect="plain">{{ completenessLabel(c.latestSyncStatus ?? c.completeness) }}</el-tag>
+            <span class="sync-count">{{ syncCountText(c) }}</span>
           </div>
         </div>
       </el-collapse-item>
     </el-collapse>
 
-    <!-- 折叠：数据覆盖范围 -->
+    <!-- 折叠：实际观测覆盖 -->
     <el-collapse v-model="coverageActive">
-      <el-collapse-item title="数据覆盖范围（时间区间）" name="coverage">
+      <el-collapse-item title="实际观测覆盖（记录数与时间区间）" name="coverage">
         <el-empty v-if="!state.coverage.length" description="无覆盖数据" />
         <div v-else class="range-list">
           <div v-for="c in state.coverage" :key="c.dataset" class="range-row">
             <span class="dataset-label">{{ datasetLabel(c.dataset) }}</span>
+            <span class="range-count">{{ observedCountText(c) }}</span>
             <span v-if="c.knownRanges.length" class="range-text">{{ c.knownRanges.map((r) => `${r.start} ~ ${r.end}`).join("，") }}</span>
             <span v-else class="range-text empty">无已知范围</span>
+            <span v-if="c.observationNote" class="range-note">{{ c.observationNote }}</span>
           </div>
         </div>
       </el-collapse-item>
@@ -144,12 +162,12 @@ const verdictLevel = computed<"ok" | "warn" | "blocked">(() => {
 const verdictTitle = computed(() => {
   if (verdictLevel.value === "blocked") return hasNoData.value ? "尚无数据" : "账户或持仓数据缺失，无法判断";
   if (verdictLevel.value === "warn") return `${gaps.value.length} 个数据集有缺口`;
-  return "数据完整，无需操作";
+  return "同步任务已完成";
 });
 const verdictDesc = computed(() => {
   if (verdictLevel.value === "blocked") return hasNoData.value ? "账本为空，请重新采集或在下方加载本地采集快照。" : "请点重新采集，补齐账户与持仓。";
   if (verdictLevel.value === "warn") return "下方列出缺口、影响与补救；点重新采集可补齐。";
-  return "所有数据集完整；可展开查看健康详情、覆盖范围或采集设置。";
+  return "所有同步任务已完成；实际记录数、日期范围和观测边界请在下方单独核对。";
 });
 
 const healthActive = ref<string[]>([]);
@@ -197,12 +215,23 @@ function datasetLabel(dataset: CoverageDataset): string {
 const PCT: Record<DataCoverage["completeness"], number> = { complete: 100, partial: 55, unknown: 20 };
 const STATUS: Record<DataCoverage["completeness"], "success" | "warning" | "exception"> = { complete: "success", partial: "warning", unknown: "exception" };
 const TAG: Record<DataCoverage["completeness"], "success" | "warning" | "info"> = { complete: "success", partial: "warning", unknown: "info" };
-const LABEL: Record<DataCoverage["completeness"], string> = { complete: "完整", partial: "部分", unknown: "未知" };
+const LABEL: Record<DataCoverage["completeness"], string> = { complete: "同步完成", partial: "部分完成", unknown: "状态未知" };
 
 function completenessLabel(c: DataCoverage["completeness"]): string { return LABEL[c]; }
 function completenessPct(c: DataCoverage["completeness"]): number { return PCT[c]; }
 function progressStatus(c: DataCoverage["completeness"]): "success" | "warning" | "exception" { return STATUS[c]; }
 function completenessTag(c: DataCoverage["completeness"]): "success" | "warning" | "info" { return TAG[c]; }
+function syncCountText(c: DataCoverage): string {
+  return c.syncExpectedCount === undefined ? "完成量未知" : `${c.syncObservedCount ?? 0}/${c.syncExpectedCount}`;
+}
+function observedCountText(c: DataCoverage): string {
+  const unit = { snapshot: "个快照", holding: "条持仓", transaction: "笔交易", daily_pnl: "个盈亏日点", fund: "只基金" }[c.observationUnit ?? "snapshot"];
+  return c.observedCount === undefined ? "记录数未知" : `${c.observedCount} ${unit}`;
+}
+function formatCapturedAt(value: string): string {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("zh-CN", { hour12: false });
+}
 </script>
 
 <style scoped>
@@ -243,6 +272,27 @@ function completenessTag(c: DataCoverage["completeness"]): "success" | "warning"
 }
 .guide-hint {
   margin-top: 12px;
+}
+.source-archive-card {
+  border-left: 3px solid var(--el-color-primary);
+}
+.archive-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.archive-summary,
+.archive-boundary {
+  margin: 0;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+  line-height: 1.7;
+}
+.archive-boundary {
+  margin-top: 6px;
+  color: var(--el-text-color-secondary);
 }
 .gap-card {
   border-left: 3px solid var(--el-color-warning);
@@ -317,6 +367,7 @@ function completenessTag(c: DataCoverage["completeness"]): "success" | "warning"
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-wrap: wrap;
 }
 .dataset-label {
   width: 96px;
@@ -326,9 +377,21 @@ function completenessTag(c: DataCoverage["completeness"]): "success" | "warning"
 .health-bar {
   flex: 1;
 }
+.sync-count,
+.range-count {
+  min-width: 88px;
+  color: var(--el-text-color-regular);
+  font-size: 13px;
+}
 .range-text {
   color: var(--el-text-color-regular);
   font-size: 13px;
+}
+.range-note {
+  flex-basis: 100%;
+  padding-left: 108px;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
 }
 .range-text.empty {
   color: var(--el-text-color-secondary);

@@ -78,11 +78,11 @@
                 回撤阈值 <el-input-number :model-value="Math.round(rule.drawdownPct * 100)" :min="1" :max="50" :step="1" size="small" @update:model-value="(v: number | undefined) => (rule.drawdownPct = Number(v ?? 0) / 100)" />%
               </template>
               <template v-else-if="rule.kind === 'reduction_target'">
-                目标下限 <el-input-number :model-value="Math.round(rule.targetMinPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMinPct = Number(v ?? 0) / 100)" />%
-                目标上限 <el-input-number :model-value="Math.round(rule.targetMaxPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMaxPct = Number(v ?? 0) / 100)" />%
+                减到下限 <el-input-number :model-value="Math.round(rule.targetMinPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMinPct = Number(v ?? 0) / 100)" />%
+                减到上限 <el-input-number :model-value="Math.round(rule.targetMaxPct * 100)" :min="0" :max="100" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetMaxPct = Number(v ?? 0) / 100)" />%
               </template>
               <template v-else-if="rule.kind === 'take_profit'">
-                目标收益率 <el-input-number :model-value="Math.round(rule.targetReturnPct * 100)" :min="1" :max="200" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetReturnPct = Number(v ?? 0) / 100)" />%
+                持仓成本收益率 <el-input-number :model-value="Math.round(rule.targetReturnPct * 100)" :min="1" :max="200" :step="5" size="small" @update:model-value="(v: number | undefined) => (rule.targetReturnPct = Number(v ?? 0) / 100)" />%
               </template>
             </div>
           </div>
@@ -153,10 +153,10 @@
           <el-input-number v-model="form.drawdownPct" :min="1" :max="50" :step="1" /> %
         </el-form-item>
         <template v-else-if="form.kind === 'reduction_target'">
-          <el-form-item label="目标下限" required><el-input-number v-model="form.targetMinPct" :min="0" :max="100" :step="5" /> %</el-form-item>
-          <el-form-item label="目标上限" required><el-input-number v-model="form.targetMaxPct" :min="1" :max="100" :step="5" /> %</el-form-item>
+          <el-form-item label="减到下限" required><el-input-number v-model="form.targetMinPct" :min="0" :max="100" :step="5" /> %</el-form-item>
+          <el-form-item label="减到上限" required><el-input-number v-model="form.targetMaxPct" :min="1" :max="100" :step="5" /> %</el-form-item>
         </template>
-        <el-form-item v-else label="目标收益率" required>
+        <el-form-item v-else label="持仓成本收益率" required>
           <el-input-number v-model="form.targetReturnPct" :min="1" :max="200" :step="5" /> %
         </el-form-item>
       </el-form>
@@ -188,7 +188,7 @@ const rationaleEntries = Object.entries(RULE_RATIONALE);
 const RULE_LABEL: Record<string, string> = {
   position_band: "仓位区间",
   trailing_stop: "移动止损",
-  reduction_target: "减仓目标",
+  reduction_target: "减仓后仓位目标",
   target_allocation: "目标配比",
   pause: "暂停新增",
   take_profit: "目标止盈",
@@ -219,8 +219,8 @@ function ruleValueText(rule: AnyStrategyRule): string {
   switch (rule.kind) {
     case "position_band": return `区间 [${pct(rule.minPct)}, ${pct(rule.maxPct)}]${rule.targetPct !== undefined ? `，目标 ${pct(rule.targetPct)}` : ""}`;
     case "trailing_stop": return `回撤阈值 ${pct(rule.drawdownPct)}`;
-    case "take_profit": return `目标收益率 ${pct(rule.targetReturnPct)}`;
-    case "reduction_target": return `目标 [${pct(rule.targetMinPct)}, ${pct(rule.targetMaxPct)}]`;
+    case "take_profit": return `当前持仓成本收益率目标 ${pct(rule.targetReturnPct)}`;
+    case "reduction_target": return `减到 [${pct(rule.targetMinPct)}, ${pct(rule.targetMaxPct)}]`;
     default: return "";
   }
 }
@@ -267,6 +267,7 @@ async function adoptDefaults(): Promise<void> {
       id: `srv:${state.activeScope.scopeId}:v${version}`,
       scopeId: state.activeScope.scopeId,
       version,
+      createdAt: new Date().toISOString(),
       effectiveFrom: todayStr(),
       rules: buildDefaultStrategyRules(scopeAssetIds.value, todayStr()),
       changeReason: hasRules.value ? "重置为基于理论惯例的默认规则集" : "采纳基于理论惯例的默认规则集",
@@ -357,6 +358,7 @@ async function saveStrategyRules(): Promise<void> {
       id: `srv:${latest.scopeId}:v${version}`,
       scopeId: latest.scopeId,
       version,
+      createdAt: new Date().toISOString(),
       effectiveFrom: todayStr(),
       rules: edited.rules,
       changeReason: changeReason.value.trim(),
