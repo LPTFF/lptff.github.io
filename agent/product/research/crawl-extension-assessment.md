@@ -49,6 +49,10 @@
 
 manifest（host_permissions 限定目标域名）→ content/network-bridge.js（MAIN world 拦截）+ content/collector.js（已登录页面采集）→ capture JSON 下载/推送 → content/web-bridge.js 与本站页面通信 → `src/investment/sync/extension-sync.ts`（协议校验 + adapter 转换）→ ledger 存储 → 前端消费。关键特征：采集发生在用户已登录的真实浏览器，凭据不进仓库与 CI。
 
+## 插件侧进展（2026-08-24）
+
+lptff-investment-assistant v3.5.1 已在真实登录 Chrome 中确认 binance/zhipin/kuaishou/douyin 四平台契约，并交付 `<platform>-source-capture/1.0` 正式白名单来源包、Coverage、完整/脱敏双导出；观察报告继续作为契约证据保留。币安已升级为一次点击后自动复制后台合约页、30 秒采集并关闭，不再要求用户刷新或切换页面标签；空数据集 Coverage 语义与全市场无关配置裁剪也已修复。站点侧 adapter 与产品页面消费仍待实现。详见 [多领域观察采集插件任务记录](../../records/multi-domain-observation-extension-20260824.md)。
+
 ## 复审触发条件
 
 - 新增采集器时按"判定标准"三问归类后再实现。

@@ -122,9 +122,28 @@
         requestId: event.data.requestId,
       }, "LPTFF_INVESTMENT_COLLECTION_STARTED");
     }
+    if (event.data?.type === "LPTFF_BINANCE_GET_STAGING") {
+      forward({ type: "GET_BINANCE_STAGING", requestId: event.data.requestId }, "LPTFF_BINANCE_STAGING");
+    }
+    if (event.data?.type === "LPTFF_BINANCE_GET_STATUS") {
+      forward({ type: "GET_BINANCE_STATUS", requestId: event.data.requestId }, "LPTFF_BINANCE_STATUS");
+    }
+    if (event.data?.type === "LPTFF_BINANCE_ACK_STAGING") {
+      forward({ type: "ACK_BINANCE_STAGING", requestId: event.data.requestId }, "LPTFF_BINANCE_STAGING_ACKNOWLEDGED");
+    }
+    if (event.data?.type === "LPTFF_BINANCE_DISCARD_STAGING") {
+      forward({ type: "DISCARD_BINANCE_STAGING", requestId: event.data.requestId }, "LPTFF_BINANCE_STAGING_DISCARDED");
+    }
+    if (event.data?.type === "LPTFF_BINANCE_START_COLLECTION") {
+      forward({ type: "START_BINANCE_COLLECTION", requestId: event.data.requestId }, "LPTFF_BINANCE_COLLECTION_STARTED");
+    }
   });
 
   chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type === "OBSERVATION_PROGRESS" && message.platform === "binance") {
+      window.postMessage({ source: "lptff-investment-assistant", type: "LPTFF_BINANCE_COLLECTION_PROGRESS", progress: message }, location.origin);
+      return;
+    }
     if (message?.type !== "COLLECTION_PROGRESS") return;
     window.postMessage({
       source: "lptff-investment-assistant",

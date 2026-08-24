@@ -51,5 +51,29 @@
     };
   }
 
-  globalThis.LPTFFCollectionPolicy = Object.freeze({ collectionOptions, summarizeCapture });
+  // 多平台观察采集（金融/市场需求/娱乐）只允许扩展自己的 popup 页面启动。
+  // 同一页面既可作为工具栏弹窗，也可固定成独立扩展标签页；两种形态的来源 URL
+  // 完全相同，普通网页无法伪造 chrome-extension:// 来源。
+  function observationCollectionOptions(_message, sender, extensionOrigin) {
+    const popupUrl = `${extensionOrigin}popup/popup.html`;
+    const senderUrl = typeof sender?.url === "string" ? sender.url : "";
+    if (senderUrl !== popupUrl) throw new Error("观察采集只能从插件 popup 启动");
+    return { fromPopup: !sender?.tab, fromExtensionTab: Boolean(sender?.tab) };
+  }
+
+  function binanceCollectionOptions(_message, sender, extensionOrigin) {
+    const popupUrl = `${extensionOrigin}popup/popup.html`;
+    const senderUrl = typeof sender?.url === "string" ? sender.url : "";
+    const fromPopup = senderUrl === popupUrl;
+    let fromContractReviewPage = false;
+    try {
+      fromContractReviewPage = Boolean(sender?.tab) && /\/(?:contract-review)(?:\/|$)/.test(new URL(senderUrl).pathname);
+    } catch {
+      fromContractReviewPage = false;
+    }
+    if (!fromPopup && !fromContractReviewPage) throw new Error("只能从插件 popup 或合约复盘页面启动采集");
+    return { fromPopup, fromContractReviewPage };
+  }
+
+  globalThis.LPTFFCollectionPolicy = Object.freeze({ collectionOptions, observationCollectionOptions, binanceCollectionOptions, summarizeCapture });
 })();

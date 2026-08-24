@@ -3,28 +3,73 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>基金复盘助手</title>
+    <title>多领域来源采集</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <main class="popup">
       <h1>LPTFF Investment OS</h1>
-      <p>复用一个账户页和一个交易页并行采集全面来源事实，再交给 Investment OS 按页面需要加工。分页所需认证信息只在来源页面内存中临时复用，不写入采集包或本地存储。</p>
-      <button id="collect" type="button">开始高效采集</button>
-      <div id="branches" class="branches" aria-live="polite"></div>
-      <div id="coverage" aria-live="polite"></div>
-      <div id="status" role="status" aria-live="polite">数据只保存在本地，采集完成后可导入页面或另行导出。</div>
-      <details class="advanced">
-        <summary>采集与开发设置</summary>
-        <label>页面超时(ms) <input id="cfg-timeout" type="number" min="5000" step="1000" /></label>
-        <label>基金详情并行数(1-8) <input id="cfg-concurrency" type="number" min="1" max="8" /></label>
-        <label>交易分页并行数(1-8) <input id="cfg-query-concurrency" type="number" min="1" max="8" /></label>
-        <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3" title="0=近1周, 1=近1月, 2=近3月, 3=近1年；4为自定义日期需手动查询，默认 3" /></label>
-        <button id="cfg-save" type="button" class="secondary">保存设置</button>
-        <button id="backup" type="button" class="secondary" aria-describedby="download-hint" disabled>下载完整本地备份</button>
-        <button id="desensitize" type="button" class="secondary" aria-describedby="download-hint" disabled>下载脱敏快照</button>
-        <p id="download-hint" class="action-hint">完成一次采集后，两个下载按钮会变为可点击，并直接保存到浏览器默认下载目录：「完整本地备份」含个人识别信息，仅限本地使用；「脱敏快照」只掩盖账户/银行卡/交易追踪标识，文件名与仓库 fixture 一致（eastmoney-source-desensitized.json），采集逻辑更新后可直接替换仓库内的同名文件。导出不影响待导入状态。</p>
-      </details>
+      <div class="mode-tabs" role="tablist">
+        <button id="mode-finance" class="mode-tab active" type="button" role="tab" aria-selected="true">金融</button>
+        <button id="mode-market" class="mode-tab" type="button" role="tab" aria-selected="false">市场需求</button>
+        <button id="mode-entertainment" class="mode-tab" type="button" role="tab" aria-selected="false">娱乐</button>
+      </div>
+
+      <section id="finance-mode">
+        <article class="collection-card">
+          <header class="collection-header">
+            <span class="collection-domain">基金</span>
+            <h2>基金复盘 · 来源采集</h2>
+          </header>
+          <p>复用账户页和交易页并行采集全面来源事实，再交给 Investment OS 按页面需要加工。分页认证信息只在来源页内存中临时复用，不写入采集包。</p>
+          <button id="collect" type="button">开始高效采集</button>
+          <div id="branches" class="branches" aria-live="polite"></div>
+          <div id="coverage" class="coverage-summary" aria-live="polite"></div>
+          <div id="status" class="collection-status" role="status" aria-live="polite">数据只保存在本地，采集完成后可导入页面或另行导出。</div>
+          <details class="advanced">
+            <summary>来源包与采集设置</summary>
+            <label>页面超时(ms) <input id="cfg-timeout" type="number" min="5000" step="1000" /></label>
+            <label>基金详情并行数(1-8) <input id="cfg-concurrency" type="number" min="1" max="8" /></label>
+            <label>交易分页并行数(1-8) <input id="cfg-query-concurrency" type="number" min="1" max="8" /></label>
+            <label>查询范围(逗号分隔) <input id="cfg-ranges" type="text" placeholder="3" title="0=近1周, 1=近1月, 2=近3月, 3=近1年；4为自定义日期需手动查询，默认 3" /></label>
+            <button id="cfg-save" type="button" class="secondary">保存设置</button>
+            <button id="backup" type="button" class="secondary" aria-describedby="download-hint" disabled>下载正式来源包</button>
+            <button id="desensitize" type="button" class="secondary" aria-describedby="download-hint" disabled>下载脱敏来源包</button>
+            <p id="download-hint" class="action-hint">正式来源包含个人识别信息，仅限本地；脱敏来源包会掩盖账户、银行卡和交易追踪标识。导出不会改变待导入状态。</p>
+          </details>
+        </article>
+
+        <article class="collection-card">
+          <header class="collection-header">
+            <span class="collection-domain">合约</span>
+            <h2>合约复盘 · 来源采集</h2>
+          </header>
+          <p>并行采集 U 本位合约基础单、条件委托、交易、持仓和资金流水，从首笔交易起自动切片、分页到底；全部委托均来自币安官方历史面板，不再由成交事实推导。不会消耗官方额度、刷新页面或发起交易。</p>
+          <button id="binance-collect" type="button">开始高效采集</button>
+          <div id="binance-branches" class="branches" aria-live="polite"></div>
+          <div id="binance-coverage" class="coverage-summary" aria-live="polite"></div>
+          <div id="binance-status" class="collection-status" role="status" aria-live="polite">请先登录币安并打开任一合约页。采集完成后前往合约复盘页面导入。</div>
+          <details class="advanced">
+            <summary>来源包与开发诊断</summary>
+            <button id="binance-source-backup" type="button" class="secondary" hidden disabled>下载正式来源包</button>
+            <button id="binance-source-desensitized" type="button" class="secondary" hidden disabled>下载脱敏正式来源包</button>
+            <p id="binance-export-hint" class="action-hint">完成采集后可在自动导入前下载；自动导入后请从 Investment OS 合约复盘台账导出。</p>
+            <p class="action-hint">分页认证信息只在币安来源页内存中临时复用，不写入来源包或本地存储。正式来源包是产品输入；REST/WS 观察报告仅用于维护端点契约。</p>
+          </details>
+        </article>
+        <div id="obs-group-finance" class="observation-group"></div>
+      </section>
+
+      <section id="market-mode" hidden>
+        <p>市场需求领域：从 BOSS直聘登录态职位列表提取正式来源包，把逐页搜索升级为一键获取可比较、可筛选、可回访的职位清单。</p>
+        <div id="obs-group-market" class="observation-group"></div>
+      </section>
+
+      <section id="entertainment-mode" hidden>
+        <p>娱乐领域：从快手/抖音登录态视频流提取正式离线清单——包含封面、文案、统计、作者、时长和直达链接，按兴趣直接消费内容。</p>
+        <div id="obs-group-entertainment" class="observation-group"></div>
+      </section>
+
     </main>
     <script src="popup.js"></script>
   </body>

@@ -48,6 +48,12 @@ const routes = [
 },
   { path: "/cryptocurrency", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") },
   {
+    path: "/contract-review",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "合约复盘", product: "Investment OS" },
+    children: [{ path: "", name: "contract-review", component: () => import("../views/crypto/ContractReviewView.vue") }],
+  },
+  {
     path: "/welfare",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
     meta: { title: "薅羊毛" },

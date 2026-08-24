@@ -1,8 +1,8 @@
-importScripts("source-capture.js", "collection-policy.js");
+importScripts("source-capture.js", "collection-policy.js", "observation-capture.js", "content/source-extractor.js");
 
 const LPTFF_CONFIG_KEY = "lptffConfig";
 const LPTFFConfig = {
-  defaults: { pageTimeout: 30000, singleConcurrency: 4, queryConcurrency: 4, queryRanges: ["3"] },
+  defaults: { pageTimeout: 30000, singleConcurrency: 4, queryConcurrency: 4, queryRanges: ["3"], observeSeconds: 90 },
   async load() {
     const stored = await chrome.storage.local.get(LPTFF_CONFIG_KEY);
     const cfg = stored[LPTFF_CONFIG_KEY] || {};
@@ -13,6 +13,7 @@ const LPTFFConfig = {
       queryRanges: Array.isArray(cfg.queryRanges) && cfg.queryRanges.length
         ? cfg.queryRanges.map(String)
         : this.defaults.queryRanges,
+      observeSeconds: boundedDuration(cfg.observeSeconds ?? cfg.cryptoObserveSeconds, this.defaults.observeSeconds),
     };
   },
   async save(overrides) {
@@ -24,6 +25,7 @@ const LPTFFConfig = {
       queryRanges: Array.isArray(overrides.queryRanges) && overrides.queryRanges.length
         ? overrides.queryRanges.map(String)
         : current.queryRanges,
+      observeSeconds: boundedDuration(overrides.observeSeconds ?? overrides.cryptoObserveSeconds, current.observeSeconds),
     };
     await chrome.storage.local.set({ [LPTFF_CONFIG_KEY]: next });
     return next;
@@ -34,6 +36,32 @@ const HOLD_URL = "https://trade.1234567.com.cn/myAssets/hold";
 const QUERY_URL = "https://query.1234567.com.cn/";
 const STAGING_KEY = "investmentStaging";
 const RECEIPT_KEY = "investmentTransferReceipt";
+const BINANCE_STAGING_KEY = "binanceStaging";
+const BINANCE_RECEIPT_KEY = "binanceTransferReceipt";
+// 多平台观察采集（金融：币安合约；市场需求：BOSS直聘；娱乐：快手/抖音）：每平台
+// 独立暂存/回执/闹钟，键由平台 id 派生。旧版键 cryptoObservationStaging 已废弃
+// （观察报告从未导入站点，无需迁移）。tabUrlPattern 用于查找已开页；pathFilter 判断
+// 已开页能否作为观察页（币安要求期货路径，其他平台任意站内页）；fallbackUrl 是
+// 无已开页时新开的采集页。
+const OBSERVATION_STAGING_KEY = (platform) => `observationStaging:${platform}`;
+const OBSERVATION_RECEIPT_KEY = (platform) => `observationReceipt:${platform}`;
+const OBSERVATION_ALARM = (platform) => `lptff-observation-finish:${platform}`;
+const OBSERVATION_PLATFORMS = {
+  binance: {
+    label: "币安合约",
+    tabUrlPattern: "https://www.binance.com/*",
+    pathFilter: (pathname) => /\/futures/i.test(pathname),
+    fallbackUrl: "https://www.binance.com/zh-CN/futures/ETHUSDT",
+    // 币安的余额、仓位、委托与配置主要在首屏加载时请求。使用同 profile 的后台副本
+    // 从 document_start 被动观察，既不会清空首屏响应，也不刷新用户正在操作的合约页。
+    dedicatedCaptureTab: true,
+    fixedDurationSeconds: 30,
+    minimumCaptureSeconds: 3,
+  },
+  zhipin: { label: "BOSS直聘", tabUrlPattern: "https://www.zhipin.com/*", pathFilter: (pathname) => /\/web\/geek\/(?:jobs?|job)/i.test(pathname), fallbackUrl: "https://www.zhipin.com/web/geek/jobs" },
+  kuaishou: { label: "快手", tabUrlPattern: "https://www.kuaishou.com/*", pathFilter: (pathname) => /\/(?:new-reco|profile|short-video)/i.test(pathname), fallbackUrl: "https://www.kuaishou.com/new-reco" },
+  douyin: { label: "抖音", tabUrlPattern: "https://www.douyin.com/*", pathFilter: (pathname) => /\/(?:jingxuan|recommend|user|video)/i.test(pathname), fallbackUrl: "https://www.douyin.com/jingxuan" },
+};
 const WEB_BRIDGE_LIFECYCLE_PORT = "lptff-web-bridge-lifecycle";
 const webBridgePorts = new Set();
 const preservedLoginTabIds = new Set();
@@ -51,6 +79,11 @@ class LoginRequiredError extends Error {
 
 function boundedConcurrency(value, fallback = 4) {
   return Math.max(1, Math.min(8, Number(value) || fallback));
+}
+
+// 观察窗口时长限制在 30 秒到 10 分钟：短于 chrome.alarms 的最小延迟，长于常规页面行为周期。
+function boundedDuration(value, fallback = 90) {
+  return Math.max(30, Math.min(600, Math.round(Number(value) || fallback)));
 }
 
 function emptyBranch(label) {
@@ -417,6 +450,8 @@ async function exportDesensitizedSnapshot() {
 
 async function runAutoCollection() {
   if (task.running) throw new Error("已有采集任务正在运行");
+  const runningObservation = getRunningObservation();
+  if (runningObservation) throw new Error(`${runningObservation.label}观察采集正在进行，请先结束观察再采集基金`);
   const existing = await getStaging();
   if (existing?.status === "pending") throw new Error("已有一批数据等待导入或丢弃，请先处理后再重新采集");
 
@@ -567,6 +602,506 @@ async function runAutoCollection() {
   }
 }
 
+// ---------------------------------------------------------------------------
+// 多平台观察采集（金融：币安合约；市场需求：BOSS直聘；娱乐：快手/抖音）
+// ---------------------------------------------------------------------------
+// 设计：后台不自行请求各平台（网络路径、风控指纹均不可假设，且实测三个国内平台的
+// 目标数据全部在登录墙后：BOSS 未登录 0 职位卡片、快手 graphql result:2、抖音壳页）；
+// 观察桥只被动记录已登录页面自身发出的 fetch/XHR/WS/Worker 行为。观察窗口由
+// chrome.alarms 兑现，popup 可提前结束。产出的 <platform>-observation-capture/0.9
+// 报告供维护者登录调试时导出脱敏版核对端点契约；同批响应还会生成正式来源包。
+// 同一时刻只允许一个平台的观察任务运行（与基金采集也互斥）。
+
+const observationTasks = new Map();
+
+function observationTaskOf(platformId) {
+  if (!OBSERVATION_PLATFORMS[platformId]) throw new Error(`未知观察平台：${platformId}`);
+  if (!observationTasks.has(platformId)) {
+    observationTasks.set(platformId, {
+      platform: platformId,
+      label: OBSERVATION_PLATFORMS[platformId].label,
+      running: false,
+      stage: "idle",
+      startedAt: 0,
+      durationMs: 0,
+      warnings: [],
+      tabId: null,
+      createdTab: false,
+      historyState: null,
+      finishing: false,
+    });
+  }
+  return observationTasks.get(platformId);
+}
+
+function getRunningObservation() {
+  return [...observationTasks.values()].find((item) => item.running) || null;
+}
+
+function observationTaskSnapshot(task) {
+  return {
+    platform: task.platform,
+    label: task.label,
+    running: task.running,
+    stage: task.stage,
+    warnings: [...task.warnings],
+    remainingMs: task.running ? Math.max(0, task.startedAt + task.durationMs - Date.now()) : 0,
+    historyState: task.historyState,
+  };
+}
+
+function notifyObservationProgress(task) {
+  chrome.runtime.sendMessage({ type: "OBSERVATION_PROGRESS", ...observationTaskSnapshot(task) }).catch(() => {});
+}
+
+async function injectObservationReceiver(tabId) {
+  await callChrome(chrome.scripting, chrome.scripting.executeScript, {
+    target: { tabId },
+    world: "MAIN",
+    files: ["content/source-extractor.js", "content/observation-bridge.js"],
+  });
+  await callChrome(chrome.scripting, chrome.scripting.executeScript, {
+    target: { tabId },
+    world: "ISOLATED",
+    files: ["content/observation-collector.js"],
+  });
+}
+
+async function sendToObservationTab(tabId, message, platformLabel) {
+  let lastError;
+  for (let attempt = 0; attempt < 6; attempt += 1) {
+    try {
+      return await callChrome(chrome.tabs, chrome.tabs.sendMessage, tabId, message);
+    } catch (error) {
+      lastError = error;
+      if (attempt === 1 && isMissingReceiverError(error)) {
+        try {
+          await injectObservationReceiver(tabId);
+        } catch (injectError) {
+          lastError = injectError;
+        }
+      }
+      await delay(500);
+    }
+  }
+  if (isMissingReceiverError(lastError)) {
+    throw new Error(`${platformLabel}观察采集脚本未连接。请确认已打开目标页面并完成加载，然后重试`);
+  }
+  throw lastError || new Error(`${platformLabel}采集页面未响应`);
+}
+
+async function findOrCreateObservationTab(platformId) {
+  const config = OBSERVATION_PLATFORMS[platformId];
+  const tabs = await callChrome(chrome.tabs, chrome.tabs.query, { url: config.tabUrlPattern });
+  const usable = tabs.filter((tab) => {
+    try {
+      return config.pathFilter(new URL(tab.url || "").pathname);
+    } catch {
+      return false;
+    }
+  });
+  if (config.dedicatedCaptureTab) {
+    const active = usable.find((tab) => tab.active);
+    const targetUrl = active?.url || usable[0]?.url || config.fallbackUrl;
+    const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url: targetUrl, active: false });
+    if (!tab?.id) throw new Error(`无法创建${config.label}后台采集页`);
+    const started = Date.now();
+    while (Date.now() - started < PAGE_TIMEOUT) {
+      const current = await callChrome(chrome.tabs, chrome.tabs.get, tab.id);
+      if (current.status === "complete") {
+        return { tabId: tab.id, created: true, reused: false, capturedFromNavigation: true };
+      }
+      await delay(200);
+    }
+    return {
+      tabId: tab.id,
+      created: true,
+      reused: false,
+      capturedFromNavigation: true,
+      warning: `${config.label}后台采集页加载超时，观察可能不完整`,
+    };
+  }
+  if (usable.length) {
+    const active = usable.find((tab) => tab.active);
+    const chosen = active || usable[0];
+    return { tabId: chosen.id, created: false, reused: true };
+  }
+  // 用户已有该平台页面但不在观察路径：复用该标签页导航会打断用户操作，
+  // 因此新开一个不激活的采集页。
+  const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url: config.fallbackUrl, active: false });
+  if (!tab?.id) throw new Error(`无法创建${config.label}采集页面`);
+  const started = Date.now();
+  while (Date.now() - started < PAGE_TIMEOUT) {
+    const current = await callChrome(chrome.tabs, chrome.tabs.get, tab.id);
+    if (current.status === "complete") return { tabId: tab.id, created: true, reused: false };
+    await delay(200);
+  }
+  // 页面未完全加载也继续：能采到多少算多少，覆盖度报告会如实反映未观察到的事实。
+  return { tabId: tab.id, created: true, reused: false, warning: `${config.label}页面加载超时，观察可能不完整` };
+}
+
+async function startObservation(platformId, durationSeconds) {
+  // 局部命名 obsTask：不遮蔽全局 task（基金采集任务），下面的基金互斥检查要用它。
+  const obsTask = observationTaskOf(platformId);
+  const running = getRunningObservation();
+  if (running) {
+    throw new Error(running.platform === platformId
+      ? "该平台的观察任务正在运行，请等待结束或提前结束"
+      : `${running.label}观察采集正在进行，同一时刻只能观察一个平台`);
+  }
+  if (task.running) throw new Error("基金采集正在进行，请先完成后再开始观察");
+  const existing = await getObservationStaging(platformId);
+  if (existing?.status === "pending") throw new Error("已有一份观察报告等待处理，请先导出或丢弃后再观察");
+
+  const platformConfig = OBSERVATION_PLATFORMS[platformId];
+  const durationMs = boundedDuration(platformConfig.fixedDurationSeconds || durationSeconds) * 1000;
+  obsTask.running = true;
+  obsTask.stage = "preparing";
+  obsTask.startedAt = Date.now();
+  obsTask.durationMs = durationMs;
+  obsTask.warnings = [];
+  obsTask.tabId = null;
+  obsTask.createdTab = false;
+  obsTask.historyState = null;
+  obsTask.finishing = false;
+  notifyObservationProgress(obsTask);
+
+  try {
+    const tab = await findOrCreateObservationTab(platformId);
+    obsTask.tabId = tab.tabId;
+    obsTask.createdTab = tab.created;
+    if (tab.warning) obsTask.warnings.push(tab.warning);
+    if (tab.capturedFromNavigation) {
+      // 后台副本由 manifest 在 document_start 注入；保留首屏已经捕获的响应。
+      const initial = await sendToObservationTab(tab.tabId, { type: "OBSERVATION_READ" }, obsTask.label);
+      if (!initial?.ok || !initial.data) throw new Error(initial?.error || `${obsTask.label}后台采集桥未响应`);
+    } else {
+      await injectObservationReceiver(tab.tabId);
+      // 复用现有页面时清零旧观察数据，让报告只覆盖本次观察窗口。
+      await sendToObservationTab(tab.tabId, { type: "OBSERVATION_RESET" }, obsTask.label);
+    }
+    if (platformId === "binance") {
+      const history = await sendToObservationTab(tab.tabId, { type: "BINANCE_HISTORY_START" }, obsTask.label);
+      if (!history?.ok) throw new Error(history?.error || "币安全量历史采集未启动");
+      obsTask.historyState = history.data;
+    }
+    obsTask.stage = "observing";
+    notifyObservationProgress(obsTask);
+    // 观察窗口由 popup 倒计时展示；chrome.alarms 兑现截止（popup 关闭也能正常收尾）。
+    await chrome.alarms.clear(OBSERVATION_ALARM(platformId));
+    await chrome.alarms.create(OBSERVATION_ALARM(platformId), { delayInMinutes: durationMs / 60000 });
+    if (platformId === "binance") monitorBinanceCompletion(obsTask);
+    return { ok: true, platform: platformId, durationMs };
+  } catch (error) {
+    obsTask.warnings.push(error instanceof Error ? error.message : "观察启动失败");
+    await resetObservationTask(obsTask);
+    return { ok: false, error: obsTask.warnings[obsTask.warnings.length - 1] };
+  }
+}
+
+async function monitorBinanceCompletion(obsTask) {
+  const minimumMs = Number(OBSERVATION_PLATFORMS.binance.minimumCaptureSeconds || 3) * 1000;
+  while (obsTask.running && !obsTask.finishing && Date.now() < obsTask.startedAt + obsTask.durationMs) {
+    await delay(250);
+    const history = await sendToObservationTab(obsTask.tabId, { type: "BINANCE_HISTORY_STATUS" }, obsTask.label).catch(() => null);
+    if (!history?.ok || !history.data) continue;
+    obsTask.historyState = history.data;
+    obsTask.stage = history.data.running ? "collectingHistory" : "processing";
+    notifyObservationProgress(obsTask);
+    if (!history.data.running && Date.now() - obsTask.startedAt >= minimumMs) {
+      await finishObservation("binance");
+      return;
+    }
+  }
+}
+
+async function finishObservation(platformId) {
+  const obsTask = observationTaskOf(platformId);
+  if (!obsTask.running) return { ok: false, error: "没有正在进行的观察任务" };
+  if (obsTask.finishing) return { ok: false, error: "采集结果正在生成" };
+  obsTask.finishing = true;
+  obsTask.stage = "reading";
+  notifyObservationProgress(obsTask);
+  try {
+    await chrome.alarms.clear(OBSERVATION_ALARM(platformId));
+    if (platformId === "binance") {
+      obsTask.stage = "collectingHistory";
+      const deadline = Date.now() + 120000;
+      while (Date.now() < deadline) {
+        const history = await sendToObservationTab(obsTask.tabId, { type: "BINANCE_HISTORY_STATUS" }, obsTask.label);
+        if (history?.ok && history.data) {
+          obsTask.historyState = history.data;
+          notifyObservationProgress(obsTask);
+          if (!history.data.running) break;
+        }
+        await delay(500);
+      }
+      if (obsTask.historyState?.running) obsTask.warnings.push("币安全量历史采集等待超时，来源包将如实标记未完成分支");
+    }
+    const response = await sendToObservationTab(obsTask.tabId, { type: "OBSERVATION_READ" }, obsTask.label);
+    if (!response?.ok || !response.data) throw new Error(response?.error || "未读取到观察数据");
+    const capturedAt = new Date().toISOString();
+    const capture = globalThis.LPTFFObservationCapture.buildObservationCapture(platformId, {
+      capturedAt,
+      observedUntil: capturedAt,
+      data: response.data,
+      warnings: obsTask.warnings,
+      metrics: {
+        totalMs: Date.now() - obsTask.startedAt,
+        configuredDurationMs: obsTask.durationMs,
+        reusedExistingTab: !obsTask.createdTab,
+      },
+    });
+    const summary = globalThis.LPTFFObservationCapture.summarizeObservation(capture);
+    const sourceCapture = globalThis.LPTFFMultiDomainSourceExtractor.buildSourceCapture(platformId, {
+      capturedAt,
+      data: response.data,
+      warnings: obsTask.warnings,
+      metrics: capture.metrics,
+    });
+    const sourceSummary = globalThis.LPTFFMultiDomainSourceExtractor.summarizeSource(sourceCapture);
+    await callChrome(chrome.storage.local, chrome.storage.local.set, {
+      [OBSERVATION_STAGING_KEY(platformId)]: {
+        protocol: capture.protocol,
+        sourceProtocol: sourceCapture.protocol,
+        capturedAt: capture.capturedAt,
+        status: "pending",
+        capture,
+        sourceCapture,
+      },
+      [OBSERVATION_RECEIPT_KEY(platformId)]: {
+        protocol: capture.protocol,
+        sourceProtocol: sourceCapture.protocol,
+        capturedAt: capture.capturedAt,
+        status: "pending",
+        summary,
+        sourceSummary,
+      },
+      ...(platformId === "binance" ? {
+        [BINANCE_STAGING_KEY]: {
+          protocol: sourceCapture.protocol,
+          capturedAt: sourceCapture.capturedAt,
+          status: "pending",
+          capture: sourceCapture,
+        },
+        [BINANCE_RECEIPT_KEY]: {
+          protocol: sourceCapture.protocol,
+          capturedAt: sourceCapture.capturedAt,
+          status: "pending",
+          summary: sourceSummary,
+        },
+      } : {}),
+    });
+    obsTask.stage = "completed";
+    return { ok: true, summary };
+  } catch (error) {
+    obsTask.warnings.push(error instanceof Error ? error.message : "观察读取失败");
+    obsTask.stage = "error";
+    return { ok: false, error: obsTask.warnings[obsTask.warnings.length - 1] };
+  } finally {
+    if (obsTask.createdTab && obsTask.tabId) {
+      // 只关闭本次新开的采集页；用户自己的页面永不关闭。
+      try {
+        await callChrome(chrome.tabs, chrome.tabs.remove, obsTask.tabId);
+      } catch {
+        // 页面可能已被用户手动关闭。
+      }
+    }
+    obsTask.tabId = null;
+    obsTask.running = false;
+    obsTask.finishing = false;
+    notifyObservationProgress(obsTask);
+  }
+}
+
+async function resetObservationTask(obsTask) {
+  await chrome.alarms.clear(OBSERVATION_ALARM(obsTask.platform));
+  if (obsTask.createdTab && obsTask.tabId) {
+    try {
+      await callChrome(chrome.tabs, chrome.tabs.remove, obsTask.tabId);
+    } catch {
+      // 同上。
+    }
+  }
+  obsTask.tabId = null;
+  obsTask.createdTab = false;
+  obsTask.historyState = null;
+  obsTask.running = false;
+  obsTask.finishing = false;
+  notifyObservationProgress(obsTask);
+}
+
+async function getObservationStaging(platformId) {
+  const key = OBSERVATION_STAGING_KEY(platformId);
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, key);
+  return result?.[key] || null;
+}
+
+function binanceBranches(sourceSummary, running, historyState) {
+  const counts = sourceSummary?.entityCounts || {};
+  const coverageDetails = new Map((sourceSummary?.coverage || []).map((item) => [item.dataset, item]));
+  const coverage = new Map([...coverageDetails].map(([dataset, item]) => [dataset, item.completeness]));
+  const historyBranches = historyState?.branches || {};
+  const branch = (dataset, label) => {
+    const live = historyBranches[dataset];
+    const archived = coverageDetails.get(dataset);
+    const completed = Number(live?.recordCount ?? archived?.recordCount ?? counts[dataset] ?? 0);
+    const total = Number(live?.expectedCount ?? archived?.expectedCount ?? completed);
+    const completeness = live?.completeness || coverage.get(dataset);
+    return {
+      dataset,
+      label,
+      status: running ? (live?.status || "running") : completeness === "complete" ? "completed" : completeness === "failed" ? "failed" : "partial",
+      completed,
+      total,
+      pageCount: Number(live?.pageCount ?? archived?.pageCount ?? 0),
+      windowsCompleted: Number(live?.windowsCompleted ?? archived?.windowsCompleted ?? 0),
+      windowsTotal: Number(live?.windowsTotal ?? archived?.windowsTotal ?? 0),
+      missingOrderCount: Number(live?.missingOrderCount ?? archived?.missingOrderCount ?? 0),
+      regularOrderCount: Number(live?.regularOrderCount ?? archived?.regularOrderCount ?? -1),
+      conditionalOrderCount: Number(live?.conditionalOrderCount ?? archived?.conditionalOrderCount ?? -1),
+      duplicateResponseCount: Number(live?.duplicateResponseCount ?? archived?.duplicateResponseCount ?? 0),
+      limitation: live?.limitation || archived?.limitation,
+    };
+  };
+  const snapshotTotal = Number(counts.equity || 0) + Number(counts.positions || 0) + Number(counts.funding || 0) + Number(counts.fundingHistory || 0) + Number(counts.symbolConfigs || 0);
+  const snapshotComplete = ["equity", "positions", "funding"].every((name) => coverage.get(name) === "complete");
+  return {
+    orderHistory: branch("orderHistory", "合约订单历史"),
+    tradeHistory: branch("tradeHistory", "交易历史"),
+    positionHistory: branch("positionHistory", "持仓历史"),
+    transactionHistory: branch("transactionHistory", "资金流水"),
+    snapshot: {
+      dataset: "snapshot",
+      label: "账户与行情快照",
+      status: running ? "running" : snapshotComplete ? "completed" : "partial",
+      completed: running ? 0 : snapshotTotal,
+      total: running ? 0 : snapshotTotal,
+    },
+  };
+}
+
+async function getBinanceStaging() {
+  const stored = await callChrome(chrome.storage.local, chrome.storage.local.get, [BINANCE_STAGING_KEY, OBSERVATION_STAGING_KEY("binance")]);
+  if (stored?.[BINANCE_STAGING_KEY]) return stored[BINANCE_STAGING_KEY];
+  const legacy = stored?.[OBSERVATION_STAGING_KEY("binance")];
+  return legacy?.sourceCapture ? { protocol: legacy.sourceCapture.protocol, capturedAt: legacy.sourceCapture.capturedAt, status: "pending", capture: legacy.sourceCapture } : null;
+}
+
+async function getBinanceStatus() {
+  const stored = await callChrome(chrome.storage.local, chrome.storage.local.get, [BINANCE_STAGING_KEY, BINANCE_RECEIPT_KEY, OBSERVATION_STAGING_KEY("binance"), OBSERVATION_RECEIPT_KEY("binance")]);
+  const staging = stored?.[BINANCE_STAGING_KEY] || (stored?.[OBSERVATION_STAGING_KEY("binance")]?.sourceCapture ? { capture: stored[OBSERVATION_STAGING_KEY("binance")].sourceCapture } : null);
+  const legacyReceipt = stored?.[OBSERVATION_RECEIPT_KEY("binance")];
+  const receipt = stored?.[BINANCE_RECEIPT_KEY] || (legacyReceipt ? { protocol: legacyReceipt.sourceProtocol, capturedAt: legacyReceipt.capturedAt, status: "pending", summary: legacyReceipt.sourceSummary } : null);
+  const observation = observationTaskSnapshot(observationTaskOf("binance"));
+  return { extensionVersion: chrome.runtime.getManifest().version, pending: Boolean(staging), receipt, collection: { ...observation, branches: binanceBranches(receipt?.summary, observation.running, observation.historyState) } };
+}
+
+async function acknowledgeBinanceStaging() {
+  const staging = await getBinanceStaging();
+  if (!staging?.capture) throw new Error("没有可确认的币安来源采集包");
+  await callChrome(chrome.storage.local, chrome.storage.local.remove, [BINANCE_STAGING_KEY, OBSERVATION_STAGING_KEY("binance")]);
+  await callChrome(chrome.storage.local, chrome.storage.local.set, { [BINANCE_RECEIPT_KEY]: { protocol: staging.protocol, capturedAt: staging.capturedAt, acknowledgedAt: new Date().toISOString(), status: "imported", summary: globalThis.LPTFFMultiDomainSourceExtractor.summarizeSource(staging.capture) } });
+}
+
+async function discardBinanceStaging() {
+  const staging = await getBinanceStaging();
+  await callChrome(chrome.storage.local, chrome.storage.local.remove, [BINANCE_STAGING_KEY, OBSERVATION_STAGING_KEY("binance")]);
+  if (staging) await callChrome(chrome.storage.local, chrome.storage.local.set, { [BINANCE_RECEIPT_KEY]: { protocol: staging.protocol, capturedAt: staging.capturedAt, acknowledgedAt: new Date().toISOString(), status: "discarded", summary: globalThis.LPTFFMultiDomainSourceExtractor.summarizeSource(staging.capture) } });
+}
+
+// 一次读取全部平台的暂存/回执：popup 打开时拉一次即可刷新所有观察卡片。
+async function getObservationStatus() {
+  const platformIds = globalThis.LPTFFObservationCapture.platforms();
+  const keys = [];
+  for (const platformId of platformIds) {
+    keys.push(OBSERVATION_STAGING_KEY(platformId), OBSERVATION_RECEIPT_KEY(platformId));
+  }
+  const stored = await callChrome(chrome.storage.local, chrome.storage.local.get, keys);
+  const platforms = {};
+  for (const platformId of platformIds) {
+    if (!OBSERVATION_PLATFORMS[platformId]) continue;
+    const obsTask = observationTaskOf(platformId);
+    platforms[platformId] = {
+      label: obsTask.label,
+      observation: observationTaskSnapshot(obsTask),
+      pending: Boolean(stored?.[OBSERVATION_STAGING_KEY(platformId)]),
+      receipt: stored?.[OBSERVATION_RECEIPT_KEY(platformId)] || null,
+    };
+  }
+  return { extensionVersion: chrome.runtime.getManifest().version, platforms };
+}
+
+async function discardObservationStaging(platformId) {
+  const stagingKey = OBSERVATION_STAGING_KEY(platformId);
+  const receiptKey = OBSERVATION_RECEIPT_KEY(platformId);
+  const result = await callChrome(chrome.storage.local, chrome.storage.local.get, [stagingKey, receiptKey]);
+  const staging = result?.[stagingKey];
+  const receipt = result?.[receiptKey];
+  await callChrome(chrome.storage.local, chrome.storage.local.remove, stagingKey);
+  if (staging || receipt) {
+    await callChrome(chrome.storage.local, chrome.storage.local.set, {
+      [receiptKey]: {
+        protocol: staging?.protocol || receipt?.protocol || globalThis.LPTFFObservationCapture.protocolOf(platformId),
+        capturedAt: staging?.capturedAt || receipt?.capturedAt || "",
+        acknowledgedAt: new Date().toISOString(),
+        status: "discarded",
+        summary: receipt?.summary,
+      },
+    });
+  }
+}
+
+async function exportObservationBackup(platformId) {
+  const staging = await getObservationStaging(platformId);
+  if (!staging?.capture) throw new Error("当前没有观察报告，请先完成观察采集");
+  await downloadData(staging.capture, `${platformId}-observation-capture.json`);
+  return { ok: true };
+}
+
+// 脱敏导出：业务标识值替换为稳定伪 ID，残留自检发现被脱敏原值/邮箱/手机号残留时
+// 宁可失败也不生成假脱敏文件，与基金脱敏导出同一标准。
+async function exportObservationDesensitized(platformId) {
+  const staging = await getObservationStaging(platformId);
+  if (!staging?.capture) throw new Error("当前没有观察报告，请先完成观察采集");
+  const { desensitized, maskedOriginals } = globalThis.LPTFFObservationCapture.desensitizeObservation(staging.capture);
+  const residual = globalThis.LPTFFObservationCapture.residualCheck(desensitized, maskedOriginals);
+  if (residual.length) throw new Error(`脱敏自检失败：${residual.join("；")}，请改用「下载完整本地备份」并人工处理`);
+  await downloadData(desensitized, `${platformId}-observation-desensitized.json`);
+  return { ok: true };
+}
+
+async function exportObservationSourceBackup(platformId) {
+  const staging = await getObservationStaging(platformId);
+  if (!staging?.sourceCapture) throw new Error("当前没有正式来源包，请先完成一次采集");
+  await downloadData(staging.sourceCapture, `${platformId}-source-capture.json`);
+  return { ok: true };
+}
+
+async function exportObservationSourceDesensitized(platformId) {
+  const staging = await getObservationStaging(platformId);
+  if (!staging?.sourceCapture) throw new Error("当前没有正式来源包，请先完成一次采集");
+  const { desensitized, maskedOriginals } = globalThis.LPTFFMultiDomainSourceExtractor.desensitizeSource(staging.sourceCapture);
+  const residual = globalThis.LPTFFMultiDomainSourceExtractor.residualCheck(desensitized, maskedOriginals);
+  if (residual.length) throw new Error(`脱敏自检失败：${residual.join("；")}`);
+  await downloadData(desensitized, `${platformId}-source-desensitized.json`);
+  return { ok: true };
+}
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  const match = /^lptff-observation-finish:(.+)$/.exec(alarm?.name || "");
+  if (!match) return;
+  const platformId = match[1];
+  const obsTask = observationTasks.get(platformId);
+  if (obsTask?.running) {
+    finishObservation(platformId).catch(() => {
+      obsTask.stage = "error";
+      obsTask.running = false;
+      notifyObservationProgress(obsTask);
+    });
+  }
+});
+
 chrome.runtime.onConnect.addListener((port) => {
   if (port.name !== WEB_BRIDGE_LIFECYCLE_PORT) return;
   webBridgePorts.add(port);
@@ -639,6 +1174,77 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "GET_COLLECTION_STATUS") {
     sendResponse({ ok: true, status: taskSnapshot() });
     return false;
+  }
+  if (message?.type === "START_OBSERVATION") {
+    try {
+      globalThis.LPTFFCollectionPolicy.observationCollectionOptions(message, sender, chrome.runtime.getURL(""));
+    } catch (error) {
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : "无权启动观察采集" });
+      return false;
+    }
+    Promise.resolve()
+      .then(() => startObservation(String(message.platform || ""), Number(message.durationSeconds)))
+      .then(sendResponse)
+      .catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "START_BINANCE_COLLECTION") {
+    try {
+      globalThis.LPTFFCollectionPolicy.binanceCollectionOptions(message, sender, chrome.runtime.getURL(""));
+    } catch (error) {
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : "无权启动合约采集" });
+      return false;
+    }
+    startObservation("binance", 30).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "GET_BINANCE_STAGING") {
+    getBinanceStaging().then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "GET_BINANCE_STATUS") {
+    getBinanceStatus().then((status) => sendResponse({ ok: true, status })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "ACK_BINANCE_STAGING") {
+    acknowledgeBinanceStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "DISCARD_BINANCE_STAGING") {
+    discardBinanceStaging().then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "STOP_OBSERVATION") {
+    finishObservation(String(message.platform || "")).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "GET_OBSERVATION_STATUS") {
+    getObservationStatus().then((status) => sendResponse({ ok: true, status })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "GET_OBSERVATION_STAGING") {
+    getObservationStaging(String(message.platform || "")).then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "DISCARD_OBSERVATION_STAGING") {
+    discardObservationStaging(String(message.platform || "")).then(() => sendResponse({ ok: true })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_OBSERVATION_BACKUP") {
+    exportObservationBackup(String(message.platform || "")).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_OBSERVATION_DESENSITIZED") {
+    exportObservationDesensitized(String(message.platform || "")).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_OBSERVATION_SOURCE_BACKUP") {
+    exportObservationSourceBackup(String(message.platform || "")).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "EXPORT_OBSERVATION_SOURCE_DESENSITIZED") {
+    exportObservationSourceDesensitized(String(message.platform || "")).then(sendResponse).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
   }
   return undefined;
 });
