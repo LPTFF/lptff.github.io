@@ -54,11 +54,23 @@
   // 多平台观察采集（金融/市场需求/娱乐）只允许扩展自己的 popup 页面启动。
   // 同一页面既可作为工具栏弹窗，也可固定成独立扩展标签页；两种形态的来源 URL
   // 完全相同，普通网页无法伪造 chrome-extension:// 来源。
-  function observationCollectionOptions(_message, sender, extensionOrigin) {
+  function observationCollectionOptions(message, sender, extensionOrigin) {
     const popupUrl = `${extensionOrigin}popup/popup.html`;
     const senderUrl = typeof sender?.url === "string" ? sender.url : "";
-    if (senderUrl !== popupUrl) throw new Error("观察采集只能从插件 popup 启动");
-    return { fromPopup: !sender?.tab, fromExtensionTab: Boolean(sender?.tab) };
+    const fromPopup = senderUrl === popupUrl;
+    let fromDouyinFavoritePage = false;
+    if (message?.platform === "douyin" && sender?.tab && senderUrl) {
+      try {
+        const url = new URL(senderUrl);
+        fromDouyinFavoritePage = url.hostname === "www.douyin.com"
+          && url.pathname === "/user/self"
+          && url.searchParams.get("showTab") === "favorite_collection";
+      } catch {
+        fromDouyinFavoritePage = false;
+      }
+    }
+    if (!fromPopup && !fromDouyinFavoritePage) throw new Error("采集只能从插件界面启动；抖音数据集也可从我的收藏页启动");
+    return { fromPopup: !sender?.tab && fromPopup, fromExtensionTab: Boolean(sender?.tab) && fromPopup, fromDouyinFavoritePage };
   }
 
   function binanceCollectionOptions(_message, sender, extensionOrigin) {

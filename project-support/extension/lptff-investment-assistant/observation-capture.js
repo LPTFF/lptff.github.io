@@ -93,7 +93,9 @@
     douyin: {
       label: "抖音",
       datasets: [
-        { dataset: "videoFeedEndpoints", hint: "/aweme/v1/web/*（视频列表/详情：aweme/视频地址/统计数据）", test: (snap) => /\/aweme\/v1\/web\/(?:aweme\/detail|aweme\/(?:post|feed|list)|[^/]*(?:feed|video|favorite))/i.test(String(snap.path || "")) },
+        { dataset: "favoriteVideoFeed", hint: "/aweme/v1/web/aweme/favorite/（收藏视频兴趣种子）", test: (snap) => /\/aweme\/v1\/web\/aweme\/favorite\/?$/i.test(String(snap.path || "")) },
+        { dataset: "interestSearchFeed", hint: "/aweme/v1/web/*/search/*（按收藏标签自动搜索的候选视频）", test: (snap) => /\/aweme\/v1\/web\/(?:general\/search|search)\//i.test(String(snap.path || "")) },
+        { dataset: "videoFeedEndpoints", hint: "/aweme/v1/web/*（视频列表/详情：候选视频补充字段）", test: (snap) => /\/aweme\/v1\/web\/(?:aweme\/detail|aweme\/(?:post|feed|list)|[^/]*(?:feed|video|favorite))/i.test(String(snap.path || "")) },
         { dataset: "commentEndpoints", hint: "/aweme/v1/web/comment/*（评论接口）", test: (snap) => /\/comment/i.test(String(snap.path || "")) },
         { dataset: "awemeOthers", hint: "其他 /aweme/v1/web/* 接口", test: (snap) => String(snap.path || "").startsWith("/aweme/") },
         { dataset: "websockets", hint: "页面 WebSocket 流", wsKind: "websocket" },
@@ -101,10 +103,20 @@
       ],
       buildWarnings(counts) {
         const warnings = [];
-        if (!counts.videoFeedEndpoints) {
-          warnings.push("未观察到视频流端点：可能未登录，或观察窗口内没有触发加载。请登录后打开推荐页或目标主页并滚动几屏，再执行一次观察采集");
+        if (!counts.favoriteVideoFeed) {
+          warnings.push("未观察到收藏视频端点：请登录抖音并打开“我 → 收藏 → 视频合集”，滚动几屏后重试");
         }
+        if (!counts.interestSearchFeed) warnings.push("未观察到标签搜索结果端点，最终感兴趣视频数据集可能为空");
         return warnings;
+      },
+    },
+    hongguo: {
+      label: "红果短剧",
+      datasets: [
+        { dataset: "domCatalog", hint: "官网 Elements 中的公开短剧卡片与详情", kind: "dom" },
+      ],
+      buildWarnings(counts) {
+        return counts.domCatalog ? [] : ["未读取到官网短剧卡片；请打开首页、分类页或由 APP 分享的短剧详情页后重试"];
       },
     },
   };
@@ -201,10 +213,10 @@
     douyin: [
       {
         entity: "Video",
-        label: "视频（清单主体）",
+        label: "收藏视频（兴趣种子与清单主体）",
         required: "must",
-        trigger: "打开推荐页/目标主页并滚动几屏",
-        fields: [["desc", /desc|caption/i], ["coverUrl", /cover_?url|cover/i], ["playAddr", /play_?addr|video_?url|play_?url/i], ["diggCount", /digg_?count|like_?count/i], ["playCount", /play_?count|view_?count/i], ["createTime", /create_?time|timestamp/i], ["duration", /duration/i]],
+        trigger: "打开“我 → 收藏 → 视频合集”并滚动几屏",
+        fields: [["desc", /desc|caption/i], ["tags", /text_?extra|hashtag|tag/i], ["coverUrl", /cover_?url|cover/i], ["playAddr", /play_?addr|video_?url|play_?url/i], ["diggCount", /digg_?count|like_?count/i], ["playCount", /play_?count|view_?count/i], ["createTime", /create_?time|timestamp/i], ["duration", /duration/i]],
       },
       {
         entity: "Author",
@@ -219,6 +231,36 @@
         required: "must",
         trigger: "滚动触发下一页加载",
         fields: [["cursor", /cursor|pcursor/i], ["hasMore", /has_?more/i]],
+      },
+      {
+        entity: "InterestProfile",
+        label: "收藏标签搜索画像",
+        required: "must",
+        trigger: "收藏视频文案或 text_extra 中的 #标签",
+        fields: [["tags", /text_?extra|hashtag|tag/i], ["favorite", /favorite/i]],
+      },
+      {
+        entity: "InterestVideo",
+        label: "感兴趣视频（最终候选数据集）",
+        required: "must",
+        trigger: "插件按收藏标签自动打开抖音视频搜索并翻页",
+        fields: [["search", /search/i], ["video", /aweme|video/i], ["playAddr", /play_?addr|video_?url|play_?url/i]],
+      },
+    ],
+    hongguo: [
+      {
+        entity: "Series",
+        label: "短剧（筛选基座主体）",
+        required: "must",
+        trigger: "打开官网片库或 APP 分享的详情链接",
+        fields: [["title", /title/i], ["coverUrl", /cover_?url/i], ["episodeCount", /episode_?count/i], ["tags", /tags?/i], ["detailUrl", /detail_?url/i], ["playUrl", /play_?url/i]],
+      },
+      {
+        entity: "CatalogContext",
+        label: "片库上下文",
+        required: "must",
+        trigger: "打开首页、分类页或详情页",
+        fields: [["pageType", /page_?type/i], ["pageUrl", /page_?url/i]],
       },
     ],
   };
@@ -247,6 +289,7 @@
     }
     for (const row of config.datasets) {
       if (row.kind === "workers") counts[row.dataset] = (data?.workers || []).length;
+      if (row.kind === "dom") counts[row.dataset] = (data?.domSnapshots || []).length;
       if (row.wsKind) counts[row.dataset] = (data?.wsStreams || []).filter((ws) => ws?.kind === row.wsKind).length;
     }
     return config.datasets.map((row) => ({
@@ -291,13 +334,14 @@
   function buildCoreFieldCoverage(platformId, data) {
     const entities = CORE_ENTITY_RE[platformId] || [];
     const stats = new Map(entities.map((entity) => [entity.entity, { ...entity, hitFields: [], endpoints: new Set() }]));
-    for (const snapshot of data?.restSnapshots || []) {
+    for (const snapshot of [...(data?.restSnapshots || []), ...(data?.domSnapshots || [])]) {
       // 字段名三处来源：响应体、URL query 参数（已脱敏但参数名保留）、请求体——
       // 分页参数与游标（SearchContext/FeedContext 类实体）在请求侧，也是待确认契约。
       const names = new Set([
         ...collectFieldNames(snapshot?.response),
         ...collectFieldNames(snapshot?.query),
         ...collectFieldNames(snapshot?.requestBody),
+        ...collectFieldNames(snapshot?.sourceData),
       ]);
       if (!names.size) continue;
       const endpoint = `${String(snapshot?.method || "GET")} ${String(snapshot?.path || "")}${snapshot?.operationName ? ` (${snapshot.operationName})` : ""}`;
@@ -375,6 +419,7 @@
       observedUntil: input.observedUntil,
       pageUrl: data.pageUrl,
       restSnapshots: data.restSnapshots || [],
+      domSnapshots: data.domSnapshots || [],
       wsStreams: data.wsStreams || [],
       workers: data.workers || [],
       coverage,
@@ -459,6 +504,7 @@
       source: capture?.source || "",
       sourceLabel: capture?.sourceLabel || "",
       restEndpointCount: Array.isArray(capture?.restSnapshots) ? capture.restSnapshots.length : 0,
+      domSnapshotCount: Array.isArray(capture?.domSnapshots) ? capture.domSnapshots.length : 0,
       wsStreamCount: Array.isArray(capture?.wsStreams) ? capture.wsStreams.length : 0,
       workerCount: Array.isArray(capture?.workers) ? capture.workers.length : 0,
       warningCount: Array.isArray(capture?.warnings) ? capture.warnings.length : 0,

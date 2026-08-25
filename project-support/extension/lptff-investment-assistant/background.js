@@ -59,8 +59,40 @@ const OBSERVATION_PLATFORMS = {
     minimumCaptureSeconds: 3,
   },
   zhipin: { label: "BOSS直聘", tabUrlPattern: "https://www.zhipin.com/*", pathFilter: (pathname) => /\/web\/geek\/(?:jobs?|job)/i.test(pathname), fallbackUrl: "https://www.zhipin.com/web/geek/jobs" },
-  kuaishou: { label: "快手", tabUrlPattern: "https://www.kuaishou.com/*", pathFilter: (pathname) => /\/(?:new-reco|profile|short-video)/i.test(pathname), fallbackUrl: "https://www.kuaishou.com/new-reco" },
-  douyin: { label: "抖音", tabUrlPattern: "https://www.douyin.com/*", pathFilter: (pathname) => /\/(?:jingxuan|recommend|user|video)/i.test(pathname), fallbackUrl: "https://www.douyin.com/jingxuan" },
+  kuaishou: {
+    label: "快手",
+    tabUrlPattern: "https://www.kuaishou.com/*",
+    pathFilter: (pathname) => /\/(?:new-reco|profile|short-video)/i.test(pathname),
+    fallbackUrl: "https://www.kuaishou.com/new-reco",
+    // 推荐流首批响应发生在应用启动阶段。始终从 document_start 打开同登录 profile
+    // 的后台副本，避免在已加载页面里晚注入后漏掉首屏请求或命中页面缓存的原 fetch。
+    dedicatedCaptureTab: true,
+    automaticPaging: true,
+  },
+  douyin: {
+    label: "抖音",
+    tabUrlPattern: "https://www.douyin.com/*",
+    pathFilter: (pathname) => /\/(?:jingxuan|recommend|user|video)/i.test(pathname),
+    fallbackUrl: "https://www.douyin.com/user/self?from_tab_name=main&showSubTab=video&showTab=favorite_collection",
+    preferredUrl: (url) => url.pathname === "/user/self"
+      && url.searchParams.get("showTab") === "favorite_collection"
+      && url.searchParams.get("showSubTab") === "video",
+    requirePreferredUrl: true,
+    dedicatedCaptureTab: true,
+    immediateFinalize: true,
+    maxInterestSearchTags: 8,
+    maxInterestSearchConcurrency: 3,
+  },
+  hongguo: {
+    label: "红果短剧",
+    tabUrlPattern: "https://hongguoduanju.com/*",
+    pathFilter: (pathname) => /^\/(?:$|category|detail|player)/i.test(pathname),
+    fallbackUrl: "https://hongguoduanju.com/",
+    preferredPath: (pathname) => /^\/(?:detail|player)/i.test(pathname),
+    dedicatedCaptureTab: true,
+    automaticPaging: true,
+    fixedDurationSeconds: 30,
+  },
 };
 const WEB_BRIDGE_LIFECYCLE_PORT = "lptff-web-bridge-lifecycle";
 const webBridgePorts = new Set();
@@ -241,8 +273,8 @@ async function ensureOffscreenDocument() {
   }
   await chrome.offscreen.createDocument({
     url: OFFSCREEN_PATH,
-    reasons: ["DOM_PARSER"],
-    justification: "并发解析公开基金概况 HTML，避免为每只基金打开完整标签页",
+    reasons: ["DOM_PARSER", "BLOBS"],
+    justification: "并发解析公开基金概况 HTML，并为超过 data URL 上限的本地 JSON 生成下载 Blob",
   });
 }
 
@@ -410,15 +442,102 @@ async function discardStaging() {
 
 async function downloadData(data, filename) {
   const content = JSON.stringify(data, null, 2);
-  const url = `data:application/json;charset=utf-8,${encodeURIComponent(content)}`;
-  await callChrome(chrome.downloads, chrome.downloads.download, {
+  let url = `data:application/json;charset=utf-8,${encodeURIComponent(content)}`;
+  // data: URL 会对中文 JSON 明显膨胀；大文件统一走 offscreen Blob。
+  if (content.length > 128 * 1024) {
+    await ensureOffscreenDocument();
+    await waitForOffscreenReceiver();
+    const startedAt = new Date(Date.now() - 1000).toISOString();
+    const response = await chrome.runtime.sendMessage({
+      type: "OFFSCREEN_DOWNLOAD",
+      content,
+      mimeType: "application/json;charset=utf-8",
+      filename,
+    });
+    if (!response?.ok || !response.url) throw new Error(response?.error || "大文件下载未启动");
+    const deadline = Date.now() + 30000;
+    while (Date.now() < deadline) {
+      const items = await chrome.downloads.search({ startedAfter: startedAt, orderBy: ["-startTime"], limit: 20 });
+      const item = items.find((candidate) => candidate.url === response.url);
+      if (item?.state === "interrupted") throw new Error(`下载中断：${item.error || filename}`);
+      if (item?.state === "complete") {
+        if (item.exists === false) throw new Error(`文件未落盘：${item.filename || filename}`);
+        return { downloadId: item.id, filename: item.filename || filename };
+      }
+      await delay(200);
+    }
+    throw new Error(`下载等待超时：${filename}`);
+  }
+  const downloadId = await chrome.downloads.download({
     url,
     filename,
     // 扩展 popup 会在“另存为”窗口获得焦点时关闭，继而销毁 sendMessage
     // 响应端口。直接交给浏览器下载可让后台回调在 popup 生命周期内完成。
     saveAs: false,
-    conflictAction: "overwrite",
+    // 离线数据集保留每次生成结果；也避免 Chrome 下载库中的同名旧记录已被外部
+    // 移除时，overwrite 卡在一个实际不存在的目标上。
+    conflictAction: "uniquify",
   });
+  if (!Number.isInteger(downloadId)) throw new Error(`Chrome 未创建下载任务：${filename}`);
+  const deadline = Date.now() + 30000;
+  while (Date.now() < deadline) {
+    const items = await chrome.downloads.search({ id: downloadId });
+    const item = items?.[0];
+    if (item?.state === "interrupted") throw new Error(`下载中断：${item.error || filename}`);
+    if (item?.state === "complete") {
+      if (item.exists === false) throw new Error(`Chrome 已完成下载记录，但文件未落盘：${item.filename || filename}`);
+      return { downloadId, filename: item.filename || filename };
+    }
+    await delay(200);
+  }
+  throw new Error(`下载等待超时：${filename}`);
+}
+
+function buildDouyinInterestDataset(sourceCapture) {
+  const entities = sourceCapture?.entities || {};
+  const favoriteVideos = Array.isArray(entities.favoriteVideos) ? entities.favoriteVideos : [];
+  const candidates = Array.isArray(entities.interestVideos) ? entities.interestVideos : [];
+  const profile = entities.interestProfiles?.[0] || {};
+  const searchQueue = Array.isArray(profile.searchTags)
+    ? profile.searchTags.slice(0, OBSERVATION_PLATFORMS.douyin.maxInterestSearchTags || 8)
+    : [];
+  if (!favoriteVideos.length) throw new Error("没有采集到收藏视频，已保留上一份有效数据集；请确认抖音已登录且收藏合集可见");
+  if (!searchQueue.length) throw new Error("收藏视频中没有可搜索的 #标签，已保留上一份有效数据集");
+  if (!candidates.length) throw new Error("按收藏标签搜索后没有采集到相关视频，已保留上一份有效数据集；请稍后重试");
+
+  const frequencyByTag = new Map(searchQueue.map((item) => [String(item.tag || ""), Number(item.count) || 0]));
+  const videos = candidates
+    .map((video) => {
+      const matchedSearchTags = Array.isArray(video.matchedSearchTags) ? video.matchedSearchTags : [];
+      const interestScore = matchedSearchTags.reduce((sum, tag) => sum + (frequencyByTag.get(String(tag)) || 0), 0);
+      return { ...video, interestScore, matchedTagCount: matchedSearchTags.length };
+    })
+    .sort((left, right) => right.interestScore - left.interestScore
+      || right.matchedTagCount - left.matchedTagCount
+      || (Number(right.likeCount) || 0) - (Number(left.likeCount) || 0));
+
+  return {
+    protocol: "douyin-interest-video-dataset/1.0",
+    kind: "interest-video-dataset",
+    platform: "douyin",
+    generatedAt: sourceCapture.capturedAt,
+    sourcePage: sourceCapture.pageUrl,
+    strategy: {
+      basis: profile.basis || "favorite-collection-tags",
+      description: "以我的收藏视频为兴趣种子，按 #标签频次搜索并汇总相关视频",
+      seedVideoCount: favoriteVideos.length,
+      taggedSeedVideoCount: Number(profile.taggedSeedVideoCount) || 0,
+      searchedTagCount: searchQueue.length,
+    },
+    summary: {
+      favoriteVideoCount: favoriteVideos.length,
+      searchedTagCount: searchQueue.length,
+      interestVideoCount: videos.length,
+    },
+    searchQueue,
+    favoriteVideos,
+    videos,
+  };
 }
 
 async function exportSourceBackup() {
@@ -629,6 +748,17 @@ function observationTaskOf(platformId) {
       createdTab: false,
       historyState: null,
       finishing: false,
+      searchTabIds: new Set(),
+      seedVideoCount: 0,
+      seedReady: false,
+      searchCompleted: 0,
+      searchTotal: 0,
+      searchSucceeded: 0,
+      searchFailed: 0,
+      searchActive: 0,
+      searchFinished: false,
+      interestVideoCount: 0,
+      completedDurationMs: 0,
     });
   }
   return observationTasks.get(platformId);
@@ -639,14 +769,59 @@ function getRunningObservation() {
 }
 
 function observationTaskSnapshot(task) {
+  const branches = task.platform === "douyin" ? douyinObservationBranches(task) : undefined;
   return {
     platform: task.platform,
     label: task.label,
     running: task.running,
     stage: task.stage,
     warnings: [...task.warnings],
-    remainingMs: task.running ? Math.max(0, task.startedAt + task.durationMs - Date.now()) : 0,
+    remainingMs: task.running && task.platform !== "douyin" ? Math.max(0, task.startedAt + task.durationMs - Date.now()) : 0,
     historyState: task.historyState,
+    searchCompleted: task.searchCompleted || 0,
+    searchTotal: task.searchTotal || 0,
+    searchActive: task.searchActive || 0,
+    searchSucceeded: task.searchSucceeded || 0,
+    searchFailed: task.searchFailed || 0,
+    maxSearchConcurrency: task.platform === "douyin" ? OBSERVATION_PLATFORMS.douyin.maxInterestSearchConcurrency : 0,
+    ...(branches ? { branches } : {}),
+  };
+}
+
+function douyinObservationBranches(task) {
+  const elapsed = task.completedDurationMs || (task.startedAt ? Math.max(0, Date.now() - task.startedAt) : 0);
+  const finished = !task.running && task.stage === "completed";
+  const failed = !task.running && task.stage === "error";
+  const searchStatus = task.stage === "searchingInterests"
+    ? "running"
+    : task.searchFinished
+      ? task.searchFailed > 0 ? "partial" : "completed"
+      : failed ? "failed" : "pending";
+  return {
+    favoriteSeeds: {
+      label: "收藏兴趣种子",
+      status: task.seedReady ? "completed" : failed ? "failed" : task.running ? "running" : "pending",
+      completed: task.seedReady ? task.seedVideoCount : 0,
+      total: task.seedReady ? task.seedVideoCount : 0,
+      detail: task.seedReady ? "标签已提取" : "读取登录态收藏",
+    },
+    tagSearch: {
+      label: `标签并行搜索（${OBSERVATION_PLATFORMS.douyin.maxInterestSearchConcurrency} 路）`,
+      status: searchStatus,
+      completed: task.searchCompleted || 0,
+      total: task.searchTotal || 0,
+      detail: task.stage === "searchingInterests"
+        ? `${task.searchActive || 0} 路进行中`
+        : task.searchFailed > 0 ? `${task.searchFailed} 个失败` : "",
+    },
+    dataset: {
+      label: "相关视频数据集",
+      status: finished ? "completed" : failed ? "failed" : task.stage === "processing" ? "running" : "pending",
+      completed: finished ? task.interestVideoCount : 0,
+      total: finished ? task.interestVideoCount : 0,
+      durationMs: finished || failed ? elapsed : 0,
+      detail: finished ? "已去重并按兴趣排序" : task.stage === "processing" ? "去重、评分与排序" : "",
+    },
   };
 }
 
@@ -702,7 +877,17 @@ async function findOrCreateObservationTab(platformId) {
   });
   if (config.dedicatedCaptureTab) {
     const active = usable.find((tab) => tab.active);
-    const targetUrl = active?.url || usable[0]?.url || config.fallbackUrl;
+    const preferred = (config.preferredUrl || config.preferredPath) && usable.find((tab) => {
+      try {
+        const url = new URL(tab.url || "");
+        return config.preferredUrl ? config.preferredUrl(url) : config.preferredPath(url.pathname);
+      } catch {
+        return false;
+      }
+    });
+    const targetUrl = config.requirePreferredUrl
+      ? (preferred?.url || config.fallbackUrl)
+      : (preferred?.url || active?.url || usable[0]?.url || config.fallbackUrl);
     const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url: targetUrl, active: false });
     if (!tab?.id) throw new Error(`无法创建${config.label}后台采集页`);
     const started = Date.now();
@@ -751,7 +936,8 @@ async function startObservation(platformId, durationSeconds) {
   }
   if (task.running) throw new Error("基金采集正在进行，请先完成后再开始观察");
   const existing = await getObservationStaging(platformId);
-  if (existing?.status === "pending") throw new Error("已有一份观察报告等待处理，请先导出或丢弃后再观察");
+  const replaceableEntertainment = ["kuaishou", "douyin", "hongguo"].includes(platformId);
+  if (existing?.status === "pending" && !replaceableEntertainment) throw new Error("已有一份观察报告等待处理，请先导出或丢弃后再观察");
 
   const platformConfig = OBSERVATION_PLATFORMS[platformId];
   const durationMs = boundedDuration(platformConfig.fixedDurationSeconds || durationSeconds) * 1000;
@@ -760,9 +946,21 @@ async function startObservation(platformId, durationSeconds) {
   obsTask.startedAt = Date.now();
   obsTask.durationMs = durationMs;
   obsTask.warnings = [];
+  if (existing?.status === "pending") obsTask.warnings.push("本次完成后将替换上一份未处理的娱乐清单；若本次失败，旧清单仍会保留");
   obsTask.tabId = null;
   obsTask.createdTab = false;
   obsTask.historyState = null;
+  obsTask.searchCompleted = 0;
+  obsTask.searchTotal = 0;
+  obsTask.searchSucceeded = 0;
+  obsTask.searchFailed = 0;
+  obsTask.searchActive = 0;
+  obsTask.searchFinished = false;
+  obsTask.searchTabIds = new Set();
+  obsTask.seedVideoCount = 0;
+  obsTask.seedReady = false;
+  obsTask.interestVideoCount = 0;
+  obsTask.completedDurationMs = 0;
   obsTask.finishing = false;
   notifyObservationProgress(obsTask);
 
@@ -785,12 +983,19 @@ async function startObservation(platformId, durationSeconds) {
       if (!history?.ok) throw new Error(history?.error || "币安全量历史采集未启动");
       obsTask.historyState = history.data;
     }
-    obsTask.stage = "observing";
+    obsTask.stage = platformId === "douyin" ? "collectingSeeds" : "observing";
     notifyObservationProgress(obsTask);
+    if (platformConfig.immediateFinalize) {
+      // 收藏页的观察桥会主动重放登录态收藏请求；读取成功后无需再等待固定观察窗口。
+      // 延后一拍让 START_OBSERVATION 先回到调用方，随后自动完成整条数据集流水线。
+      setTimeout(() => finishObservation(platformId), 0);
+      return { ok: true, platform: platformId, durationMs: 0, observation: observationTaskSnapshot(obsTask) };
+    }
     // 观察窗口由 popup 倒计时展示；chrome.alarms 兑现截止（popup 关闭也能正常收尾）。
     await chrome.alarms.clear(OBSERVATION_ALARM(platformId));
     await chrome.alarms.create(OBSERVATION_ALARM(platformId), { delayInMinutes: durationMs / 60000 });
     if (platformId === "binance") monitorBinanceCompletion(obsTask);
+    if (platformConfig.automaticPaging) monitorEntertainmentCollection(obsTask);
     return { ok: true, platform: platformId, durationMs };
   } catch (error) {
     obsTask.warnings.push(error instanceof Error ? error.message : "观察启动失败");
@@ -815,12 +1020,160 @@ async function monitorBinanceCompletion(obsTask) {
   }
 }
 
+async function advanceEntertainmentFeed(obsTask, { force = false } = {}) {
+  if (!obsTask.running || (!force && obsTask.finishing) || !obsTask.tabId) return;
+  try {
+    await callChrome(chrome.scripting, chrome.scripting.executeScript, {
+      target: { tabId: obsTask.tabId },
+      func: (platformId) => {
+        if (platformId === "hongguo") {
+          [...document.querySelectorAll("button")]
+            .filter((button) => /查看更多|展开/.test(button.textContent || ""))
+            .forEach((button) => button.click());
+        }
+        const candidates = [document.scrollingElement, ...document.querySelectorAll("main, [role='main'], div")]
+          .filter((element, index, items) => element && items.indexOf(element) === index)
+          .filter((element) => {
+            const style = getComputedStyle(element);
+            return element.scrollHeight > element.clientHeight + 120
+              && /auto|scroll|overlay/.test(`${style.overflowY} ${style.overflow}`);
+          })
+          .sort((left, right) => (right.clientHeight * right.clientWidth) - (left.clientHeight * left.clientWidth));
+        const target = candidates[0] || document.scrollingElement;
+        const distance = Math.max(480, Math.round((target?.clientHeight || innerHeight) * 0.9));
+        target?.scrollBy?.({ top: distance, behavior: "instant" });
+        window.scrollBy({ top: distance, behavior: "instant" });
+      },
+      args: [obsTask.platform],
+    });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "自动翻页失败";
+    if (!obsTask.warnings.includes(message)) obsTask.warnings.push(message);
+  }
+}
+
+async function monitorEntertainmentCollection(obsTask) {
+  while (obsTask.running && !obsTask.finishing && Date.now() < obsTask.startedAt + obsTask.durationMs) {
+    await delay(2500);
+    await advanceEntertainmentFeed(obsTask);
+  }
+}
+
+function mergeObservationData(base, addition) {
+  return {
+    ...(base || {}),
+    pageUrl: base?.pageUrl,
+    restSnapshots: [...(base?.restSnapshots || []), ...(addition?.restSnapshots || [])],
+    wsStreams: [...(base?.wsStreams || []), ...(addition?.wsStreams || [])],
+    workerScripts: [...(base?.workerScripts || []), ...(addition?.workerScripts || [])],
+    domSnapshots: [...(base?.domSnapshots || []), ...(addition?.domSnapshots || [])],
+  };
+}
+
+async function waitForObservationNavigation(tabId, timeoutMs = 15000) {
+  const started = Date.now();
+  while (Date.now() - started < timeoutMs) {
+    const tab = await callChrome(chrome.tabs, chrome.tabs.get, tabId);
+    if (tab?.status === "complete") return true;
+    await delay(200);
+  }
+  return false;
+}
+
+async function collectDouyinInterestResults(obsTask, seedData) {
+  const seedCapture = globalThis.LPTFFMultiDomainSourceExtractor.buildSourceCapture("douyin", {
+    capturedAt: new Date().toISOString(),
+    data: seedData,
+    warnings: [],
+    metrics: {},
+  });
+  const searchTags = (seedCapture.entities?.interestProfiles?.[0]?.searchTags || [])
+    .slice(0, OBSERVATION_PLATFORMS.douyin.maxInterestSearchTags || 8);
+  obsTask.seedVideoCount = (seedCapture.entities?.videos || []).filter((video) => video.isFavoriteSeed).length;
+  obsTask.seedReady = true;
+  notifyObservationProgress(obsTask);
+  if (!searchTags.length) {
+    obsTask.warnings.push("收藏视频中未提取到可搜索的 #标签，未生成感兴趣视频候选集");
+    obsTask.searchFinished = true;
+    notifyObservationProgress(obsTask);
+    return seedData;
+  }
+
+  obsTask.stage = "searchingInterests";
+  obsTask.searchTotal = searchTags.length;
+  obsTask.searchCompleted = 0;
+  obsTask.searchSucceeded = 0;
+  obsTask.searchFailed = 0;
+  obsTask.searchFinished = false;
+  notifyObservationProgress(obsTask);
+
+  const results = new Array(searchTags.length);
+  let nextIndex = 0;
+  const collectTag = async (item, index) => {
+    let tabId = null;
+    try {
+      const tab = await callChrome(chrome.tabs, chrome.tabs.create, { url: item.searchUrl, active: false });
+      tabId = tab?.id || null;
+      if (!tabId) throw new Error(`无法打开搜索“${item.tag}”`);
+      obsTask.searchTabIds.add(tabId);
+      obsTask.searchActive += 1;
+      notifyObservationProgress(obsTask);
+      const loaded = await waitForObservationNavigation(tabId);
+      if (!loaded) throw new Error(`搜索“${item.tag}”加载超时`);
+      const searchTask = { ...obsTask, tabId };
+      await delay(900);
+      await advanceEntertainmentFeed(searchTask, { force: true });
+      await delay(500);
+      await advanceEntertainmentFeed(searchTask, { force: true });
+      await delay(500);
+      const result = await sendToObservationTab(tabId, { type: "OBSERVATION_READ" }, obsTask.label);
+      if (!result?.ok || !result.data) throw new Error(result?.error || `搜索“${item.tag}”未返回数据`);
+      results[index] = result.data;
+      obsTask.searchSucceeded += 1;
+    } catch (error) {
+      obsTask.warnings.push(error instanceof Error ? error.message : `搜索“${item.tag}”采集失败`);
+      obsTask.searchFailed += 1;
+    } finally {
+      if (tabId) {
+        obsTask.searchTabIds.delete(tabId);
+        try {
+          await callChrome(chrome.tabs, chrome.tabs.remove, tabId);
+        } catch {
+          // 搜索页可能已被用户手动关闭。
+        }
+      }
+      obsTask.searchActive = Math.max(0, obsTask.searchActive - 1);
+      obsTask.searchCompleted += 1;
+      notifyObservationProgress(obsTask);
+    }
+  };
+  const worker = async () => {
+    while (nextIndex < searchTags.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      await collectTag(searchTags[index], index);
+    }
+  };
+  const concurrency = Math.min(
+    OBSERVATION_PLATFORMS.douyin.maxInterestSearchConcurrency || 3,
+    searchTags.length,
+  );
+  await Promise.all(Array.from({ length: concurrency }, () => worker()));
+  obsTask.searchFinished = true;
+  notifyObservationProgress(obsTask);
+  const combined = results.reduce(
+    (current, result) => result ? mergeObservationData(current, result) : current,
+    seedData,
+  );
+  return combined;
+}
+
 async function finishObservation(platformId) {
   const obsTask = observationTaskOf(platformId);
   if (!obsTask.running) return { ok: false, error: "没有正在进行的观察任务" };
   if (obsTask.finishing) return { ok: false, error: "采集结果正在生成" };
   obsTask.finishing = true;
-  obsTask.stage = "reading";
+  obsTask.stage = platformId === "douyin" ? "collectingSeeds" : "reading";
   notifyObservationProgress(obsTask);
   try {
     await chrome.alarms.clear(OBSERVATION_ALARM(platformId));
@@ -840,6 +1193,27 @@ async function finishObservation(platformId) {
     }
     const response = await sendToObservationTab(obsTask.tabId, { type: "OBSERVATION_READ" }, obsTask.label);
     if (!response?.ok || !response.data) throw new Error(response?.error || "未读取到观察数据");
+    if (platformId === "douyin") {
+      // 抖音个人页是 SPA：document.readyState=complete 早于收藏接口落入观察桥。
+      // 这里按“已出现收藏实体”收敛，避免恢复固定倒计时，也避免空数据抢跑。
+      let seedData = response.data;
+      const seedDeadline = Date.now() + 15000;
+      while (Date.now() < seedDeadline) {
+        const seedCapture = globalThis.LPTFFMultiDomainSourceExtractor.buildSourceCapture("douyin", {
+          capturedAt: new Date().toISOString(),
+          data: seedData,
+          warnings: [],
+          metrics: {},
+        });
+        if ((seedCapture.entities?.favoriteVideos || []).length > 0) break;
+        await delay(750);
+        const retry = await sendToObservationTab(obsTask.tabId, { type: "OBSERVATION_READ" }, obsTask.label);
+        if (retry?.ok && retry.data) seedData = mergeObservationData(seedData, retry.data);
+      }
+      response.data = await collectDouyinInterestResults(obsTask, seedData);
+    }
+    obsTask.stage = "processing";
+    notifyObservationProgress(obsTask);
     const capturedAt = new Date().toISOString();
     const capture = globalThis.LPTFFObservationCapture.buildObservationCapture(platformId, {
       capturedAt,
@@ -860,6 +1234,9 @@ async function finishObservation(platformId) {
       metrics: capture.metrics,
     });
     const sourceSummary = globalThis.LPTFFMultiDomainSourceExtractor.summarizeSource(sourceCapture);
+    const productDataset = platformId === "douyin" ? buildDouyinInterestDataset(sourceCapture) : null;
+    const productSummary = productDataset?.summary || null;
+    if (productSummary) obsTask.interestVideoCount = Number(productSummary.interestVideoCount) || 0;
     await callChrome(chrome.storage.local, chrome.storage.local.set, {
       [OBSERVATION_STAGING_KEY(platformId)]: {
         protocol: capture.protocol,
@@ -868,6 +1245,7 @@ async function finishObservation(platformId) {
         status: "pending",
         capture,
         sourceCapture,
+        ...(productDataset ? { productDataset } : {}),
       },
       [OBSERVATION_RECEIPT_KEY(platformId)]: {
         protocol: capture.protocol,
@@ -876,6 +1254,7 @@ async function finishObservation(platformId) {
         status: "pending",
         summary,
         sourceSummary,
+        ...(productSummary ? { productSummary } : {}),
       },
       ...(platformId === "binance" ? {
         [BINANCE_STAGING_KEY]: {
@@ -892,13 +1271,22 @@ async function finishObservation(platformId) {
         },
       } : {}),
     });
+    obsTask.completedDurationMs = Date.now() - obsTask.startedAt;
     obsTask.stage = "completed";
-    return { ok: true, summary };
+    return { ok: true, summary, ...(productSummary ? { productSummary } : {}) };
   } catch (error) {
     obsTask.warnings.push(error instanceof Error ? error.message : "观察读取失败");
     obsTask.stage = "error";
     return { ok: false, error: obsTask.warnings[obsTask.warnings.length - 1] };
   } finally {
+    if (obsTask.searchTabIds?.size) {
+      try {
+        await callChrome(chrome.tabs, chrome.tabs.remove, [...obsTask.searchTabIds]);
+      } catch {
+        // 搜索页可能已经在各自的 finally 中关闭。
+      }
+      obsTask.searchTabIds.clear();
+    }
     if (obsTask.createdTab && obsTask.tabId) {
       // 只关闭本次新开的采集页；用户自己的页面永不关闭。
       try {
@@ -916,6 +1304,14 @@ async function finishObservation(platformId) {
 
 async function resetObservationTask(obsTask) {
   await chrome.alarms.clear(OBSERVATION_ALARM(obsTask.platform));
+  if (obsTask.searchTabIds?.size) {
+    try {
+      await callChrome(chrome.tabs, chrome.tabs.remove, [...obsTask.searchTabIds]);
+    } catch {
+      // 已关闭的搜索页无需再次处理。
+    }
+    obsTask.searchTabIds.clear();
+  }
   if (obsTask.createdTab && obsTask.tabId) {
     try {
       await callChrome(chrome.tabs, chrome.tabs.remove, obsTask.tabId);
@@ -926,6 +1322,12 @@ async function resetObservationTask(obsTask) {
   obsTask.tabId = null;
   obsTask.createdTab = false;
   obsTask.historyState = null;
+  obsTask.searchCompleted = 0;
+  obsTask.searchTotal = 0;
+  obsTask.searchSucceeded = 0;
+  obsTask.searchFailed = 0;
+  obsTask.searchActive = 0;
+  obsTask.searchFinished = false;
   obsTask.running = false;
   obsTask.finishing = false;
   notifyObservationProgress(obsTask);
@@ -1047,6 +1449,8 @@ async function discardObservationStaging(platformId) {
         acknowledgedAt: new Date().toISOString(),
         status: "discarded",
         summary: receipt?.summary,
+        sourceSummary: receipt?.sourceSummary,
+        productSummary: receipt?.productSummary,
       },
     });
   }
@@ -1073,6 +1477,11 @@ async function exportObservationDesensitized(platformId) {
 
 async function exportObservationSourceBackup(platformId) {
   const staging = await getObservationStaging(platformId);
+  if (platformId === "douyin") {
+    if (!staging?.productDataset) throw new Error("当前没有感兴趣视频数据集，请先生成一次数据集");
+    await downloadData(staging.productDataset, "douyin-interest-video-dataset.json");
+    return { ok: true };
+  }
   if (!staging?.sourceCapture) throw new Error("当前没有正式来源包，请先完成一次采集");
   await downloadData(staging.sourceCapture, `${platformId}-source-capture.json`);
   return { ok: true };
@@ -1080,6 +1489,14 @@ async function exportObservationSourceBackup(platformId) {
 
 async function exportObservationSourceDesensitized(platformId) {
   const staging = await getObservationStaging(platformId);
+  if (platformId === "douyin") {
+    if (!staging?.productDataset) throw new Error("当前没有感兴趣视频数据集，请先生成一次数据集");
+    const { desensitized, maskedOriginals } = globalThis.LPTFFMultiDomainSourceExtractor.desensitizeSource(staging.productDataset);
+    const residual = globalThis.LPTFFMultiDomainSourceExtractor.residualCheck(desensitized, maskedOriginals);
+    if (residual.length) throw new Error(`脱敏自检失败：${residual.join("；")}`);
+    await downloadData(desensitized, "douyin-interest-video-dataset-desensitized.json");
+    return { ok: true };
+  }
   if (!staging?.sourceCapture) throw new Error("当前没有正式来源包，请先完成一次采集");
   const { desensitized, maskedOriginals } = globalThis.LPTFFMultiDomainSourceExtractor.desensitizeSource(staging.sourceCapture);
   const residual = globalThis.LPTFFMultiDomainSourceExtractor.residualCheck(desensitized, maskedOriginals);
@@ -1100,6 +1517,17 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       notifyObservationProgress(obsTask);
     });
   }
+});
+
+chrome.commands.onCommand.addListener((command) => {
+  if (command !== "generate-douyin-dataset") return;
+  startObservation("douyin", 30).catch((error) => {
+    const obsTask = observationTaskOf("douyin");
+    obsTask.warnings.push(error instanceof Error ? error.message : "抖音数据集生成启动失败");
+    obsTask.stage = "error";
+    obsTask.running = false;
+    notifyObservationProgress(obsTask);
+  });
 });
 
 chrome.runtime.onConnect.addListener((port) => {
@@ -1224,6 +1652,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   if (message?.type === "GET_OBSERVATION_STAGING") {
     getObservationStaging(String(message.platform || "")).then((staging) => sendResponse({ ok: true, staging })).catch((error) => sendResponse({ ok: false, error: error.message }));
+    return true;
+  }
+  if (message?.type === "GET_DOUYIN_DATASET") {
+    const senderUrl = String(sender?.url || sender?.tab?.url || "");
+    const allowed = senderUrl.startsWith(chrome.runtime.getURL("")) || senderUrl.startsWith("https://www.douyin.com/");
+    if (!allowed) {
+      sendResponse({ ok: false, error: "无权读取抖音数据集" });
+      return false;
+    }
+    getObservationStaging("douyin")
+      .then((staging) => {
+        if (!staging?.productDataset) return sendResponse({ ok: false, error: "当前没有感兴趣视频数据集，请先生成一次数据集" });
+        if (!message.desensitized) return sendResponse({ ok: true, dataset: staging.productDataset });
+        const { desensitized, maskedOriginals } = globalThis.LPTFFMultiDomainSourceExtractor.desensitizeSource(staging.productDataset);
+        const residual = globalThis.LPTFFMultiDomainSourceExtractor.residualCheck(desensitized, maskedOriginals);
+        if (residual.length) return sendResponse({ ok: false, error: `脱敏自检失败：${residual.join("；")}` });
+        return sendResponse({ ok: true, dataset: desensitized });
+      })
+      .catch((error) => sendResponse({ ok: false, error: error.message }));
     return true;
   }
   if (message?.type === "DISCARD_OBSERVATION_STAGING") {

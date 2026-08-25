@@ -174,6 +174,35 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     sendResponse({ ok: true });
     return false;
   }
+  if (message?.type === "OFFSCREEN_CREATE_DOWNLOAD_URL") {
+    try {
+      const blob = new Blob([String(message.content || "")], { type: message.mimeType || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      sendResponse({ ok: true, url });
+    } catch (error) {
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : "Blob 下载地址生成失败" });
+    }
+    return false;
+  }
+  if (message?.type === "OFFSCREEN_DOWNLOAD") {
+    try {
+      const blob = new Blob([String(message.content || "")], { type: message.mimeType || "application/octet-stream" });
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = url;
+      anchor.download = String(message.filename || "download.json");
+      anchor.hidden = true;
+      document.body.append(anchor);
+      anchor.click();
+      anchor.remove();
+      // Chrome 可能在 click 返回后才开始读取 Blob；保留到后台完成轮询的两倍时长。
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+      sendResponse({ ok: true, url });
+    } catch (error) {
+      sendResponse({ ok: false, error: error instanceof Error ? error.message : "大文件下载失败" });
+    }
+    return false;
+  }
   if (message?.type !== "OFFSCREEN_COLLECT_PUBLIC_FUNDS") return undefined;
   collectPublicFunds(message.holdings || [], message.concurrency || 4)
     .then((items) => sendResponse({ ok: true, items }))

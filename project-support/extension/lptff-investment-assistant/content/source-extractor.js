@@ -50,6 +50,43 @@
     return { endpoint: path, capturedAt };
   }
 
+  function douyinTags(item, caption) {
+    const metadata = array(first(item?.text_extra, item?.textExtra)).map((row) => first(row?.hashtag_name, row?.hashtagName, row?.tag_name, row?.tagName));
+    const inline = [...String(caption || "").matchAll(/#([^#\s]+)/gu)].map((match) => match[1]);
+    return unique([...metadata, ...inline]
+      .map((tag) => String(tag || "").trim().replace(/[，。！？、,.!?;；:：]+$/u, ""))
+      .filter((tag) => tag && tag.length <= 40), (tag) => tag);
+  }
+
+  function buildDouyinInterestProfiles(videos) {
+    const seeds = videos.filter((video) => video?.isFavoriteSeed);
+    if (!seeds.length) return [];
+    const byTag = new Map();
+    for (const video of seeds) {
+      for (const tag of video.tags || []) {
+        const entry = byTag.get(tag) || { tag, count: 0, firstSeen: byTag.size, sampleVideoIds: [] };
+        entry.count += 1;
+        if (video.videoId && entry.sampleVideoIds.length < 5) entry.sampleVideoIds.push(video.videoId);
+        byTag.set(tag, entry);
+      }
+    }
+    const searchTags = [...byTag.values()]
+      .sort((left, right) => right.count - left.count || left.firstSeen - right.firstSeen)
+      .map((entry) => ({
+        tag: entry.tag,
+        count: entry.count,
+        sampleVideoIds: entry.sampleVideoIds,
+        query: entry.tag,
+        searchUrl: `https://www.douyin.com/search/${encodeURIComponent(entry.tag)}?type=video`,
+      }));
+    return [{
+      basis: "favorite-collection-tags",
+      seedVideoCount: seeds.length,
+      taggedSeedVideoCount: seeds.filter((video) => video.tags?.length).length,
+      searchTags,
+    }];
+  }
+
   function extractBinance(snapshot) {
     const { path, response, capturedAt, collectionDataset } = snapshot;
     const payload = response?.data ?? response;
@@ -334,16 +371,26 @@
     const { path, response, query, capturedAt } = snapshot;
     const data = response?.data ?? response;
     const detail = first(response?.aweme_detail, data?.aweme_detail, response?.aweme, data?.aweme);
-    const rows = first(response?.aweme_list, data?.aweme_list, response?.awemeList, data?.awemeList, detail ? [detail] : []);
+    const searchRows = array(data).map((item) => first(item?.aweme_info, item?.awemeInfo, item?.aweme)).filter(Boolean);
+    const rows = first(response?.aweme_list, data?.aweme_list, response?.awemeList, data?.awemeList, searchRows.length ? searchRows : undefined, detail ? [detail] : []);
     if (!Array.isArray(rows)) return {};
     const videos = rows.map((item) => {
       const author = item?.author ?? {};
       const video = item?.video ?? {};
       const stats = item?.statistics ?? item?.stats ?? {};
       const videoId = first(item?.aweme_id, item?.awemeId, item?.id);
+      const caption = first(item?.desc, item?.caption);
+      const isFavoriteSeed = /\/(?:aweme\/)?favorite\/?$/i.test(path);
+      const isInterestCandidate = /\/search\//i.test(path);
+      const matchedSearchTag = first(query?.keyword, query?.search_keyword, query?.query);
       return compact({
         videoId,
-        caption: first(item?.desc, item?.caption),
+        isFavoriteSeed: isFavoriteSeed || undefined,
+        seedOrigin: isFavoriteSeed ? "favorite-collection" : undefined,
+        isInterestCandidate: isInterestCandidate || undefined,
+        matchedSearchTags: isInterestCandidate && matchedSearchTag ? [matchedSearchTag] : undefined,
+        caption,
+        tags: douyinTags(item, caption),
         coverUrl: firstUrl(first(video?.cover, video?.origin_cover, item?.cover)),
         playUrl: firstUrl(first(video?.play_addr, video?.playAddr, item?.play_addr)),
         likeCount: first(stats?.digg_count, stats?.diggCount, stats?.like_count),
@@ -366,9 +413,74 @@
       feedContext: {
         cursor: first(response?.cursor, data?.cursor, response?.max_cursor, data?.max_cursor, query?.cursor, query?.max_cursor),
         hasMore: first(response?.has_more, data?.has_more, response?.hasMore, data?.hasMore),
+        pageType: /\/(?:aweme\/)?favorite\/?$/i.test(path) ? "favorite-collection" : /\/search\//i.test(path) ? "interest-search" : "video-feed",
+        searchQuery: first(query?.keyword, query?.search_keyword, query?.query),
         source: source(path, capturedAt),
       },
     }) || {};
+  }
+
+  function extractHongguoDocument(documentRef, pageUrl, capturedAt) {
+    if (!documentRef?.querySelectorAll) return {};
+    const rows = [...documentRef.querySelectorAll('a[href*="/detail?series_id="]')].map((link) => {
+      const parsed = new URL(link.href, pageUrl);
+      const seriesId = parsed.searchParams.get("series_id") || undefined;
+      const image = link.querySelector("img[alt]");
+      const lines = String(link.innerText || "").split(/\n+/).map((item) => item.trim()).filter(Boolean);
+      const episodeText = lines.find((item) => /^全?\d+集$/.test(item));
+      const title = image?.alt || lines.find((item) => item !== episodeText);
+      return compact({
+        seriesId,
+        title,
+        coverUrl: firstUrl(image?.currentSrc || image?.src),
+        episodeCount: episodeText ? Number(episodeText.match(/\d+/)?.[0]) : undefined,
+        tags: lines.filter((item) => item !== title && item !== episodeText),
+        detailUrl: parsed.toString(),
+        playUrl: seriesId ? `https://hongguoduanju.com/player/${seriesId}` : undefined,
+        source: source(new URL(pageUrl).pathname, capturedAt),
+      });
+    });
+    let current;
+    try {
+      const parsed = new URL(pageUrl);
+      const seriesId = parsed.searchParams.get("series_id") || parsed.pathname.match(/^\/player\/([^/]+)/)?.[1];
+      const heading = documentRef.querySelector("h1")?.textContent?.trim();
+      const detail = documentRef.defaultView?._ROUTER_DATA?.loaderData?.detail_page?.seriesDetail;
+      if (seriesId && (heading || detail?.series_name)) {
+        const actors = [...documentRef.querySelectorAll('a[href*="/character/"]')]
+          .map((link) => String(link.innerText || "").split(/\n+/)[0]?.trim()).filter(Boolean);
+        current = compact({
+          seriesId,
+          isSeed: true,
+          seedOrigin: "app-share-or-open-detail",
+          title: first(detail?.series_name, heading),
+          coverUrl: firstUrl(first(detail?.series_cover, documentRef.querySelector('meta[property="og:image"]')?.content)),
+          episodeCount: first(detail?.episode_cnt, detail?.series_episode_info?.episode_total_cnt),
+          tags: Array.isArray(detail?.tags) ? detail.tags : undefined,
+          summary: first(detail?.series_intro, documentRef.querySelector('meta[name="description"]')?.content),
+          actors: Array.isArray(detail?.celebrities)
+            ? detail.celebrities.map((item) => item?.nickname).filter(Boolean)
+            : actors,
+          actorRoles: Array.isArray(detail?.celebrities)
+            ? detail.celebrities.map((item) => compact({ name: item?.nickname, role: item?.sub_title })).filter(Boolean)
+            : undefined,
+          detailUrl: `https://hongguoduanju.com/detail?series_id=${seriesId}`,
+          playUrl: `https://hongguoduanju.com/player/${seriesId}`,
+          source: source(parsed.pathname, capturedAt),
+        });
+      }
+    } catch {
+      current = undefined;
+    }
+    return {
+      series: unique([current, ...rows].filter(Boolean), (item) => item.seriesId || item.detailUrl),
+      catalogContext: {
+        pageType: /\/detail/.test(new URL(pageUrl).pathname) ? "shared-detail" : /\/category/.test(new URL(pageUrl).pathname) ? "category" : "catalog",
+        pageUrl,
+        seedSeriesId: current?.seriesId,
+        source: source(new URL(pageUrl).pathname, capturedAt),
+      },
+    };
   }
 
   const EXTRACTORS = { binance: extractBinance, zhipin: extractZhipin, kuaishou: extractKuaishou, douyin: extractDouyin };
@@ -434,9 +546,37 @@
         searchContexts: chunks.map((item) => item.searchContext).filter(Boolean),
       };
     }
+    if (platform === "hongguo") {
+      return {
+        series: unique(chunks.flatMap((item) => item.series || []), (item) => item.seriesId || item.detailUrl),
+        catalogContexts: chunks.map((item) => item.catalogContext).filter(Boolean),
+      };
+    }
+    const videosById = new Map();
+    for (const video of chunks.flatMap((item) => item.videos || [])) {
+      const key = String(video?.videoId || video?.detailUrl || "");
+      if (!key) continue;
+      const previous = videosById.get(key) || {};
+      videosById.set(key, compact({
+        ...previous,
+        ...video,
+        isFavoriteSeed: previous.isFavoriteSeed || video.isFavoriteSeed || undefined,
+        seedOrigin: previous.seedOrigin || video.seedOrigin,
+        isInterestCandidate: previous.isInterestCandidate || video.isInterestCandidate || undefined,
+        matchedSearchTags: unique([...(previous.matchedSearchTags || []), ...(video.matchedSearchTags || [])], (tag) => tag),
+        tags: unique([...(previous.tags || []), ...(video.tags || [])], (tag) => tag),
+        source: video.isFavoriteSeed ? video.source : (previous.source || video.source),
+      }));
+    }
+    const videos = [...videosById.values()];
     return {
-      videos: unique(chunks.flatMap((item) => item.videos || []), (item) => item.videoId || item.detailUrl),
+      videos,
+      ...(platform === "douyin" ? {
+        favoriteVideos: videos.filter((video) => video.isFavoriteSeed),
+        interestVideos: videos.filter((video) => video.isInterestCandidate && !video.isFavoriteSeed),
+      } : {}),
       feedContexts: chunks.map((item) => item.feedContext).filter(Boolean),
+      ...(platform === "douyin" ? { interestProfiles: buildDouyinInterestProfiles(videos) } : {}),
     };
   }
 
@@ -452,9 +592,14 @@
       } else if (platform === "zhipin" && Object.prototype.hasOwnProperty.call(data, "jobs")) {
         observed.add("jobs");
         observed.add("searchContext");
+      } else if (platform === "hongguo" && Object.prototype.hasOwnProperty.call(data, "series")) {
+        observed.add("series");
+        observed.add("catalogContext");
       } else if ((platform === "kuaishou" || platform === "douyin") && Object.prototype.hasOwnProperty.call(data, "videos")) {
         observed.add("videos");
         observed.add("feedContext");
+        if (platform === "douyin" && data.videos?.some((video) => video?.isFavoriteSeed)) observed.add("interestProfile");
+        if (platform === "douyin" && data.videos?.some((video) => video?.isInterestCandidate)) observed.add("interestVideos");
       }
     }
     return observed;
@@ -494,12 +639,16 @@
       item("jobs", entities.jobs, (row) => [row?.jobName, row?.salary, row?.experience, row?.degree, row?.city, row?.jobUrl, row?.company?.name, row?.company?.industry].every(present)),
       item("searchContext", entities.searchContexts, (row) => [row?.query, row?.city, row?.page].every(present)),
     ];
+    if (platform === "hongguo") return [
+      item("series", entities.series, (row) => [row?.seriesId, row?.title, row?.detailUrl, row?.playUrl].every(present)),
+      item("catalogContext", entities.catalogContexts, (row) => [row?.pageType, row?.pageUrl].every(present)),
+    ];
     const videoComplete = platform === "kuaishou"
       ? (row) => [row?.caption, row?.coverUrl, row?.playUrl, row?.likeCount, row?.viewCount, row?.createdAt, row?.duration, row?.detailUrl, row?.author?.authorId, row?.author?.name].every(present)
       : (row) => [row?.caption, row?.coverUrl, row?.playUrl, row?.likeCount, row?.playCount, row?.createdAt, row?.duration, row?.detailUrl, row?.author?.authorId, row?.author?.nickname].every(present);
     const contexts = entities.feedContexts || [];
     const cursorCount = contexts.filter((row) => present(row?.cursor)).length;
-    return [
+    const result = [
       item("videos", entities.videos, videoComplete),
       {
         dataset: "feedContext",
@@ -510,12 +659,24 @@
         completeRecordCount: cursorCount,
       },
     ];
+    if (platform === "douyin") {
+      result.push(item("interestVideos", entities.interestVideos, (row) => row?.isInterestCandidate
+        && Array.isArray(row?.matchedSearchTags)
+        && row.matchedSearchTags.length > 0
+        && [row?.videoId, row?.caption, row?.coverUrl, row?.playUrl, row?.detailUrl].every(present)));
+      result.push(item("interestProfile", entities.interestProfiles, (row) => present(row?.basis)
+        && present(row?.seedVideoCount)
+        && Array.isArray(row?.searchTags)
+        && row.searchTags.length > 0
+        && row.searchTags.every((tag) => [tag?.tag, tag?.count, tag?.searchUrl].every(present))));
+    }
+    return result;
   }
 
   function buildSourceCapture(platform, input) {
     const snapshots = input?.data?.restSnapshots || [];
     const history = input?.data?.historyCollection || null;
-    const combinedSnapshots = [...snapshots, ...(history?.chunks || [])];
+    const combinedSnapshots = [...snapshots, ...(input?.data?.domSnapshots || []), ...(history?.chunks || [])];
     const entities = mergeSourceData(platform, combinedSnapshots, input?.data?.pageUrl);
     let coverage = coverageOf(platform, entities, observedDatasetsOf(platform, combinedSnapshots));
     if (platform === "binance" && history?.branches) {
@@ -562,7 +723,7 @@
   }
 
   function desensitizeSource(capture) {
-    const idKey = /^(?:historyId|algoId|orderId|clientOrderId|tradeId|positionId|transactionId|recordId|jobId|videoId|authorId)$/;
+    const idKey = /^(?:historyId|algoId|orderId|clientOrderId|tradeId|positionId|transactionId|recordId|jobId|videoId|authorId|seriesId)$/;
     const originals = new Map();
     let seq = 0;
     function collect(value, key = "") {
@@ -600,6 +761,7 @@
   globalThis.LPTFFMultiDomainSourceExtractor = Object.freeze({
     protocolOf: (platform) => `${platform}-source-capture/${PROTOCOL_VERSION}`,
     extractSnapshot,
+    extractHongguoDocument,
     buildSourceCapture,
     summarizeSource,
     desensitizeSource,

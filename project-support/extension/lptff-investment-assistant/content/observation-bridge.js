@@ -11,7 +11,7 @@
 
   // 通用敏感字段基底：认证/会话/凭据类一律剥离；平台专属字段由配置附加。
   const BASE_SENSITIVE_KEY = /^(?:authorization|access[-_]?token|token|cookie|set[-_]?cookie|session(?:[-_]?id)?|password|passphrase|secret|mnemonic|seed|private[-_]?key|api[-_]?key|apisecret|signature|csrftoken|csrf|client[-_]?id|client[-_]?type|device[-_]?id|fingerprint|uid)$/i;
-  const BASE_SENSITIVE_PART = /(?:authorization|csrf|token|cookie|session|password|passphrase|mnemonic|seed|private.?key|api.?key|apisecret|signature|email|phone|mobile|identity|idcard|passport|google.?auth|otp|2fa|wallet|address|bank(?:card)?|card(?:no)?|pay(?:ee|ment)?|beneficiar)/i;
+  const BASE_SENSITIVE_PART = /(?:authorization|csrf|token|cookie|session|password|passphrase|mnemonic|mnemonic.?seed|seed.?phrase|private.?key|api.?key|apisecret|signature|email|phone|mobile|identity|idcard|passport|google.?auth|otp|2fa|wallet|address|bank(?:card)?|card(?:no)?|pay(?:ee|ment)?|beneficiar)/i;
 
   // 平台配置：hostRe 限定注入域；restPathRe 是候选端点宽匹配；excludedPathRe 是
   // 与采集目标无关且强敏感的路径（宁可少采不多采）；extraSensitiveKey/Part 是平台
@@ -68,11 +68,20 @@
     {
       id: "douyin",
       hostRe: /(^|\.)douyin\.com$/i,
-      // 只观察视频列表/详情/收藏与精选流；IM、通知、社交关系和用户设置全部排除。
-      restPathRe: /^\/aweme\/v1\/web\/(?:aweme\/(?:detail|favorite|post|feed|list)|feed|favorite|mix\/(?:aweme|list)|douyin\/select)(?:\/|$)/i,
+      // 只观察视频列表/详情/收藏、标签搜索与精选流；IM、通知、社交关系和用户设置全部排除。
+      restPathRe: /^\/aweme\/v1\/web\/(?:aweme\/(?:detail|favorite|post|feed|list)|feed|favorite|mix\/(?:aweme|list)|douyin\/select|general\/search\/(?:single|item)|search\/(?:item|video|general))(?:\/|$)/i,
       excludedPathRe: null,
       extraSensitiveKey: /^(?:ms[-_]?token|a[-_]?bogus|x[-_]?bogus|ttwid|s[-_]?v[-_]?web[-_]?id|verify[-_]?fp|web[-_]?id)$/i,
       extraSensitivePart: /(?:ms.?token|a.?bogus|ttwid|verify.?fp)/i,
+    },
+    {
+      id: "hongguo",
+      hostRe: /(^|\.)hongguoduanju\.com$/i,
+      // PC 官网是公开 SSR 片库，没有登录态 REST 收藏接口；正式实体来自 Elements。
+      restPathRe: /^\/__lptff_no_rest_endpoint__$/,
+      excludedPathRe: null,
+      extraSensitiveKey: /$a/,
+      extraSensitivePart: /$a/,
     },
   ];
 
@@ -182,9 +191,63 @@
     }
   }
 
+  function compactDouyinAweme(item) {
+    if (!item || typeof item !== "object") return item;
+    const author = item.author || {};
+    const video = item.video || {};
+    const statistics = item.statistics || item.stats || {};
+    return {
+      aweme_id: item.aweme_id,
+      desc: item.desc,
+      text_extra: item.text_extra,
+      create_time: item.create_time,
+      author: {
+        sec_uid: author.sec_uid,
+        uid: author.uid,
+        user_id: author.user_id,
+        nickname: author.nickname,
+        avatar_thumb: author.avatar_thumb,
+        avatar_medium: author.avatar_medium,
+      },
+      video: {
+        cover: video.cover,
+        origin_cover: video.origin_cover,
+        play_addr: video.play_addr,
+        duration: video.duration,
+      },
+      statistics: {
+        digg_count: statistics.digg_count,
+        play_count: statistics.play_count,
+        comment_count: statistics.comment_count,
+        share_count: statistics.share_count,
+      },
+    };
+  }
+
+  function compactDouyinPayload(payload) {
+    if (!payload || typeof payload !== "object") return payload;
+    const result = {
+      cursor: payload.cursor,
+      max_cursor: payload.max_cursor,
+      has_more: payload.has_more,
+    };
+    if (Array.isArray(payload.aweme_list)) result.aweme_list = payload.aweme_list.map(compactDouyinAweme);
+    if (payload.aweme_detail) result.aweme_detail = compactDouyinAweme(payload.aweme_detail);
+    if (Array.isArray(payload.data)) {
+      result.data = payload.data.map((row) => row?.aweme_info
+        ? { type: row.type, aweme_info: compactDouyinAweme(row.aweme_info) }
+        : compactDouyinAweme(row));
+    }
+    return result;
+  }
+
   function responseSample(text, size, parsedPayload) {
     const payload = parsedPayload === undefined ? parseJsonLoose(text) : parsedPayload;
-    if (size > MAX_RESPONSE_SAMPLE_BYTES) {
+    if (platform.id === "douyin" && payload && typeof payload === "object") {
+      return safeValue(compactDouyinPayload(payload));
+    }
+    const responseLimit = MAX_RESPONSE_SAMPLE_BYTES;
+    if (size > responseLimit) {
       return {
         truncated: true,
         size,
@@ -204,12 +267,32 @@
     const operationName = request && typeof request === "object" && typeof request.operationName === "string"
       ? request.operationName
       : "";
+    // 游标和实体 ID 必须参与指纹。推荐流多页通常方法、路径和参数名完全相同；
+    // 只按“参数名集合”归并会把第二页之后的正式视频实体全部丢掉。
+    const identity = [
+      info.query.aweme_id,
+      info.query.cursor,
+      info.query.max_cursor,
+      info.query.min_cursor,
+      info.query.sec_user_id,
+      info.query.mix_id,
+      info.query.keyword,
+      info.query.search_keyword,
+      info.query.query,
+      request?.cursor,
+      request?.pcursor,
+      request?.max_cursor,
+      parsedResponse?.pcursor,
+      parsedResponse?.cursor,
+      parsedResponse?.max_cursor,
+    ].filter((value) => value !== undefined && value !== null && value !== "").join(":");
     const fingerprint = [
       method,
       info.hostname + info.pathname,
       Object.keys(info.query).sort().join(","),
       operationName,
       request && typeof request === "object" ? Object.keys(request).sort().join(",") : "",
+      identity,
     ].join("|");
     const existing = restSnapshots.get(fingerprint);
     if (existing) {
@@ -762,7 +845,70 @@
     workerScripts.set(String(url), { url: String(url), kind, capturedAt: new Date().toISOString() });
   }
 
-  window.addEventListener("message", (event) => {
+  async function replayDouyinProductRequest() {
+    if (platform.id !== "douyin") return;
+    const isFavoritePage = location.pathname === "/user/self" && new URL(location.href).searchParams.get("showTab") === "favorite_collection";
+    const isSearchPage = location.pathname.startsWith("/search/");
+    if (!isFavoritePage && !isSearchPage) return;
+    const alreadyCaptured = [...restSnapshots.values()].some((snapshot) => {
+      const videos = snapshot?.sourceData?.videos || [];
+      return isFavoritePage
+        ? videos.some((video) => video?.isFavoriteSeed)
+        : videos.some((video) => video?.isInterestCandidate);
+    });
+    if (alreadyCaptured) return;
+    const pattern = isFavoritePage ? /\/aweme\/v1\/web\/aweme\/favorite\/?/i : /\/aweme\/v1\/web\/search\/item\/?/i;
+    let resourceUrl = performance.getEntriesByType("resource")
+      .map((entry) => entry.name)
+      .reverse()
+      .find((url) => pattern.test(url));
+    if (!resourceUrl && isFavoritePage) {
+      const encodedMatch = document.documentElement.innerHTML.match(/%22secUid%22%3A%22([^%]+)%22/);
+      const secUserId = encodedMatch?.[1];
+      if (secUserId) {
+        const url = new URL("/aweme/v1/web/aweme/favorite/", location.origin);
+        Object.entries({
+          device_platform: "webapp",
+          aid: "6383",
+          channel: "channel_pc_web",
+          sec_user_id: secUserId,
+          max_cursor: "0",
+          min_cursor: "0",
+          count: "20",
+        }).forEach(([name, value]) => url.searchParams.set(name, value));
+        resourceUrl = url.toString();
+      }
+    }
+    if (!resourceUrl && isSearchPage) {
+      const keyword = decodeURIComponent(location.pathname.slice("/search/".length)).trim();
+      if (keyword) {
+        const url = new URL("/aweme/v1/web/search/item/", location.origin);
+        Object.entries({
+          device_platform: "webapp",
+          aid: "6383",
+          channel: "channel_pc_web",
+          keyword,
+          search_channel: "aweme_video_web",
+          count: "20",
+          offset: "0",
+        }).forEach(([name, value]) => url.searchParams.set(name, value));
+        resourceUrl = url.toString();
+      }
+    }
+    if (!resourceUrl) return;
+    try {
+      // 只在抖音页面内存中重放页面自己刚刚发出的只读 URL；Cookie 仍由浏览器附加，
+      // 完整 URL、认证参数和响应原文都不会跨越页面边界或写入 storage。
+      const response = await originalFetch(resourceUrl, { method: "GET", credentials: "include", cache: "no-store" });
+      const text = await response.text();
+      const info = requestInfo(resourceUrl);
+      if (info && response.ok) storeSnapshot(info, "GET", undefined, response.status, response.headers.get("content-type") || "", text, text.length);
+    } catch {
+      // 若页面令牌已过期，正常采集会返回明确的“未采集到收藏/搜索视频”，不伪造数据。
+    }
+  }
+
+  window.addEventListener("message", async (event) => {
     if (event.source !== window || event.origin !== location.origin) return;
     if (event.data?.type === "LPTFF_OBS_PING") {
       window.postMessage({
@@ -773,6 +919,10 @@
       return;
     }
     if (event.data?.type === "LPTFF_OBS_GET_DATA") {
+      await replayDouyinProductRequest();
+      const domSourceData = platform.id === "hongguo"
+        ? globalThis.LPTFFMultiDomainSourceExtractor?.extractHongguoDocument(document, location.href, new Date().toISOString())
+        : null;
       window.postMessage({
         source: "lptff-investment-assistant",
         type: "LPTFF_OBS_DATA",
@@ -783,6 +933,7 @@
           restSnapshots: [...restSnapshots.values()],
           wsStreams: [...wsStreams.values()],
           workers: [...workerScripts.values()],
+          domSnapshots: domSourceData ? [{ sourceData: domSourceData, capturedAt: new Date().toISOString() }] : [],
           historyCollection: publicHistoryState(true),
         },
       }, location.origin);
@@ -805,6 +956,9 @@
       return;
     }
     if (event.data?.type === "LPTFF_SOURCE_GET_DATA") {
+      const domSourceData = platform.id === "hongguo"
+        ? globalThis.LPTFFMultiDomainSourceExtractor?.extractHongguoDocument(document, location.href, new Date().toISOString())
+        : null;
       const data = {
         platform: platform.id,
         pageUrl: location.href,
@@ -812,6 +966,7 @@
         restSnapshots: [...restSnapshots.values()],
         wsStreams: [...wsStreams.values()],
         workers: [...workerScripts.values()],
+        domSnapshots: domSourceData ? [{ sourceData: domSourceData, capturedAt: new Date().toISOString() }] : [],
         historyCollection: publicHistoryState(true),
       };
       window.postMessage({

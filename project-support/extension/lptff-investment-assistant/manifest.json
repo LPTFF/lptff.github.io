@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "LPTFF Investment Assistant",
-  "version": "3.9.2",
-  "description": "多领域正式来源采集：基金、币安 U 本位合约全量历史、BOSS直聘职位、快手/抖音视频清单。认证信息仅在来源页内存中临时复用。",
+  "version": "3.15.0",
+  "description": "多领域正式来源采集：基金、币安 U 本位合约全量历史、BOSS直聘职位、快手视频、抖音兴趣视频数据集、红果短剧清单。认证信息仅在来源页内存中临时复用。",
   "permissions": ["activeTab", "alarms", "downloads", "offscreen", "tabs", "storage", "scripting", "declarativeNetRequest"],
   "host_permissions": [
     "https://fund.eastmoney.com/*",
@@ -11,7 +11,8 @@
     "https://*.binance.com/*",
     "https://www.zhipin.com/*",
     "https://www.kuaishou.com/*",
-    "https://www.douyin.com/*"
+    "https://www.douyin.com/*",
+    "https://hongguoduanju.com/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
@@ -24,7 +25,15 @@
   },
   "action": {
     "default_title": "高效采集投资来源数据",
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/shell.html"
+  },
+  "commands": {
+    "generate-douyin-dataset": {
+      "suggested_key": {
+        "default": "Alt+Shift+D"
+      },
+      "description": "生成抖音感兴趣视频数据集"
+    }
   },
   "background": {
     "service_worker": "background.js"
@@ -112,6 +121,17 @@
     },
     {
       "matches": ["https://www.douyin.com/*"],
+      "js": ["content/observation-collector.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["https://hongguoduanju.com/*"],
+      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "run_at": "document_start",
+      "world": "MAIN"
+    },
+    {
+      "matches": ["https://hongguoduanju.com/*"],
       "js": ["content/observation-collector.js"],
       "run_at": "document_idle"
     }
