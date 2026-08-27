@@ -58,7 +58,6 @@ const OBSERVATION_PLATFORMS = {
     fixedDurationSeconds: 30,
     minimumCaptureSeconds: 3,
   },
-  zhipin: { label: "BOSS直聘", tabUrlPattern: "https://www.zhipin.com/*", pathFilter: (pathname) => /\/web\/geek\/(?:jobs?|job)/i.test(pathname), fallbackUrl: "https://www.zhipin.com/web/geek/jobs" },
   kuaishou: {
     label: "快手",
     tabUrlPattern: "https://www.kuaishou.com/*",
@@ -1543,6 +1542,51 @@ chrome.runtime.onConnect.addListener((port) => {
 
 chrome.tabs.onRemoved.addListener((tabId) => preservedLoginTabIds.delete(tabId));
 
+async function requestBossAiCompletion(message, sender) {
+  const senderUrl = String(sender?.url || sender?.tab?.url || "");
+  const allowedSender = senderUrl.startsWith(chrome.runtime.getURL("")) || /^https:\/\/([^.]+\.)?zhipin\.com\//i.test(senderUrl);
+  if (!allowedSender) throw new Error("无权调用 BOSS 助手 AI");
+
+  const stored = await chrome.storage.local.get("bossAssistantSettings");
+  const settings = stored?.bossAssistantSettings || {};
+  const baseUrl = String(settings.apiBaseUrl || "").replace(/\/$/, "");
+  const apiKey = String(settings.apiKey || "").trim();
+  const model = String(settings.aiModel || "").trim();
+  if (!baseUrl || !apiKey || !model) throw new Error("请先在扩展弹窗中完善 AI 配置");
+
+  const endpoint = new URL(`${baseUrl}/chat/completions`);
+  if (!/^https?:$/.test(endpoint.protocol) || endpoint.username || endpoint.password) throw new Error("AI API 地址无效");
+  const originPattern = `${endpoint.origin}/*`;
+  const permitted = await chrome.permissions.contains({ origins: [originPattern] });
+  if (!permitted) throw new Error("AI API 域名尚未授权，请在扩展弹窗中重新保存 AI 配置");
+
+  const prompt = String(message?.prompt || "").slice(0, 12000);
+  const systemPrompt = String(message?.systemPrompt || "你是一个严谨的求职助手。").slice(0, 2000);
+  if (!prompt) throw new Error("AI 请求内容为空");
+
+  const response = await fetch(endpoint.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.3,
+    }),
+  });
+  if (!response.ok) {
+    const detail = (await response.text()).slice(0, 300);
+    throw new Error(`AI 请求失败 (HTTP ${response.status}): ${detail}`);
+  }
+  const data = await response.json();
+  return String(data?.choices?.[0]?.message?.content || "");
+}
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "SOURCE_BRANCH_PROGRESS") {
     const branch = task.branches[message.branch];
@@ -1602,6 +1646,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type === "GET_COLLECTION_STATUS") {
     sendResponse({ ok: true, status: taskSnapshot() });
     return false;
+  }
+  if (message?.type === "BOSS_HELPER_AI_COMPLETION") {
+    requestBossAiCompletion(message, sender)
+      .then((content) => sendResponse({ ok: true, content }))
+      .catch((error) => sendResponse({ ok: false, error: error instanceof Error ? error.message : "AI 请求失败" }));
+    return true;
   }
   if (message?.type === "START_OBSERVATION") {
     try {

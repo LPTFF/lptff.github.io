@@ -14,6 +14,8 @@
 
 真实登录态和扩展运行环境是验收对象的一部分。源码检查、隔离 profile 或新开的自动化浏览器不能替代用户实际使用的 Chrome。
 
+> **BOSS 直聘特例：** BOSS 页面不得使用 DevTools/CDP/Playwright 等浏览器控制链路做最终验收。涉及 BOSS Extension 时，改读并严格执行 [`boss-extension-real-validation.md`](boss-extension-real-validation.md)，使用普通 Chrome 与 OS 级桌面截图、鼠标和键盘。下文 DevTools 路径只适用于本项目其他站点。
+
 ### 接管前
 
 - 先确认用户已明确授权本次观察或采集，以及不可触碰的行为边界；投资数据授权不包含购买、卖出、赎回、定投修改或其他交易操作。

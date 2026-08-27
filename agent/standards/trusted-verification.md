@@ -12,7 +12,11 @@
 
 只有对应真实环境中的关键路径和预期结果都已实际观察，才能标记 `PASS` 或“已验收”。
 
-页面和扩展验收的唯一允许工具是 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）。它必须连接用户实际 Chrome，并用 Elements、Network、Console 和运行时状态证明结果。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器及其他页面测试工具一律不得用于项目验收；如果该 MCP 不可用、选中的不是目标 profile，或无法访问实际扩展页面与登录态，则保持 `BLOCKED` 或“未验收”，不得换用其他工具或静态材料补成 `PASS`。
+除 BOSS 直聘外，页面和扩展验收的唯一允许工具是 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）。它必须连接用户实际 Chrome，并用 Elements、Network、Console 和运行时状态证明结果。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器及其他页面测试工具一律不得用于这些站点的项目验收；如果该 MCP 不可用、选中的不是目标 profile，或无法访问实际扩展页面与登录态，则保持 `BLOCKED` 或“未验收”，不得换用其他工具或静态材料补成 `PASS`。
+
+### BOSS 直聘特例
+
+BOSS 的反自动化和异常环境识别可能使 DevTools/CDP/自动化浏览器改变真实页面行为，因此 BOSS Extension 的最终验收禁止使用 Chrome DevTools MCP、CDP、Playwright、Puppeteer、Selenium、WebDriver 或 remote debugging 控制线上页面。只允许普通用户 Chrome、真实登录页面和 OS 级 screenshot/mouse/keyboard；不得研究或规避自动化指纹、站点检测或专用字体保护。完整步骤、基础设施修复顺序和结论状态见 [`../verification/boss-extension-real-validation.md`](../verification/boss-extension-real-validation.md)。
 
 ## 不能作为验收的材料
 

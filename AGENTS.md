@@ -3,3 +3,5 @@
 本文件只用于宿主发现。项目资料和人机协作原则统一放在 [agent/](agent/README.md)。
 
 `agent/` 是人的项目工作台，不是要求人服从 Agent 的流程系统。请按当前问题选择需要的事实、产品、代码组织或验收资料；不要求固定阅读顺序、模板或治理命令。
+
+涉及 BOSS 直聘 Chrome Extension 的测试或验收时，必须先读 `agent/verification/boss-extension-real-validation.md`；BOSS 不适用项目其他页面的 DevTools MCP 验收路径。

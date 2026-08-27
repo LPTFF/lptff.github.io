@@ -364,13 +364,6 @@ refreshBinanceStatus();
 // 领域 tab；intro/loginHint 是面向维护者的登录调试操作指引，产品逻辑写在这里。
 const OBSERVATION_PLATFORMS = [
   {
-    id: "zhipin",
-    name: "BOSS直聘",
-    group: "market",
-    intro: "采集 BOSS直聘职位列表响应，生成包含职位、公司、招聘者和搜索上下文的正式来源包。这是「一键获取高价值职位清单」的数据基础。",
-    loginHint: "登录 BOSS直聘 → 打开搜索结果页 → 开始观察 → 搜索目标职位并翻 2–3 页（触发职位列表与分页参数）→ 用一次筛选、点开 1–2 个职位详情 → 等倒计时结束",
-  },
-  {
     id: "kuaishou",
     name: "快手",
     group: "entertainment",

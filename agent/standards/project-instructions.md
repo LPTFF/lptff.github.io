@@ -30,13 +30,14 @@
 
 项目验收只以目标真实环境中的实际操作结果符合预期为准。静态检查、构建、脱敏快照、模拟数据、Mock、人工 fixture 和自设测试工具都不能替代验收，也不能据此宣称功能完成；未完成真实操作时必须标记为未验收、无法验证或未知。
 
-## Chrome DevTools MCP 唯一验收基准
+## 页面真实验收基准
 
-- 页面、路由、浏览器存储和浏览器扩展变更，只允许使用 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome 验收。
+- 除 BOSS 直聘外，页面、路由、浏览器存储和浏览器扩展变更只允许使用 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome 验收。
 - 验收环境必须是用户实际 profile、实际加载目录、真实登录态、真实来源和实际消费者页面；必须观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。
-- 禁止使用 Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器或任何其他页面自动化工具执行项目页面验收。
-- 截图、HTTP 请求、源码阅读、类型检查和构建结果只能辅助定位，不能替代 Chrome DevTools MCP 的真实浏览器结果，也不能单独支持 `PASS`。
-- Chrome DevTools MCP 无法接管目标环境时，必须保持 `BLOCKED` 或“未验收”；不得切换到其他浏览器或页面测试工具继续验收，不得以任何降级方案宣布完成。
+- BOSS Extension 是明确特例：禁止用 DevTools/CDP/Playwright/Puppeteer/Selenium/WebDriver/remote debugging 控制真实 BOSS 页面，只允许普通 Chrome 与 OS 级 screenshot/mouse/keyboard。执行前必须读 [`../verification/boss-extension-real-validation.md`](../verification/boss-extension-real-validation.md)。
+- 对非 BOSS 页面，禁止使用 Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器或其他页面自动化工具执行项目页面验收。
+- HTTP 请求、源码阅读、类型检查和构建结果只能辅助定位，不能替代对应站点规则要求的真实浏览器结果，也不能单独支持 `PASS`。BOSS 的 OS 截图只有与同一普通 Chrome 中的真实鼠标键盘操作组合后才是有效验收证据。
+- 非 BOSS 页面在 Chrome DevTools MCP 无法接管目标环境时，必须保持 `BLOCKED` 或“未验收”；不得切换到其他浏览器或页面测试工具继续验收。BOSS 的桌面能力缺失先记为 `TEST_INFRASTRUCTURE_FAILURE` 并按专用手册修复，只有穷尽合法执行路径后才能写 `TEST_INFRASTRUCTURE_HARD_BLOCKED`。
 
 ## 提交与推送审核卡点
 

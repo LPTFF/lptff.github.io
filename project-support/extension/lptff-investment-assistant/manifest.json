@@ -3,16 +3,31 @@
   "name": "LPTFF Investment Assistant",
   "version": "3.15.0",
   "description": "多领域正式来源采集：基金、币安 U 本位合约全量历史、BOSS直聘职位、快手视频、抖音兴趣视频数据集、红果短剧清单。认证信息仅在来源页内存中临时复用。",
-  "permissions": ["activeTab", "alarms", "downloads", "offscreen", "tabs", "storage", "scripting", "declarativeNetRequest"],
+  "permissions": [
+    "activeTab",
+    "alarms",
+    "downloads",
+    "offscreen",
+    "tabs",
+    "storage",
+    "scripting",
+    "declarativeNetRequest"
+  ],
   "host_permissions": [
     "https://fund.eastmoney.com/*",
     "https://fundf10.eastmoney.com/*",
     "https://api.fund.eastmoney.com/*",
     "https://*.binance.com/*",
-    "https://www.zhipin.com/*",
+    "https://*.zhipin.com/*",
+    "https://zhipin.com/*",
     "https://www.kuaishou.com/*",
     "https://www.douyin.com/*",
     "https://hongguoduanju.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
@@ -24,7 +39,7 @@
     ]
   },
   "action": {
-    "default_title": "高效采集投资来源数据",
+    "default_title": "LPTFF 多领域本地助手",
     "default_popup": "popup/shell.html"
   },
   "commands": {
@@ -44,7 +59,9 @@
         "https://trade.1234567.com.cn/*",
         "https://query.1234567.com.cn/*"
       ],
-      "js": ["content/network-bridge.js"],
+      "js": [
+        "content/network-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
@@ -57,7 +74,9 @@
         "https://lptff.github.io/investment*",
         "https://lptff.github.io/contract-review*"
       ],
-      "js": ["content/web-bridge.js"],
+      "js": [
+        "content/web-bridge.js"
+      ],
       "run_at": "document_start"
     },
     {
@@ -65,7 +84,9 @@
         "https://trade.1234567.com.cn/*",
         "https://query.1234567.com.cn/*"
       ],
-      "js": ["content/collector.js"],
+      "js": [
+        "content/collector.js"
+      ],
       "run_at": "document_idle"
     },
     {
@@ -76,7 +97,10 @@
         "https://www.binance.com/zh/futures*",
         "https://www.binance.com/zh-CN/futures*"
       ],
-      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "js": [
+        "content/source-extractor.js",
+        "content/observation-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
@@ -88,51 +112,92 @@
         "https://www.binance.com/zh/futures*",
         "https://www.binance.com/zh-CN/futures*"
       ],
-      "js": ["content/observation-collector.js"],
+      "js": [
+        "content/observation-collector.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.zhipin.com/*"],
-      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "matches": [
+        "https://*.zhipin.com/*",
+        "https://zhipin.com/*"
+      ],
+      "js": [
+        "content/source-extractor.js",
+        "content/observation-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.zhipin.com/*"],
-      "js": ["content/observation-collector.js"],
+      "matches": [
+        "https://*.zhipin.com/*",
+        "https://zhipin.com/*"
+      ],
+      "js": [
+        "content/observation-collector.js",
+        "content/boss-helper.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.kuaishou.com/*"],
-      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "matches": [
+        "https://www.kuaishou.com/*"
+      ],
+      "js": [
+        "content/source-extractor.js",
+        "content/observation-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.kuaishou.com/*"],
-      "js": ["content/observation-collector.js"],
+      "matches": [
+        "https://www.kuaishou.com/*"
+      ],
+      "js": [
+        "content/observation-collector.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://www.douyin.com/*"],
-      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "matches": [
+        "https://www.douyin.com/*"
+      ],
+      "js": [
+        "content/source-extractor.js",
+        "content/observation-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://www.douyin.com/*"],
-      "js": ["content/observation-collector.js"],
+      "matches": [
+        "https://www.douyin.com/*"
+      ],
+      "js": [
+        "content/observation-collector.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://hongguoduanju.com/*"],
-      "js": ["content/source-extractor.js", "content/observation-bridge.js"],
+      "matches": [
+        "https://hongguoduanju.com/*"
+      ],
+      "js": [
+        "content/source-extractor.js",
+        "content/observation-bridge.js"
+      ],
       "run_at": "document_start",
       "world": "MAIN"
     },
     {
-      "matches": ["https://hongguoduanju.com/*"],
-      "js": ["content/observation-collector.js"],
+      "matches": [
+        "https://hongguoduanju.com/*"
+      ],
+      "js": [
+        "content/observation-collector.js"
+      ],
       "run_at": "document_idle"
     }
   ]

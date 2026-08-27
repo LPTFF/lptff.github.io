@@ -15,6 +15,7 @@
 - 想用有限 Agent 资源完成涉及私人真实环境的任务：看 [主力 Agent—授权验证 Agent—人类裁决者协作标准](standards/main-agent-authorized-validation.md)。Agent A 默认完成绝大多数工作；Agent B 只在存在必须由人授权的真实私人环境证据缺口时介入。
 - 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
 - 想验证一个改动是否真的有效：看 `verification/playbook.md`；需要可信验证原则、证据边界和方法选择时，再看 `standards/trusted-verification.md`。
+- 想测试 BOSS 直聘 Chrome Extension：必须看 [BOSS 直聘扩展真实验收与测试基础设施修复手册](verification/boss-extension-real-validation.md)。这是 BOSS 的特殊执行路径，包含 diff 范围映射、Windows Desktop Runner、真实 Chrome、安全批处理、恢复和报告规则。
 - 想研究其他项目：看 `product/research/`。
 - 想回顾过去做过什么：看 `context/iteration-log.md`，但以当前代码和当前事实为准。
 
@@ -30,7 +31,7 @@ Agent 应以项目内已有资料、当前代码和实际检查结果为行动�
 
 涉及页面、浏览器扩展或其他运行时行为的修改，Agent 不能在写完代码和静态检查通过后直接交付。应当先在目标真实环境观察并复现问题，再执行“修改 → 在同一真实环境重测关键用户路径 → 把实际结果与人的需求和验收预期逐项比对 → 根据差异继续修改”的循环，直到真实结果通过验收。每轮必须同时检查成功路径、原失败路径以及刷新、重载或恢复行为；只有真实证据支持的范围才能标记 `PASS`。如果无法接管指定环境、加载源不明或缺少必要授权，应继续完成所有安全的定位工作并明确标记 `BLOCKED`，不能用静态检查或替代浏览器冒充通过。
 
-页面和浏览器扩展的真实环境验收只允许使用 **Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome**。必须在用户真实 profile、实际加载的扩展目录、真实登录态和目标页面中操作，并观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器、截图、HTTP 请求、源码推断和构建结果均不得作为页面验收工具或替代证据，也不得据此标记 `PASS`。Chrome DevTools MCP 不可用或无法接管目标 Chrome 时，该部分只能标记为 `BLOCKED` 或“未验收”，不得切换到其他页面测试工具继续验收。
+除 BOSS 直聘外，页面和浏览器扩展的真实环境验收只允许使用 **Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome**。必须在用户真实 profile、实际加载的扩展目录、真实登录态和目标页面中操作，并观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器、截图、HTTP 请求、源码推断和构建结果均不得作为这些站点的页面验收工具或替代证据，也不得据此标记 `PASS`。Chrome DevTools MCP 不可用或无法接管目标 Chrome 时，该部分只能标记为 `BLOCKED` 或“未验收”，不得切换到其他页面测试工具继续验收。BOSS 因反自动化风险改用普通 Chrome 与 OS 级桌面操作，并严格遵守 [BOSS 专用手册](verification/boss-extension-real-validation.md)。
 
 任何 `git commit` 或向远程仓库 `git push` 前都必须经过人的审核卡点。Agent 可以先整理并暂存明确路径，但必须在提交前向维护者展示准确的待提交范围、重要差异、删除项、真实环境验收结果、剩余未知以及目标分支和远程，并明确询问是否审查通过、是否授权提交推送。只有维护者对这一个确定版本明确回复审查通过后，才允许提交和推送；初始任务中的笼统“完成后推送”、Agent 自审、自动检查或历史授权都不能替代本次审核。审核后只要代码、暂存树、提交范围、目标分支或远程发生变化，原审核立即失效，必须重新审核。
 
