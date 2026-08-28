@@ -13,5 +13,5 @@
 1. 在 `agent/references/boss-helper-upstream` 切换到明确的上游 tag，并初始化 Git 子模块。
 2. 使用上游锁文件安装依赖并执行 `build:chrome`。
 3. 将 `.output/chrome-mv3` 中的 `boss.js`、`background.js`、`content-scripts/content.js` 和 `content-scripts/content.css` 同步到本目录现有对应文件。
-4. 重新应用本项目批准的精简项，更新 `verify-boss-helper-upstream-parity.cjs` 中的版本、提交和四个 SHA-256。
-5. 运行 `npm run test:boss-helper-parity`，再执行扩展整体构建与普通 Chrome 真实页面验收。
+4. 重新应用本项目批准的精简项并同步四个构建产物。
+5. 重新加载未打包扩展，在普通 Chrome 的真实 BOSS 页面逐项完成交互验收。

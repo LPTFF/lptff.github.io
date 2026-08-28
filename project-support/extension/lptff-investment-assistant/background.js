@@ -555,8 +555,8 @@ async function exportSourceBackup() {
 // 脱敏导出：复用 source-capture.js 的 desensitizeSource（只掩盖能定位到账户/银行卡/交易的
 // 个人识别信息，其余字段保留真实值），并照搬 desensitize-source.js 的残留自检——
 // 32 位交易/追踪 ID 与银行卡尾号不允许残留，宁可失败也不生成假脱敏文件。
-// 文件名与仓库 fixture 一致（eastmoney-source-desensitized.json），采集逻辑变更后可直接替换
-// project-support/fixtures/investment/ 下的同名文件（serve/build 会同步到 public）。
+// 文件名与仓库正式脱敏快照一致（eastmoney-source-desensitized.json），采集逻辑变更后可直接替换
+// project-support/data-snapshots/investment/ 下的同名文件（serve/build 会同步到 public）。
 async function exportDesensitizedSnapshot() {
   const staging = await getStaging();
   if (!staging?.capture) throw new Error("当前没有全面来源采集包，请先完成采集");

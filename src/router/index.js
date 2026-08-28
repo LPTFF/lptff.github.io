@@ -2,8 +2,6 @@ import { createRouter, createWebHistory } from "vue-router";
 
 const routes = [
   { path: "/foo", redirect: "/" },
-  { path: "/job", name: "job", component: () => import("../views/job/index.vue") },
-  { path: "/life", name: "life", component: () => import("../views/life/index.vue") },
   {
     path: "/blog",
     component: () => import("../views/Blog/BlogLayout.vue"),
@@ -32,7 +30,6 @@ const routes = [
   },
   { path: "/fundHoldInfoMsg", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") },
   { path: "/newsArticle", name: "newsArticle", component: () => import("../views/Message/NewsArticle.vue") },
-  { path: "/loginFund", name: "loginFund", component: () => import("../views/Login/FundLogin.vue") },
   // 旧版基金工具（买入建议/三代持仓分析）已归档，详见博客 fund-tools-evolution
 {
   path: "/fundPilot",

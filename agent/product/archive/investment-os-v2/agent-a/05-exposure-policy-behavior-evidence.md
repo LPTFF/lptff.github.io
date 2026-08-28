@@ -104,7 +104,7 @@ UI 只能消费 Core 语义，不得在组件中复制或发明计算规则。
 
 ## 9. Agent A 验证要求
 
-- 只使用 [Fixture 与测试矩阵](../shared/03-fixture-and-test-matrix.md) 中的人工场景。
+- 只使用已授权真实环境中直接观察到的场景。
 - expected 由手算、公式、不变量或状态转换表生成，不调用生产函数生成。
 - 每项任务包含正常、partial、stale/failed、重载和版本边界。
 - 完成必须满足 [Definition of Done](../shared/02-definition-of-done.md)。

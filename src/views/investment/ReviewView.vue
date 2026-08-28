@@ -289,7 +289,7 @@ async function simInitReal(): Promise<void> {
 }
 async function simExitReal(): Promise<void> {
   try {
-    const ok = await investmentOS.loadRealFixtureSnapshot();
+    const ok = await investmentOS.loadBundledSnapshot();
     if (ok) ElMessage.success("已恢复脱敏采集快照（交易 72/72 页）");
     else ElMessage.error(osState.error || "恢复真实数据失败");
   } catch (e) {

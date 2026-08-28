@@ -58,7 +58,7 @@ import { toContractReviewDataset } from "../../crypto/adapter";
 import type { BinanceSourceCapture, ContractReviewDataset } from "../../crypto/domain";
 import { getBinanceStaging, getBinanceStatus, acknowledgeBinanceStaging, discardBinanceStaging, startBinanceCollection } from "../../crypto/extension-sync";
 import { ContractReviewLedger } from "../../crypto/ledger";
-import bundledSnapshotUrl from "../../../project-support/fixtures/crypto/binance-source-desensitized.json?url";
+import bundledSnapshotUrl from "../../../project-support/data-snapshots/crypto/binance-source-desensitized.json?url";
 
 interface Branch { label: string; status: string; total: number; pageCount?: number; windowsCompleted?: number; windowsTotal?: number; regularOrderCount?: number; conditionalOrderCount?: number; duplicateResponseCount?: number }
 interface ExtensionStatus { pending: boolean; receipt?: { status: string }; collection?: { running: boolean; branches?: Record<string, Branch> } }

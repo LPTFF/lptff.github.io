@@ -1,232 +1,117 @@
-# BOSS 直聘扩展真实验收与测试基础设施修复手册
+# BOSS 直聘扩展自闭环测试手册
 
-本手册用于测试 `project-support/extension/lptff-investment-assistant/` 在普通 Windows Chrome 与真实 BOSS 直聘页面中的行为。它把已验证有效的做法写成可机械执行的步骤，避免执行者依赖隐含经验。
+目标：把 `project-support/extension/lptff-investment-assistant/` 的每项 UI 承诺转成可观察结果，在普通 Windows Chrome 的真实 BOSS 页面中完成“复现 → 修复 → 重载 → 重测”，直到本次变更涉及的场景收敛。
 
-需要了解本手册的真实验证来源和已观察问题时，读 [`../records/boss-extension-real-validation-20260827.md`](../records/boss-extension-real-validation-20260827.md)。
+## 1. 保存状态并确定范围
 
-## 适用边界
+先查看 `git status --short`、`git diff`、`git diff --stat`，然后在仓库根目录 `REAL_VALIDATION_STATE.md` 维护：
 
-- 只在任务涉及 BOSS 直聘 Chrome Extension 的真实页面功能时使用。
-- BOSS 是项目特例：最终验收不得使用 Chrome DevTools MCP、CDP、Playwright、Puppeteer、Selenium、WebDriver、remote debugging 或隔离自动化浏览器控制真实 BOSS 页面。
-- 原因是这些连接方式可能改变登录、验证、风控或页面行为。这里验证的是普通用户实际使用的 Chrome，不是自动化浏览器。
-- 不得研究、隐藏或修改 webdriver/CDP/automation 指纹，不得逆向 BOSS 的反自动化检测或专用字体映射。
-- 静态分析、构建、单元测试、fixture 和本地模拟只能形成 `Development Evidence`，不能冒充 `Real BOSS Validation`。
+- Changed files
+- Impacted behaviors
+- Pending real scenarios
+- Infrastructure issue/attempts
+- Current executor
+- Issues found
+- Next action
 
-## 结果状态
+为每个文件建立 `Changed File → Changed Behavior → Real Scenario` 映射：P0 测直接变化，P1 测调用链和生命周期，P2 测最可能受影响的相邻功能。P3 只有发现连带影响时才扩展。
 
-- `PASS`：真实普通 Chrome 已执行目标路径，实际结果符合预期。
-- `FAIL`：真实路径已执行，结果明确不符合预期。
-- `NOT EXECUTED`：尚未进入真实页面执行。
-- `TEST_INFRASTRUCTURE_FAILURE`：当前没有桌面执行能力，但仍有修复路径；必须继续修复，不能结束。
-- `TEST_INFRASTRUCTURE_HARD_BLOCKED`：已检查所有当前实际可用路径，且有证据证明无法创建或连接授权的交互式 Windows 执行环境。只有此条件允许因基础设施停止。
+## 2. 确认产物能够加载
 
-不要把 `FAIL` 改写成 `BLOCKED`，也不要把构建成功改写成真实验收 `PASS`。
+按当前改动完成必要的语法、类型、构建、manifest 文件引用和 ZIP 生成检查，确保扩展能被 Chrome 加载。失败立即修复。
 
-## 维护测试状态
+这些检查只用于避免把无法加载的产物送入真实环境，不作为功能通过证据。
 
-仓库根目录使用 `TEST_STATE.md` 保存跨轮次状态。不存在时创建，至少保留：
+## 3. 获得普通桌面执行能力
 
-```markdown
-# BOSS Extension Test State
+最终 BOSS 验收使用普通 Chrome 与 OS 级截图、鼠标和键盘。不要给 Chrome 添加 remote debugging、WebDriver 或 automation 参数，也不研究或修改站点反自动化指纹。
 
-## Changed files
-## Impacted behaviors
-## Pending real scenarios
-## Infrastructure issue
-## Infrastructure attempts
-## Current executor
-## Issues found
-## Next action
-```
+按以下顺序取得执行器，成功即进入第 4 节：
 
-每次基础设施尝试、真实场景结果、临时配置变更和恢复动作后更新。基础设施恢复后从 `Pending real scenarios` 继续，禁止从头重复已经完成的分析。
+1. 连接当前环境已有的 Desktop/Computer Use 能力。
+2. 当前任务与 Chrome 在同一交互用户 Session 时，运行用户态 Desktop Runner。
+3. 后台 Session 无法触达桌面时，通过已登录用户的 IDE terminal、启动项、计划任务或 tray app 启动 Runner。
+4. 当前机器没有交互桌面时，只迁移测试执行层到已登录 Windows VM/测试机；代码分析和修复仍留在当前任务。
 
-## 第一阶段：从 Git 变更确定测试范围
+Runner 至少支持：`screenshot`、`list_windows`、`focus_window`、`maximize_window`、`click`、`double_click`、`scroll`、`type`、`hotkey`、`launch`。
 
-先执行并阅读：
-
-```powershell
-git status --short
-git diff
-git diff --stat
-```
-
-注意：`git diff` 不显示未跟踪文件，必须把 `git status --short` 中的 `??` 文件单独读完。
-
-建立映射：`Changed File -> Changed Behavior -> Impacted Real BOSS Scenario`。
-
-优先级固定为：
-
-1. `P0`：diff 直接改变的真实功能。
-2. `P1`：直接调用方、被调用方和生命周期。
-3. `P2`：最可能受影响的相邻功能。
-4. `P3`：默认不测试；只有发现连带影响才扩大。
-
-| 变更 | 必测真实场景 |
-| --- | --- |
-| `content/boss-helper.js` | 初始扫描、异步/滚动卡片、字段解析、筛选、高亮/虚化、批处理、重载恢复 |
-| `content/observation-bridge.js` | 搜索条件、分页、SPA 切换、重复快照、刷新 |
-| `background.js` | 消息来源校验、API 权限、失败回退、密钥隔离 |
-| `popup/boss-helper.js` | 配置保存、页面同步、持久化、HTML 安全、AI 域名权限 |
-| `manifest.json` | 内容脚本顺序、匹配域名、可选 host 权限、加载版本 |
-| CSS/HTML | 遮挡、重复 UI、标签位置、弹窗滚动、原页面布局 |
-
-## 第二阶段：开发证据
-
-1. 阅读变更代码和直接调用链。
-2. 对所有扩展 JavaScript 执行语法检查。
-3. 执行与改动对应的 fixture/unit tests。
-4. 执行 `npm run typecheck` 和 `npm run build`。
-5. 检查 manifest 引用文件都存在、内容脚本顺序正确。
-6. 执行 `git diff --check`。
-7. 使用 `project-support/scripts/extension/build-zip.js` 重新生成 ZIP。
-
-失败时先修复再继续。即使全部通过，也只能写 `Development Evidence: PASS`。
-
-## 第三阶段：修复桌面测试基础设施
-
-### 确认会话事实
-
-```powershell
-[Environment]::UserInteractive
-[System.Security.Principal.WindowsIdentity]::GetCurrent().Name
-Get-Process explorer,chrome,ChatGPT,Code -ErrorAction SilentlyContinue |
-  Select-Object ProcessName,Id,SessionId,MainWindowTitle
-```
-
-可用路径按顺序选择：
-
-1. 已挂载且获授权的 OS Desktop/Computer Use。
-2. 当前进程与 Chrome 同在交互用户 Session：建立用户态 Desktop Runner。
-3. 通过已登录用户的启动项、Task Scheduler、tray app、IDE terminal 或已有用户态进程启动 Runner。
-4. 把测试执行层迁移到已登录 Windows VM、测试机或支持桌面控制的执行入口；代码推理仍留在当前任务。
-
-不要从 Session 0 穿透 Windows 安全边界。某条启动方式失败后换下一条合法路径，不要无限重复同一种尝试。
-
-### Desktop Runner 最小契约
+执行器的验收顺序：
 
 ```text
-screenshot
-screenshot_region
-list_windows
-focus_window
-maximize_window
-click
-double_click
-scroll
-type
-hotkey
-launch
+截取完整桌面
+→ 能看到普通 Windows 桌面
+→ 打开记事本并完成聚焦、输入、点击
+→ 关闭且不保存
+→ 列出并控制现有普通 Chrome
 ```
 
-Runner 只能调用普通 Win32 用户输入和屏幕捕获能力，不启动 remote debugging，不附着 CDP，不加载 webdriver。
+多显示器时先截完整虚拟桌面，再按原图像素定位；不要按图片查看器缩放后的坐标点击。只对最小化窗口执行 restore，避免把最大化 Chrome 意外缩小。
 
-仓库提供已在本次真实验收中验证过的实现：[`../../project-support/scripts/testing/windows-desktop-runner.ps1`](../../project-support/scripts/testing/windows-desktop-runner.ps1)。先运行 `-Action list_windows` 和一次临时目录截图验证环境，再进行任何输入操作。
+执行器暂不可用属于待修复的基础设施故障，不是测试完成。只有已检查上述所有实际可用路径且有证据表明不存在授权的交互式 Windows 环境，才记录 `TEST_INFRASTRUCTURE_HARD_BLOCKED`。
 
-验证顺序固定为：
+## 4. 加载正确的扩展
+
+1. 在现有普通 Chrome 打开 `chrome://extensions/`。
+2. 核对扩展名称、版本、ID和加载目录，目录必须是当前工作区的 `project-support/extension/lptff-investment-assistant/`。
+3. 记录其他会注入 BOSS 的扩展开关，测试期间关闭，结束时恢复。
+4. 点击当前扩展的“重新加载”，回到 BOSS 页面后刷新。
+5. 首屏先核对产品结构：保留统计、筛选、配置、AI、日志、对话、职位队列和自动处理；不再出现关于/赞赏、反馈和帮助模式。
+
+## 5. 按用户路径验证 UI 承诺
+
+每个场景都记录 `前置条件、操作、预期、实际、截图、PASS/FAIL、恢复动作`。
+
+### 页面生命周期与岗位获取
+
+- 初次进入职位列表后只出现一个工作台，职位卡片无需用户先手工滚动就开始获取。
+- 自动加载/翻页时显示“当前页面处理数、今日成功数、运行/暂停状态”，用户能判断仍在工作、已完成还是失败。
+- 滚动、异步替换、搜索条件变化、SPA 切换、扩展重载和页面刷新后不会重复挂载，处理能够恢复。
+
+### BOSS 原生筛选与插件筛选
+
+- 插件中的原生筛选条件与 BOSS 页面实际条件同步；修改后真实列表随之变化。
+- 标题、公司、经验、学历、薪资、地区、活跃度等规则用可见正反样本验证，日志给出具体排除原因。
+- 无匹配条件得到 0 命中且不发起沟通；恢复条件后重新出现候选岗位。
+- 没有真实正反样本的规则记录“本轮未覆盖”，不能凭界面存在标记 PASS。
+
+### 自动处理、即时反馈与恢复
+
+- 点击开始后立即显示状态变化，持续更新当前/总数、成功、跳过、失败和剩余额度。
+- 暂停/继续即时生效；达到日限额、无更多岗位、登录失效、页面结构变化或请求失败时明确停止并给出下一步。
+- 同一岗位/公司/HR 的去重规则真实生效，刷新后缓存策略与 UI 描述一致。
+- 每个失败项可从日志定位到岗位和失败阶段；可恢复错误按既定次数重试，不无限循环。
+
+真实发送消息会影响招聘方。没有当前任务的明确发送授权时，先设置不可能匹配的条件验证完整控制流；涉及真正发送的场景标记待授权，不用模拟结果冒充真实成功。
+
+### AI、地址与聊天
+
+- AI 模型配置能够保存、校验并在失败时显示明确原因；密钥不出现在页面日志、截图文本或仓库文件中。
+- AI 筛选的评分和理由进入岗位处理结果；AI 招呼语在发送前可见且与岗位数据一致。
+- 地址/通勤规则的输入、地图服务失败和超限排除均有即时反馈，不能静默放行。
+- 对话框能展示模型输出、编辑招呼内容并保持开关状态；关闭对话框不应停掉后台任务。
+
+未获授权时不调用付费模型或外部地图额度，对应场景记录为未执行；获得授权后直接在真实配置和真实页面补齐验证。
+
+## 6. 修复循环
+
+发现 `FAIL` 后立即执行：
 
 ```text
-截取桌面 -> 看见普通 Windows 桌面 -> 启动无害的记事本 ->
-聚焦 -> 键盘输入 -> 鼠标点击 -> 截图确认 -> 关闭且不保存 ->
-控制现有普通 Chrome
+保留复现条件
+→ 定位根因和最小影响范围
+→ 修改源码/生成产物
+→ 确认产物可加载
+→ 重新加载当前扩展
+→ 在同一真实页面重测原失败路径
+→ 补测成功、失败、刷新/恢复三个分支
+→ 更新 REAL_VALIDATION_STATE.md
 ```
 
-### 多显示器和 DPI 陷阱
+不要通过删除整项功能、放宽断言、隐藏错误文案或把模拟结果写成 PASS 来“收敛”。如果 UI 描述比实现更强，优先补齐实现；只有产品明确改变承诺时才同步修改 UI。
 
-- `GetWindowRect`、输入坐标和截图 bitmap 可能使用不同坐标空间。
-- 第二显示器直截可能得到黑图。可靠做法是先截完整虚拟桌面，再按截图 bitmap 的逻辑坐标裁剪。
-- 不要根据图片查看器缩放后的显示位置点击；必须以原图像素和显示器缩放比例换算。
-- 先用无害窗口验证一个点击坐标，再操作 Chrome。
-- `focus_window` 不应无条件 restore 已最大化窗口，否则 Chrome 可能缩小；只对最小化窗口 restore，另提供 `maximize_window`。
+## 7. 收尾与报告
 
-## 第四阶段：准备普通 Chrome
-
-1. 使用现有普通 Chrome profile；启动参数不得包含 debugging、automation 或 webdriver 相关参数。
-2. 打开 `chrome://extensions/`。
-3. 在扩展详情底部确认名称、版本、ID、来源为“未打包的扩展程序”，且加载来源精确指向当前工作区目录。
-4. “Service Worker（无效）”通常表示当前未激活，不等同于加载错误；不要仅凭该文字判失败。
-5. 找出其他会注入 BOSS 页面的扩展。记录原开关状态，测试期间临时关闭以隔离结果，结束后恢复。
-6. 点击当前扩展卡片的重新加载按钮，并通过 Chrome 提示确认重载发生。
-
-## 第五阶段：真实 BOSS 验收
-
-所有输入、点击、滚动、刷新和截图必须经过 OS Desktop Runner。
-
-### 基础生命周期
-
-1. 打开真实登录态 `https://www.zhipin.com/web/geek/jobs`。
-2. 工作台只出现一个；检查关键内容遮挡和关闭入口。
-3. 核对初始卡片数、命中数和排除数。
-4. 在职位列表区域滚动，确认虚拟列表/异步替换后仍有标签且无重复工作台。
-5. 点击一个站内推荐搜索项，确认 SPA 内容改变后重新扫描。
-6. 在扩展页重载当前扩展，回到 BOSS 页确认恢复。
-7. 完整刷新页面，再确认设置、工作台和卡片处理恢复。
-
-### 字段和筛选
-
-逐项比对可见卡片：标题、公司、薪资、经验、学历、地区和可见活跃时间。然后用可恢复配置验证：
-
-- 标题包含词：选择能产生部分命中和部分排除的词，记录统计变化。
-- 无匹配词：使用明显不存在的词，确认 `0 命中` 和全部排除。
-- 高亮：关闭后命中卡片的插件边框消失，恢复后重新出现。
-- 虚化：存在排除卡片时关闭/开启，确认透明度变化。
-- 薪资：设置明显高于当前可见岗位的最低值，必须得到基于真实数字的排除原因；若全部显示“薪资格式未知”，判 `FAIL`。
-- fresh/chatted/headhunter/gold：只有结果集中存在确定正反样本时才能做真实结论；没有样本则记录未覆盖，不要臆造 `PASS`。
-
-每次临时修改都记录原值，测试后恢复并保存。
-
-### 批处理安全边界
-
-真实招聘方沟通属于外部副作用。没有明确授权时：
-
-- 不得在存在匹配职位时点击“开始”。
-- 可设置不可能匹配的标题词，使统计为 `0 命中`，再点击“开始”。
-- 预期：日志出现“当前页面未匹配到符合规则的职位”，`今日投递` 保持不变。
-- 实际点击、计数、日限额、低 AI 分数和去重分支用 fixture 验证；不能把 fixture 写成真实投递通过。
-
-### AI 与密钥
-
-- BOSS 页面 AI Tab 的 API Key 字段必须为空、禁用，并提示去扩展弹窗配置。
-- 不要把真实 Key 输出到日志、截图文字或报告。
-- 未获授权时不调用付费 API；使用 fixture 验证低分、无评分、请求失败均阻止沟通。
-- 弹窗设置的 API host 权限只能按用户配置的 origin 请求。
-
-## 已知真实站点问题：薪资专用字体
-
-当前 BOSS 卡片肉眼可见 `50-70K·15薪` 等数字，但复制到普通字体区域后会显示为非数字字形，数字正则无法解析。
-
-允许：兼容常规短横线、尝试正常 DOM 选择器/属性/完整卡片文本回退、显示“薪资格式未知”、将真实结果记为 `FAIL`。
-
-禁止：逆向或解码站点字体映射、研究反抓取实现、伪造可见数字，或放宽规则后宣称薪资筛选通过。
-
-## 证据记录
-
-每个真实场景记录：
-
-```text
-Scenario
-Priority
-Precondition
-Action
-Expected
-Actual
-Evidence screenshot
-Result: PASS | FAIL | NOT EXECUTED
-Restoration
-```
-
-截图只保存在临时工作目录，不提交含私人页面信息的图片。报告只写聚合计数和脱敏结果。
-
-## 收尾检查
-
-1. 恢复所有测试配置。
-2. 恢复临时关闭的其他扩展开关。
-3. 用最终代码重新加载扩展并刷新 BOSS 页。
-4. 再跑语法、fixture、typecheck、build、manifest 引用和 ZIP 打包。
-5. 更新 `TEST_STATE.md`。
-6. 不自动 commit 或 push；遵守项目人工审核卡点。
-
-## 最终报告模板
+恢复临时配置和其他扩展开关，用最终代码再次重载扩展并检查关键路径。最终报告固定包含：
 
 ```markdown
 ## Changed Files
@@ -239,7 +124,7 @@ Restoration
 ## Real BOSS Validation
 ```
 
-`Real BOSS Validation` 必须明确写执行工具和状态：
+真实验收通过时写：
 
 ```text
 Execution: ordinary Windows Chrome + OS screenshot/mouse/keyboard
@@ -247,4 +132,4 @@ Forbidden browser-control tools used: NO
 REAL_BOSS_VALIDATION: EXECUTED — PASS
 ```
 
-存在一个 P0 失败时必须写 `EXECUTED — FAIL`，不能因为其他场景通过而写整体 `PASS`。
+任一 P0 仍失败则整体写 `EXECUTED — FAIL`，并留下具体未收敛项和下一步。

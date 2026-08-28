@@ -1,4 +1,4 @@
-# BOSS Extension Test State
+# BOSS Extension Real Validation State
 
 Last updated: 2026-08-28
 
@@ -8,13 +8,14 @@ Last updated: 2026-08-28
 - Removed `project-support/extension/lptff-investment-assistant/popup/boss-helper.js`.
 - Added Boss-Helper `0.5.2.2` Chrome MV3 artifacts: `boss.js`, `boss-helper-upstream-background.js`, `content/boss-helper-upstream.js`, and `content/boss-helper-upstream.css`; the main UI build has the approved About/Feedback/Help removals.
 - Updated `manifest.json`, `background.js`, and `popup/popup.html` to load the upstream module and remove the duplicate Popup feature surface.
-- Added upstream attribution/license, integration notes, and `verify-boss-helper-upstream-parity.cjs`.
-- Added `npm run test:boss-helper-parity`.
+- Added upstream attribution/license and integration notes.
 - Kept `agent/references/boss-helper-upstream/` at tag `0.5.2.2`, commit `ddc15026e8c9c04e4243d98379c85856eba43ab3` as the source baseline.
+- Simplified the `agent/` entry and BOSS runbook so future agents preserve core product capabilities, repair the execution path, and validate observable UI promises in the real environment.
+- Removed locally generated `node_modules`/`.output` content from reference repositories; dependencies remain reproducible from lockfiles.
 
 ## Impacted behaviors
 
-- The BOSS page now uses the upstream information architecture and runtime directly: Statistics, native Filter, Config, AI, Logs, About & Donation, JobCards, ChatBox, feedback, and help mode.
+- The BOSS page uses the upstream information architecture and runtime directly: Statistics, native Filter, Config, AI, Logs, JobCards, ChatBox, automatic processing, notifications, appearance configuration, and address analysis. The approved About/Donation, Feedback, and Help-mode entries remain removed.
 - Start/pause/reset, filtering pipeline, pagination, delivery limit, presets, model management, greeting, AI filtering, caching, notification, appearance, and logs now follow the upstream implementation.
 - Removed non-upstream right floating dock, master switch, quick-search pills, card highlight/dim feature, custom Popup configuration, and the locally invented workflow.
 - AI Reply remains disabled because upstream marks it unimplemented.
@@ -58,18 +59,19 @@ Last updated: 2026-08-28
 - Replaced the duplicate implementation with Chrome MV3 artifacts produced from upstream tag `0.5.2.2`, then removed the approved About/Feedback/Help UI and help-mode code at source level.
 - Integrated the upstream background proxy, injected main-world script, CSS, notifications permission, web-accessible resource, and host permissions into the existing extension.
 - Removed the old content and Popup BOSS scripts and their obsolete background AI message path.
-- Added SHA-256 and manifest-wiring verification so future edits fail closed when artifacts drift from upstream.
+- Pinned the upstream version and documented the real Chrome comparison path for future upgrades.
 
-## Verification
+## Loadability checks
 
 - Upstream `build:chrome`: PASS.
-- `npm run test:boss-helper-parity`: PASS; all four vendored artifacts match the local curated upstream build and fixed SHA-256 values, and assertions reject reintroduction of About/Feedback/Help.
 - JavaScript syntax checks: PASS.
 - Manifest references: PASS (23 referenced files present).
 - `npm run typecheck`: PASS.
 - `npm run build`: PASS.
 - Extension ZIP generation: PASS (`dist-extension/lptff-investment-assistant.zip`).
 - `git diff --check`: PASS.
+
+These checks only confirmed that the artifact could be loaded. Functional conclusions are recorded in the real BOSS validation section below.
 
 ## Real BOSS validation
 
@@ -107,6 +109,24 @@ REAL_BOSS_VALIDATION: EXECUTED — PASS for interaction parity and all authorize
 - Config page confirmed the obsolete “enter Help mode” alert is absent while filter controls and save/reload/preset actions remain intact.
 - No application workflow was started and no recruiter contact occurred.
 
+### 2026-08-28 deletion-scope correction
+
+- Reverted the accidental removal of AI, ChatBox, notifications, appearance settings, address analysis, model/request infrastructure, and the complete upstream processing pipeline.
+- Reloaded the unpacked extension from the current workspace in ordinary Chrome and refreshed the existing signed-in BOSS page using OS-level desktop input only.
+- Confirmed Statistics, Filter, Config, AI, Logs, Chat, JobCards, start/progress UI, notification configuration, AI Greeting, AI Filtering, AI Reply state, and Model Configuration are visible again.
+- Confirmed the Chat button opens the right-side conversation drawer.
+- Confirmed About/Donation, Feedback, and Help mode remain absent.
+- No processing run, recruiter message, paid AI request, or AMap request was triggered during this correction check.
+
+### 2026-08-28 test-artifact cleanup
+
+- Removed the obsolete parity test command/script, test-only documents, unused `fake-indexeddb` dependency, and empty `tests/` directory.
+- Removed `/job`, `/life`, and `/loginFund` because they only exposed placeholder or fabricated interactions; removed their navigation entries and orphaned login helpers.
+- Renamed runtime-consumed desensitized data from `project-support/fixtures/` to `project-support/data-snapshots/`; these snapshots remain product data, not test doubles.
+- Preserved `src/investment/engines/scenario/stress-test.ts` because it implements the user-facing portfolio stress-analysis feature rather than automated testing.
+- `npm run typecheck`, `npm run build`, extension ZIP generation, and `git diff --check`: PASS.
+- Ordinary Windows Chrome loaded `/investment/data` and `/contract-review`; the removed `/job`, `/life`, and `/loginFund` paths redirected to the real home page (`导航专区`): PASS.
+
 ## Next action
 
-- For a future upstream upgrade, rebuild the selected tag, sync the four artifacts, update their SHA-256 values, run `npm run test:boss-helper-parity`, then repeat the same ordinary-Chrome matrix.
+- For a future upstream upgrade, rebuild the selected tag, sync the four artifacts, reload the unpacked extension, and repeat the same ordinary-Chrome matrix.

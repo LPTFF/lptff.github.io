@@ -16,7 +16,7 @@
 
 - 页面在 `src/views/`，路由在 `src/router/`，跨页面纯逻辑在 `src/utils/`。
 - 页面使用的 Markdown 内容直接放在对应页面目录：博客文章在 `src/views/Blog/articles/`，面试资料在 `src/views/home/findJob/`，投资协议在 `src/views/investment/`；应用数据在 `src/data/`；项目支持静态资源在 `project-support/public/`。
-- `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试 Markdown 只保留 `src/views/home/findJob/` 下的唯一源文件，投资脱敏快照只保留 `project-support/fixtures/investment/` 下的唯一源文件。
+- `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试 Markdown 只保留 `src/views/home/findJob/` 下的唯一源文件，投资脱敏快照只保留 `project-support/data-snapshots/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。
 - 除非任务确实涉及爬虫或部署，不运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
@@ -28,16 +28,14 @@
 - 采集或生成链：检查真实产物的结构、完整性和消费者，不以 HTTP 200、退出码 0 或 JSON 可解析单独判断成功。
 - 依赖或构建链：关注 lockfile、安装结果、构建和受影响运行时。
 
-项目验收只以目标真实环境中的实际操作结果符合预期为准。静态检查、构建、脱敏快照、模拟数据、Mock、人工 fixture 和自设测试工具都不能替代验收，也不能据此宣称功能完成；未完成真实操作时必须标记为未验收、无法验证或未知。
+项目验收只以目标真实环境中的实际操作结果符合预期为准。静态检查和构建只负责保证产物可加载，不作为功能验收；未完成真实操作时标记为未验收、无法验证或未知。
 
 ## 页面真实验收基准
 
-- 除 BOSS 直聘外，页面、路由、浏览器存储和浏览器扩展变更只允许使用 Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome 验收。
-- 验收环境必须是用户实际 profile、实际加载目录、真实登录态、真实来源和实际消费者页面；必须观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。
-- BOSS Extension 是明确特例：禁止用 DevTools/CDP/Playwright/Puppeteer/Selenium/WebDriver/remote debugging 控制真实 BOSS 页面，只允许普通 Chrome 与 OS 级 screenshot/mouse/keyboard。执行前必须读 [`../verification/boss-extension-real-validation.md`](../verification/boss-extension-real-validation.md)。
-- 对非 BOSS 页面，禁止使用 Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器或其他页面自动化工具执行项目页面验收。
-- HTTP 请求、源码阅读、类型检查和构建结果只能辅助定位，不能替代对应站点规则要求的真实浏览器结果，也不能单独支持 `PASS`。BOSS 的 OS 截图只有与同一普通 Chrome 中的真实鼠标键盘操作组合后才是有效验收证据。
-- 非 BOSS 页面在 Chrome DevTools MCP 无法接管目标环境时，必须保持 `BLOCKED` 或“未验收”；不得切换到其他浏览器或页面测试工具继续验收。BOSS 的桌面能力缺失先记为 `TEST_INFRASTRUCTURE_FAILURE` 并按专用手册修复，只有穷尽合法执行路径后才能写 `TEST_INFRASTRUCTURE_HARD_BLOCKED`。
+- 验收环境要匹配本次主张：涉及真实登录态、扩展加载目录、账户数据或既有存储时，使用用户实际 profile 和实际消费者页面；公开页面、本地组件或纯交互可以在隔离浏览器中先完成开发验证。
+- 根据问题选择 DevTools、in-app browser、桌面操作或自动化测试，实际观察 Elements、Network、Console、路由、存储、刷新、失败与恢复中与本次改动相关的部分。工具不可用时优先更换同等可信路径或修复执行层。
+- BOSS Extension 是明确特例：真实线上页面使用普通 Chrome 与 OS 级 screenshot/mouse/keyboard，不用 DevTools/CDP/WebDriver 控制链路。执行前读 [`../verification/boss-extension-real-validation.md`](../verification/boss-extension-real-validation.md)。
+- HTTP 请求、源码阅读、类型检查和构建用于尽早排错；结论不得超出实际覆盖范围。未观察到的真实行为写“未验收”，而不是把开发证据扩写成真实页面 `PASS`。
 
 ## 提交与推送审核卡点
 

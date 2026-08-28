@@ -9,7 +9,7 @@ const root = path.resolve(__dirname, "../../..");
 
 const inputPath = process.argv[2];
 const outputPath =
-  process.argv[3] || path.join(root, "project-support/fixtures/investment/eastmoney-source-desensitized.json");
+  process.argv[3] || path.join(root, "project-support/data-snapshots/investment/eastmoney-source-desensitized.json");
 
 if (!inputPath) {
   console.error(

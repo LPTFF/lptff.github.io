@@ -103,7 +103,7 @@ Investment OS 合约复盘台账新增“导出正式来源包 / 导出脱敏来
 
 ## 2026-08-24 内置币安脱敏快照
 
-维护者提供的 `C:\Users\TFF001\Desktop\binance-source-desensitized.json` 已作为法律脱敏结构样本写入 `project-support/fixtures/crypto/binance-source-desensitized.json`，SHA256 为 `6962FA5F5BD57C337AA1DB338EE8E18CEFC942A8EFA5FB707FE46FFE953CABA4`。协议为 `binance-source-capture/1.0`；订单历史 499、交易历史 197、持仓历史 48、资金流水 408，四类核心 coverage 全部 complete，warnings 为空。自检未发现认证字段或未替换的订单、交易、仓位、流水数字标识。
+维护者提供的 `C:\Users\TFF001\Desktop\binance-source-desensitized.json` 已作为法律脱敏正式数据快照写入 `project-support/data-snapshots/crypto/binance-source-desensitized.json`，SHA256 为 `6962FA5F5BD57C337AA1DB338EE8E18CEFC942A8EFA5FB707FE46FFE953CABA4`。协议为 `binance-source-capture/1.0`；订单历史 499、交易历史 197、持仓历史 48、资金流水 408，四类核心 coverage 全部 complete，warnings 为空。自检未发现认证字段或未替换的订单、交易、仓位、流水数字标识。
 
 合约复盘页像基金复盘一样通过 Vite `?url` 引入独立 JSON 资源，并提供显式“导入内置脱敏快照”入口；快照不会默认冒充当前账户。Chrome DevTools MCP 真实点击导入后，IndexedDB 新增采集时间 2026-08-24 22:13:05 的批次，页面显示四类数量与完整覆盖，Console 无 error/warn/issue。
 

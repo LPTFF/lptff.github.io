@@ -1,49 +1,44 @@
-# agent/：个人工作台
+# agent/：项目维护工作台
 
-这里不是让人服从 Agent 的控制面，而是项目的外置认知工具箱。它帮助人记住事实、理解取舍、规划产品、研究外部方案和复盘结果。
+`agent/` 只保存能帮助后续维护者快速理解项目、做产品判断和完成验证的资料。它不是运行时代码目录，也不是一套让执行者先证明“为什么不能做”的流程系统。
 
-## 按问题使用
+## 默认执行方式
 
-- 想了解项目现在是什么：看 [context/project-context.md](context/project-context.md)。
-- 想知道当前产品方向和优先级：看 [product/README.md](product/README.md)。
-- 想审查 Investment Review 为什么做、当前差距、本次 P0、A/B 分工和人的验收：直接看 [product/investment-review.md](product/investment-review.md)，不需要再拼接 Agent 任务板。
-- 想设计页面或交互：看 [standards/product-design.md](standards/product-design.md)；工程对象、公式、真实来源与验收边界只在深审时看 [product/reference/investment-review-engineering.md](product/reference/investment-review-engineering.md)。
-- 想知道哪些文件属于项目功能、哪些属于工作台：看 `context/project-file-boundaries.md`。
-- 想了解代码放在哪里：看 `standards/code-organization.md`。
-- 想查看已收藏理论或引入新理论：看 `theories/README.md`；想了解当前可执行的 Agent 约定：看 `standards/`。
-- 想分析一个需求背后的业务目的、用户任务、判断与信息成本：看 `standards/business-task-analysis.md`；它用于复杂或信息密集型问题，不要求简单任务套固定模板。
-- 想用有限 Agent 资源完成涉及私人真实环境的任务：看 [主力 Agent—授权验证 Agent—人类裁决者协作标准](standards/main-agent-authorized-validation.md)。Agent A 默认完成绝大多数工作；Agent B 只在存在必须由人授权的真实私人环境证据缺口时介入。
-- 想了解本地开发环境和远程数据服务：看 `docs/development-environment.md`。
-- 想验证一个改动是否真的有效：看 `verification/playbook.md`；需要可信验证原则、证据边界和方法选择时，再看 `standards/trusted-verification.md`。
-- 想测试 BOSS 直聘 Chrome Extension：必须看 [BOSS 直聘扩展真实验收与测试基础设施修复手册](verification/boss-extension-real-validation.md)。这是 BOSS 的特殊执行路径，包含 diff 范围映射、Windows Desktop Runner、真实 Chrome、安全批处理、恢复和报告规则。
-- 想研究其他项目：看 `product/research/`。
-- 想回顾过去做过什么：看 `context/iteration-log.md`，但以当前代码和当前事实为准。
+1. 先读当前任务直接相关的代码、Git 变更和一份对应说明，不遍历整套文档。
+2. 把用户目标拆成可观察结果；优先保留现有有效能力，只有用户明确要求或证据证明无价值时才删除。
+3. 先复现，再修改，再在同一目标环境重测；失败就记录实际差异并继续修复。
+4. 只保留让产物能够加载所需的静态检查和构建；功能结论直接来自目标环境的真实结果。
+5. 工具不可用时先寻找同等可信的执行路径、修复执行环境或迁移测试执行层。只有所有合法路径都已证实不可用时，才报告硬阻塞。
 
-不要求每次任务先读完整目录，也不要求使用固定模板或维护无助于判断的流程。资料是否值得更新，由维护者根据未来的人是否会因此更快理解和做出更好判断来决定。
+## 按任务找资料
 
-## 人机协作原则
+- 项目现状：[`context/project-context.md`](context/project-context.md)
+- 文件归属：[`context/project-file-boundaries.md`](context/project-file-boundaries.md)
+- 产品方向：[`product/README.md`](product/README.md)
+- Investment Review：[`product/investment-review.md`](product/investment-review.md)
+- 开发环境：[`docs/development-environment.md`](docs/development-environment.md)
+- 通用验证：[`verification/playbook.md`](verification/playbook.md)
+- BOSS 直聘扩展：[`verification/boss-extension-real-validation.md`](verification/boss-extension-real-validation.md)
+- 代码组织：[`standards/code-organization.md`](standards/code-organization.md)
+- 产品设计：[`standards/product-design.md`](standards/product-design.md)
+- 外部项目研究：[`product/research/`](product/research/)
 
-人负责定义问题、选择取舍、批准外部或不可逆行动，并承担最终结果。Agent 可以帮助搜索、比较、起草、运行可逆的本地检查和暴露未知，但不能替人决定目标、风险承受能力、产品范围或完成标准。
+不要求按固定顺序阅读，也不要求简单任务套模板。`archive/` 只用于追溯旧决策，不能覆盖当前代码和当前产品说明。
 
-Agent 应以项目内已有资料、当前代码和实际检查结果为行动依据，不得把外部工具的默认惯例或未经验证的推测当作项目要求。执行每一步前，应先找到与当前问题直接相关的依据；项目没有明确规定、现有证据不足或规则发生冲突时，应说明已知事实、未知与拟采用的判断，涉及范围、风险或外部状态变化的选择须交由人确认。
+## BOSS 扩展的产品边界
 
-项目验收的唯一完成依据，是目标真实环境中的实际操作结果符合人的预期。源码阅读、类型检查、构建、脱敏快照、模拟数据、Mock、人工 fixture、单元测试以及 Agent 自设的 Oracle、测试工具或验证方案，只能暴露局部问题，不能替代真实环境验收，也不得据此宣称功能正确或任务完成。没有取得真实操作证据时，结论必须保持“未验收”“无法验证”或“未知”；不得为了获得绿色结果而创建、保留或扩展脱离真实环境的测试体系。
+核心能力包括岗位获取、原生筛选、自动处理、进度与日志、AI 筛选/招呼、地址分析、聊天和失败恢复。审查这些能力时，默认方向是修复或改进，不是因为权限、网络或实现复杂就整项删除。
 
-涉及页面、浏览器扩展或其他运行时行为的修改，Agent 不能在写完代码和静态检查通过后直接交付。应当先在目标真实环境观察并复现问题，再执行“修改 → 在同一真实环境重测关键用户路径 → 把实际结果与人的需求和验收预期逐项比对 → 根据差异继续修改”的循环，直到真实结果通过验收。每轮必须同时检查成功路径、原失败路径以及刷新、重载或恢复行为；只有真实证据支持的范围才能标记 `PASS`。如果无法接管指定环境、加载源不明或缺少必要授权，应继续完成所有安全的定位工作并明确标记 `BLOCKED`，不能用静态检查或替代浏览器冒充通过。
+当前明确精简的是“关于/赞赏”“反馈”“帮助模式”三个非核心入口。不要把这项产品决定扩大解释为删除 AI、地址、聊天、通知、外观配置或自动投递链路。
 
-除 BOSS 直聘外，页面和浏览器扩展的真实环境验收只允许使用 **Chrome DevTools MCP（工具名 `mcp__chrome_devtools__*`）接管用户实际 Chrome**。必须在用户真实 profile、实际加载的扩展目录、真实登录态和目标页面中操作，并观察 Elements、Network、Console、路由、存储、刷新、失败与恢复。Browser/Chrome 插件控制器、Playwright、Puppeteer、Selenium、Computer Use、隔离浏览器、截图、HTTP 请求、源码推断和构建结果均不得作为这些站点的页面验收工具或替代证据，也不得据此标记 `PASS`。Chrome DevTools MCP 不可用或无法接管目标 Chrome 时，该部分只能标记为 `BLOCKED` 或“未验收”，不得切换到其他页面测试工具继续验收。BOSS 因反自动化风险改用普通 Chrome 与 OS 级桌面操作，并严格遵守 [BOSS 专用手册](verification/boss-extension-real-validation.md)。
+真实 BOSS 验收使用普通 Windows Chrome 和 OS 级桌面截图、鼠标、键盘；不使用会改变站点运行环境的 CDP/WebDriver 控制链路。正确步骤和失败后的替代路径见 BOSS 专用手册。
 
-任何 `git commit` 或向远程仓库 `git push` 前都必须经过人的审核卡点。Agent 可以先整理并暂存明确路径，但必须在提交前向维护者展示准确的待提交范围、重要差异、删除项、真实环境验收结果、剩余未知以及目标分支和远程，并明确询问是否审查通过、是否授权提交推送。只有维护者对这一个确定版本明确回复审查通过后，才允许提交和推送；初始任务中的笼统“完成后推送”、Agent 自审、自动检查或历史授权都不能替代本次审核。审核后只要代码、暂存树、提交范围、目标分支或远程发生变化，原审核立即失效，必须重新审核。
+## 目录卫生
 
-本项目以中文协作为主。新建 `git commit` 时统一使用 Vue 风格的 `<type>(<scope>): <中文摘要>`（无必要 scope 时为 `<type>: <中文摘要>`），一个提交只承载一个完整且相关的变更；类型、scope、长度、正文和示例以 [项目工作说明](standards/project-instructions.md#git-提交信息规范) 为准，不再混用裸标题、中文类型前缀或临时风格。除非维护者对某次提交另有明确要求，标题和必要说明均使用中文。
+- `src/` 和 `project-support/` 保存产品代码、构建脚本与交付物。
+- `agent/` 保存说明、研究结论、长期记录和只读参考源码。
+- 外部参考仓库可保留固定提交和许可证，但不要保留可重新安装的 `node_modules`、测试产物、截图、登录态、凭据或原始网络日志。
+- `agent/references/` 是本地比对材料，不是项目运行依赖；生产代码不得从这里导入。
+- 对外部副作用、提交和推送保持人工审核卡点；普通可逆的本地分析、修复和验证应主动完成。
 
-涉及私人真实环境时，默认由一个主力 Agent 完成需求、实现和静态排错；只有完成主张必须访问用户授权的私人数据或真实登录环境才能证明时，才启用范围更窄的授权验证 Agent。这是最小权限升级，不是复杂任务默认增加第二 Agent，具体见[协作标准](standards/main-agent-authorized-validation.md)。
-
-好的记录应该让未来的人少走弯路：写清楚事实、判断、依据、未知和下一步；不要为了让某个工具更容易解析而堆砌格式。
-
-## 资料边界
-
-- 产品源码、运行时资源和构建配置留在项目目录。
-- 项目事实、产品判断、研究结论和有长期价值的复盘资料放在这里。
-- 临时输出、自动生成文件、凭据、个人宿主配置和无助于判断的过程材料不放在这里。
-- `AGENTS.md` 和 `CLAUDE.md` 只是宿主发现入口，不是第二套规则来源。
+好的交接只需要写清楚：目标、现状、已证实事实、失败点、修复、验证结果和下一步。删除过时内容通常比继续叠加新规则更有价值。

@@ -146,7 +146,7 @@ import { usePluginGuide } from "../../investment/composables/use-plugin-guide";
 import { buildCoverageGaps } from "../../investment/composables/selectors";
 import type { CoverageDataset, DataCoverage } from "../../investment/domain";
 
-const { state, clearEverything, loadRealFixtureSnapshot, importCaptureFile } = useInvestmentOS();
+const { state, clearEverything, loadBundledSnapshot, importCaptureFile } = useInvestmentOS();
 const { collect, sync } = useCollectionControl();
 const { pluginHint, downloadPlugin } = usePluginGuide();
 
@@ -177,7 +177,7 @@ const clearActive = ref<string[]>([]);
 const snapshotActive = ref<string[]>(["snapshot"]);
 
 async function importSnapshot(): Promise<void> {
-  const ok = await loadRealFixtureSnapshot();
+  const ok = await loadBundledSnapshot();
   if (ok) ElMessage.success("已加载脱敏采集快照（交易 72/72 页）");
   else ElMessage.error(state.error || "加载真实快照失败");
 }

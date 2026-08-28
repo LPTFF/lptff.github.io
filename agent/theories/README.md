@@ -8,7 +8,6 @@
 | --- | --- | --- | --- |
 | [Agent 业务任务分析协议](agent-business-task-analysis.md) | Cognitive Work Analysis、Task–Technology Fit、Sensemaking、Information Foraging、Human-Centred Design | 已转化，验证中 | [业务任务分析执行规范](../standards/business-task-analysis.md)、[产品设计标准](../standards/product-design.md)、[产品工作台](../product/README.md) |
 | [投资绩效与决策复盘](investment-performance-and-decision-review.md) | Performance Measurement/Attribution/Appraisal、IPS、Outcome Bias、Disposition、Overtrading、Sharpe | 已转化，部分来源复核中 | [Investment Review 人的产品审查](../product/investment-review.md)、[工程附录](../product/reference/investment-review-engineering.md) |
-| [软件可信验证原则](software-trusted-verification.md) | Verification & Validation、软件测试、可靠性与形式化方法 | 理论收藏，执行边界已收敛 | [真实环境验收规范](../standards/trusted-verification.md)、[验收清单](../verification/playbook.md) |
 
 ## 理论卡片与执行规范的边界
 
@@ -25,7 +24,7 @@
 2. **独立理解**：用自己的话区分理论原始主张、推论和个人判断，不把权威名称当作证据。
 3. **连接项目问题**：说明它可能改善哪个 Agent 判断、软件行为或验证盲区。
 4. **定义可观察改变**：提出能在代码、工作流、真实运行或验收结果中观察的影响。
-5. **设计最小验证**：为影响指定 Oracle、环境、反例和停止条件；无法验证的部分标为未知。
+5. **设计最小验证**：指定真实环境、可观察结果、反例和停止条件；无法验证的部分标为未知。
 6. **决定状态**：根据证据标记为已转化、验证中、已采纳、不采纳或待复评。
 7. **同步落地**：只有已采纳的最小部分才链接到 `standards/`、`verification/` 或产品资料，并保留反向链接。
 8. **定期回顾**：当项目边界、证据或理论理解变化时，重新检查落地规则是否仍然适用。

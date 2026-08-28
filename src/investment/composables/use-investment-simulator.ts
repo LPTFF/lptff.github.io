@@ -3,7 +3,7 @@
  *
  * 用真实持仓（导入的采集快照或插件采集数据）+ 通过 normalizeIndexId 映射到 IndexId 净值曲线
  * 逐期推进，行为模型生成交易，观察真实组合在牛熊周期的市值/规则偏离演变。
- * 演练用 clearImportedFacts 保留 rules/assets/scope；结束可一键 loadRealFixtureSnapshot 恢复真实。
+ * 演练用 clearImportedFacts 保留 rules/assets/scope；结束可一键 loadBundledSnapshot 恢复脱敏采集快照。
  * 不再支持 F001-F007 虚构沙盒。
  */
 import { reactive, computed } from "vue";
