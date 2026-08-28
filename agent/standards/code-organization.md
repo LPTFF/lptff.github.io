@@ -5,7 +5,7 @@
 - 页面与局部组件：`src/views/<domain>/`。
 - 路由入口：`src/router/`。
 - 跨页面纯逻辑：`src/utils/<domain>/`。
-- 用户内容：直接放在唯一消费者的页面目录，例如 `src/views/Blog/articles/`、`src/views/home/findJob/` 和 `src/views/investment/`。
+- 用户内容：直接放在唯一消费者的页面目录，例如 `src/views/Blog/articles/` 和 `src/views/investment/`；没有一级页面消费者的职业原始资料放在 `src/data/career/` 或 `src/data/findJobMarkDown/`。
 - 用户内容和应用资源：页面内容直接随消费者组织，应用数据在 `src/data/`，应用资源在 `src/assets/`。
 - 项目支持区：`project-support/public/`、`project-support/scripts/`、`project-support/crawl/`、`project-support/extension/`、`project-support/deploy/`。
 - 运行时可读的产品文档：明确由页面导入的文档仍属于项目功能，例如 `src/views/Blog/articles/**/*.md` 由 `import.meta.glob` 以 `?raw` 编译。

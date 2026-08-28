@@ -34,12 +34,12 @@ class CollectorSpec:
 COLLECTORS = (
     CollectorSpec("welfare", "welfare.py", "welfare.json", "welfare", 3, optional=True),
     CollectorSpec("infzm", "infzm.py", "infzm.json", "article", 3),
-    CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3),
+    CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3, group="archived"),
     CollectorSpec("weibo", "weibo.py", "weibo.json", "article", 5),
-    CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3),
+    CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3, group="archived"),
     CollectorSpec("52pojie", "52pojie.py", "52pojie.json", "article", 3),
-    CollectorSpec("meituanTech", "meituanTech.py", "techForum/meituanTech.json", "article", 3),
-    CollectorSpec("v2ex", "v2ex.py", "v2ex.json", "article", 3, optional=True),
+    CollectorSpec("meituanTech", "meituanTech.py", "techForum/meituanTech.json", "article", 3, group="archived"),
+    CollectorSpec("v2ex", "v2ex.py", "v2ex.json", "article", 3, optional=True, group="archived"),
     CollectorSpec("0818tuan", "welfare/0818tuan.py", "welfare/0818tuan.json", "welfare", 3, optional=True),
     CollectorSpec("0818tuanTop", "welfare/0818tuanTop.py", "welfare/0818tuanTop.json", "welfare", optional=True),
     CollectorSpec("zhuanyes", "welfare/zhuanyes.py", "welfare/zhuanyes.json", "welfare"),
@@ -47,8 +47,8 @@ COLLECTORS = (
     CollectorSpec("daydayzhuan", "welfare/daydayzhuan.py", "welfare/daydayzhuan.json", "welfare", optional=True),
     CollectorSpec("daydayzhuanTop", "welfare/daydayzhuanTop.py", "welfare/daydayzhuanTop.json", "welfare", optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
-    CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="full"),
-    CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, group="full"),
+    CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
+    CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, group="archived"),
     CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True),
     CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "full"),
 )
@@ -234,7 +234,7 @@ def select_collectors(*, include_full: bool, only: list[str]) -> list[CollectorS
     return [
         spec
         for spec in COLLECTORS
-        if (not only and (include_full or spec.group == "core"))
+        if (not only and (spec.group == "core" or (include_full and spec.group == "full")))
         or (only and spec.name in only)
     ]
 

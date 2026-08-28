@@ -1,3 +1,18 @@
+---
+title: "前端面试知识树归档"
+date: "2026-08-28"
+slug: "interview-knowledge-archive"
+category: "职业资产"
+tags: ["前端", "面试", "知识归档"]
+summary: "从独立面试题页面迁入博客的完整前端知识树，用于检索和 AI 按岗位调用，不再作为一级求职产品。"
+cover: "/img/logo.jpg"
+legacyPaths: ["/interview"]
+---
+
+> 归档说明：这份资料原来由独立“面试题”页面展示。现在它作为个人职业知识资产保留在博客中；实际求职准备应从具体 JD 出发，由 AI 选择最值得准备的部分，而不是从头浏览全部题目。
+
+[查看按项目场景串联的面试准备稿](/blog/articles/interview-project-chain) · [了解职业决策产品的新方向](/blog/articles/career-decision-system)
+
 # HTML
 
 1. HTML5新增特性； HTML5 为什么只需要写 `<!DOCTYPE HTML >`，而不需要引入 DTD ；HTML5 元素的分类； HTML5 有哪些新特性、移除了那些元素；如何处理 HTML5 新标签的浏览器兼容问题； HTML5 的 form 的自动完成功能是什么；HTML5 的离线储存怎么使用,工作原理能不能解释一下；HTML5 新增的表单元素有哪些；在 HTML5 中,哪个方法用于获得用户的当前位置；用于预格式化文本的标签是什么

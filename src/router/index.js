@@ -62,30 +62,11 @@ const routes = [
     meta: { title: "高级搜索" },
     children: [{ path: "", name: "advanced-search", component: () => import("../views/home/advancedSearch/index.vue") }],
   },
-  {
-    path: "/tech-forum",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "技术论坛" },
-    children: [{ path: "", name: "tech-forum", component: () => import("../views/home/news/index.vue") }],
-  },
-  {
-    path: "/github-trending",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "GitHub Trending" },
-    children: [{ path: "", name: "github-trending", component: () => import("../views/home/githubTrending/index.vue") }],
-  },
-  {
-    path: "/leetcode",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "LeetCode" },
-    children: [{ path: "", name: "leetcode", component: () => import("../views/home/leetCode/index.vue") }],
-  },
-  {
-    path: "/interview",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "面试题" },
-    children: [{ path: "", name: "interview", component: () => import("../views/home/findJob/index.vue") }],
-  },
+  // 旧职业信息消费页面已归档为博客文章，历史链接继续可用。
+  { path: "/tech-forum", redirect: "/blog/articles/career-tools-evolution" },
+  { path: "/github-trending", redirect: "/blog/articles/career-tools-evolution" },
+  { path: "/leetcode", redirect: "/blog/articles/career-tools-evolution" },
+  { path: "/interview", redirect: "/blog/articles/interview-knowledge-archive" },
   {
     path: "/investment",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
@@ -106,18 +87,7 @@ const routes = [
       },
     ],
   },
-  {
-    path: "/boss-zhipin",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "BOSS直聘" },
-    children: [
-      {
-        path: "",
-        name: "boss-zhipin",
-        component: () => import("../views/home/bossZhipin/index.vue"),
-      },
-    ],
-  },
+  { path: "/boss-zhipin", redirect: "/blog/articles/career-decision-system" },
   {
     path: "/pending",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),

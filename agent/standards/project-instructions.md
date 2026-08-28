@@ -15,8 +15,8 @@
 ## 项目边界
 
 - 页面在 `src/views/`，路由在 `src/router/`，跨页面纯逻辑在 `src/utils/`。
-- 页面使用的 Markdown 内容直接放在对应页面目录：博客文章在 `src/views/Blog/articles/`，面试资料在 `src/views/home/findJob/`，投资协议在 `src/views/investment/`；应用数据在 `src/data/`；项目支持静态资源在 `project-support/public/`。
-- `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试 Markdown 只保留 `src/views/home/findJob/` 下的唯一源文件，投资脱敏快照只保留 `project-support/data-snapshots/investment/` 下的唯一源文件。
+- 页面使用的 Markdown 内容直接放在对应页面目录：博客文章和面试归档在 `src/views/Blog/articles/`，投资协议在 `src/views/investment/`；应用数据在 `src/data/`，职业原始资料在 `src/data/career/` 和 `src/data/findJobMarkDown/`；项目支持静态资源在 `project-support/public/`。
+- `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试知识树与项目串联稿只保留 `src/views/Blog/articles/2026/` 下的博客源文件，投资脱敏快照只保留 `project-support/data-snapshots/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。
 - 除非任务确实涉及爬虫或部署，不运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。

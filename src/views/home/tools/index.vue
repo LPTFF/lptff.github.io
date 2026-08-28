@@ -24,6 +24,7 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
+import { useRouter } from "vue-router";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
 import logoImageUrl from "../../../assets/logo.jpg";
@@ -39,6 +40,7 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
+    const router = useRouter();
     const loadFrequentWebsites = () => {
       const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
       const list = Object.values(clickData)
@@ -69,8 +71,11 @@ export default defineComponent({
         }
         localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
         const isInternal = website.url.startsWith("/") && !/^https?:\/\//.test(website.url);
-        const targetUrl = isInternal ? window.location.origin + website.url : website.url;
-        gotoOutPage(targetUrl);
+        if (isInternal) {
+          router.push(website.url);
+        } else {
+          gotoOutPage(website.url);
+        }
       }
     };
     const websiteTransformType = (parentIndex: number) => {

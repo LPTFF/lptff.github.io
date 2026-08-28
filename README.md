@@ -1,6 +1,6 @@
 # lptff.github.io
 
-这是一个基于 Vue 3 的个人网站，使用 Vite 构建，包含博客、面试/求职资料、生活记录以及基金和加密货币工具页面。
+这是一个基于 Vue 3 的个人网站，使用 Vite 构建，包含博客、职业资产归档、生活记录以及基金和加密货币决策工具。职业方向以浏览器插件接触真实市场需求，博客负责保存长期知识和历史产品演进。
 
 ## 技术栈
 
@@ -26,7 +26,7 @@
 
 - 首页及个人信息展示
 - 博客文章、归档、搜索和旧地址重定向
-- 面试/求职资料和 Markdown 内容
+- 职业决策方向、面试知识树和项目证据的博客归档
 - 基金分析和加密货币页面
 - 基金、对冲基金和加密货币持仓数据导出为 `.xlsx`
 
@@ -98,15 +98,16 @@ npm run build
 
 - `src/views/`：页面组件
 - `src/views/Blog/articles/`：博客文章 Markdown 内容
-- `src/views/home/findJob/`：求职页面使用的面试资料 Markdown 和加载逻辑
+- `src/views/Blog/articles/2026/`：职业方向、面试知识树、项目证据与旧功能归档
 - `src/views/investment/`：投资页面及其运行时协议文档
 - `src/utils/`：共享工具，包括 Excel 导出适配器
 - `src/assets/`：页面打包图片等应用资源
 - `project-support/public/`：Vite 静态发布资源
 - `src/data/`：页面打包的数据快照
+- `src/data/career/`、`src/data/findJobMarkDown/`：不由一级页面直接消费的职业结构化资料与面试原文资产
 - `project-support/scripts/`：产品摘要同步、数据采集和构建辅助脚本
 - `project-support/crawl/`：Python 数据采集和 CI 发布链路
-- `project-support/extension/`：Chrome 投资助手运行功能
+- `project-support/extension/`：Chrome 多领域本地助手运行功能，包含 BOSS 真实市场现场能力
 - `project-support/deploy/`：手工部署工具
 - `agent/`：维护者的项目工作台，记录业务规划、产品设计、项目事实、研究材料和有长期价值的验收经验
 - `agent/product/prd/`：Investment OS PRD 原文归档、拆解和需求追踪

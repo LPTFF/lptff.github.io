@@ -2,9 +2,9 @@
   <section>
     <div class="hero">
       <div>
-        <p class="eyebrow">学习笔记 · 技术分享</p>
+        <p class="eyebrow">产品演进 · 职业资产 · 技术实践</p>
         <h1>把问题想清楚，再写下来。</h1>
-        <p class="hero-copy">这里收录关于人工智能、自动驾驶和水下机器人的学习记录。</p>
+        <p class="hero-copy">这里保存长期知识、项目演进和职业实践；实时市场判断交给浏览器插件与 AI。</p>
       </div>
       <img :src="logoUrl" alt="tangff" class="hero-avatar" />
     </div>

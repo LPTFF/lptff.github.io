@@ -6,13 +6,14 @@
 
 - 技术栈：Vue 3、Vue Router 4、Vite 6.4.3、JavaScript、TypeScript；npm 管理依赖。
 - 入口：`index.html` → `src/main.js` → `src/App.vue` → `src/router/index.js`。
-- 页面位于 `src/views/`，页面内容与唯一消费者放在一起：博客文章位于 `src/views/Blog/articles/`，面试资料位于 `src/views/home/findJob/`，投资协议位于 `src/views/investment/`；应用数据位于 `src/data/`，应用资源位于 `src/assets/`；项目支持区位于 `project-support/`。
+- 页面位于 `src/views/`，页面内容与唯一消费者放在一起：博客文章、职业方向和面试归档位于 `src/views/Blog/articles/`，投资协议位于 `src/views/investment/`；应用数据位于 `src/data/`，应用资源位于 `src/assets/`；项目支持区位于 `project-support/`。
 - Element Plus 是默认 UI 基础；新增或重构页面优先复用现有组件和页面模式。
 - 面试 Markdown 与投资脱敏快照由 Vite 直接从各自唯一源文件生成构建资源，不维护 `public` 副本；`dist/`、`auto-imports.d.ts` 和 `components.d.ts` 由构建或开发工具生成。
 
 ## 产品与业务
 
 - 产品方向是利用私人数据持续改善重要决策的个人高收益软件。交易复盘是第一主线，职业资产和健康精力是后续候选。
+- 职业方向以真实招聘市场为输入、浏览器插件为现场入口、AI 为信息和知识加工层；LeetCode、技术论坛、GitHub Trending、静态 BOSS 列表和独立面试页面已退出一级产品，历史页面重定向到博客归档，相关采集器只允许手动按需运行。
 - 产品闭环：记录 → 分析 → 改进 → 验证。
 - 决策模型：目标 → 信息 → 判断 → 行动 → 预期 → 结果 → 错误归因 → 修改规则。
 - 通用聊天壳、普通待办/日报/摘要、无反馈 AI 建议、纯仪表盘和复杂多 Agent 系统不是当前核心方向。

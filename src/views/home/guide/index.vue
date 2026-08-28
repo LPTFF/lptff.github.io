@@ -145,7 +145,6 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import infzmNews from "../../../data/infzm.json";
-import githubNews from "../../../data/githubTrending.json";
 import pojieNews from "../../../data/52pojie.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
@@ -178,7 +177,7 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    const newsGuide = ([...infzmNews, ...githubNews, ...pojieNews] as any[]).sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const newsGuide = ([...infzmNews, ...pojieNews] as any[]).sort((a: any, b: any) => b.timestamp - a.timestamp);
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();

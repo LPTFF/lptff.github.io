@@ -1,3 +1,18 @@
+---
+title: "前端项目证据与面试串联归档"
+date: "2026-08-28"
+slug: "interview-project-chain"
+category: "职业资产"
+tags: ["项目证据", "Vue", "React", "面试"]
+summary: "把通用面试知识连接到真实项目、业务场景和技术取舍，作为 AI 匹配 JD 与个人证据时的职业资产。"
+cover: "/img/logo.jpg"
+legacyPaths: []
+---
+
+> 归档说明：这份资料不再承担独立面试产品，而是作为“个人项目证据库”的历史底稿。使用时应先识别目标 JD 的核心问题，再从项目场景中选择证据。
+
+[返回完整知识树](/blog/articles/interview-knowledge-archive) · [了解职业决策产品的新方向](/blog/articles/career-decision-system)
+
 # 前端八股 · 项目串联背诵版（高级前端 / 技术负责人）
 
 > **副本说明**：本文档由 `前端八股文汇总背诵版.md` 按「真实命中规律 + 项目→原理→八股」重组而成。  
