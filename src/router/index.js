@@ -28,22 +28,37 @@ const routes = [
     path: "/message",
     redirect: "/blog/articles/fund-tools-evolution",
   },
-  { path: "/fundHoldInfoMsg", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") },
-  { path: "/newsArticle", name: "newsArticle", component: () => import("../views/Message/NewsArticle.vue") },
+  {
+    path: "/fundHoldInfoMsg",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "持仓明细" },
+    children: [{ path: "", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") }],
+  },
+  {
+    path: "/newsArticle",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "资讯文章" },
+    children: [{ path: "", name: "newsArticle", component: () => import("../views/Message/NewsArticle.vue") }],
+  },
   // 旧版基金工具（买入建议/三代持仓分析）已归档，详见博客 fund-tools-evolution
-{
-  path: "/fundPilot",
-  redirect: "/blog/articles/fund-tools-evolution",
-},
-{
-  path: "/fundPilotPlus",
-  redirect: "/blog/articles/fund-tools-evolution",
-},
-{
-  path: "/fundPilotV1",
-  redirect: "/blog/articles/fund-tools-evolution",
-},
-  { path: "/cryptocurrency", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") },
+  {
+    path: "/fundPilot",
+    redirect: "/blog/articles/fund-tools-evolution",
+  },
+  {
+    path: "/fundPilotPlus",
+    redirect: "/blog/articles/fund-tools-evolution",
+  },
+  {
+    path: "/fundPilotV1",
+    redirect: "/blog/articles/fund-tools-evolution",
+  },
+  {
+    path: "/cryptocurrency",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "加密货币分析" },
+    children: [{ path: "", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") }],
+  },
   {
     path: "/contract-review",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
@@ -52,9 +67,7 @@ const routes = [
   },
   {
     path: "/welfare",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "薅羊毛" },
-    children: [{ path: "", name: "welfare", component: () => import("../views/home/welfare/index.vue") }],
+    redirect: () => ({ path: "/", query: { tab: "welfare" } }),
   },
   {
     path: "/advanced-search",

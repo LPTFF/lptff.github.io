@@ -4,6 +4,7 @@
       <div class="header-inner">
         <RouterLink class="brand" to="/blog">tangff <span>博客</span></RouterLink>
         <nav class="desktop-nav">
+          <a href="/" class="home-link">返回首页</a>
           <RouterLink to="/blog">文章</RouterLink>
           <RouterLink to="/blog/archives">归档</RouterLink>
           <RouterLink to="/blog/reading">阅读</RouterLink>
@@ -16,6 +17,7 @@
         </div>
       </div>
       <nav v-if="menuOpen" class="mobile-nav">
+        <a href="/" class="home-link" @click="menuOpen = false">返回首页</a>
         <RouterLink to="/blog" @click="menuOpen = false">文章</RouterLink>
         <RouterLink to="/blog/archives" @click="menuOpen = false">归档</RouterLink>
         <RouterLink to="/blog/reading" @click="menuOpen = false">阅读</RouterLink>

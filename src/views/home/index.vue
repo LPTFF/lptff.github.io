@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed, defineAsyncComponent } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
 import {
   ElMenu,
@@ -68,12 +68,23 @@ const menuConfig = [
     component: defineAsyncComponent(() => import("./douban/index.vue")),
     propName: "doubanLocation",
   },
+  {
+    key: "welfare",
+    label: "薅羊毛",
+    component: defineAsyncComponent(() => import("./welfare/index.vue")),
+    propName: "welfareLocation",
+  },
 ];
 
 const previousRoute = ref("");
 const isPCRes = computed(() => isPC());
+const route = useRoute();
 const router = useRouter();
-const selectIndex = ref(isPCRes.value ? "tools" : "guide");
+const queryTab = route.query.tab ? String(route.query.tab) : "";
+const defaultTab = menuConfig.some((item) => item.key === queryTab)
+  ? queryTab
+  : (isPCRes.value ? "tools" : "guide");
+const selectIndex = ref(defaultTab);
 
 const lastClickTime = ref(0);
 let clickTimer: ReturnType<typeof setTimeout>;
@@ -120,6 +131,10 @@ const gotoIssue = () => {
 };
 
 onMounted(() => {
+  const currentTab = route.query.tab ? String(route.query.tab) : "";
+  if (currentTab && menuConfig.some((item) => item.key === currentTab)) {
+    selectIndex.value = currentTab;
+  }
   previousRoute.value = window.history.state?.back ?? "";
   document.title = menuConfig.find((item) => item.key === selectIndex.value)?.label || "";
 });

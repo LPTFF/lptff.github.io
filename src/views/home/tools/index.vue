@@ -24,7 +24,6 @@
 
 <script lang="ts">
 import { defineComponent, ref } from "vue";
-import { useRouter } from "vue-router";
 import { gotoOutPage } from "../../../utils/utils";
 import websiteGroups from "./websiteGroups.json";
 import logoImageUrl from "../../../assets/logo.jpg";
@@ -40,7 +39,6 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
-    const router = useRouter();
     const loadFrequentWebsites = () => {
       const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
       const list = Object.values(clickData)
@@ -54,8 +52,6 @@ export default defineComponent({
       }
       return [];
     };
-    // 加载缓存并打印
-    const frequentGroup = loadFrequentWebsites();
     const websiteSource: any = ref([
       ...loadFrequentWebsites(),
       ...websiteGroups
@@ -70,12 +66,7 @@ export default defineComponent({
           clickData[key].count += 1;
         }
         localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
-        const isInternal = website.url.startsWith("/") && !/^https?:\/\//.test(website.url);
-        if (isInternal) {
-          router.push(website.url);
-        } else {
-          gotoOutPage(website.url);
-        }
+        gotoOutPage(website.url);
       }
     };
     const websiteTransformType = (parentIndex: number) => {
