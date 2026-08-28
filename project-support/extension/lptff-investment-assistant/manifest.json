@@ -10,6 +10,7 @@
     "offscreen",
     "tabs",
     "storage",
+    "notifications",
     "scripting",
     "declarativeNetRequest"
   ],
@@ -22,12 +23,9 @@
     "https://zhipin.com/*",
     "https://www.kuaishou.com/*",
     "https://www.douyin.com/*",
-    "https://hongguoduanju.com/*"
-  ],
-  "optional_host_permissions": [
-    "https://*/*",
-    "http://localhost/*",
-    "http://127.0.0.1/*"
+    "https://hongguoduanju.com/*",
+    "http://*/*",
+    "https://*/*"
   ],
   "declarative_net_request": {
     "rule_resources": [
@@ -53,6 +51,17 @@
   "background": {
     "service_worker": "background.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "boss.js"
+      ],
+      "matches": [
+        "https://*.zhipin.com/*",
+        "https://zhipin.com/*"
+      ]
+    }
+  ],
   "content_scripts": [
     {
       "matches": [
@@ -122,6 +131,19 @@
         "https://*.zhipin.com/*",
         "https://zhipin.com/*"
       ],
+      "css": [
+        "content/boss-helper-upstream.css"
+      ],
+      "js": [
+        "content/boss-helper-upstream.js"
+      ],
+      "run_at": "document_start"
+    },
+    {
+      "matches": [
+        "https://*.zhipin.com/*",
+        "https://zhipin.com/*"
+      ],
       "js": [
         "content/source-extractor.js",
         "content/observation-bridge.js"
@@ -135,8 +157,7 @@
         "https://zhipin.com/*"
       ],
       "js": [
-        "content/observation-collector.js",
-        "content/boss-helper.js"
+        "content/observation-collector.js"
       ],
       "run_at": "document_idle"
     },
