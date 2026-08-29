@@ -34,12 +34,7 @@ const routes = [
     meta: { title: "持仓明细" },
     children: [{ path: "", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") }],
   },
-  {
-    path: "/newsArticle",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "资讯文章" },
-    children: [{ path: "", name: "newsArticle", component: () => import("../views/Message/NewsArticle.vue") }],
-  },
+  { path: "/newsArticle", redirect: "/blog/articles/information-tools-evolution" },
   // 旧版基金工具（买入建议/三代持仓分析）已归档，详见博客 fund-tools-evolution
   {
     path: "/fundPilot",
@@ -69,12 +64,7 @@ const routes = [
     path: "/welfare",
     redirect: () => ({ path: "/", query: { tab: "welfare" } }),
   },
-  {
-    path: "/advanced-search",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "高级搜索" },
-    children: [{ path: "", name: "advanced-search", component: () => import("../views/home/advancedSearch/index.vue") }],
-  },
+  { path: "/advanced-search", redirect: "/blog/articles/information-tools-evolution" },
   // 旧职业信息消费页面已归档为博客文章，历史链接继续可用。
   { path: "/tech-forum", redirect: "/blog/articles/career-tools-evolution" },
   { path: "/github-trending", redirect: "/blog/articles/career-tools-evolution" },

@@ -44,8 +44,6 @@ jobs:
         run: |
           npm install
           python -m pip install --requirement project-support/requirements-crawl.txt
-      - name: Collect public RSS for Pages
-        run: node ./project-support/scripts/collectors/rss/collect.js --output ./project-support/public/data/recommendArticleData.json
       - name: Crawl and validate site data
         run: |
           chmod +x project-support/build.sh
@@ -74,11 +72,6 @@ jobs:
       - name: Build
         run: |
           npm run build
-      - name: Verify RSS in production build
-        run: |
-          test -s project-support/public/data/recommendArticleData.json
-          test -s dist/data/recommendArticleData.json
-          cmp project-support/public/data/recommendArticleData.json dist/data/recommendArticleData.json
       - name: Package investment assistant extension
         run: |
           node project-support/scripts/extension/build-zip.js
