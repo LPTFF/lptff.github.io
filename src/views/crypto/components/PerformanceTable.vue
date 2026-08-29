@@ -1,19 +1,19 @@
 <template>
-  <el-table :data="rows" stripe size="small">
+  <el-table :data="rows" stripe size="small" :default-sort="{ prop: 'netPnl', order: 'descending' }">
     <el-table-column prop="label" label="维度" min-width="130" />
-    <el-table-column prop="trades" label="样本" width="80" />
-    <el-table-column label="胜率" width="100">
+    <el-table-column prop="trades" label="样本" width="80" sortable />
+    <el-table-column prop="winRatePct" label="胜率" width="100" sortable>
       <template #default="{ row }">{{ row.winRatePct.toFixed(1) }}%</template>
     </el-table-column>
-    <el-table-column label="净盈亏" min-width="120">
+    <el-table-column prop="netPnl" label="净盈亏" min-width="120" sortable>
       <template #default="{ row }">
         <span :class="row.netPnl >= 0 ? 'positive' : 'negative'">{{ row.netPnl.toFixed(2) }} USDT</span>
       </template>
     </el-table-column>
-    <el-table-column label="平均每笔" min-width="120">
+    <el-table-column prop="averagePnl" label="平均每笔" min-width="120" sortable>
       <template #default="{ row }">{{ row.averagePnl.toFixed(2) }} USDT</template>
     </el-table-column>
-    <el-table-column label="Profit Factor" width="120">
+    <el-table-column prop="profitFactor" label="盈利因子" width="110" sortable>
       <template #default="{ row }">{{ factor(row.profitFactor) }}</template>
     </el-table-column>
     <el-table-column label="样本提示" min-width="130">

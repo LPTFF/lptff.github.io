@@ -57,7 +57,7 @@ const routes = [
   {
     path: "/contract-review",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "合约复盘", product: "Investment OS" },
+    meta: { title: "合约复盘助手", product: "合约复盘助手" },
     children: [{ path: "", name: "contract-review", component: () => import("../views/crypto/ContractReviewView.vue") }],
   },
   {

@@ -5,7 +5,7 @@
 
   if (!isAllowedOrigin) return;
 
-  const CONTEXT_INVALIDATED_MESSAGE = "采集插件已更新或重新加载，当前页面中的旧连接已失效。请刷新当前基金复盘页面后重试";
+  const CONTEXT_INVALIDATED_MESSAGE = "采集插件已重新加载或更新，当前页面旧连接已失效。请刷新当前页面后重试";
   let contextInvalidated = false;
   let lifecyclePort = null;
 
@@ -84,8 +84,8 @@
         postResponse(message, responseType, response || {
           ok: false,
           error: missingReceiver
-            ? "采集插件后台尚未连接。请在 chrome://extensions 重新加载插件，并刷新当前基金复盘页面"
-            : runtimeError?.message || "Investment 插件后台未响应，请在 chrome://extensions 重新加载插件后刷新本页面",
+            ? "采集插件后台尚未连接。请在 chrome://extensions 确认加载插件，并刷新当前页面"
+            : runtimeError?.message || "采集插件后台未响应，请在 chrome://extensions 重新加载插件后刷新本页面",
         });
       });
     } catch (error) {
@@ -97,7 +97,7 @@
       }
       postResponse(message, responseType, {
         ok: false,
-        error: errorMessage || "Investment 插件通信失败，请刷新当前基金复盘页面后重试",
+        error: errorMessage || "采集插件通信失败，请刷新当前页面后重试",
       });
     }
   }
