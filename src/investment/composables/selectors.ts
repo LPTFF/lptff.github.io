@@ -1071,27 +1071,31 @@ export function buildAllocationDrift(
   }
 
   const totalValue = portfolio.holdings.reduce((s, h) => s + (h.marketValue || 0), 0) || 1;
-  for (const sv of strategyRuleVersions) {
-    for (const rule of sv.rules) {
-      if (rule.kind !== "position_band") continue;
-      if (!rule.assetId) continue;
-      const holding = portfolio.holdings.find((h) => h.assetId === rule.assetId);
-      if (!holding) continue;
-      const meta = assetMap.get(rule.assetId);
-      const weight = holding.weight ?? (holding.marketValue || 0) / totalValue;
-      out.push({
-        scope: "asset",
-        assetId: rule.assetId,
-        label: meta?.name ?? holding.name ?? rule.assetId,
-        actualPct: weight,
-        targetPct: rule.targetPct,
-        minPct: rule.minPct,
-        maxPct: rule.maxPct,
-        direction: driftDirection(weight, rule.minPct, rule.maxPct),
-        ruleSource: "position_band",
-        rationale: describeRuleRationale("position_band"),
-      });
-    }
+  // StrategyRuleVersion 是完整规则集快照，不是增量规则。机械检查只能消费最新版本；
+  // 若遍历全部历史版本，每次“重置为默认”都会把同一条偏离重复追加到结果中。
+  const currentStrategyVersion = strategyRuleVersions.reduce<StrategyRuleVersion | undefined>(
+    (latest, candidate) => !latest || candidate.version > latest.version ? candidate : latest,
+    undefined,
+  );
+  for (const rule of currentStrategyVersion?.rules ?? []) {
+    if (rule.kind !== "position_band") continue;
+    if (!rule.assetId) continue;
+    const holding = portfolio.holdings.find((h) => h.assetId === rule.assetId);
+    if (!holding) continue;
+    const meta = assetMap.get(rule.assetId);
+    const weight = holding.weight ?? (holding.marketValue || 0) / totalValue;
+    out.push({
+      scope: "asset",
+      assetId: rule.assetId,
+      label: meta?.name ?? holding.name ?? rule.assetId,
+      actualPct: weight,
+      targetPct: rule.targetPct,
+      minPct: rule.minPct,
+      maxPct: rule.maxPct,
+      direction: driftDirection(weight, rule.minPct, rule.maxPct),
+      ruleSource: "position_band",
+      rationale: describeRuleRationale("position_band"),
+    });
   }
 
   return out;

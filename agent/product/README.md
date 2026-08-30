@@ -1,6 +1,6 @@
 # 产品工作台
 
-这里首先帮助人理解产品，而不是展示 Agent 的文件组织。当前产品需求、分工和验收应在一次主文档阅读中完成；工程细节按需下钻，不作为理解产品的前置条件。
+这里首先帮助人理解产品，而不是展示 Agent 的文件组织。当前产品价值、边界和验收应在一次主文档阅读中完成；工程细节按需下钻，不作为理解产品的前置条件。
 
 ## 当前主线
 
@@ -8,13 +8,12 @@
 | --- | --- |
 | 产品 | **Investment Review**：用私人数据改善基金纪律、复盘和未来决策过程 |
 | 当前交付 | **P0 纪律与执行复盘**：按用户自己的计划与规则检查操作异常、仓位边界、移动止损、减仓进度和真实恢复 |
-| 实现状态 | 产品逻辑已定义，运行时未交付；当前 `/investment` 只有可复用的数据、Ledger、Coverage 和局部 Policy/Behavior/Action 基础 |
+| 实现状态 | P0 纪律与执行复盘运行时已实现；具体来源未提供的执行阶段语义继续保持 unknown |
 | 人的审查入口 | [Investment Review：人的基金复盘产品审查](investment-review.md) |
-| 本次分工 | 在同一审查正文的 `WP0-1` 至 `WP0-4` 中按用户结果查看分工；Agent A 是承担绝大多数交付的主力 Agent，Agent B 只在维护者授权后填补私人真实环境证据缺口 |
-| 协作方式 | [主力 Agent—授权验证 Agent—人类裁决者协作标准](../standards/main-agent-authorized-validation.md)，不建立 A/B 平行任务板 |
+| 协作方式 | 当前交付者纵向完成实现与非私人验证；私人真实环境仅按[最小授权验证](../standards/main-agent-authorized-validation.md)补足具体证据缺口 |
 | 工程深审 | [Investment Review 工程附录](reference/investment-review-engineering.md)，可选阅读 |
 
-若要回答“这次为什么做、做什么、谁做、怎样验收、是否对人友好”，只读[人的产品审查正文](investment-review.md)，不要从工程附录、source 或 archive 开始。
+若要回答“这次为什么做、做什么、怎样验收、是否对人友好”，只读[人的产品审查正文](investment-review.md)，不要从工程附录、source 或 archive 开始。
 
 **待审查新诉求（2026-08-15）**：[基金复盘助手：核心产品定义](source/fund-review-assistant-product-definition.md) 已作为上游输入入库，尚未与当前 Investment Review 主线合并审查。它强调“账户状态 + 投资纪律 + 异常检测”、四层模型与 LLM escalation；是否调整当前 P0 主线，按[业务任务分析规范](../standards/business-task-analysis.md)核对后再决定。
 

@@ -269,48 +269,15 @@ P2 Attribution 只有 Measurement 可信且数据粒度满足时运行。Level 1
 
 历史 ID 只用于追踪来源，不构成独立活动任务板。当前状态、范围和角色只在[产品正文](../investment-review.md)维护。
 
-## 7. Agent 边界与回传协议
+## 7. 私人来源与实现边界
 
-本节是[主力 Agent—授权验证 Agent—人类裁决者协作标准](../../standards/main-agent-authorized-validation.md)在 Investment Review 中的领域加严实例。Agent A 是主力交付者，常态承担 80% 以上工作；Agent B 不是通用代码 reviewer，只填补 A 无权接触的天天基金真实登录环境证据缺口。这里的真实 Chrome、金融隐私和脱敏协议不能被反向解释为其他产品都必须启用 B。
+通用权限规则见[最小授权验证](../../standards/main-agent-authorized-validation.md)。Investment Review 只增加以下领域边界：
 
-### Agent A
-
-- 负责需求细化、目标契约、Core 公式和状态机、migration、UI、构建、静态排错与修复；不能因为技术复杂而转交 B；
-- 只使用源码、已观察的公开来源事实和 B 的脱敏真实环境结论；
-- 不访问真实账户、真实资产或交易、Cookie、Token、Raw Snapshot、登录态或完整 Network Logs；
-- 核心判断明确输入、规则版本、Coverage、公式/状态和 unknown 条件；
-- sequence/state 能力包含属性或状态机测试；
-- runtime 不依赖 `agent/`，AI 不作为 Core Oracle。
-
-### Agent B
-
-只有 A 已完成源码实现和静态排错，剩余主张被收敛为必须在私人真实环境观察的问题，且维护者明确批准目标、数据、动作和停止条件时，才启用 B：
-
-- 单次只验证一个明确授权的来源能力、场景和目标；
-- 只读观察，不创建/修改交易，不设计 Core 规则，不计算绩效，不评价决策、仓位或减仓，也不接管 A 的实现或静态排错；
-- 真实登录 Chrome 是验收目标时，隔离 profile 不得替代真实验收；
-- 不能证明时返回 `BLOCKED/unknown` 和 Required change，不猜 mapping；
-- 不输出或保存基金名、真实金额、收益、可组合识别个人的日期金额、Raw JSON/HTML、Cookie、Token、银行卡信息、登录态或完整 Network Logs。
-
-固定回传：
-
-```text
-Task
-Authorization
-Environment
-Result: PASS | FAIL | BLOCKED
-Target capability
-Field presence/absence
-Field semantics
-Coverage
-Unknown
-Required change
-Sensitive data exposed
-Stopped because
-Agent A dependency impact
-```
-
-原始网络材料只在授权浏览器会话临时观察，不复制到仓库、摘要或 fixture。
+- Core 只消费已确认语义的标准化事实，明确输入、规则版本、Coverage、状态和 unknown 条件；AI 不作为 Core Oracle，runtime 不依赖 `agent/`。
+- 私人来源只用于确认字段有无、语义、时间、Coverage 和页面消费，不用于设计阈值、评价仓位、计算投资结论或执行交易。
+- 真实登录 Chrome 是目标时，隔离 profile 不得替代；不能证明的 mapping 保持 unknown。
+- 只回传 `REAL_SOURCE_PASS | FAIL | BLOCKED | UNKNOWN`、字段能力、Coverage、必要变更和敏感信息暴露情况；不输出基金名、金额、收益、账户、Raw JSON/HTML、Cookie、Token、银行卡、登录态或完整 Network Log。
+- 原始材料只在获批会话临时观察，不进入仓库、fixture、摘要或长期报告。
 
 ## 8. Definition of Done
 

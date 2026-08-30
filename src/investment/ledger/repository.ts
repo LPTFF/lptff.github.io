@@ -28,6 +28,15 @@ import { dailyPnlKey } from "../sync/keys";
 import { transactionKey } from "../sync/keys";
 import { explicitThemesFromSourceText } from "../metadata/themes";
 import {
+  createAuditEvent,
+  USER_AUDIT_CONTEXT,
+  verifyAuditTrail as verifyStoredAuditTrail,
+  type AuditContext,
+  type AuditEvent,
+  type AuditEventInput,
+  type AuditVerification,
+} from "../audit/trail";
+import {
   openInvestmentDB,
   reqToPromise,
   StoreName,
@@ -220,6 +229,10 @@ function sameStoredValue(left: unknown, right: unknown): boolean {
   return JSON.stringify(left) === JSON.stringify(right);
 }
 
+// 同一页面可能存在多个 InvestmentLedger 实例；模块级队列保证它们共享一个写入顺序。
+// 跨标签页再由 Web Locks 串行化，Chrome 不支持 Web Locks 时仍保留当前页面内的安全性。
+const auditQueues = new Map<string, Promise<unknown>>();
+
 export class InvestmentLedger {
   private dbPromise: Promise<IDBDatabase>;
 
@@ -311,6 +324,61 @@ export class InvestmentLedger {
       .map(migrateLegacyIndustryAllocationScale)
       .map(migrateLegacyEastmoneyThemeProvenance)
       .map(migrateLegacyIndexSemantics);
+  }
+
+  // ---- 本地关键操作审计 ----
+
+  private async enqueueAuditWrite<T>(write: () => Promise<T>): Promise<T> {
+    const db = await this.db();
+    const previous = auditQueues.get(db.name) ?? Promise.resolve();
+    const operation = previous.then(async () => {
+      const lockManager = typeof navigator === "undefined" ? undefined : navigator.locks;
+      if (!lockManager) return write();
+      return lockManager.request(`investment-ledger-audit:${db.name}`, { mode: "exclusive" }, write);
+    });
+    auditQueues.set(db.name, operation.catch(() => undefined));
+    return operation;
+  }
+
+  /**
+   * 在持有跨实例/跨标签页锁时计算下一条哈希，并把业务写入和审计事件放进同一事务。
+   * writer 必须同步排入 IDB 请求，不能在回调里 await，避免事务提前变为 inactive。
+   */
+  private async auditedWrite(
+    stores: string[],
+    input: AuditEventInput,
+    writer: (tx: IDBTransaction) => void,
+    resetChain = false,
+  ): Promise<AuditEvent> {
+    return this.enqueueAuditWrite(async () => {
+      const db = await this.db();
+      const existing = resetChain ? [] : await this.getAuditEvents();
+      const event = await createAuditEvent(input, existing.at(-1));
+      const tx = db.transaction([...new Set([...stores, StoreName.auditEvents])], "readwrite");
+      if (resetChain) tx.objectStore(StoreName.auditEvents).clear();
+      writer(tx);
+      tx.objectStore(StoreName.auditEvents).add(event);
+      await txDone(tx);
+      return event;
+    });
+  }
+
+  async appendAuditEvent(input: AuditEventInput): Promise<AuditEvent> {
+    return this.auditedWrite([], input, () => undefined);
+  }
+
+  async getAuditEvents(): Promise<AuditEvent[]> {
+    const db = await this.db();
+    const tx = db.transaction(StoreName.auditEvents, "readonly");
+    const events = await reqToPromise(tx.objectStore(StoreName.auditEvents).getAll()) as AuditEvent[];
+    return events.sort((left, right) => left.sequence - right.sequence);
+  }
+
+  async getAuditTrail(): Promise<{ events: AuditEvent[]; verification: AuditVerification }> {
+    const db = await this.db();
+    await auditQueues.get(db.name);
+    const events = await this.getAuditEvents();
+    return { events, verification: await verifyStoredAuditTrail(events) };
   }
 
   // ---- Transactions ----
@@ -442,16 +510,32 @@ export class InvestmentLedger {
   // ---- Imports 审计 ----
 
   async addImport(record: ImportRecord): Promise<void> {
-    const db = await this.db();
-    const tx = db.transaction(StoreName.imports, "readwrite");
-    const store = tx.objectStore(StoreName.imports);
-    store.put(record);
-    const all = (await reqToPromise(store.getAll())) as ImportRecord[];
-    const expired = all
-      .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt) || b.id.localeCompare(a.id))
-      .slice(IMPORT_RETENTION_COUNT);
-    for (const item of expired) store.delete(item.id);
-    await txDone(tx);
+    await this.auditedWrite([StoreName.imports], {
+      type: "data.imported",
+      actor: "system",
+      origin: "data-import",
+      subjectId: record.id,
+      summary: record.status === "ok" ? "采集数据已写入本地账本" : "采集数据已部分写入本地账本",
+      details: {
+        source: record.source,
+        status: record.status,
+        addedTransactions: record.addedTransactions,
+        duplicateTransactions: record.duplicateTransactions,
+        addedDailyPnl: record.addedDailyPnl,
+        failureCount: record.failures.length,
+        warningCount: record.warnings.length,
+      },
+    }, (tx) => {
+      const store = tx.objectStore(StoreName.imports);
+      store.put(record);
+      const request = store.getAll();
+      request.onsuccess = () => {
+        const expired = (request.result as ImportRecord[])
+          .sort((a, b) => b.capturedAt.localeCompare(a.capturedAt) || b.id.localeCompare(a.id))
+          .slice(IMPORT_RETENTION_COUNT);
+        for (const item of expired) store.delete(item.id);
+      };
+    });
   }
 
   /**
@@ -786,7 +870,7 @@ export class InvestmentLedger {
   }
 
   /** 清除来源事实和所有派生结果，保留用户定义的 Policies / PolicyVersions。 */
-  async clearImportedFacts(): Promise<void> {
+  async clearImportedFacts(audit: AuditContext | false = USER_AUDIT_CONTEXT): Promise<void> {
     const db = await this.db();
     const stores = [
       StoreName.accounts,
@@ -802,14 +886,23 @@ export class InvestmentLedger {
       StoreName.reviewSnapshots,
       StoreName.reviewActions,
     ];
-    const tx = db.transaction(stores as string[], "readwrite");
-    for (const store of stores) tx.objectStore(store).clear();
-    await txDone(tx);
+    if (audit === false) {
+      const tx = db.transaction(stores as string[], "readwrite");
+      for (const store of stores) tx.objectStore(store).clear();
+      await txDone(tx);
+      return;
+    }
+    await this.auditedWrite(stores, {
+      type: "facts.cleared",
+      ...audit,
+      summary: "已清除来源事实和派生结果，用户规则继续保留",
+    }, (tx) => {
+      for (const store of stores) tx.objectStore(store).clear();
+    });
   }
 
   /** 清空 Investment Ledger，包括用户定义的 Policies / PolicyVersions。 */
-  async clearEverything(): Promise<void> {
-    const db = await this.db();
+  async clearEverything(audit: AuditContext = USER_AUDIT_CONTEXT): Promise<void> {
     const stores = [
       StoreName.accounts,
       StoreName.portfolioSnapshots,
@@ -833,10 +926,17 @@ export class InvestmentLedger {
       StoreName.reductionPlans,
       StoreName.reviewSnapshots,
       StoreName.reviewActions,
+      StoreName.auditEvents,
     ];
-    const tx = db.transaction(stores as string[], "readwrite");
-    for (const store of stores) tx.objectStore(store).clear();
-    await txDone(tx);
+    await this.auditedWrite(stores, {
+      type: "ledger.reset",
+      ...audit,
+      summary: "已完全清空本地账本并重新建立操作链",
+    }, (tx) => {
+      for (const store of stores) {
+        if (store !== StoreName.auditEvents) tx.objectStore(store).clear();
+      }
+    }, true);
   }
 
   // ---- 清空（兼容既有测试入口） ----
@@ -871,17 +971,31 @@ export class InvestmentLedger {
 
   // ---- P0：StrategyRuleVersion ----
 
-  async putStrategyRuleVersion(version: StrategyRuleVersion): Promise<void> {
+  async putStrategyRuleVersion(
+    version: StrategyRuleVersion,
+    audit: AuditContext | false = USER_AUDIT_CONTEXT,
+  ): Promise<void> {
     const db = await this.db();
-    const tx = db.transaction(StoreName.strategyRuleVersions, "readwrite");
+    const tx = db.transaction(StoreName.strategyRuleVersions, "readonly");
     const store = tx.objectStore(StoreName.strategyRuleVersions);
     const existing = (await reqToPromise(store.get(version.id))) as StrategyRuleVersion | undefined;
     if (existing && !sameStoredValue(existing, version)) {
-      await txDone(tx);
       throw new Error(`putStrategyRuleVersion: 规则版本 ${version.id} 已存在且内容不同，不得覆盖历史`);
     }
-    if (!existing) store.add(version);
-    await txDone(tx);
+    if (existing) return;
+    if (audit === false) {
+      const writeTx = db.transaction(StoreName.strategyRuleVersions, "readwrite");
+      writeTx.objectStore(StoreName.strategyRuleVersions).add(version);
+      await txDone(writeTx);
+      return;
+    }
+    await this.auditedWrite([StoreName.strategyRuleVersions], {
+        type: "rules.updated",
+        ...audit,
+        subjectId: version.id,
+        summary: `已保存第 ${version.version} 版投资纪律`,
+        details: { scopeId: version.scopeId, ruleCount: version.rules.length, effectiveFrom: version.effectiveFrom },
+    }, (writeTx) => writeTx.objectStore(StoreName.strategyRuleVersions).add(version));
   }
 
   async getStrategyRuleVersions(scopeId: string): Promise<StrategyRuleVersion[]> {
@@ -911,16 +1025,23 @@ export class InvestmentLedger {
     record: DecisionRecord,
     plan: OperationPlan,
     scope: InvestmentScope,
+    audit: AuditContext = USER_AUDIT_CONTEXT,
   ): Promise<void> {
-    const db = await this.db();
-    const tx = db.transaction(
+    await this.auditedWrite(
       [StoreName.decisionRecords, StoreName.operationPlans, StoreName.investmentScopes],
-      "readwrite",
+      {
+        type: "decision.recorded",
+        ...audit,
+        subjectId: record.id,
+        summary: "已记录事前决策和操作计划",
+        details: { scopeId: scope.scopeId, direction: record.direction, assetId: record.assetId },
+      },
+      (tx) => {
+        tx.objectStore(StoreName.decisionRecords).put(record);
+        tx.objectStore(StoreName.operationPlans).put(plan);
+        tx.objectStore(StoreName.investmentScopes).put(scope);
+      },
     );
-    tx.objectStore(StoreName.decisionRecords).put(record);
-    tx.objectStore(StoreName.operationPlans).put(plan);
-    tx.objectStore(StoreName.investmentScopes).put(scope);
-    await txDone(tx);
   }
 
   async getDecisionRecords(scopeId: string): Promise<DecisionRecord[]> {
@@ -960,11 +1081,21 @@ export class InvestmentLedger {
     return (await reqToPromise(index.getAll(scopeId))) as OperationPlan[];
   }
 
-  async putExecutionLink(link: ExecutionLink): Promise<void> {
+  async putExecutionLink(link: ExecutionLink, audit: AuditContext | false = USER_AUDIT_CONTEXT): Promise<void> {
     const db = await this.db();
-    const tx = db.transaction(StoreName.executionLinks, "readwrite");
-    tx.objectStore(StoreName.executionLinks).put(link);
-    await txDone(tx);
+    if (audit === false) {
+      const tx = db.transaction(StoreName.executionLinks, "readwrite");
+      tx.objectStore(StoreName.executionLinks).put(link);
+      await txDone(tx);
+      return;
+    }
+    await this.auditedWrite([StoreName.executionLinks], {
+      type: "execution.linked",
+      ...audit,
+      subjectId: link.id,
+      summary: "已将真实交易与事前决策建立关联",
+      details: { linkMethod: link.linkMethod, confidence: link.confidence },
+    }, (tx) => tx.objectStore(StoreName.executionLinks).put(link));
   }
 
   async getExecutionLinks(): Promise<ExecutionLink[]> {
@@ -1037,17 +1168,28 @@ export class InvestmentLedger {
     await txDone(tx);
   }
 
-  async putReductionPlan(plan: ReductionPlan): Promise<void> {
+  async putReductionPlan(plan: ReductionPlan, audit: AuditContext | false = USER_AUDIT_CONTEXT): Promise<void> {
     const db = await this.db();
-    const tx = db.transaction(StoreName.reductionPlans, "readwrite");
+    const tx = db.transaction(StoreName.reductionPlans, "readonly");
     const store = tx.objectStore(StoreName.reductionPlans);
     const existing = (await reqToPromise(store.get(plan.id))) as ReductionPlan | undefined;
     if (existing && !sameStoredValue(existing, plan)) {
-      await txDone(tx);
       throw new Error(`putReductionPlan: 减仓计划 ${plan.id} 已存在且内容不同，不得覆盖历史`);
     }
-    if (!existing) store.add(plan);
-    await txDone(tx);
+    if (existing) return;
+    if (audit === false) {
+      const writeTx = db.transaction(StoreName.reductionPlans, "readwrite");
+      writeTx.objectStore(StoreName.reductionPlans).add(plan);
+      await txDone(writeTx);
+      return;
+    }
+    await this.auditedWrite([StoreName.reductionPlans], {
+        type: "reduction.plan.created",
+        ...audit,
+        subjectId: plan.id,
+        summary: "已保存减仓计划",
+        details: { scopeId: plan.scopeId, assetId: plan.assetId },
+    }, (writeTx) => writeTx.objectStore(StoreName.reductionPlans).add(plan));
   }
 
   async getReductionPlans(scopeId: string): Promise<ReductionPlan[]> {

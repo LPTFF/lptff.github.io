@@ -103,13 +103,15 @@ onMounted(async () => {
       && coverage.completeness === "partial"
       && coverage.warningCodes.includes("eastmoney:transactions-partial"),
     );
-  if (bundledPartialCapture) await clearImportedFacts();
+  if (bundledPartialCapture) {
+    await clearImportedFacts({ actor: "system", origin: "automatic-maintenance" });
+  }
 
   // source=sim：真实持仓演练续演；旧虚构残留（simulator 拒绝恢复 initialized=false）则清除。
   if (state.account?.source === "sim") {
     await simulator.init();
     if (!simulator.state.initialized) {
-      await clearEverything();
+      await clearEverything({ actor: "system", origin: "automatic-maintenance" });
     }
   }
   // 自动行动是可重新计算的派生数据。进入页面即与当前事实对账，清除旧版本留下的误报。

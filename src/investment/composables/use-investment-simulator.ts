@@ -375,7 +375,7 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
   const realAssets: AssetMetadata[] = JSON.parse(JSON.stringify(os.state.assets));
   const realUserRulesRaw = os.state.strategyRuleVersions.at(-1)?.rules;
   const realUserRules = realUserRulesRaw ? (JSON.parse(JSON.stringify(realUserRulesRaw)) as StrategyRule[]) : undefined;
-  await l.clearImportedFacts();
+  await l.clearImportedFacts(false);
   const holdings: Record<string, SimHolding> = {};
   const holdingIndex: Record<string, IndexId> = {};
   const holdingNames: Record<string, string | undefined> = {};
@@ -406,7 +406,7 @@ async function init(forceReset = false, options?: { useRealHoldings?: boolean })
     rules: realUserRules?.length ? realUserRules : buildSimRules(assetIds),
     changeReason: "真实持仓演练初始规则",
   };
-  await l.putStrategyRuleVersion(ruleVersion);
+  await l.putStrategyRuleVersion(ruleVersion, false);
   state.round = 0; state.asOf = dateOf(0); state.phase = phaseOf(0);
   state.toggles = defaultToggles(); state.behaviorLog = [];
   state.assetHistory = [];
@@ -464,7 +464,7 @@ async function advance(): Promise<void> {
     });
     for (const tx of out.transactions) applyTx(tx, period);
     for (const d of out.decisions) await l.putDecisionRecord(d);
-    for (const lk of out.links) await l.putExecutionLink(lk);
+    for (const lk of out.links) await l.putExecutionLink(lk, false);
     if (out.transactions.length) await l.putTransactions(out.transactions);
     const assetIds = Object.keys(state.holdings);
     const trailingRules = buildSimRules(assetIds).filter((r): r is TrailingStopRule => r.kind === "trailing_stop");
@@ -521,7 +521,7 @@ async function rewind(): Promise<void> {
   state.running = true;
   try {
     const l = getLedger();
-    await l.clearImportedFacts();
+    await l.clearImportedFacts(false);
     await l.deleteDecisionRecordsByScope(SCOPE_ID);
     await l.deleteExecutionLinks(popped.links.map((lk) => lk.id));
     await l.deleteTrailingStopStatesByScope(SCOPE_ID);
@@ -529,7 +529,7 @@ async function rewind(): Promise<void> {
     for (const snap of rewindStack) {
       if (snap.transactions.length) await l.putTransactions(snap.transactions);
       for (const d of snap.decisions) await l.putDecisionRecord(d);
-      for (const lk of snap.links) await l.putExecutionLink(lk);
+      for (const lk of snap.links) await l.putExecutionLink(lk, false);
       for (const ts of snap.trailingStates) await l.putTrailingStopState(ts);
       await writeFactsToLedger(snap.round, snap.holdings, realAssets);
     }

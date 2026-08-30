@@ -28,6 +28,7 @@ import type {
   Transaction,
 } from "../domain";
 import { InvestmentLedger, type ImportRecord, type SourceCaptureArchive } from "../ledger/repository";
+import type { AuditContext, AuditEvent, AuditVerification } from "../audit/trail";
 import { DatasetSourceAdapter } from "../adapter/InvestmentSourceAdapter";
 import { SyncService } from "../sync/sync-service";
 import {
@@ -76,6 +77,8 @@ export interface InvestmentOsState {
   lastImport?: ImportRecord;
   latestSourceCapture?: SourceCaptureArchive;
   sourceCaptureArchiveCount: number;
+  auditEvents: AuditEvent[];
+  auditVerification: AuditVerification;
   account?: AccountSnapshot;
   portfolio?: PortfolioSnapshot;
   transactions: Transaction[];
@@ -112,6 +115,13 @@ const state = reactive<InvestmentOsState>({
   coverage: [],
   assets: [],
   sourceCaptureArchiveCount: 0,
+  auditEvents: [],
+  auditVerification: {
+    ok: true,
+    count: 0,
+    headHash: "",
+    message: "尚未读取本地操作链",
+  },
   warnings: [],
   policies: [],
   activeVersions: [],
@@ -203,7 +213,7 @@ async function loadFromLedger(): Promise<void> {
   await l.removeMockData();
   if (!ledgerCompaction) ledgerCompaction = l.compactCollectionHistory();
   await ledgerCompaction;
-  const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, sourceCaptures, scopes] = await Promise.all([
+  const [account, portfolio, transactions, dailyPnl, coverage, assets, policies, activeVersions, actions, patterns, imports, sourceCaptures, scopes, auditTrail] = await Promise.all([
     l.getLatestAccount(),
     l.getLatestPortfolio(),
     l.getAllTransactions(),
@@ -217,6 +227,7 @@ async function loadFromLedger(): Promise<void> {
     l.getImports(),
     l.getSourceCaptureArchives(),
     l.getScopes(),
+    l.getAuditTrail(),
   ]);
   const activeScope = scopes
     .filter((s) => s.effectiveFrom <= today() && (!s.effectiveTo || s.effectiveTo >= today()))
@@ -240,6 +251,8 @@ async function loadFromLedger(): Promise<void> {
     ? sourceCaptures.find((capture) => capture.capturedAt === lastImport.capturedAt)
     : undefined;
   state.sourceCaptureArchiveCount = sourceCaptures.length;
+  state.auditEvents = auditTrail.events;
+  state.auditVerification = auditTrail.verification;
   state.portfolio = portfolio;
   state.transactions = transactions;
   state.dailyPnl = dailyPnl;
@@ -346,6 +359,12 @@ async function syncFromExtension(): Promise<ExtensionSyncResult | undefined> {
   }
 }
 
+async function refreshAuditTrail(): Promise<void> {
+  const auditTrail = await getLedger().getAuditTrail();
+  state.auditEvents = auditTrail.events;
+  state.auditVerification = auditTrail.verification;
+}
+
 async function startCollection(): Promise<boolean> {
   if (state.syncing || state.collecting) return false;
   state.importContext = undefined;
@@ -388,20 +407,24 @@ async function discardStaging(): Promise<void> {
   state.syncMessage = "已丢弃插件待导入数据，可重新采集";
 }
 
-async function clearImportedFacts(): Promise<void> {
+async function clearImportedFacts(
+  audit: AuditContext = { actor: "user", origin: "user-action" },
+): Promise<void> {
   state.error = undefined;
   // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）；扩展暂存由扩展自身管理。
-  await getLedger().clearImportedFacts();
+  await getLedger().clearImportedFacts(audit);
   resetFactState();
   await loadFromLedger();
   state.syncPhase = "idle";
   state.syncMessage = "投资数据已清除，规则已保留；可重新采集";
 }
 
-async function clearEverything(): Promise<void> {
+async function clearEverything(
+  audit: AuditContext = { actor: "user", origin: "user-action" },
+): Promise<void> {
   state.error = undefined;
   // 本地清空不触碰浏览器扩展桥接（无扩展时 discard/refresh 会 5s 超时卡顿）。
-  await getLedger().clearEverything();
+  await getLedger().clearEverything(audit);
   resetFactState();
   state.policies = [];
   state.activeVersions = [];
@@ -738,7 +761,7 @@ async function importSourceCapture(capture: EastmoneySourceCapture, successMessa
     const l = getLedger();
     state.syncPhase = "importing";
     state.syncMessage = "正在写入账户、持仓、交易和覆盖范围…";
-    await l.clearImportedFacts();
+    await l.clearImportedFacts({ actor: "system", origin: "automatic-maintenance" });
     await l.removeMockData();
     await l.removeDemoReviewConfiguration();
     // 委托 SyncService 统一去重 / coverage 保守合并 / 审计。
@@ -859,6 +882,7 @@ export function useInvestmentOS() {
     clearAll,
     loadBundledSnapshot,
     importCaptureFile,
+    refreshAuditTrail,
     createPolicy,
     createPolicyVersion,
     evaluateAndPersistActions,

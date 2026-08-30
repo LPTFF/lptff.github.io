@@ -8,7 +8,7 @@ import type { Transaction, TransactionStatus } from "../domain";
 import { transactionKey } from "../sync/keys";
 
 export const INVESTMENT_DB_NAME = "investment-db";
-export const INVESTMENT_DB_VERSION = 3;
+export const INVESTMENT_DB_VERSION = 4;
 
 export const StoreName = {
   // v1
@@ -26,6 +26,8 @@ export const StoreName = {
   evidence: "evidence",
   // v3：完整原始采集事实档案；仅本地保存，不作为计算模型直接输入。
   sourceCaptures: "sourceCaptures",
+  // v4：本地账本关键操作的追加式哈希链；不保存账户或交易原文。
+  auditEvents: "auditEvents",
   // v2：P0 纪律与执行复盘（Investment Review WP0-1~WP0-3）
   investmentScopes: "investmentScopes",
   strategyRuleVersions: "strategyRuleVersions",
@@ -138,6 +140,14 @@ function createV3Stores(db: IDBDatabase): void {
   }
 }
 
+function createV4Stores(db: IDBDatabase): void {
+  if (!db.objectStoreNames.contains(StoreName.auditEvents)) {
+    const store = db.createObjectStore(StoreName.auditEvents, { keyPath: "sequence" });
+    store.createIndex("byOccurredAt", "occurredAt", { unique: false });
+    store.createIndex("byType", "type", { unique: false });
+  }
+}
+
 /**
  * 迁移 v1 旧 TransactionStatus 值到 v2 新枚举，并重建 dedupKey（fingerprint 含 status，
  * 不重建会导致同一笔交易旧/新 fingerprint 不匹配，重复导入时双倍记账）。
@@ -163,6 +173,7 @@ function upgrade(db: IDBDatabase, oldVersion: number): void {
   if (oldVersion < 1) createV1Stores(db);
   if (oldVersion < 2) createV2Stores(db);
   if (oldVersion < 3) createV3Stores(db);
+  if (oldVersion < 4) createV4Stores(db);
 }
 
 /** 打开 Investment Ledger，自动执行结构迁移；status 数据迁移在打开成功后幂等执行。 */

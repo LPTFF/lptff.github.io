@@ -1,7 +1,16 @@
 # Agent 入口
 
-本文件只用于宿主发现。项目资料和人机协作原则统一放在 [agent/](agent/README.md)。
+本项目只保留五条通用原则：
 
-`agent/` 是人的项目工作台，不是要求人服从 Agent 的流程系统。请按当前问题选择需要的事实、产品、代码组织或验收资料；不要求固定阅读顺序、模板或治理命令。
+1. **为人的结果负责**：先确认要改善的用户结果，再选择实现手段；事实、推测和价值取舍分开表达。
+2. **主动完成闭环**：在授权范围内自动完成可逆的分析、实现、排错和验证；失败就依据真实差异继续修复，不把机械工作退还给人。
+3. **真实结果才算完成**：源码、类型检查、构建、Mock 和测试只用于排错；功能结论必须来自与主张匹配的真实消费者、数据、浏览器、存储、网络或部署环境，并注明没有证明的范围。
+4. **权限和副作用最小化**：私人数据只在明确授权的环境和字段范围内观察；默认只输出脱敏状态与聚合结果。对外、不可逆、交易、凭据和用户可见高风险动作必须单独获批。
+5. **让人容易审查**：提交、推送前展示确定版本、重要差异、真实证据和剩余未知并取得明确批准；证据交付前不清理仍需人查看的页面或服务。
 
-涉及 BOSS 直聘 Chrome Extension 的测试或验收时，必须先读 `agent/verification/boss-extension-real-validation.md`；BOSS 不适用项目其他页面的 DevTools MCP 验收路径。
+项目事实和按任务路由见 [agent/README.md](agent/README.md)。不要遍历整套资料，也不要为简单任务套治理模板。
+
+## 浏览器特例
+
+- **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](agent/product/investment-review.md) 与 [真实环境验收原则](agent/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
+- **BOSS 直聘扩展**：必须先读 [BOSS 真实验收手册](agent/verification/boss-extension-real-validation.md)。BOSS 禁止使用 DevTools/CDP/WebDriver 控制线上页面，只使用普通 Chrome 与 OS 级截图、鼠标和键盘。

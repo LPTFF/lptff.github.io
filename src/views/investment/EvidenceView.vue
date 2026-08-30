@@ -48,6 +48,43 @@
       </div>
     </el-card>
 
+    <el-card shadow="never" class="section audit-trail-card" :class="{ 'audit-trail-broken': !state.auditVerification.ok }">
+      <template #header>
+        <div class="audit-trail-header">
+          <div>
+            <span>本地账本操作追溯</span>
+            <p>记录导入、规则、计划与清除等关键动作，不复制账户或交易原文。</p>
+          </div>
+          <el-button size="small" :loading="verifyingAudit" @click="verifyAudit">重新校验</el-button>
+        </div>
+      </template>
+      <el-alert
+        :type="state.auditVerification.ok ? 'success' : 'error'"
+        :title="auditStatusTitle"
+        :description="auditStatusDescription"
+        show-icon
+        :closable="false"
+        class="audit-status"
+      />
+      <el-table v-if="recentAuditEvents.length" :data="recentAuditEvents" size="small" border>
+        <el-table-column prop="occurredAt" label="时间" width="178">
+          <template #default="{ row }">{{ formatAuditTime(row.occurredAt) }}</template>
+        </el-table-column>
+        <el-table-column label="动作" width="130">
+          <template #default="{ row }"><el-tag size="small" effect="plain">{{ auditTypeLabel(row.type) }}</el-tag></template>
+        </el-table-column>
+        <el-table-column label="发起方式" width="110">
+          <template #default="{ row }">{{ auditOriginLabel(row.origin, row.actor) }}</template>
+        </el-table-column>
+        <el-table-column prop="summary" label="发生了什么" min-width="280" />
+        <el-table-column label="链上锚点" width="150">
+          <template #default="{ row }"><code class="audit-hash">#{{ row.sequence }} · {{ row.hash.slice(0, 10) }}</code></template>
+        </el-table-column>
+      </el-table>
+      <el-empty v-else description="尚无关键操作记录；下一次导入或规则变更后开始形成操作链" :image-size="58" />
+      <p class="audit-boundary">校验能发现链内事件被修改、插入或删除；若整条链被重写或尾部被截断，仍需外部可信锚点才能独立证明。</p>
+    </el-card>
+
     <!-- 折叠：可验证事实明细（计数 + 对账锚点 + 逐笔核对） -->
     <el-collapse v-model="factsActive">
       <el-collapse-item name="facts">
@@ -233,7 +270,7 @@ import { useInvestmentOS } from "../../investment/composables/use-investment-os"
 import { buildAllocationDrift, buildTransactionLedger, buildDailyPnlAudit, type TransactionLedgerRow } from "../../investment/composables/selectors";
 import { confirmedBuyOrderRequestedAmount, type CoverageDataset, type DataCoverage, type EvidenceStrength } from "../../investment/domain";
 
-const { state } = useInvestmentOS();
+const { state, refreshAuditTrail } = useInvestmentOS();
 const isSimulator = computed(() => state.account?.source === "sim");
 
 const transactions = computed(() => [...state.transactions]);
@@ -247,6 +284,49 @@ const pnl = computed(() => dailyPnl.value.reduce((sum, point) => sum + point.pnl
 const ruleDeviations = computed(() => state.actions.filter((action) =>
   action.type === "ABNORMAL_TRANSACTION" || action.type === "UNCLASSIFIED_TRANSACTION",
 ).length);
+
+const verifyingAudit = ref(false);
+const recentAuditEvents = computed(() => [...state.auditEvents].reverse().slice(0, 8));
+const auditStatusTitle = computed(() => {
+  if (!state.auditVerification.ok) return "操作链校验失败，请停止依赖该链作审计判断";
+  return state.auditVerification.count
+    ? `链内一致 · 已校验 ${state.auditVerification.count} 条关键操作`
+    : "尚未形成操作链";
+});
+const auditStatusDescription = computed(() => {
+  if (!state.auditVerification.ok) return state.auditVerification.message;
+  if (!state.auditVerification.count) return "导入数据、保存纪律或清除账本后会自动记录。";
+  return `当前头部锚点 ${state.auditVerification.headHash.slice(0, 18)}…；所有记录仅保存在本机 IndexedDB。`;
+});
+const AUDIT_TYPE_LABELS: Record<string, string> = {
+  "data.imported": "数据导入",
+  "facts.cleared": "事实清除",
+  "ledger.reset": "完全清空",
+  "rules.updated": "纪律变更",
+  "decision.recorded": "事前计划",
+  "execution.linked": "执行关联",
+  "reduction.plan.created": "减仓计划",
+};
+function auditTypeLabel(type: string): string {
+  return AUDIT_TYPE_LABELS[type] ?? type;
+}
+function auditOriginLabel(origin: string | undefined, actor: string): string {
+  if (origin === "user-action") return "用户操作";
+  if (origin === "data-import") return "数据导入";
+  if (origin === "automatic-maintenance") return "自动维护";
+  return actor === "user" ? "用户操作（旧）" : "系统操作（旧）";
+}
+function formatAuditTime(value: string): string {
+  return new Date(value).toLocaleString("zh-CN", { hour12: false });
+}
+async function verifyAudit(): Promise<void> {
+  verifyingAudit.value = true;
+  try {
+    await refreshAuditTrail();
+  } finally {
+    verifyingAudit.value = false;
+  }
+}
 
 const observationPeriod = computed(() => {
   const dates = [
@@ -522,6 +602,37 @@ function coverageTag(value: DataCoverage["completeness"]): "success" | "warning"
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 16px;
   margin-top: 8px;
+}
+.audit-trail-card {
+  border-left: 3px solid var(--el-color-success);
+}
+.audit-trail-broken {
+  border-left-color: var(--el-color-danger);
+}
+.audit-trail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+}
+.audit-trail-header p {
+  margin: 4px 0 0;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+.audit-status {
+  margin-bottom: 12px;
+}
+.audit-hash {
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+}
+.audit-boundary {
+  margin: 10px 0 0;
+  color: var(--el-text-color-secondary);
+  font-size: 12px;
+  line-height: 1.6;
 }
 .metric {
   display: flex;

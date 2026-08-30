@@ -1,44 +1,38 @@
-# agent/：项目维护工作台
+# agent/：人的项目工作台
 
-`agent/` 只保存能帮助后续维护者快速理解项目、做产品判断和完成验证的资料。它不是运行时代码目录，也不是一套让执行者先证明“为什么不能做”的流程系统。
+`agent/` 用来降低理解、判断和验证成本，不是 Agent 的控制面。执行原则以根目录 [AGENTS.md](../AGENTS.md) 为准；这里只提供项目事实和任务入口。
 
-## 默认执行方式
+## 工作方式
 
-1. 先读当前任务直接相关的代码、Git 变更和一份对应说明，不遍历整套文档。
-2. 把用户目标拆成可观察结果；优先保留现有有效能力，只有用户明确要求或证据证明无价值时才删除。
-3. 先复现，再修改，再在同一目标环境重测；失败就记录实际差异并继续修复。
-4. 只保留让产物能够加载所需的静态检查和构建；功能结论直接来自目标环境的真实结果。
-5. 工具不可用时先寻找同等可信的执行路径、修复执行环境或迁移测试执行层。只有所有合法路径都已证实不可用时，才报告硬阻塞。
+- 从用户结果出发，直接读取受影响代码和一份最相关资料；不为“完整理解”遍历文档。
+- 优先复用有效能力，以最小、可撤销的改动解决问题；不因惯例或已有实现限制方案空间。
+- 在授权范围内主动自动化搜索、比较、实现、排错和真实重测，直到结果收敛或出现明确阻塞。
+- 真实环境结果优先于源码推断；无法观察的部分保持未知，不用整齐的报告掩盖证据不足。
+- 私人数据、本机状态和外部副作用按最小权限处理；人负责价值取舍、高风险授权以及提交、推送前的最终审查。
 
-## 按任务找资料
+## 按任务读取
 
-- 项目现状：[`context/project-context.md`](context/project-context.md)
-- 文件归属：[`context/project-file-boundaries.md`](context/project-file-boundaries.md)
-- 产品方向：[`product/README.md`](product/README.md)
-- Investment Review：[`product/investment-review.md`](product/investment-review.md)
-- 开发环境：[`docs/development-environment.md`](docs/development-environment.md)
-- 通用验证：[`verification/playbook.md`](verification/playbook.md)
-- BOSS 直聘扩展：[`verification/boss-extension-real-validation.md`](verification/boss-extension-real-validation.md)
-- 代码组织：[`standards/code-organization.md`](standards/code-organization.md)
-- 产品设计：[`standards/product-design.md`](standards/product-design.md)
-- 外部项目研究：[`product/research/`](product/research/)
+| 当前问题 | 读取 |
+| --- | --- |
+| 项目现状或文件归属 | [项目上下文](context/project-context.md)、[文件边界](context/project-file-boundaries.md) |
+| 产品价值或范围 | [产品入口](product/README.md) 与对应产品正文 |
+| Investment Review | [产品正文](product/investment-review.md)；实现细节才读[工程附录](product/reference/investment-review-engineering.md) |
+| 本地运行或构建 | [项目工作说明](standards/project-instructions.md)、[开发环境](docs/development-environment.md) |
+| 页面、数据或部署验收 | [真实环境验收原则](standards/trusted-verification.md) |
+| BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |
+| 代码或产品组织 | [代码组织](standards/code-organization.md)、[产品设计](standards/product-design.md) |
+| 外部项目商业研究 | [研究入口](product/research/README.md) |
 
-不要求按固定顺序阅读，也不要求简单任务套模板。`archive/` 只用于追溯旧决策，不能覆盖当前代码和当前产品说明。
+`archive/` 只用于追溯旧决策，不能覆盖当前代码和当前产品正文。
 
-## BOSS 扩展的产品边界
+## 仅保留的人工卡点
 
-核心能力包括岗位获取、原生筛选、自动处理、进度与日志、AI 筛选/招呼、地址分析、聊天和失败恢复。审查这些能力时，默认方向是修复或改进，不是因为权限、网络或实现复杂就整项删除。
+- 未明确授权时，不进入私人登录环境，不扩大观察字段，不执行交易、删除、外发或其他高风险动作。
+- 每次提交和推送前，人必须审查确定的待提交版本、真实证据、未知、分支和远程；批准后内容变化则重新审查。
+- 真实页面或截图仍需人查看时先完成证据交付，再关闭页面、服务或临时环境。
 
-当前明确精简的是“关于/赞赏”“反馈”“帮助模式”三个非核心入口。不要把这项产品决定扩大解释为删除 AI、地址、聊天、通知、外观配置或自动投递链路。
+## 目录边界
 
-真实 BOSS 验收使用普通 Windows Chrome 和 OS 级桌面截图、鼠标、键盘；不使用会改变站点运行环境的 CDP/WebDriver 控制链路。正确步骤和失败后的替代路径见 BOSS 专用手册。
-
-## 目录卫生
-
-- `src/` 和 `project-support/` 保存产品代码、构建脚本与交付物。
-- `agent/` 保存说明、研究结论、长期记录和只读参考源码。
-- 外部参考仓库可保留固定提交和许可证，但不要保留可重新安装的 `node_modules`、测试产物、截图、登录态、凭据或原始网络日志。
-- `agent/references/` 是本地比对材料，不是项目运行依赖；生产代码不得从这里导入。
-- 对外部副作用、提交和推送保持人工审核卡点；普通可逆的本地分析、修复和验证应主动完成。
-
-好的交接只需要写清楚：目标、现状、已证实事实、失败点、修复、验证结果和下一步。删除过时内容通常比继续叠加新规则更有价值。
+- `src/` 与 `project-support/` 保存产品代码和交付链；`agent/` 保存仍有长期价值的事实、产品判断和参考资料。
+- 不把可重新安装的依赖、凭据、登录态、真实私人数据、原始网络日志、临时测试产物或截图提交到仓库。
+- 好的交接只说明目标、已证实结果、失败或未知、变更、证据和下一步；没有长期价值的过程材料应删除。
