@@ -1,6 +1,6 @@
 <template>
   <div class="portfolio-analytics">
-    <!-- 1. 核心持仓风险指标与安全垫 -->
+    <!-- 1. 核心持仓事实指标 -->
     <div class="analytics-metrics-row">
       <div class="stat-card">
         <span class="stat-label">总名义敞口（货值）</span>
@@ -26,12 +26,12 @@
 
     <!-- 2. 图表分析区：资金占用环形图 + 标的敞口分布 -->
     <div class="analytics-charts-grid">
-      <!-- 资金占用与可用安全垫 -->
+      <!-- 资金占用与可用余额 -->
       <el-card shadow="never" class="chart-sub-card">
         <template #header>
           <div class="chart-header">
-            <span>资金占用与安全垫分布</span>
-            <el-tag size="small" effect="plain">{{ marginUtilizationPct > 50 ? '仓位偏重' : '安全垫充裕' }}</el-tag>
+            <span>资金占用与可用余额分布</span>
+            <el-tag size="small" effect="plain">保证金使用率 {{ marginUtilizationPct.toFixed(1) }}%</el-tag>
           </div>
         </template>
         <div class="chart-body">
@@ -39,11 +39,11 @@
         </div>
       </el-card>
 
-      <!-- 活跃持仓强平安全缓冲标尺 -->
+      <!-- 活跃持仓距强平价距离标尺 -->
       <el-card shadow="never" class="chart-sub-card">
         <template #header>
           <div class="chart-header">
-            <span>活跃持仓强平缓冲标尺（离爆仓还有多远）</span>
+            <span>活跃持仓距强平价距离</span>
             <span class="chart-hint">标记价 vs 开仓价 vs 强平价</span>
           </div>
         </template>
@@ -55,14 +55,14 @@
                 <el-tag size="small" :type="pos.side === 'LONG' ? 'success' : 'danger'" effect="plain">{{ pos.side }} {{ pos.leverageText }}</el-tag>
               </div>
               <div class="buffer-tag" :class="'is-' + pos.level">
-                强平缓冲空间：<b>{{ pos.bufferPct.toFixed(1) }}%</b>（{{ pos.levelText }}）
+                当前距离：<b>{{ pos.bufferPct.toFixed(1) }}%</b>（不代表安全程度）
               </div>
             </div>
 
             <!-- 价格标尺进度条 -->
             <div class="price-ruler">
               <div class="ruler-bar-bg">
-                <div class="ruler-safe-zone" :style="{ width: Math.min(100, pos.bufferPct * 2.5) + '%' }" />
+                <div class="ruler-distance-zone" :style="{ width: Math.min(100, pos.bufferPct * 2.5) + '%' }" />
               </div>
               <div class="ruler-labels-grid">
                 <div class="ruler-col align-left">
@@ -81,7 +81,7 @@
             </div>
           </div>
         </div>
-        <el-empty v-else description="当前无活跃持仓，无强平风险" :image-size="60" />
+        <el-empty v-else description="当前快照没有活跃持仓" :image-size="60" />
       </el-card>
     </div>
 
@@ -120,7 +120,7 @@
           </div>
           <div class="stress-result-item">
             <span>强平触碰预警</span>
-            <b :class="simLiqWarning ? 'danger-text' : 'positive-text'">{{ simLiqWarning ? '⚠️ 触碰强平线！' : '安全（未触碰强平）' }}</b>
+            <b :class="simLiqWarning ? 'danger-text' : ''">{{ simLiqWarning ? '模拟价格触及强平价' : '本次模拟未触及强平价' }}</b>
           </div>
         </div>
       </div>
@@ -242,15 +242,8 @@ const positionBuffers = computed(() => {
       bufferPct = (Math.abs(markPrice - liquidationPrice) / markPrice) * 100;
     }
 
-    let level: "safe" | "warn" | "danger" = "safe";
-    let levelText = "安全缓冲充足";
-    if (bufferPct <= 10) {
-      level = "danger";
-      levelText = "极度危险";
-    } else if (bufferPct <= 25) {
-      level = "warn";
-      levelText = "中度警惕";
-    }
+    const level = "neutral";
+    const levelText = "仅显示事实距离";
 
     return {
       symbol,
@@ -268,20 +261,13 @@ const positionBuffers = computed(() => {
 
 const closestLiqRisk = computed(() => {
   if (!positionBuffers.value.length) {
-    return { text: "无持仓", class: "positive-text", detail: "当前无爆仓风险" };
+    return { text: "无持仓", class: "", detail: "当前快照没有活跃持仓" };
   }
   const sorted = [...positionBuffers.value].sort((a, b) => a.bufferPct - b.bufferPct);
   const top = sorted[0];
-  if (top.bufferPct <= 15) {
-    return {
-      text: `${top.symbol} 距强平仅 ${top.bufferPct.toFixed(1)}%`,
-      class: "danger-text",
-      detail: `强平价 ${formatPrice(top.liquidationPrice)}`,
-    };
-  }
   return {
-    text: `${top.bufferPct.toFixed(1)}% 缓冲`,
-    class: "positive-text",
+    text: `${top.bufferPct.toFixed(1)}% 距离`,
+    class: "",
     detail: `最接近强平标的为 ${top.symbol}`,
   };
 });
@@ -353,7 +339,7 @@ function renderCharts(): void {
 
   const data = [
     { name: "持仓保证金", value: Number(marginVal.toFixed(2)), itemStyle: { color: "#e6a23c" } },
-    { name: "可用安全垫", value: Number(availVal.toFixed(2)), itemStyle: { color: "#67c23a" } },
+    { name: "可用余额", value: Number(availVal.toFixed(2)), itemStyle: { color: "#67c23a" } },
   ];
   if (pnlVal > 0) {
     data.push({ name: "浮动盈利", value: Number(pnlVal.toFixed(2)), itemStyle: { color: "#409eff" } });
@@ -548,7 +534,7 @@ onBeforeUnmount(() => {
   border-radius: 4px;
 }
 
-.buffer-tag.is-safe {
+.buffer-tag.is-neutral {
   background: var(--el-color-success-light-9);
   color: var(--el-color-success);
 }
@@ -577,7 +563,7 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
-.ruler-safe-zone {
+.ruler-distance-zone {
   height: 100%;
   background: linear-gradient(90deg, var(--el-color-danger), var(--el-color-warning), var(--el-color-success));
   border-radius: 4px;

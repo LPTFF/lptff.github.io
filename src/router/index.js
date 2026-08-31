@@ -28,12 +28,6 @@ const routes = [
     path: "/message",
     redirect: "/blog/articles/fund-tools-evolution",
   },
-  {
-    path: "/fundHoldInfoMsg",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "持仓明细" },
-    children: [{ path: "", name: "fundHoldInfoMsg", component: () => import("../views/Message/FundHoldInfo.vue") }],
-  },
   { path: "/newsArticle", redirect: "/blog/articles/information-tools-evolution" },
   // 旧版基金工具（买入建议/三代持仓分析）已归档，详见博客 fund-tools-evolution
   {
@@ -48,12 +42,7 @@ const routes = [
     path: "/fundPilotV1",
     redirect: "/blog/articles/fund-tools-evolution",
   },
-  {
-    path: "/cryptocurrency",
-    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
-    meta: { title: "加密货币分析" },
-    children: [{ path: "", name: "cryptocurrency", component: () => import("../views/Message/Cryptocurrency.vue") }],
-  },
+  { path: "/cryptocurrency", redirect: "/blog/articles/crypto-tools-evolution" },
   {
     path: "/contract-review",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),

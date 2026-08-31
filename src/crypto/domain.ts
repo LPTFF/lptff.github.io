@@ -194,6 +194,7 @@ export interface ContractReviewConclusion {
 
 export interface ContractReviewManagementState {
   rules: ContractRiskRules;
+  rulesConfirmed: boolean;
   acknowledgedFindingIds: string[];
   conclusions: ContractReviewConclusion[];
   preflightHistory: Array<{

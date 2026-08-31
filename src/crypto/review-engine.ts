@@ -11,18 +11,18 @@ import type {
   TradePreflightResult,
 } from "./domain";
 
-export const DEFAULT_CONTRACT_RISK_RULES: ContractRiskRules = {
-  maxLeverage: 5,
-  maxRiskPerTradePct: 1,
-  maxMarginPerTradePct: 20,
-  maxSymbolExposurePct: 35,
-  maxConcurrentPositions: 3,
-  maxDailyLossPct: 3,
-  maxConsecutiveLosses: 3,
-  cooldownHoursAfterLossStreak: 24,
-  maxTradesPerDay: 5,
-  minRewardRiskRatio: 2,
-  requireStopLoss: true,
+export const EMPTY_CONTRACT_RISK_RULES: ContractRiskRules = {
+  maxLeverage: 0,
+  maxRiskPerTradePct: 0,
+  maxMarginPerTradePct: 0,
+  maxSymbolExposurePct: 0,
+  maxConcurrentPositions: 0,
+  maxDailyLossPct: 0,
+  maxConsecutiveLosses: 0,
+  cooldownHoursAfterLossStreak: 0,
+  maxTradesPerDay: 0,
+  minRewardRiskRatio: 0,
+  requireStopLoss: false,
 };
 
 function numberOf(value: unknown): number {

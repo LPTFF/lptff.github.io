@@ -1,11 +1,12 @@
 import type { ContractReviewManagementState } from "./domain";
-import { DEFAULT_CONTRACT_RISK_RULES } from "./review-engine";
+import { EMPTY_CONTRACT_RISK_RULES } from "./review-engine";
 
 const STORAGE_KEY = "contract-review-management/1.0";
 
 export function defaultContractReviewManagementState(): ContractReviewManagementState {
   return {
-    rules: { ...DEFAULT_CONTRACT_RISK_RULES },
+    rules: { ...EMPTY_CONTRACT_RISK_RULES },
+    rulesConfirmed: false,
     acknowledgedFindingIds: [],
     conclusions: [],
     preflightHistory: [],
@@ -20,6 +21,7 @@ export function loadContractReviewManagementState(): ContractReviewManagementSta
     const parsed = JSON.parse(raw) as Partial<ContractReviewManagementState>;
     return {
       rules: { ...fallback.rules, ...(parsed.rules ?? {}) },
+      rulesConfirmed: parsed.rulesConfirmed === true,
       acknowledgedFindingIds: Array.isArray(parsed.acknowledgedFindingIds)
         ? parsed.acknowledgedFindingIds.map(String)
         : [],

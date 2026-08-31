@@ -12,6 +12,7 @@
 - 导航图标官方源直连（2026-08-23）：52 个入口优先使用目标站点的官方 favicon；已有明确官方 CDN 资源的入口继续使用官方 CDN，其余使用目标域名根路径 `/favicon.ico`。官方图片加载失败时由 el-avatar slot 直接显示首字符色块，不再依赖 Cravatar、DuckDuckGo 或本地 map。图标不参与本地安装、开发启动或生产构建；Live2D 模型作为锁定依赖由 Vite 在开发与构建阶段直接提供。修复附带问题：L2Dwidget 老库初始化与首页首屏异步组件（导航专区为 PC 默认 tab）竞争导致其渲染空白，live2d 已改为页面 load 后延迟启动。
 - 历史分支功能对比（2026-08-23）：对比 `hexo-backup`、`vuepress-blog` 分支与当前项目，确认 about / reading / archives / 搜索 / 6 篇 2018–2019 文章 / 旧路径重定向均已迁移；linkList 已由导航专区替代，idea 系列文章为空壳或时效笔记。唯一遗漏的 live2d 看板娘已复刻并扩展为 18 模型多选（hijiki 来自 hexo-backup，其余 17 个来自 live2d-widget 官方免费示例包，限个人非商用；运行库随 git，模型包由 devDependencies 与锁文件管理，Vite 在开发时从 `node_modules` 提供并在构建时写入 `dist`，同时生成 models/manifest.json 供前端渲染选择列表，前端失败回退内置 4 款兜底清单；控制页 `/live2d`，入口导航专区）；切换模型闪烁已优化：L2Dwidget 老库整体隔离在 srcdoc iframe 中运行，切换时销毁重建 iframe 即全新库状态、无需刷新页面（此隔离同时根治老库与主文档全局/首屏渲染的耦合）；拖拽悬浮按钮与自定义 404 页不采纳（backTop 与重定向兜底已覆盖）。
 - 旧版基金工具归档（2026-08-23）：基金买入建议（/message）、持仓分析 V1/Plus/精简版（/fundPilotV1|Plus|fundPilot）四个入口已从导航专区关闭，旧路由统一重定向到博客归档文章《从静态清单到复盘系统：基金工具的五代演变》（`src/views/Blog/articles/2026/fund-tools-evolution.md`，新分类“产品复盘”）；四个页面代码保留在仓库但不再打包。归档依据：均为静态 JSON 展示器（其中三代持仓分析的数据文件 fundPilotData/fundPilotV1.json 已不存在，页面实际空转），数据链路、分析能力、场景闭环均已被基金复盘助手（/investment）全面替代。资讯文章随后于 2026-08-28 随高级搜索一并归档，详见 `information-tools-evolution.md`。
+- 旧基金持仓与加密策略页收口（2026-08-30）：`/fundHoldInfoMsg` 及其唯一页面源码直接删除，不并入 Investment Review；`/cryptocurrency` 从一级导航退出并重定向到 `crypto-tools-evolution` 产品复盘文章，旧页面源码删除。Contract Review 同日冻结，只保留真实事实、确定性统计和本人规则对照，不再生成默认安全、推荐或执行许可结论。
 
 ## 使用原则
 

@@ -13,23 +13,22 @@
        ▼
 家庭服务器 192.168.1.100:5000
        │ http-server 工作目录：/root/Test
-       └─ /data/fundHoldData.json
+       └─ /data/*（只供历史工具按需排查）
 ```
 
 - 本地前端由 Vite 严格固定在 `8090` 端口提供，启动命令是 `npm run serve`；端口被占用时会直接启动失败，不会自动切换到 `8091`、`8092` 等端口。
 - Live2D 模型包由 devDependencies 和锁文件管理。`npm install` 只需安装依赖；Vite 在开发时直接从 `node_modules` 提供模型，在生产构建时写入 `dist/live2dw/models/`，不维护 `project-support/public/live2dw/models/` 缓存，也没有安装后或启动前准备脚本。`npm run serve` 只启动 Vite；面试 Markdown 和投资脱敏快照同样由 Vite 直接读取唯一源文件。导航图标直连目标站点的官方 favicon 或官方 CDN，失败时显示首字符色块。
 - Vite 开发服务器在 `vite.config.ts` 中将 `/data` 请求代理到 `http://192.168.1.100:5000`。
-- 远程 HTTP 服务的工作目录是 `/root/Test`，因此 URL `/data/fundHoldData.json` 对应服务器文件 `/root/Test/data/fundHoldData.json`。
-- 例如，基金持仓页面 [src/views/Message/FundHoldInfo.vue](../../src/views/Message/FundHoldInfo.vue) 使用 `fetch('/data/fundHoldData.json?...')`，开发时应通过 Vite 代理访问，不要在组件中写入远程绝对地址。
+- 远程 HTTP 服务的工作目录是 `/root/Test`，因此 `/data/*` 会映射到服务器的 `/root/Test/data/*`。当前生产路由不依赖这条代理；它只为仍保留在 Git 历史或源码中的旧工具提供按需排查能力。
 
 ## 当前开发地址
 
 | 用途 | 地址或路径 |
 | --- | --- |
 | 本地站点 | `http://localhost:8090` |
-| 本地数据请求 | `http://localhost:8090/data/fundHoldData.json` |
+| 历史数据代理前缀 | `http://localhost:8090/data/` |
 | 远程数据服务 | `http://192.168.1.100:5000` |
-| 远程基金数据文件 | `/root/Test/data/fundHoldData.json` |
+| 远程历史数据目录 | `/root/Test/data/` |
 | Vite 配置 | [`vite.config.ts`](../../vite.config.ts) 的 `server.proxy['/data']` |
 
 `http://106.15.131.89:60080` 不属于当前本地开发环境的数据代理目标；修改代理目标时必须同步检查本文档和 [项目上下文](../context/project-context.md)。
@@ -54,9 +53,9 @@ ssh -p 22 root@192.168.1.100
 ## 排查顺序
 
 1. 确认家庭服务器与当前开发机处于可互通的局域网，并确认 `192.168.1.100:5000` 可访问。
-2. 直接检查 `http://192.168.1.100:5000/data/fundHoldData.json` 是否返回 JSON。
+2. 只有排查明确的历史工具时，才检查对应 `/data/<文件名>` 是否返回 JSON。
 3. 启动或重启本地 `npm run serve`，使 Vite 重新加载 `vite.config.ts`。
-4. 在浏览器开发者工具中检查 `/data/fundHoldData.json` 请求；页面代码应继续使用 `/data/...` 相对路径。
+4. 在浏览器开发者工具中检查对应的 `/data/...` 请求；页面代码应继续使用相对路径。
 5. 若远程文件位置变化，同时更新远程 `http-server` 的工作目录、Vite 代理目标和本文档，并运行 `git diff --check`。
 
 ## 边界与注意事项

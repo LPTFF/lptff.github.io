@@ -37,7 +37,7 @@
           <template #header>
             <div class="card-head-row">
               <span>账户与策略核心指标</span>
-              <span class="head-hint">系统持续计算期望、回撤、胜率、盈亏比——优先展示默认值，异常一键外包</span>
+              <span class="head-hint">只展示已导入历史事实的确定性统计，不生成交易许可</span>
             </div>
           </template>
           <div class="metric-grid">
@@ -283,15 +283,14 @@
 
       <!-- ── Tab 4: 纪律 (Policies / 风控规则) ── -->
       <div v-else-if="activeTab === 'policies'" class="tab-pane">
-        <!-- 规则状态第一性结论 -->
-        <el-card shadow="never" class="section verdict-card verdict-ok">
+        <el-card shadow="never" class="section verdict-card" :class="management.rulesConfirmed ? 'verdict-ok' : 'verdict-warn'">
           <div class="verdict-kicker">规则状态</div>
-          <h2>当前生效 11 项交易风控硬规则</h2>
-          <p>默认值来自风控惯例示例；开仓前检查将严格按此规则执行阻断，复杂评估可外包给 GPT。</p>
+          <h2>{{ management.rulesConfirmed ? '已声明本人的交易风险边界' : '尚未声明本人的交易风险边界' }}</h2>
+          <p>系统不提供适用于你的默认阈值。只有逐项填写并主动确认后，规则对照才会启用；检查结果也不代表交易安全或可以执行。</p>
           <div class="verdict-actions">
-            <el-button type="primary" size="small" @click="saveRules">保存并重新计算</el-button>
-            <el-button size="small" @click="resetDefaultRules">一键恢复默认规则集</el-button>
-            <el-button size="small" text type="primary" @click="openFullDeepAnalysis">规则评估→深度分析</el-button>
+            <el-button type="primary" size="small" @click="saveRules">确认本人规则并重新计算</el-button>
+            <el-button v-if="management.rulesConfirmed" size="small" @click="revokeRules">撤销规则确认</el-button>
+            <el-button v-if="management.rulesConfirmed" size="small" text type="primary" @click="openFullDeepAnalysis">生成规则复盘事实包</el-button>
           </div>
         </el-card>
 
@@ -300,48 +299,48 @@
           <template #header>
             <div class="card-head-row">
               <span>交易风险边界规则设置</span>
-              <span class="head-hint">默认固定合理阈值，支持按个人风格自定义修改</span>
+              <span class="head-hint">所有数值必须由你根据自己的账户范围和纪律声明</span>
             </div>
           </template>
           <el-form label-position="top" size="small">
             <div class="rule-grid">
-              <el-form-item label="最大杠杆倍数（默认 5x，严禁过高杠杆）">
+              <el-form-item label="本人声明的最大杠杆倍数">
                 <el-input-number v-model="management.rules.maxLeverage" :min="1" :max="125" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="单笔最大止损（占权益%，默认 2%）">
+              <el-form-item label="本人声明的单笔最大损失（占权益%）">
                 <el-input-number v-model="management.rules.maxRiskPerTradePct" :min="0.1" :max="20" :step="0.1" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="账户单日损失保护线（占权益%，默认 5%）">
+              <el-form-item label="本人声明的账户单日损失边界（占权益%）">
                 <el-input-number v-model="management.rules.maxDailyLossPct" :min="0.5" :max="30" :step="0.5" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="单笔保证金上限（占权益%，默认 20%）">
+              <el-form-item label="本人声明的单笔保证金上限（占权益%）">
                 <el-input-number v-model="management.rules.maxMarginPerTradePct" :min="1" :max="100" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="单标的暴露上限（占权益%，默认 40%）">
+              <el-form-item label="本人声明的单标的暴露上限（占权益%）">
                 <el-input-number v-model="management.rules.maxSymbolExposurePct" :min="1" :max="100" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="最大同时持仓数（默认 2 个）">
+              <el-form-item label="本人声明的最大同时持仓数">
                 <el-input-number v-model="management.rules.maxConcurrentPositions" :min="1" :max="10" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="连续亏损暂停阈值（默认 3 笔）">
+              <el-form-item label="本人声明的连续亏损暂停阈值">
                 <el-input-number v-model="management.rules.maxConsecutiveLosses" :min="1" :max="20" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="连亏后冷静期（默认 24 小时）">
+              <el-form-item label="本人声明的连亏后冷静期（小时）">
                 <el-input-number v-model="management.rules.cooldownHoursAfterLossStreak" :min="1" :max="72" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="单日最大交易笔数（默认 6 笔）">
+              <el-form-item label="本人声明的单日最大交易笔数">
                 <el-input-number v-model="management.rules.maxTradesPerDay" :min="1" :max="50" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="最小目标盈亏比（默认 1.5 : 1）">
+              <el-form-item label="本人声明的最小目标盈亏比">
                 <el-input-number v-model="management.rules.minRewardRiskRatio" :min="1" :max="5" :step="0.5" style="width: 100%" />
               </el-form-item>
-              <el-form-item label="是否强制要求设置止损（默认强制）">
+              <el-form-item label="本人是否要求每笔计划记录止损">
                 <el-switch v-model="management.rules.requireStopLoss" active-text="强制止损" inactive-text="可选止损" />
               </el-form-item>
             </div>
             <div class="form-actions-row">
-              <el-button type="primary" @click="saveRules">保存并重新计算</el-button>
-              <el-button @click="resetDefaultRules">一键恢复默认规则</el-button>
+              <el-button type="primary" @click="saveRules">确认本人规则并重新计算</el-button>
+              <el-button v-if="management.rulesConfirmed" @click="revokeRules">撤销规则确认</el-button>
             </div>
           </el-form>
         </el-card>
@@ -355,7 +354,7 @@
           :closable="false"
           show-icon
           title="深度分析外包给通用大模型"
-          description="把收益质量、尾部风险、行为维度、规则异常、数据边界整理成事实包，由外部模型结合最新行情独立分析。本系统优先固定默认值，复杂归因交给 GPT；不预设分析结论、不调 AI、不替你判断，也不自动外传。"
+          description="把收益质量、尾部风险、行为维度、已声明规则和数据边界整理成事实包，由外部模型独立分析。系统不提供默认交易参数，不调 AI，不替你判断，也不自动外传。"
           class="section-alert"
         />
 
@@ -389,22 +388,21 @@
 
         <el-alert
           v-else
-          type="success"
+          type="info"
           :closable="false"
           show-icon
           class="section-alert"
-          title="暂无需要处理的紧急事项"
-          description="当前账户在声明的纪律范围内、无开仓阻断。开仓前请在下方直接执行一次拦截检查；需要深度思考时，可在下方生成事实包交给 ChatGPT。"
+          title="当前没有可列出的规则偏离"
+          description="这不代表交易安全或可以执行；可能是尚未声明规则、数据不足，或当前事实未触发已声明的边界。"
         />
 
-        <!-- 2. 开仓前重大失误拦截（极简、默认值全预装配、支持微调） -->
+        <!-- 2. 用户声明计划与本人规则的机械对照 -->
         <el-card shadow="never" class="section preflight-card">
           <template #header>
             <div class="card-head-row">
-              <span>开仓前重大失误拦截（每次交易前秒级校验）</span>
+              <span>交易计划与本人规则对照</span>
               <div class="card-head-right-actions">
-                <el-button size="small" type="primary" plain @click="applySmartDefaults">⚡ 一键装配推荐安全计划</el-button>
-                <el-button size="small" @click="syncPreflightFacts">🔄 同步账户实时状态</el-button>
+                <el-button size="small" @click="syncPreflightFacts">同步已采集账户事实</el-button>
               </div>
             </div>
           </template>
@@ -416,8 +414,8 @@
                 <span>账户权益 <b>{{ money(preflight.accountEquity) }}</b></span>
                 <span>当前持仓 <b>{{ preflight.currentOpenPositions }} 个</b></span>
                 <span>当前连亏 <b>{{ preflight.consecutiveLosses }} 笔</b></span>
-                <span>允许杠杆 <b>{{ management.rules.maxLeverage }}x</b></span>
-                <span>单笔止损线 <b>{{ management.rules.maxRiskPerTradePct }}%</b></span>
+                <span>声明杠杆上限 <b>{{ management.rulesConfirmed ? management.rules.maxLeverage + 'x' : '未确认' }}</b></span>
+                <span>声明单笔损失边界 <b>{{ management.rulesConfirmed ? management.rules.maxRiskPerTradePct + '%' : '未确认' }}</b></span>
               </div>
 
               <div class="form-grid">
@@ -425,21 +423,21 @@
                   <el-input v-model="preflight.symbol" placeholder="ETHUSDT" />
                 </el-form-item>
                 <el-form-item label="交易方向">
-                  <el-segmented v-model="preflight.direction" :options="['LONG', 'SHORT']" style="width: 100%" @change="onDirectionChange" />
+                  <el-segmented v-model="preflight.direction" :options="['LONG', 'SHORT']" style="width: 100%" />
                 </el-form-item>
-                <el-form-item label="杠杆倍数（自动取风控上限）">
-                  <el-input-number v-model="preflight.leverage" :min="1" :max="management.rules.maxLeverage" style="width: 100%" />
+                <el-form-item label="计划使用的杠杆倍数">
+                  <el-input-number v-model="preflight.leverage" :min="1" :max="125" style="width: 100%" />
                 </el-form-item>
                 <el-form-item label="拟入场价（USDT）">
-                  <el-input-number v-model="preflight.entryPrice" :min="0" :precision="4" style="width: 100%" @change="onPriceOrQuantityChange" />
+                  <el-input-number v-model="preflight.entryPrice" :min="0" :precision="4" style="width: 100%" />
                 </el-form-item>
-                <el-form-item label="委托数量（智能推荐默认值）">
-                  <el-input-number v-model="preflight.quantity" :min="0" :precision="4" style="width: 100%" @change="onPriceOrQuantityChange" />
+                <el-form-item label="计划委托数量（手工输入）">
+                  <el-input-number v-model="preflight.quantity" :min="0" :precision="4" style="width: 100%" />
                 </el-form-item>
-                <el-form-item label="设定止损价（自动按2%风险计算）">
+                <el-form-item label="计划止损价（手工输入）">
                   <el-input-number v-model="preflight.stopPrice" :min="0" :precision="4" style="width: 100%" />
                 </el-form-item>
-                <el-form-item label="设定止盈价（可选，按盈亏比预填）">
+                <el-form-item label="计划止盈价（可选，手工输入）">
                   <el-input-number v-model="preflight.takeProfitPrice" :min="0" :precision="4" style="width: 100%" />
                 </el-form-item>
                 <el-form-item label="当前标的暴露（%）">
@@ -452,20 +450,20 @@
               </el-form-item>
 
               <div class="preflight-btn-row">
-                <el-button type="danger" size="large" class="main-check-btn" @click="runPreflight">运行重大失误拦截</el-button>
+                <el-button type="primary" size="large" class="main-check-btn" :disabled="!management.rulesConfirmed" @click="runPreflight">对照本人已确认规则</el-button>
                 <el-button v-if="preflightResult" size="large" @click="openPreflightDeepAnalysis">针对此计划→GPT独立复核</el-button>
               </div>
             </el-form>
 
-            <!-- 校验结果与硬约束判定 -->
+            <!-- 只说明与本人规则是否一致，不提供执行许可 -->
             <el-card v-if="preflightResult" shadow="never" class="result-card" :class="'verdict-' + preflightResult.verdict">
               <template #header>
                 <div class="verdict-head">
                   <div>
-                    <p class="eyebrow">初筛结论</p>
+                    <p class="eyebrow">规则对照结果</p>
                     <h3>{{ verdictTitle(preflightResult.verdict) }}</h3>
                   </div>
-                  <el-tag :type="verdictType(preflightResult.verdict)" effect="dark">{{ preflightResult.verdict.toUpperCase() }}</el-tag>
+                  <el-tag :type="verdictType(preflightResult.verdict)" effect="dark">{{ verdictTag(preflightResult.verdict) }}</el-tag>
                 </div>
               </template>
               <div class="result-metrics">
@@ -483,7 +481,7 @@
               </div>
               <div class="result-footer-actions">
                 <el-button size="small" type="primary" plain @click="openPreflightDeepAnalysis">
-                  {{ preflightResult.verdict === 'blocked' ? '阻断疑问？交给 ChatGPT 归因' : '交给 ChatGPT 深度复核盲点' }}
+                  生成此计划的独立复核事实包
                 </el-button>
               </div>
             </el-card>
@@ -1100,7 +1098,6 @@ import {
 } from "../../crypto/extension-sync";
 import { ContractReviewLedger } from "../../crypto/ledger";
 import {
-  DEFAULT_CONTRACT_RISK_RULES,
   computeContractReview,
   evaluateTradePreflight,
 } from "../../crypto/review-engine";
@@ -1164,14 +1161,14 @@ watch(
 
 const management = reactive<ContractReviewManagementState>(loadContractReviewManagementState());
 const preflight = reactive<TradePreflightInput>({
-  symbol: "ETHUSDT",
+  symbol: "",
   direction: "LONG",
-  leverage: management.rules.maxLeverage || 5,
+  leverage: 1,
   accountEquity: 0,
-  entryPrice: 2750,
-  stopPrice: 2640,
-  takeProfitPrice: 2970,
-  quantity: 0.05,
+  entryPrice: 0,
+  stopPrice: undefined,
+  takeProfitPrice: undefined,
+  quantity: 0,
   currentSymbolExposurePct: 0,
   currentOpenPositions: 0,
   consecutiveLosses: 0,
@@ -1181,8 +1178,12 @@ const preflightResult = ref<TradePreflightResult>();
 const deepAnalysis = reactive({ visible: false, text: "", title: "交给 ChatGPT 的深度分析事实包" });
 
 const review = computed(() => (latest.value ? computeContractReview(latest.value, management.rules) : undefined));
-const urgentFindings = computed(() => review.value?.findings.filter((item) => item.priority === "critical" || item.priority === "high") ?? []);
-const secondaryFindings = computed(() => review.value?.findings.filter((item) => item.priority !== "critical" && item.priority !== "high") ?? []);
+const urgentFindings = computed(() => management.rulesConfirmed
+  ? review.value?.findings.filter((item) => item.priority === "critical" || item.priority === "high") ?? []
+  : []);
+const secondaryFindings = computed(() => management.rulesConfirmed
+  ? review.value?.findings.filter((item) => item.priority !== "critical" && item.priority !== "high") ?? []
+  : []);
 
 const activePositions = computed(() => (latest.value?.positions ?? []).filter((p) => Math.abs(Number(p.positionAmount) || 0) > 0));
 
@@ -1544,13 +1545,13 @@ const todoList = computed<TodoItem[]>(() => {
     });
   });
 
-  // 2. 纪律异常（如杠杆超标或需要确认规则）
-  if (management.rules.maxLeverage > 20) {
+  // 2. 规则尚未由用户明确声明时，不生成任何默认规则结论。
+  if (!management.rulesConfirmed) {
     list.push({
-      source: "纪律 · 风险边界",
-      title: `最大杠杆当前设置为 ${management.rules.maxLeverage}x，偏高`,
-      detail: "建议下调至 5x-10x 以免单次极端行情导致不可逆损失。",
-      actionText: "去纪律页调整",
+      source: "纪律 · 规则声明",
+      title: "尚未确认本人的交易风险边界",
+      detail: "系统不会使用默认阈值评价历史交易或当前计划。请逐项填写本人规则后主动确认。",
+      actionText: "去声明规则",
       action: () => switchTab("policies"),
     });
   }
@@ -1650,7 +1651,14 @@ function priorityTag(priority: ContractRiskPriority): "danger" | "warning" | "in
   return "info";
 }
 function verdictTitle(verdict: TradePreflightResult["verdict"]): string {
-  return { blocked: "不要执行：硬约束阻断，先修改交易计划", review: "可继续复核，但仍有风险警告", pass: "通过硬约束检查，可执行" }[verdict];
+  return {
+    blocked: "计划与本人已声明规则存在偏离",
+    review: "计划仍有信息需要补充或复核",
+    pass: "未发现与本人已声明规则的机械偏离",
+  }[verdict];
+}
+function verdictTag(verdict: TradePreflightResult["verdict"]): string {
+  return { blocked: "存在偏离", review: "需要复核", pass: "未发现偏离" }[verdict];
 }
 function verdictType(verdict: TradePreflightResult["verdict"]): "danger" | "warning" | "success" {
   return ({ blocked: "danger", review: "warning", pass: "success" } as const)[verdict];
@@ -1796,80 +1804,44 @@ function persistManagement(): void {
   saveContractReviewManagementState(management);
 }
 function saveRules(): void {
+  const numericRules = [
+    management.rules.maxLeverage,
+    management.rules.maxRiskPerTradePct,
+    management.rules.maxMarginPerTradePct,
+    management.rules.maxSymbolExposurePct,
+    management.rules.maxConcurrentPositions,
+    management.rules.maxDailyLossPct,
+    management.rules.maxConsecutiveLosses,
+    management.rules.cooldownHoursAfterLossStreak,
+    management.rules.maxTradesPerDay,
+    management.rules.minRewardRiskRatio,
+  ];
+  if (numericRules.some((value) => !Number.isFinite(value) || value <= 0)) {
+    ElMessage.error("请先逐项填写大于 0 的本人规则；系统不提供默认阈值。");
+    return;
+  }
+  management.rulesConfirmed = true;
   persistManagement();
-  preflight.leverage = Math.min(preflight.leverage, management.rules.maxLeverage);
-  ElMessage.success("风险规则已保存，并已用新规则重新复盘。");
+  preflightResult.value = undefined;
+  ElMessage.success("本人规则已确认，历史事实将按这些边界重新对照。");
 }
-function resetDefaultRules(): void {
-  management.rules = { ...DEFAULT_CONTRACT_RISK_RULES };
+function revokeRules(): void {
+  management.rulesConfirmed = false;
+  preflightResult.value = undefined;
   persistManagement();
-  applySmartDefaults();
-  ElMessage.success("已恢复默认风控规则集并刷新预设参数");
-}
-
-// 智能预装配安全交易计划（优先固定默认值，降低用户管理成本）
-function applySmartDefaults(): void {
-  syncPreflightFacts();
-  const rules = management.rules;
-  preflight.leverage = rules.maxLeverage;
-
-  // 1. 优先取当前持仓标的，否则取 ETHUSDT
-  if (activePositions.value.length > 0) {
-    const pos = activePositions.value[0];
-    preflight.symbol = String(pos.symbol || "ETHUSDT");
-    preflight.direction = pos.positionSide === "SHORT" || Number(pos.positionAmount) < 0 ? "SHORT" : "LONG";
-    preflight.entryPrice = Number(pos.markPrice || pos.entryPrice || 2750);
-  } else if (!preflight.entryPrice || preflight.entryPrice <= 0) {
-    preflight.symbol = "ETHUSDT";
-    preflight.direction = "LONG";
-    preflight.entryPrice = 2750;
-  }
-
-  // 2. 自动估算符合保证金上限的委托数量 (保证金约占权益 15%~20%)
-  const equity = preflight.accountEquity > 0 ? preflight.accountEquity : 100;
-  const targetMargin = equity * (rules.maxMarginPerTradePct / 100) * 0.8;
-  const targetNotional = targetMargin * preflight.leverage;
-  if (preflight.entryPrice > 0) {
-    preflight.quantity = Number((targetNotional / preflight.entryPrice).toFixed(4));
-  }
-
-  // 3. 自动计算符合 maxRiskPerTradePct (如 2%) 的安全止损价
-  calculateSafeStopAndTakeProfit();
-  ElMessage.success("已一键装配推荐风控默认值（符合单笔止损与盈亏比约束）");
-}
-
-function calculateSafeStopAndTakeProfit(): void {
-  const rules = management.rules;
-  const entry = preflight.entryPrice;
-  if (entry <= 0) return;
-
-  // 单笔损失限额 = 账户权益 * maxRiskPerTradePct%
-  const equity = preflight.accountEquity > 0 ? preflight.accountEquity : 100;
-  const maxRiskAmount = equity * (rules.maxRiskPerTradePct / 100);
-  const qty = preflight.quantity > 0 ? preflight.quantity : 0.05;
-  const stopDistance = maxRiskAmount / qty;
-
-  const rewardRatio = rules.minRewardRiskRatio > 0 ? rules.minRewardRiskRatio : 1.5;
-
-  if (preflight.direction === "LONG") {
-    preflight.stopPrice = Number(Math.max(0.0001, entry - stopDistance).toFixed(4));
-    preflight.takeProfitPrice = Number((entry + stopDistance * rewardRatio).toFixed(4));
-  } else {
-    preflight.stopPrice = Number((entry + stopDistance).toFixed(4));
-    preflight.takeProfitPrice = Number(Math.max(0.0001, entry - stopDistance * rewardRatio).toFixed(4));
-  }
-}
-
-function onDirectionChange(): void {
-  calculateSafeStopAndTakeProfit();
-}
-
-function onPriceOrQuantityChange(): void {
-  calculateSafeStopAndTakeProfit();
+  ElMessage.info("已撤销规则确认；系统停止生成规则偏离结论，已填写数值仅保留为草稿。");
 }
 
 function runPreflight(): void {
+  if (!management.rulesConfirmed) {
+    ElMessage.warning("请先逐项声明并确认本人的规则。");
+    return;
+  }
   preflight.symbol = preflight.symbol.trim().toUpperCase();
+  if (!preflight.symbol || preflight.accountEquity <= 0 || preflight.entryPrice <= 0 || preflight.quantity <= 0 || preflight.leverage <= 0) {
+    ElMessage.error("缺少合约代码、真实账户权益、计划入场价、委托数量或杠杆；系统不会使用回退值补齐。");
+    return;
+  }
   preflightResult.value = evaluateTradePreflight({ ...preflight }, management.rules);
   management.preflightHistory.unshift({
     id: "preflight:" + preflightResult.value.checkedAt,
@@ -1879,11 +1851,11 @@ function runPreflight(): void {
   management.preflightHistory = management.preflightHistory.slice(0, 30);
   persistManagement();
   if (preflightResult.value.verdict === "blocked") {
-    ElMessage.error("存在开仓硬约束阻断项，请查看右侧阻断原因！");
+    ElMessage.error("计划与本人已声明规则存在偏离，请核对具体项目。");
   } else if (preflightResult.value.verdict === "review") {
-    ElMessage.warning("通过硬约束，但存在风险警告，建议复核！");
+    ElMessage.warning("计划仍有信息需要补充或复核。");
   } else {
-    ElMessage.success("硬约束检查全部通过！");
+    ElMessage.info("未发现与本人已声明规则的机械偏离；这不代表交易安全或可以执行。");
   }
 }
 
@@ -1891,6 +1863,10 @@ function runPreflight(): void {
 function openFullDeepAnalysis(): void {
   if (!latest.value || !review.value) {
     ElMessage.warning("请先导入合约数据");
+    return;
+  }
+  if (!management.rulesConfirmed) {
+    ElMessage.warning("请先声明并确认本人规则，系统不会把空白或默认阈值写入分析事实包。");
     return;
   }
   deepAnalysis.title = "全量账户与策略深度分析事实包";
@@ -2006,7 +1982,7 @@ async function importBundledSnapshot(): Promise<void> {
     const dataset = toContractReviewDataset((await response.json()) as BinanceSourceCapture);
     await ledger.put(dataset);
     await loadLocal();
-    applySmartDefaults();
+    syncPreflightFacts();
     ElMessage.success("已成功导入脱敏快照（53 笔已平仓样本）");
   } catch (error) {
     ElMessage.error(error instanceof Error ? error.message : "导入内置脱敏快照失败");
@@ -2052,7 +2028,7 @@ async function importPending(): Promise<void> {
     const acknowledgement = await acknowledgeBinanceStaging();
     if (!acknowledgement.ok) throw new Error(acknowledgement.error || "本地已写入，但插件暂存确认失败");
     await loadLocal();
-    applySmartDefaults();
+    syncPreflightFacts();
     pending.value = false;
     ElMessage.success("来源包已写入本地台账");
   } catch (error) {
@@ -2109,7 +2085,7 @@ onMounted(async () => {
     await loadLocal();
     await refreshStatus();
     if (latest.value) {
-      applySmartDefaults();
+      syncPreflightFacts();
     }
   } catch {
     // ignore
