@@ -95,9 +95,9 @@ welfareInitSource = [
   ...daydayzhuanSource,
 ];
 welfareTopSource = [...zhuanyesTopSource, ...daydayzhuanTopSource];
-welfareTopSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
-welfareInitSource.sort((a, b) => b.timestamp - a.timestamp); //按时间最新的靠前排序
-welfareSource = [...welfareTopSource, ...welfareInitSource];
+welfareSource = [...welfareTopSource, ...welfareInitSource].sort(
+  (a, b) => b.timestamp - a.timestamp
+); // 合并全部来源后全局排序，保证默认展示真正最新的数据
 export default {
   props: {
     welfareLocation: [String, Number],
@@ -347,5 +347,74 @@ export default {
     linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
   background-size: 100% 100px;
   background-repeat: repeat-y;
+}
+
+@media screen and (max-width: 768px) {
+  :deep(.el-card__body) {
+    display: block;
+    padding: 14px;
+  }
+
+  .welfare-date {
+    display: grid;
+    grid-template-columns: 58px 1px 68px minmax(0, 1fr);
+    gap: 8px;
+    margin-right: 0;
+    align-items: center;
+  }
+
+  .day-week-welfare {
+    margin: 0;
+    text-align: center;
+  }
+
+  .welfare-day {
+    font-size: 38px;
+  }
+
+  .welfare-week {
+    margin-left: 0;
+    font-size: 14px;
+  }
+
+  .welfare-hour {
+    margin: 0;
+    font-size: 13px;
+  }
+
+  .welfare-date > div:last-child {
+    min-width: 0;
+  }
+
+  .welfare-link-title {
+    display: -webkit-box;
+    height: auto;
+    min-height: 42px;
+    max-width: none;
+    overflow: hidden;
+    font-size: 15px;
+    line-height: 21px;
+    white-space: normal;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .welfare-div-link {
+    margin-top: 6px;
+  }
+
+  .welfare-img-link {
+    width: 26px;
+    height: 26px;
+  }
+
+  .welfare-div-website {
+    justify-content: flex-end;
+    margin-top: 10px;
+  }
+
+  .welfare-name-link {
+    font-size: 12px;
+  }
 }
 </style>

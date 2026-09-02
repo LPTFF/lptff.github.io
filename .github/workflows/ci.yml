@@ -52,6 +52,10 @@ jobs:
           KUAISHOU_COOKIE: ${{ secrets.KUAISHOU_COOKIE }}
           DOUYIN_COOKIE: ${{ secrets.DOUYIN_COOKIE }}
           LEETCODE_COOKIE: ${{ secrets.LEETCODE_COOKIE }}
+      - name: Keep only bank offers in welfare data
+        run: python -B project-support/crawl/filter_welfare_with_gemini.py --require-key
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Publish validated crawler data
         run: |
           cd ./src/data/
