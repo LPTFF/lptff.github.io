@@ -1,132 +1,298 @@
-# BOSS Extension Real Validation State
+# 真实环境验收状态
 
-Last updated: 2026-08-28
+最后更新：2026-09-02
 
-## Changed files
+## 状态说明
 
-- Removed `project-support/extension/lptff-investment-assistant/content/boss-helper.js`.
-- Removed `project-support/extension/lptff-investment-assistant/popup/boss-helper.js`.
-- Added Boss-Helper `0.5.2.2` Chrome MV3 artifacts: `boss.js`, `boss-helper-upstream-background.js`, `content/boss-helper-upstream.js`, and `content/boss-helper-upstream.css`; the main UI build has the approved About/Feedback/Help removals.
-- Updated `manifest.json`, `background.js`, and `popup/popup.html` to load the upstream module and remove the duplicate Popup feature surface.
-- Added upstream attribution/license and integration notes.
-- Kept `agent/references/boss-helper-upstream/` at tag `0.5.2.2`, commit `ddc15026e8c9c04e4243d98379c85856eba43ab3` as the source baseline.
-- Simplified the `agent/` entry and BOSS runbook so future agents preserve core product capabilities, repair the execution path, and validate observable UI promises in the real environment.
-- Removed locally generated `node_modules`/`.output` content from reference repositories; dependencies remain reproducible from lockfiles.
+- `LOCAL_BROWSER_PASS`：本地代码已在浏览器中通过对应场景，不代表已经部署上线。
+- `REAL_SOURCE_PASS`：已在用户授权的真实来源、登录态和数据链中通过对应场景。
+- `PRODUCTION_PASS`：已经在生产环境完成目标路径验收。
+- `PASS`：对应检查或局部场景通过。
+- `FAIL`：真实结果与预期不一致。
+- `未验收 / 未知`：没有取得足够的真实环境证据。
 
-## Impacted behaviors
+## 当前结论
 
-- The BOSS page uses the upstream information architecture and runtime directly: Statistics, native Filter, Config, AI, Logs, JobCards, ChatBox, automatic processing, notifications, appearance configuration, and address analysis. The approved About/Donation, Feedback, and Help-mode entries remain removed.
-- Start/pause/reset, filtering pipeline, pagination, delivery limit, presets, model management, greeting, AI filtering, caching, notification, appearance, and logs now follow the upstream implementation.
-- Removed non-upstream right floating dock, master switch, quick-search pills, card highlight/dim feature, custom Popup configuration, and the locally invented workflow.
-- AI Reply remains disabled because upstream marks it unimplemented.
+### Chrome 扩展重载报错修复（2026-09-02）
 
-## Pending real scenarios
+#### 问题根因
 
-- A successful live recruiter contact/custom greeting was not executed because it would create an external side effect and no specific job/recruiter was authorized.
-- Paid AI-provider calls and AMap calls were not executed because no credentials or paid-call authorization were supplied.
-- Positive branches requiring rare real samples (headhunter, gold interviewer, previously chatted, same-company/same-HR cache) were not forced.
+- 在 `chrome://extensions` 重载本地扩展后，已打开 BOSS 页面中的旧内容脚本仍可能被定时器或 DOM 观察器唤醒。
+- 旧脚本直接调用 `chrome.storage.local`，扩展上下文失效时产生未处理的 `Extension context invalidated` Promise 拒绝。
+- 真实复测还发现页面快速跳转时存在注入竞争：后台开始加载 BOSS 功能后，目标标签可能已经离开 BOSS 页面，从而产生 `Cannot access a chrome:// URL` 伪故障。
 
-## Infrastructure issue
+#### 修复结果
 
-- Chrome was on a second display whose direct window capture returned black. The ordinary Chrome window was moved to the primary interactive display with a Win32 user-session window move.
+- 增加统一的上下文失效识别与收尾，停止轮询、断开观察器、清理延迟任务并移除旧助手面板。
+- 存储和扩展消息改用安全入口；AI 分析异常分支不再因二次保存配置而泄漏未处理拒绝。
+- BOSS 功能注入前后重新检查目标标签地址，正常导航竞争改为安全跳过。
+- 本地扩展版本升级到 `3.17.8`，并对已排队的会话处理、下一未读会话和延迟发送入口增加失效上下文硬停止保护。
 
-## Infrastructure attempts
+#### 真实 Chrome 验证
 
-- Confirmed Codex, Explorer, Chrome, and the OS Desktop Runner are in interactive Windows Session 1.
-- Reloaded the unpacked target extension in `chrome://extensions/`.
-- Confirmed the Chrome Web Store Boss-Helper `0.5.2.2` extension stayed disabled to prevent double injection.
-- Used only OS-level screenshot, mouse, keyboard, focus, and window movement for the live site.
+- 普通、已登录 Windows Chrome 加载的版本为 `3.17.8`：`PASS`。
+- BOSS 页面保持打开时重载扩展，并等待旧轮询触发：扩展卡片没有新增“错误”入口，`PASS`。
+- 刷新真实 BOSS 职位页后，自动投递工作台和 AI 沟通小助手重新挂载，且助手保持“自动分析未开启”：`PASS`。
+- 没有启动职位处理，没有发送招聘方消息，没有请求 Gemini，也没有发送企业微信通知。
+- 证据报告：`artifacts/validation-20260902/REAL_EXTENSION_VALIDATION_REPORT.md`。
 
-## Current executor
+结论：原始扩展上下文失效路径和复测时发现的标签跳转竞争均为 `REAL_BOSS_VALIDATION PASS`。
 
-- Ordinary signed-in Windows Chrome.
-- OS-level Desktop Runner only.
-- CDP, DevTools MCP, Playwright, Puppeteer, Selenium, WebDriver, and remote debugging used on live BOSS: NO.
+### 合约复盘真实只读采集补充验证（2026-09-02）
 
-## Issues found
+- 在当前生产页面启动真实只读币安采集，刷新页面后再次点击采集，页面接续现有任务，没有出现“该平台的观察任务正在运行”：`REAL_SOURCE_PASS`。
+- 任务自然完成后，新快照写入本地台账，归档历史计数增加：`REAL_SOURCE_PASS`。
+- 没有执行任何下单、撤单、转账或其他交易动作。
+- 当前生产站点仍是旧前端，本地新增的结束按钮和 180 秒等待交互要部署后才能声明 `PRODUCTION_PASS`。
 
-1. The prior implementation duplicated the upstream product with a separate right-side workbench and divergent state model.
-2. It exposed features absent upstream: master switch, decision/review stage, confirmation pipeline, custom native-search shortcuts, and Popup configuration.
-3. Maintaining copied labels while independently implementing behavior caused UI/function drift and false parity.
+### 合约复盘采集生命周期修复（2026-09-01）
 
-## Root causes
+#### 问题根因
 
-- The previous approach treated screenshots and feature names as a design reference instead of using the actual open-source build as the executable baseline.
-- The multi-domain extension kept a second BOSS implementation and attempted to approximate upstream lifecycle behavior.
+- 合约复盘页面原来只轮询约 45 秒，但币安历史数据分支在收尾阶段还可能继续约 2 分钟。
+- 页面先结束等待、后台任务仍在运行，用户再次点击后便收到“该平台的观察任务正在运行”。
+- 错误提示提到“提前结束”，但合约复盘页面没有提供对应按钮。
 
-## Fixes
+#### 修复结果
 
-- Replaced the duplicate implementation with Chrome MV3 artifacts produced from upstream tag `0.5.2.2`, then removed the approved About/Feedback/Help UI and help-mode code at source level.
-- Integrated the upstream background proxy, injected main-world script, CSS, notifications permission, web-accessible resource, and host permissions into the existing extension.
-- Removed the old content and Popup BOSS scripts and their obsolete background AI message path.
-- Pinned the upstream version and documented the real Chrome comparison path for future upgrades.
+- 再次启动同一平台时，改为接续健康的现有任务并返回 `alreadyRunning`，不再直接报错。
+- 采集页消失，或任务超过截止时间及宽限期时，自动清理旧任务后重新开始。
+- 初始采集页仍在准备时，重复请求会被识别为同一任务，避免两个启动流程互相竞争。
+- 合约复盘页面最长等待时间由 45 秒提升到 180 秒，并实时同步运行状态。
+- 空数据页和“采集”页均增加“结束当前采集”按钮。
+- 页面与扩展之间新增币安结束/收尾通信；重复结束时接续正在生成的结果。
+- 扩展版本升级到 `3.17.5`。
 
-## Loadability checks
+#### 验证结果
 
-- Upstream `build:chrome`: PASS.
-- JavaScript syntax checks: PASS.
-- Manifest references: PASS (23 referenced files present).
-- `npm run typecheck`: PASS.
-- `npm run build`: PASS.
-- Extension ZIP generation: PASS (`dist-extension/lptff-investment-assistant.zip`).
-- `git diff --check`: PASS.
+- 当前生产页面可以正常加载，但尚未包含本地修复。
+- 本地 `http://localhost:8090/contract-review` 修改后可以正常渲染。
+- TypeScript 检查、扩展 JavaScript 语法、生产构建、通信链路核对、扩展 ZIP 生成和 `git diff --check`：`PASS`。
+- 本轮无法接管已加载未打包扩展的 Chrome，因此真实登录币安采集生命周期仍为 `未验收 / 未知`。
+- 本轮没有执行任何交易操作。
 
-These checks only confirmed that the artifact could be loaded. Functional conclusions are recorded in the real BOSS validation section below.
+结论：页面加载和构建集成为 `LOCAL_BROWSER_PASS`。站点部署并在用户 Chrome 中重新加载扩展 `3.17.5` 前，不声明 `PRODUCTION_PASS`。
 
-## Real BOSS validation
+### 简历驱动筛选、功能开关与数值范围（2026-09-01）
 
-- Unpacked target extension reload: PASS.
-- Official Web Store Boss-Helper isolated/disabled: PASS.
-- Single centered `Boss-Helper v0.5.2.2` panel and horizontal JobCards: PASS.
-- Old right floating workbench and old Popup control surface absent: PASS.
-- Core tabs and controls visible: Statistics, Filter, Config, AI, Logs, Chat: PASS.
-- Product-requested removals: About & Donation, Feedback, and Help entries are absent: PASS.
-- Filter tab moves and renders BOSS native expectation/search/filter controls: PASS.
-- Config tab renders filter and appearance accordions, config level, notification, save/reload/recommended config, and preset controls: PASS.
-- AI tab renders AI Greeting, AI Filtering, disabled AI Reply, and working Model Configuration modal: PASS.
-- Logs tab renders the upstream log console: PASS.
-- Chat button opens the upstream right-side ChatBox drawer: PASS.
-- Safe no-match run with temporary impossible title: PASS; progress reached 9/15, logs recorded each job as filtered, and today delivery remained 0/120.
-- Pause returned workflow to Start state: PASS.
-- Temporary title filter/value restored to the original disabled/empty state and saved: PASS.
-- Full page reload restored a single clean panel with 0/15 current progress and 0/120 today delivery: PASS.
-- Live recruiter contact/custom greeting: NOT EXECUTED (external side effect not authorized).
+#### 文件、行为与真实场景
 
-Execution: ordinary Windows Chrome + OS screenshot/mouse/keyboard
+- `content/boss-resume-profile.js`、`background.js`：在保留用户城市选择的前提下，一次性迁移为覆盖面更宽的高级前端画像。
+- 真实配置页显示 React、Vue、AI 应用前端、低代码、可视化、前端全栈等方向，薪资为 20–50K，仅保留强冲突排除项。
+- `content/boss-autopilot.js`：根据用户简历扩展沟通参考画像，并将默认值调整为回复前等待 20 秒、每日 300 条、单会话 30 条。
+- 真实“沟通规则”页显示有效范围：5–900 秒、1–1000 条、1–100 条。
+- Popup 与 `content/boss-feature-bootstrap.js`：增加默认开启的“自动投递”和“AI 沟通小助手”独立开关。
+- `manifest.json`、`background.js`：根据开关按需注入自动投递和 AI 沟通脚本，关闭的功能不会在页面初始化。
 
-Forbidden browser-control tools used on live BOSS: NO
+#### 真实 BOSS 验证
 
-REAL_BOSS_VALIDATION: EXECUTED — PASS for interaction parity and all authorized non-side-effect P0/P1 scenarios.
+- 在普通、已登录的 Windows Chrome 中重新加载未打包扩展 `3.17.4`：`PASS`。
+- 两个功能开关默认开启：`PASS`。
+- 单独关闭 AI 沟通后刷新页面，聊天页不再出现小助手：`PASS`。
+- 同时关闭自动投递后，职位页只保留 BOSS 原生页面：`PASS`。
+- 重新开启后，“自动投递”工作台和折叠状态的“AI 沟通小助手”恢复：`PASS`。
+- 自动投递配置确认：标题关键词已扩展、描述仅排除强冲突、薪资 20–50K、杭州/上海地址保留、活跃/好友/同 HR 去重启用、公司规模和 HR 职位不作为硬门槛、投递上限 120：`PASS`。
+- 沟通规则确认：实际发送模式已恢复，等待 20 秒、每日 300 条、单会话 30 条；助手保持“自动分析未开启”：`PASS`。
+- 清空旧画像搜索遗留错误后刷新真实职位页，扩展没有产生新错误：`PASS`。
+- 本轮没有启动职位处理，没有发送招聘方消息，没有请求 Gemini，也没有发送企业微信通知。
 
-### 2026-08-28 UI refinement regression
+#### 可加载性检查
 
-- Removed the About & Donation tab and its unused component.
-- Removed the Feedback action.
-- Removed the Help checkbox, hover overlay, tracking state, and animation loop.
-- Removed or rewrote stale user-facing references to Help and Feedback in configuration, filtering, workflow messages, and onboarding.
-- Rebuilt the upstream-derived Chrome bundle and reloaded the unpacked extension.
-- Real BOSS page confirmed only Statistics, Filter, Config, AI, Logs, and Chat remain.
-- Config page confirmed the obsolete “enter Help mode” alert is absent while filter controls and save/reload/preset actions remain intact.
-- No application workflow was started and no recruiter contact occurred.
+- 19 个扩展 JavaScript 文件语法：`PASS`。
+- Manifest JSON 与 23 个引用资源：`PASS`。
+- TypeScript 检查：`PASS`。
+- 扩展 ZIP：`PASS`，当时产物大小为 `708366` 字节。
+- `git diff --check`：`PASS`，仅有换行符提示。
 
-### 2026-08-28 deletion-scope correction
+结论：`REAL_BOSS_VALIDATION` 已执行，结果为 `PASS`。已验证画像配置、独立开关、数值边界展示和安全暂停状态；因为没有授权启动真实投递，所以不声明新的投递命中率。
 
-- Reverted the accidental removal of AI, ChatBox, notifications, appearance settings, address analysis, model/request infrastructure, and the complete upstream processing pipeline.
-- Reloaded the unpacked extension from the current workspace in ordinary Chrome and refreshed the existing signed-in BOSS page using OS-level desktop input only.
-- Confirmed Statistics, Filter, Config, AI, Logs, Chat, JobCards, start/progress UI, notification configuration, AI Greeting, AI Filtering, AI Reply state, and Model Configuration are visible again.
-- Confirmed the Chat button opens the right-side conversation drawer.
-- Confirmed About/Donation, Feedback, and Help mode remain absent.
-- No processing run, recruiter message, paid AI request, or AMap request was triggered during this correction check.
+### 自动投递与 AI 沟通小助手重构（2026-09-01）
 
-### 2026-08-28 test-artifact cleanup
+#### 修改内容
 
-- Removed the obsolete parity test command/script, test-only documents, unused `fake-indexeddb` dependency, and empty `tests/` directory.
-- Removed `/job`, `/life`, and `/loginFund` because they only exposed placeholder or fabricated interactions; removed their navigation entries and orphaned login helpers.
-- Renamed runtime-consumed desensitized data from `project-support/fixtures/` to `project-support/data-snapshots/`; these snapshots remain product data, not test doubles.
-- Preserved `src/investment/engines/scenario/stress-test.ts` because it implements the user-facing portfolio stress-analysis feature rather than automated testing.
-- `npm run typecheck`, `npm run build`, extension ZIP generation, and `git diff --check`: PASS.
-- Ordinary Windows Chrome loaded `/investment/data` and `/contract-review`; the removed `/job`, `/life`, and `/loginFund` paths redirected to the real home page (`导航专区`): PASS.
+- `agent/references/boss-helper-upstream/src/App.vue`：工作台更名为“自动投递”，移除上游 AI/Chat 入口，只保留统计、筛选、配置和日志。
+- `content/boss-autopilot.js`、`.css`：实现可拖动的“AI 沟通小助手”，包含运行状态、配置、沟通规则和日志四个标签页。
+- 一键启动会将当前标签页导航到 `https://www.zhipin.com/web/geek/chat`，并启用保存的沟通模式。
+- 历史沟通日志只记录时间、会话定位、动作和结果，不保存完整聊天原文或凭据。
 
-## Next action
+#### 已验证场景
 
-- For a future upstream upgrade, rebuild the selected tag, sync the four artifacts, reload the unpacked extension, and repeat the same ordinary-Chrome matrix.
+- 普通 Chrome 中最终工作台名称、标签和小助手四标签布局：`PASS`。
+- 拖动过程中没有最大化、全屏或改变页面布局：`PASS`。
+- 当前标签页一键进入沟通页，再安全暂停；没有发送招聘方消息：`PASS`。
+- 位置保存、收起/展开、职位页与沟通页交互一致：`PASS`。
+- 仅元数据日志的新增、显示和清理：`PASS`。
+
+执行环境：普通、已登录的 Windows Chrome，只使用操作系统级截图、鼠标和键盘。BOSS 线上页面没有使用 CDP、DevTools MCP、Playwright、Puppeteer、Selenium、WebDriver 或远程调试。
+
+## 上游 Boss-Helper 集成基线
+
+### 主要文件变化
+
+- 删除旧的 `content/boss-helper.js` 和 `popup/boss-helper.js`。
+- 引入 Boss-Helper `0.5.2.2` 的 Chrome MV3 产物：`boss.js`、`boss-helper-upstream-background.js`、`content/boss-helper-upstream.js`、`content/boss-helper-upstream.css`。
+- 上游主界面已按需求移除“关于与赞赏”“反馈”“帮助”等入口。
+- `manifest.json`、`background.js`、`popup/popup.html` 改为加载上游模块，并移除重复的 Popup 功能面板。
+- 上游基线固定为 tag `0.5.2.2`、提交 `ddc15026e8c9c04e4243d98379c85856eba43ab3`。
+- 删除参考仓库里本地生成的 `node_modules` 和 `.output`；依赖仍可根据锁文件重建。
+- 增加 `content/boss-autopilot.js`、`.css`，用于个人画像和受保护的 AI 沟通。
+- Gemini Key 和企业微信 Webhook 只保存在浏览器本地，并始终遮罩显示。
+
+### 行为边界
+
+- BOSS 页面直接复用上游的信息架构与运行时：统计、原生筛选、配置、职位卡片、自动处理、通知、外观和地址分析。
+- 开始、暂停、重置、筛选流水线、翻页、投递上限、预设、招呼语、缓存和日志均遵循上游实现。
+- 已删除非上游的右侧工作台、总开关、快捷搜索标签、职位卡片高亮/虚化和自创工作流。
+- 画像搜索阶段曾生成 Gemini 搜索计划，并同步 BOSS 查询和扩展筛选；该能力后来按产品要求移除，详见后续时间线。
+- 自动沟通最初采用安全预览优先、显式实际发送切换、限额、去重和可暂停设计；有价值线索只向企业微信发送摘要。
+
+### 历史可加载性检查
+
+- 上游 `build:chrome`：`PASS`。
+- JavaScript 语法、Manifest JSON、Manifest 引用：`PASS`。
+- `npm run typecheck`、`npm run build`：`PASS`。
+- 扩展 ZIP 生成、`git diff --check`：`PASS`。
+
+这些结果只证明产物能够加载，功能结论以真实 BOSS 验证为准。
+
+## 真实 BOSS 验证时间线
+
+### 2026-08-28：上游基线
+
+- 重新加载未打包扩展：`PASS`。
+- Chrome 应用商店版 Boss-Helper 保持禁用，避免重复注入：`PASS`。
+- 页面只出现一个居中的 `Boss-Helper v0.5.2.2` 面板和横向职位卡片：`PASS`。
+- 旧右侧悬浮工作台和旧 Popup 控制面板已消失：`PASS`。
+- 统计、筛选、配置、AI、日志、对话等核心入口可见：`PASS`。
+- “关于与赞赏”“反馈”“帮助”入口已移除：`PASS`。
+- 筛选页可以显示并移动 BOSS 原生期望、搜索和筛选控件：`PASS`。
+- 配置页可以显示筛选、外观、通知、保存、重载、推荐配置和预设控件：`PASS`。
+- AI 页可以显示 AI 招呼、AI 筛选、禁用状态的 AI 回复和模型配置弹窗：`PASS`。
+- 日志页和右侧对话抽屉可以正常打开：`PASS`。
+- 使用临时“不可能命中”的标题安全运行，进度达到 9/15，全部职位被过滤，当日投递仍为 0/120：`PASS`。
+- 暂停后恢复“开始”状态，临时筛选被还原并保存；刷新后进度恢复为 0/15：`PASS`。
+- 真实联系招聘方和自定义招呼语：`未执行`，因为没有授权外部副作用。
+
+### 2026-08-28：界面精简回归
+
+- 删除“关于与赞赏”标签及其未使用组件。
+- 删除“反馈”操作。
+- 删除“帮助”复选框、悬浮层、跟踪状态和动画循环。
+- 清理配置、筛选、工作流和引导中的旧“帮助/反馈”文案。
+- 重新构建并加载后，页面只保留统计、筛选、配置、AI、日志、对话：`PASS`。
+- 没有启动工作流，也没有联系招聘方。
+
+### 2026-08-28：删除范围纠正
+
+- 恢复此前误删的 AI、对话抽屉、通知、外观、地址分析、模型请求基础设施和完整处理流水线。
+- 普通 Chrome 中确认上述能力重新可见：`PASS`。
+- “关于与赞赏”“反馈”“帮助”仍保持删除：`PASS`。
+- 没有启动处理，没有发送消息，没有产生付费 AI 或高德地图请求。
+
+### 2026-08-28：测试产物清理
+
+- 删除废弃的一致性测试命令/脚本、测试专用文档、未使用的 `fake-indexeddb` 依赖和空 `tests/` 目录。
+- 删除只提供占位或虚构交互的 `/job`、`/life`、`/loginFund` 及其导航和登录辅助代码。
+- 运行时脱敏数据从 `project-support/fixtures/` 移至 `project-support/data-snapshots/`，明确其为产品数据而非测试替身。
+- 保留 `src/investment/engines/scenario/stress-test.ts`，因为它属于用户可见的组合压力分析功能。
+- 类型检查、构建、扩展 ZIP、差异检查：`PASS`。
+- 普通 Chrome 中 `/investment/data`、`/contract-review` 可加载；已删除路由回到真实首页：`PASS`。
+
+### 2026-08-31：个人画像与无人值守助手
+
+- 重新加载未打包扩展 `3.16.0`，应用商店版 Boss-Helper 保持禁用：`PASS`。
+- 个人画像面板只渲染一次，包含画像、遮罩凭据、无人值守规则和状态卡：`PASS`。
+- Gemini 和企业微信凭据只保存于本地，并只显示“已保存”；截图和仓库没有明文凭据：`PASS`。
+- 空白凭据输入不会覆盖已保存值；清除与重新录入 Gemini Key 均正常：`PASS`。
+- 企业微信发送过一条明确标注为开发测试的通知，页面显示成功：`PASS`。
+- Gemini 首次真实连接返回 `User location is not supported for the API use.`：`FAIL`，属于外部出口地区限制，页面已明确显示。
+- WinXray 增加 Gemini 域名 PAC 路由后仍返回相同限制：`FAIL`。
+- Windows PowerShell 使用同一 Key 也返回相同限制；PowerShell 出口显示香港，普通 Chrome 出口显示中国大陆，说明两条网络路径不同，但两者当时都被 Gemini 拒绝。
+- WinXray 切换日本后，Windows 出口稳定显示日本；首次 Gemini 请求由地区限制变为超时。
+- 扩展请求随后能够到达 Google 模型服务：`gemini-3.7-flash` 返回高负载，切换 `gemini-3.5-flash-lite` 后连接测试通过：`PASS`。
+- Flash-Lite 生成结构化画像搜索计划，并应用到真实 BOSS 原生搜索：`PASS`。
+- 增加 30 秒 Gemini 超时和可操作错误提示：语法、ZIP、扩展重载和页面恢复均通过。
+- 凭据控件改为默认遮罩、可显隐、30 秒自动重新遮罩；日志和导出不包含明文：`PASS`。
+- 页面加载、扩展重载、刷新或保存配置后，已保存凭据会重新填充但保持遮罩：`PASS`。
+- 一键画像搜索在 Gemini 失败时使用保守本地降级方案，并同步标题、内容、地址和薪资条件：`PASS`。
+- 安全预览、延迟、每日上限、单会话上限、启用开关和暂停状态可以跨刷新保存：`PASS`。
+- 本轮只启用安全预览进行控制验证，随后暂停；没有开启实际发送，没有联系招聘方：`PASS`。
+
+### 2026-08-31：聊天页遮挡与未读队列修复
+
+- 根因：小助手插入 BOSS 对话容器之前，完整配置面板把会话列表推到首屏下方，标题还会滚动到固定导航下面。
+- 旧自动化只监听当前打开的会话；未选择会话时，即使存在未读队列，也不会自动打开或送入 Gemini。
+- 扩展 `3.16.1` 将小助手改为聊天页固定、默认折叠的面板，展开后内部滚动，不再推动页面；支持 `Alt+Shift+B`。
+- 折叠标题显示真实运行状态和未读数；展开状态区分总未读会话和当前 DOM 可处理行。
+- 实际发送模式能够按顺序打开未读会话，执行延迟和限额，分析最新收到的消息，确认编辑器清空后再处理下一条。
+- Gemini 分析失败不再写入去重记录；安全预览不会自动打开未读队列，也不会发送企业微信通知。
+- 普通 Chrome 中面板位置和未读汇总：`PASS`。
+- 一个已打开的未读会话使用真实 Gemini 凭据完成安全预览，并显示“已判定为有价值线索”：`PASS`。
+- 本轮没有点击 BOSS 发送，也没有企业微信通知；最终保持安全预览。
+
+### 2026-08-31：真实无人值守沟通执行
+
+- 用户明确授权对当前 BOSS 未读队列进行真实无人值守测试。
+- 复现未读队列卡住：4 个会话行合计 5 条未读；旧代码点击 `<li>`，而 BOSS 实际把选择事件绑定在 `.friend-content`，且固定等待 1.3 秒、没有打开成功校验。
+- `3.16.2` 改用真实 DOM 结构，并增加有限次数的打开、等待、重试和跳过状态机；普通 Chrome 无需人工选择即可将未读总数从 5 降到 0：`PASS`。
+- 真实发送暴露两个问题：手动触发输入事件导致草稿重复；发送按钮搜索停在 `.chat-input`，没有上溯到 `.chat-editor`。每次失败后均暂停并清空草稿。
+- `3.16.5` 改为一次原生编辑插入，从 `.chat-editor` 查找可见发送按钮，执行完整鼠标序列并校验编辑器清空；发送失败时自动暂停。
+- 真实 BOSS 页面接受了一条生成回复，出现本人消息气泡和送达状态，编辑器清空，会话预览时间更新：`PASS`。
+- 第一次去重回归暴露会话 ID 不稳定：ID 包含会变化的最后消息预览，失败期间出现 3 个发出气泡，随后 BOSS 显示 3 条撤回提示，最终仍有 1 条送达消息。该副作用如实记录。
+- `3.16.6` 改用稳定行属性、头像和身份生成会话 ID；只有最后一条为对方消息时才分析；成功处理先于企业微信通知记录，不把后续本人消息当成新输入。
+- 最终去重回归：实际发送保持开启 18 秒，没有新增发出消息，编辑器为空，状态为“实际发送 · 当前未读 0 · 可处理 0”：`PASS`。
+- 当时最终状态按用户要求保持实际无人值守开启，每日上限 20、单会话上限 4。
+- 队列清零后没有新的自然未读消息，因此 `3.16.6` 对全新到达消息的生命周期边缘在当时仍未观察到。
+
+### 2026-09-01：严格企业微信通知与新未读生命周期
+
+- `3.16.7` 将企业微信消息改为 `msgtype: text` 和 `text.content`。
+- 只有 `valuable`、`requirementsComplete`、`allCriteriaMet` 全为 `true`，`stop` 为 `false`，且 `missingQuestions` 为空时，岗位才可进入通知队列。
+- 通知只包含结构化岗位信息和审核理由，不包含原始对话。
+- 待通知状态与 BOSS 回复去重分开保存，失败最多指数退避重试 3 次，避免通知失败导致重复回复。
+- 增加每 5 秒一次的未读轮询，作为 DOM 变化监听的兜底。
+- 一个自然到达的未读会话使未读数从 0 变为 1；扩展自动打开、调用真实 Gemini、等待配置的 12 秒、发送一次追问并显示送达，未读随后从 1 变为 0：`PASS`。
+- 继续运行 20 秒没有重复回复：`PASS`。
+- 该真实样本缺少完整岗位事实，因此正确地没有触发企业微信岗位通知：负向门槛 `PASS`。
+- 当时没有自然出现完全符合条件的岗位，因此真实正向企业微信岗位通知仍未观察到。
+- 企业微信连接测试没有显示页面错误，但没有查看机器人接收端内容，因此不声明接收端渲染结果。
+
+### 2026-09-01：多地区画像搜索和全职结果防护
+
+- 普通 Chrome 中重新加载 `3.17.1`，应用商店版 Boss-Helper 保持禁用：`PASS`。
+- Gemini 将实体城市和工作方式分开，生成杭州、上海和远程任务；一次操作打开多个独立 BOSS 原生搜索：`PASS`。
+- 地址栏确认杭州 `city=101210100`、上海 `city=101020100`，远程任务使用包含“远程办公”的独立查询：`PASS`。
+- 全职画像强制排除兼职、实习、临时、小时工、日结、短期，并将小时/日结薪资视为冲突：`PASS`。
+- 真实远程结果中原本存在无关 Java/PHP 和小时计薪前端职位；最终页面隐藏这些卡片，只保留目标前端正式岗位：`PASS`。
+- 同样的目标/冲突规则加入上游第一阶段职位标题流水线，隐藏卡片不会被“开始”按钮处理。
+- 搜索计划和净化计数在 BOSS 导航及整页刷新后保持：`PASS`。
+- 没有启动真实投递，因为任务没有授权联系招聘方。
+
+### 2026-09-01：恢复上游筛选并统一小助手交互
+
+- 删除画像搜索计划器、多地区标签创建、上游筛选同步、画像标题防护和职位卡片隐藏。
+- 保存的画像只保留为 Gemini 分析与回复的沟通上下文。
+- 职位页和沟通页统一为右上角悬浮、默认折叠的小助手。
+- Boss-Helper 职位标题流水线恢复仓库基线，扩展升级为 `3.17.2`。
+- Boss-Helper 原有“筛选”标签重新成为唯一的扩展职位筛选入口。
+- 小助手不再生成搜索词、修改预设、打开城市/远程标签或隐藏职位卡片。
+- 迁移只删除废弃画像搜索元数据，不清除普通 Boss-Helper 筛选值。
+- 普通 Chrome 中职位页和聊天页都显示同一个紧凑小助手，且不会推动会话列表：`PASS`。
+- `Alt+Shift+B` 展开后只保留 Gemini/企业微信、沟通画像、沟通规则和运行状态；画像搜索入口已消失：`PASS`。
+- 本轮没有启动职位处理，没有发送招聘方消息，没有请求 Gemini，也没有企业微信通知。
+- JavaScript、Manifest `3.17.2`、ZIP 和差异检查：`PASS`。
+
+结论：`REAL_BOSS_VALIDATION` 已执行，结果为 `PASS`。已验证上游筛选所有权恢复、一键画像搜索移除、职位页与沟通页交互一致；没有执行真实招聘方发送。
+
+## 当前待办与未知
+
+- 合约复盘修复尚未部署，扩展 `3.17.5` 尚未在可控的用户 Chrome 中完成真实币安只读采集验证。
+- 企业微信完全符合条件岗位的真实正向通知仍缺少自然样本。
+- BOSS 实际发送属于外部副作用，除已明确授权并如实记录的历史场景外，不主动重复执行。
+- 当前已验证可用的 Gemini 默认模型为 `gemini-3.5-flash-lite`；应继续使用受支持的代理出口。
+
+## 证据与隐私边界
+
+- BOSS 真实页面始终使用普通 Windows Chrome 和操作系统级截图、鼠标、键盘操作，没有使用 CDP、DevTools MCP、Playwright、Puppeteer、Selenium、WebDriver 或远程调试。
+- 验收截图只保存脱敏状态；凭据、岗位名称、金额、收益、账户和原始会话内容不进入仓库或验收记录。
+- 历史脱敏截图和验收材料位于 `artifacts/`，仅用于对应时间点的事实核对。

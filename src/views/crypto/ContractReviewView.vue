@@ -25,7 +25,8 @@
         <el-empty description="尚未导入合约交易数据" />
         <p class="empty-intro">先导入一份来源数据，系统才能机械复盘。真实账户建议通过浏览器插件只读采集；内置脱敏快照仅用于体验完整流程。</p>
         <div class="guide-actions">
-          <el-button type="primary" :loading="busy" :disabled="pending" @click="collect">开始采集投资数据</el-button>
+          <el-button type="primary" :loading="busy" :disabled="pending || collectionRunning" @click="collect">开始采集投资数据</el-button>
+          <el-button v-if="collectionRunning" type="danger" plain :loading="stopBusy" @click="stopCollection">结束当前采集</el-button>
           <el-button :loading="busy" :disabled="!pending" @click="importPending">读取待导入数据</el-button>
           <el-button type="primary" plain :loading="busy" @click="importBundledSnapshot">导入内置脱敏快照（2026-08-24）</el-button>
         </div>
@@ -1005,7 +1006,8 @@
           <h2>{{ dataVerdictTitle }}</h2>
           <p>数据采集仅读取交易所导出快照或插件同步，绝不发起任何真实链上/交易所交易；所有风控指标与复盘结论均在本地沙箱内确定性计算。</p>
           <div class="verdict-actions">
-            <el-button type="primary" size="small" :loading="busy" :disabled="pending" @click="collect">重新采集数据</el-button>
+            <el-button type="primary" size="small" :loading="busy" :disabled="pending || collectionRunning" @click="collect">重新采集数据</el-button>
+            <el-button v-if="collectionRunning" type="danger" plain size="small" :loading="stopBusy" @click="stopCollection">结束当前采集</el-button>
             <el-button size="small" :loading="busy" :disabled="!pending" @click="importPending">读取待导入插件数据</el-button>
             <el-button size="small" @click="importBundledSnapshot">重新导入内置脱敏快照</el-button>
             <el-button v-if="pending" size="small" :disabled="busy" @click="discard">丢弃插件暂存</el-button>
@@ -1095,6 +1097,7 @@ import {
   getBinanceStaging,
   getBinanceStatus,
   startBinanceCollection,
+  stopBinanceCollection,
 } from "../../crypto/extension-sync";
 import { ContractReviewLedger } from "../../crypto/ledger";
 import {
@@ -1136,6 +1139,8 @@ const latest = ref<ContractReviewDataset>();
 const archiveCount = ref(0);
 const pending = ref(false);
 const busy = ref(false);
+const stopBusy = ref(false);
+const collectionRunning = ref(false);
 const dimensionTab = ref("symbol");
 const evidenceTab = ref("positions");
 const branchList = ref<Branch[]>([]);
@@ -1995,6 +2000,7 @@ async function refreshStatus(): Promise<void> {
   const response = await getBinanceStatus<ExtensionStatus>();
   if (!response.ok || !response.status) throw new Error(response.error || "无法读取插件状态");
   pending.value = response.status.pending;
+  collectionRunning.value = Boolean(response.status.collection?.running);
   branchList.value = Object.values(response.status.collection?.branches || {});
 }
 
@@ -2044,11 +2050,16 @@ async function collect(): Promise<void> {
   try {
     const response = await startBinanceCollection();
     if (!response.ok) throw new Error(response.error || "启动失败");
-    for (let attempt = 0; attempt < 45; attempt += 1) {
+    collectionRunning.value = true;
+    if (response.alreadyRunning) {
+      ElMessage.info("已接续正在进行的采集任务，无需重复启动");
+    }
+    for (let attempt = 0; attempt < 180; attempt += 1) {
       await new Promise((resolve) => window.setTimeout(resolve, 1000));
       const status = await getBinanceStatus<ExtensionStatus>();
       if (!status.ok || !status.status) continue;
       pending.value = status.status.pending;
+      collectionRunning.value = Boolean(status.status.collection?.running);
       branchList.value = Object.values(status.status.collection?.branches || {});
       if (pending.value) {
         busy.value = false;
@@ -2059,11 +2070,25 @@ async function collect(): Promise<void> {
         throw new Error("后台采集未生成来源包，请确认币安合约页仍保持登录状态");
       }
     }
-    throw new Error("等待采集完成超时，请检查插件状态");
+    throw new Error("采集收尾超过 3 分钟，可点击“结束当前采集”生成当前结果或重新加载插件后重试");
   } catch (error) {
     handleBridgeError(error, "启动失败");
   } finally {
     busy.value = false;
+  }
+}
+
+async function stopCollection(): Promise<void> {
+  stopBusy.value = true;
+  try {
+    const response = await stopBinanceCollection();
+    if (!response.ok) throw new Error(response.error || "结束采集失败");
+    ElMessage.info(response.alreadyFinishing ? "采集结果已经在生成，请稍候" : "正在结束采集并生成当前结果");
+    await refreshStatus();
+  } catch (error) {
+    handleBridgeError(error, "结束采集失败");
+  } finally {
+    stopBusy.value = false;
   }
 }
 

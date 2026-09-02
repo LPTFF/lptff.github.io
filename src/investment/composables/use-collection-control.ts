@@ -8,10 +8,32 @@ import { useInvestmentOS } from "./use-investment-os";
 export function useCollectionControl() {
   const { state, startCollection, syncFromExtension, discardStaging, refreshExtensionStatus } = useInvestmentOS();
 
+  async function recoverInvalidatedBridge(): Promise<boolean> {
+    const message = `${state.error || ""} ${state.syncMessage || ""}`;
+    if (!/旧连接已失效|Extension context invalidated|插件已重新加载或更新/i.test(message)) return false;
+
+    try {
+      await ElMessageBox.confirm(
+        "采集插件刚刚重新加载或更新，当前页面仍连接着旧版本。刷新本页面即可重新建立连接，不会清除插件待导入数据或本地账本。",
+        "重新连接采集插件",
+        { type: "warning", confirmButtonText: "刷新并重连", cancelButtonText: "暂不刷新" },
+      );
+    } catch {
+      return true;
+    }
+    window.location.reload();
+    return true;
+  }
+
   async function collect(): Promise<boolean> {
     if (state.syncing || state.collecting) return false;
     // 先刷新拿到最新 pending，区分"被待导入数据阻塞"与"真正启动失败"，再决定是否提示丢弃。
-    await refreshExtensionStatus();
+    const extensionStatus = await refreshExtensionStatus(true);
+    if (!extensionStatus) {
+      if (await recoverInvalidatedBridge()) return false;
+      ElMessage.error(state.error || "无法读取采集插件状态，请确认插件已安装并重新加载");
+      return false;
+    }
     if (state.extensionStatus?.pending) {
       try {
         await ElMessageBox.confirm(
@@ -34,6 +56,8 @@ export function useCollectionControl() {
     const started = await startCollection();
     if (started) {
       ElMessage.success("采集完成，新批次等待导入");
+    } else if (await recoverInvalidatedBridge()) {
+      return false;
     } else if (state.extensionStatus?.pending) {
       ElMessage.warning(state.syncMessage || "插件中仍有一批待导入数据，请先读取或丢弃");
     } else if (state.collectionRecovery === "login-required") {
@@ -56,6 +80,8 @@ export function useCollectionControl() {
       ElMessage.warning("插件尚未生成待导入数据，请先开始采集");
     } else if (result?.outcome === "collecting") {
       ElMessage.info("插件正在采集，请等待完成后导入");
+    } else if (await recoverInvalidatedBridge()) {
+      return;
     } else {
       ElMessage.error(state.error || state.syncMessage || "读取插件数据失败");
     }

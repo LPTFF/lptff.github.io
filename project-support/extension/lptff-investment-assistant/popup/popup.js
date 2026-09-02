@@ -18,6 +18,38 @@ const modeSections = {
   market: document.querySelector("#market-mode"),
   entertainment: document.querySelector("#entertainment-mode"),
 };
+const BOSS_FEATURES_KEY = "lptffBossFeatures";
+const bossAutoDeliveryToggle = document.querySelector("#boss-auto-delivery-enabled");
+const bossAiCommunicationToggle = document.querySelector("#boss-ai-communication-enabled");
+const bossFeatureStatus = document.querySelector("#boss-feature-status");
+
+async function loadBossFeatures() {
+  const stored = await chrome.storage.local.get(BOSS_FEATURES_KEY);
+  const features = stored[BOSS_FEATURES_KEY] || {};
+  bossAutoDeliveryToggle.checked = features.autoDelivery !== false;
+  bossAiCommunicationToggle.checked = features.aiCommunication !== false;
+}
+
+async function saveBossFeatures() {
+  const features = {
+    autoDelivery: bossAutoDeliveryToggle.checked,
+    aiCommunication: bossAiCommunicationToggle.checked,
+  };
+  bossFeatureStatus.textContent = "正在应用功能开关…";
+  await chrome.storage.local.set({ [BOSS_FEATURES_KEY]: features });
+  const tabs = await chrome.tabs.query({ url: ["https://*.zhipin.com/*", "https://zhipin.com/*"] });
+  await Promise.all(tabs.filter((tab) => Number.isInteger(tab.id)).map((tab) => chrome.tabs.reload(tab.id)));
+  bossFeatureStatus.textContent = `自动投递已${features.autoDelivery ? "开启" : "关闭"}，AI 沟通小助手已${features.aiCommunication ? "开启" : "关闭"}；BOSS 页面已刷新。`;
+}
+
+for (const toggle of [bossAutoDeliveryToggle, bossAiCommunicationToggle]) {
+  toggle.addEventListener("change", () => saveBossFeatures().catch((error) => {
+    bossFeatureStatus.textContent = `开关保存失败：${error instanceof Error ? error.message : "未知错误"}`;
+  }));
+}
+loadBossFeatures().catch((error) => {
+  bossFeatureStatus.textContent = `开关读取失败：${error instanceof Error ? error.message : "未知错误"}`;
+});
 
 function setMode(mode) {
   const active = modeSections[mode] ? mode : "finance";

@@ -284,7 +284,7 @@ async function loadFromLedger(): Promise<void> {
   state.loaded = true;
 }
 
-async function refreshExtensionStatus(): Promise<InvestmentExtensionStatus | undefined> {
+async function refreshExtensionStatus(reportError = false): Promise<InvestmentExtensionStatus | undefined> {
   try {
     state.extensionStatus = await readInvestmentExtensionStatus();
     state.collectionProgress = state.extensionStatus.collection;
@@ -314,8 +314,13 @@ async function refreshExtensionStatus(): Promise<InvestmentExtensionStatus | und
       }
     }
     return state.extensionStatus;
-  } catch {
+  } catch (error) {
     // 页面仍可读取已有 Ledger；用户显式操作时再展示桥接错误。
+    if (reportError) {
+      state.error = error instanceof Error ? error.message : "无法读取采集插件状态";
+      state.syncPhase = "failed";
+      state.syncMessage = "读取采集插件状态失败";
+    }
     return undefined;
   }
 }

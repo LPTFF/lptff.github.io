@@ -137,6 +137,9 @@
     if (event.data?.type === "LPTFF_BINANCE_START_COLLECTION") {
       forward({ type: "START_BINANCE_COLLECTION", requestId: event.data.requestId }, "LPTFF_BINANCE_COLLECTION_STARTED");
     }
+    if (event.data?.type === "LPTFF_BINANCE_STOP_COLLECTION") {
+      forward({ type: "STOP_OBSERVATION", platform: "binance", requestId: event.data.requestId }, "LPTFF_BINANCE_COLLECTION_STOPPED");
+    }
   });
 
   chrome.runtime.onMessage.addListener((message) => {

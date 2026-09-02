@@ -61,7 +61,20 @@
       </section>
 
       <section id="market-mode" hidden>
-        <p>BOSS 直聘助手已与 Boss-Helper 0.5.2.2 对齐。请打开 BOSS 直聘职位页，在页面内使用统计、原生筛选、配置、AI、日志、职位卡片和对话功能。</p>
+        <p>BOSS 直聘助手已与 Boss-Helper 0.5.2.2 对齐。请打开 BOSS 直聘职位页使用自动投递，或通过可拖动的 AI 沟通小助手管理运行状态、配置、沟通规则和日志。</p>
+        <div class="feature-switches" aria-label="BOSS 直聘功能开关">
+          <label class="feature-switch" for="boss-auto-delivery-enabled">
+            <span><strong>自动投递</strong><small>关闭后不加载职位筛选、岗位处理和投递工作台。</small></span>
+            <input id="boss-auto-delivery-enabled" type="checkbox" checked />
+            <i aria-hidden="true"></i>
+          </label>
+          <label class="feature-switch" for="boss-ai-communication-enabled">
+            <span><strong>AI 沟通小助手</strong><small>关闭后不分析会话、不生成回复，也不显示悬浮助手。</small></span>
+            <input id="boss-ai-communication-enabled" type="checkbox" checked />
+            <i aria-hidden="true"></i>
+          </label>
+        </div>
+        <p id="boss-feature-status" class="action-hint" role="status" aria-live="polite">两个功能默认启用；修改后会刷新已打开的 BOSS 页面。</p>
       </section>
 
       <section id="entertainment-mode" hidden>

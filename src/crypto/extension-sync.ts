@@ -1,6 +1,13 @@
 import type { BinanceSourceCapture } from "./domain";
 
-interface BridgeResponse<T = unknown> { ok: boolean; staging?: { capture?: BinanceSourceCapture } | null; status?: T; error?: string }
+interface BridgeResponse<T = unknown> {
+  ok: boolean;
+  staging?: { capture?: BinanceSourceCapture } | null;
+  status?: T;
+  error?: string;
+  alreadyRunning?: boolean;
+  alreadyFinishing?: boolean;
+}
 
 function bridge<T>(type: string, responseType: string, timeoutMs = 8000): Promise<BridgeResponse<T>> {
   return new Promise((resolve, reject) => {
@@ -25,3 +32,4 @@ export const getBinanceStatus = <T>() => bridge<T>("LPTFF_BINANCE_GET_STATUS", "
 export const acknowledgeBinanceStaging = () => bridge("LPTFF_BINANCE_ACK_STAGING", "LPTFF_BINANCE_STAGING_ACKNOWLEDGED");
 export const discardBinanceStaging = () => bridge("LPTFF_BINANCE_DISCARD_STAGING", "LPTFF_BINANCE_STAGING_DISCARDED");
 export const startBinanceCollection = () => bridge("LPTFF_BINANCE_START_COLLECTION", "LPTFF_BINANCE_COLLECTION_STARTED", 15000);
+export const stopBinanceCollection = () => bridge("LPTFF_BINANCE_STOP_COLLECTION", "LPTFF_BINANCE_COLLECTION_STOPPED", 150000);

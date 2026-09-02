@@ -7,6 +7,232 @@ importScripts(
 );
 
 const LPTFF_CONFIG_KEY = "lptffConfig";
+const BOSS_AUTOPILOT_CONFIG_KEY = "lptffBossAutopilot";
+const BOSS_AUTOPILOT_STATE_KEY = "lptffBossAutopilotState";
+const BOSS_FEATURES_KEY = "lptffBossFeatures";
+const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 1;
+const GEMINI_MODELS = new Set(["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"]);
+const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，现任高级前端开发工程师。核心技术栈覆盖 React、Vue、TypeScript、JavaScript、Next.js、Nuxt.js，熟悉 Redux、MobX、Pinia；具备 Webpack、Vite、Rollup、ESBuild、微前端、SSR/SSG、CI/CD、性能优化和组件库建设经验。做过金融科技复杂业务系统、低代码平台 React 迁移、PC 中后台、移动端、ECharts/Canvas/SVG 数据可视化，并具备 Node.js、RESTful API、GraphQL、WebSocket、Nginx、爬虫与自动化脚本基础。持续实践 AI 辅助开发、内容审核和自动化流程。目标岗位包括高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端，以及以前端为主的全栈岗位；优先产品技术团队、复杂业务、工程化或平台建设方向。`;
+const RESUME_OPTIMIZED_MUST_ASK = "核心工作内容与技术栈、团队规模及岗位级别、薪资结构与年终奖、工作时间和双休情况、社保公积金、办公地点与远程安排、是否外包驻场或长期出差、面试流程";
+const RESUME_OPTIMIZED_CRITERIA = "优先高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端、金融科技或复杂中后台；React/Vue/TypeScript、工程化、性能优化、组件平台、微前端、Node.js 协作经验可形成匹配。薪资和工作时间需可接受，团队职责清晰；排除兼职实习、纯销售客服、培训收费、劳务派遣、长期驻场外包、长期高频出差和虚假招聘。";
+const DEFAULT_BOSS_AUTOPILOT_CONFIG = Object.freeze({
+  profile: RESUME_OPTIMIZED_PROFILE,
+  mustAsk: RESUME_OPTIMIZED_MUST_ASK,
+  valuableCriteria: RESUME_OPTIMIZED_CRITERIA,
+  model: "gemini-3.5-flash-lite",
+  geminiKey: "",
+  wecomWebhook: "",
+  autoReply: false,
+  sendMode: "preview",
+  dailyReplyLimit: 300,
+  perConversationLimit: 30,
+  replyDelaySeconds: 20,
+  optimizationVersion: BOSS_AUTOPILOT_OPTIMIZATION_VERSION,
+});
+
+function bossAutopilotSenderAllowed(sender) {
+  const senderUrl = String(sender?.url || sender?.tab?.url || "");
+  return senderUrl.startsWith(chrome.runtime.getURL("")) || /^https:\/\/([^.]+\.)?zhipin\.com\//i.test(senderUrl);
+}
+
+function normalizeBossAutopilotConfig(input = {}, current = DEFAULT_BOSS_AUTOPILOT_CONFIG) {
+  const model = GEMINI_MODELS.has(String(input.model || current.model)) ? String(input.model || current.model) : DEFAULT_BOSS_AUTOPILOT_CONFIG.model;
+  const sendMode = input.sendMode === "live" ? "live" : "preview";
+  const nextGeminiKey = String(input.geminiKey || "").trim();
+  const nextWecomWebhook = String(input.wecomWebhook || "").trim();
+  return {
+    profile: String(input.profile ?? current.profile ?? "").trim().slice(0, 8000),
+    mustAsk: String(input.mustAsk ?? current.mustAsk ?? "").trim().slice(0, 2000),
+    valuableCriteria: String(input.valuableCriteria ?? current.valuableCriteria ?? "").trim().slice(0, 2000),
+    model,
+    geminiKey: (nextGeminiKey || String(current.geminiKey || "").trim()).slice(0, 500),
+    wecomWebhook: (nextWecomWebhook || String(current.wecomWebhook || "").trim()).slice(0, 1000),
+    autoReply: input.autoReply === true,
+    sendMode,
+    dailyReplyLimit: Math.max(1, Math.min(1000, Number(input.dailyReplyLimit ?? current.dailyReplyLimit) || 300)),
+    perConversationLimit: Math.max(1, Math.min(100, Number(input.perConversationLimit ?? current.perConversationLimit) || 30)),
+    replyDelaySeconds: Math.max(5, Math.min(900, Number(input.replyDelaySeconds ?? current.replyDelaySeconds) || 20)),
+    optimizationVersion: Math.max(0, Number(input.optimizationVersion ?? current.optimizationVersion) || 0),
+  };
+}
+
+async function loadBossAutopilotConfig() {
+  const stored = await chrome.storage.local.get(BOSS_AUTOPILOT_CONFIG_KEY);
+  const raw = stored[BOSS_AUTOPILOT_CONFIG_KEY] || {};
+  if (Number(raw.optimizationVersion || 0) < BOSS_AUTOPILOT_OPTIMIZATION_VERSION) {
+    const migrated = normalizeBossAutopilotConfig({
+      ...raw,
+      profile: RESUME_OPTIMIZED_PROFILE,
+      mustAsk: RESUME_OPTIMIZED_MUST_ASK,
+      valuableCriteria: RESUME_OPTIMIZED_CRITERIA,
+      dailyReplyLimit: Math.max(300, Number(raw.dailyReplyLimit) || 0),
+      perConversationLimit: Math.max(30, Number(raw.perConversationLimit) || 0),
+      replyDelaySeconds: Math.max(20, Number(raw.replyDelaySeconds) || 0),
+      optimizationVersion: BOSS_AUTOPILOT_OPTIMIZATION_VERSION,
+    });
+    await chrome.storage.local.set({ [BOSS_AUTOPILOT_CONFIG_KEY]: migrated });
+    return migrated;
+  }
+  return normalizeBossAutopilotConfig(raw);
+}
+
+async function saveBossAutopilotConfig(input) {
+  const current = await loadBossAutopilotConfig();
+  const next = normalizeBossAutopilotConfig(input, current);
+  await chrome.storage.local.set({ [BOSS_AUTOPILOT_CONFIG_KEY]: next });
+  return next;
+}
+
+function bossAutopilotPublicConfig(config) {
+  return {
+    ...config,
+    geminiKey: "",
+    wecomWebhook: "",
+    hasGeminiKey: Boolean(config.geminiKey),
+    hasWecomWebhook: Boolean(config.wecomWebhook),
+  };
+}
+
+async function clearBossAutopilotSecret(secret) {
+  const current = await loadBossAutopilotConfig();
+  if (secret === "gemini") current.geminiKey = "";
+  if (secret === "wecom") current.wecomWebhook = "";
+  await chrome.storage.local.set({ [BOSS_AUTOPILOT_CONFIG_KEY]: current });
+  return bossAutopilotPublicConfig(current);
+}
+
+function geminiJsonText(response) {
+  const text = response?.candidates?.[0]?.content?.parts?.map((part) => part?.text || "").join("").trim();
+  if (!text) throw new Error("Gemini 未返回可用内容");
+  const normalized = text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "");
+  try {
+    return JSON.parse(normalized);
+  } catch {
+    throw new Error("Gemini 返回格式无法解析，请重试");
+  }
+}
+
+async function callBossGemini({ system, prompt, schema }) {
+  const config = await loadBossAutopilotConfig();
+  if (!config.geminiKey) throw new Error("请先录入 Gemini Key");
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+  let response;
+  try {
+    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-goog-api-key": config.geminiKey },
+      signal: controller.signal,
+      body: JSON.stringify({
+        systemInstruction: { parts: [{ text: system }] },
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: {
+          temperature: 0.2,
+          maxOutputTokens: 1600,
+          responseMimeType: "application/json",
+          responseSchema: schema,
+        },
+      }),
+    });
+  } catch (error) {
+    if (error?.name === "AbortError") throw new Error("Gemini 连接超时，请检查代理节点或网络后重试");
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    const detail = String(body?.error?.message || `HTTP ${response.status}`).replace(config.geminiKey, "[已隐藏]");
+    throw new Error(`Gemini 请求失败：${detail.slice(0, 300)}`);
+  }
+  return geminiJsonText(await response.json());
+}
+
+const STRING_ARRAY_SCHEMA = { type: "ARRAY", items: { type: "STRING" } };
+
+async function analyzeBossConversation(input) {
+  const config = await loadBossAutopilotConfig();
+  if (!config.profile) throw new Error("请先填写并保存个人画像");
+  return callBossGemini({
+    system: "你是谨慎的求职沟通助手。你的目标是补齐岗位基本事实，不承诺入职、不约面试、不发送简历、不提供敏感个人信息。每次只问最重要的 1-2 个问题，避免重复。发现收费、培训贷、身份信息索取或明显欺诈时停止沟通。只有需要确认的每一项都已从对话中获得明确答案、每一项有价值标准都明确满足、没有任何待确认问题时，requirementsComplete、allCriteriaMet 和 valuable 才能同时为 true；信息缺失、含糊或仅凭推测时必须为 false。",
+    prompt: `求职者画像：\n${config.profile}\n\n需要逐项确认且全部满足后才能通知：\n${config.mustAsk}\n\n有价值标准（必须逐项满足）：\n${config.valuableCriteria}\n\nBOSS 会话定位：\n${String(input?.conversationLabel || "未识别").slice(0, 300)}\n\n当前会话可见摘要：\n${String(input?.conversation || "").slice(-6000)}\n\n招聘方最新消息：\n${String(input?.latestMessage || "").slice(0, 1500)}`,
+    schema: {
+      type: "OBJECT",
+      properties: {
+        reply: { type: "STRING" },
+        valuable: { type: "BOOLEAN" },
+        requirementsComplete: { type: "BOOLEAN" },
+        allCriteriaMet: { type: "BOOLEAN" },
+        stop: { type: "BOOLEAN" },
+        summary: { type: "STRING" },
+        reason: { type: "STRING" },
+        job: {
+          type: "OBJECT",
+          properties: {
+            title: { type: "STRING" },
+            company: { type: "STRING" },
+            salary: { type: "STRING" },
+            location: { type: "STRING" },
+            workSchedule: { type: "STRING" },
+            employmentType: { type: "STRING" },
+          },
+          required: ["title", "company", "salary", "location", "workSchedule", "employmentType"],
+        },
+        matchedCriteria: STRING_ARRAY_SCHEMA,
+        missingQuestions: STRING_ARRAY_SCHEMA,
+      },
+      required: ["reply", "valuable", "requirementsComplete", "allCriteriaMet", "stop", "summary", "reason", "job", "matchedCriteria", "missingQuestions"],
+    },
+  });
+}
+
+function validWecomWebhook(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" && url.hostname === "qyapi.weixin.qq.com" && url.pathname === "/cgi-bin/webhook/send" && Boolean(url.searchParams.get("key"));
+  } catch {
+    return false;
+  }
+}
+
+function compactWecomLine(value, fallback = "未明确") {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, 500) || fallback;
+}
+
+function bossWecomText(payload, test = false) {
+  if (test) return "【BOSS 求职助手连接测试】\n企业微信文本消息链路可用，本消息不包含岗位或聊天数据。";
+  const job = payload?.job || {};
+  const matchedCriteria = Array.isArray(payload?.matchedCriteria) ? payload.matchedCriteria.map((item) => compactWecomLine(item, "")).filter(Boolean).slice(0, 12) : [];
+  return [
+    "【BOSS 有价值岗位待人工审核】",
+    `岗位：${compactWecomLine(job.title)}`,
+    `公司：${compactWecomLine(job.company)}`,
+    `薪资：${compactWecomLine(job.salary)}`,
+    `地点：${compactWecomLine(job.location)}`,
+    `工作安排：${compactWecomLine(job.workSchedule)}`,
+    `用工方式：${compactWecomLine(job.employmentType)}`,
+    `BOSS 会话定位：${compactWecomLine(payload?.conversationLabel)}`,
+    `推送理由：${compactWecomLine(payload?.reason)}`,
+    matchedCriteria.length ? `已满足条件：${matchedCriteria.join("；")}` : "",
+    "请打开 BOSS 直聘，按岗位或会话定位进行人工审核。",
+  ].filter(Boolean).join("\n").slice(0, 4000);
+}
+
+async function sendBossWecomNotification(payload, test = false) {
+  const config = await loadBossAutopilotConfig();
+  if (!validWecomWebhook(config.wecomWebhook)) throw new Error("请录入有效的企业微信机器人地址");
+  const webhook = new URL(config.wecomWebhook);
+  const key = webhook.searchParams.get("key");
+  const url = `https://qyapi.weixin.qq.com/cgi-bin/webhook/send?key=${encodeURIComponent(key)}`;
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ msgtype: "text", text: { content: bossWecomText(payload, test) } }),
+  });
+  const body = await response.json().catch(() => ({}));
+  if (!response.ok || Number(body?.errcode) !== 0) throw new Error(`企业微信通知失败：${String(body?.errmsg || `HTTP ${response.status}`).slice(0, 200)}`);
+  return { ok: true };
+}
 const LPTFFConfig = {
   defaults: { pageTimeout: 30000, singleConcurrency: 4, queryConcurrency: 4, queryRanges: ["3"], observeSeconds: 90 },
   async load() {
@@ -52,6 +278,7 @@ const BINANCE_RECEIPT_KEY = "binanceTransferReceipt";
 const OBSERVATION_STAGING_KEY = (platform) => `observationStaging:${platform}`;
 const OBSERVATION_RECEIPT_KEY = (platform) => `observationReceipt:${platform}`;
 const OBSERVATION_ALARM = (platform) => `lptff-observation-finish:${platform}`;
+const OBSERVATION_STALE_GRACE_MS = 3 * 60 * 1000;
 const OBSERVATION_PLATFORMS = {
   binance: {
     label: "币安合约",
@@ -773,6 +1000,23 @@ function getRunningObservation() {
   return [...observationTasks.values()].find((item) => item.running) || null;
 }
 
+function observationTaskIsStale(task, now = Date.now()) {
+  if (!task?.running) return false;
+  if (!Number.isFinite(task.startedAt) || task.startedAt <= 0) return true;
+  const nominalDuration = Math.max(Number(task.durationMs) || 0, 30 * 1000);
+  return now > task.startedAt + nominalDuration + OBSERVATION_STALE_GRACE_MS;
+}
+
+async function observationTaskTabIsAvailable(task) {
+  if (!Number.isInteger(task?.tabId)) return false;
+  try {
+    await callChrome(chrome.tabs, chrome.tabs.get, task.tabId);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function observationTaskSnapshot(task) {
   const branches = task.platform === "douyin" ? douyinObservationBranches(task) : undefined;
   return {
@@ -933,11 +1177,29 @@ async function findOrCreateObservationTab(platformId) {
 async function startObservation(platformId, durationSeconds) {
   // 局部命名 obsTask：不遮蔽全局 task（基金采集任务），下面的基金互斥检查要用它。
   const obsTask = observationTaskOf(platformId);
-  const running = getRunningObservation();
+  let running = getRunningObservation();
   if (running) {
-    throw new Error(running.platform === platformId
-      ? "该平台的观察任务正在运行，请等待结束或提前结束"
-      : `${running.label}观察采集正在进行，同一时刻只能观察一个平台`);
+    const preparing = running.stage === "preparing"
+      && Date.now() - running.startedAt < PAGE_TIMEOUT + 5000;
+    const resumable = !observationTaskIsStale(running)
+      && (preparing || await observationTaskTabIsAvailable(running));
+    if (!resumable) {
+      running.warnings.push("检测到上一次观察任务已超时或采集页失联，已自动清理并重新开始");
+      await resetObservationTask(running);
+      running = null;
+    }
+  }
+  if (running) {
+    if (running.platform === platformId) {
+      return {
+        ok: true,
+        platform: platformId,
+        alreadyRunning: true,
+        durationMs: Math.max(0, running.startedAt + running.durationMs - Date.now()),
+        observation: observationTaskSnapshot(running),
+      };
+    }
+    throw new Error(`${running.label}观察采集正在进行，同一时刻只能观察一个平台`);
   }
   if (task.running) throw new Error("基金采集正在进行，请先完成后再开始观察");
   const existing = await getObservationStaging(platformId);
@@ -1176,7 +1438,9 @@ async function collectDouyinInterestResults(obsTask, seedData) {
 async function finishObservation(platformId) {
   const obsTask = observationTaskOf(platformId);
   if (!obsTask.running) return { ok: false, error: "没有正在进行的观察任务" };
-  if (obsTask.finishing) return { ok: false, error: "采集结果正在生成" };
+  if (obsTask.finishing) {
+    return { ok: true, alreadyFinishing: true, observation: observationTaskSnapshot(obsTask) };
+  }
   obsTask.finishing = true;
   obsTask.stage = platformId === "douyin" ? "collectingSeeds" : "reading";
   notifyObservationProgress(obsTask);
@@ -1549,6 +1813,79 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.tabs.onRemoved.addListener((tabId) => preservedLoginTabIds.delete(tabId));
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message?.type === "BOSS_FEATURE_BOOTSTRAP") {
+    const senderUrl = String(sender?.url || sender?.tab?.url || "");
+    const tabId = sender?.tab?.id;
+    if (!Number.isInteger(tabId) || !/^https:\/\/([^.]+\.)?zhipin\.com\//i.test(senderUrl)) {
+      sendResponse({ ok: false, error: "无权加载 BOSS 功能" });
+      return false;
+    }
+    const bootstrap = async () => {
+      const currentTab = await chrome.tabs.get(tabId).catch(() => null);
+      const currentUrl = String(currentTab?.url || "");
+      if (!/^https:\/\/([^.]+\.)?zhipin\.com\//i.test(currentUrl)) {
+        return { ok: true, skipped: true, reason: "页面已离开 BOSS 直聘" };
+      }
+      const stored = await chrome.storage.local.get(BOSS_FEATURES_KEY);
+      const features = {
+        autoDelivery: stored[BOSS_FEATURES_KEY]?.autoDelivery !== false,
+        aiCommunication: stored[BOSS_FEATURES_KEY]?.aiCommunication !== false,
+      };
+      try {
+        if (features.autoDelivery) {
+          await chrome.scripting.insertCSS({ target: { tabId }, files: ["content/boss-helper-upstream.css"] });
+          await chrome.scripting.executeScript({ target: { tabId }, files: ["content/boss-resume-profile.js"], injectImmediately: true });
+          await chrome.scripting.executeScript({ target: { tabId }, files: ["content/boss-helper-upstream.js"], injectImmediately: true });
+        }
+        if (features.aiCommunication) {
+          await chrome.scripting.insertCSS({ target: { tabId }, files: ["content/boss-autopilot.css"] });
+          await chrome.scripting.executeScript({ target: { tabId }, files: ["content/boss-autopilot.js"], injectImmediately: true });
+        }
+      } catch (error) {
+        const latestTab = await chrome.tabs.get(tabId).catch(() => null);
+        const latestUrl = String(latestTab?.url || "");
+        if (!/^https:\/\/([^.]+\.)?zhipin\.com\//i.test(latestUrl)) {
+          return { ok: true, skipped: true, reason: "加载期间页面已离开 BOSS 直聘" };
+        }
+        throw error;
+      }
+      return { ok: true, features };
+    };
+    bootstrap().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error instanceof Error ? error.message : "BOSS 功能加载失败" }));
+    return true;
+  }
+  if (String(message?.type || "").startsWith("BOSS_AUTOPILOT_")) {
+    if (!bossAutopilotSenderAllowed(sender)) {
+      sendResponse({ ok: false, error: "无权访问 BOSS 求职助手" });
+      return false;
+    }
+    const action = async () => {
+      if (message.type === "BOSS_AUTOPILOT_GET_CONFIG") return { ok: true, config: bossAutopilotPublicConfig(await loadBossAutopilotConfig()) };
+      if (message.type === "BOSS_AUTOPILOT_SAVE_CONFIG") return { ok: true, config: bossAutopilotPublicConfig(await saveBossAutopilotConfig(message.config || {})) };
+      if (message.type === "BOSS_AUTOPILOT_REVEAL_SECRET") {
+        const secret = String(message.secret || "");
+        const config = await loadBossAutopilotConfig();
+        if (secret === "gemini") return { ok: true, value: config.geminiKey };
+        if (secret === "wecom") return { ok: true, value: config.wecomWebhook };
+        throw new Error("未知的密钥类型");
+      }
+      if (message.type === "BOSS_AUTOPILOT_CLEAR_SECRET") return { ok: true, config: await clearBossAutopilotSecret(String(message.secret || "")) };
+      if (message.type === "BOSS_AUTOPILOT_TEST_GEMINI") {
+        const result = await callBossGemini({
+          system: "你是连接测试助手。",
+          prompt: "返回连接状态。",
+          schema: { type: "OBJECT", properties: { status: { type: "STRING" } }, required: ["status"] },
+        });
+        return { ok: true, result: { status: String(result.status || "ok").slice(0, 40) } };
+      }
+      if (message.type === "BOSS_AUTOPILOT_ANALYZE_CONVERSATION") return { ok: true, analysis: await analyzeBossConversation(message.input || {}) };
+      if (message.type === "BOSS_AUTOPILOT_TEST_WECOM") return await sendBossWecomNotification({}, true);
+      if (message.type === "BOSS_AUTOPILOT_NOTIFY_WECOM") return await sendBossWecomNotification(message.notification || {}, false);
+      throw new Error("未知的 BOSS 求职助手操作");
+    };
+    action().then(sendResponse).catch((error) => sendResponse({ ok: false, error: error instanceof Error ? error.message : "BOSS 求职助手操作失败" }));
+    return true;
+  }
   if (message?.type === "SOURCE_BRANCH_PROGRESS") {
     const branch = task.branches[message.branch];
     if (branch) {
