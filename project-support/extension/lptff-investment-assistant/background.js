@@ -10,11 +10,11 @@ const LPTFF_CONFIG_KEY = "lptffConfig";
 const BOSS_AUTOPILOT_CONFIG_KEY = "lptffBossAutopilot";
 const BOSS_AUTOPILOT_STATE_KEY = "lptffBossAutopilotState";
 const BOSS_FEATURES_KEY = "lptffBossFeatures";
-const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 1;
+const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 2;
 const GEMINI_MODELS = new Set(["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"]);
-const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，现任高级前端开发工程师。核心技术栈覆盖 React、Vue、TypeScript、JavaScript、Next.js、Nuxt.js，熟悉 Redux、MobX、Pinia；具备 Webpack、Vite、Rollup、ESBuild、微前端、SSR/SSG、CI/CD、性能优化和组件库建设经验。做过金融科技复杂业务系统、低代码平台 React 迁移、PC 中后台、移动端、ECharts/Canvas/SVG 数据可视化，并具备 Node.js、RESTful API、GraphQL、WebSocket、Nginx、爬虫与自动化脚本基础。持续实践 AI 辅助开发、内容审核和自动化流程。目标岗位包括高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端，以及以前端为主的全栈岗位；优先产品技术团队、复杂业务、工程化或平台建设方向。`;
-const RESUME_OPTIMIZED_MUST_ASK = "核心工作内容与技术栈、团队规模及岗位级别、薪资结构与年终奖、工作时间和双休情况、社保公积金、办公地点与远程安排、是否外包驻场或长期出差、面试流程";
-const RESUME_OPTIMIZED_CRITERIA = "优先高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端、金融科技或复杂中后台；React/Vue/TypeScript、工程化、性能优化、组件平台、微前端、Node.js 协作经验可形成匹配。薪资和工作时间需可接受，团队职责清晰；排除兼职实习、纯销售客服、培训收费、劳务派遣、长期驻场外包、长期高频出差和虚假招聘。";
+const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，现任高级前端开发工程师。核心技术栈覆盖 React、Vue、TypeScript、JavaScript、Next.js、Nuxt.js，熟悉 Redux、MobX、Pinia；具备 Webpack、Vite、Rollup、ESBuild、微前端、SSR/SSG、CI/CD、性能优化和组件库建设经验。做过金融科技复杂业务系统、低代码平台 React 迁移、PC 中后台、移动端、ECharts/Canvas/SVG 数据可视化，并具备 Node.js、RESTful API、GraphQL、WebSocket、Nginx、爬虫与自动化脚本基础。持续实践 AI 辅助开发、内容审核和自动化流程。曾独立设计低代码到 React 的渐进式迁移基础设施，在日常迭代中控制迁移风险，统一登录、权限和部署能力，使后端同学也能直接参与 React 业务开发，最终覆盖全部相关页面。求职时看重业务成长空间以及业务产出与个人回报的长期联动，不执着于职位名称，更关注能否参与高价值业务决策并持续为公司创造价值。目标岗位包括高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端，以及以前端为主的全栈岗位。期望总年收入 40–60 万，在职、一个月可到岗；优先上海、杭州，也接受武汉、南京、合肥。`;
+const RESUME_OPTIMIZED_MUST_ASK = "分阶段了解，不要一次问完：先确认核心工作内容、业务价值与技术方向；有继续沟通价值后，再了解职责权限和团队协作、总包及回馈机制、工作时间与双休、办公地点和远程安排、用工性质及是否驻场或高频出差；进入面试前再确认面试流程、社保公积金和到岗安排";
+const RESUME_OPTIMIZED_CRITERIA = "优先能参与高价值业务决策、通过技术方案提升组织产能并拥有合理职责空间的高级/资深前端、技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端、金融科技或复杂中后台岗位；React/Vue/TypeScript、工程化、性能优化、组件平台、微前端、Node.js 协作经验可形成匹配。总年收入期望 40–60 万，关注固定薪资、奖金、项目激励、利润分成或期权等机制的透明度和兑现难度。工作应支持长期、可持续的高价值产出；排除兼职实习、纯销售客服、培训收费、劳务派遣、长期驻场外包、单休、常态化高强度加班、长期高频出差、纯执行型岗位和虚假招聘。";
 const DEFAULT_BOSS_AUTOPILOT_CONFIG = Object.freeze({
   profile: RESUME_OPTIMIZED_PROFILE,
   mustAsk: RESUME_OPTIMIZED_MUST_ASK,
@@ -115,37 +115,43 @@ function geminiJsonText(response) {
 async function callBossGemini({ system, prompt, schema }) {
   const config = await loadBossAutopilotConfig();
   if (!config.geminiKey) throw new Error("请先录入 Gemini Key");
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000);
-  let response;
-  try {
-    response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-goog-api-key": config.geminiKey },
-      signal: controller.signal,
-      body: JSON.stringify({
-        systemInstruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.2,
-          maxOutputTokens: 1600,
-          responseMimeType: "application/json",
-          responseSchema: schema,
-        },
-      }),
-    });
-  } catch (error) {
-    if (error?.name === "AbortError") throw new Error("Gemini 连接超时，请检查代理节点或网络后重试");
-    throw error;
-  } finally {
-    clearTimeout(timeoutId);
-  }
-  if (!response.ok) {
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    let response;
+    try {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-goog-api-key": config.geminiKey },
+        signal: controller.signal,
+        body: JSON.stringify({
+          systemInstruction: { parts: [{ text: system }] },
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          generationConfig: {
+            temperature: 0.2,
+            maxOutputTokens: 1600,
+            responseMimeType: "application/json",
+            responseSchema: schema,
+          },
+        }),
+      });
+    } catch (error) {
+      if (error?.name === "AbortError") throw new Error("Gemini 连接超时，请检查代理节点或网络后重试");
+      throw error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+    if (response.ok) return geminiJsonText(await response.json());
     const body = await response.json().catch(() => ({}));
     const detail = String(body?.error?.message || `HTTP ${response.status}`).replace(config.geminiKey, "[已隐藏]");
+    const temporary = response.status === 429 || response.status === 500 || response.status === 503 || /high demand|overload|temporar|稍后重试|繁忙/i.test(detail);
+    if (temporary && attempt === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1800));
+      continue;
+    }
     throw new Error(`Gemini 请求失败：${detail.slice(0, 300)}`);
   }
-  return geminiJsonText(await response.json());
+  throw new Error("Gemini 临时繁忙，重试后仍未恢复");
 }
 
 const STRING_ARRAY_SCHEMA = { type: "ARRAY", items: { type: "STRING" } };
@@ -154,8 +160,19 @@ async function analyzeBossConversation(input) {
   const config = await loadBossAutopilotConfig();
   if (!config.profile) throw new Error("请先填写并保存个人画像");
   return callBossGemini({
-    system: "你是谨慎的求职沟通助手。你的目标是补齐岗位基本事实，不承诺入职、不约面试、不发送简历、不提供敏感个人信息。每次只问最重要的 1-2 个问题，避免重复。发现收费、培训贷、身份信息索取或明显欺诈时停止沟通。只有需要确认的每一项都已从对话中获得明确答案、每一项有价值标准都明确满足、没有任何待确认问题时，requirementsComplete、allCriteriaMet 和 valuable 才能同时为 true；信息缺失、含糊或仅凭推测时必须为 false。",
-    prompt: `求职者画像：\n${config.profile}\n\n需要逐项确认且全部满足后才能通知：\n${config.mustAsk}\n\n有价值标准（必须逐项满足）：\n${config.valuableCriteria}\n\nBOSS 会话定位：\n${String(input?.conversationLabel || "未识别").slice(0, 300)}\n\n当前会话可见摘要：\n${String(input?.conversation || "").slice(-6000)}\n\n招聘方最新消息：\n${String(input?.latestMessage || "").slice(0, 1500)}`,
+    system: `你代表求职者与招聘方进行简短、真诚、对等的求职沟通。首要目标是让值得了解的招聘方愿意继续沟通，并高效判断双方是否可能共赢；不要把对话变成条件审查或问卷。
+
+回复规则：
+1. 先回应招聘方刚提供的有效信息；能结合求职者经历指出一处具体匹配时，再自然推进下一步。
+2. 每次通常只问一个最影响去留的问题。只有两个问题强相关、都很容易回答时才可一起问，绝不连续罗列薪资、社保、用工性质、面试流程等清单。
+3. 按阶段推进：初聊优先了解岗位核心职责、业务目标或关键技术方向；发现可能匹配后再问职责空间、薪资总包、工作安排和用工性质；临近面试再确认细节。不要为了补齐配置中的所有字段而破坏交流节奏。
+4. 语气像有经验的候选人本人：自然、简洁、专业、有选择但不傲慢。避免每条都以“您好”开头，避免“请问该岗位是否属于”“另外，具体……是怎样的呢”等审讯式模板，也不要复述大段招聘方原话。
+5. 不编造经历、数字或意愿，不替求职者承诺入职、确定面试时间、发送简历或提供敏感个人信息。对方索要简历、电话、微信、身份证明，或要求立即约面时，设置 needsHuman=true、reply 留空，并用 humanAction 简短说明本人需要完成的动作；不要用追问阻拦正常推进。其他场景 needsHuman=false、humanAction 留空。
+6. 招聘方只发“你好”、表情、已读提示或没有实质内容时，用一句轻量回复表达兴趣并邀请介绍岗位重点，不展开盘问。对方已经回答的问题绝不重复询问。
+7. 遇到收费、培训贷、代付、验证码、账户或身份敏感信息索取、明显欺诈时 stop=true；礼貌结束，不继续套取信息。
+
+判断规则：missingQuestions 只记录仍需在后续阶段了解的事项，不代表下一条回复必须逐项追问。只有需要确认的每一项都已有明确答案、每一项有价值标准都明确满足、且没有待确认问题时，requirementsComplete、allCriteriaMet 和 valuable 才能同时为 true；信息缺失、含糊或仅凭推测时必须为 false。reply 尽量控制在 20–80 个汉字，除必要的礼貌回应外不写空泛套话。`,
+    prompt: `求职者画像：\n${config.profile}\n\n后续阶段仍需了解的事项（不要在当前回复中一次问完）：\n${config.mustAsk}\n\n最终有价值标准：\n${config.valuableCriteria}\n\nBOSS 会话定位：\n${String(input?.conversationLabel || "未识别").slice(0, 300)}\n\n当前会话可见摘要：\n${String(input?.conversation || "").slice(-6000)}\n\n招聘方最新消息：\n${String(input?.latestMessage || "").slice(0, 1500)}`,
     schema: {
       type: "OBJECT",
       properties: {
@@ -164,6 +181,8 @@ async function analyzeBossConversation(input) {
         requirementsComplete: { type: "BOOLEAN" },
         allCriteriaMet: { type: "BOOLEAN" },
         stop: { type: "BOOLEAN" },
+        needsHuman: { type: "BOOLEAN" },
+        humanAction: { type: "STRING" },
         summary: { type: "STRING" },
         reason: { type: "STRING" },
         job: {
@@ -181,7 +200,7 @@ async function analyzeBossConversation(input) {
         matchedCriteria: STRING_ARRAY_SCHEMA,
         missingQuestions: STRING_ARRAY_SCHEMA,
       },
-      required: ["reply", "valuable", "requirementsComplete", "allCriteriaMet", "stop", "summary", "reason", "job", "matchedCriteria", "missingQuestions"],
+      required: ["reply", "valuable", "requirementsComplete", "allCriteriaMet", "stop", "needsHuman", "humanAction", "summary", "reason", "job", "matchedCriteria", "missingQuestions"],
     },
   });
 }

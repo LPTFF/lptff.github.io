@@ -13,6 +13,47 @@
 
 ## 当前结论
 
+### AI 沟通成功率优化（2026-09-02）
+
+#### Changed files
+
+- `background.js`：更新访谈画像、分阶段沟通策略、人工接管字段和 Gemini 临时拥堵有限重试。
+- `content/boss-autopilot.js`、`.css`：为历史消息标注招聘方/求职者；增加本地脱敏沟通优化样本的保存、查看、保留期限和独立清理；在简历、联系方式或约面等场景提示本人处理。
+- `manifest.json`：扩展版本升级到 `3.17.10`。
+- `BOSS_HELPER_UPSTREAM.md`：记录新的沟通产品边界。
+
+#### Impacted behaviors
+
+- 从“逐项补齐事实”改为“先建立匹配感，再每轮推进一个关键问题”。
+- 避免重复询问已经回答的信息；初聊不批量盘问薪资、社保、用工和面试流程。
+- 需要发送简历、提供联系方式或确定面试时不自动拒绝或承诺，而是在助手状态和脱敏日志中提示本人处理。
+- Gemini 遇到高负载、限流或临时服务错误时等待 1.8 秒并重试一次。
+- 每次模型分析后保存招聘方最新消息、近期角色化上下文、助手建议、动作、判断理由和后续待确认事项；手机号、邮箱、证件号、账号、链接参数和凭据先遮盖，最多保存 200 条或 30 天。
+- 沟通优化样本与运行日志分开查看和清理，内容只进入当前 Chrome 的 `chrome.storage.local`，不写入仓库。
+
+#### Verification
+
+- 19 个扩展 JavaScript 文件语法、Manifest `3.17.10`、脱敏断言、扩展 ZIP 和 `git diff --check`：`PASS`。
+- 脱敏断言覆盖手机号、邮箱、身份证号、微信号、Token 和带参数链接：`PASS`。
+- ZIP：`dist-extension/lptff-investment-assistant.zip`，大小 `713377` 字节。
+- 普通、已登录 Windows Chrome 重载工作区扩展后显示版本 `3.17.10`：`PASS`。
+- 真实 BOSS 会话在安全预览模式调用真实 Gemini，生成一条未发送的建议回复；“沟通技巧优化样本”出现 1 条可展开记录，运行日志仍独立展示：`PASS`。
+- 测试完成后恢复原有“实际自动发送”配置，但自动分析保持停止；没有向招聘方发送消息，没有发送企业微信通知：`PASS`。
+- 证据报告：`artifacts/validation-20260902/REAL_COMMUNICATION_LOG_VALIDATION_REPORT.md`。
+
+#### Pending real scenarios
+
+- 仍需用安全预览观察真实 Gemini 对“索要简历”“已说明薪资和作息”“仅打招呼”三类自然会话的输出；本轮覆盖的是招聘方追问语言能力和签约安排的会话。
+- 只有取得新的明确发送授权后，才验证真实回复能否提高继续沟通率；当前成功率变化仍为 `未验收 / 未知`。
+
+#### Infrastructure issue / executor / next action
+
+- Current executor：普通 Windows Chrome + 操作系统级截图、Windows UI Automation、鼠标和键盘。
+- Forbidden browser-control tools used：`NO`；未使用 DevTools、CDP、WebDriver、Playwright、Puppeteer、Selenium、远程调试或内置浏览器控制 BOSS 页面。
+- Next action：继续积累自然安全预览样本并按回复率、继续沟通率、人工接管率和重复追问率复盘；真实发送仍需新的明确授权。
+
+结论：本轮日志存储和安全预览链路为 `REAL_BOSS_VALIDATION: EXECUTED — PASS`；沟通成功率提升仍为未知。
+
 ### Chrome 扩展重载报错修复（2026-09-02）
 
 #### 问题根因

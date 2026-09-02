@@ -6,6 +6,7 @@
   const LEGACY_LOCAL_MODEL_KEY = "conf-model";
   const LOCAL_STATE_KEY = "lptffBossAutopilotState";
   const LOCAL_LOG_KEY = "lptffBossAutopilotLogs";
+  const LOCAL_SAMPLE_KEY = "lptffBossCommunicationSamples";
   const LOCAL_UI_KEY = "lptffBossAutopilotUi";
   const CHAT_URL = "https://www.zhipin.com/web/geek/chat";
   const DEFAULTS = {
@@ -125,6 +126,34 @@
     return String(value || "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
   }
 
+  function redactCommunicationText(value, limit = 2000) {
+    let text = String(value || "").replace(/\s+/g, " ").trim();
+    text = text
+      .replace(/https?:\/\/[^\s<>'"]+/gi, (raw) => {
+        try {
+          const url = new URL(raw);
+          return `${url.origin}${url.pathname}${url.search || url.hash ? "[链接参数已隐藏]" : ""}`;
+        } catch {
+          return "[链接已隐藏]";
+        }
+      })
+      .replace(/\b1[3-9]\d{9}\b/g, "[手机号已隐藏]")
+      .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[邮箱已隐藏]")
+      .replace(/\b\d{17}[\dXx]\b/g, "[身份证号已隐藏]")
+      .replace(/((?:微信|微 信|WeChat|vx|v信|QQ)\s*(?:号|账号)?\s*[：:]?\s*)[a-zA-Z][-_a-zA-Z0-9]{5,19}/gi, "$1[账号已隐藏]")
+      .replace(/((?:api[-_ ]?key|token|cookie|authorization|webhook)\s*[：:=]\s*)[^\s,;，；]+/gi, "$1[凭据已隐藏]");
+    return text.slice(0, limit);
+  }
+
+  function conversationKey(value) {
+    let hash = 2166136261;
+    for (const char of String(value || "")) {
+      hash ^= char.charCodeAt(0);
+      hash = Math.imul(hash, 16777619);
+    }
+    return `conversation-${(hash >>> 0).toString(16).padStart(8, "0")}`;
+  }
+
   function setNativeInput(input, value) {
     const prototype = input instanceof HTMLTextAreaElement ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
     const setter = Object.getOwnPropertyDescriptor(prototype, "value")?.set;
@@ -181,11 +210,51 @@
     if (activeTab === "logs") await renderLogs();
   }
 
+  async function appendCommunicationSample(sample) {
+    const stored = await storageGet(LOCAL_SAMPLE_KEY);
+    const samples = Array.isArray(stored[LOCAL_SAMPLE_KEY]) ? stored[LOCAL_SAMPLE_KEY] : [];
+    const now = Date.now();
+    samples.push({
+      id: `${now}-${Math.random().toString(36).slice(2, 8)}`,
+      at: now,
+      conversationKey: conversationKey(sample.conversationId),
+      label: redactCommunicationText(sample.label, 160),
+      model: String(config.model || "").slice(0, 80),
+      mode: config.sendMode === "live" ? "实际发送" : "安全预览",
+      recruiterMessage: redactCommunicationText(sample.recruiterMessage, 1500),
+      context: redactCommunicationText(sample.context, 5000),
+      suggestedReply: redactCommunicationText(sample.suggestedReply, 1200),
+      action: String(sample.action || "未处理").slice(0, 80),
+      reason: redactCommunicationText(sample.reason, 1200),
+      humanAction: redactCommunicationText(sample.humanAction, 500),
+      valuable: sample.valuable === true,
+      requirementsComplete: sample.requirementsComplete === true,
+      allCriteriaMet: sample.allCriteriaMet === true,
+      missingQuestions: Array.isArray(sample.missingQuestions) ? sample.missingQuestions.map((item) => redactCommunicationText(item, 200)).filter(Boolean).slice(0, 20) : [],
+    });
+    const retained = samples.filter((item) => Number(item.at) >= now - 30 * 864e5).slice(-200);
+    await storageSet({ [LOCAL_SAMPLE_KEY]: retained });
+    if (activeTab === "logs") await renderLogs();
+  }
+
   async function renderLogs() {
     const node = qs("[data-role='logs']");
-    if (!node) return;
-    const stored = await storageGet(LOCAL_LOG_KEY);
+    const samplesNode = qs("[data-role='communication-samples']");
+    if (!node || !samplesNode) return;
+    const stored = await storageGet([LOCAL_LOG_KEY, LOCAL_SAMPLE_KEY]);
     const logs = (Array.isArray(stored[LOCAL_LOG_KEY]) ? stored[LOCAL_LOG_KEY] : []).slice(-100).reverse();
+    const samples = (Array.isArray(stored[LOCAL_SAMPLE_KEY]) ? stored[LOCAL_SAMPLE_KEY] : []).slice(-50).reverse();
+    samplesNode.innerHTML = samples.length ? samples.map((item) => `
+      <details class="lptff-sample" data-action="${escapeHtml(item.action)}">
+        <summary><span>${escapeHtml(item.action)}</span><time>${escapeHtml(new Date(item.at).toLocaleString("zh-CN", { hour12: false }))}</time></summary>
+        <div class="lptff-sample-meta">${escapeHtml(item.mode)} · ${escapeHtml(item.model)} · ${escapeHtml(item.conversationKey)}</div>
+        ${item.label ? `<div class="lptff-sample-label">会话：${escapeHtml(item.label)}</div>` : ""}
+        <div class="lptff-sample-turn"><strong>招聘方</strong><span>${escapeHtml(item.recruiterMessage || "未记录")}</span></div>
+        <div class="lptff-sample-turn"><strong>助手建议</strong><span>${escapeHtml(item.suggestedReply || item.humanAction || "未生成回复")}</span></div>
+        ${item.context ? `<div class="lptff-sample-turn"><strong>近期上下文</strong><span>${escapeHtml(item.context)}</span></div>` : ""}
+        ${item.reason ? `<div class="lptff-sample-turn"><strong>判断理由</strong><span>${escapeHtml(item.reason)}</span></div>` : ""}
+        ${item.missingQuestions?.length ? `<div class="lptff-sample-turn"><strong>后续事项</strong><span>${escapeHtml(item.missingQuestions.join("；"))}</span></div>` : ""}
+      </details>`).join("") : '<div class="lptff-empty">暂无沟通优化样本</div>';
     node.innerHTML = logs.length ? logs.map((item) => `
       <div class="lptff-log" data-tone="${escapeHtml(item.tone)}">
         <div class="lptff-log-meta"><time>${escapeHtml(new Date(item.at).toLocaleString("zh-CN", { hour12: false }))}</time><span>${escapeHtml(item.action)}</span></div>
@@ -225,7 +294,7 @@
           </article>
           <article class="lptff-card lptff-tab-panel" data-tab-panel="config" hidden>
             <h3>Gemini 与企业微信</h3>
-            <p class="lptff-help">密钥只保存在浏览器本地存储，默认遮罩；可像登录密码一样点击显示或隐藏。日志不会记录原文，也可随时清除后重新录入。</p>
+            <p class="lptff-help">密钥只保存在浏览器本地存储，默认遮罩；可像登录密码一样点击显示或隐藏。沟通优化样本会自动遮盖常见联系方式和凭据，密钥不会进入日志。</p>
             <label>Gemini 模型</label>
             <select data-field="model"><option value="gemini-3.7-flash">Gemini 3.7 Flash</option><option value="gemini-3.6-flash">Gemini 3.6 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option></select>
             <label>Gemini Key</label>
@@ -253,7 +322,9 @@
             <div class="lptff-actions"><button type="button" class="lptff-primary" data-action="save">保存沟通规则</button></div>
           </article>
           <article class="lptff-card lptff-tab-panel" data-tab-panel="logs" hidden>
-            <div class="lptff-section-head"><div><h3>历史沟通日志</h3><p class="lptff-help">仅记录时间、会话定位、动作和结果，不保存完整聊天原文或密钥。</p></div><button type="button" class="lptff-danger" data-action="clear-logs">清空日志</button></div>
+            <div class="lptff-section-head"><div><h3>沟通技巧优化样本</h3><p class="lptff-help">仅保存在当前浏览器，自动遮盖常见手机号、邮箱、证件号、账号和凭据；最多保留 200 条或 30 天。点击样本可查看详情。</p></div><button type="button" class="lptff-danger" data-action="clear-samples">清空样本</button></div>
+            <div class="lptff-sample-list" data-role="communication-samples"><div class="lptff-empty">暂无沟通优化样本</div></div>
+            <div class="lptff-section-head lptff-log-section"><div><h3>运行日志</h3><p class="lptff-help">记录时间、会话定位、动作和结果。</p></div><button type="button" class="lptff-danger" data-action="clear-logs">清空运行日志</button></div>
             <div class="lptff-log-list" data-role="logs"><div class="lptff-empty">暂无沟通日志</div></div>
           </article>
         </div>
@@ -477,8 +548,13 @@
       if (action === "tab") { switchTab(button.dataset.tab); void persistUiState(); return; }
       if (action === "open-chat") { location.assign(CHAT_URL); return; }
       if (action === "clear-logs") {
-        if (!window.confirm("确定清空 AI 沟通小助手的历史日志吗？配置和运行状态不会受影响。")) return;
+        if (!window.confirm("确定清空 AI 沟通小助手的运行日志吗？沟通优化样本不会受影响。")) return;
         void storageRemove(LOCAL_LOG_KEY).then(() => renderLogs());
+        return;
+      }
+      if (action === "clear-samples") {
+        if (!window.confirm("确定清空全部沟通优化样本吗？该操作不会影响运行配置。")) return;
+        void storageRemove(LOCAL_SAMPLE_KEY).then(() => renderLogs());
         return;
       }
       if (action === "show-gemini" || action === "show-wecom") {
@@ -617,13 +693,20 @@
     processing = true;
     setStatus("检测到招聘方新消息，Gemini 正在分析…");
     const label = conversationLabel();
+    let conversation = "";
     try {
-      const conversation = visibleMessageNodes().slice(-12).map((item) => (item.textContent || "").trim()).filter(Boolean).join("\n");
+      conversation = visibleMessageNodes().slice(-12).map((item) => {
+        const text = (item.textContent || "").trim();
+        return text ? `${inboundMessage(item) ? "招聘方" : "求职者"}：${text}` : "";
+      }).filter(Boolean).join("\n");
       const response = await call({ type: "BOSS_AUTOPILOT_ANALYZE_CONVERSATION", input: { latestMessage, conversation, conversationLabel: label } });
       const analysis = response.analysis;
       const reply = String(analysis.reply || "").trim();
-      let outcome = analysis.stop ? "已停止本会话" : "无需回复";
-      if (!analysis.stop && reply) {
+      const needsHuman = analysis.needsHuman === true;
+      let outcome = needsHuman
+        ? `需要本人处理：${String(analysis.humanAction || analysis.reason || "请查看当前会话").replace(/\s+/g, " ").trim().slice(0, 120)}`
+        : (analysis.stop ? "已停止本会话" : "无需回复");
+      if (!analysis.stop && !needsHuman && reply) {
         if (config.sendMode === "live") {
           setStatus(`Gemini 分析完成，${config.replyDelaySeconds} 秒后发送…`);
           await new Promise((resolve) => setTimeout(resolve, config.replyDelaySeconds * 1000));
@@ -646,8 +729,23 @@
       await storageSet({ [LOCAL_STATE_KEY]: state });
       const notified = eligible ? await flushPendingNotifications(state) : false;
       const valueStatus = eligible ? (notified ? " · 全部条件满足，已推送企业微信" : " · 全部条件满足，通知待重试") : (analysis.valuable ? " · 尚未满足全部通知条件" : "");
-      setStatus(`${outcome}${valueStatus}`, notified || !eligible ? "success" : "error");
-      await appendLog("会话处理", `${outcome}${valueStatus}`, notified || !eligible ? "success" : "error", label);
+      const outcomeTone = needsHuman || (eligible && !notified) ? "error" : "success";
+      await appendCommunicationSample({
+        conversationId: cid,
+        label,
+        recruiterMessage: latestMessage,
+        context: conversation,
+        suggestedReply: reply,
+        action: outcome,
+        reason: analysis.reason || analysis.summary,
+        humanAction: analysis.humanAction,
+        valuable: analysis.valuable,
+        requirementsComplete: analysis.requirementsComplete,
+        allCriteriaMet: analysis.allCriteriaMet,
+        missingQuestions: analysis.missingQuestions,
+      });
+      setStatus(`${outcome}${valueStatus}`, outcomeTone);
+      await appendLog("会话处理", `${outcome}${valueStatus}`, outcomeTone, label);
     } catch (error) {
       if (contextInvalidated || stopInvalidatedContext(error)) return;
       if (config.sendMode === "live" && config.autoReply) {
@@ -657,6 +755,7 @@
           if (contextInvalidated || stopInvalidatedContext(saveError)) return;
         }
       }
+      await appendCommunicationSample({ conversationId: cid, label, recruiterMessage: latestMessage, context: conversation, action: "模型分析失败", reason: error.message });
       setStatus(`自动沟通暂停：${error.message}`, "error");
       await appendLog("会话处理", `自动沟通暂停：${error.message}`, "error", label);
     } finally {
