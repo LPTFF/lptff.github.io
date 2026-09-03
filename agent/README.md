@@ -19,6 +19,7 @@
 | Investment Review | [产品正文](product/investment-review.md)；实现细节才读[工程附录](product/reference/investment-review-engineering.md) |
 | 本地运行或构建 | [项目工作说明](standards/project-instructions.md)、[开发环境](docs/development-environment.md) |
 | 页面、数据或部署验收 | [真实环境验收原则](standards/trusted-verification.md) |
+| 外部资讯源、AI 筛选或定时采集接入 | [外部资讯源接入手册](verification/external-content-source-integration.md) |
 | BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |
 | 代码或产品组织 | [代码组织](standards/code-organization.md)、[产品设计](standards/product-design.md) |
 | 外部项目商业研究 | [研究入口](product/research/README.md) |

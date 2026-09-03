@@ -6,7 +6,9 @@ on:
       - master
 
   schedule:
-    # GitHub Actions 使用 UTC；每天北京时间 06:17 自动采集并发布。
+    # GitHub Actions 使用 UTC；除北京时间 06:17 外，每小时只刷新福利数据。
+    - cron: "17 0-21,23 * * *"
+    # 每天北京时间 06:17 保留一次全量采集，避免其他站点数据停止更新。
     - cron: "17 22 * * *"
 
   workflow_dispatch:
@@ -42,16 +44,32 @@ jobs:
           cache-dependency-path: project-support/requirements-crawl.txt
       - name: Install dependencies
         run: |
-          npm install
+          npm ci
           python -m pip install --requirement project-support/requirements-crawl.txt
       - name: Crawl and validate site data
-        run: |
-          chmod +x project-support/build.sh
-          ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
         env:
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_SCHEDULE: ${{ github.event.schedule }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KUAISHOU_COOKIE: ${{ secrets.KUAISHOU_COOKIE }}
           DOUYIN_COOKIE: ${{ secrets.DOUYIN_COOKIE }}
           LEETCODE_COOKIE: ${{ secrets.LEETCODE_COOKIE }}
+        run: |
+          chmod +x project-support/build.sh
+          if [[ "$EVENT_NAME" == "schedule" && "$EVENT_SCHEDULE" != "17 22 * * *" ]]; then
+            ./project-support/build.sh \
+              --only welfare \
+              --only 0818tuan \
+              --only 0818tuanTop \
+              --only zhuanyes \
+              --only zhuanyesTop \
+              --only daydayzhuan \
+              --only daydayzhuanTop \
+              --only zhujiceping \
+              --summary .artifacts/collectors/python-ci.json
+          else
+            ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
+          fi
       - name: Keep only bank offers in welfare data
         run: python -B project-support/crawl/filter_welfare_with_gemini.py --require-key
         env:
@@ -69,6 +87,7 @@ jobs:
         env:
           ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
       - name: Notify crawl result
+        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
         continue-on-error: true
         run: python -B ./project-support/crawl/sendNotify.py
         env:
@@ -77,10 +96,12 @@ jobs:
         run: |
           npm run build
       - name: Package investment assistant extension
+        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
         run: |
           node project-support/scripts/extension/build-zip.js
           test -s dist-extension/lptff-investment-assistant.zip
       - name: Publish investment assistant extension release
+        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

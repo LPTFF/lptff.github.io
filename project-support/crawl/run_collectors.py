@@ -46,6 +46,7 @@ COLLECTORS = (
     CollectorSpec("zhuanyesTop", "welfare/zhuanyesTop.py", "welfare/zhuanyesTop.json", "welfare", optional=True),
     CollectorSpec("daydayzhuan", "welfare/daydayzhuan.py", "welfare/daydayzhuan.json", "welfare", optional=True),
     CollectorSpec("daydayzhuanTop", "welfare/daydayzhuanTop.py", "welfare/daydayzhuanTop.json", "welfare", optional=True),
+    CollectorSpec("zhujiceping", "welfare/zhujiceping.py", "welfare/zhujiceping.json", "welfare", optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, group="archived"),

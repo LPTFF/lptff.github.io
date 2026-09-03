@@ -11,7 +11,12 @@
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
             <div class="day-week-welfare">
-              <div class="welfare-week">{{ handleWeek(item) }}</div>
+              <div class="welfare-month">
+                <div class="welfare-icon-month">
+                  <el-icon :size="15"><Calendar /></el-icon>
+                </div>
+                {{ handleMonth(item) }}
+              </div>
               <div class="welfare-day">{{ handleDay(item) }}</div>
             </div>
             <div>
@@ -56,6 +61,7 @@
               :src="handleWebsiteImg(item) ? handleWebsiteImg(item) : logoUrl"
               alt="网站"
               class="welfare-img-link"
+              @error="handleImageError"
             />
             <div class="welfare-name-link">
               {{ handleWebsiteName(item) }}
@@ -76,6 +82,7 @@ import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
 import zhuanyesTopSource from "../../../data/welfare/zhuanyesTop.json";
 import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
+import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import mutouxbImage from "./img/mutouxb.png";
 import yqhd8Image from "./img/yqhd8.png";
@@ -83,7 +90,7 @@ import hxm5Image from "./img/hxm5.png";
 import tuanImage from "./img/0818tuan.png";
 import zhuanyesImage from "./img/zhuanyes.png";
 import daydayzhuanImage from "./img/daydayzhuan.png";
-import { Timer, CircleCheck } from "@element-plus/icons-vue";
+import { Calendar, Timer, CircleCheck } from "@element-plus/icons-vue";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
 let welfareInitSource: any[] = [];
 let welfareTopSource: any[] = [];
@@ -93,6 +100,7 @@ welfareInitSource = [
   ...tuanSource,
   ...zhuanyesSource,
   ...daydayzhuanSource,
+  ...zhujicepingSource,
 ];
 welfareTopSource = [...zhuanyesTopSource, ...daydayzhuanTopSource];
 welfareSource = [...welfareTopSource, ...welfareInitSource].sort(
@@ -104,20 +112,9 @@ export default {
   },
   setup(props: any) {
     const logoUrl = logoImageUrl;
-    const handleWeek = (item: any) => {
+    const handleMonth = (item: any) => {
       const date = new Date(item.timestamp);
-      const dayOfWeek = date.getDay();
-      const weekdays = [
-        "星期日",
-        "星期一",
-        "星期二",
-        "星期三",
-        "星期四",
-        "星期五",
-        "星期六",
-      ];
-      const dayName = weekdays[dayOfWeek];
-      return dayName;
+      return `${date.getMonth() + 1}月`;
     };
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
@@ -190,6 +187,13 @@ export default {
             websiteImg: daydayzhuanImage,
           };
           break;
+        case "zhujiceping":
+          websiteInfo = {
+            websiteName: "国外主机测评",
+            mainWebsite: "https://www.zhujiceping.com/",
+            websiteImg: "https://www.zhujiceping.com/favicon.ico",
+          };
+          break;
         default:
           websiteInfo = {
             websiteName: "羊毛",
@@ -226,7 +230,15 @@ export default {
           ? maxLength * rate + initData
           : welfareSource.length
       );
-      return welfareTmpAll;
+      const vpsOffers = welfareSource.filter(
+        (item) => item.website === "zhujiceping"
+      );
+      const regularOffers = welfareTmpAll.filter(
+        (item) => item.website !== "zhujiceping"
+      );
+      return [...vpsOffers, ...regularOffers].sort(
+        (a, b) => b.timestamp - a.timestamp
+      );
     });
     const gotoMainWebsite = (item: any) => {
       let websiteInfo = getWebsiteInfo(item);
@@ -236,7 +248,7 @@ export default {
     };
     return {
       logoUrl,
-      handleWeek,
+      handleMonth,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -253,6 +265,7 @@ export default {
     ElCard,
     ElIcon,
     ElDivider,
+    Calendar,
     Timer,
     CircleCheck,
   },
@@ -295,11 +308,17 @@ export default {
   font-weight: 600;
   font-size: 46px;
 }
-.welfare-week {
+.welfare-month {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #797979;
   font-weight: 600;
   font-size: 16px;
-  margin-left: 5px;
+}
+.welfare-icon-month {
+  display: flex;
+  margin-right: 8px;
 }
 .welfare-icon-hour {
   margin-right: 8px;
@@ -372,9 +391,12 @@ export default {
     font-size: 38px;
   }
 
-  .welfare-week {
-    margin-left: 0;
+  .welfare-month {
     font-size: 14px;
+  }
+
+  .welfare-icon-month {
+    margin-right: 5px;
   }
 
   .welfare-hour {
