@@ -24,8 +24,6 @@
 - `npm run collect:rss:site`：生成被 Git 忽略的 `project-support/public/data/recommendArticleData.json`。
 - `node project-support/scripts/extension/build-zip.js`：生成被忽略的 `dist-extension/lptff-investment-assistant.zip`。
 
-本地开发 `/data` 代理到家庭服务器；生产预览不继承该代理。迁移后的维护说明见 [`agent/docs/development-environment.md`](../../docs/development-environment.md)。
-
 ## CI 与发布
 
 `.github/workflows/ci.yml` 运行 collector 测试、RSS 采集、Python crawl、构建、生产数据比对、扩展打包和 GitHub Release/Pages 发布。任何路径迁移都必须同步检查 workflow 的硬编码路径和 shell 工作目录。

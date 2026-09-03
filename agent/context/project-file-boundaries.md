@@ -49,7 +49,7 @@ project-support/ → 构建、CI、扩展发布和静态资源
 
 ## 可进入工作台的资料
 
-没有运行时消费者的维护文档可以放在 `agent/docs/`，当前迁移的是 [`agent/docs/development-environment.md`](../docs/development-environment.md)。根 README 和文档相对链接必须同步更新。
+没有运行时消费者的维护文档可以放在 `agent/docs/`。根 README 和文档相对链接必须同步更新。
 
 ## 禁止放入工作台
 

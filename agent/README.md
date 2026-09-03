@@ -17,7 +17,7 @@
 | 项目现状或文件归属 | [项目上下文](context/project-context.md)、[文件边界](context/project-file-boundaries.md) |
 | 产品价值或范围 | [产品入口](product/README.md) 与对应产品正文 |
 | Investment Review | [产品正文](product/investment-review.md)；实现细节才读[工程附录](product/reference/investment-review-engineering.md) |
-| 本地运行或构建 | [项目工作说明](standards/project-instructions.md)、[开发环境](docs/development-environment.md) |
+| 本地运行或构建 | [项目工作说明](standards/project-instructions.md) |
 | 页面、数据或部署验收 | [真实环境验收原则](standards/trusted-verification.md) |
 | 外部资讯源、AI 筛选或定时采集接入 | [外部资讯源接入手册](verification/external-content-source-integration.md) |
 | BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |

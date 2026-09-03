@@ -75,17 +75,8 @@ export default defineConfig({
         secure: true,
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/douban/, ""),
-      },
-      '/data': {
-        target: 'http://192.168.1.100:5000',
-        changeOrigin: true,
-        rewrite: path => path.replace(/^\/data/, '/data')
       }
     },
-  },
-  preview: {
-    // 生产预览直接读取 dist，避免继承开发环境的家庭数据服务代理。
-    proxy: {},
   },
   build: {
     target: "es2015",
