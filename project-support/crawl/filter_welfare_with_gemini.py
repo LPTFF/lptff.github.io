@@ -58,7 +58,7 @@ RESPONSE_SCHEMA = {
 }
 
 BANK_IDENTITY = re.compile(
-    r"银行(?!卡)|中行|工行|建行|农行|交行|招行|邮储|浦发|广发|光大|兴业|民生|华夏|中信|招商|南京|苏州|华瑞微"
+    r"银行|信用卡|借记卡|中行|工行|建行|农行|交行|招行|邮储|浦发|广发|光大|兴业|民生|华夏|中信|招商|南京|苏州|华瑞微"
 )
 NON_BANK_PRODUCT = re.compile(r"保险|金管家|黄金体验金|贵金属")
 
@@ -105,7 +105,11 @@ def _request_batch(
 ) -> set[str]:
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     input_items = [
-        {"id": entry.identifier, "title": str(entry.item["title"]).strip()}
+        {
+            "id": entry.identifier,
+            "title": str(entry.item["title"]).strip(),
+            "summary": str(entry.item.get("summary") or "").strip()[:600],
+        }
         for entry in entries
     ]
     payload = {

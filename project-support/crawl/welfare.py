@@ -61,6 +61,9 @@ def parse_hxm5_response(payload: object) -> list[dict[str, object]]:
             continue
         item_id = str(entry.get("ID") or "").strip()
         title = str(entry.get("Title") or "").strip()
+        summary = BeautifulSoup(
+            f"<div>{str(entry.get('Content') or '')}</div>", "html.parser"
+        ).get_text(" ", strip=True)
         try:
             date = BEIJING.localize(datetime.strptime(str(entry.get("time") or ""), "%Y-%m-%d %H:%M"))
         except ValueError:
@@ -75,6 +78,7 @@ def parse_hxm5_response(payload: object) -> list[dict[str, object]]:
             {
                 "link": f"https://www.hxm5.com/t/{item_id}",
                 "title": title,
+                "summary": summary[:600],
                 "img_src": image_url,
                 "time": date.strftime("%Y-%m-%d %H:%M:%S"),
                 "timestamp": int(date.timestamp() * 1000),

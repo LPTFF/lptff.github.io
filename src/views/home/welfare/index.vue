@@ -47,22 +47,22 @@
                   class="welfare-img-link"
                   @error="handleImageError"
                 />
-                <el-icon
-                  :size="32"
-                  v-if="item.isTop && item.isTop == '1'"
-                  style="color: red"
-                  ><CircleCheck
-                /></el-icon>
               </div>
             </div>
           </div>
           <div class="welfare-div-website" @click="gotoMainWebsite(item)">
-            <img
-              :src="handleWebsiteImg(item) ? handleWebsiteImg(item) : logoUrl"
-              alt="网站"
-              class="welfare-img-link"
-              @error="handleImageError"
-            />
+            <el-avatar
+              :size="isPCRes ? 30 : 26"
+              :src="handleWebsiteImg(item)"
+              class="welfare-source-avatar"
+            >
+              <span
+                class="website-icon-fallback"
+                :style="{ backgroundColor: fallbackColor(handleWebsiteName(item)) }"
+              >
+                {{ fallbackChar(handleWebsiteName(item)) }}
+              </span>
+            </el-avatar>
             <div class="welfare-name-link">
               {{ handleWebsiteName(item) }}
             </div>
@@ -84,14 +84,8 @@ import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
 import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
 import logoImageUrl from "../../../assets/logo.jpg";
-import mutouxbImage from "./img/mutouxb.png";
-import yqhd8Image from "./img/yqhd8.png";
-import hxm5Image from "./img/hxm5.png";
-import tuanImage from "./img/0818tuan.png";
-import zhuanyesImage from "./img/zhuanyes.png";
-import daydayzhuanImage from "./img/daydayzhuan.png";
-import { Calendar, Timer, CircleCheck } from "@element-plus/icons-vue";
-import { ElRow, ElCol, ElCard, ElIcon, ElDivider } from "element-plus";
+import { Calendar, Timer } from "@element-plus/icons-vue";
+import { ElRow, ElCol, ElCard, ElIcon, ElDivider, ElAvatar } from "element-plus";
 let welfareInitSource: any[] = [];
 let welfareTopSource: any[] = [];
 let welfareSource: any[] = [];
@@ -147,44 +141,45 @@ export default {
       switch (String(item.website)) {
         case "hxm5":
           websiteInfo = {
-            websiteName: "线报引擎",
+            websiteName: "线报屋",
             mainWebsite: "https://www.hxm5.com/",
-            websiteImg: hxm5Image,
+            websiteImg: "https://www.hxm5.com/favicon.ico",
           };
           break;
         case "mutouxb":
           websiteInfo = {
             websiteName: "86收线报网",
             mainWebsite: "http://www.mutouxb.com/",
-            websiteImg: mutouxbImage,
+            websiteImg: "",
           };
           break;
         case "yqhd8":
           websiteInfo = {
             websiteName: "实时线报",
             mainWebsite: "https://www.yqhd8.com/",
-            websiteImg: yqhd8Image,
+            websiteImg: "https://www.yqhd8.com/static/favicon.ico",
           };
           break;
         case "0818tuan":
           websiteInfo = {
-            websiteName: "0818团（HTTPS 公共索引）",
+            websiteName: "0818团",
             mainWebsite: "https://tophub.today/n/4MdAkn1oxD",
-            websiteImg: tuanImage,
+            websiteImg:
+              "https://icons.duckduckgo.com/ip3/www.0818tuan.com.ico",
           };
           break;
         case "zhuanyes":
           websiteInfo = {
             websiteName: "好赚网",
             mainWebsite: "https://www.zhuanyes.com/",
-            websiteImg: zhuanyesImage,
+            websiteImg: "https://www.zhuanyes.com/favicon.ico",
           };
           break;
         case "daydayzhuan":
           websiteInfo = {
             websiteName: "天天线报网",
             mainWebsite: "https://www.daydayzhuan.com/yangmao",
-            websiteImg: daydayzhuanImage,
+            websiteImg: "https://www.daydayzhuan.com/favicon.ico",
           };
           break;
         case "zhujiceping":
@@ -212,6 +207,22 @@ export default {
       // 根据 item 的属性动态计算图片的 src 值
       let websiteInfo = getWebsiteInfo(item);
       return websiteInfo.websiteImg;
+    };
+    const fallbackPalette = [
+      "#5b8ff9",
+      "#5ad8a6",
+      "#f6bd16",
+      "#e8684a",
+      "#6dc8ec",
+      "#9270ca",
+    ];
+    const fallbackChar = (name: string) => (name || "?").trim().charAt(0);
+    const fallbackColor = (name: string) => {
+      let hash = 0;
+      for (const char of name || "") {
+        hash = (hash * 31 + char.charCodeAt(0)) % 997;
+      }
+      return fallbackPalette[hash % fallbackPalette.length];
     };
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
@@ -255,6 +266,9 @@ export default {
       handleImageError,
       handleWebsiteName,
       handleWebsiteImg,
+      fallbackChar,
+      fallbackColor,
+      isPCRes,
       welfareLimited,
       gotoMainWebsite,
     };
@@ -265,9 +279,9 @@ export default {
     ElCard,
     ElIcon,
     ElDivider,
+    ElAvatar,
     Calendar,
     Timer,
-    CircleCheck,
   },
 };
 </script>
@@ -281,6 +295,20 @@ export default {
   color: #797979;
   font-weight: 600;
   font-size: 14px;
+}
+.welfare-source-avatar {
+  flex-shrink: 0;
+  margin-right: 10px;
+}
+.website-icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
 }
 .welfare-img-link {
   height: 30px;
