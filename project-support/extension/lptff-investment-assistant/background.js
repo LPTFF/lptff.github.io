@@ -10,11 +10,13 @@ const LPTFF_CONFIG_KEY = "lptffConfig";
 const BOSS_AUTOPILOT_CONFIG_KEY = "lptffBossAutopilot";
 const BOSS_AUTOPILOT_STATE_KEY = "lptffBossAutopilotState";
 const BOSS_FEATURES_KEY = "lptffBossFeatures";
-const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 2;
+const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 3;
+const GEMINI_REQUEST_TIMEOUT_MS = 45000;
+const GEMINI_MAX_ATTEMPTS = 3;
 const GEMINI_MODELS = new Set(["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"]);
-const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，现任高级前端开发工程师。核心技术栈覆盖 React、Vue、TypeScript、JavaScript、Next.js、Nuxt.js，熟悉 Redux、MobX、Pinia；具备 Webpack、Vite、Rollup、ESBuild、微前端、SSR/SSG、CI/CD、性能优化和组件库建设经验。做过金融科技复杂业务系统、低代码平台 React 迁移、PC 中后台、移动端、ECharts/Canvas/SVG 数据可视化，并具备 Node.js、RESTful API、GraphQL、WebSocket、Nginx、爬虫与自动化脚本基础。持续实践 AI 辅助开发、内容审核和自动化流程。曾独立设计低代码到 React 的渐进式迁移基础设施，在日常迭代中控制迁移风险，统一登录、权限和部署能力，使后端同学也能直接参与 React 业务开发，最终覆盖全部相关页面。求职时看重业务成长空间以及业务产出与个人回报的长期联动，不执着于职位名称，更关注能否参与高价值业务决策并持续为公司创造价值。目标岗位包括高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端，以及以前端为主的全栈岗位。期望总年收入 40–60 万，在职、一个月可到岗；优先上海、杭州，也接受武汉、南京、合肥。`;
-const RESUME_OPTIMIZED_MUST_ASK = "分阶段了解，不要一次问完：先确认核心工作内容、业务价值与技术方向；有继续沟通价值后，再了解职责权限和团队协作、总包及回馈机制、工作时间与双休、办公地点和远程安排、用工性质及是否驻场或高频出差；进入面试前再确认面试流程、社保公积金和到岗安排";
-const RESUME_OPTIMIZED_CRITERIA = "优先能参与高价值业务决策、通过技术方案提升组织产能并拥有合理职责空间的高级/资深前端、技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端、金融科技或复杂中后台岗位；React/Vue/TypeScript、工程化、性能优化、组件平台、微前端、Node.js 协作经验可形成匹配。总年收入期望 40–60 万，关注固定薪资、奖金、项目激励、利润分成或期权等机制的透明度和兑现难度。工作应支持长期、可持续的高价值产出；排除兼职实习、纯销售客服、培训收费、劳务派遣、长期驻场外包、单休、常态化高强度加班、长期高频出差、纯执行型岗位和虚假招聘。";
+const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，最熟悉 React 和 Vue。下一份工作优先以前端为主，也接受架构、工程化、性能优化、可视化、低代码、AI 应用、前端偏全栈、技术决策或带团队等工作内容。不限行业和公司规模，不以职位名称作为硬门槛。求职优先级依次是收入、业务前景、稳定性；税前年收入至少 25 万，理想为 30 万以上，可接受月薪 18K 且 13–14 薪有明确制度或可靠兑现记录。工作地点由求职者在 BOSS 原生筛选中自行选择。`;
+const RESUME_OPTIMIZED_MUST_ASK = "分阶段了解，不要一次问完：先确认实际工作是否以前端为主、月薪范围与固定薪数；有继续沟通价值后，再了解业务是否有持续需求、公司经营与团队裁员情况、岗位是否长期正式、是否与招聘公司直签、社保公积金、双休与加班情况、是否有值班或夜间响应；信息未写明时先继续沟通，不因缺失信息直接否定机会";
+const RESUME_OPTIMIZED_CRITERIA = "收入为第一优先级：税前年收入至少 25 万，理想 30 万以上；月薪 18K 配合有明确制度或历史兑现依据的 13–14 薪可接受，不用口头承诺、不确定奖金或浮动绩效凑年包。其次看业务是否有真实且持续的需求，不限行业。稳定性要求公司经营正常、团队不频繁裁员、岗位不是临时项目、正常缴纳社保公积金并与实际招聘公司直签；明确排除外包、劳务派遣、驻场和创业早期公司。工作强度是硬底线：必须双休，不接受加班、大小周、值班或夜间响应。招聘信息未写明时先投递并后续确认；只有明确冲突才提前排除。";
 const DEFAULT_BOSS_AUTOPILOT_CONFIG = Object.freeze({
   profile: RESUME_OPTIMIZED_PROFILE,
   mustAsk: RESUME_OPTIMIZED_MUST_ASK,
@@ -115,12 +117,15 @@ function geminiJsonText(response) {
 async function callBossGemini({ system, prompt, schema }) {
   const config = await loadBossAutopilotConfig();
   if (!config.geminiKey) throw new Error("请先录入 Gemini Key");
-  for (let attempt = 0; attempt < 2; attempt += 1) {
+  const modelCandidates = [config.model, ...GEMINI_MODELS].filter((model, index, models) => models.indexOf(model) === index).slice(0, GEMINI_MAX_ATTEMPTS);
+  let lastTemporaryError = "Gemini 临时不可用";
+  for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt += 1) {
+    const requestModel = modelCandidates[attempt] || config.model;
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    const timeoutId = setTimeout(() => controller.abort(), GEMINI_REQUEST_TIMEOUT_MS);
     let response;
     try {
-      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(config.model)}:generateContent`, {
+      response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(requestModel)}:generateContent`, {
         method: "POST",
         headers: { "Content-Type": "application/json", "x-goog-api-key": config.geminiKey },
         signal: controller.signal,
@@ -136,22 +141,35 @@ async function callBossGemini({ system, prompt, schema }) {
         }),
       });
     } catch (error) {
-      if (error?.name === "AbortError") throw new Error("Gemini 连接超时，请检查代理节点或网络后重试");
-      throw error;
+      const temporary = error?.name === "AbortError" || error instanceof TypeError || /network|fetch|连接|超时|代理/i.test(String(error?.message || error || ""));
+      if (!temporary) throw error;
+      lastTemporaryError = error?.name === "AbortError" ? `Gemini ${requestModel} 连接超时` : `Gemini ${requestModel} 网络连接中断`;
+      if (attempt < GEMINI_MAX_ATTEMPTS - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 1800 * (attempt + 1)));
+        continue;
+      }
+      break;
     } finally {
       clearTimeout(timeoutId);
     }
-    if (response.ok) return geminiJsonText(await response.json());
+    if (response.ok) {
+      const result = geminiJsonText(await response.json());
+      Object.defineProperty(result, "__lptffModel", { value: requestModel, enumerable: false });
+      return result;
+    }
     const body = await response.json().catch(() => ({}));
     const detail = String(body?.error?.message || `HTTP ${response.status}`).replace(config.geminiKey, "[已隐藏]");
     const temporary = response.status === 429 || response.status === 500 || response.status === 503 || /high demand|overload|temporar|稍后重试|繁忙/i.test(detail);
-    if (temporary && attempt === 0) {
-      await new Promise((resolve) => setTimeout(resolve, 1800));
+    if (temporary) lastTemporaryError = `Gemini ${requestModel} 临时服务异常：${detail.slice(0, 180)}`;
+    if (temporary && attempt < GEMINI_MAX_ATTEMPTS - 1) {
+      const retryAfterSeconds = Math.min(15, Math.max(0, Number(response.headers?.get?.("retry-after")) || 0));
+      await new Promise((resolve) => setTimeout(resolve, Math.max(retryAfterSeconds * 1000, 1800 * (attempt + 1))));
       continue;
     }
+    if (temporary) break;
     throw new Error(`Gemini 请求失败：${detail.slice(0, 300)}`);
   }
-  throw new Error("Gemini 临时繁忙，重试后仍未恢复");
+  throw new Error(`${lastTemporaryError}，已自动尝试 ${modelCandidates.length} 个模型`);
 }
 
 const STRING_ARRAY_SCHEMA = { type: "ARRAY", items: { type: "STRING" } };
@@ -1895,7 +1913,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
           prompt: "返回连接状态。",
           schema: { type: "OBJECT", properties: { status: { type: "STRING" } }, required: ["status"] },
         });
-        return { ok: true, result: { status: String(result.status || "ok").slice(0, 40) } };
+        return { ok: true, result: { status: String(result.status || "ok").slice(0, 40), model: String(result.__lptffModel || "") } };
       }
       if (message.type === "BOSS_AUTOPILOT_ANALYZE_CONVERSATION") return { ok: true, analysis: await analyzeBossConversation(message.input || {}) };
       if (message.type === "BOSS_AUTOPILOT_TEST_WECOM") return await sendBossWecomNotification({}, true);

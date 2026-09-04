@@ -1,6 +1,6 @@
 # 真实环境验收状态
 
-最后更新：2026-09-02
+最后更新：2026-09-04
 
 ## 状态说明
 
@@ -12,6 +12,75 @@
 - `未验收 / 未知`：没有取得足够的真实环境证据。
 
 ## 当前结论
+
+### Gemini 超时与单模型拥堵恢复（2026-09-04）
+
+#### Changed files
+
+- `background.js`：将 Gemini 单模型固定超时改为超时/网络/429/5xx 统一有限重试，并在临时故障时依次尝试三个已支持模型。
+- `content/boss-autopilot.js`：临时连接故障不再永久关闭自动沟通；保留当前消息并按 15–300 秒递增间隔重试，配置页持久显示连接结果和实际成功模型。
+- `BOSS_HELPER_UPSTREAM.md`：记录临时故障恢复与不可恢复错误安全暂停边界。
+
+#### Impacted behaviors
+
+- 45 秒请求超时、网络中断、限流、503 和 high demand 均可自动重试；不再由一次代理或服务抖动触发永久暂停。
+- 首选模型临时不可用时自动尝试备用模型，用户保存的首选模型不被修改。
+- 三个模型均临时失败时不标记当前消息为已处理，也不切换下一会话；15、30、60、120、240、300 秒递增恢复。
+- Key 无效、请求参数或模型配置错误等不可恢复错误仍停止自动沟通，避免无限重试。
+
+#### Verification
+
+- JavaScript 语法和 `git diff --check`：`PASS`。
+- 可控回归覆盖：连续两次超时后第三次成功、持续网络失败、503 后恢复、401 不重试、模型尝试顺序、前台临时错误分类和 15/30 秒退避：`PASS`。
+- 普通、已登录 Windows Chrome 重载未打包扩展后，真实连接测试首先复现 `Gemini 3.5 Flash-Lite` high demand；加入模型故障转移后再次测试，由 `Gemini 3.6 Flash` 成功返回：`REAL_SOURCE_PASS`。
+- 配置页持久显示“连接通过 · Gemini 3.6-flash”，且用户保存的首选项仍为 Gemini 3.5 Flash-Lite：`PASS`。
+- 自动分析保持未开启；未打开具体会话，未发送招聘方消息或企业微信通知：`PASS`。
+- 证据报告：`artifacts/validation-20260904-gemini-recovery/REAL_GEMINI_RECOVERY_VALIDATION_REPORT.md`。
+
+#### Infrastructure issue / executor / next action
+
+- Current executor：普通 Windows Chrome + 操作系统级截图、鼠标和键盘。
+- Forbidden browser-control tools used：`NO`；未使用 DevTools、CDP、WebDriver、Playwright、Puppeteer、Selenium、远程调试或内置浏览器控制 BOSS 页面。
+- 真实自动会话中的延时恢复未执行，因为当前任务未授权读取或发送招聘会话；该分支由可控状态机回归覆盖，不声明真实消息发送结果。
+
+结论：Gemini 连接测试与模型故障转移为 `REAL_BOSS_VALIDATION: EXECUTED — PASS`；真实招聘消息仍未发送。
+
+### 求职访谈默认筛选（2026-09-04）
+
+#### Changed files
+
+- `content/boss-resume-profile.js`：增加一次性配置迁移，扩大前端相关岗位名覆盖，薪资改为 18–50K 宽松匹配，关闭并清空地址文本筛选，只拦截明确冲突。
+- `background.js`、`content/boss-autopilot.js`：将沟通画像调整为收入、业务前景、稳定性优先，工作强度为硬底线。
+- `BOSS_HELPER_UPSTREAM.md`：记录默认筛选与先投递后确认的产品边界。
+
+#### Impacted behaviors
+
+- 工作地点只由用户在 BOSS 原生筛选中决定，扩展不再对岗位地址做第二层包含过滤。
+- 岗位标题按前端工作方向宽匹配，不再依赖“高级/资深/负责人”等头衔。
+- 月薪 18K 起且 13–14 薪有可靠兑现依据的岗位可进入后续沟通。
+- 业务、稳定性和工作强度信息缺失时不预先排除；明确外包/派遣/驻场/创业早期、单休/大小周/加班/值班/夜间响应时才过滤。
+
+#### Verification
+
+- 本地 Chrome 直接加载的 3 个 JavaScript 变更文件语法检查：`PASS`。
+- 通过模拟 `chrome.storage.local` 执行真实迁移脚本：地址关闭且清空、18K 下限、宽岗位名、明确冲突词、其他用户配置保留和迁移幂等均为 `PASS`。
+- Manifest JSON 与后台入口存在性：`PASS`；仍使用本地调试版本 `3.17.10`，未执行发包。
+- 普通、已登录 Windows Chrome 在 `chrome://extensions/` 重载当前工作区未打包扩展后，真实 BOSS 配置页显示：工作地址筛选为空且关闭、薪资 18–50K、前端相关岗位名扩展、明确冲突排除项生效：`REAL_SOURCE_PASS`。
+- 临时启用 AI 沟通小助手后，真实“沟通规则”页显示新的求职画像、25 万最低年薪、30 万以上理想年薪、18K × 13–14 薪接受条件以及分阶段确认策略：`REAL_SOURCE_PASS`。
+- 验收后恢复 AI 沟通小助手原有关闭状态；未点击“开始”或“一键启动”，未打开具体会话，未发送招聘方消息、Gemini 请求或企业微信通知：`PASS`。
+- 证据报告：`artifacts/validation-20260904-boss-filter/REAL_BOSS_FILTER_VALIDATION_REPORT.md`。
+
+#### Pending real scenarios
+
+- 因未获授权启动真实投递，本轮不声明新的投递命中率、投递效率或沟通转化率；这些指标仍为 `未验收 / 未知`。
+
+#### Infrastructure issue / executor / next action
+
+- 首次尝试重载时，Chrome 位于第二块屏幕，窗口内坐标没有换算为桌面绝对坐标，导致后台进程未真正重载；职位注入脚本已读取新文件，但 Gemini 画像仍由旧后台返回。按真实窗口边界修正坐标并重新点击重载后，两条链路均通过复验。
+- Current executor：普通 Windows Chrome + 操作系统级截图、鼠标和键盘。
+- Forbidden browser-control tools used：`NO`；未使用 DevTools、CDP、WebDriver、Playwright、Puppeteer、Selenium、远程调试或内置浏览器控制 BOSS 页面。
+
+结论：求职默认筛选和 Gemini 沟通画像为 `REAL_BOSS_VALIDATION: EXECUTED — PASS`；真实投递效率仍为未知。
 
 ### AI 沟通成功率优化（2026-09-02）
 

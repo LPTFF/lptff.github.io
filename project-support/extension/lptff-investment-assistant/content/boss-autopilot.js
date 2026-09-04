@@ -10,9 +10,9 @@
   const LOCAL_UI_KEY = "lptffBossAutopilotUi";
   const CHAT_URL = "https://www.zhipin.com/web/geek/chat";
   const DEFAULTS = {
-    profile: "6年前端开发经验，硕士学历，核心技术栈覆盖 React、Vue、TypeScript、Next.js、Nuxt.js、状态管理、工程化与性能优化；具备金融复杂业务、低代码迁移、微前端、组件平台、可视化、Node.js 协作、AI 与自动化实践。目标为高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端及以前端为主的全栈岗位。",
-    mustAsk: "核心工作内容与技术栈、团队规模及岗位级别、薪资结构与年终奖、工作时间和双休情况、社保公积金、办公地点与远程安排、是否外包驻场或长期出差、面试流程",
-    valuableCriteria: "优先高级/资深前端、前端技术专家或负责人、前端架构、AI 应用前端、低代码/可视化前端、金融科技或复杂中后台；排除兼职实习、纯销售客服、培训收费、劳务派遣、长期驻场外包、长期高频出差和虚假招聘。",
+    profile: "6年前端开发经验，硕士学历，最熟悉 React 和 Vue。下一份工作优先以前端为主，不限行业和公司规模，不以职位名称作为硬门槛。求职优先级依次是收入、业务前景、稳定性；税前年收入至少 25 万，理想 30 万以上，可接受月薪 18K 且 13–14 薪有可靠兑现依据。",
+    mustAsk: "实际工作是否以前端为主、月薪与固定薪数、业务持续性、公司经营与团队裁员情况、是否长期正式岗位、是否与招聘公司直签、社保公积金、双休与加班情况、是否有值班或夜间响应；信息缺失时先继续沟通，不直接否定机会",
+    valuableCriteria: "税前年收入至少 25 万，理想 30 万以上，不用不确定奖金凑年包；业务有真实持续需求；公司经营正常、团队不频繁裁员、长期正式岗位、正常社保公积金、与招聘公司直签；排除外包、派遣、驻场和创业早期公司。必须双休，不接受加班、大小周、值班或夜间响应。",
     model: "gemini-3.5-flash-lite",
     autoReply: false,
     sendMode: "preview",
@@ -26,6 +26,8 @@
   let panel;
   let chatObserver;
   let arrivalPollTimer;
+  let transientRetryTimer;
+  let transientFailureCount = 0;
   let processing = false;
   let queueOpening = false;
   const queueOpenFailures = new Map();
@@ -42,6 +44,8 @@
     contextInvalidated = true;
     if (arrivalPollTimer) window.clearInterval(arrivalPollTimer);
     arrivalPollTimer = null;
+    if (transientRetryTimer) window.clearTimeout(transientRetryTimer);
+    transientRetryTimer = null;
     window.clearTimeout(ensureChatObserver.timer);
     chatObserver?.disconnect();
     chatObserver = null;
@@ -113,6 +117,30 @@
   }
 
   const qs = (selector) => panel?.querySelector(selector);
+
+  function isTemporaryGeminiError(error) {
+    return /Gemini.*(?:连接超时|网络连接中断|临时服务异常|临时不可用|繁忙|已自动重试|已自动尝试)/i.test(String(error?.message || error || ""));
+  }
+
+  function clearTemporaryRetry() {
+    if (transientRetryTimer) window.clearTimeout(transientRetryTimer);
+    transientRetryTimer = null;
+    transientFailureCount = 0;
+  }
+
+  function scheduleTemporaryRetry(error) {
+    if (transientRetryTimer || contextInvalidated || !config.autoReply) return 0;
+    transientFailureCount += 1;
+    const delaySeconds = Math.min(300, 15 * (2 ** Math.min(5, transientFailureCount - 1)));
+    transientRetryTimer = window.setTimeout(() => {
+      transientRetryTimer = null;
+      if (!contextInvalidated && config.autoReply) void processLatestMessage();
+    }, delaySeconds * 1000);
+    setStatus(`Gemini 临时连接异常，${delaySeconds} 秒后自动重试；当前消息不会跳过`, "error");
+    void appendLog("模型连接重试", `${String(error?.message || error || "Gemini 临时不可用")}；${delaySeconds} 秒后自动重试`, "error", conversationLabel());
+    return delaySeconds;
+  }
+
   function setStatus(message, tone = "") {
     const node = qs("[data-role='status']");
     if (!node) return;
@@ -299,7 +327,7 @@
             <select data-field="model"><option value="gemini-3.7-flash">Gemini 3.7 Flash</option><option value="gemini-3.6-flash">Gemini 3.6 Flash</option><option value="gemini-3.5-flash-lite">Gemini 3.5 Flash-Lite</option></select>
             <label>Gemini Key</label>
             <div class="lptff-row"><input type="text" autocomplete="off" class="lptff-secret-input" data-masked="true" data-field="geminiKey" placeholder="请输入 Gemini Key"><button type="button" class="lptff-reveal" data-action="show-gemini" aria-label="显示 Gemini Key">显示</button><span class="lptff-secret-state" data-role="gemini-state"></span></div>
-            <div class="lptff-actions"><button type="button" data-action="test-gemini">保存并测试</button><button type="button" class="lptff-danger" data-action="clear-gemini">清除 Key</button></div>
+            <div class="lptff-actions"><button type="button" data-action="test-gemini">保存并测试</button><button type="button" class="lptff-danger" data-action="clear-gemini">清除 Key</button><span class="lptff-secret-state" data-role="gemini-test-state"></span></div>
             <label>企业微信机器人 Webhook</label>
             <div class="lptff-row"><input type="text" autocomplete="off" class="lptff-secret-input" data-masked="true" data-field="wecomWebhook" placeholder="请输入企业微信 Webhook"><button type="button" class="lptff-reveal" data-action="show-wecom" aria-label="显示企业微信 Webhook">显示</button><span class="lptff-secret-state" data-role="wecom-state"></span></div>
             <div class="lptff-actions"><button type="button" data-action="test-wecom">保存并发送测试通知</button><button type="button" class="lptff-danger" data-action="clear-wecom">清除 Webhook</button></div>
@@ -564,6 +592,7 @@
       }
       void withBusy(button, async () => {
         if (action === "start") {
+          clearTemporaryRetry();
           if (!config.hasGeminiKey) { switchTab("config"); throw new Error("请先在“配置”中保存 Gemini Key"); }
           await saveConfig({ autoReply: true });
           await appendLog("运行控制", config.sendMode === "live" ? "已启动实际自动发送" : "已启动安全预览", "success");
@@ -572,7 +601,20 @@
           else void processLatestMessage();
         }
         if (action === "save") { await saveConfig(); refreshRuntimeStatus("配置已保存 · " + (config.autoReply ? `${config.sendMode === "live" ? "实际发送" : "安全预览"}已开启 · 当前未读 ${unreadCount()} · 可处理 ${unreadConversationRows().length}` : "自动分析未开启")); }
-        if (action === "test-gemini") { await saveConfig(); await call({ type: "BOSS_AUTOPILOT_TEST_GEMINI" }); setStatus("Gemini 连接测试通过", "success"); }
+        if (action === "test-gemini") {
+          const testState = qs("[data-role='gemini-test-state']");
+          if (testState) { testState.textContent = "测试中…"; testState.dataset.ready = "false"; }
+          try {
+            await saveConfig();
+            const response = await call({ type: "BOSS_AUTOPILOT_TEST_GEMINI" });
+            const actualModel = String(response.result?.model || "").replace(/^gemini-/i, "Gemini ");
+            if (testState) { testState.textContent = `连接通过${actualModel ? ` · ${actualModel}` : ""}`; testState.dataset.ready = "true"; }
+            setStatus("Gemini 连接测试通过", "success");
+          } catch (error) {
+            if (testState) { testState.textContent = "连接失败"; testState.dataset.ready = "false"; }
+            throw error;
+          }
+        }
         if (action === "test-wecom") { await saveConfig(); await call({ type: "BOSS_AUTOPILOT_TEST_WECOM" }); setStatus("企业微信测试通知已发送", "success"); }
         if (action === "clear-gemini" || action === "clear-wecom") {
           const secret = action.endsWith("gemini") ? "gemini" : "wecom";
@@ -580,7 +622,7 @@
           resetSecretField(secret);
           setStatus(`${secret === "gemini" ? "Gemini Key" : "企业微信 Webhook"} 已清除`, "success");
         }
-        if (action === "pause") { await saveConfig({ autoReply: false }); await appendLog("运行控制", "自动沟通已暂停", "info"); setStatus("自动沟通已暂停", "success"); refreshRuntimeStatus("自动沟通已暂停"); }
+        if (action === "pause") { clearTemporaryRetry(); await saveConfig({ autoReply: false }); await appendLog("运行控制", "自动沟通已暂停", "info"); setStatus("自动沟通已暂停", "success"); refreshRuntimeStatus("自动沟通已暂停"); }
       });
     });
   }
@@ -672,7 +714,7 @@
   }
 
   async function processLatestMessage() {
-    if (contextInvalidated || processing || queueOpening || !config.autoReply) return;
+    if (contextInvalidated || processing || queueOpening || transientRetryTimer || !config.autoReply) return;
     const messages = visibleMessageNodes().filter((item) => /item-friend|item-myself/.test(`${item.className || ""} ${item.parentElement?.className || ""}`.toLowerCase()));
     const node = messages.at(-1);
     if (!node || !inboundMessage(node)) {
@@ -700,6 +742,7 @@
         return text ? `${inboundMessage(item) ? "招聘方" : "求职者"}：${text}` : "";
       }).filter(Boolean).join("\n");
       const response = await call({ type: "BOSS_AUTOPILOT_ANALYZE_CONVERSATION", input: { latestMessage, conversation, conversationLabel: label } });
+      clearTemporaryRetry();
       const analysis = response.analysis;
       const reply = String(analysis.reply || "").trim();
       const needsHuman = analysis.needsHuman === true;
@@ -748,6 +791,10 @@
       await appendLog("会话处理", `${outcome}${valueStatus}`, outcomeTone, label);
     } catch (error) {
       if (contextInvalidated || stopInvalidatedContext(error)) return;
+      if (isTemporaryGeminiError(error) && config.autoReply) {
+        scheduleTemporaryRetry(error);
+        return;
+      }
       if (config.sendMode === "live" && config.autoReply) {
         try {
           await saveConfig({ autoReply: false });
@@ -760,7 +807,7 @@
       await appendLog("会话处理", `自动沟通暂停：${error.message}`, "error", label);
     } finally {
       processing = false;
-      if (!contextInvalidated && config.autoReply && config.sendMode === "live") window.setTimeout(() => void openNextUnreadConversation(), 1400);
+      if (!contextInvalidated && !transientRetryTimer && config.autoReply && config.sendMode === "live") window.setTimeout(() => void openNextUnreadConversation(), 1400);
     }
   }
 
@@ -886,7 +933,7 @@
   function ensureArrivalPolling() {
     if (arrivalPollTimer || contextInvalidated) return;
     arrivalPollTimer = window.setInterval(() => {
-      if (contextInvalidated || !config.autoReply || processing || queueOpening) return;
+      if (contextInvalidated || !config.autoReply || processing || queueOpening || transientRetryTimer) return;
       void flushPendingNotifications();
       if (config.sendMode === "live" && unreadConversationRows().length) void openNextUnreadConversation();
       else void processLatestMessage();
