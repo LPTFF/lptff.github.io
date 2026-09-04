@@ -26,12 +26,25 @@
   let panel;
   let chatObserver;
   let arrivalPollTimer;
+  let progressTickTimer;
   let transientRetryTimer;
   let transientFailureCount = 0;
   let processing = false;
   let queueOpening = false;
+  let lastQueueDiagnosticAt = 0;
   const queueOpenFailures = new Map();
   const secretHideTimers = new Map();
+  const completedQueueItems = new Set();
+  const queueProgress = {
+    startedAt: 0,
+    total: 0,
+    completed: 0,
+    phase: "等待启动",
+    detail: "启动后会实时显示每一步",
+    updatedAt: Date.now(),
+    nextActionAt: 0,
+    stoppedAt: 0,
+  };
   let activeTab = "status";
   let contextInvalidated = false;
 
@@ -44,6 +57,8 @@
     contextInvalidated = true;
     if (arrivalPollTimer) window.clearInterval(arrivalPollTimer);
     arrivalPollTimer = null;
+    if (progressTickTimer) window.clearInterval(progressTickTimer);
+    progressTickTimer = null;
     if (transientRetryTimer) window.clearTimeout(transientRetryTimer);
     transientRetryTimer = null;
     window.clearTimeout(ensureChatObserver.timer);
@@ -136,6 +151,7 @@
       transientRetryTimer = null;
       if (!contextInvalidated && config.autoReply) void processLatestMessage();
     }, delaySeconds * 1000);
+    setQueuePhase("等待 Gemini 重试", "当前消息会保留，不会跳过", Date.now() + delaySeconds * 1000);
     setStatus(`Gemini 临时连接异常，${delaySeconds} 秒后自动重试；当前消息不会跳过`, "error");
     void appendLog("模型连接重试", `${String(error?.message || error || "Gemini 临时不可用")}；${delaySeconds} 秒后自动重试`, "error", conversationLabel());
     return delaySeconds;
@@ -148,6 +164,66 @@
     node.dataset.tone = tone;
     const headStatus = qs("[data-role='head-status']");
     if (headStatus && headStatus.textContent !== message) headStatus.textContent = message;
+  }
+
+  function formatElapsed(milliseconds) {
+    const seconds = Math.max(0, Math.floor(Number(milliseconds || 0) / 1000));
+    const minutes = Math.floor(seconds / 60);
+    return `${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+  }
+
+  function startQueueProgress() {
+    completedQueueItems.clear();
+    queueProgress.startedAt = Date.now();
+    queueProgress.total = unreadCount();
+    queueProgress.completed = 0;
+    queueProgress.phase = "准备处理";
+    queueProgress.detail = queueProgress.total ? `已发现 ${queueProgress.total} 条未读` : "正在检查未读消息";
+    queueProgress.updatedAt = Date.now();
+    queueProgress.nextActionAt = 0;
+    queueProgress.stoppedAt = 0;
+    renderQueueProgress();
+  }
+
+  function setQueuePhase(phase, detail = "", nextActionAt = 0) {
+    queueProgress.phase = phase;
+    queueProgress.detail = detail;
+    queueProgress.updatedAt = Date.now();
+    queueProgress.nextActionAt = Number(nextActionAt || 0);
+    queueProgress.stoppedAt = phase === "已暂停" ? Date.now() : 0;
+    renderQueueProgress();
+  }
+
+  function markQueueItemCompleted(fingerprint) {
+    if (!fingerprint || completedQueueItems.has(fingerprint)) return;
+    completedQueueItems.add(fingerprint);
+    queueProgress.completed += 1;
+    queueProgress.total = Math.max(queueProgress.total, queueProgress.completed);
+    queueProgress.updatedAt = Date.now();
+  }
+
+  function renderQueueProgress() {
+    const node = qs("[data-role='queue-progress']");
+    if (!node) return;
+    const onChatPage = location.pathname.includes("/web/geek/chat");
+    const unread = onChatPage ? unreadCount() : 0;
+    const processable = onChatPage ? unreadConversationRows().length : 0;
+    const total = Math.max(queueProgress.total, queueProgress.completed + unread, unread);
+    const percentage = total ? Math.min(100, Math.round(queueProgress.completed / total * 100)) : (config.autoReply ? 100 : 0);
+    const elapsed = queueProgress.startedAt ? formatElapsed((queueProgress.stoppedAt || Date.now()) - queueProgress.startedAt) : "00:00";
+    const countdown = queueProgress.nextActionAt > Date.now()
+      ? `${Math.max(1, Math.ceil((queueProgress.nextActionAt - Date.now()) / 1000))} 秒后`
+      : (config.autoReply ? "马上" : "已暂停");
+    const lastActivity = new Date(queueProgress.updatedAt).toLocaleTimeString("zh-CN", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    node.dataset.running = String(config.autoReply);
+    node.innerHTML = `
+      <div class="lptff-progress-head"><strong>${escapeHtml(queueProgress.phase)}</strong><span>本轮 ${queueProgress.completed} / ${total}</span></div>
+      <div class="lptff-progress-track" role="progressbar" aria-label="本轮处理进度" aria-valuemin="0" aria-valuemax="${total}" aria-valuenow="${queueProgress.completed}"><i style="width:${percentage}%"></i></div>
+      <div class="lptff-progress-detail">${escapeHtml(queueProgress.detail || "等待下一步")}</div>
+      <div class="lptff-progress-metrics">
+        <span>剩余未读<strong>${unread}</strong></span><span>当前可处理<strong>${processable}</strong></span><span>已运行<strong>${elapsed}</strong></span><span>下一动作<strong>${countdown}</strong></span>
+      </div>
+      <div class="lptff-progress-updated">最近活动 ${lastActivity}</div>`;
   }
 
   function escapeHtml(value) {
@@ -316,6 +392,7 @@
           <article class="lptff-card lptff-tab-panel" data-tab-panel="status">
             <div class="lptff-section-head"><div><h3>运行状态</h3><p class="lptff-help">一键启动会在当前标签页进入 BOSS 沟通页，并按已保存的安全预览或实际发送模式运行。</p></div><span class="lptff-run-dot" data-role="run-dot"></span></div>
             <div class="lptff-readiness" data-role="readiness">正在读取运行状态…</div>
+            <div class="lptff-queue-progress" data-role="queue-progress" aria-live="polite"></div>
             <div class="lptff-actions"><button type="button" class="lptff-primary" data-action="start">一键启动</button><button type="button" data-action="pause">立即暂停</button><button type="button" data-action="open-chat">打开沟通页</button></div>
             <div class="lptff-status" role="status" aria-live="polite" data-role="status">正在读取本地配置…</div>
             <pre class="lptff-plan" data-role="plan"></pre>
@@ -395,6 +472,8 @@
     const response = await call({ type: "BOSS_AUTOPILOT_GET_CONFIG" });
     config = { ...DEFAULTS, ...response.config };
     fillForm();
+    if (config.autoReply && !queueProgress.startedAt) startQueueProgress();
+    else if (!config.autoReply && !queueProgress.startedAt) setQueuePhase("已暂停", "点击“一键启动”后开始显示本轮进度");
     await populateSavedSecrets();
     await removeLegacyProfileSearchState();
     refreshRuntimeStatus();
@@ -444,6 +523,7 @@
     const unread = location.pathname.includes("/web/geek/chat") ? ` · 当前未读 ${unreadCount()} · 可处理 ${unreadConversationRows().length}` : "";
     const running = config.autoReply ? `自动分析已开启 · ${config.sendMode === "live" ? "实际发送" : "安全预览"}${unread}` : `自动分析未开启${unread}`;
     if (!message) setStatus(running, config.autoReply ? "success" : "");
+    renderQueueProgress();
     void renderDashboard();
   }
 
@@ -595,6 +675,7 @@
           clearTemporaryRetry();
           if (!config.hasGeminiKey) { switchTab("config"); throw new Error("请先在“配置”中保存 Gemini Key"); }
           await saveConfig({ autoReply: true });
+          startQueueProgress();
           await appendLog("运行控制", config.sendMode === "live" ? "已启动实际自动发送" : "已启动安全预览", "success");
           refreshRuntimeStatus();
           if (location.origin !== "https://www.zhipin.com" || location.pathname !== "/web/geek/chat") location.assign(CHAT_URL);
@@ -622,7 +703,7 @@
           resetSecretField(secret);
           setStatus(`${secret === "gemini" ? "Gemini Key" : "企业微信 Webhook"} 已清除`, "success");
         }
-        if (action === "pause") { clearTemporaryRetry(); await saveConfig({ autoReply: false }); await appendLog("运行控制", "自动沟通已暂停", "info"); setStatus("自动沟通已暂停", "success"); refreshRuntimeStatus("自动沟通已暂停"); }
+        if (action === "pause") { clearTemporaryRetry(); await saveConfig({ autoReply: false }); setQueuePhase("已暂停", "已停止读取、分析和发送"); await appendLog("运行控制", "自动沟通已暂停", "info"); setStatus("自动沟通已暂停", "success"); refreshRuntimeStatus("自动沟通已暂停"); }
       });
     });
   }
@@ -727,12 +808,15 @@
     const fingerprint = `${cid}|${latestMessage}`;
     const state = await stateForToday();
     if (state.seen.includes(fingerprint)) {
+      markQueueItemCompleted(fingerprint);
+      setQueuePhase("查找下一条", "当前会话今天已处理，已跳过重复分析", Date.now() + 500);
       refreshRuntimeStatus();
       if (config.sendMode === "live") window.setTimeout(() => void openNextUnreadConversation(), 500);
       return;
     }
-    if (state.total >= config.dailyReplyLimit || Number(state.conversations[cid] || 0) >= config.perConversationLimit) { setStatus("自动沟通已达到配置上限，已安全暂停", "error"); return; }
+    if (state.total >= config.dailyReplyLimit || Number(state.conversations[cid] || 0) >= config.perConversationLimit) { setQueuePhase("已暂停", "已达到配置的处理上限"); setStatus("自动沟通已达到配置上限，已安全暂停", "error"); return; }
     processing = true;
+    setQueuePhase("Gemini 正在分析", "正在理解招聘方消息并生成下一步");
     setStatus("检测到招聘方新消息，Gemini 正在分析…");
     const label = conversationLabel();
     let conversation = "";
@@ -751,6 +835,8 @@
         : (analysis.stop ? "已停止本会话" : "无需回复");
       if (!analysis.stop && !needsHuman && reply) {
         if (config.sendMode === "live") {
+          const sendAt = Date.now() + config.replyDelaySeconds * 1000;
+          setQueuePhase("等待发送", "Gemini 已完成分析，保留人工暂停时间", sendAt);
           setStatus(`Gemini 分析完成，${config.replyDelaySeconds} 秒后发送…`);
           await new Promise((resolve) => setTimeout(resolve, config.replyDelaySeconds * 1000));
           if (!config.autoReply || config.sendMode !== "live") throw new Error("发送前已被暂停");
@@ -764,6 +850,7 @@
         }
       }
       state.seen.push(fingerprint);
+      markQueueItemCompleted(fingerprint);
       const eligible = notificationEligible(analysis);
       const notificationId = `${cid}|${String(analysis?.job?.title || label).trim()}`.slice(0, 700);
       if (eligible && config.hasWecomWebhook && config.sendMode === "live" && !state.notified.includes(notificationId) && !state.pendingNotifications.some((item) => item.id === notificationId)) {
@@ -788,6 +875,7 @@
         missingQuestions: analysis.missingQuestions,
       });
       setStatus(`${outcome}${valueStatus}`, outcomeTone);
+      setQueuePhase("本条处理完成", `${outcome}，正在继续检查未读队列`, config.sendMode === "live" ? Date.now() + 1400 : 0);
       await appendLog("会话处理", `${outcome}${valueStatus}`, outcomeTone, label);
     } catch (error) {
       if (contextInvalidated || stopInvalidatedContext(error)) return;
@@ -802,6 +890,7 @@
           if (contextInvalidated || stopInvalidatedContext(saveError)) return;
         }
       }
+      setQueuePhase("已暂停", error.message || "处理失败");
       await appendCommunicationSample({ conversationId: cid, label, recruiterMessage: latestMessage, context: conversation, action: "模型分析失败", reason: error.message });
       setStatus(`自动沟通暂停：${error.message}`, "error");
       await appendLog("会话处理", `自动沟通暂停：${error.message}`, "error", label);
@@ -867,8 +956,46 @@
     return rows;
   }
 
+  function unreadTabControl() {
+    return [...document.querySelectorAll("button,a,[role='tab'],span,div")].find((node) => {
+      if (!node.offsetParent || node.closest(`#${HOST_ID}`) || node.children.length > 2) return false;
+      return /^未读\s*[（(]?\s*\d+\s*[）)]?$/.test((node.textContent || "").trim());
+    }) || null;
+  }
+
+  async function revealUnreadQueue() {
+    let rows = unreadConversationRows();
+    if (rows.length || unreadCount() < 1) return rows;
+    const tab = unreadTabControl();
+    if (!tab) return rows;
+    setQueuePhase("切换未读列表", `当前有 ${unreadCount()} 条未读，正在让消息队列显示出来`);
+    setStatus(`当前有 ${unreadCount()} 条未读，正在切换到未读列表…`);
+    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+      tab.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, button: 0, buttons: type.endsWith("down") ? 1 : 0 }));
+    }
+    if (typeof tab.click === "function") tab.click();
+    const started = Date.now();
+    while (Date.now() - started < 5000) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      rows = unreadConversationRows();
+      if (rows.length) return rows;
+    }
+    return rows;
+  }
+
   function queueRowKey(row) {
     return String(row.querySelector(".name-text,.name-box")?.textContent || row.textContent || "").trim().slice(0, 160);
+  }
+
+  function queueRowFailureCount(row) {
+    const key = queueRowKey(row);
+    const failure = queueOpenFailures.get(key);
+    if (!failure) return 0;
+    if (Date.now() - Number(failure.at || 0) >= 60000) {
+      queueOpenFailures.delete(key);
+      return 0;
+    }
+    return Number(failure.count || 0);
   }
 
   function activateConversationRow(row) {
@@ -894,23 +1021,44 @@
 
   async function openNextUnreadConversation() {
     if (contextInvalidated || queueOpening || processing || !config.autoReply || config.sendMode !== "live") return;
-    const rows = unreadConversationRows();
-    const row = rows.find((item) => Number(queueOpenFailures.get(queueRowKey(item)) || 0) < 2);
-    if (!row) { refreshRuntimeStatus(); return; }
     queueOpening = true;
+    const unread = unreadCount();
+    setQueuePhase("扫描未读队列", `正在查找 ${unread} 条未读中的下一条`);
+    let rows = unreadConversationRows();
+    if (!rows.length) rows = await revealUnreadQueue();
+    const row = rows.find((item) => queueRowFailureCount(item) < 2);
+    if (!row) {
+      queueOpening = false;
+      if (unread > 0 && Date.now() - lastQueueDiagnosticAt > 60000) {
+        lastQueueDiagnosticAt = Date.now();
+        const outcome = rows.length
+          ? `检测到 ${unread} 条未读，但当前 ${rows.length} 条可见会话均已连续打开失败；稍后自动重试`
+          : `检测到 ${unread} 条未读，但未找到可打开的会话行；请保持“未读”列表可见后重试`;
+        setQueuePhase("等待队列恢复", outcome, Date.now() + 60000);
+        setStatus(outcome, "error");
+        await appendLog("未读队列", outcome, "error");
+      } else {
+        if (unread < 1) setQueuePhase("等待新消息", "当前未读队列已处理完，后台会继续检查", Date.now() + 5000);
+        refreshRuntimeStatus();
+      }
+      return;
+    }
     const key = queueRowKey(row);
-    setStatus(`发现 ${unreadCount()} 个未读会话，正在打开下一条…`);
+    setQueuePhase("打开下一条会话", `本轮已完成 ${queueProgress.completed} 条，当前可处理 ${rows.length} 条`);
+    setStatus(`发现 ${unread} 个未读会话，当前可处理 ${rows.length}，正在打开下一条…`);
     const target = activateConversationRow(row);
     const opened = await waitForConversationOpen(target);
     queueOpening = false;
     if (!opened) {
-      const failures = Number(queueOpenFailures.get(key) || 0) + 1;
-      queueOpenFailures.set(key, failures);
-      setStatus(`未读会话打开超时（${failures}/2），${failures < 2 ? "正在重试" : "已跳过该条"}`, "error");
+      const failures = queueRowFailureCount(row) + 1;
+      queueOpenFailures.set(key, { count: failures, at: Date.now() });
+      setQueuePhase("会话打开超时", failures < 2 ? "马上重试当前队列" : "该条 60 秒后再试", Date.now() + (failures < 2 ? 900 : 60000));
+      setStatus(`未读会话打开超时（${failures}/2），${failures < 2 ? "正在重试" : "60 秒后再试该条"}`, "error");
       window.setTimeout(() => void openNextUnreadConversation(), 900);
       return;
     }
     queueOpenFailures.delete(key);
+    setQueuePhase("读取会话内容", "会话已打开，正在等待消息内容加载", Date.now() + 700);
     setStatus("会话已打开，正在等待消息内容…");
     await new Promise((resolve) => setTimeout(resolve, 700));
     await processLatestMessage();
@@ -938,6 +1086,7 @@
       if (config.sendMode === "live" && unreadConversationRows().length) void openNextUnreadConversation();
       else void processLatestMessage();
     }, 5000);
+    progressTickTimer = window.setInterval(renderQueueProgress, 1000);
   }
 
   function mountWhenReady() {

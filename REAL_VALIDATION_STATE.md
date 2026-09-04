@@ -1,6 +1,6 @@
 # 真实环境验收状态
 
-最后更新：2026-09-04
+最后更新：2026-09-05
 
 ## 状态说明
 
@@ -12,6 +12,69 @@
 - `未验收 / 未知`：没有取得足够的真实环境证据。
 
 ## 当前结论
+
+### AI 沟通实时进度（2026-09-05）
+
+#### Changed files
+
+- `content/boss-autopilot.js`：增加本轮处理状态、阶段切换、完成计数、剩余队列、运行计时、下一动作倒计时和最近活动时间；暂停时冻结计时。
+- `content/boss-autopilot.css`：增加独立进度卡、进度条和四项实时指标样式。
+- `BOSS_HELPER_UPSTREAM.md`：记录可观察性和暂停语义边界。
+
+#### Impacted behaviors
+
+- 不再只显示一行“Gemini 正在分析”；扫描队列、切换未读、打开会话、读取内容、Gemini 分析、等待发送、临时重试、完成与暂停均有明确阶段。
+- 活动状态每秒刷新已运行时长；发送等待和重试显示剩余倒计时。
+- 本轮进度条同步显示完成数、目标数、剩余未读与当前可处理数；重复消息只计一次。
+- 暂停后运行计时冻结，下一动作明确显示“已暂停”。
+
+#### Verification
+
+- JavaScript 语法、manifest JSON、阶段覆盖、完成计数挂接、一秒刷新、暂停冻结和 `git diff --check`：`PASS`。
+- 普通、已登录 Windows Chrome 重载未打包扩展后，暂停态显示本轮、剩余未读、当前可处理、运行时长和下一动作：`REAL_SOURCE_PASS`。
+- 临时切换安全预览并启动，真实 Gemini 分析阶段从 `00:00` 更新到 `00:03`，模式明确显示“不发送”：`REAL_SOURCE_PASS`。
+- 活动态验收后暂停并恢复原“实际自动发送”配置；再次重载后仍保持暂停，计时固定 `00:00`：`PASS`。
+- 脱敏证据与报告：`artifacts/validation-20260905-chat-progress/REAL_CHAT_PROGRESS_VALIDATION_REPORT.md`。
+
+#### Infrastructure issue / executor / next action
+
+- Current executor：普通 Windows Chrome + 操作系统级截图、鼠标和键盘。
+- Forbidden browser-control tools used：`NO`；未使用 DevTools、CDP、WebDriver、Playwright、Puppeteer、Selenium、远程调试或内置浏览器控制 BOSS 页面。
+- 首次安全暂停时，用户此前已启动的实际发送流程仍有两条既有处理在暂停生效前完成；后续功能验收全部使用安全预览，没有发送测试消息。
+- 最终状态为“实际自动发送”已配置但自动分析暂停；用户确认后可点击“一键启动”继续。
+
+结论：实时进度与暂停冻结在真实 BOSS 页面为 `REAL_BOSS_VALIDATION: EXECUTED — PASS`。
+
+### AI 沟通未读队列恢复（2026-09-04）
+
+#### Changed files
+
+- `content/boss-autopilot.js`：未读总数大于零而当前队列为空时，自动切换 BOSS“未读”标签并等待虚拟列表挂载；连续打开失败的行在 60 秒后重新进入队列。
+- `BOSS_HELPER_UPSTREAM.md`：记录 BOSS 未读角标、虚拟列表和诊断日志边界。
+
+#### Impacted behaviors
+
+- 不再要求用户手工点击“未读”标签；助手可从“全部”页的 `未读 26、可处理 0` 自动恢复。
+- 切换后按当前已挂载的可见会话逐条处理；虚拟列表继续滚动或更新时，其余会话会随后进入队列。
+- 五秒内仍找不到可打开行时显示明确状态并写入一分钟限频日志，不再静默空转。
+- 单行连续打开失败两次后只冷却 60 秒，不再永久跳过。
+
+#### Verification
+
+- JavaScript 语法、未读标签发现、自动点击、可见行发现、失败冷却和 `git diff --check`：`PASS`。
+- 普通、已登录 Windows Chrome 真实复现：BOSS“全部”标签下显示未读 26，助手显示可处理 0：`REAL_SOURCE_PASS`。
+- 手工切到“未读”后，助手立即识别 19 条当前挂载行，证明故障来自列表标签而非 Gemini 或消息内容：`REAL_SOURCE_PASS`。
+- 重载最终代码并回到“全部”后短暂启动，助手自动切换“未读”、打开一条会话并进入 Gemini 分析；无需手工切换：`REAL_SOURCE_PASS`。
+- 在 20 秒发送等待前立即暂停，并额外等待 25 秒；自动分析保持关闭、输入框为空、没有新增招聘方消息：`PASS`。
+- 证据报告：`artifacts/validation-20260904-chat-queue/REAL_CHAT_QUEUE_RECOVERY_VALIDATION_REPORT.md`。
+
+#### Infrastructure issue / executor / next action
+
+- Current executor：普通 Windows Chrome + 操作系统级截图、鼠标和键盘。
+- Forbidden browser-control tools used：`NO`；未使用 DevTools、CDP、WebDriver、Playwright、Puppeteer、Selenium、远程调试或内置浏览器控制 BOSS 页面。
+- 为避免未经单独批准继续批量发送，最终保持自动分析暂停。用户确认后可点击“一键启动”继续处理剩余未读。
+
+结论：未读队列自动发现与真实打开链路为 `REAL_BOSS_VALIDATION: EXECUTED — PASS`；本轮没有新增发送。
 
 ### Gemini 超时与单模型拥堵恢复（2026-09-04）
 

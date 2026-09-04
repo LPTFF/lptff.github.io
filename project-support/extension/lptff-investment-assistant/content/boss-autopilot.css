@@ -57,6 +57,17 @@
 #lptff-boss-autopilot .lptff-ready-item { display: flex; align-items: center; justify-content: space-between; gap: 14px; border-bottom: 1px solid #edf4f1; padding: 7px 2px; color: #57746c; font-size: 12px; }
 #lptff-boss-autopilot .lptff-ready-item strong { color: #315e52; font-weight: 650; text-align: right; }
 #lptff-boss-autopilot .lptff-ready-item strong[data-ready="false"] { color: #a76224; }
+#lptff-boss-autopilot .lptff-queue-progress { margin: 12px 0 4px; border: 1px solid #cfe8df; border-radius: 12px; background: #f4fbf8; padding: 11px 12px; }
+#lptff-boss-autopilot .lptff-queue-progress[data-running="true"] { border-color: #9fd7c7; background: linear-gradient(135deg, #f1fcf8, #f8fdfb); }
+#lptff-boss-autopilot .lptff-progress-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #52736a; font-size: 12px; }
+#lptff-boss-autopilot .lptff-progress-head strong { color: #126a55; font-size: 13px; }
+#lptff-boss-autopilot .lptff-progress-track { height: 8px; margin-top: 8px; overflow: hidden; border-radius: 999px; background: #dceee8; }
+#lptff-boss-autopilot .lptff-progress-track i { display: block; height: 100%; border-radius: 999px; background: #14a67e; transition: width .25s ease; }
+#lptff-boss-autopilot .lptff-progress-detail { margin-top: 8px; color: #52736a; font-size: 11px; line-height: 1.45; }
+#lptff-boss-autopilot .lptff-progress-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 9px; }
+#lptff-boss-autopilot .lptff-progress-metrics span { display: flex; flex-direction: column; gap: 2px; border-radius: 8px; background: #e5f3ee; color: #6c847d; padding: 7px 5px; text-align: center; font-size: 10px; }
+#lptff-boss-autopilot .lptff-progress-metrics strong { color: #234e43; font-size: 12px; }
+#lptff-boss-autopilot .lptff-progress-updated { margin-top: 7px; color: #7a9089; text-align: right; font-size: 10px; }
 #lptff-boss-autopilot .lptff-plan { display: none; max-height: 180px; margin: 10px 0 0; overflow: auto; white-space: pre-wrap; border-radius: 10px; background: #f3faf7; color: #315e52; padding: 10px; font: 12px/1.55 inherit; }
 #lptff-boss-autopilot .lptff-plan[data-show="true"] { display: block; }
 #lptff-boss-autopilot .lptff-sample-list { display: grid; gap: 8px; max-height: min(420px, calc(100vh - 330px)); overflow: auto; }
