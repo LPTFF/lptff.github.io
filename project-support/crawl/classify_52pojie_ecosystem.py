@@ -15,6 +15,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from crawl.lib.output import DATA_ROOT, write_json_atomically
+from crawl.sendNotify import send_notification
 
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 REPOSITORY_ROOT = DATA_ROOT.parents[1]
@@ -246,7 +247,18 @@ def main() -> int:
         print(json.dumps({"state": "success", "model": args.model, "itemCount": len(analyses)}))
     except Exception as error:
         state = "preserved" if existing_output_is_valid() else "skipped"
+        warn_msg = f"52pojie 生态分析失败（{state}），原因：{error}"
         print(json.dumps({"state": state, "reason": str(error)}))
+        # 推送企业微信告警
+        qywx_key = os.environ.get("QYWX_KEY", "").strip()
+        if qywx_key:
+            try:
+                send_notification(
+                    qywx_key,
+                    {"msgtype": "text", "text": {"content": f"[classify_52pojie] ⚠️ {warn_msg}"}},
+                )
+            except Exception as notify_err:
+                print(f"[classify_52pojie] 告警推送失败（{notify_err}），已忽略。", flush=True)
     return 0
 
 

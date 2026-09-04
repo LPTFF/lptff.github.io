@@ -17,6 +17,7 @@ from crawl.lib.output import DATA_ROOT, REPOSITORY_ROOT
 from crawl.lib.status import CollectorResult
 from crawl.lib.validate import UNIQUE_KEYS, existing_snapshot_is_valid
 from crawl.leetCode import validate_existing_release
+from crawl.sendNotify import send_notification
 
 
 @dataclass(frozen=True)
@@ -240,6 +241,32 @@ def select_collectors(*, include_full: bool, only: list[str]) -> list[CollectorS
     ]
 
 
+def _notify_collector_failures(results: list[dict[str, object]]) -> None:
+    """若有 collector 失败或超时，推送企业微信告警（QYWX_KEY 未配置时静默）。"""
+    qywx_key = os.environ.get("QYWX_KEY", "").strip()
+    if not qywx_key:
+        return
+    problem_items = [
+        item for item in results
+        if item.get("state") == "failed" or item.get("timedOut")
+    ]
+    if not problem_items:
+        return
+    lines = ["[run_collectors] ⚠️ 以下采集任务未完成："]
+    for item in problem_items:
+        flag = "⏱ 超时" if item.get("timedOut") else "❌ 失败"
+        reason = item.get("reason", "")
+        label = f"  • {item['name']} [{flag}]"
+        if reason:
+            label += f"：{reason}"
+        lines.append(label)
+    content = "\n".join(lines)
+    try:
+        send_notification(qywx_key, {"msgtype": "text", "text": {"content": content}})
+    except Exception as err:
+        print(f"[run_collectors] 告警推送失败（{err}），已忽略。", flush=True)
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--full", action="store_true", help="include long-running collectors")
@@ -268,6 +295,8 @@ def main() -> int:
         args.summary.parent.mkdir(parents=True, exist_ok=True)
         args.summary.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     required_failed = any(item["required"] and item["state"] == "failed" for item in results)
+    # 推送告警：任何 collector 失败或超时时通知
+    _notify_collector_failures(results)
     return 1 if required_failed else 0
 
 
