@@ -38,13 +38,22 @@ SCHEMAS: dict[str, tuple[str, ...]] = {
 }
 
 
-def _has_valid_url(value: object, allow_data_url: bool = False) -> bool:
+def _has_valid_url(
+    value: object,
+    allow_data_url: bool = False,
+    allowed_http_hostnames: Iterable[str] = (),
+) -> bool:
     if not isinstance(value, str) or not value.strip():
         return False
     if allow_data_url and value.startswith("data:image/"):
         return True
     parsed = urlparse(value)
-    return parsed.scheme == "https" and bool(parsed.netloc)
+    if parsed.username or parsed.password or not parsed.netloc:
+        return False
+    if parsed.scheme == "https":
+        return True
+    allowed_http_hosts = {hostname.lower() for hostname in allowed_http_hostnames}
+    return parsed.scheme == "http" and (parsed.hostname or "").lower() in allowed_http_hosts
 
 
 def validate_items(
@@ -54,6 +63,7 @@ def validate_items(
     min_items: int = 1,
     max_items: int = 100_000,
     require_unique: str | None = None,
+    allowed_http_hostnames: Iterable[str] = (),
 ) -> list[dict[str, object]]:
     if not isinstance(items, list):
         raise ValidationError("dataset must be a JSON array")
@@ -79,8 +89,10 @@ def validate_items(
         if timestamp is not None and (not isinstance(timestamp, (int, float)) or timestamp <= 0):
             raise ValidationError(f"item {index} has an invalid timestamp")
         link_key = "link" if kind == "welfare" else "url"
-        if kind in {"article", "welfare"} and not _has_valid_url(item.get(link_key)):
-            raise ValidationError(f"item {index} has an invalid HTTPS URL")
+        if kind in {"article", "welfare"} and not _has_valid_url(
+            item.get(link_key), allowed_http_hostnames=allowed_http_hostnames
+        ):
+            raise ValidationError(f"item {index} has an invalid URL")
         if kind == "video" and not _has_valid_url(item.get("videoUrl")):
             raise ValidationError(f"item {index} has an invalid video URL")
         if kind == "movie" and not _has_valid_url(item.get("url")):
@@ -112,6 +124,7 @@ def existing_snapshot_is_valid(
     kind: str,
     min_items: int = 1,
     require_unique: str | None = None,
+    allowed_http_hostnames: Iterable[str] = (),
 ) -> int:
     from pathlib import Path
 
@@ -126,6 +139,7 @@ def existing_snapshot_is_valid(
                 kind=kind,
                 min_items=min_items,
                 require_unique=require_unique or UNIQUE_KEYS.get(kind),
+                allowed_http_hostnames=allowed_http_hostnames,
             )
         )
     except (OSError, json.JSONDecodeError, ValidationError, UnicodeDecodeError):

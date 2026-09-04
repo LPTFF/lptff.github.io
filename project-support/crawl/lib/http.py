@@ -34,11 +34,17 @@ class ChallengeError(HttpError):
     pass
 
 
-def assert_allowed_url(value: str, allowed_hostnames: Iterable[str]) -> str:
+def assert_allowed_url(
+    value: str,
+    allowed_hostnames: Iterable[str],
+    *,
+    allowed_schemes: Iterable[str] = ("https",),
+) -> str:
     parsed = urlparse(value)
     hosts = {hostname.lower() for hostname in allowed_hostnames}
-    if parsed.scheme != "https":
-        raise HttpError("collector URL must use HTTPS")
+    schemes = {scheme.lower() for scheme in allowed_schemes}
+    if parsed.scheme.lower() not in schemes:
+        raise HttpError("collector URL scheme is not allowed")
     if parsed.username or parsed.password:
         raise HttpError("collector URL must not contain credentials")
     if not parsed.hostname or parsed.hostname.lower() not in hosts:
@@ -77,9 +83,11 @@ class HttpClient:
         timeout: tuple[float, float] = (5, 20),
         session: requests.Session | None = None,
         user_agent: str = "lptff.github.io collector/1.0",
+        allowed_schemes: Iterable[str] = ("https",),
     ) -> None:
         self.allowed_hostnames = tuple(allowed_hostnames)
         self._allowed_hostname_set = {hostname.lower() for hostname in self.allowed_hostnames}
+        self.allowed_schemes = tuple(allowed_schemes)
         self.max_bytes = max_bytes
         self.retries = retries
         self.timeout = timeout
@@ -98,7 +106,11 @@ class HttpClient:
     ) -> requests.Response:
         urls = (url, *fallback_urls)
         for request_url in urls:
-            assert_allowed_url(request_url, self.allowed_hostnames)
+            assert_allowed_url(
+                request_url,
+                self.allowed_hostnames,
+                allowed_schemes=self.allowed_schemes,
+            )
         request_headers = {"User-Agent": self.user_agent, **(headers or {})}
         last_error: Exception | None = None
 
@@ -113,13 +125,23 @@ class HttpClient:
                         **kwargs,
                     )
                     for redirect in response.history:
-                        assert_allowed_url(redirect.url, self._allowed_hostname_set)
+                        assert_allowed_url(
+                            redirect.url,
+                            self._allowed_hostname_set,
+                            allowed_schemes=self.allowed_schemes,
+                        )
                         location = redirect.headers.get("Location")
                         if location:
                             assert_allowed_url(
-                                urljoin(redirect.url, location), self._allowed_hostname_set
+                                urljoin(redirect.url, location),
+                                self._allowed_hostname_set,
+                                allowed_schemes=self.allowed_schemes,
                             )
-                    assert_allowed_url(response.url, self._allowed_hostname_set)
+                    assert_allowed_url(
+                        response.url,
+                        self._allowed_hostname_set,
+                        allowed_schemes=self.allowed_schemes,
+                    )
                     if response.status_code == 429 or 500 <= response.status_code < 600:
                         if attempt < self.retries:
                             time.sleep(0.25 * (2**attempt))

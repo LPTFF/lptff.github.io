@@ -163,7 +163,7 @@ export default {
         case "0818tuan":
           websiteInfo = {
             websiteName: "0818团",
-            mainWebsite: "https://tophub.today/n/4MdAkn1oxD",
+            mainWebsite: "http://www.0818tuan.com/list-1-0.html",
             websiteImg:
               "https://icons.duckduckgo.com/ip3/www.0818tuan.com.ico",
           };

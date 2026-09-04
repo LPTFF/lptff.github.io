@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from pathlib import Path
 
 import requests
@@ -19,6 +19,7 @@ def publish_items(
     kind: str,
     min_items: int = 1,
     unique_by: str | None = None,
+    allowed_http_hostnames: Iterable[str] = (),
 ) -> CollectorResult:
     path = Path(output)
     if not path.is_absolute():
@@ -30,6 +31,7 @@ def publish_items(
             kind=kind,
             min_items=min_items,
             require_unique=unique_by,
+            allowed_http_hostnames=allowed_http_hostnames,
         )
 
     write_json_atomically(path, items, validate=validate)
@@ -78,6 +80,7 @@ def preserve_or_fail(
     optional: bool = False,
     missing_configuration: bool = False,
     unique_by: str | None = None,
+    allowed_http_hostnames: Iterable[str] = (),
 ) -> CollectorResult:
     path = Path(output)
     if not path.is_absolute():
@@ -87,6 +90,7 @@ def preserve_or_fail(
         kind=kind,
         min_items=min_items,
         require_unique=unique_by,
+        allowed_http_hostnames=allowed_http_hostnames,
     )
     if count:
         state = "skipped" if optional and missing_configuration else "preserved"
@@ -103,6 +107,7 @@ def run_guarded(
     min_items: int = 1,
     unique_by: str | None = None,
     optional: bool = False,
+    allowed_http_hostnames: Iterable[str] = (),
 ) -> CollectorResult:
     try:
         items = collect()
@@ -113,6 +118,7 @@ def run_guarded(
             kind=kind,
             min_items=min_items,
             unique_by=unique_by,
+            allowed_http_hostnames=allowed_http_hostnames,
         )
     except Exception as error:
         reason = _failure_reason(error)
@@ -124,4 +130,5 @@ def run_guarded(
             reason=reason,
             optional=optional,
             unique_by=unique_by,
+            allowed_http_hostnames=allowed_http_hostnames,
         )
