@@ -16,6 +16,7 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from crawl.lib.output import DATA_ROOT, write_json_atomically
+from crawl.sendNotify import send_notification
 
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_BATCH_SIZE = 40
@@ -272,8 +273,22 @@ def main() -> int:
         )
     except RuntimeError as exc:
         # Gemini 全部重试耗尽：降级为纯正则过滤，避免 CI 崩溃
-        print(f"[filter_welfare] 警告：Gemini 调用彻底失败（{exc}），降级为正则过滤。", flush=True)
+        warn_msg = f"Gemini 调用彻底失败，降级为正则过滤。原因：{exc}"
+        print(f"[filter_welfare] 警告：{warn_msg}", flush=True)
         ai_kept_ids = {entry.identifier for entry in entries}
+        # 推送企业微信告警
+        qywx_key = os.environ.get("QYWX_KEY", "").strip()
+        if qywx_key:
+            try:
+                send_notification(
+                    qywx_key,
+                    {
+                        "msgtype": "text",
+                        "text": {"content": f"[filter_welfare] ⚠️ {warn_msg}"},
+                    },
+                )
+            except Exception as notify_err:
+                print(f"[filter_welfare] 告警推送失败（{notify_err}），已忽略。", flush=True)
     kept_ids = {
         entry.identifier
         for entry in entries
