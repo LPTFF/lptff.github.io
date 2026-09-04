@@ -1,5 +1,61 @@
 <template>
   <div>
+    <section class="ecosystem-radar">
+      <div>
+        <div class="radar-title">吾爱破解生态雷达</div>
+        <div class="radar-description">
+          保留全部近期资讯，观察真实需求、工具链与攻防热点，不以“学术深度”删帖。
+        </div>
+      </div>
+      <div class="radar-stats">
+        <span>{{ newsGuide.length }} 条资讯</span>
+        <span>{{ analyzedCount }} 条已分析</span>
+        <span>{{ categoryCount }} 个生态主题</span>
+      </div>
+    </section>
+    <section class="radar-filters" v-if="analyzedCount">
+      <div class="filter-row">
+        <span class="filter-label">生态主题</span>
+        <button
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedCategory === 'all' }"
+          :aria-pressed="selectedCategory === 'all'"
+          @click="selectedCategory = 'all'"
+        >
+          全部 {{ analyzedCount }}
+        </button>
+        <button
+          v-for="category in categoryOptions"
+          :key="category.name"
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedCategory === category.name }"
+          :aria-pressed="selectedCategory === category.name"
+          @click="selectedCategory = category.name"
+        >
+          {{ category.name }} {{ category.count }}
+        </button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">观察视角</span>
+        <button
+          v-for="focus in focusOptions"
+          :key="focus.key"
+          type="button"
+          class="filter-tag focus-tag"
+          :class="{ active: selectedFocus === focus.key }"
+          :aria-pressed="selectedFocus === focus.key"
+          @click="selectedFocus = focus.key"
+        >
+          {{ focus.label }}
+        </button>
+        <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+      </div>
+    </section>
+    <div class="filter-empty" v-if="analyzedCount && filteredNews.length === 0">
+      当前标签组合暂无资讯，可切换主题或观察视角。
+    </div>
     <el-row>
       <el-col
         :span="24"
@@ -42,6 +98,33 @@
               >
                 {{ item.title }}
               </a>
+              <div class="ecosystem-tags" v-if="item.ecosystem">
+                <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
+                <el-tag size="small" type="success">
+                  生态 {{ item.ecosystem.ecosystemValue }}
+                </el-tag>
+                <el-tag size="small" type="info">
+                  技术 {{ item.ecosystem.technicalDepth }}
+                </el-tag>
+                <el-tag size="small" type="primary">
+                  趋势 {{ item.ecosystem.trendNovelty }}
+                </el-tag>
+                <el-tag size="small" type="warning" v-if="item.ecosystem.duplicateGroup">
+                  主题演化
+                </el-tag>
+              </div>
+              <div class="ecosystem-tags" v-else>
+                <el-tag size="small" type="info">生态信号待分析</el-tag>
+              </div>
+              <div class="ecosystem-summary" v-if="item.ecosystem">
+                {{ item.ecosystem.summary }}
+              </div>
+              <div
+                class="ecosystem-evolution"
+                v-if="item.ecosystem?.duplicateGroup && item.ecosystem.evolutionNote"
+              >
+                演化：{{ item.ecosystem.evolutionNote }}
+              </div>
               <div class="welfare-div-link">
                 <div
                   v-if="item.website == 'weibo'"
@@ -72,6 +155,10 @@
               <div class="mobile-link-title">
                 <div @click="gotoMobileWebsite(item)">
                   {{ handleMobileTitle(item) }}
+                </div>
+                <div class="mobile-ecosystem-signal">
+                  <span>{{ item.ecosystem?.category || "生态信号待分析" }}</span>
+                  <span v-if="item.ecosystem">生态 {{ item.ecosystem.ecosystemValue }}</span>
                 </div>
               </div>
               <div
@@ -145,6 +232,7 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
+import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
@@ -154,6 +242,7 @@ import {
   ElButton,
   ElIcon,
   ElDivider,
+  ElTag,
 } from "element-plus";
 export default {
   props: {
@@ -167,6 +256,7 @@ export default {
     ElButton,
     ElIcon,
     ElDivider,
+    ElTag,
     Calendar,
     Timer,
   },
@@ -176,7 +266,62 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    const newsGuide = [...pojieNews].sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const ecosystemByUrl = new Map(
+      ecosystemRadar.items.map((item: any) => [item.url, item])
+    );
+    const newsGuide = [...pojieNews]
+      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
+      .sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const analyzedCount = computed(
+      () => newsGuide.filter((item: any) => item.ecosystem).length
+    );
+    const categoryCount = computed(
+      () => new Set(newsGuide.map((item: any) => item.ecosystem?.category).filter(Boolean)).size
+    );
+    const selectedCategory = ref("all");
+    const selectedFocus = ref("all");
+    const categoryOptions = computed(() => {
+      const counts = new Map<string, number>();
+      newsGuide.forEach((item: any) => {
+        if (item.ecosystem?.category) {
+          counts.set(item.ecosystem.category, (counts.get(item.ecosystem.category) || 0) + 1);
+        }
+      });
+      return [...counts.entries()]
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
+    });
+    const focusOptions = [
+      { key: "all", label: "全部视角" },
+      { key: "high", label: "高生态信号" },
+      { key: "evolution", label: "主题演化" },
+      { key: "gray", label: "灰色用途" },
+      { key: "beginner", label: "入门生态" },
+    ];
+    const filteredNews = computed(() =>
+      newsGuide.filter((item: any) => {
+        const ecosystem = item.ecosystem;
+        if (!ecosystem) return selectedCategory.value === "all" && selectedFocus.value === "all";
+        if (
+          selectedCategory.value !== "all" &&
+          ecosystem.category !== selectedCategory.value
+        ) {
+          return false;
+        }
+        switch (selectedFocus.value) {
+          case "high":
+            return ecosystem.ecosystemValue >= 85;
+          case "evolution":
+            return Boolean(ecosystem.duplicateGroup);
+          case "gray":
+            return ecosystem.riskType === "gray_abuse";
+          case "beginner":
+            return ecosystem.technicalDepth <= 50;
+          default:
+            return true;
+        }
+      })
+    );
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -316,11 +461,11 @@ export default {
       let guideTmpAll;
       maxLength < length ? (maxLength = length) : maxLength;
       let rate = isPCRes.value ? 2 : 1;
-      guideTmpAll = newsGuide.slice(
+      guideTmpAll = filteredNews.value.slice(
         0,
-        maxLength * rate + initData < newsGuide.length
+        maxLength * rate + initData < filteredNews.value.length
           ? maxLength * rate + initData
-          : newsGuide.length
+          : filteredNews.value.length
       );
       return guideTmpAll;
     });
@@ -347,12 +492,139 @@ export default {
       guideNewsLimited,
       handleWeiboIconColor,
       handleWeiboIconDesc,
+      newsGuide,
+      analyzedCount,
+      categoryCount,
+      selectedCategory,
+      selectedFocus,
+      categoryOptions,
+      focusOptions,
+      filteredNews,
     };
   },
 };
 </script>
 
 <style scoped>
+.ecosystem-radar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 14px;
+  padding: 18px 20px;
+  border: 1px solid #d9e7ff;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7faff, #eef5ff);
+}
+.radar-title {
+  color: #30486f;
+  font-size: 19px;
+  font-weight: 700;
+}
+.radar-description {
+  max-width: 700px;
+  margin-top: 6px;
+  color: #65738a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.radar-stats {
+  display: flex;
+  flex-shrink: 0;
+  gap: 14px;
+  color: #4a74ad;
+  font-size: 13px;
+  font-weight: 600;
+}
+.radar-filters {
+  margin-bottom: 14px;
+  padding: 13px 16px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #fff;
+}
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filter-row + .filter-row {
+  margin-top: 10px;
+}
+.filter-label {
+  min-width: 60px;
+  color: #65738a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.filter-tag {
+  padding: 4px 9px;
+  border: 1px solid #d8e0ec;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #52647d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  transition: 0.16s ease;
+}
+.filter-tag:hover {
+  border-color: #8eb8ee;
+  color: #337ecc;
+}
+.filter-tag.active {
+  border-color: #409eff;
+  background: #409eff;
+  color: #fff;
+}
+.focus-tag.active {
+  border-color: #7c65c1;
+  background: #7c65c1;
+}
+.filter-result {
+  margin-left: auto;
+  color: #4a74ad;
+  font-size: 12px;
+  font-weight: 600;
+}
+.filter-empty {
+  margin-bottom: 14px;
+  padding: 28px;
+  border: 1px dashed #c9d5e6;
+  border-radius: 8px;
+  color: #65738a;
+  text-align: center;
+}
+.ecosystem-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 7px;
+}
+.ecosystem-summary {
+  max-width: 680px;
+  margin-bottom: 9px;
+  color: #65738a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.ecosystem-evolution {
+  max-width: 680px;
+  margin: -3px 0 9px;
+  color: #a06a28;
+  font-size: 12px;
+  line-height: 1.4;
+}
+.mobile-ecosystem-signal {
+  display: flex;
+  gap: 8px;
+  margin-top: 7px;
+  color: #4a74ad;
+  font-size: 12px;
+}
 .dialog-content {
   padding: 0;
 }
@@ -398,7 +670,7 @@ export default {
 .welfare-link-title {
   display: block;
   color: #797979;
-  height: 50px;
+  min-height: 30px;
   font-size: 18px;
   font-weight: 600;
   text-decoration: none;
@@ -465,6 +737,31 @@ export default {
 }
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
+  .ecosystem-radar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .radar-stats {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+  .radar-filters {
+    padding: 12px;
+  }
+  .filter-label {
+    flex-basis: 100%;
+  }
+  .filter-result {
+    flex-basis: 100%;
+    margin: 2px 0 0;
+  }
+  .ecosystem-tags,
+  .ecosystem-summary,
+  .ecosystem-evolution {
+    display: none;
+  }
   .welfare-div-website {
     display: none;
   }
@@ -497,7 +794,7 @@ export default {
   }
   .mobile-link-title {
     color: #797979;
-    height: 80px;
+    min-height: 80px;
     font-size: 18px;
     font-weight: 600;
     max-width: 250px;

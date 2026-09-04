@@ -46,6 +46,11 @@ jobs:
         run: |
           npm ci
           python -m pip install --requirement project-support/requirements-crawl.txt
+      - name: Restore previously published crawler data
+        if: github.event_name == 'schedule' && github.event.schedule != '17 22 * * *'
+        run: |
+          git fetch --depth=1 origin python-crawl
+          git archive --format=tar FETCH_HEAD | tar -xf - -C src/data
       - name: Crawl and validate site data
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -70,6 +75,11 @@ jobs:
           else
             ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
           fi
+      - name: Analyze 52pojie ecosystem signals
+        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
+        run: python -B project-support/crawl/classify_52pojie_ecosystem.py
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Keep only bank offers in welfare data
         run: python -B project-support/crawl/filter_welfare_with_gemini.py --require-key
         env:
