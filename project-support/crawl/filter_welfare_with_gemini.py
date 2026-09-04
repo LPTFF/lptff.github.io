@@ -62,6 +62,11 @@ BANK_IDENTITY = re.compile(
 )
 NON_BANK_PRODUCT = re.compile(r"保险|金管家|黄金体验金|贵金属")
 
+# ── 重试参数 ─────────────────────────────────────────────────────────────────
+_MAX_ATTEMPTS = 5      # 最多重试次数
+_BACKOFF_BASE = 10.0   # 退避基数（秒）：10, 20, 40, 80 …
+_MIN_BATCH_SIZE = 5    # 批次自动缩小的下限
+
 
 @dataclass(frozen=True)
 class WelfareEntry:
@@ -133,7 +138,9 @@ def _request_batch(
     }
     expected_ids = {entry.identifier for entry in entries}
     last_error: Exception | None = None
-    for attempt in range(3):
+    timeout_count = 0
+
+    for attempt in range(_MAX_ATTEMPTS):
         try:
             response = session.post(
                 endpoint,
@@ -163,11 +170,33 @@ def _request_batch(
                 for item in results
                 if item["isBankOffer"] is True
             }
+        except requests.exceptions.Timeout as error:
+            last_error = error
+            timeout_count += 1
+            # 连续超时两次且批次可缩小时，对半递归重试
+            if timeout_count >= 2 and len(entries) > _MIN_BATCH_SIZE:
+                mid = len(entries) // 2
+                print(f"[filter_welfare] 批次连续超时，自动缩小至 {mid} 条重试…", flush=True)
+                left = _request_batch(
+                    session, api_key=api_key, model=model, entries=entries[:mid], timeout=timeout
+                )
+                right = _request_batch(
+                    session, api_key=api_key, model=model, entries=entries[mid:], timeout=timeout
+                )
+                return left | right
+            sleep_secs = _BACKOFF_BASE * (2 ** attempt)
+            print(f"[filter_welfare] 超时（第 {attempt + 1} 次），{sleep_secs:.0f}s 后重试…", flush=True)
+            time.sleep(sleep_secs)
         except (KeyError, IndexError, TypeError, ValueError, requests.RequestException, RuntimeError) as error:
             last_error = error
-            if attempt < 2:
-                time.sleep(2**attempt)
-    raise RuntimeError(f"Gemini classification failed after 3 attempts: {last_error}") from last_error
+            if attempt < _MAX_ATTEMPTS - 1:
+                sleep_secs = _BACKOFF_BASE * (2 ** attempt)
+                print(
+                    f"[filter_welfare] 请求失败（第 {attempt + 1} 次）：{error}，{sleep_secs:.0f}s 后重试…",
+                    flush=True,
+                )
+                time.sleep(sleep_secs)
+    raise RuntimeError(f"Gemini classification failed after {_MAX_ATTEMPTS} attempts: {last_error}") from last_error
 
 
 def classify_entries(
@@ -221,7 +250,7 @@ def main() -> int:
     parser.add_argument("--require-key", action="store_true")
     parser.add_argument("--model", default=os.environ.get("GEMINI_MODEL", DEFAULT_MODEL))
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
-    parser.add_argument("--timeout", type=float, default=45.0)
+    parser.add_argument("--timeout", type=float, default=120.0)
     args = parser.parse_args()
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key:
@@ -233,13 +262,18 @@ def main() -> int:
         parser.error("--batch-size must be between 1 and 100")
 
     snapshots, entries = load_entries()
-    ai_kept_ids = classify_entries(
-        entries,
-        api_key=api_key,
-        model=args.model,
-        batch_size=args.batch_size,
-        timeout=args.timeout,
-    )
+    try:
+        ai_kept_ids = classify_entries(
+            entries,
+            api_key=api_key,
+            model=args.model,
+            batch_size=args.batch_size,
+            timeout=args.timeout,
+        )
+    except RuntimeError as exc:
+        # Gemini 全部重试耗尽：降级为纯正则过滤，避免 CI 崩溃
+        print(f"[filter_welfare] 警告：Gemini 调用彻底失败（{exc}），降级为正则过滤。", flush=True)
+        ai_kept_ids = {entry.identifier for entry in entries}
     kept_ids = {
         entry.identifier
         for entry in entries
