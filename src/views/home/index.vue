@@ -9,7 +9,7 @@
               <div class="logo-title">tangff</div>
             </div>
           </div>
-          <el-menu class="navigation" mode="horizontal" :default-active="selectIndex" @select="handleSelect">
+          <el-menu class="navigation" mode="horizontal" :ellipsis="false" :default-active="selectIndex" @select="handleSelect">
             <el-menu-item v-for="item in menuConfig" :key="item.key" :index="item.key">
               {{ item.label }}
             </el-menu-item>
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed, defineAsyncComponent } from "vue";
+import { ref, onMounted, onUnmounted, computed, defineAsyncComponent, nextTick } from "vue";
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
@@ -63,10 +63,10 @@ const menuConfig = [
     component: defineAsyncComponent(() => import("./tools/index.vue")),
   },
   {
-    key: "douban",
-    label: "豆瓣电影",
-    component: defineAsyncComponent(() => import("./douban/index.vue")),
-    propName: "doubanLocation",
+    key: "entertainment",
+    label: "娱乐专区",
+    component: defineAsyncComponent(() => import("./entertainment/index.vue")),
+    propName: "entertainmentLocation",
   },
   {
     key: "welfare",
@@ -80,10 +80,11 @@ const previousRoute = ref("");
 const isPCRes = computed(() => isPC());
 const route = useRoute();
 const router = useRouter();
-const queryTab = route.query.tab ? String(route.query.tab) : "";
+const requestedTab = route.query.tab ? String(route.query.tab) : "";
+const queryTab = requestedTab === "douban" ? "entertainment" : requestedTab;
 const defaultTab = menuConfig.some((item) => item.key === queryTab)
   ? queryTab
-  : (isPCRes.value ? "tools" : "guide");
+  : "tools";
 const selectIndex = ref(defaultTab);
 
 const lastClickTime = ref(0);
@@ -111,6 +112,12 @@ const handleSelect = (key: string) => {
   const currentItem = menuConfig.find((item) => item.key === key);
   document.title = currentItem?.label || "";
   selectIndex.value = key;
+  void router.replace({
+    path: "/",
+    query: { ...route.query, tab: key },
+  }).then(() => {
+    document.title = currentItem?.label || "";
+  });
   const locationInfo = sessionStorage.getItem(`scrollInfoLocation-${key}`);
   const container = document.querySelector(
     isPCRes.value ? ".scroll-home-container" : ".inner-container"
@@ -121,6 +128,18 @@ const handleSelect = (key: string) => {
       behavior: "auto",
     });
   }
+  void scrollActiveMenuIntoView();
+};
+
+const scrollActiveMenuIntoView = async () => {
+  await nextTick();
+  const navigation = document.querySelector<HTMLElement>(".navigation");
+  const activeItem = navigation?.querySelector<HTMLElement>(".is-active");
+  if (!navigation || !activeItem) return;
+  navigation.scrollTo({
+    behavior: "smooth",
+    left: Math.max(0, activeItem.offsetLeft - (navigation.clientWidth - activeItem.clientWidth) / 2),
+  });
 };
 
 const gotoIssue = () => {
@@ -131,12 +150,14 @@ const gotoIssue = () => {
 };
 
 onMounted(() => {
-  const currentTab = route.query.tab ? String(route.query.tab) : "";
+  const requestedTab = route.query.tab ? String(route.query.tab) : "";
+  const currentTab = requestedTab === "douban" ? "entertainment" : requestedTab;
   if (currentTab && menuConfig.some((item) => item.key === currentTab)) {
     selectIndex.value = currentTab;
   }
   previousRoute.value = window.history.state?.back ?? "";
   document.title = menuConfig.find((item) => item.key === selectIndex.value)?.label || "";
+  void scrollActiveMenuIntoView();
 });
 
 onUnmounted(() => {
@@ -243,14 +264,19 @@ const currentYear = new Date(
 
 .navigation {
   line-height: 80px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.navigation::-webkit-scrollbar {
+  display: none;
 }
 
 .footer {
   padding: 20px;
   text-align: center;
   background-color: rgb(255, 255, 255);
-  position: fixed;
-  bottom: 0px;
+  position: static;
   margin: 0 auto;
   width: 100%;
   max-width: 1200px;
@@ -282,6 +308,11 @@ const currentYear = new Date(
 
   .main-content {
     padding-top: 115px;
+  }
+
+  .navigation :deep(.el-menu-item) {
+    flex-shrink: 0;
+    padding: 0 18px;
   }
 }
 </style>

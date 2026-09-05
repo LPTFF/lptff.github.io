@@ -17,7 +17,8 @@ from crawl.lib.status import CollectorResult
 from crawl.lib.validate import validate_items
 
 NAME = "douban"
-URL = "https://movie.douban.com/j/search_subjects"
+URL = "https://m.douban.com/rexxar/api/v2/subject/recent_hot/tv"
+POSTERS_OUTPUT = "doubanPosters.json"
 SUPPORTED_POSTER_TYPES = {"image/jpeg", "image/png", "image/webp", "image/gif"}
 POSTER_SIGNATURES = (b"\xff\xd8\xff", b"\x89PNG\r\n\x1a\n", b"RIFF", b"GIF8")
 
@@ -42,14 +43,15 @@ def get_poster(client: HttpClient, cover: str) -> str:
 
 def collect() -> tuple[list[dict[str, object]], dict[str, str]]:
     client = HttpClient(
-        allowed_hostnames=["movie.douban.com", "img1.doubanio.com", "img2.doubanio.com", "img3.doubanio.com", "img9.doubanio.com"],
+        allowed_hostnames=["m.douban.com", "img1.doubanio.com", "img2.doubanio.com", "img3.doubanio.com", "img9.doubanio.com"],
         max_bytes=5_000_000,
     )
     response = client.get(
         URL,
-        params={"type": "movie", "tag": "热门", "page_limit": 50, "page_start": 0},
+        params={"limit": 50, "category": "tv", "type": "tv_animation"},
+        headers={"Referer": "https://movie.douban.com/"},
     )
-    subjects = response.json().get("subjects")
+    subjects = response.json().get("items")
     if not isinstance(subjects, list):
         raise ValueError("Douban response has no subjects array")
     movies: list[dict[str, object]] = []
@@ -59,16 +61,20 @@ def collect() -> tuple[list[dict[str, object]], dict[str, str]]:
             continue
         movie_id = str(item.get("id") or "")
         title = str(item.get("title") or "")
-        cover = str(item.get("cover") or "")
-        url = str(item.get("url") or "")
-        if not movie_id or not title or not cover or not url:
+        picture = item.get("pic") if isinstance(item.get("pic"), dict) else {}
+        cover = str(picture.get("normal") or picture.get("large") or "")
+        if not movie_id or not title or not cover:
             continue
+        rating = item.get("rating") if isinstance(item.get("rating"), dict) else {}
         movies.append(
             {
-                "url": url,
+                "url": f"https://movie.douban.com/subject/{movie_id}/",
                 "title": title,
                 "is_new": bool(item.get("is_new")),
-                "rate": str(item.get("rate") or ""),
+                "rate": str(rating.get("value") or "暂无评分"),
+                "episodes_info": str(item.get("episodes_info") or ""),
+                "subtitle": str(item.get("card_subtitle") or ""),
+                "category": "animation",
                 "index": index,
                 "cover": cover,
                 "id": movie_id,
@@ -92,29 +98,37 @@ def publish(movies: list[dict[str, object]], posters: dict[str, str]) -> Collect
         (staging / "movie.json").write_text(
             json.dumps(movies, ensure_ascii=False, indent=4) + "\n", encoding="utf-8"
         )
-        poster_dir = staging / "doubanImg"
-        poster_dir.mkdir()
-        for movie_id, content in posters.items():
-            (poster_dir / f"moviePoster_{movie_id}.json").write_text(
-                json.dumps(content) + "\n", encoding="utf-8"
-            )
-        target_posters = data_path("doubanImg")
-        backup_posters = data_path(".doubanImg.backup")
-        if backup_posters.exists():
-            shutil.rmtree(backup_posters)
-        if target_posters.exists():
-            target_posters.replace(backup_posters)
+        (staging / POSTERS_OUTPUT).write_text(
+            json.dumps(posters, ensure_ascii=False, separators=(",", ":")) + "\n",
+            encoding="utf-8",
+        )
+        targets = {
+            "movie.json": data_path("movie.json"),
+            POSTERS_OUTPUT: data_path(POSTERS_OUTPUT),
+        }
+        backups = {name: data_path(f".{name}.backup") for name in targets}
+        for backup in backups.values():
+            if backup.exists():
+                backup.unlink()
+        backed_up: list[str] = []
+        published: list[str] = []
         try:
-            poster_dir.replace(target_posters)
-            (staging / "movie.json").replace(data_path("movie.json"))
+            for name, target in targets.items():
+                if target.exists():
+                    target.replace(backups[name])
+                    backed_up.append(name)
+            for name, target in targets.items():
+                (staging / name).replace(target)
+                published.append(name)
         except Exception:
-            if target_posters.exists():
-                shutil.rmtree(target_posters)
-            if backup_posters.exists():
-                backup_posters.replace(target_posters)
+            for name in published:
+                targets[name].unlink(missing_ok=True)
+            for name in reversed(backed_up):
+                backups[name].replace(targets[name])
             raise
-        if backup_posters.exists():
-            shutil.rmtree(backup_posters)
+        for backup in backups.values():
+            if backup.exists():
+                backup.unlink()
         return CollectorResult(NAME, "success", len(movies), str(data_path("movie.json")))
     finally:
         if staging.exists():

@@ -53,6 +53,10 @@ const routes = [
     path: "/welfare",
     redirect: () => ({ path: "/", query: { tab: "welfare" } }),
   },
+  {
+    path: "/entertainment",
+    redirect: () => ({ path: "/", query: { tab: "entertainment" } }),
+  },
   { path: "/advanced-search", redirect: "/blog/articles/information-tools-evolution" },
   // 旧职业信息消费页面已归档为博客文章，历史链接继续可用。
   { path: "/tech-forum", redirect: "/blog/articles/career-tools-evolution" },
