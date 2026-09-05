@@ -13,6 +13,36 @@
 
 ## 当前结论
 
+### 关键词采集器 → Gemini → 薅羊毛（2026-09-05）
+
+#### Changed files
+
+- `project-support/crawl/welfare/keyword_search.py`：新增 Google 新闻关键词 RSS 采集、时效/去重、Gemini 结构化分类、ID 完整性校验和本地权益信号护栏。
+- `project-support/crawl/welfare/keyword_search_config.json`、`src/data/welfare/keyword-search.json`：新增可审查的四组采集词和 AI 准入快照。
+- `src/views/home/welfare/index.vue`：消费关键词采集结果，显示真实来源并纳入现有薅羊毛排序。
+- `project-support/crawl/run_collectors.py`、`.github/workflows/ci.yml`：注册采集器并加入每小时福利采集。
+
+#### Impacted behaviors
+
+- 不新增页面、路由或用户操作；`/advanced-search` 继续跳转到原归档文章。
+- 每小时由后台自动执行“公开来源关键词采集 → 时效/去重校验 → Gemini 判断 → 本地二次护栏 → 写入现有薅羊毛数据”。
+- 本机调试优先读取进程环境变量，缺失时读取被 Git 忽略的 `.env.local`；CI 继续使用 Secret。页面、日志和公开数据均不包含 Key、Cookie 或账号信息，也不会自动报名、下单或外发。
+
+#### Verification
+
+- Chrome 真实打开 Google 新闻 RSS：主文档 `200`、`application/xml`，可见标题、来源、发布时间和跳转：`REAL_SOURCE_PASS`。
+- 自动采集器已从 `.env.local` 读取现有调试配置并真实调用 Gemini API；最终公开快照收录 6 条通过双重准入的近期权益信息：`REAL_GEMINI_API_PIPELINE_PASS`。
+- 本地按 CI 同一流程对既有福利源执行 Gemini 与银行主体硬规则过滤：72 条输入保留 24 条；`0818tuan.json` 从 49 条缩减为 2 条，普通饮料和水果商品均已移除：`LOCAL_GEMINI_FILTER_PASS`。
+- Chrome 本地 `/?tab=welfare` 可见自动采集结果及其真实来源、权益与判断理由，且无控制台错误：`LOCAL_BROWSER_PASS`。
+- 采集器注册、Vue 类型检查、生产构建、敏感值泄露检查和 `git diff --check`：`PASS`；测试类产物不作为本项目交付或完成证据。
+- CI 配置已接入既有 Secret，但代码未推送，不能声明 CI 或生产通过。
+- 脱敏截图与报告：`artifacts/validation-20260905-keyword-collector/REAL_KEYWORD_COLLECTOR_VALIDATION_REPORT.md`。
+
+#### Infrastructure issue / executor / next action
+
+- 当前结论：`REAL_SOURCE_PASS`、`REAL_GEMINI_API_PIPELINE_PASS`、`LOCAL_BROWSER_PASS`；`PRODUCTION_PASS: UNEXECUTED`。
+- 下一步只剩提交/推送后观察首个 GitHub Actions 运行，确认 CI Secret 环境中的定时分类和生产页面更新；提交与推送需用户另行明确批准。
+
 ### AI 沟通实时进度（2026-09-05）
 
 #### Changed files

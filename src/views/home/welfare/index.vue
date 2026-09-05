@@ -83,6 +83,7 @@ import zhuanyesTopSource from "../../../data/welfare/zhuanyesTop.json";
 import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
 import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
+import keywordSearchSource from "../../../data/welfare/keyword-search.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider, ElAvatar } from "element-plus";
@@ -95,6 +96,7 @@ welfareInitSource = [
   ...zhuanyesSource,
   ...daydayzhuanSource,
   ...zhujicepingSource,
+  ...keywordSearchSource,
 ];
 welfareTopSource = [...zhuanyesTopSource, ...daydayzhuanTopSource];
 welfareSource = [...welfareTopSource, ...welfareInitSource].sort(
@@ -189,6 +191,13 @@ export default {
             websiteImg: "https://www.zhujiceping.com/favicon.ico",
           };
           break;
+        case "keyword-search":
+          websiteInfo = {
+            websiteName: item.sourceName || "关键词采集",
+            mainWebsite: item.sourceUrl || "https://news.google.com/",
+            websiteImg: "https://news.google.com/favicon.ico",
+          };
+          break;
         default:
           websiteInfo = {
             websiteName: "羊毛",
@@ -241,13 +250,13 @@ export default {
           ? maxLength * rate + initData
           : welfareSource.length
       );
-      const vpsOffers = welfareSource.filter(
-        (item) => item.website === "zhujiceping"
+      const aiOffers = welfareSource.filter(
+        (item) => ["zhujiceping", "keyword-search"].includes(item.website)
       );
       const regularOffers = welfareTmpAll.filter(
-        (item) => item.website !== "zhujiceping"
+        (item) => !["zhujiceping", "keyword-search"].includes(item.website)
       );
-      return [...vpsOffers, ...regularOffers].sort(
+      return [...aiOffers, ...regularOffers].sort(
         (a, b) => b.timestamp - a.timestamp
       );
     });
