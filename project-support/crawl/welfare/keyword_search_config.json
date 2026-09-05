@@ -1,9 +1,29 @@
 {
   "source": {
-    "name": "Google 新闻关键词检索",
+    "name": "Google 定向搜索",
     "homepage": "https://news.google.com/",
-    "windowDays": 7
+    "windowDays": 30
   },
+  "searchSources": [
+    {
+      "id": "github",
+      "label": "GitHub",
+      "domain": "github.com",
+      "homepage": "https://github.com/"
+    },
+    {
+      "id": "telegram",
+      "label": "Telegram",
+      "domain": "t.me",
+      "homepage": "https://t.me/"
+    },
+    {
+      "id": "bilibili",
+      "label": "Bilibili",
+      "domain": "bilibili.com",
+      "homepage": "https://www.bilibili.com/"
+    }
+  ],
   "queries": [
     {
       "id": "bank-card",
@@ -21,13 +41,25 @@
       "id": "cloud-deals",
       "label": "云与主机",
       "anchors": ["云服务器", "VPS"],
-      "benefits": ["年付", "优惠", "折扣", "特价"]
+      "benefits": ["免费额度", "免费试用", "赠送"]
     },
     {
       "id": "public-subsidy",
       "label": "消费补贴",
       "anchors": ["消费补贴", "以旧换新", "政府补贴"],
       "benefits": ["领取", "申领", "活动", "优惠"]
+    },
+    {
+      "id": "developer-benefits",
+      "label": "开发者福利",
+      "anchors": ["开发者", "AI", "API", "Codex", "Claude"],
+      "benefits": ["免费额度", "公益", "免费使用", "兑换码"]
+    },
+    {
+      "id": "community-deals",
+      "label": "社区线报",
+      "anchors": ["羊毛", "福利", "优惠"],
+      "benefits": ["免费", "优惠券", "兑换码", "限时"]
     }
   ]
 }
