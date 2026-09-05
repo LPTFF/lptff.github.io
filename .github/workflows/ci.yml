@@ -6,7 +6,7 @@ on:
       - master
 
   schedule:
-    # GitHub Actions 使用 UTC；除北京时间 06:17 外，每小时只刷新福利数据。
+    # GitHub Actions 使用 UTC；除北京时间 06:17 外，每小时刷新福利和热门资讯。
     - cron: "17 0-21,23 * * *"
     # 每天北京时间 06:17 保留一次全量采集，避免其他站点数据停止更新。
     - cron: "17 22 * * *"
@@ -74,6 +74,9 @@ jobs:
               --only daydayzhuanTop \
               --only zhujiceping \
               --only keywordSearch \
+              --only infzm \
+              --only weibo \
+              --only douyinHot \
               --summary .artifacts/collectors/python-ci.json
           else
             ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json

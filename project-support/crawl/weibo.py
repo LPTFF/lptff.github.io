@@ -41,13 +41,14 @@ def parse_response(
     items: list[dict[str, object]] = []
     collection_time = collected_at or datetime.now().astimezone()
     collection_timestamp = int(collection_time.timestamp())
-    for entry in hot_list:
-        if not isinstance(entry, dict) or entry.get("ad_type"):
+    for fallback_rank, entry in enumerate(hot_list, start=1):
+        if not isinstance(entry, dict) or entry.get("ad_type") or entry.get("is_ad"):
             continue
         title = str(entry.get("note") or "").strip()
         word = str(entry.get("word_scheme") or entry.get("word") or title).strip()
         try:
             timestamp = int(entry.get("onboard_time") or collection_timestamp)
+            rank = int(entry.get("realpos") or fallback_rank)
         except (TypeError, ValueError):
             continue
         if not title or not word:
@@ -58,6 +59,7 @@ def parse_response(
                 "desc": "",
                 "time": datetime.fromtimestamp(timestamp).strftime("%Y-%m-%d %H:%M:%S"),
                 "timestamp": timestamp * 1000,
+                "rank": rank,
                 "image": {
                     "small_icon_desc": entry.get("small_icon_desc") or "",
                     "small_icon_desc_color": entry.get("small_icon_desc_color") or "",
@@ -66,7 +68,7 @@ def parse_response(
                 "title": title,
             }
         )
-    return sorted(items, key=lambda item: int(item["timestamp"]), reverse=True)
+    return sorted(items, key=lambda item: int(item["rank"]))
 
 
 def collect() -> list[dict[str, object]]:

@@ -37,6 +37,7 @@ COLLECTORS = (
     CollectorSpec("infzm", "infzm.py", "infzm.json", "article", 3),
     CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3, group="archived"),
     CollectorSpec("weibo", "weibo.py", "weibo.json", "article", 5),
+    CollectorSpec("douyinHot", "douyinHot.py", "douyinHot.json", "article", 5, 90, True),
     CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3, group="archived"),
     CollectorSpec("52pojie", "52pojie.py", "52pojie.json", "article", 3),
     CollectorSpec("meituanTech", "meituanTech.py", "techForum/meituanTech.json", "article", 3, group="archived"),

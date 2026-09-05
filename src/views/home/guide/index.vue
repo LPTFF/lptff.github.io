@@ -1,12 +1,91 @@
 <template>
   <div>
+    <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
+      <div>
+        <div class="radar-title" id="guide-radar-title">热门资讯生态雷达</div>
+        <div class="radar-description">
+          汇集抖音热榜、微博热搜与南方周末，观察公共注意力、跨平台共振和深度议题。
+        </div>
+      </div>
+      <div class="radar-stats">
+        <span>{{ totalNewsCount }} 条信号</span>
+        <span>{{ sourceFilters.length }} 个来源</span>
+        <span>{{ categoryOptions.length }} 个生态主题</span>
+      </div>
+    </section>
+    <section class="radar-filters" aria-label="热门资讯生态筛选">
+      <div class="filter-row">
+        <span class="filter-label">资讯来源</span>
+        <button
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedSource === 'all' }"
+          :aria-pressed="selectedSource === 'all'"
+          @click="selectedSource = 'all'"
+        >
+          全部 {{ totalNewsCount }}
+        </button>
+        <button
+          v-for="source in sourceFilters"
+          :key="source.id"
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedSource === source.id }"
+          :aria-pressed="selectedSource === source.id"
+          @click="selectedSource = source.id"
+        >
+          {{ source.label }} {{ source.count }}
+        </button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">生态主题</span>
+        <button
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedCategory === 'all' }"
+          :aria-pressed="selectedCategory === 'all'"
+          @click="selectedCategory = 'all'"
+        >
+          全部 {{ totalNewsCount }}
+        </button>
+        <button
+          v-for="category in categoryOptions"
+          :key="category.name"
+          type="button"
+          class="filter-tag"
+          :class="{ active: selectedCategory === category.name }"
+          :aria-pressed="selectedCategory === category.name"
+          @click="selectedCategory = category.name"
+        >
+          {{ category.name }} {{ category.count }}
+        </button>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">观察视角</span>
+        <button
+          v-for="focus in focusOptions"
+          :key="focus.key"
+          type="button"
+          class="filter-tag focus-tag"
+          :class="{ active: selectedFocus === focus.key }"
+          :aria-pressed="selectedFocus === focus.key"
+          @click="selectedFocus = focus.key"
+        >
+          {{ focus.label }}
+        </button>
+        <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+      </div>
+    </section>
+    <div class="filter-empty" v-if="filteredNews.length === 0">
+      当前筛选组合暂无资讯，可以切换来源、主题或观察视角。
+    </div>
     <el-row>
       <el-col
         :span="24"
         :md="24"
         :lg="24"
         v-for="(item, sonIndex) in guideNewsLimited"
-        :key="sonIndex"
+        :key="item.url || sonIndex"
       >
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
@@ -42,6 +121,19 @@
               >
                 {{ item.title }}
               </a>
+              <div class="ecosystem-tags">
+                <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
+                <el-tag size="small" type="success" v-if="item.rank">
+                  榜单 #{{ item.rank }}
+                </el-tag>
+                <el-tag size="small" type="primary" v-if="item.ecosystem.sourceBreadth > 1">
+                  {{ item.ecosystem.sourceBreadth }} 源共振
+                </el-tag>
+                <el-tag size="small" type="warning" v-if="item.ecosystem.isDeep">
+                  深度追踪
+                </el-tag>
+              </div>
+              <div class="ecosystem-summary">{{ item.ecosystem.observation }}</div>
               <div class="welfare-div-link">
                 <div
                   v-if="item.website == 'weibo'"
@@ -62,7 +154,12 @@
             </div>
           </div>
           <div class="welfare-div-website">
-            <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
+            <img
+              :src="handleWebsiteImg(item)"
+              alt="网站"
+              class="welfare-img-link"
+              @error="handleImageError"
+            />
             <div class="welfare-name-link">
               {{ handleWebsiteName(item) }}
             </div>
@@ -72,6 +169,12 @@
               <div class="mobile-link-title">
                 <div @click="gotoMobileWebsite(item)">
                   {{ handleMobileTitle(item) }}
+                </div>
+                <div class="mobile-ecosystem-signal">
+                  <span>{{ item.ecosystem.category }}</span>
+                  <span v-if="item.ecosystem.sourceBreadth > 1">
+                    {{ item.ecosystem.sourceBreadth }} 源共振
+                  </span>
                 </div>
               </div>
               <div
@@ -145,7 +248,8 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import infzmNews from "../../../data/infzm.json";
-import pojieNews from "../../../data/52pojie.json";
+import weiboNews from "../../../data/weibo.json";
+import douyinHotNews from "../../../data/douyinHot.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
@@ -155,6 +259,7 @@ import {
   ElButton,
   ElIcon,
   ElDivider,
+  ElTag,
 } from "element-plus";
 export default {
   props: {
@@ -168,6 +273,7 @@ export default {
     ElButton,
     ElIcon,
     ElDivider,
+    ElTag,
     Calendar,
     Timer,
   },
@@ -177,7 +283,182 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
-    const newsGuide = ([...infzmNews, ...pojieNews] as any[]).sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const selectedSource = ref("all");
+    const selectedCategory = ref("all");
+    const selectedFocus = ref("all");
+    const rawSourceDefinitions = [
+      {
+        id: "douyinHot",
+        label: "抖音热榜",
+        items: douyinHotNews as any[],
+      },
+      {
+        id: "weibo",
+        label: "微博热搜",
+        items: weiboNews as any[],
+      },
+      {
+        id: "infzm",
+        label: "南方周末",
+        items: infzmNews as any[],
+      },
+    ];
+    const topicDefinitions = [
+      {
+        name: "灾害与安全",
+        keywords: [
+          "泥石流", "山体滑坡", "遇难", "失联", "被埋", "灾害", "救援", "犯罪",
+          "罪案", "勒索", "拘禁", "枪声", "逮捕", "被查", "罚单", "造假", "谣言",
+          "走失", "男童", "儿童",
+        ],
+      },
+      {
+        name: "教育与职场",
+        keywords: [
+          "教育", "会计", "开学", "学校", "同学", "应届生", "上班", "就业", "职场",
+          "写字", "读懂", "主科",
+        ],
+      },
+      {
+        name: "体育竞技",
+        keywords: [
+          "足球", "篮球", "比赛", "冠军", "全运会", "奥运", "世界杯", "英超", "拳王",
+          "赛道", "比分", "圣日耳曼", "利物浦", "贝林厄姆", "姆巴佩", "赵心童",
+        ],
+      },
+      {
+        name: "科技产业",
+        keywords: [
+          "科技", "人工智能", "AI", "机器人", "芯片", "手机", "商业航天", "暗物质",
+          "DLSS", "产品发布", "企业AI",
+        ],
+      },
+      {
+        name: "国际与政策",
+        keywords: [
+          "总书记", "中方", "政策", "政府", "法院", "税", "证监会", "经济", "医保",
+          "养老", "住房", "演习", "美联储", "菲律宾", "尼泊尔", "美国反对", "中俄蒙",
+        ],
+      },
+      {
+        name: "消费与生活",
+        keywords: [
+          "消费", "钱", "文旅", "旅游", "追秋", "妆容", "穿搭", "通勤", "打卡", "油价",
+          "手环", "豪宅", "雪花牛肉", "肥皂", "小猫", "小狗", "天气", "减肥", "外套",
+        ],
+      },
+      {
+        name: "文娱舆情",
+        keywords: [
+          "电影", "电视剧", "综艺", "演员", "明星", "歌手", "演唱会", "音乐", "舞台",
+          "MV", "粉丝", "拍摄", "造型", "口碑", "实体专", "广告", "订婚", "点赞",
+          "分手", "花少", "极限挑战", "早春晴朗", "披荆斩棘", "说唱", "舞蹈", "角色展示",
+        ],
+      },
+    ];
+    const classifyTopic = (item: any) => {
+      const content = String(item.title || "").toUpperCase();
+      return (
+        topicDefinitions.find((topic) =>
+          topic.keywords.some((keyword) => content.includes(keyword.toUpperCase()))
+        )?.name || "平台流行"
+      );
+    };
+    const categorizedGroups = rawSourceDefinitions.map((source) => ({
+      ...source,
+      items: source.items.map((item) => ({
+        ...item,
+        ecosystem: {
+          category: classifyTopic(item),
+          isTop: Number(item.rank) > 0 && Number(item.rank) <= 10,
+          isDeep: item.website === "infzm" && String(item.desc || "").length >= 50,
+        },
+      })),
+    }));
+    const categorySources = new Map<string, Set<string>>();
+    categorizedGroups.forEach((source) => {
+      source.items.forEach((item) => {
+        const category = item.ecosystem.category;
+        if (!categorySources.has(category)) categorySources.set(category, new Set());
+        categorySources.get(category)?.add(source.id);
+      });
+    });
+    const sourceDefinitions = categorizedGroups.map((source) => ({
+      ...source,
+      items: source.items.map((item) => {
+        const sourceBreadth = categorySources.get(item.ecosystem.category)?.size || 1;
+        const rankText = item.rank
+          ? `榜单第 ${item.rank} 位`
+          : source.id === "infzm"
+            ? "深度内容"
+            : "置顶信号";
+        const observation = item.ecosystem.isDeep
+          ? `来自南方周末的深度追踪，为当前${item.ecosystem.category}补充事件背景与后续。`
+          : sourceBreadth > 1
+            ? `当前快照中，这类${item.ecosystem.category}同时出现在 ${sourceBreadth} 个来源；本条为${source.label}${rankText}。`
+            : `本条为${source.label}${rankText}，反映该平台此刻的注意力。`;
+        return {
+          ...item,
+          ecosystem: { ...item.ecosystem, sourceBreadth, observation },
+        };
+      }),
+    }));
+    const interleaveSources = (groups: any[][]) => {
+      const result: any[] = [];
+      const maxLength = Math.max(...groups.map((group) => group.length), 0);
+      for (let index = 0; index < maxLength; index += 1) {
+        groups.forEach((group) => {
+          if (group[index]) result.push(group[index]);
+        });
+      }
+      return result;
+    };
+    const newsGuide = interleaveSources(sourceDefinitions.map((source) => source.items));
+    const totalNewsCount = newsGuide.length;
+    const sourceFilters = sourceDefinitions.map((source) => ({
+      id: source.id,
+      label: source.label,
+      count: source.items.length,
+    }));
+    const categoryOptions = computed(() => {
+      const counts = new Map<string, number>();
+      newsGuide.forEach((item) => {
+        const category = item.ecosystem.category;
+        counts.set(category, (counts.get(category) || 0) + 1);
+      });
+      return [...counts.entries()]
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
+    });
+    const focusOptions = [
+      { key: "all", label: "全部视角" },
+      { key: "resonance", label: "跨来源共振" },
+      { key: "top", label: "热榜前列" },
+      { key: "deep", label: "深度报道" },
+    ];
+    const filteredNews = computed(() =>
+      newsGuide.filter((item) => {
+        if (selectedSource.value !== "all" && item.website !== selectedSource.value) {
+          return false;
+        }
+        if (
+          selectedCategory.value !== "all" &&
+          item.ecosystem.category !== selectedCategory.value
+        ) {
+          return false;
+        }
+        switch (selectedFocus.value) {
+          case "resonance":
+            return item.ecosystem.sourceBreadth > 1;
+          case "top":
+            return item.ecosystem.isTop;
+          case "deep":
+            return item.ecosystem.isDeep;
+          default:
+            return true;
+        }
+      })
+    );
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -216,9 +497,11 @@ export default {
       let data = isPC();
       switch (String(item.website)) {
         case "infzm":
-          websiteUrl = data
-            ? `https://www.infzm.com/contents/${item.url}`
-            : `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
+          websiteUrl = item.url.startsWith("http")
+            ? item.url
+            : data
+              ? `https://www.infzm.com/contents/${item.url}`
+              : `https://www.infzm.com/wap/#/content/${item.url}?source=133&source_1=1`;
           break;
         case "weibo":
           let originUrl = `https://m.weibo.cn/search?containerid=100103type=1&q=${decodeURI(
@@ -230,6 +513,7 @@ export default {
         case "v2ex":
         case "githubTrending":
         case "52pojie":
+        case "douyinHot":
           websiteUrl = item.url;
           break;
         case "hxm5":
@@ -265,6 +549,9 @@ export default {
           break;
         case "weibo":
           websiteName = "微博热搜";
+          break;
+        case "douyinHot":
+          websiteName = "抖音热榜";
           break;
         case "githubTrending":
           websiteName = "githubTrending";
@@ -311,6 +598,9 @@ export default {
         case "52pojie":
           websiteImg =
             "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAMAAABEpIrGAAAAkFBMVEX////87OzsYmL5zc3509P+9/fzoaH62tr1r6/3vLzylZXwgYHmMzPudHT99PTqUlL85+f1qqrtamr74uLznp7fAADhBwflJyfgAADpRETjFxfiDw/iCwvhAADkHBzmLi7rWVniEBDpSEjqT0/oPz/4xsbdAADyl5fvfHz3wsLjERHxjIzkICD2tbXtbW3wh4dkMKV5AAACuUlEQVR4ATWNBwKrKBRFr11jiUbBGwEV0zFl/7sbZub/A683IAijOEmzvDiUWVXnzbHtTuUxiOq+H8oWgJAjKenlPCltfCBmsQhvlCKBVSotJyW1nCGordbVdj5vl8vluPkSUBs9btfzNo8ndOmiLW/woG/blooRMLFOEKDxEgYFJz3rpT3d73dBZRkjphVpKsSjERCo5OwvjrhlCPy2yaR4Tj6+C9G9iLuUTjk2QPF4Rjm15Y6Con21OKfpESikmo3glNzFvXvotzIPBOIU4Fq2XdysFVapOwT4C82AfbmeIMYmugoxYZN6rJb3tFRhNY/LxAHPt7kmIoz7d384gcpppm0LTzBJRaClmvDAmswENjr1FujOM0kMRk3+IJW8flbiXcDvk7oSmIUhJXZa7uhpnTRmwfdlxVbzrPnBoS47JFbrLUdEO1n1nmtJraR0Wlle0lsxHKmtZYivVNZpX1PKqVE5j5okOemLdhPx3wn9fvuOiaT1daulJKmp/IYChVbaIBXc9u5VG+usdFX4LFpg1I4vnKQTPbrP8dXgi6d03IEcpV4LYZUABr6bOA+z5p797sONTmsJpuEVp8Wo+YSQaqeoIUfwHqVGuZq3Vwb0PX5yKtEuzHyI52ffAKctgSDCKIXwDaYEJPtleC64rtWF0jmz3+5FetfjikWbBwrLbI+xJs8uf82zsnJPf2gAJK1v6AHJ+BVHFwQJgFI6+vqhOtZ7SKkMEJF9npcjRvFL77TOcUKAtng0DzPJDbkRUdJjSNZv0WYdnRXxfn19hUq+0vKFWi5ZeKjXYEij6OiUkxWk2ACUYlZmwEUzewzlIRKiy4VyljgsAeL6hZ+ZmMMvNcZQamUNrXNWh24ONclldUrcAKklPcaLR9J4JbwlBUUHz+viJX90fRx8fnVWdN2KwykuGvQR8A+lNlPn0UGdyAAAAABJRU5ErkJggg==";
+          break;
+        case "douyinHot":
+          websiteImg = "https://www.douyin.com/favicon.ico";
           break;
         default:
           websiteImg = "羊毛";
@@ -390,11 +680,11 @@ export default {
       let guideTmpAll;
       maxLength < length ? (maxLength = length) : maxLength;
       let rate = isPCRes.value ? 2 : 1;
-      guideTmpAll = newsGuide.slice(
+      guideTmpAll = filteredNews.value.slice(
         0,
-        maxLength * rate + initData < newsGuide.length
+        maxLength * rate + initData < filteredNews.value.length
           ? maxLength * rate + initData
-          : newsGuide.length
+          : filteredNews.value.length
       );
       return guideTmpAll;
     });
@@ -419,12 +709,132 @@ export default {
       handleDialogCancel,
       handleDialogConfirm,
       guideNewsLimited,
+      selectedSource,
+      selectedCategory,
+      selectedFocus,
+      sourceFilters,
+      totalNewsCount,
+      categoryOptions,
+      focusOptions,
+      filteredNews,
     };
   },
 };
 </script>
 
 <style scoped>
+.ecosystem-radar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 14px;
+  padding: 18px 20px;
+  border: 1px solid #d9e7ff;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f7faff, #eef5ff);
+}
+.radar-title {
+  color: #30486f;
+  font-size: 19px;
+  font-weight: 700;
+}
+.radar-description {
+  max-width: 700px;
+  margin-top: 6px;
+  color: #65738a;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.radar-stats {
+  display: flex;
+  flex-shrink: 0;
+  gap: 14px;
+  color: #4a74ad;
+  font-size: 13px;
+  font-weight: 600;
+}
+.radar-filters {
+  margin-bottom: 14px;
+  padding: 13px 16px;
+  border: 1px solid #e4e9f2;
+  border-radius: 8px;
+  background: #fff;
+}
+.filter-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.filter-row + .filter-row {
+  margin-top: 10px;
+}
+.filter-label {
+  min-width: 60px;
+  color: #65738a;
+  font-size: 12px;
+  font-weight: 700;
+}
+.filter-tag {
+  padding: 4px 9px;
+  border: 1px solid #d8e0ec;
+  border-radius: 999px;
+  background: #f8fafc;
+  color: #52647d;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  transition: 0.16s ease;
+}
+.filter-tag:hover {
+  border-color: #8eb8ee;
+  color: #337ecc;
+}
+.filter-tag.active {
+  border-color: #409eff;
+  background: #409eff;
+  color: #fff;
+}
+.focus-tag.active {
+  border-color: #7c65c1;
+  background: #7c65c1;
+}
+.filter-result {
+  margin-left: auto;
+  color: #4a74ad;
+  font-size: 12px;
+  font-weight: 600;
+}
+.filter-empty {
+  margin-bottom: 14px;
+  padding: 28px;
+  border: 1px dashed #c9d5e6;
+  border-radius: 8px;
+  color: #65738a;
+  text-align: center;
+}
+.ecosystem-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 7px;
+}
+.ecosystem-summary {
+  max-width: 680px;
+  margin-bottom: 9px;
+  color: #65738a;
+  font-size: 13px;
+  line-height: 1.45;
+}
+.mobile-ecosystem-signal {
+  display: flex;
+  gap: 8px;
+  margin-top: 7px;
+  color: #4a74ad;
+  font-size: 12px;
+}
 .dialog-content {
   padding: 0;
 }
@@ -470,7 +880,7 @@ export default {
 .welfare-link-title {
   display: block;
   color: #797979;
-  height: 50px;
+  min-height: 30px;
   font-size: 18px;
   font-weight: 600;
   text-decoration: none;
@@ -537,6 +947,30 @@ export default {
 }
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
+  .ecosystem-radar {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+  }
+  .radar-stats {
+    flex-wrap: wrap;
+    gap: 8px 14px;
+  }
+  .radar-filters {
+    padding: 12px;
+  }
+  .filter-label,
+  .filter-result {
+    flex-basis: 100%;
+  }
+  .filter-result {
+    margin: 2px 0 0;
+  }
+  .ecosystem-tags,
+  .ecosystem-summary {
+    display: none;
+  }
   .welfare-div-website {
     display: none;
   }
@@ -569,7 +1003,7 @@ export default {
   }
   .mobile-link-title {
     color: #797979;
-    height: 80px;
+    min-height: 80px;
     font-size: 18px;
     font-weight: 600;
     max-width: 250px;
