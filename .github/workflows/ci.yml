@@ -87,7 +87,8 @@ jobs:
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Keep only bank offers in welfare data
-        run: python -B project-support/crawl/filter_welfare_with_gemini.py --require-key
+        # AI 不可用时仍执行保守规则筛选，不让辅助分类阻断网站发布。
+        run: python -B project-support/crawl/filter_welfare_with_gemini.py
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Publish validated crawler data

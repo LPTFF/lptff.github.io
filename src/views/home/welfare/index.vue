@@ -7,7 +7,8 @@
           <h2 id="collector-title">多路福利采集</h2>
           <p>
             定时从已配置的公开页面直接采集，同时用 Google 定向搜索扩展发现范围；
-            两路候选都要通过规则与 Gemini 筛选才会进入列表。
+            银行优惠优先由 AI 筛选，不可用时仅按标题保守筛选，可能减少收录。
+            定向搜索和主机优惠未能更新时保留已有结果；活动条件与有效期以原文为准。
           </p>
         </div>
         <div class="collector-total">{{ welfareSourceCount }} 条当前结果</div>
@@ -30,7 +31,7 @@
           <div class="collector-flow" aria-label="指定页面采集流程">
             <span>公开页面 / API</span><span class="flow-arrow">→</span>
             <span>结构解析</span><span class="flow-arrow">→</span>
-            <span>规则 + Gemini</span><span class="flow-arrow">→</span>
+            <span>优惠筛选</span><span class="flow-arrow">→</span>
             <span>福利列表</span>
           </div>
         </article>
@@ -86,7 +87,7 @@
     </section>
     <div v-if="welfareLimited.length === 0" class="source-empty">
       <strong>{{ selectedSourceLabel }} 暂无通过筛选的福利</strong>
-      <span>采集源仍在定时检索，只有具体、可参与的权益才会进入列表。</span>
+      <span>可查看其他来源；来源或分析服务暂不可用时，部分结果可能暂停更新。</span>
     </div>
     <el-row>
       <el-col

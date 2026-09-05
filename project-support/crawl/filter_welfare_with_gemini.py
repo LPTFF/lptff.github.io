@@ -63,6 +63,11 @@ BANK_IDENTITY = re.compile(
 )
 NON_BANK_PRODUCT = re.compile(r"保险|金管家|黄金体验金|贵金属")
 
+# 无 AI 时宁可少收，也不把城市名、品牌简称或支付平台活动当作银行优惠。
+FALLBACK_BANK_IDENTITY = re.compile(r"银行|信用卡|借记卡")
+FALLBACK_BENEFIT = re.compile(r"优惠|返现|立减|红包|积分|抽奖|奖励")
+FALLBACK_EXCLUDED = re.compile(r"证券|基金|贷款|借贷|理财|网贷|支付宝|微信|财付通|云闪付|银联")
+
 # ── 重试参数 ─────────────────────────────────────────────────────────────────
 _MAX_ATTEMPTS = 5      # 最多重试次数
 _BACKOFF_BASE = 10.0   # 退避基数（秒）：10, 20, 40, 80 …
@@ -152,7 +157,7 @@ def _request_batch(
             if response.status_code == 429 or response.status_code >= 500:
                 raise RuntimeError(f"Gemini temporarily unavailable (HTTP {response.status_code})")
             if not response.ok:
-                raise RuntimeError(f"Gemini request failed (HTTP {response.status_code})")
+                response.raise_for_status()
             body = response.json()
             text = body["candidates"][0]["content"]["parts"][0]["text"]
             classified = json.loads(text)
@@ -190,6 +195,11 @@ def _request_batch(
             time.sleep(sleep_secs)
         except (KeyError, IndexError, TypeError, ValueError, requests.RequestException, RuntimeError) as error:
             last_error = error
+            if isinstance(error, requests.HTTPError) and error.response is not None:
+                status = error.response.status_code
+                if 400 <= status < 500 and status not in (408, 429):
+                    # 密钥失效、无权限或模型不存在，等待重试不会恢复访问。
+                    raise RuntimeError(f"Gemini unavailable (HTTP {status})") from error
             if attempt < _MAX_ATTEMPTS - 1:
                 sleep_secs = _BACKOFF_BASE * (2 ** attempt)
                 print(
@@ -229,6 +239,16 @@ def has_explicit_bank_identity(entry: WelfareEntry) -> bool:
     return not NON_BANK_PRODUCT.search(title) and bool(BANK_IDENTITY.search(title))
 
 
+def is_conservative_bank_offer(entry: WelfareEntry) -> bool:
+    title = str(entry.item.get("title") or "")
+    return (
+        has_explicit_bank_identity(entry)
+        and bool(FALLBACK_BANK_IDENTITY.search(title))
+        and bool(FALLBACK_BENEFIT.search(title))
+        and not FALLBACK_EXCLUDED.search(title)
+    )
+
+
 def write_filtered_snapshots(
     snapshots: dict[Path, list[dict[str, object]]],
     entries: list[WelfareEntry],
@@ -248,22 +268,23 @@ def write_filtered_snapshots(
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Keep only bank offers in welfare data using Gemini")
-    parser.add_argument("--require-key", action="store_true")
+    parser.add_argument("--require-key", action="store_true", help="Fail on a missing key; only for explicit configuration checks")
     parser.add_argument("--model", default=os.environ.get("GEMINI_MODEL", DEFAULT_MODEL))
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     parser.add_argument("--timeout", type=float, default=120.0)
     args = parser.parse_args()
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
-    if not api_key:
-        if args.require_key:
-            raise SystemExit("GEMINI_API_KEY is required for welfare filtering")
-        print(json.dumps({"state": "skipped", "reason": "GEMINI_API_KEY is not configured"}))
-        return 0
+    if not api_key and args.require_key:
+        raise SystemExit("GEMINI_API_KEY is required for welfare filtering")
     if args.batch_size < 1 or args.batch_size > 100:
         parser.error("--batch-size must be between 1 and 100")
 
     snapshots, entries = load_entries()
+    ai_kept_ids: set[str] | None = None
+    fallback_reason = ""
     try:
+        if not api_key:
+            raise RuntimeError("GEMINI_API_KEY is not configured")
         ai_kept_ids = classify_entries(
             entries,
             api_key=api_key,
@@ -272,13 +293,13 @@ def main() -> int:
             timeout=args.timeout,
         )
     except RuntimeError as exc:
-        # Gemini 全部重试耗尽：降级为纯正则过滤，避免 CI 崩溃
-        warn_msg = f"Gemini 调用彻底失败，降级为正则过滤。原因：{exc}"
+        # 缺少密钥与服务失败使用同一退路；输入和写入错误仍正常失败。
+        fallback_reason = str(exc)
+        warn_msg = f"Gemini 不可用，使用保守标题规则筛选。原因：{fallback_reason}"
         print(f"[filter_welfare] 警告：{warn_msg}", flush=True)
-        ai_kept_ids = {entry.identifier for entry in entries}
         # 推送企业微信告警
         qywx_key = os.environ.get("QYWX_KEY", "").strip()
-        if qywx_key:
+        if api_key and qywx_key:
             try:
                 send_notification(
                     qywx_key,
@@ -292,16 +313,22 @@ def main() -> int:
     kept_ids = {
         entry.identifier
         for entry in entries
-        if entry.identifier in ai_kept_ids and has_explicit_bank_identity(entry)
+        if (
+            is_conservative_bank_offer(entry)
+            if ai_kept_ids is None
+            else entry.identifier in ai_kept_ids and has_explicit_bank_identity(entry)
+        )
     }
     counts = write_filtered_snapshots(snapshots, entries, kept_ids)
     print(
         json.dumps(
             {
-                "state": "success",
-                "model": args.model,
+                "state": "degraded" if ai_kept_ids is None else "success",
+                "filterMode": "rules" if ai_kept_ids is None else "gemini",
+                "reason": fallback_reason or None,
+                "model": args.model if ai_kept_ids is not None else None,
                 "inputCount": len(entries),
-                "aiKeptCount": len(ai_kept_ids),
+                "aiKeptCount": len(ai_kept_ids) if ai_kept_ids is not None else None,
                 "keptCount": len(kept_ids),
                 "files": {
                     path: {"inputCount": before, "keptCount": after}
