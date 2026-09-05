@@ -1,0 +1,1 @@
+import{d as n,l as o,B as r,s as c,k as p}from"./vue-vendor-c7x-_rhk.js";const f=n({__name:"LazyPanel",props:{active:{type:Boolean}},setup(s){const a=s,t=o(a.active);return r(()=>a.active,e=>{e&&(t.value=!0)},{flush:"sync"}),(e,l)=>t.value?c(e.$slots,"default",{key:0}):p("",!0)}});export{f as _};
