@@ -64,6 +64,7 @@
     <!-- 场景工具：历史周期压力测试（默认折叠）-->
     <el-collapse v-model="stressActiveNames">
       <el-collapse-item title="历史周期压力测试（可选：把当前组合放进历史市场风格）" name="stress">
+        <LazyPanel :active="stressActiveNames.includes('stress')">
         <p class="tool-disclaimer">示意性历史风格，非精确回测；以当前市值为基准平移，不模拟交易、不预测未来。</p>
         <p class="tool-disclaimer">未覆盖市场：组合中跟踪全球配置/QDII（无单一基准）、日本/越南/印度/欧洲等市场的基金，在历史周期中无对应基准，末态市值不变、不参与回撤；可在下方各周期详情核验「（无该周期基准）」项。</p>
         <el-empty v-if="!osState.portfolio" description="尚无持仓，请先采集数据或在下方启动模拟器" />
@@ -157,6 +158,7 @@
             </div>
           </div>
         </template>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
@@ -170,6 +172,7 @@
         </div>
         <div v-show="simPanelOpen" class="el-collapse-item__wrap">
           <div class="el-collapse-item__content">
+        <LazyPanel :active="simPanelOpen">
         <p class="sim-intro">用当前真实持仓逐期推进（按基金指数净值曲线模拟牛熊），生成行为交易并观察规则偏离。演练期间系统全局数据为模拟值：复盘/待办围绕演练运转（这正是演练目的），持仓页暂停（需真实数据），上方压力测试切换为按演练持仓计算；结束可一键恢复真实数据。</p>
         <div class="sim-controls">
           <span class="sim-meta" v-if="isSimulator">第 {{ sim.state.round }} / 23 期 · {{ sim.state.asOf }} · {{ simPhaseLabel }}</span>
@@ -214,6 +217,7 @@
           </div>
         </div>
         <p v-if="isSimulator" class="sim-hint">以上为基于历史市场风格的推断提示（非规则机械检查结论）；交易为演练模拟、日期属演练日历（{{ sim.state.asOf }} 所在期）非真实记录；末态回撤可在上方「历史周期压力测试」选对应周期复算。</p>
+        </LazyPanel>
           </div>
         </div>
       </div>
@@ -231,7 +235,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onActivated, onBeforeUnmount, onDeactivated, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 import { ArrowRight } from "@element-plus/icons-vue";
@@ -246,6 +250,7 @@ import DriftBulletChart from "../../investment/charts/DriftBulletChart.vue";
 import DrawdownBars from "../../investment/charts/DrawdownBars.vue";
 import CycleNavChart from "../../investment/charts/CycleNavChart.vue";
 import SimAssetLine from "../../investment/charts/SimAssetLine.vue";
+import LazyPanel from "./components/LazyPanel.vue";
 
 const router = useRouter();
 const investmentOS = useInvestmentOS();
@@ -274,6 +279,10 @@ const simFindings = computed<SimFinding[]>(() => {
   return buildSimFindings(sim.state.phase, sim.state.asOf, sim.state.behaviorLog, drift, sim.state.holdingIndex, sim.state.realTransactionsByAsset);
 });
 const simPanelOpen = ref(false);
+let reviewActive = true;
+onActivated(() => { reviewActive = true; });
+onDeactivated(() => { reviewActive = false; stopFullSimCycle(); });
+onBeforeUnmount(() => { reviewActive = false; stopFullSimCycle(); });
 const runningFullSim = ref(false);
 const stopFullSimRequested = ref(false);
 /** 逐期回放节奏：每期间隔，让曲线逐点生长、进度可见，而不是一次性同步跑完卡住。 */
@@ -328,11 +337,12 @@ async function runFullSimCycle(): Promise<void> {
   runningFullSim.value = true;
   stopFullSimRequested.value = false;
   try {
-    while (!sim.isLastRound.value && !sim.state.running) {
+    while (!sim.isLastRound.value && !sim.state.running && !stopFullSimRequested.value) {
       await sim.advance();
       if (sim.isLastRound.value || stopFullSimRequested.value) break;
       await new Promise((resolve) => setTimeout(resolve, SIM_PLAYBACK_INTERVAL_MS));
     }
+    if (!reviewActive) return;
     if (stopFullSimRequested.value && !sim.isLastRound.value) {
       ElMessage.info(`回放已暂停在第 ${sim.state.round} 期，可继续逐轮推进或再次一键跑完`);
     } else {

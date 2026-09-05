@@ -25,6 +25,7 @@ const { container } = useChart(() => {
   const pct = (v: number): string => `${(v * 100).toFixed(1)}%`;
   const gap = d.direction === "over" ? d.actualPct - d.maxPct : d.direction === "under" ? d.minPct - d.actualPct : 0;
   return {
+    animation: false,
     grid: { left: 2, right: 46, top: 4, bottom: 4 },
     xAxis: { type: "value", min: 0, max: scaleMax.value, show: false },
     yAxis: { type: "category", data: [""], show: false },

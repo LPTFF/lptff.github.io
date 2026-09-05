@@ -36,6 +36,7 @@
     <!-- 折叠：全部规则集 -->
     <el-collapse v-model="allRulesActive">
       <el-collapse-item :title="`查看全部规则集（${totalRuleCount} 项）`" name="all">
+        <LazyPanel :active="allRulesActive.includes('all')">
         <p class="tool-disclaimer">默认值来自风控惯例示例（理论依据见下）；阈值非权威值，可外包分析后调整。当前显示{{ hasRules ? "当前生效规则" : "默认规则集（尚未采纳）" }}。</p>
         <el-empty v-if="!ruleGroups.length" description="尚无投资范围，请先导入数据或启动模拟" />
         <div v-for="g in ruleGroups" :key="g.assetId" class="rule-group">
@@ -55,12 +56,14 @@
             <el-button v-if="r.kind === 'position_band'" size="small" text type="primary" @click="deepAnalyzeRule(r.kind, g.assetId)">疑问→深度分析</el-button>
           </div>
         </div>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
     <!-- 折叠：自定义阈值 -->
     <el-collapse v-model="customActive">
       <el-collapse-item title="自定义阈值（可选：外包分析后在此调整并保存新版本）" name="custom">
+        <LazyPanel :active="customActive.includes('custom')">
         <p class="strategy-hint">修改阈值后请说明原因，再保存为新版本；历史版本不会被覆盖。</p>
         <el-input v-model="changeReason" class="change-reason" placeholder="必填：本次规则变更原因" maxlength="120" show-word-limit />
         <div v-for="ver in editableStrategyRules" :key="ver.id" class="rule-version">
@@ -91,12 +94,14 @@
           <el-button size="small" type="primary" @click="saveStrategyRules">保存为新版本</el-button>
           <el-button size="small" :disabled="!state.activeScope" @click="openCreate">新建单标的规则</el-button>
         </div>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
     <!-- 折叠：规则与理论依据 -->
     <el-collapse v-model="rationaleActive">
       <el-collapse-item title="规则与理论依据" name="rationale">
+        <LazyPanel :active="rationaleActive.includes('rationale')">
         <p class="tool-disclaimer">理论提供原则、不给具体阈值；默认阈值为风控惯例示例值，须你按自身风险承受确认。理论全文见 agent/theories/investment-performance-and-decision-review.md。</p>
         <div class="rationale-list">
           <div v-for="[kind, r] in rationaleEntries" :key="kind" class="rationale-item">
@@ -108,16 +113,19 @@
             </div>
           </div>
         </div>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
     <!-- 折叠：历史版本 -->
     <el-collapse v-if="historicalStrategyRules.length" v-model="historyActive">
       <el-collapse-item title="历史规则版本（只读）" name="history">
+        <LazyPanel :active="historyActive.includes('history')">
         <div v-for="ver in historicalStrategyRules" :key="ver.id" class="history-version">
           <strong>v{{ ver.version }} · {{ ver.effectiveFrom }}</strong>
           <span>{{ ver.changeReason || "未记录变更原因" }}</span>
         </div>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
@@ -169,8 +177,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onDeactivated, reactive, ref, watch } from "vue";
 import { useRoute } from "vue-router";
+import LazyPanel from "./components/LazyPanel.vue";
 import { ElMessage } from "element-plus";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { useInvestmentReview } from "../../investment/composables/use-investment-review";
@@ -395,10 +404,11 @@ function openCreate(): void {
   form.targetMaxPct = undefined;
   createVisible.value = true;
 }
+onDeactivated(() => { createVisible.value = false; });
 watch(
-  () => route.query.create,
-  (value) => {
-    if (value === "rule") openCreate();
+  () => [route.name, route.query.create, route.query.assetId, route.query.kind],
+  ([name, create]) => {
+    if (name === "os-policies" && create === "rule") openCreate();
   },
   { immediate: true },
 );

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
+import { investmentTabs, isInvestmentTab } from "./investment-tabs";
 
 const routes = [
   { path: "/foo", redirect: "/" },
@@ -71,15 +72,9 @@ const routes = [
       {
         path: "",
         component: () => import("../views/investment/OSLayout.vue"),
-        children: [
-          { path: "", name: "os-console", component: () => import("../views/investment/ConsoleView.vue"), meta: { title: "总览", product: "基金复盘助手" } },
-          { path: "review", name: "os-review", component: () => import("../views/investment/ReviewView.vue"), meta: { title: "复盘", product: "基金复盘助手" } },
-          { path: "portfolio", name: "os-portfolio", component: () => import("../views/investment/PortfolioView.vue"), meta: { title: "持仓", product: "基金复盘助手" } },
-          { path: "policies", name: "os-policies", component: () => import("../views/investment/PoliciesView.vue"), meta: { title: "纪律", product: "基金复盘助手" } },
-          { path: "actions", name: "os-actions", component: () => import("../views/investment/ActionsView.vue"), meta: { title: "待办", product: "基金复盘助手" } },
-          { path: "data", name: "os-data", component: () => import("../views/investment/DataView.vue"), meta: { title: "采集", product: "基金复盘助手" } },
-          { path: "evidence", name: "os-evidence", component: () => import("../views/investment/EvidenceView.vue"), meta: { title: "明细", product: "基金复盘助手" } },
-        ],
+        children: investmentTabs.map(({ title, ...tab }) => ({
+          ...tab, meta: { title, product: "基金复盘助手" },
+        })),
       },
     ],
   },
@@ -144,14 +139,28 @@ const routes = [
   { path: "/:pathMatch(.*)*", redirect: "/" },
 ];
 
+const tabScrollPositions = new Map();
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
-  scrollBehavior(to, _from, savedPosition) {
+  scrollBehavior(to, from, savedPosition) {
     if (savedPosition) return savedPosition;
     if (to.hash) return { el: to.hash, behavior: "smooth" };
+    if (isInvestmentTab(to) && isInvestmentTab(from)) {
+      if (to.name === from.name) return false;
+      return tabScrollPositions.get(to.name) ?? { top: 0 };
+    }
     return { top: 0 };
   },
+});
+
+router.beforeEach((to, from) => {
+  if (isInvestmentTab(to) && isInvestmentTab(from)) {
+    tabScrollPositions.set(from.name, { left: window.scrollX, top: window.scrollY });
+  } else {
+    // 离开投资产品时，页面缓存与滚动位置一起释放。
+    tabScrollPositions.clear();
+  }
 });
 
 router.afterEach((to) => {

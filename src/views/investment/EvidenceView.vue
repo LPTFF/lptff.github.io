@@ -89,6 +89,7 @@
     <el-collapse v-model="factsActive">
       <el-collapse-item name="facts">
         <template #title>可验证事实明细（逐笔可核对）</template>
+        <LazyPanel :active="factsActive.includes('facts')">
         <el-descriptions :column="1" border class="fact-counts">
           <el-descriptions-item label="交易记录">{{ transactions.length ? `已记录 ${transactions.length} 笔` : "暂无交易记录" }}</el-descriptions-item>
           <el-descriptions-item label="每日盈亏">{{ dailyPnl.length ? `已记录 ${dailyPnl.length} 个日点` : "暂无每日盈亏" }}</el-descriptions-item>
@@ -127,6 +128,7 @@
         <!-- 二级折叠：逐笔核对 -->
         <el-collapse v-model="txDetailActive" class="inner-collapse">
           <el-collapse-item :title="`逐笔核对（${filteredRows.length} 笔）`" name="tx">
+            <LazyPanel :active="txDetailActive.includes('tx')">
             <el-alert type="info" :closable="false" show-icon class="tx-note"
               title="只列来源采集记录的字段，供与来源 App 逐笔核对。"
             />
@@ -175,10 +177,12 @@
               size="small"
               class="tx-pagination"
             />
+            </LazyPanel>
           </el-collapse-item>
 
           <!-- 二级折叠：已确认订单申请金额构成（聚合黑盒变白盒；筛选与分页同逐笔核对） -->
           <el-collapse-item title="已确认订单申请金额构成（聚合口径可追溯）" name="buy">
+            <LazyPanel :active="txDetailActive.includes('buy')">
             <p class="buy-formula">已确认订单申请金额 = 全额确认且申请单位为人民币的买入订单申请值合计。部分确认、仅受理、失败和撤销订单均不纳入；确认份额只证明成交数量，不作为金额。</p>
             <div class="tx-filters">
               <el-select v-model="buyFilterAsset" clearable placeholder="全部基金" size="small" filterable style="width: 300px">
@@ -215,10 +219,12 @@
               class="tx-pagination"
             />
             <p class="buy-total">合计（与上方指标一致）：{{ formatMoney(investedAmount) }} 元</p>
+            </LazyPanel>
           </el-collapse-item>
 
           <!-- 二级折叠：每日盈亏核对 -->
           <el-collapse-item title="每日盈亏核对" name="pnlAudit">
+            <LazyPanel :active="txDetailActive.includes('pnlAudit')">
             <template v-if="pnlAudit.pointCount">
               <el-descriptions :column="3" border size="small" class="pnl-audit-desc">
                 <el-descriptions-item label="日期范围">{{ pnlAudit.firstDate }} ~ {{ pnlAudit.lastDate }}</el-descriptions-item>
@@ -245,8 +251,10 @@
               </el-table>
             </template>
             <el-empty v-else description="暂无每日盈亏记录" :image-size="60" />
+            </LazyPanel>
           </el-collapse-item>
         </el-collapse>
+        </LazyPanel>
       </el-collapse-item>
     </el-collapse>
 
@@ -266,6 +274,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
+import LazyPanel from "./components/LazyPanel.vue";
 import { useInvestmentOS } from "../../investment/composables/use-investment-os";
 import { buildAllocationDrift, buildTransactionLedger, buildDailyPnlAudit, type TransactionLedgerRow } from "../../investment/composables/selectors";
 import { confirmedBuyOrderRequestedAmount, type CoverageDataset, type DataCoverage, type EvidenceStrength } from "../../investment/domain";
@@ -419,11 +428,12 @@ interface BuyCompositionRow {
   status: TransactionLedgerRow["status"];
   statusText?: string;
 }
+const transactionById = computed(() => new Map(transactions.value.map((tx) => [tx.id, tx])));
 const buyComposition = computed<BuyCompositionRow[]>(() => ledger.value.rows
   .filter((r) => r.type === "BUY")
   .reverse()
   .map((r) => {
-    const source = transactions.value.find((tx) => tx.id === r.id);
+    const source = transactionById.value.get(r.id);
     const cashValue = source ? confirmedBuyOrderRequestedAmount(source) : undefined;
     const excluded = cashValue === undefined;
     return {
@@ -449,6 +459,19 @@ const pagedBuyRows = computed(() =>
   filteredBuyRows.value.slice((buyPage.value - 1) * buyPageSize, buyPage.value * buyPageSize));
 watch([filterAsset, filterType], () => { page.value = 1; });
 watch(buyFilterAsset, () => { buyPage.value = 1; });
+// 页签保留筛选与页码，但账本替换后不能停在已不存在的基金或空页。
+watch(() => ledger.value.assetIds, (ids) => {
+  if (filterAsset.value && !ids.includes(filterAsset.value)) filterAsset.value = "";
+});
+watch(buyAssetIds, (ids) => {
+  if (buyFilterAsset.value && !ids.includes(buyFilterAsset.value)) buyFilterAsset.value = "";
+});
+watch(() => filteredRows.value.length, (count) => {
+  page.value = Math.min(page.value, Math.max(1, Math.ceil(count / pageSize)));
+});
+watch(() => filteredBuyRows.value.length, (count) => {
+  buyPage.value = Math.min(buyPage.value, Math.max(1, Math.ceil(count / buyPageSize)));
+});
 
 const AUDIT_DETAIL_NAMES = ["tx", "buy", "pnlAudit"] as const;
 const allAuditDetailsExpanded = computed(() =>
@@ -479,7 +502,6 @@ const recentPnlPoints = computed(() => [...dailyPnl.value]
 const allocationDrift = computed(() =>
   state.portfolio ? buildAllocationDrift(state.activeVersions, state.strategyRuleVersions, state.portfolio, state.assets) : [],
 );
-const transactionById = computed(() => new Map(transactions.value.map((tx) => [tx.id, tx])));
 const assetNameById = computed(() => new Map(state.assets.map((asset) => [asset.assetId, asset.name || asset.assetId])));
 const riskFindingEntries = computed(() => {
   const out: { title: string; detail: string }[] = [];

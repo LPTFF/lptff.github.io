@@ -3,68 +3,78 @@
  * 投资图表组件共用；数据更新用 replaceMerge:["series"]——series 按序差分更新（走 animationDurationUpdate
  * 平滑过渡，不重播入场动画，避免逐期回放闪烁），变少时正确移除，其余组件 merge 不重建。
  */
-import { onBeforeUnmount, onMounted, ref, shallowRef, watch } from "vue";
+import { computed, onActivated, onBeforeUnmount, onDeactivated, onMounted, ref, shallowRef, watch } from "vue";
 import { ensureEchartsRegistered, type EChartsType } from "./echarts";
 import type { EChartsCoreOption } from "echarts/core";
 
 export function useChart(buildOption: () => EChartsCoreOption) {
   const container = ref<HTMLDivElement | null>(null);
   const chart = shallowRef<EChartsType | null>(null);
+  const active = ref(true);
+  const visible = ref(false);
+  const option = computed(buildOption);
   let observer: ResizeObserver | null = null;
+  let frame = 0;
+  let appliedOption: EChartsCoreOption | undefined;
 
-  /** 折叠面板/展开动画中的容器可能暂时 0 宽：延迟到首次有宽再 init，避免 0 宽坐标系崩溃。 */
-  function initChart(): void {
-    if (chart.value || !container.value) return;
-    const el = container.value as unknown as HTMLElement;
-    if (el.clientWidth === 0 || el.clientHeight === 0) return;
-    const echarts = ensureEchartsRegistered();
-    chart.value = echarts.init(el);
-    applyOption(buildOption());
-  }
-
-  /** echarts 缓存尺寸与容器实际尺寸不一致时（如展开动画中间态 init）resize 自愈。
- * 注：zrender 写内联尺寸的是它内部自建的 div，不会锁死外层容器，resize 即可正确重读布局。 */
-  function syncSize(el: HTMLElement): void {
-    if (!chart.value) return;
-    if (chart.value.getWidth() !== el.clientWidth || chart.value.getHeight() !== el.clientHeight) {
-      chart.value.resize();
-    }
-  }
-
-  function applyOption(option: EChartsCoreOption): void {
-    // 容器暂不可用时部分组件（markArea 等）可能抛错；吞掉防打断 Vue render effect，待下次更新重试。
+  // 折叠或缓存的页面不构造选项、不读取零尺寸；返回时复用实例与未变化的选项。
+  function render(): void {
+    frame = 0;
+    const el = container.value as unknown as HTMLElement | null;
+    if (!active.value || !el?.isConnected) return;
+    const width = el.clientWidth;
+    const height = el.clientHeight;
+    visible.value = width > 0 && height > 0;
+    if (!visible.value) return;
     try {
-      if (chart.value && container.value) syncSize(container.value as unknown as HTMLElement);
-      // notMerge 会丢弃旧模型全新重建 series，导致入场动画（animationDuration）每次更新重播——
-      // 逐期回放时表现为曲线反复闪现；replaceMerge 只替换 series 组件且按序差分，其余组件 merge。
-      chart.value?.setOption(option, { replaceMerge: ["series"] });
+      if (!chart.value) chart.value = ensureEchartsRegistered().init(el);
+      else if (chart.value.getWidth() !== width || chart.value.getHeight() !== height) {
+        chart.value.resize({ width, height });
+      }
+      if (appliedOption !== option.value) {
+        chart.value.setOption(option.value, { replaceMerge: ["series"] });
+        appliedOption = option.value;
+      }
     } catch {
-      /* 跳过本帧 */
+      // 展开动画中的暂态失败留到下次尺寸/数据变化重试。
     }
   }
 
-  onMounted(() => {
-    if (!container.value) return;
-    // 项目类型环境存在双份 DOM lib 声明，模板 ref 类型与 echarts 入参不兼容，此处显式收窄。
-    const el = container.value as unknown as HTMLElement;
-    initChart();
-    observer = new ResizeObserver(() => {
-      if (!chart.value) {
-        initChart();
-        return;
-      }
-      chart.value.resize();
-    });
-    observer.observe(el);
-  });
+  function scheduleRender(): void {
+    if (active.value && !frame) frame = requestAnimationFrame(render);
+  }
 
-  watch(buildOption, (option) => applyOption(option));
+  function resume(): void {
+    active.value = true;
+    if (!container.value) return;
+    observer ??= new ResizeObserver(scheduleRender);
+    observer.observe(container.value as unknown as HTMLElement);
+    scheduleRender();
+  }
+
+  function pause(): void {
+    active.value = false;
+    visible.value = false;
+    observer?.disconnect();
+    cancelAnimationFrame(frame);
+    frame = 0;
+    chart.value?.dispatchAction({ type: "hideTip" });
+  }
+
+  watch(() => active.value && visible.value ? option.value : undefined, (value) => {
+    if (value) scheduleRender();
+  }, { flush: "post" });
+
+  onMounted(resume);
+  onActivated(resume);
+  onDeactivated(pause);
 
   onBeforeUnmount(() => {
-    observer?.disconnect();
+    pause();
     observer = null;
     chart.value?.dispose();
     chart.value = null;
+    appliedOption = undefined;
   });
 
   return { container, chart };

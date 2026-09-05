@@ -2,7 +2,7 @@
  * 深度分析上下文弹窗共享逻辑：聚焦单偏离 / 全量整体 两种模式，复制 + 一键跳转 ChatGPT。
  * 抽出自 ReviewView / PoliciesView / ActionsView 三处重复实现。
  */
-import { reactive } from "vue";
+import { onDeactivated, reactive } from "vue";
 import { ElMessage } from "element-plus";
 import type { AllocationDrift, ContextPackageInput } from "./selectors";
 import { buildFocusedDriftContextPackage, buildInvestmentContextPackage } from "./selectors";
@@ -36,6 +36,11 @@ export function directionText(direction: AllocationDrift["direction"]): string {
 
 export function useFocusedContext() {
   const fc = reactive({ visible: false, text: "", label: "" });
+  onDeactivated(() => {
+    fc.visible = false;
+    fc.text = "";
+    fc.label = "";
+  });
 
   function openFocused(d: AllocationDrift, input: ContextPackageInput): void {
     fc.label = `深度分析：${d.label} · ${directionText(d.direction)}`;
