@@ -16,7 +16,9 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from crawl.lib.output import DATA_ROOT, write_json_atomically
-from crawl.sendNotify import send_notification
+from crawl.lib.runner import failure_reason
+from crawl.lib.status import report_result
+from crawl.sendNotify import notify_ai_results
 
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 DEFAULT_BATCH_SIZE = 40
@@ -203,7 +205,7 @@ def _request_batch(
             if attempt < _MAX_ATTEMPTS - 1:
                 sleep_secs = _BACKOFF_BASE * (2 ** attempt)
                 print(
-                    f"[filter_welfare] 请求失败（第 {attempt + 1} 次）：{error}，{sleep_secs:.0f}s 后重试…",
+                    f"[filter_welfare] 请求失败（第 {attempt + 1} 次）：{failure_reason(error)}，{sleep_secs:.0f}s 后重试…",
                     flush=True,
                 )
                 time.sleep(sleep_secs)
@@ -272,6 +274,7 @@ def main() -> int:
     parser.add_argument("--model", default=os.environ.get("GEMINI_MODEL", DEFAULT_MODEL))
     parser.add_argument("--batch-size", type=int, default=DEFAULT_BATCH_SIZE)
     parser.add_argument("--timeout", type=float, default=120.0)
+    parser.add_argument("--summary", type=Path, help="Write this run's status for a combined AI alert")
     args = parser.parse_args()
     api_key = os.environ.get("GEMINI_API_KEY", "").strip()
     if not api_key and args.require_key:
@@ -294,22 +297,9 @@ def main() -> int:
         )
     except RuntimeError as exc:
         # 缺少密钥与服务失败使用同一退路；输入和写入错误仍正常失败。
-        fallback_reason = str(exc)
+        fallback_reason = failure_reason(exc)
         warn_msg = f"Gemini 不可用，使用保守标题规则筛选。原因：{fallback_reason}"
         print(f"[filter_welfare] 警告：{warn_msg}", flush=True)
-        # 推送企业微信告警
-        qywx_key = os.environ.get("QYWX_KEY", "").strip()
-        if api_key and qywx_key:
-            try:
-                send_notification(
-                    qywx_key,
-                    {
-                        "msgtype": "text",
-                        "text": {"content": f"[filter_welfare] ⚠️ {warn_msg}"},
-                    },
-                )
-            except Exception as notify_err:
-                print(f"[filter_welfare] 告警推送失败（{notify_err}），已忽略。", flush=True)
     kept_ids = {
         entry.identifier
         for entry in entries
@@ -320,24 +310,23 @@ def main() -> int:
         )
     }
     counts = write_filtered_snapshots(snapshots, entries, kept_ids)
-    print(
-        json.dumps(
-            {
-                "state": "degraded" if ai_kept_ids is None else "success",
-                "filterMode": "rules" if ai_kept_ids is None else "gemini",
-                "reason": fallback_reason or None,
-                "model": args.model if ai_kept_ids is not None else None,
-                "inputCount": len(entries),
-                "aiKeptCount": len(ai_kept_ids) if ai_kept_ids is not None else None,
-                "keptCount": len(kept_ids),
-                "files": {
-                    path: {"inputCount": before, "keptCount": after}
-                    for path, (before, after) in counts.items()
-                },
-            },
-            ensure_ascii=False,
-        )
-    )
+    result = {
+        "name": "welfare-filter",
+        "state": "degraded" if ai_kept_ids is None else "success",
+        "filterMode": "rules" if ai_kept_ids is None else "gemini",
+        "reason": fallback_reason or None,
+        "model": args.model if ai_kept_ids is not None else None,
+        "inputCount": len(entries),
+        "aiKeptCount": len(ai_kept_ids) if ai_kept_ids is not None else None,
+        "keptCount": len(kept_ids),
+        "files": {
+            path: {"inputCount": before, "keptCount": after}
+            for path, (before, after) in counts.items()
+        },
+    }
+    report_result(result, args.summary)
+    if args.summary is None and ai_kept_ids is None:
+        notify_ai_results([result])
     return 0
 
 

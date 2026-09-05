@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable
 from pathlib import Path
+import re
 
 import requests
 
@@ -38,7 +39,23 @@ def publish_items(
     return CollectorResult(name, "success", len(items), str(path))
 
 
-def _failure_reason(error: Exception) -> str:
+def failure_reason(error: Exception) -> str:
+    # 保留可行动的 AI 故障类别，绝不把请求 URL、密钥或响应正文带入摘要。
+    message = str(error)
+    if message in {
+        "Gemini did not approve any candidate with a verifiable benefit signal",
+        "keyword search returned no recent candidates",
+    }:
+        return "no-eligible-items"
+    if "GEMINI_API_KEY" in message:
+        return "GEMINI_API_KEY is not configured"
+    if "Gemini" in message:
+        status = re.search(r"HTTP[ (]+([45]\d{2})", message)
+        if status:
+            return f"Gemini unavailable (HTTP {status.group(1)})"
+        if "timeout" in message.lower() or "timed out" in message.lower():
+            return "Gemini request timeout"
+        return "Gemini request or response failed"
     if isinstance(error, ChallengeError):
         category = "challenge"
     elif isinstance(error, (requests.exceptions.ConnectTimeout, requests.exceptions.ReadTimeout)):
@@ -121,7 +138,7 @@ def run_guarded(
             allowed_http_hostnames=allowed_http_hostnames,
         )
     except Exception as error:
-        reason = _failure_reason(error)
+        reason = failure_reason(error)
         return preserve_or_fail(
             name=name,
             output=output,

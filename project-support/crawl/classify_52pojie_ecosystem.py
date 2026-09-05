@@ -15,7 +15,9 @@ if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from crawl.lib.output import DATA_ROOT, write_json_atomically
-from crawl.sendNotify import send_notification
+from crawl.lib.runner import failure_reason
+from crawl.lib.status import report_result
+from crawl.sendNotify import notify_ai_results
 
 DEFAULT_MODEL = "gemini-3.5-flash-lite"
 REPOSITORY_ROOT = DATA_ROOT.parents[1]
@@ -227,10 +229,14 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Analyze 52pojie as a security ecosystem radar")
     parser.add_argument("--model", default=os.environ.get("GEMINI_MODEL", DEFAULT_MODEL))
     parser.add_argument("--timeout", type=float, default=60.0)
+    parser.add_argument("--summary", type=Path, help="Write this run's status for a combined AI alert")
     args = parser.parse_args()
     api_key = load_api_key()
     if not api_key:
-        print(json.dumps({"state": "preserved" if existing_output_is_valid() else "skipped", "reason": "GEMINI_API_KEY is not configured"}))
+        result = {"name": "52pojie-ecosystem", "state": "preserved" if existing_output_is_valid() else "skipped", "reason": "GEMINI_API_KEY is not configured"}
+        report_result(result, args.summary)
+        if args.summary is None:
+            notify_ai_results([result])
         return 0
 
     source = load_source()
@@ -244,21 +250,13 @@ def main() -> int:
         }
         validate_output(output)
         write_json_atomically(OUTPUT_PATH, output, validate=validate_output)
-        print(json.dumps({"state": "success", "model": args.model, "itemCount": len(analyses)}))
+        report_result({"name": "52pojie-ecosystem", "state": "success", "model": args.model, "itemCount": len(analyses)}, args.summary)
     except Exception as error:
         state = "preserved" if existing_output_is_valid() else "skipped"
-        warn_msg = f"52pojie 生态分析失败（{state}），原因：{error}"
-        print(json.dumps({"state": state, "reason": str(error)}))
-        # 推送企业微信告警
-        qywx_key = os.environ.get("QYWX_KEY", "").strip()
-        if qywx_key:
-            try:
-                send_notification(
-                    qywx_key,
-                    {"msgtype": "text", "text": {"content": f"[classify_52pojie] ⚠️ {warn_msg}"}},
-                )
-            except Exception as notify_err:
-                print(f"[classify_52pojie] 告警推送失败（{notify_err}），已忽略。", flush=True)
+        result = {"name": "52pojie-ecosystem", "state": state, "reason": failure_reason(error)}
+        report_result(result, args.summary)
+        if args.summary is None:
+            notify_ai_results([result])
     return 0
 
 

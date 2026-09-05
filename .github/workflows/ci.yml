@@ -83,14 +83,25 @@ jobs:
           fi
       - name: Analyze 52pojie ecosystem signals
         if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
-        run: python -B project-support/crawl/classify_52pojie_ecosystem.py
+        run: python -B project-support/crawl/classify_52pojie_ecosystem.py --summary .artifacts/collectors/ecosystem.json
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Keep only bank offers in welfare data
         # AI 不可用时仍执行保守规则筛选，不让辅助分类阻断网站发布。
-        run: python -B project-support/crawl/filter_welfare_with_gemini.py
+        run: python -B project-support/crawl/filter_welfare_with_gemini.py --summary .artifacts/collectors/welfare-filter.json
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Notify AI availability issues
+        # 包含保留旧结果/降级的情况；每轮合并一次，不依赖后续发布成功。
+        if: always()
+        continue-on-error: true
+        run: >-
+          python -B project-support/crawl/sendNotify.py
+          --ai-status .artifacts/collectors/python-ci.json
+          --ai-status .artifacts/collectors/ecosystem.json
+          --ai-status .artifacts/collectors/welfare-filter.json
+        env:
+          QYWX_KEY: ${{ secrets.QYWX_KEY }}
       - name: Publish validated crawler data
         run: |
           cd ./src/data/
