@@ -13,6 +13,17 @@
 
 ## 当前结论
 
+### Bilibili 定向发现聚焦厂商基础设施优惠（2026-09-05）
+
+- 原因：宽泛的 AI/福利/兑换码召回，加上含 AI 的兑换码白名单，使 AI2U 游戏推广误入；失败回退会继续发布未经当前范围重筛的旧快照。
+- 改动：六组 VPS/域名/云服务/AI 订阅与额度查询；AI 返回服务类别及逐字原文证据，本地双重准入；启动和 CI 发布前清理旧缓存；允许成功零结果。固定银行来源规则不变。
+- 真实 Chrome 在 `https://lptff.github.io/?tab=welfare` 复现 1 条 AI2U 推广。新配置的 Bilibili AI 订阅 RSS 主文档为 `200 application/xml`，含 66 条具备标题、链接、时间、来源的记录：`REAL_SOURCE_PASS`。
+- 真实采集与 Gemini API 最终生成 2 条 Bilibili AI 额度相关线索，GitHub/Telegram 各 0 条；2 条均通过连续原文证据检查，旧快照中的 3 条跨范围内容不再准入。来源索引并不保证穷尽全部活动。
+- 本地福利采集后执行 CI 同类统一后处理：银行候选 171 条，Gemini 与银行护栏保留 11 条；主机采集真实成功 1 条；发布前定向结果重筛保留 2 条。页面实际合并 13 条（银行后处理的置顶文件有 1 条未被现有页面消费）。
+- Chrome 在 `http://127.0.0.1:8090/?tab=welfare` 验证来源筛选、Telegram 零结果状态、Bilibili 2 条日期与来源、刷新及游戏广告为 0；点击活动通过 Google RSS 跳转到匹配的 Bilibili 视频：`LOCAL_BROWSER_PASS`。页面无控制台错误，可见图片回退正常。
+- Python 语法、Vue 类型检查、生产构建和差异检查通过。当前 Chrome 页面与本地服务保留供审查。
+- 未验证厂商官网领取资格、当前额度是否仍可领取，也未提交、推送或部署；不能声明 `PRODUCTION_PASS`。本次本地记录在 `artifacts/validation-20260905-infrastructure/`，不提交原始过程材料。
+
 ### 关键词采集器 → Gemini → 薅羊毛（2026-09-05）
 
 #### Changed files

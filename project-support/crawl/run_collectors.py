@@ -49,7 +49,7 @@ COLLECTORS = (
     CollectorSpec("daydayzhuan", "welfare/daydayzhuan.py", "welfare/daydayzhuan.json", "welfare", optional=True),
     CollectorSpec("daydayzhuanTop", "welfare/daydayzhuanTop.py", "welfare/daydayzhuanTop.json", "welfare", optional=True),
     CollectorSpec("zhujiceping", "welfare/zhujiceping.py", "welfare/zhujiceping.json", "welfare", optional=True),
-    CollectorSpec("keywordSearch", "welfare/keyword_search.py", "welfare/keyword-search.json", "welfare", optional=True),
+    CollectorSpec("keywordSearch", "welfare/keyword_search.py", "welfare/keyword-search.json", "welfare", min_items=0, timeout=600, optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, group="archived"),
@@ -178,18 +178,26 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
             stderr = stderr.decode("utf-8", "replace")
 
     after_count = valid_count(spec)
+    # A collector that explicitly allows zero results must distinguish [] from a missing/bad file.
+    empty_snapshot = False
+    if spec.min_items == 0 and path.is_file():
+        try:
+            empty_snapshot = json.loads(path.read_text(encoding="utf-8")) == []
+        except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+            pass
+    after_usable = after_count > 0 or empty_snapshot
     after_metrics = snapshot_metrics(path, spec.kind)
     parsed = parse_result(stdout, spec)
     if timed_out:
-        state = "preserved" if after_count else "failed"
+        state = "preserved" if after_usable else "failed"
         reason = "collector exceeded its configured timeout"
-    elif return_code == 0 and after_count:
+    elif return_code == 0 and after_usable:
         state = parsed.state if parsed else "success"
         reason = parsed.reason if parsed else None
     elif spec.optional:
-        state = "preserved" if after_count else "skipped"
+        state = "preserved" if after_usable else "skipped"
         reason = parsed.reason if parsed else "optional collector has no usable new or existing snapshot"
-    elif after_count:
+    elif after_usable:
         state = "preserved"
         reason = parsed.reason if parsed else "collector failed; existing valid snapshot remains"
     else:

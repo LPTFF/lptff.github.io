@@ -102,6 +102,9 @@ jobs:
           --ai-status .artifacts/collectors/welfare-filter.json
         env:
           QYWX_KEY: ${{ secrets.QYWX_KEY }}
+      - name: Revalidate retained infrastructure offers
+        # 覆盖采集器超时或旧发布快照回退；不重新调用 AI，也不让不合当前范围的广告重新发布。
+        run: python -B project-support/crawl/welfare/keyword_search.py --sanitize-only
       - name: Publish validated crawler data
         run: |
           cd ./src/data/

@@ -6,9 +6,10 @@
           <div class="collector-eyebrow">后台采集器</div>
           <h2 id="collector-title">多路福利采集</h2>
           <p>
-            定时从已配置的公开页面直接采集，同时用 Google 定向搜索扩展发现范围；
+            定时采集固定来源，定向发现 VPS、域名、云服务、AI 订阅与额度优惠。
             银行优惠优先由 AI 筛选，不可用时仅按标题保守筛选，可能减少收录。
-            定向搜索和主机优惠未能更新时保留已有结果；活动条件与有效期以原文为准。
+            定向搜索保留的旧结果也会按当前范围重新筛选，没有符合项时显示 0 条；
+            主机优惠未能更新时保留已有结果。收录不代表已核实厂商官网的参与条件与有效期，请查看原文确认。
           </p>
         </div>
         <div class="collector-total">{{ welfareSourceCount }} 条当前结果</div>
@@ -22,7 +23,7 @@
             </div>
             <small>{{ directSourceCount }} 条</small>
           </div>
-          <p>读取已配置的公开页面或接口，解析标题、链接和发布时间。</p>
+          <p>从线报站筛选银行 App 和银行卡的立减、返现、红包、积分、抽奖及开户开卡奖励，并从主机资讯站发现年费不超过 20 美元的低价 VPS。</p>
           <div class="lane-sources">
             <span v-for="source in directCollectorSources" :key="source.id">
               {{ source.label }}
@@ -43,7 +44,7 @@
             </div>
             <small>{{ directedSourceCount }} 条</small>
           </div>
-          <p>通过 Google 新闻 RSS 组合福利关键词与站点限定，补充固定页面之外的候选。</p>
+          <p>通过 Google 新闻 RSS 定向发现厂商的 VPS 打折、域名降价、云服务额度，以及 AI 订阅促销和额度重置活动。</p>
           <div class="lane-sources search-source-list">
             <span v-for="source in collectorSources" :key="source.id">
               {{ source.label }} <code>site:{{ source.domain }}</code>
@@ -59,7 +60,7 @@
       </div>
       <div class="filter-heading">
         <strong>查看结果</strong>
-        <span>可查看全部福利，或只看 Google 定向发现的来源</span>
+        <span>可查看全部福利，或按来源查看基础设施与 AI 服务优惠</span>
       </div>
       <div class="source-filters" aria-label="选择采集源">
         <button
@@ -87,7 +88,7 @@
     </section>
     <div v-if="welfareLimited.length === 0" class="source-empty">
       <strong>{{ selectedSourceLabel }} 暂无通过筛选的福利</strong>
-      <span>可查看其他来源；来源或分析服务暂不可用时，部分结果可能暂停更新。</span>
+      <span>没有符合当前范围的结果时显示 0 条；来源或分析服务暂不可用时，部分结果可能暂停更新。</span>
     </div>
     <el-row>
       <el-col
