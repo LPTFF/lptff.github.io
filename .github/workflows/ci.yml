@@ -46,6 +46,8 @@ jobs:
         run: |
           npm ci
           python -m pip install --requirement project-support/requirements-crawl.txt
+      - name: Type check
+        run: npm run typecheck
       - name: Restore previously published crawler data
         if: github.event_name == 'schedule' && github.event.schedule != '17 22 * * *'
         run: |
