@@ -69,6 +69,12 @@
             评论功能暂不支持，如有问题请提issue © {{ currentYear }}
           </div>
         </el-footer>
+        <el-backtop
+          :target="backtopTarget"
+          :right="backtopRight"
+          :bottom="88"
+          aria-label="回到顶部"
+        />
       </div>
     </div>
   </div>
@@ -93,6 +99,7 @@ import {
   ElHeader,
   ElFooter,
   ElMain,
+  ElBacktop,
 } from "element-plus";
 
 type TabKey = "guide" | "pojie" | "tools" | "entertainment" | "welfare";
@@ -148,6 +155,30 @@ const menuConfig = [
 
 const previousRoute = ref("");
 const isPCRes = computed(() => isPC());
+const backtopTarget = computed(() =>
+  isPCRes.value ? ".scroll-home-container" : ".inner-container"
+);
+const backtopRight = ref(16);
+let backtopResizeObserver: ResizeObserver | null = null;
+
+const updateBacktopPosition = () => {
+  const content = document.querySelector<HTMLElement>(".news-aggregator");
+  if (!content) return;
+  const contentRight = content.getBoundingClientRect().right;
+  const outsideSpace = window.innerWidth - contentRight;
+  const buttonWidth = 40;
+  const contentGap = 12;
+  const viewportInset = 4;
+  if (outsideSpace >= buttonWidth + viewportInset) {
+    const adaptiveGap = Math.min(
+      contentGap,
+      outsideSpace - buttonWidth - viewportInset
+    );
+    backtopRight.value = Math.round(outsideSpace - buttonWidth - adaptiveGap);
+    return;
+  }
+  backtopRight.value = 16;
+};
 const route = useRoute();
 const router = useRouter();
 const requestedTab = route.query.tab ? String(route.query.tab) : "";
@@ -250,10 +281,21 @@ onMounted(() => {
   previousRoute.value = window.history.state?.back ?? "";
   document.title = menuConfig.find((item) => item.key === selectIndex.value)?.label || "";
   void scrollActiveMenuIntoView();
+  void nextTick(() => {
+    updateBacktopPosition();
+    const content = document.querySelector<HTMLElement>(".news-aggregator");
+    if (content) {
+      backtopResizeObserver = new ResizeObserver(updateBacktopPosition);
+      backtopResizeObserver.observe(content);
+    }
+    window.addEventListener("resize", updateBacktopPosition);
+  });
 });
 
 onUnmounted(() => {
   clearTimeout(clickTimer);
+  backtopResizeObserver?.disconnect();
+  window.removeEventListener("resize", updateBacktopPosition);
 });
 
 const contentLocation = ref(0);
@@ -368,10 +410,17 @@ const currentYear = new Date(
   padding: 20px;
   text-align: center;
   background-color: rgb(255, 255, 255);
-  position: static;
-  margin: 0 auto;
-  width: 100%;
+  position: fixed;
+  z-index: 8;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  box-sizing: border-box;
+  width: min(calc(100% - 16px), 1200px);
   max-width: 1200px;
+  border-top: 1px solid #ebeef5;
+  box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
 }
 
 .footer-text {
@@ -552,6 +601,7 @@ const currentYear = new Date(
 
 .main-content {
   padding-top: 135px;
+  padding-bottom: 92px;
 }
 
 /* 响应式布局 */
