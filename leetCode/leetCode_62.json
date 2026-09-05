@@ -1,0 +1,452 @@
+[
+    {
+        "problemsName": " 3051.所有路径",
+        "hardRate": "MEDIUM",
+        "passRate": "80.96%",
+        "problemsUrl": "https://leetcode.cn/problems/bP4bmD/",
+        "solutionsUrl": "https://leetcode.cn/problems/bP4bmD/solution",
+        "problemsDesc": "<p>给定一个有&nbsp;<code>n</code>&nbsp;个节点的有向无环图，用二维数组&nbsp;<code>graph</code>&nbsp;表示，请找到所有从&nbsp;<code>0</code>&nbsp;到&nbsp;<code>n-1</code>&nbsp;的路径并输出（不要求按顺序）。</p>\n\n<p><code>graph</code>&nbsp;的第 <code>i</code> 个数组中的单元都表示有向图中 <code>i</code>&nbsp;号节点所能到达的下一些结点（译者注：有向图是有方向的，即规定了 a&rarr;b 你就不能从 b&rarr;a ），若为空，就是没有下一个节点了。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/09/28/all_1.jpg\" style=\"height: 242px; width: 242px;\" /></p>\n\n<pre>\n<strong>输入：</strong>graph = [[1,2],[3],[3],[]]\n<strong>输出：</strong>[[0,1,3],[0,2,3]]\n<strong>解释：</strong>有两条路径 0 -&gt; 1 -&gt; 3 和 0 -&gt; 2 -&gt; 3\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/09/28/all_2.jpg\" style=\"height: 301px; width: 423px;\" /></p>\n\n<pre>\n<strong>输入：</strong>graph = [[4,3,1],[3,2,4],[3],[4],[]]\n<strong>输出：</strong>[[0,4],[0,3,4],[0,1,3,4],[0,1,2,3,4],[0,1,4]]\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>graph = [[1],[]]\n<strong>输出：</strong>[[0,1]]\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre>\n<strong>输入：</strong>graph = [[1,2,3],[2],[3],[]]\n<strong>输出：</strong>[[0,1,2,3],[0,2,3],[0,3]]\n</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre>\n<strong>输入：</strong>graph = [[1,3],[2],[3],[]]\n<strong>输出：</strong>[[0,1,2,3],[0,3]]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>n == graph.length</code></li>\n\t<li><code>2 &lt;= n &lt;= 15</code></li>\n\t<li><code>0 &lt;= graph[i][j] &lt; n</code></li>\n\t<li><code>graph[i][j] != i</code>&nbsp;</li>\n\t<li>保证输入为有向无环图 <code>(GAD)</code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 797&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/all-paths-from-source-to-target/\">https://leetcode-cn.com/problems/all-paths-from-source-to-target/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3052.计算除法",
+        "hardRate": "MEDIUM",
+        "passRate": "64.78%",
+        "problemsUrl": "https://leetcode.cn/problems/vlzXQL/",
+        "solutionsUrl": "https://leetcode.cn/problems/vlzXQL/solution",
+        "problemsDesc": "<p>给定一个变量对数组 <code>equations</code> 和一个实数值数组 <code>values</code> 作为已知条件，其中 <code>equations[i] = [A<sub>i</sub>, B<sub>i</sub>]</code> 和 <code>values[i]</code> 共同表示等式 <code>A<sub>i</sub> / B<sub>i</sub> = values[i]</code> 。每个 <code>A<sub>i</sub></code> 或 <code>B<sub>i</sub></code> 是一个表示单个变量的字符串。</p>\n\n<p>另有一些以数组 <code>queries</code> 表示的问题，其中 <code>queries[j] = [C<sub>j</sub>, D<sub>j</sub>]</code> 表示第 <code>j</code> 个问题，请你根据已知条件找出 <code>C<sub>j</sub> / D<sub>j</sub> = ?</code> 的结果作为答案。</p>\n\n<p>返回 <strong>所有问题的答案</strong> 。如果存在某个无法确定的答案，则用 <code>-1.0</code> 替代这个答案。如果问题中出现了给定的已知条件中没有出现的字符串，也需要用 <code>-1.0</code> 替代这个答案。</p>\n\n<p><strong>注意：</strong>输入总是有效的。可以假设除法运算中不会出现除数为 0 的情况，且不存在任何矛盾的结果。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>equations = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;c&quot;]], values = [2.0,3.0], queries = [[&quot;a&quot;,&quot;c&quot;],[&quot;b&quot;,&quot;a&quot;],[&quot;a&quot;,&quot;e&quot;],[&quot;a&quot;,&quot;a&quot;],[&quot;x&quot;,&quot;x&quot;]]\n<strong>输出：</strong>[6.00000,0.50000,-1.00000,1.00000,-1.00000]\n<strong>解释：</strong>\n条件：<em>a / b = 2.0</em>, <em>b / c = 3.0</em>\n问题：<em>a / c = ?</em>, <em>b / a = ?</em>, <em>a / e = ?</em>, <em>a / a = ?</em>, <em>x / x = ?</em>\n结果：[6.0, 0.5, -1.0, 1.0, -1.0 ]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>equations = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;c&quot;],[&quot;bc&quot;,&quot;cd&quot;]], values = [1.5,2.5,5.0], queries = [[&quot;a&quot;,&quot;c&quot;],[&quot;c&quot;,&quot;b&quot;],[&quot;bc&quot;,&quot;cd&quot;],[&quot;cd&quot;,&quot;bc&quot;]]\n<strong>输出：</strong>[3.75000,0.40000,5.00000,0.20000]\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>equations = [[&quot;a&quot;,&quot;b&quot;]], values = [0.5], queries = [[&quot;a&quot;,&quot;b&quot;],[&quot;b&quot;,&quot;a&quot;],[&quot;a&quot;,&quot;c&quot;],[&quot;x&quot;,&quot;y&quot;]]\n<strong>输出：</strong>[0.50000,2.00000,-1.00000,-1.00000]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= equations.length &lt;= 20</code></li>\n\t<li><code>equations[i].length == 2</code></li>\n\t<li><code>1 &lt;= A<sub>i</sub>.length, B<sub>i</sub>.length &lt;= 5</code></li>\n\t<li><code>values.length == equations.length</code></li>\n\t<li><code>0.0 &lt; values[i] &lt;= 20.0</code></li>\n\t<li><code>1 &lt;= queries.length &lt;= 20</code></li>\n\t<li><code>queries[i].length == 2</code></li>\n\t<li><code>1 &lt;= C<sub>j</sub>.length, D<sub>j</sub>.length &lt;= 5</code></li>\n\t<li><code>A<sub>i</sub>, B<sub>i</sub>, C<sub>j</sub>, D<sub>j</sub></code> 由小写英文字母与数字组成</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 399&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/evaluate-division/\">https://leetcode-cn.com/problems/evaluate-division/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3053.最长递增路径",
+        "hardRate": "HARD",
+        "passRate": "57.93%",
+        "problemsUrl": "https://leetcode.cn/problems/fpTFWP/",
+        "solutionsUrl": "https://leetcode.cn/problems/fpTFWP/solution",
+        "problemsDesc": "<p>给定一个&nbsp;<code>m x n</code> 整数矩阵&nbsp;<code>matrix</code> ，找出其中 <strong>最长递增路径</strong> 的长度。</p>\n\n<p>对于每个单元格，你可以往上，下，左，右四个方向移动。 <strong>不能</strong> 在 <strong>对角线</strong> 方向上移动或移动到 <strong>边界外</strong>（即不允许环绕）。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2021/01/05/grid1.jpg\" style=\"width: 242px; height: 242px;\" /></p>\n\n<pre>\n<strong>输入：</strong>matrix = [[9,9,4],[6,6,8],[2,1,1]]\n<strong>输出：</strong>4 \n<strong>解释：</strong>最长递增路径为&nbsp;<code>[1, 2, 6, 9]</code>。</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2021/01/27/tmp-grid.jpg\" style=\"width: 253px; height: 253px;\" /></p>\n\n<pre>\n<strong>输入：</strong>matrix = [[3,4,5],[3,2,6],[2,2,1]]\n<strong>输出：</strong>4 \n<strong>解释：</strong>最长递增路径是&nbsp;<code>[3, 4, 5, 6]</code>。注意不允许在对角线方向上移动。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>matrix = [[1]]\n<strong>输出：</strong>1\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>m == matrix.length</code></li>\n\t<li><code>n == matrix[i].length</code></li>\n\t<li><code>1 &lt;= m, n &lt;= 200</code></li>\n\t<li><code>0 &lt;= matrix[i][j] &lt;= 2<sup>31</sup> - 1</code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 329&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/\">https://leetcode-cn.com/problems/longest-increasing-path-in-a-matrix/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3054.课程顺序",
+        "hardRate": "MEDIUM",
+        "passRate": "56.73%",
+        "problemsUrl": "https://leetcode.cn/problems/QA2IGt/",
+        "solutionsUrl": "https://leetcode.cn/problems/QA2IGt/solution",
+        "problemsDesc": "<p>现在总共有 <code>numCourses</code>&nbsp;门课需要选，记为&nbsp;<code>0</code>&nbsp;到&nbsp;<code>numCourses-1</code>。</p>\n\n<p>给定一个数组&nbsp;<code>prerequisites</code> ，它的每一个元素&nbsp;<code>prerequisites[i]</code>&nbsp;表示两门课程之间的先修顺序。&nbsp;例如&nbsp;<code>prerequisites[i] = [a<sub>i</sub>, b<sub>i</sub>]</code>&nbsp;表示想要学习课程 <code>a<sub>i</sub></code>&nbsp;，需要先完成课程 <code>b<sub>i</sub></code>&nbsp;。</p>\n\n<p>请根据给出的总课程数 &nbsp;<code>numCourses</code> 和表示先修顺序的&nbsp;<code>prerequisites</code>&nbsp;得出一个可行的修课序列。</p>\n\n<p>可能会有多个正确的顺序，只要任意返回一种就可以了。如果不可能完成所有课程，返回一个空数组。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre>\n<strong>输入:</strong> numCourses = 2, prerequisites = [[1,0]] \n<strong>输出: </strong><code>[0,1]</code>\n<strong>解释:</strong>&nbsp;总共有 2 门课程。要学习课程 1，你需要先完成课程 0。因此，正确的课程顺序为 <code>[0,1] 。</code></pre>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入:</strong> numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]\n<strong>输出: </strong><code>[0,1,2,3] or [0,2,1,3]</code>\n<strong>解释:</strong>&nbsp;总共有 4 门课程。要学习课程 3，你应该先完成课程 1 和课程 2。并且课程 1 和课程 2 都应该排在课程 0 之后。\n&nbsp;因此，一个正确的课程顺序是&nbsp;<code>[0,1,2,3]</code> 。另一个正确的排序是&nbsp;<code>[0,2,1,3]</code> 。\n</pre>\n\n<p><strong>示例 3:</strong></p>\n\n<pre>\n<strong>输入:</strong> numCourses = 1, prerequisites = [] \n<strong>输出: </strong><code>[0]</code>\n<strong>解释:</strong>&nbsp;总共 1 门课，直接修第一门课就可。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示:</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= numCourses &lt;= 2000</code></li>\n\t<li><code>0 &lt;= prerequisites.length &lt;= numCourses * (numCourses - 1)</code></li>\n\t<li><code>prerequisites[i].length == 2</code></li>\n\t<li><code>0 &lt;= ai, bi &lt; numCourses</code></li>\n\t<li><code>ai != bi</code></li>\n\t<li><code>prerequisites</code>&nbsp;中不存在重复元素</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 210&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/course-schedule-ii/\">https://leetcode-cn.com/problems/course-schedule-ii/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3055.外星文字典",
+        "hardRate": "HARD",
+        "passRate": "51.83%",
+        "problemsUrl": "https://leetcode.cn/problems/Jf1JuT/",
+        "solutionsUrl": "https://leetcode.cn/problems/Jf1JuT/solution",
+        "problemsDesc": "<p>现有一种使用英语字母的外星文语言，这门语言的字母顺序与英语顺序不同。</p>\n\n<p>给定一个字符串列表 <code>words</code> ，作为这门语言的词典，<code>words</code> 中的字符串已经 <strong>按这门新语言的字母顺序进行了排序</strong> 。</p>\n\n<p>请你根据该词典还原出此语言中已知的字母顺序，并 <strong>按字母递增顺序</strong> 排列。若不存在合法字母顺序，返回 <code>&quot;&quot;</code> 。若存在多种可能的合法字母顺序，返回其中 <strong>任意一种</strong> 顺序即可。</p>\n\n<p>字符串 <code>s</code> <strong>字典顺序小于</strong> 字符串 <code>t</code> 有两种情况：</p>\n\n<ul>\n\t<li>在第一个不同字母处，如果 <code>s</code> 中的字母在这门外星语言的字母顺序中位于 <code>t</code> 中字母之前，那么&nbsp;<code>s</code> 的字典顺序小于 <code>t</code> 。</li>\n\t<li>如果前面 <code>min(s.length, t.length)</code> 字母都相同，那么 <code>s.length &lt; t.length</code> 时，<code>s</code> 的字典顺序也小于 <code>t</code> 。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>words = [&quot;wrt&quot;,&quot;wrf&quot;,&quot;er&quot;,&quot;ett&quot;,&quot;rftt&quot;]\n<strong>输出：</strong>&quot;wertf&quot;\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>words = [&quot;z&quot;,&quot;x&quot;]\n<strong>输出：</strong>&quot;zx&quot;\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>words = [&quot;z&quot;,&quot;x&quot;,&quot;z&quot;]\n<strong>输出：</strong>&quot;&quot;\n<strong>解释：</strong>不存在合法字母顺序，因此返回 <code>&quot;&quot; 。</code>\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= words.length &lt;= 100</code></li>\n\t<li><code>1 &lt;= words[i].length &lt;= 100</code></li>\n\t<li><code>words[i]</code> 仅由小写英文字母组成</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 269&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/alien-dictionary/\">https://leetcode-cn.com/problems/alien-dictionary/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3056.重建序列",
+        "hardRate": "MEDIUM",
+        "passRate": "51.07%",
+        "problemsUrl": "https://leetcode.cn/problems/ur2n8P/",
+        "solutionsUrl": "https://leetcode.cn/problems/ur2n8P/solution",
+        "problemsDesc": "<p>给定一个长度为 <code>n</code> 的整数数组 <code>nums</code> ，其中 <code>nums</code> 是范围为 <code>[1，n]</code> 的整数的排列。还提供了一个 2D 整数数组&nbsp;<code>sequences</code>&nbsp;，其中&nbsp;<code>sequences[i]</code>&nbsp;是&nbsp;<code>nums</code>&nbsp;的子序列。<br />\n检查 <code>nums</code> 是否是唯一的最短&nbsp;<strong>超序列</strong> 。最短 <strong>超序列</strong> 是 <strong>长度最短</strong> 的序列，并且所有序列&nbsp;<code>sequences[i]</code>&nbsp;都是它的子序列。对于给定的数组&nbsp;<code>sequences</code>&nbsp;，可能存在多个有效的 <strong>超序列</strong> 。</p>\n\n<ul>\n\t<li>例如，对于&nbsp;<code>sequences = [[1,2],[1,3]]</code>&nbsp;，有两个最短的 <strong>超序列</strong> ，<code>[1,2,3]</code> 和 <code>[1,3,2]</code> 。</li>\n\t<li>而对于&nbsp;<code>sequences = [[1,2],[1,3],[1,2,3]]</code>&nbsp;，唯一可能的最短 <strong>超序列</strong> 是 <code>[1,2,3]</code> 。<code>[1,2,3,4]</code> 是可能的超序列，但不是最短的。</li>\n</ul>\n\n<p><em>如果 <code>nums</code> 是序列的唯一最短 <strong>超序列</strong> ，则返回 <code>true</code> ，否则返回 <code>false</code> 。</em><br />\n<strong>子序列</strong> 是一个可以通过从另一个序列中删除一些元素或不删除任何元素，而不改变其余元素的顺序的序列。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3], sequences = [[1,2],[1,3]]\n<strong>输出：</strong>false\n<strong>解释：</strong>有两种可能的超序列：[1,2,3]和[1,3,2]。\n序列 [1,2] 是[<u><strong>1,2</strong></u>,3]和[<u><strong>1</strong></u>,3,<u><strong>2</strong></u>]的子序列。\n序列 [1,3] 是[<u><strong>1</strong></u>,2,<u><strong>3</strong></u>]和[<u><strong>1,3</strong></u>,2]的子序列。\n因为 nums 不是唯一最短的超序列，所以返回false。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3], sequences = [[1,2]]\n<strong>输出：</strong>false\n<strong>解释：</strong>最短可能的超序列为 [1,2]。\n序列 [1,2] 是它的子序列：[<u><strong>1,2</strong></u>]。\n因为 nums 不是最短的超序列，所以返回false。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3], sequences = [[1,2],[1,3],[2,3]]\n<strong>输出：</strong>true\n<strong>解释：</strong>最短可能的超序列为[1,2,3]。\n序列 [1,2] 是它的一个子序列：[<strong>1,2</strong>,3]。\n序列 [1,3] 是它的一个子序列：[<u><strong>1</strong></u>,2,<u><strong>3</strong></u>]。\n序列 [2,3] 是它的一个子序列：[1,<u><strong>2,3</strong></u>]。\n因为 nums 是唯一最短的超序列，所以返回true。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>n == nums.length</code></li>\n\t<li><code>1 &lt;= n &lt;= 10<sup>4</sup></code></li>\n\t<li><code>nums</code>&nbsp;是&nbsp;<code>[1, n]</code>&nbsp;范围内所有整数的排列</li>\n\t<li><code>1 &lt;= sequences.length &lt;= 10<sup>4</sup></code></li>\n\t<li><code>1 &lt;= sequences[i].length &lt;= 10<sup>4</sup></code></li>\n\t<li><code>1 &lt;= sum(sequences[i].length) &lt;= 10<sup>5</sup></code></li>\n\t<li><code>1 &lt;= sequences[i][j] &lt;= n</code></li>\n\t<li><code>sequences</code>&nbsp;的所有数组都是 <strong>唯一 </strong>的</li>\n\t<li><code>sequences[i]</code>&nbsp;是&nbsp;<code>nums</code> 的一个子序列</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p>注意：本题与主站 444&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/sequence-reconstruction/\">https://leetcode-cn.com/problems/sequence-reconstruction/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3057.省份数量",
+        "hardRate": "MEDIUM",
+        "passRate": "67.35%",
+        "problemsUrl": "https://leetcode.cn/problems/bLyHh0/",
+        "solutionsUrl": "https://leetcode.cn/problems/bLyHh0/solution",
+        "problemsDesc": "<div class=\"original__bRMd\">\n<p>有 <code>n</code> 个城市，其中一些彼此相连，另一些没有相连。如果城市 <code>a</code> 与城市 <code>b</code> 直接相连，且城市 <code>b</code> 与城市 <code>c</code> 直接相连，那么城市 <code>a</code> 与城市 <code>c</code> 间接相连。</p>\n\n<p><strong>省份</strong> 是一组直接或间接相连的城市，组内不含其他没有相连的城市。</p>\n\n<p>给你一个 <code>n x n</code> 的矩阵 <code>isConnected</code> ，其中 <code>isConnected[i][j] = 1</code> 表示第 <code>i</code> 个城市和第 <code>j</code> 个城市直接相连，而 <code>isConnected[i][j] = 0</code> 表示二者不直接相连。</p>\n\n<p>返回矩阵中 <strong>省份</strong> 的数量。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n<img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/12/24/graph1.jpg\" />\n<pre>\n<strong>输入：</strong>isConnected = [[1,1,0],[1,1,0],[0,0,1]]\n<strong>输出：</strong>2\n</pre>\n\n<p><strong>示例 2：</strong></p>\n<img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/12/24/graph2.jpg\" />\n<pre>\n<strong>输入：</strong>isConnected = [[1,0,0],[0,1,0],[0,0,1]]\n<strong>输出：</strong>3\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= n &lt;= 200</code></li>\n\t<li><code>n == isConnected.length</code></li>\n\t<li><code>n == isConnected[i].length</code></li>\n\t<li><code>isConnected[i][j]</code> 为 <code>1</code> 或 <code>0</code></li>\n\t<li><code>isConnected[i][i] == 1</code></li>\n\t<li><code>isConnected[i][j] == isConnected[j][i]</code></li>\n</ul>\n</div>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 547&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/number-of-provinces/\">https://leetcode-cn.com/problems/number-of-provinces/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3058.相似的字符串",
+        "hardRate": "HARD",
+        "passRate": "61.88%",
+        "problemsUrl": "https://leetcode.cn/problems/H6lPxb/",
+        "solutionsUrl": "https://leetcode.cn/problems/H6lPxb/solution",
+        "problemsDesc": "<p>如果交换字符串&nbsp;<code>X</code> 中的两个不同位置的字母，使得它和字符串&nbsp;<code>Y</code> 相等，那么称 <code>X</code> 和 <code>Y</code> 两个字符串相似。如果这两个字符串本身是相等的，那它们也是相似的。</p>\n\n<p>例如，<code>&quot;tars&quot;</code> 和 <code>&quot;rats&quot;</code> 是相似的 (交换 <code>0</code> 与 <code>2</code> 的位置)；&nbsp;<code>&quot;rats&quot;</code> 和 <code>&quot;arts&quot;</code> 也是相似的，但是 <code>&quot;star&quot;</code> 不与 <code>&quot;tars&quot;</code>，<code>&quot;rats&quot;</code>，或 <code>&quot;arts&quot;</code> 相似。</p>\n\n<p>总之，它们通过相似性形成了两个关联组：<code>{&quot;tars&quot;, &quot;rats&quot;, &quot;arts&quot;}</code> 和 <code>{&quot;star&quot;}</code>。注意，<code>&quot;tars&quot;</code> 和 <code>&quot;arts&quot;</code> 是在同一组中，即使它们并不相似。形式上，对每个组而言，要确定一个单词在组中，只需要这个词和该组中至少一个单词相似。</p>\n\n<p>给定一个字符串列表 <code>strs</code>。列表中的每个字符串都是 <code>strs</code> 中其它所有字符串的一个&nbsp;<strong>字母异位词&nbsp;</strong>。请问 <code>strs</code> 中有多少个相似字符串组？</p>\n\n<p><strong>字母异位词（anagram）</strong>，一种把某个字符串的字母的位置（顺序）加以改换所形成的新词。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>strs = [&quot;tars&quot;,&quot;rats&quot;,&quot;arts&quot;,&quot;star&quot;]\n<strong>输出：</strong>2\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>strs = [&quot;omv&quot;,&quot;ovm&quot;]\n<strong>输出：</strong>1\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= strs.length &lt;= 300</code></li>\n\t<li><code>1 &lt;= strs[i].length &lt;= 300</code></li>\n\t<li><code>strs[i]</code> 只包含小写字母。</li>\n\t<li><code>strs</code> 中的所有单词都具有相同的长度，且是彼此的字母异位词。</li>\n</ul>\n\n<p>&nbsp; &nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 839&nbsp;题相同：<a href=\"https://leetcode-cn.com/problems/similar-string-groups/\">https://leetcode-cn.com/problems/similar-string-groups/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3059.多余的边",
+        "hardRate": "MEDIUM",
+        "passRate": "69.36%",
+        "problemsUrl": "https://leetcode.cn/problems/7LpjUW/",
+        "solutionsUrl": "https://leetcode.cn/problems/7LpjUW/solution",
+        "problemsDesc": "<p>树可以看成是一个连通且 <strong>无环&nbsp;</strong>的&nbsp;<strong>无向&nbsp;</strong>图。</p>\n\n<p>给定往一棵&nbsp;<code>n</code> 个节点 (节点值&nbsp;<code>1～n</code>) 的树中添加一条边后的图。添加的边的两个顶点包含在 <code>1</code> 到 <code>n</code>&nbsp;中间，且这条附加的边不属于树中已存在的边。图的信息记录于长度为 <code>n</code> 的二维数组 <code>edges</code>&nbsp;，<code>edges[i] = [a<sub>i</sub>, b<sub>i</sub>]</code>&nbsp;表示图中在 <code>ai</code> 和 <code>bi</code> 之间存在一条边。</p>\n\n<p>请找出一条可以删去的边，删除后可使得剩余部分是一个有着 <code>n</code> 个节点的树。如果有多个答案，则返回数组&nbsp;<code>edges</code>&nbsp;中最后出现的边。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://pic.leetcode-cn.com/1626676174-hOEVUL-image.png\" style=\"width: 152px; \" /></p>\n\n<pre>\n<strong>输入:</strong> edges = [[1,2],[1,3],[2,3]]\n<strong>输出:</strong> [2,3]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://pic.leetcode-cn.com/1626676179-kGxcmu-image.png\" style=\"width: 250px; \" /></p>\n\n<pre>\n<strong>输入:</strong> edges = [[1,2],[2,3],[3,4],[1,4],[1,5]]\n<strong>输出:</strong> [1,4]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示:</strong></p>\n\n<ul>\n\t<li><code>n == edges.length</code></li>\n\t<li><code>3 &lt;= n &lt;= 1000</code></li>\n\t<li><code>edges[i].length == 2</code></li>\n\t<li><code>1 &lt;= ai&nbsp;&lt; bi&nbsp;&lt;= edges.length</code></li>\n\t<li><code>ai != bi</code></li>\n\t<li><code>edges</code> 中无重复元素</li>\n\t<li>给定的图是连通的&nbsp;</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 684&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/redundant-connection/\">https://leetcode-cn.com/problems/redundant-connection/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3060.最长连续序列",
+        "hardRate": "MEDIUM",
+        "passRate": "49.21%",
+        "problemsUrl": "https://leetcode.cn/problems/WhsWhI/",
+        "solutionsUrl": "https://leetcode.cn/problems/WhsWhI/solution",
+        "problemsDesc": "<p>给定一个未排序的整数数组 <code>nums</code> ，找出数字连续的最长序列（不要求序列元素在原数组中连续）的长度。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [100,4,200,1,3,2]\n<strong>输出：</strong>4\n<strong>解释：</strong>最长数字连续序列是 <code>[1, 2, 3, 4]。它的长度为 4。</code></pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [0,3,7,2,5,8,4,6,0,1]\n<strong>输出：</strong>9\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= nums.length &lt;= 10<sup>4</sup></code></li>\n\t<li><code>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></code></li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶：</strong>可以设计并实现时间复杂度为&nbsp;<code>O(n)</code><em> </em>的解决方案吗？</p>\n\n<p>&nbsp;</p>\n\n<p><meta charset=\"UTF-8\" />注意：本题与主站 128&nbsp;题相同：&nbsp;<a href=\"https://leetcode-cn.com/problems/longest-consecutive-sequence/\">https://leetcode-cn.com/problems/longest-consecutive-sequence/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3061.判定字符是否唯一",
+        "hardRate": "EASY",
+        "passRate": "70.98%",
+        "problemsUrl": "https://leetcode.cn/problems/is-unique-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/is-unique-lcci/solution",
+        "problemsDesc": "<p>实现一个算法，确定一个字符串 <code>s</code> 的所有字符是否全都不同。</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入:</strong> <code>s</code> = \"leetcode\"\n<strong>输出:</strong> false \n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入:</strong> <code>s</code> = \"abc\"\n<strong>输出:</strong> true\n</pre>\n\n<p><strong>限制：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= len(s) &lt;= 100 </code></li>\n\t<li><code>s[i]</code>仅包含小写字母</li>\n\t<li>如果你不使用额外的数据结构，会很加分。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3062.判定是否互为字符重排",
+        "hardRate": "EASY",
+        "passRate": "65.67%",
+        "problemsUrl": "https://leetcode.cn/problems/check-permutation-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/check-permutation-lcci/solution",
+        "problemsDesc": "<p>给定两个由小写字母组成的字符串 <code>s1</code> 和 <code>s2</code>，请编写一个程序，确定其中一个字符串的字符重新排列后，能否变成另一个字符串。</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入:</strong> <code>s1</code> = \"abc\", <code>s2</code> = \"bca\"\n<strong>输出:</strong> true \n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入:</strong> <code>s1</code> = \"abc\", <code>s2</code> = \"bad\"\n<strong>输出:</strong> false\n</pre>\n\n<p><strong>说明：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= len(s1) &lt;= 100 </code></li>\n\t<li><code>0 &lt;= len(s2) &lt;= 100 </code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3063.URL化",
+        "hardRate": "EASY",
+        "passRate": "57.37%",
+        "problemsUrl": "https://leetcode.cn/problems/string-to-url-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/string-to-url-lcci/solution",
+        "problemsDesc": "<p>URL化。编写一种方法，将字符串中的空格全部替换为<code>%20</code>。假定该字符串尾部有足够的空间存放新增字符，并且知道字符串的“真实”长度。（注：用<code>Java</code>实现的话，请使用字符数组实现，以便直接在数组上操作。）</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入</strong>：\"Mr John Smith    \", 13\n<strong>输出</strong>：\"Mr%20John%20Smith\"\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入</strong>：\"               \", 5\n<strong>输出</strong>：\"%20%20%20%20%20\"\n</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>字符串长度在 [0, 500000] 范围内。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3064.回文排列",
+        "hardRate": "EASY",
+        "passRate": "53.69%",
+        "problemsUrl": "https://leetcode.cn/problems/palindrome-permutation-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/palindrome-permutation-lcci/solution",
+        "problemsDesc": "<p>给定一个字符串，编写一个函数判定其是否为某个回文串的排列之一。</p>\n\n<p>回文串是指正反两个方向都一样的单词或短语。排列是指字母的重新排列。</p>\n\n<p>回文串不一定是字典当中的单词。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例1：</strong></p>\n\n<pre><strong>输入：&quot;</strong>tactcoa&quot;\n<strong>输出：</strong>true（排列有&quot;tacocat&quot;、&quot;atcocta&quot;，等等）\n</pre>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3065.一次编辑",
+        "hardRate": "MEDIUM",
+        "passRate": "35.18%",
+        "problemsUrl": "https://leetcode.cn/problems/one-away-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/one-away-lcci/solution",
+        "problemsDesc": "<p>字符串有三种编辑操作:插入一个英文字符、删除一个英文字符或者替换一个英文字符。 给定两个字符串，编写一个函数判定它们是否只需要一次(或者零次)编辑。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;1:</strong></p>\n\n<pre>\n<strong>输入:</strong> \nfirst = \"pale\"\nsecond = \"ple\"\n<strong>输出:</strong> True</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>示例&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入:</strong> \nfirst = \"pales\"\nsecond = \"pal\"\n<strong>输出:</strong> False\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3066.字符串压缩",
+        "hardRate": "EASY",
+        "passRate": "46.16%",
+        "problemsUrl": "https://leetcode.cn/problems/compress-string-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/compress-string-lcci/solution",
+        "problemsDesc": "<p>字符串压缩。利用字符重复出现的次数，编写一种方法，实现基本的字符串压缩功能。比如，字符串<code>aabcccccaaa</code>会变为<code>a2b1c5a3</code>。若“压缩”后的字符串没有变短，则返回原先的字符串。你可以假设字符串中只包含大小写英文字母（a至z）。</p>\n\n<p> <strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：\"aabcccccaaa\"\n<strong> 输出</strong>：\"a2b1c5a3\"\n</pre>\n\n<p> <strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：\"abbccd\"\n<strong> 输出</strong>：\"abbccd\"\n<strong> 解释</strong>：\"abbccd\"压缩后为\"a1b2c2d1\"，比原字符串长度更长。\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n<li>字符串长度在[0, 50000]范围内。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3067.旋转矩阵",
+        "hardRate": "MEDIUM",
+        "passRate": "73.21%",
+        "problemsUrl": "https://leetcode.cn/problems/rotate-matrix-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/rotate-matrix-lcci/solution",
+        "problemsDesc": "<p>给你一幅由 <code>N × N</code> 矩阵表示的图像，其中每个像素的大小为 4 字节。请你设计一种算法，将图像旋转 90 度。</p>\n\n<p>不占用额外内存空间能否做到？</p>\n\n<p> </p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n给定 <strong>matrix</strong> = \n[\n  [1,2,3],\n  [4,5,6],\n  [7,8,9]\n],\n\n<strong>原地</strong>旋转输入矩阵，使其变为:\n[\n  [7,4,1],\n  [8,5,2],\n  [9,6,3]\n]\n</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre>\n给定 <strong>matrix</strong> =\n[\n  [ 5, 1, 9,11],\n  [ 2, 4, 8,10],\n  [13, 3, 6, 7],\n  [15,14,12,16]\n], \n\n<strong>原地</strong>旋转输入矩阵，使其变为:\n[\n  [15,13, 2, 5],\n  [14, 3, 4, 1],\n  [12, 6, 8, 9],\n  [16, 7,10,11]\n]\n</pre>\n\n<p><strong>注意</strong>：本题与主站 48 题相同：<a href=\"https://leetcode-cn.com/problems/rotate-image/\">https://leetcode-cn.com/problems/rotate-image/</a></p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3068.零矩阵",
+        "hardRate": "MEDIUM",
+        "passRate": "64.28%",
+        "problemsUrl": "https://leetcode.cn/problems/zero-matrix-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/zero-matrix-lcci/solution",
+        "problemsDesc": "<p>编写一种算法，若M × N矩阵中某个元素为0，则将其所在的行与列清零。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>\n[\n  [1,1,1],\n  [1,0,1],\n  [1,1,1]\n]\n<strong>输出：</strong>\n[\n  [1,0,1],\n  [0,0,0],\n  [1,0,1]\n]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>\n[\n  [0,1,2,0],\n  [3,4,5,2],\n  [1,3,1,5]\n]\n<strong>输出：</strong>\n[\n  [0,0,0,0],\n  [0,4,5,0],\n  [0,3,1,0]\n]\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3069.字符串轮转",
+        "hardRate": "EASY",
+        "passRate": "54.15%",
+        "problemsUrl": "https://leetcode.cn/problems/string-rotation-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/string-rotation-lcci/solution",
+        "problemsDesc": "<p>字符串轮转。给定两个字符串<code>s1</code>和<code>s2</code>，请编写代码检查<code>s2</code>是否为<code>s1</code>旋转而成（比如，<code>waterbottle</code>是<code>erbottlewat</code>旋转后的字符串）。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong> 输入</strong>：s1 = &quot;waterbottle&quot;, s2 = &quot;erbottlewat&quot;\n<strong> 输出</strong>：True\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre><strong> 输入</strong>：s1 = &quot;aa&quot;, s2 = &quot;aba&quot;\n<strong> 输出</strong>：False\n</pre>\n\n<ol>\n</ol>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n\t<li>字符串长度在[0, 100000]范围内。</li>\n</ol>\n\n<p><strong>说明:</strong></p>\n\n<ol>\n\t<li>你能只调用一次检查子串的方法吗？</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3070.移除重复节点",
+        "hardRate": "EASY",
+        "passRate": "66.78%",
+        "problemsUrl": "https://leetcode.cn/problems/remove-duplicate-node-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/remove-duplicate-node-lcci/solution",
+        "problemsDesc": "<p>编写代码，移除未排序链表中的重复节点。保留最开始出现的节点。</p>\n\n<p> <strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：[1, 2, 3, 3, 2, 1]\n<strong> 输出</strong>：[1, 2, 3]\n</pre>\n\n<p> <strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：[1, 1, 1, 1, 2]\n<strong> 输出</strong>：[1, 2]\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n<li>链表长度在[0, 20000]范围内。</li>\n<li>链表元素在[0, 20000]范围内。</li>\n</ol>\n\n<p> <strong>进阶：</strong></p>\n\n<p>如果不得使用临时缓冲区，该怎么解决？</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3071.返回倒数第 k 个节点",
+        "hardRate": "EASY",
+        "passRate": "78.09%",
+        "problemsUrl": "https://leetcode.cn/problems/kth-node-from-end-of-list-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/kth-node-from-end-of-list-lcci/solution",
+        "problemsDesc": "<p>实现一种算法，找出单向链表中倒数第 k 个节点。返回该节点的值。</p>\n\n<p><strong>注意：</strong>本题相对原题稍作改动</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：</strong> 1-&gt;2-&gt;3-&gt;4-&gt;5 和 <em>k</em> = 2\n<strong>输出： </strong>4</pre>\n\n<p><strong>说明：</strong></p>\n\n<p>给定的 <em>k</em>&nbsp;保证是有效的。</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3072.删除中间节点",
+        "hardRate": "EASY",
+        "passRate": "85.97%",
+        "problemsUrl": "https://leetcode.cn/problems/delete-middle-node-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/delete-middle-node-lcci/solution",
+        "problemsDesc": "<p>若链表中的某个节点，既不是链表头节点，也不是链表尾节点，则称其为该链表的「中间节点」。</p>\n\n<p>假定已知链表的某一个中间节点，请实现一种算法，将该节点从链表中删除。</p>\n\n<p>例如，传入节点 <code>c</code>（位于单向链表 <code>a->b->c->d->e->f</code> 中），将其删除后，剩余链表为 <code>a->b->d->e->f</code></p>\n\n<p> </p>\n\n<p><strong>示例：</strong></p>\n\n<pre>\n<strong>输入：</strong>节点 5 （位于单向链表 4->5->1->9 中）\n<strong>输出：</strong>不返回任何数据，从链表中删除传入的节点 5，使链表变为 4->1->9\n</pre>\n\n<p> </p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3073.分割链表",
+        "hardRate": "MEDIUM",
+        "passRate": "61.00%",
+        "problemsUrl": "https://leetcode.cn/problems/partition-list-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/partition-list-lcci/solution",
+        "problemsDesc": "<p>给你一个链表的头节点 <code>head</code> 和一个特定值<em> </em><code>x</code> ，请你对链表进行分隔，使得所有 <strong>小于</strong> <code>x</code> 的节点都出现在 <strong>大于或等于</strong> <code>x</code> 的节点之前。</p>\n\n<p>你不需要&nbsp;<strong>保留</strong>&nbsp;每个分区中各节点的初始相对位置。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n<img alt=\"\" src=\"https://assets.leetcode.com/uploads/2021/01/04/partition.jpg\" style=\"width: 662px; height: 222px;\" />\n<pre>\n<strong>输入：</strong>head = [1,4,3,2,5,2], x = 3\n<strong>输出</strong>：[1,2,2,4,3,5]\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>head = [2,1], x = 2\n<strong>输出</strong>：[1,2]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>链表中节点的数目在范围 <code>[0, 200]</code> 内</li>\n\t<li><code>-100 &lt;= Node.val &lt;= 100</code></li>\n\t<li><code>-200 &lt;= x &lt;= 200</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3074.链表求和",
+        "hardRate": "MEDIUM",
+        "passRate": "46.95%",
+        "problemsUrl": "https://leetcode.cn/problems/sum-lists-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/sum-lists-lcci/solution",
+        "problemsDesc": "<p>给定两个用链表表示的整数，每个节点包含一个数位。</p>\n\n<p>这些数位是反向存放的，也就是个位排在链表首部。</p>\n\n<p>编写函数对这两个整数求和，并用链表形式返回结果。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：</strong>(7 -&gt; 1 -&gt; 6) + (5 -&gt; 9 -&gt; 2)，即617 + 295\n<strong>输出：</strong>2 -&gt; 1 -&gt; 9，即912\n</pre>\n\n<p><strong>进阶：</strong>思考一下，假设这些数位是正向存放的，又该如何解决呢?</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：</strong>(6 -&gt; 1 -&gt; 7) + (2 -&gt; 9 -&gt; 5)，即617 + 295\n<strong>输出：</strong>9 -&gt; 1 -&gt; 2，即912\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3075.回文链表",
+        "hardRate": "EASY",
+        "passRate": "48.78%",
+        "problemsUrl": "https://leetcode.cn/problems/palindrome-linked-list-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/palindrome-linked-list-lcci/solution",
+        "problemsDesc": "<p>编写一个函数，检查输入的链表是否是回文的。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入： </strong>1-&gt;2\n<strong>输出：</strong> false \n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入： </strong>1-&gt;2-&gt;2-&gt;1\n<strong>输出：</strong> true \n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶：</strong><br>\n你能否用 O(n) 时间复杂度和 O(1) 空间复杂度解决此题？</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3076.链表相交",
+        "hardRate": "EASY",
+        "passRate": "66.24%",
+        "problemsUrl": "https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/intersection-of-two-linked-lists-lcci/solution",
+        "problemsDesc": "<p>给你两个单链表的头节点 <code>headA</code> 和 <code>headB</code> ，请你找出并返回两个单链表相交的起始节点。如果两个链表没有交点，返回 <code>null</code> 。</p>\n\n<p>图示两个链表在节点 <code>c1</code> 开始相交<strong>：</strong></p>\n\n<p><a href=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_statement.png\" style=\"height: 130px; width: 400px;\" /></a></p>\n\n<p>题目数据 <strong>保证</strong> 整个链式结构中不存在环。</p>\n\n<p><strong>注意</strong>，函数返回结果后，链表必须 <strong>保持其原始结构</strong> 。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_1.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_1.png\" style=\"height: 130px; width: 400px;\" /></a></p>\n\n<pre>\n<strong>输入：</strong>intersectVal = 8, listA = [4,1,8,4,5], listB = [5,0,1,8,4,5], skipA = 2, skipB = 3\n<strong>输出：</strong>Intersected at '8'\n<strong>解释：</strong>相交节点的值为 8 （注意，如果两个链表相交则不能为 0）。\n从各自的表头开始算起，链表 A 为 [4,1,8,4,5]，链表 B 为 [5,0,1,8,4,5]。\n在 A 中，相交节点前有 2 个节点；在 B 中，相交节点前有 3 个节点。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_2.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_2.png\" style=\"height: 136px; width: 350px;\" /></a></p>\n\n<pre>\n<strong>输入：</strong>intersectVal = 2, listA = [0,9,1,2,4], listB = [3,2,4], skipA = 3, skipB = 1\n<strong>输出：</strong>Intersected at '2'\n<strong>解释：</strong>相交节点的值为 2 （注意，如果两个链表相交则不能为 0）。\n从各自的表头开始算起，链表 A 为 [0,9,1,2,4]，链表 B 为 [3,2,4]。\n在 A 中，相交节点前有 3 个节点；在 B 中，相交节点前有 1 个节点。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><a href=\"https://assets.leetcode.com/uploads/2018/12/13/160_example_3.png\" target=\"_blank\"><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/14/160_example_3.png\" style=\"height: 126px; width: 200px;\" /></a></p>\n\n<pre>\n<strong>输入：</strong>intersectVal = 0, listA = [2,6,4], listB = [1,5], skipA = 3, skipB = 2\n<strong>输出：</strong>null\n<strong>解释：</strong>从各自的表头开始算起，链表 A 为 [2,6,4]，链表 B 为 [1,5]。\n由于这两个链表不相交，所以 intersectVal 必须为 0，而 skipA 和 skipB 可以是任意值。\n这两个链表不相交，因此返回 null 。\n</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>listA</code> 中节点数目为 <code>m</code></li>\n\t<li><code>listB</code> 中节点数目为 <code>n</code></li>\n\t<li><code>0 <= m, n <= 3 * 10<sup>4</sup></code></li>\n\t<li><code>1 <= Node.val <= 10<sup>5</sup></code></li>\n\t<li><code>0 <= skipA <= m</code></li>\n\t<li><code>0 <= skipB <= n</code></li>\n\t<li>如果 <code>listA</code> 和 <code>listB</code> 没有交点，<code>intersectVal</code> 为 <code>0</code></li>\n\t<li>如果 <code>listA</code> 和 <code>listB</code> 有交点，<code>intersectVal == listA[skipA + 1] == listB[skipB + 1]</code></li>\n</ul>\n\n<p> </p>\n\n<p><strong>进阶：</strong>你能否设计一个时间复杂度 <code>O(n)</code> 、仅用 <code>O(1)</code> 内存的解决方案？</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3077.环路检测",
+        "hardRate": "MEDIUM",
+        "passRate": "55.15%",
+        "problemsUrl": "https://leetcode.cn/problems/linked-list-cycle-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/linked-list-cycle-lcci/solution",
+        "problemsDesc": "<p>给定一个链表，如果它是有环链表，实现一个算法返回环路的<code>开头节点</code>。若环不存在，请返回 <code>null</code>。</p>\n\n<p>如果链表中有某个节点，可以通过连续跟踪 <code>next</code> 指针再次到达，则链表中存在环。 为了表示给定链表中的环，我们使用整数 <code>pos</code> 来表示链表尾连接到链表中的位置（索引从 0 开始）。 如果 <code>pos</code> 是 <code>-1</code>，则在该链表中没有环。<strong>注意：<code>pos</code> 不作为参数进行传递</strong>，仅仅是为了标识链表的实际情况。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist.png\" style=\"height: 97px; width: 300px;\" /></p>\n\n<pre>\n<strong>输入：</strong>head = [3,2,0,-4], pos = 1\n<strong>输出：</strong>tail connects to node index 1\n<strong>解释：</strong>链表中有一个环，其尾部连接到第二个节点。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test2.png\" style=\"height: 74px; width: 141px;\" /></p>\n\n<pre>\n<strong>输入：</strong>head = [1,2], pos = 0\n<strong>输出：</strong>tail connects to node index 0\n<strong>解释：</strong>链表中有一个环，其尾部连接到第一个节点。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2018/12/07/circularlinkedlist_test3.png\" style=\"height: 45px; width: 45px;\" /></p>\n\n<pre>\n<strong>输入：</strong>head = [1], pos = -1\n<strong>输出：</strong>no cycle\n<strong>解释：</strong>链表中没有环。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶：</strong></p>\n\n<ul>\n\t<li>你是否可以不用额外空间解决此题？</li>\n</ul>\n\n<p>&nbsp;</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3078.三合一",
+        "hardRate": "EASY",
+        "passRate": "53.54%",
+        "problemsUrl": "https://leetcode.cn/problems/three-in-one-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/three-in-one-lcci/solution",
+        "problemsDesc": "<p>三合一。描述如何只用一个数组来实现三个栈。</p>\n\n<p>你应该实现<code>push(stackNum, value)</code>、<code>pop(stackNum)</code>、<code>isEmpty(stackNum)</code>、<code>peek(stackNum)</code>方法。<code>stackNum</code>表示栈下标，<code>value</code>表示压入的值。</p>\n\n<p>构造函数会传入一个<code>stackSize</code>参数，代表每个栈的大小。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：\n[\"TripleInOne\", \"push\", \"push\", \"pop\", \"pop\", \"pop\", \"isEmpty\"]\n[[1], [0, 1], [0, 2], [0], [0], [0], [0]]\n<strong> 输出</strong>：\n[null, null, null, 1, -1, -1, true]\n<strong>说明</strong>：当栈为空时`pop, peek`返回-1，当栈满时`push`不压入元素。\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：\n[\"TripleInOne\", \"push\", \"push\", \"push\", \"pop\", \"pop\", \"pop\", \"peek\"]\n[[2], [0, 1], [0, 2], [0, 3], [0], [0], [0], [0]]\n<strong> 输出</strong>：\n[null, null, null, null, 2, 1, -1, -1]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= stackNum &lt;= 2</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3079.栈的最小值",
+        "hardRate": "EASY",
+        "passRate": "62.04%",
+        "problemsUrl": "https://leetcode.cn/problems/min-stack-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/min-stack-lcci/solution",
+        "problemsDesc": "<p>请设计一个栈，除了常规栈支持的pop与push函数以外，还支持min函数，该函数返回栈元素中的最小值。执行push、pop和min操作的时间复杂度必须为O(1)。</p><br><p><strong>示例：</strong><pre>MinStack minStack = new MinStack();<br>minStack.push(-2);<br>minStack.push(0);<br>minStack.push(-3);<br>minStack.getMin();   --> 返回 -3.<br>minStack.pop();<br>minStack.top();      --> 返回 0.<br>minStack.getMin();   --> 返回 -2.</pre></p>",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3080.堆盘子",
+        "hardRate": "MEDIUM",
+        "passRate": "38.53%",
+        "problemsUrl": "https://leetcode.cn/problems/stack-of-plates-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/stack-of-plates-lcci/solution",
+        "problemsDesc": "<p>堆盘子。设想有一堆盘子，堆太高可能会倒下来。因此，在现实生活中，盘子堆到一定高度时，我们就会另外堆一堆盘子。请实现数据结构<code>SetOfStacks</code>，模拟这种行为。<code>SetOfStacks</code>应该由多个栈组成，并且在前一个栈填满时新建一个栈。此外，<code>SetOfStacks.push()</code>和<code>SetOfStacks.pop()</code>应该与普通栈的操作方法相同（也就是说，pop()返回的值，应该跟只有一个栈时的情况一样）。 进阶：实现一个<code>popAt(int index)</code>方法，根据指定的子栈，执行pop操作。</p>\n\n<p>当某个栈为空时，应当删除该栈。当栈中没有元素或不存在该栈时，<code>pop</code>，<code>popAt</code>&nbsp;应返回 -1.</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong> 输入</strong>：\n[&quot;StackOfPlates&quot;, &quot;push&quot;, &quot;push&quot;, &quot;popAt&quot;, &quot;pop&quot;, &quot;pop&quot;]\n[[1], [1], [2], [1], [], []]\n<strong> 输出</strong>：\n[null, null, null, 2, 1, -1]\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre><strong> 输入</strong>：\n[&quot;StackOfPlates&quot;, &quot;push&quot;, &quot;push&quot;, &quot;push&quot;, &quot;popAt&quot;, &quot;popAt&quot;, &quot;popAt&quot;]\n[[2], [1], [2], [3], [0], [0], [0]]\n<strong> 输出</strong>：\n[null, null, null, null, 2, 1, 3]\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3081.化栈为队",
+        "hardRate": "EASY",
+        "passRate": "71.82%",
+        "problemsUrl": "https://leetcode.cn/problems/implement-queue-using-stacks-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/implement-queue-using-stacks-lcci/solution",
+        "problemsDesc": "<p>实现一个MyQueue类，该类用两个栈来实现一个队列。</p><br><p><strong>示例：</strong><pre>MyQueue queue = new MyQueue();<br><br>queue.push(1);<br>queue.push(2);<br>queue.peek();  // 返回 1<br>queue.pop();   // 返回 1<br>queue.empty(); // 返回 false</pre></p><br><p><strong>说明：</strong><br><ul><li>你只能使用标准的栈操作 -- 也就是只有 <code>push to top</code>, <code>peek/pop from top</code>, <code>size</code> 和 <code>is empty</code> 操作是合法的。</li><li>你所使用的语言也许不支持栈。你可以使用 list 或者 deque（双端队列）来模拟一个栈，只要是标准的栈操作即可。</li><li>假设所有操作都是有效的 （例如，一个空的队列不会调用 pop 或者 peek 操作）。</li></ul></p>",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3082.栈排序",
+        "hardRate": "MEDIUM",
+        "passRate": "53.61%",
+        "problemsUrl": "https://leetcode.cn/problems/sort-of-stacks-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/sort-of-stacks-lcci/solution",
+        "problemsDesc": "<p>栈排序。 编写程序，对栈进行排序使最小元素位于栈顶。最多只能使用一个其他的临时栈存放数据，但不得将元素复制到别的数据结构（如数组）中。该栈支持如下操作：<code>push</code>、<code>pop</code>、<code>peek</code> 和 <code>isEmpty</code>。当栈为空时，<code>peek</code>&nbsp;返回 -1。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong> 输入</strong>：\n[&quot;SortedStack&quot;, &quot;push&quot;, &quot;push&quot;, &quot;peek&quot;, &quot;pop&quot;, &quot;peek&quot;]\n[[], [1], [2], [], [], []]\n<strong> 输出</strong>：\n[null,null,null,1,null,2]\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre><strong> 输入</strong>： \n[&quot;SortedStack&quot;, &quot;pop&quot;, &quot;pop&quot;, &quot;push&quot;, &quot;pop&quot;, &quot;isEmpty&quot;]\n[[], [], [], [1], [], []]\n<strong> 输出</strong>：\n[null,null,null,null,null,true]\n</pre>\n\n<p><strong>说明:</strong></p>\n\n<ol>\n\t<li>栈中的元素数目在[0, 5000]范围内。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3083.动物收容所",
+        "hardRate": "EASY",
+        "passRate": "58.33%",
+        "problemsUrl": "https://leetcode.cn/problems/animal-shelter-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/animal-shelter-lcci/solution",
+        "problemsDesc": "<p>动物收容所。有家动物收容所只收容狗与猫，且严格遵守&ldquo;先进先出&rdquo;的原则。在收养该收容所的动物时，收养人只能收养所有动物中&ldquo;最老&rdquo;（由其进入收容所的时间长短而定）的动物，或者可以挑选猫或狗（同时必须收养此类动物中&ldquo;最老&rdquo;的）。换言之，收养人不能自由挑选想收养的对象。请创建适用于这个系统的数据结构，实现各种操作方法，比如<code>enqueue</code>、<code>dequeueAny</code>、<code>dequeueDog</code>和<code>dequeueCat</code>。允许使用Java内置的LinkedList数据结构。</p>\n\n<p><code>enqueue</code>方法有一个<code>animal</code>参数，<code>animal[0]</code>代表动物编号，<code>animal[1]</code>代表动物种类，其中 0 代表猫，1 代表狗。</p>\n\n<p><code>dequeue*</code>方法返回一个列表<code>[动物编号, 动物种类]</code>，若没有可以收养的动物，则返回<code>[-1,-1]</code>。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong> 输入</strong>：\n[&quot;AnimalShelf&quot;, &quot;enqueue&quot;, &quot;enqueue&quot;, &quot;dequeueCat&quot;, &quot;dequeueDog&quot;, &quot;dequeueAny&quot;]\n[[], [[0, 0]], [[1, 0]], [], [], []]\n<strong> 输出</strong>：\n[null,null,null,[0,0],[-1,-1],[1,0]]\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre><strong> 输入</strong>：\n[&quot;AnimalShelf&quot;, &quot;enqueue&quot;, &quot;enqueue&quot;, &quot;enqueue&quot;, &quot;dequeueDog&quot;, &quot;dequeueCat&quot;, &quot;dequeueAny&quot;]\n[[], [[0, 0]], [[1, 0]], [[2, 1]], [], [], []]\n<strong> 输出</strong>：\n[null,null,null,null,[2,1],[0,0],[1,0]]\n</pre>\n\n<p><strong>说明:</strong></p>\n\n<ol>\n\t<li>收纳所的最大容量为20000</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3084.节点间通路",
+        "hardRate": "MEDIUM",
+        "passRate": "53.43%",
+        "problemsUrl": "https://leetcode.cn/problems/route-between-nodes-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/route-between-nodes-lcci/solution",
+        "problemsDesc": "<p>节点间通路。给定有向图，设计一个算法，找出两个节点之间是否存在一条路径。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre><strong> 输入</strong>：n = 3, graph = [[0, 1], [0, 2], [1, 2], [1, 2]], start = 0, target = 2\n<strong> 输出</strong>：true\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre><strong> 输入</strong>：n = 5, graph = [[0, 1], [0, 2], [0, 4], [0, 4], [0, 1], [1, 3], [1, 4], [1, 3], [2, 3], [3, 4]], start = 0, target = 4\n<strong> 输出</strong> true\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n\t<li>节点数量n在[0, 1e5]范围内。</li>\n\t<li>节点编号大于等于 0 小于 n。</li>\n\t<li>图中可能存在自环和平行边。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3085.最小高度树",
+        "hardRate": "EASY",
+        "passRate": "78.91%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-height-tree-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-height-tree-lcci/solution",
+        "problemsDesc": "<p>给定一个有序整数数组，元素各不相同且按升序排列，编写一个算法，创建一棵高度最小的二叉搜索树。</p><strong>示例:</strong><pre>给定有序数组: [-10,-3,0,5,9],<br><br>一个可能的答案是：[0,-3,9,-10,null,5]，它可以表示下面这个高度平衡二叉搜索树：<br><br>          0 <br>         / &#92 <br>       -3   9 <br>       /   / <br>     -10  5 <br></pre>",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3086.特定深度节点链表",
+        "hardRate": "MEDIUM",
+        "passRate": "80.73%",
+        "problemsUrl": "https://leetcode.cn/problems/list-of-depth-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/list-of-depth-lcci/solution",
+        "problemsDesc": "<p>给定一棵二叉树，设计一个算法，创建含有某一深度上所有节点的链表（比如，若一棵树的深度为 <code>D</code>，则会创建出 <code>D</code> 个链表）。返回一个包含所有深度的链表的数组。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例：</strong></p>\n\n<pre><strong>输入：</strong>[1,2,3,4,5,null,7,8]\n\n        1\n       /  \\ \n      2    3\n     / \\    \\ \n    4   5    7\n   /\n  8\n\n<strong>输出：</strong>[[1],[2,3],[4,5,7],[8]]\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3087.检查平衡性",
+        "hardRate": "EASY",
+        "passRate": "59.75%",
+        "problemsUrl": "https://leetcode.cn/problems/check-balance-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/check-balance-lcci/solution",
+        "problemsDesc": "<p>实现一个函数，检查二叉树是否平衡。在这个问题中，平衡树的定义如下：任意一个节点，其两棵子树的高度差不超过 1。</p><br><strong>示例 1:</strong><pre>给定二叉树 [3,9,20,null,null,15,7]<br>    3<br>   / &#92<br>  9  20<br>    /  &#92<br>   15   7<br>返回 true 。</pre><strong>示例 2:</strong><br><pre>给定二叉树 [1,2,2,3,3,null,null,4,4]<br>      1<br>     / &#92<br>    2   2<br>   / &#92<br>  3   3<br> / &#92<br>4   4<br>返回 false 。</pre>",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3088.合法二叉搜索树",
+        "hardRate": "MEDIUM",
+        "passRate": "35.73%",
+        "problemsUrl": "https://leetcode.cn/problems/legal-binary-search-tree-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/legal-binary-search-tree-lcci/solution",
+        "problemsDesc": "<p>实现一个函数，检查一棵二叉树是否为二叉搜索树。</p><strong>示例 1:</strong><pre><strong>输入:</strong><br>    2<br>   / &#92<br>  1   3<br><strong>输出:</strong> true<br></pre><strong>示例 2:</strong><pre><strong>输入:</strong><br>    5<br>   / &#92<br>  1   4<br>     / &#92<br>    3   6<br><strong>输出:</strong> false<br><strong>解释:</strong> 输入为: [5,1,4,null,null,3,6]。<br>     根节点的值为 5 ，但是其右子节点值为 4 。</pre>",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3089.后继者",
+        "hardRate": "MEDIUM",
+        "passRate": "62.56%",
+        "problemsUrl": "https://leetcode.cn/problems/successor-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/successor-lcci/solution",
+        "problemsDesc": "<p>设计一个算法，找出二叉搜索树中指定节点的&ldquo;下一个&rdquo;节点（也即中序后继）。</p>\n\n<p>如果指定节点没有对应的&ldquo;下一个&rdquo;节点，则返回<code>null</code>。</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> root = <code>[2,1,3], p = 1\n\n  2\n / \\\n1   3\n</code>\n<strong>输出:</strong> 2</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> root = <code>[5,3,6,2,4,null,null,1], p = 6\n\n      5\n     / \\\n    3   6\n   / \\\n  2   4\n /   \n1\n</code>\n<strong>输出:</strong> null</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3090.首个共同祖先",
+        "hardRate": "MEDIUM",
+        "passRate": "71.57%",
+        "problemsUrl": "https://leetcode.cn/problems/first-common-ancestor-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/first-common-ancestor-lcci/solution",
+        "problemsDesc": "<p>设计并实现一个算法，找出二叉树中某两个节点的第一个共同祖先。不得将其他的节点存储在另外的数据结构中。注意：这不一定是二叉搜索树。</p>\n\n<p>例如，给定如下二叉树: root = [3,5,1,6,2,0,8,null,null,7,4]</p>\n\n<pre>    3\n   / \\\n  5   1\n / \\ / \\\n6  2 0  8\n  / \\\n 7   4\n</pre>\n\n<p><strong>示例 1:</strong></p>\n\n<pre><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 1\n<strong>输出:</strong> 3\n<strong>解释:</strong> 节点 5 和节点 1 的最近公共祖先是节点 3。</pre>\n\n<p><strong>示例 2:</strong></p>\n\n<pre><strong>输入:</strong> root = [3,5,1,6,2,0,8,null,null,7,4], p = 5, q = 4\n<strong>输出:</strong> 5\n<strong>解释:</strong> 节点 5 和节点 4 的最近公共祖先是节点 5。因为根据定义最近公共祖先节点可以为节点本身。</pre>\n\n<p><strong>说明:</strong></p>\n\n<pre>所有节点的值都是唯一的。\np、q 为不同节点且均存在于给定的二叉树中。</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3091.二叉搜索树序列",
+        "hardRate": "HARD",
+        "passRate": "48.88%",
+        "problemsUrl": "https://leetcode.cn/problems/bst-sequences-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/bst-sequences-lcci/solution",
+        "problemsDesc": "<p>从左向右遍历一个数组，通过不断将其中的元素插入树中可以逐步地生成一棵二叉搜索树。</p>\n\n<p>给定一个由<strong>不同节点</strong>组成的二叉搜索树 <code>root</code>，输出所有可能生成此树的数组。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<strong>输入: </strong>root = [2,1,3]\n<strong>输出: </strong>[[2,1,3],[2,3,1]]\n解释: 数组 [2,1,3]、[2,3,1] 均可以通过从左向右遍历元素插入树中形成以下二叉搜索树\n&nbsp;      2 \n&nbsp;     / \\ \n&nbsp;    1   3\n</pre>\n\n<p><meta charset=\"UTF-8\" /></p>\n\n<p><strong>示例</strong><strong>&nbsp;2:</strong></p>\n\n<pre>\n<strong>输入: </strong>root = [4,1,null,null,3,2]\n<strong>输出: </strong>[[4,1,3,2]]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>二叉搜索树中的节点数在<meta charset=\"UTF-8\" />&nbsp;<code>[0, 1000]</code>&nbsp;的范围内</li>\n\t<li><code>1 &lt;= 节点值&nbsp;&lt;= 10^6</code></li>\n\t<li>\n\t<p>用例保证符合要求的数组数量不超过 <code>5000</code></p>\n\t</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3092.检查子树",
+        "hardRate": "MEDIUM",
+        "passRate": "67.36%",
+        "problemsUrl": "https://leetcode.cn/problems/check-subtree-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/check-subtree-lcci/solution",
+        "problemsDesc": "<p>检查子树。你有两棵非常大的二叉树：T1，有几万个节点；T2，有几万个节点。设计一个算法，判断 T2 是否为 T1 的子树。</p>\n\n<p>如果 T1 有这么一个节点 n，其子树与 T2 一模一样，则 T2 为 T1 的子树，也就是说，从节点 n 处把树砍断，得到的树与 T2 完全相同。</p>\n\n<p><strong>注意：</strong>此题相对书上原题略有改动。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：t1 = [1, 2, 3], t2 = [2]\n<strong> 输出</strong>：true\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：t1 = [1, null, 2, 4], t2 = [3, 2]\n<strong> 输出</strong>：false\n</pre>\n\n<p><strong>提示：</strong></p>\n\n<ol>\n\t<li>树的节点数目范围为[0, 20000]。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3093.求和路径",
+        "hardRate": "MEDIUM",
+        "passRate": "48.99%",
+        "problemsUrl": "https://leetcode.cn/problems/paths-with-sum-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/paths-with-sum-lcci/solution",
+        "problemsDesc": "<p>给定一棵二叉树，其中每个节点都含有一个整数数值(该值或正或负)。设计一个算法，打印节点数值总和等于某个给定值的所有路径的数量。注意，路径不一定非得从二叉树的根节点或叶节点开始或结束，但是其方向必须向下(只能从父节点指向子节点方向)。</p>\n\n<p><strong>示例:</strong><br>\n给定如下二叉树，以及目标和&nbsp;<code>sum = 22</code>，</p>\n\n<pre>              5\n             / \\\n            4   8\n           /   / \\\n          11  13  4\n         /  \\    / \\\n        7    2  5   1\n</pre>\n\n<p>返回:</p>\n\n<pre>3\n<strong>解释：</strong>和为 22&nbsp;的路径有：[5,4,11,2], [5,8,4,5], [4,11,7]</pre>\n\n<p>提示：</p>\n\n<ul>\n\t<li><code>节点总数 &lt;= 10000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3094.插入",
+        "hardRate": "EASY",
+        "passRate": "51.48%",
+        "problemsUrl": "https://leetcode.cn/problems/insert-into-bits-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/insert-into-bits-lcci/solution",
+        "problemsDesc": "<p>给定两个整型数字 <code>N</code> 与 <code>M</code>，以及表示比特位置的 <code>i</code> 与 <code>j</code>（<code>i <= j</code>，且从 0 位开始计算）。</p>\n\n<p>编写一种方法，使 <code>M</code> 对应的二进制数字插入 <code>N</code> 对应的二进制数字的第 <code>i ~ j</code> 位区域，不足之处用 <code>0</code> 补齐。具体插入过程如图所示。</p>\n\n<p><img alt=\"\" src=\"https://pic.leetcode-cn.com/1610104070-NuLVQi-05.01.gif\" style=\"width: 267px; height: 200px;\" /></p>\n\n<p>题目保证从 <code>i</code> 位到 <code>j</code> 位足以容纳 <code>M</code>， 例如： <code>M = 10011</code>，则 <code>i～j</code> 区域至少可容纳 5 位。</p>\n\n<p> </p>\n\n<p><strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：N = 1024(10000000000), M = 19(10011), i = 2, j = 6\n<strong> 输出</strong>：N = 1100(10001001100)\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>： N = 0, M = 31(11111), i = 0, j = 4\n<strong> 输出</strong>：N = 31(11111)\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3095.二进制数转字符串",
+        "hardRate": "MEDIUM",
+        "passRate": "76.84%",
+        "problemsUrl": "https://leetcode.cn/problems/binary-number-to-string-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/binary-number-to-string-lcci/solution",
+        "problemsDesc": "<p>二进制数转字符串。给定一个介于0和1之间的实数（如0.72），类型为double，打印它的二进制表达式。如果该数字无法精确地用32位以内的二进制表示，则打印“ERROR”。</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：0.625\n<strong> 输出</strong>：\"0.101\"\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：0.1\n<strong> 输出</strong>：\"ERROR\"\n<strong> 提示</strong>：0.1无法被二进制准确表示\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>32位包括输出中的 <code>\"0.\"</code> 这两位。</li>\n\t<li>题目保证输入用例的小数位数最多只有 <code>6</code> 位</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3096.翻转数位",
+        "hardRate": "EASY",
+        "passRate": "37.65%",
+        "problemsUrl": "https://leetcode.cn/problems/reverse-bits-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/reverse-bits-lcci/solution",
+        "problemsDesc": "<p>给定一个32位整数 <code>num</code>，你可以将一个数位从0变为1。请编写一个程序，找出你能够获得的最长的一串1的长度。</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入:</strong> <code>num</code> = 1775(11011101111<sub>2</sub>)\n<strong>输出:</strong> 8\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入:</strong> <code>num</code> = 7(0111<sub>2</sub>)\n<strong>输出:</strong> 4\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3097.下一个数",
+        "hardRate": "MEDIUM",
+        "passRate": "35.63%",
+        "problemsUrl": "https://leetcode.cn/problems/closed-number-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/closed-number-lcci/solution",
+        "problemsDesc": "<p>下一个数。给定一个正整数，找出与其二进制表达式中1的个数相同且大小最接近的那两个数（一个略大，一个略小）。</p>\n\n<p> <strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：num = 2（或者0b10）\n<strong> 输出</strong>：[4, 1] 或者（[0b100, 0b1]）\n</pre>\n\n<p> <strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：num = 1\n<strong> 输出</strong>：[2, -1]\n</pre>\n\n<p> <strong>提示:</strong></p>\n\n<ol>\n<li><code>num</code>的范围在[1, 2147483647]之间；</li>\n<li>如果找不到前一个或者后一个满足条件的正数，那么输出 -1。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3098.整数转换",
+        "hardRate": "EASY",
+        "passRate": "51.59%",
+        "problemsUrl": "https://leetcode.cn/problems/convert-integer-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/convert-integer-lcci/solution",
+        "problemsDesc": "<p>整数转换。编写一个函数，确定需要改变几个位才能将整数A转成整数B。</p>\n\n<p> <strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：A = 29 （或者0b11101）, B = 15（或者0b01111）\n<strong> 输出</strong>：2\n</pre>\n\n<p> <strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：A = 1，B = 2\n<strong> 输出</strong>：2\n</pre>\n\n<p> <strong>提示:</strong></p>\n\n<ol>\n<li>A，B范围在[-2147483648, 2147483647]之间</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3099.配对交换",
+        "hardRate": "EASY",
+        "passRate": "71.00%",
+        "problemsUrl": "https://leetcode.cn/problems/exchange-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/exchange-lcci/solution",
+        "problemsDesc": "<p>配对交换。编写程序，交换某个整数的奇数位和偶数位，尽量使用较少的指令（也就是说，位0与位1交换，位2与位3交换，以此类推）。</p>\n\n<p> <strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：num = 2（或者0b10）\n<strong> 输出</strong> 1 (或者 0b01)\n</pre>\n\n<p> <strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：num = 3\n<strong> 输出</strong>：3\n</pre>\n\n<p> <strong>提示:</strong></p>\n\n<ol>\n<li><code>num</code>的范围在[0, 2^30 - 1]之间，不会发生整数溢出。</li>\n</ol>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 3100.绘制直线",
+        "hardRate": "MEDIUM",
+        "passRate": "53.77%",
+        "problemsUrl": "https://leetcode.cn/problems/draw-line-lcci/",
+        "solutionsUrl": "https://leetcode.cn/problems/draw-line-lcci/solution",
+        "problemsDesc": "<p>已知一个由像素点组成的单色屏幕，每行均有 <code>w</code> 个像素点，所有像素点初始为 <code>0</code>，左上角位置为 <code>(0,0)</code>。</p>\n\n<p>现将每行的像素点按照「每 <code>32</code> 个像素点」为一组存放在一个 <code>int</code> 中，再依次存入长度为 <code>length</code> 的一维数组中。</p>\n\n<p>我们将在屏幕上绘制一条从点 <code>(x1,y)</code> 到点 <code>(x2,y)</code> 的直线（即像素点修改为 <code>1</code>），请返回绘制过后的数组。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>注意：</strong></p>\n\n<ul>\n\t<li>用例保证屏幕宽度 <code>w</code> 可被 32 整除（即一个 <code>int</code> 不会分布在两行上）</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>示例1:</strong></p>\n\n<pre>\n<strong> 输入</strong>：length = 1, w = 32, x1 = 30, x2 = 31, y = 0\n<strong> 输出</strong>：[3]\n<strong> 解释</strong>：在第 0 行的第 30 位到第 31 位画一条直线，屏幕二进制形式表示为 [00000000000000000000000000000011]，因此返回 [3]\n</pre>\n\n<p><strong>示例2:</strong></p>\n\n<pre>\n<strong> 输入</strong>：length = 3, w = 96, x1 = 0, x2 = 95, y = 0\n<strong> 输出</strong>：[-1, -1, -1]\n<strong> 解释</strong>：由于二进制 <strong>11111111111111111111111111111111</strong> 的 int 类型代表 -1，因此返回 [-1,-1,-1]</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= w &lt;= 3 * 10^5</code></li>\n\t<li><code>0 &lt;= x1 &lt;= x2 &lt; w</code></li>\n\t<li><code>0 &lt;= y &lt;= 10</code></li>\n</ul>\n",
+        "isPlus": false
+    }
+]

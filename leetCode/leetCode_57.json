@@ -1,0 +1,452 @@
+[
+    {
+        "problemsName": " 2801.快速公交",
+        "hardRate": "HARD",
+        "passRate": "35.94%",
+        "problemsUrl": "https://leetcode.cn/problems/meChtZ/",
+        "solutionsUrl": "https://leetcode.cn/problems/meChtZ/solution",
+        "problemsDesc": "小扣打算去秋日市集，由于游客较多，小扣的移动速度受到了人流影响：\r\n- 小扣从 `x` 号站点移动至 `x + 1` 号站点需要花费的时间为 `inc`；\r\n- 小扣从 `x` 号站点移动至 `x - 1` 号站点需要花费的时间为 `dec`。\r\n\r\n现有 `m` 辆公交车，编号为 `0` 到 `m-1`。小扣也可以通过搭乘编号为 `i` 的公交车，从 `x` 号站点移动至 `jump[i]*x` 号站点，耗时仅为 `cost[i]`。小扣可以搭乘任意编号的公交车且搭乘公交次数不限。\r\n\r\n假定小扣起始站点记作 `0`，秋日市集站点记作 `target`，请返回小扣抵达秋日市集最少需要花费多少时间。由于数字较大，最终答案需要对 1000000007 (1e9 + 7) 取模。\r\n\r\n注意：小扣可在移动过程中到达编号大于 `target` 的站点。\r\n\r\n**示例 1：**\r\n>输入：`target = 31, inc =  5, dec = 3, jump = [6], cost = [10]`\r\n>\r\n>输出：`33`\r\n>\r\n>解释：\r\n>小扣步行至 1 号站点，花费时间为 5；\r\n>小扣从 1 号站台搭乘 0 号公交至 6 * 1 = 6 站台，花费时间为 10；\r\n>小扣从 6 号站台步行至 5 号站台，花费时间为 3；\r\n>小扣从 5 号站台搭乘 0 号公交至 6 * 5 = 30 站台，花费时间为 10；\r\n>小扣从 30 号站台步行至 31 号站台，花费时间为 5；\r\n>最终小扣花费总时间为 33。\r\n\r\n\r\n**示例 2：**\r\n>输入：`target = 612, inc =  4, dec = 5, jump = [3,6,8,11,5,10,4], cost = [4,7,6,3,7,6,4]`\r\n>\r\n>输出：`26`\r\n>\r\n>解释：\r\n>小扣步行至 1 号站点，花费时间为 4；\r\n>小扣从 1 号站台搭乘 0 号公交至 3 * 1 = 3 站台，花费时间为 4；\r\n>小扣从 3 号站台搭乘 3 号公交至 11 * 3 = 33 站台，花费时间为 3；\r\n>小扣从 33 号站台步行至 34 站台，花费时间为 4；\r\n>小扣从 34 号站台搭乘 0 号公交至 3 * 34 = 102 站台，花费时间为 4；\r\n>小扣从 102 号站台搭乘 1 号公交至 6 * 102 = 612 站台，花费时间为 7； \r\n>最终小扣花费总时间为 26。\r\n\r\n\r\n**提示：**\r\n- `1 <= target <= 10^9`\r\n- `1 <= jump.length, cost.length <= 10`\r\n- `2 <= jump[i] <= 10^6`\r\n- `1 <= inc, dec, cost[i] <= 10^6`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2802.追逐游戏",
+        "hardRate": "HARD",
+        "passRate": "38.57%",
+        "problemsUrl": "https://leetcode.cn/problems/Za25hA/",
+        "solutionsUrl": "https://leetcode.cn/problems/Za25hA/solution",
+        "problemsDesc": "秋游中的小力和小扣设计了一个追逐游戏。他们选了秋日市集景区中的 N 个景点，景点编号为 1~N。此外，他们还选择了 N 条小路，满足任意两个景点之间都可以通过小路互相到达，且不存在两条连接景点相同的小路。整个游戏场景可视作一个无向连通图，记作二维数组 `edges`，数组中以 `[a,b]` 形式表示景点 a 与景点 b 之间有一条小路连通。\r\n\r\n小力和小扣只能沿景点间的小路移动。小力的目标是在最快时间内追到小扣，小扣的目标是尽可能延后被小力追到的时间。游戏开始前，两人分别站在两个不同的景点 `startA` 和 `startB`。每一回合，小力先行动，小扣观察到小力的行动后再行动。小力和小扣在每回合可选择以下行动之一：\r\n- 移动至相邻景点\r\n- 留在原地\r\n\r\n如果小力追到小扣（即两人于某一时刻出现在同一位置），则游戏结束。若小力可以追到小扣，请返回最少需要多少回合；若小力无法追到小扣，请返回 -1。\r\n\r\n注意：小力和小扣一定会采取最优移动策略。\r\n\r\n**示例 1：**\r\n>输入：`edges = [[1,2],[2,3],[3,4],[4,1],[2,5],[5,6]], startA = 3, startB = 5`\r\n>\r\n>输出：`3`\r\n>\r\n>解释：\r\n>![image.png](https://pic.leetcode-cn.com/1597991318-goeHHr-image.png){:height=\"250px\"}\r\n>\r\n>第一回合，小力移动至 2 号点，小扣观察到小力的行动后移动至 6 号点；\r\n>第二回合，小力移动至 5 号点，小扣无法移动，留在原地；\r\n>第三回合，小力移动至 6 号点，小力追到小扣。返回 3。\r\n\r\n\r\n**示例 2：**\r\n>输入：`edges = [[1,2],[2,3],[3,4],[4,1]], startA = 1, startB = 3`\r\n>\r\n>输出：`-1`\r\n>\r\n>解释：\r\n>![image.png](https://pic.leetcode-cn.com/1597991157-QfeakF-image.png){:height=\"250px\"}\r\n>\r\n>小力如果不动，则小扣也不动；否则小扣移动到小力的对角线位置。这样小力无法追到小扣。\r\n\r\n**提示：**\r\n- `edges` 的长度等于图中节点个数\r\n- `3 <= edges.length <= 10^5`\r\n- `1 <= edges[i][0], edges[i][1] <= edges.length 且 edges[i][0] != edges[i][1]`\r\n- `1 <= startA, startB <= edges.length 且 startA != startB`\r\n\r\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2803.黑白方格画",
+        "hardRate": "EASY",
+        "passRate": "34.96%",
+        "problemsUrl": "https://leetcode.cn/problems/ccw6C7/",
+        "solutionsUrl": "https://leetcode.cn/problems/ccw6C7/solution",
+        "problemsDesc": "小扣注意到秋日市集上有一个创作黑白方格画的摊位。摊主给每个顾客提供一个固定在墙上的白色画板，画板不能转动。画板上有 `n * n` 的网格。绘画规则为，小扣可以选择任意多行以及任意多列的格子涂成黑色（选择的整行、整列均需涂成黑色），所选行数、列数均可为 0。\n\n小扣希望最终的成品上需要有 `k` 个黑色格子，请返回小扣共有多少种涂色方案。\n\n注意：两个方案中任意一个相同位置的格子颜色不同，就视为不同的方案。\n\n**示例 1：**\n>输入：`n = 2, k = 2`\n>\n>输出：`4`\n> \n>解释：一共有四种不同的方案：\n>第一种方案：涂第一列；\n>第二种方案：涂第二列；\n>第三种方案：涂第一行；\n>第四种方案：涂第二行。\n\n**示例 2：**\n>输入：`n = 2, k = 1`\n> \n>输出：`0`\n> \n>解释：不可行，因为第一次涂色至少会涂两个黑格。\n\n**示例 3：**\n>输入：`n = 2, k = 4`\n> \n>输出：`1`\n>\n>解释：共有 2*2=4 个格子，仅有一种涂色方案。\n\n**限制：**\n- `1 <= n <= 6`\n- `0 <= k <= n * n`\n\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2804.魔术排列",
+        "hardRate": "MEDIUM",
+        "passRate": "37.18%",
+        "problemsUrl": "https://leetcode.cn/problems/er94lq/",
+        "solutionsUrl": "https://leetcode.cn/problems/er94lq/solution",
+        "problemsDesc": "秋日市集上，魔术师邀请小扣与他互动。魔术师的道具为分别写有数字 `1~N` 的 `N` 张卡牌，然后请小扣思考一个 `N` 张卡牌的排列 `target`。\n\n魔术师的目标是找到一个数字 k（k >= 1），使得初始排列顺序为 `1~N` 的卡牌经过特殊的洗牌方式最终变成小扣所想的排列 `target`，特殊的洗牌方式为：\n- 第一步，魔术师将当前位于 **偶数位置** 的卡牌（下标自 1 开始），保持 **当前排列顺序** 放在位于 **奇数位置** 的卡牌之前。例如：将当前排列 [1,2,3,4,5] 位于偶数位置的 [2,4] 置于奇数位置的 [1,3,5] 前，排列变为 [2,4,1,3,5]；\n- 第二步，若当前卡牌数量小于等于 `k`，则魔术师按排列顺序取走全部卡牌；若当前卡牌数量大于 `k`，则取走前 `k` 张卡牌，剩余卡牌继续重复这两个步骤，直至所有卡牌全部被取走；\n\n卡牌按照魔术师取走顺序构成的新排列为「魔术取数排列」，请返回是否存在这个数字 k 使得「魔术取数排列」恰好就是 `target`，从而让小扣感到大吃一惊。\n\n**示例 1：**\n>输入：`target = [2,4,3,1,5]`\n>\n>输出：`true`\n>\n>解释：排列 target 长度为 5，初始排列为：1,2,3,4,5。我们选择 k = 2：\n>第一次：将当前排列 [1,2,3,4,5] 位于偶数位置的 [2,4] 置于奇数位置的 [1,3,5] 前，排列变为 [2,4,1,3,5]。取走前 2 张卡牌 2,4，剩余 [1,3,5]；\n>第二次：将当前排列 [1,3,5] 位于偶数位置的 [3] 置于奇数位置的 [1,5] 前，排列变为 [3,1,5]。取走前 2 张 3,1，剩余 [5]；\n>第三次：当前排列为 [5]，全部取出。\n>最后，数字按照取出顺序构成的「魔术取数排列」2,4,3,1,5 恰好为 target。\n\n**示例 2：**\n>输入：`target = [5,4,3,2,1]`\n>\n>输出：`false`\n>\n>解释：无法找到一个数字 k 可以使「魔术取数排列」恰好为 target。\n\n\n**提示：**\n- `1 <= target.length = N <= 5000`\n- 题目保证 `target` 是 `1~N` 的一个排列。",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2805.数字游戏",
+        "hardRate": "HARD",
+        "passRate": "32.52%",
+        "problemsUrl": "https://leetcode.cn/problems/5TxKeK/",
+        "solutionsUrl": "https://leetcode.cn/problems/5TxKeK/solution",
+        "problemsDesc": "小扣在秋日市集入口处发现了一个数字游戏。主办方共有 `N` 个计数器，计数器编号为 `0 ~ N-1`。每个计数器上分别显示了一个数字，小扣按计数器编号升序将所显示的数字记于数组 `nums`。每个计数器上有两个按钮，分别可以实现将显示数字加一或减一。小扣每一次操作可以选择一个计数器，按下加一或减一按钮。\n\n主办方请小扣回答出一个长度为 `N` 的数组，第 `i` 个元素(0 <= i < N)表示将 `0~i` 号计数器 **初始** 所示数字操作成满足所有条件 `nums[a]+1 == nums[a+1],(0 <= a < i)` 的最小操作数。回答正确方可进入秋日市集。\n\n由于答案可能很大，请将每个最小操作数对 `1,000,000,007` 取余。\n\n\n**示例 1：**\n>输入：`nums = [3,4,5,1,6,7]`\n>\n>输出：`[0,0,0,5,6,7]`\n>\n>解释：\n>i = 0，[3] 无需操作\n>i = 1，[3,4] 无需操作；\n>i = 2，[3,4,5] 无需操作；\n>i = 3，将 [3,4,5,1] 操作成 [3,4,5,6], 最少 5 次操作；\n>i = 4，将 [3,4,5,1,6] 操作成 [3,4,5,6,7], 最少 6 次操作；\n>i = 5，将 [3,4,5,1,6,7] 操作成 [3,4,5,6,7,8]，最少 7 次操作；\n>返回 [0,0,0,5,6,7]。\n\n\n**示例 2：**\n>输入：`nums = [1,2,3,4,5]`\n>\n>输出：`[0,0,0,0,0]`\n>\n>解释：对于任意计数器编号 i 都无需操作。\n\n**示例 3：**\n>输入：`nums = [1,1,1,2,3,4]`\n>\n>输出：`[0,1,2,3,3,3]`\n>\n>解释：\n>i = 0，无需操作；\n>i = 1，将 [1,1] 操作成 [1,2] 或 [0,1] 最少 1 次操作；\n>i = 2，将 [1,1,1] 操作成 [1,2,3] 或 [0,1,2]，最少 2 次操作；\n>i = 3，将 [1,1,1,2] 操作成 [1,2,3,4] 或 [0,1,2,3]，最少 3 次操作；\n>i = 4，将 [1,1,1,2,3] 操作成 [-1,0,1,2,3]，最少 3 次操作；\n>i = 5，将 [1,1,1,2,3,4] 操作成 [-1,0,1,2,3,4]，最少 3 次操作；\n>返回 [0,1,2,3,3,3]。\n\n\n**提示：**\n- `1 <= nums.length <= 10^5`\n- `1 <= nums[i] <= 10^3`\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2806.古董键盘",
+        "hardRate": "HARD",
+        "passRate": "37.76%",
+        "problemsUrl": "https://leetcode.cn/problems/Uh984O/",
+        "solutionsUrl": "https://leetcode.cn/problems/Uh984O/solution",
+        "problemsDesc": "小扣在秋日市集购买了一个古董键盘。由于古董键盘年久失修，键盘上只有 26 个字母 **a~z** 可以按下，且每个字母最多仅能被按 `k` 次。\n\n小扣随机按了 `n` 次按键，请返回小扣总共有可能按出多少种内容。由于数字较大，最终答案需要对 1000000007 (1e9 + 7) 取模。\n\n\n**示例 1：**\n>输入：`k = 1, n = 1`\n> \n>输出：`26`\n> \n>解释：由于只能按一次按键，所有可能的字符串为 \"a\", \"b\", ... \"z\" \n\n**示例 2：**\n>输入：`k = 1, n = 2`\n> \n>输出：`650`\n> \n>解释：由于只能按两次按键，且每个键最多只能按一次，所有可能的字符串（按字典序排序）为 \"ab\", \"ac\", ... \"zy\" \n\n**提示：**\n- `1 <= k <= 5`\n- `1 <= n <= 26*k`\n \n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2807.导航装置",
+        "hardRate": "HARD",
+        "passRate": "37.60%",
+        "problemsUrl": "https://leetcode.cn/problems/hSRGyL/",
+        "solutionsUrl": "https://leetcode.cn/problems/hSRGyL/solution",
+        "problemsDesc": "小扣参加的秋日市集景区共有 $N$ 个景点，景点编号为 $1$~$N$。景点内设有 $N-1$ 条双向道路，使所有景点形成了一个二叉树结构，根结点记为 `root`，景点编号即为节点值。\r\n\r\n由于秋日市集景区的结构特殊，游客很容易迷路，主办方决定在景区的若干个景点设置导航装置，按照所在景点编号升序排列后定义装置编号为 1 ~ M。导航装置向游客发送数据，数据内容为列表 `[游客与装置 1 的相对距离,游客与装置 2 的相对距离,...,游客与装置 M 的相对距离]`。由于游客根据导航装置发送的信息来确认位置，因此主办方需保证游客在每个景点接收的数据信息皆不相同。请返回主办方最少需要设置多少个导航装置。\r\n\r\n**示例 1：**\r\n>输入：`root = [1,2,null,3,4]`\r\n>\r\n>输出：`2`\r\n>\r\n>解释：在景点 1、3 或景点 1、4 或景点 3、4 设置导航装置。\r\n>\r\n>![image.png](https://pic.leetcode-cn.com/1597996812-tqrgwu-image.png){:height=\"250px\"}\r\n\r\n\r\n\r\n**示例 2：**\r\n>输入：`root = [1,2,3,4]`\r\n>\r\n>输出：`1`\r\n>\r\n>解释：在景点 3、4 设置导航装置皆可。\r\n>\r\n>![image.png](https://pic.leetcode-cn.com/1597996826-EUQRyz-image.png){:height=\"200px\"}\r\n\r\n\r\n\r\n**提示：**\r\n- `2 <= N <= 50000`\r\n- 二叉树的非空节点值为 `1~N` 的一个排列。\r\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2808.黑盒光线反射",
+        "hardRate": "HARD",
+        "passRate": "34.23%",
+        "problemsUrl": "https://leetcode.cn/problems/IQvJ9i/",
+        "solutionsUrl": "https://leetcode.cn/problems/IQvJ9i/solution",
+        "problemsDesc": "秋日市集上有个奇怪的黑盒，黑盒的主视图为 n\\*m 的矩形。从黑盒的主视图来看，黑盒的上面和下面各均匀分布有 m 个小孔，黑盒的左面和右面各均匀分布有 n 个小孔。黑盒左上角小孔序号为 0，按顺时针编号，总共有 2*(m+n) 个小孔。每个小孔均可以打开或者关闭，初始时，所有小孔均处于关闭状态。每个小孔上的盖子均为镜面材质。例如一个 2\\*3 的黑盒主视图与其小孔分布如图所示:\n\n![image.png](https://pic.leetcode-cn.com/1598951281-ZCBrif-image.png){:height=\"200px\"}\n\n店长告诉小扣，这里是「几何学的快问快答」，店长可能有两种操作：\n\n- `open(int index, int direction)` - 若小孔处于关闭状态，则打开小孔，照入光线；否则直接照入光线；\n- `close(int index)` - 关闭处于打开状态小孔，店长保证不会关闭已处于关闭状态的小孔；\n\n其中：\n- `index`： 表示小孔序号\n- `direction`：`1` 表示光线沿 $y=x$ 方向，`-1` 表示光线沿 $y=-x$ 方向。\n\n![image.png](https://pic.leetcode-cn.com/1599620810-HdOlMi-image.png){:height=\"200px\"}\n\n\n当光线照至边界时：若边界上的小孔为开启状态，则光线会射出；否则，光线会在小孔之间进行反射。特别地：\n1. 若光线射向未打开的拐角（黑盒顶点），则光线会原路反射回去；\n2. 光线自拐角处的小孔照入时，只有一种入射方向（如自序号为 0 的小孔照入方向只能为 `-1`）\n\n![image.png](https://pic.leetcode-cn.com/1598953840-DLiAsf-image.png){:height=\"200px\"}\n\n请帮助小扣判断并返回店长每次照入的光线从几号小孔射出。\n\n\n**示例 1：**\n>输入：\n>`[\"BlackBox\",\"open\",\"open\",\"open\",\"close\",\"open\"]`\n>`[[2,3],[6,-1],[4,-1],[0,-1],[6],[0,-1]]`\n>\n>输出：`[null,6,4,6,null,4]`\n>\n>解释：\n>BlackBox b = BlackBox(2,3); // 新建一个 2x3 的黑盒\n>b.open(6,-1) // 打开 6 号小孔，并沿 y=-x 方向照入光线，光线至 0 号小孔反射，从 6 号小孔射出\n>b.open(4,-1) // 打开 4 号小孔，并沿 y=-x 方向照入光线，光线轨迹为 4-2-8-2-4，从 4 号小孔射出\n>b.open(0,-1) // 打开 0 号小孔，并沿 y=-x 方向照入光线，由于 6 号小孔为开启状态，光线从 6 号小孔射出\n>b.close(6) // 关闭 6 号小孔\n>b.shoot(0,-1) // 从 0 号小孔沿 y=-x 方向照入光线，由于 6 号小孔为关闭状态，4 号小孔为开启状态，光线轨迹为 0-6-4，从 4 号小孔射出\n\n**示例 2：**\n>输入：\n>`[\"BlackBox\",\"open\",\"open\",\"open\",\"open\",\"close\",\"open\",\"close\",\"open\"]`\n>`[[3,3],[1,-1],[5,1],[11,-1],[11,1],[1],[11,1],[5],[11,-1]]`\n>\n>输出：`[null,1,1,5,1,null,5,null,11]`\n>\n>解释：\n>\n>![image.png](https://pic.leetcode-cn.com/1599204202-yGDMVk-image.png){:height=\"300px\"}\n>\n>BlackBox b = BlackBox(3,3); // 新建一个 3x3 的黑盒\n>b.open(1,-1) // 打开 1 号小孔，并沿 y=-x 方向照入光线，光线轨迹为 1-5-7-11-1，从 1 号小孔射出\n>b.open(5,1) // 打开 5 号小孔，并沿 y=x 方向照入光线，光线轨迹为 5-7-11-1，从 1 号小孔射出\n>b.open(11,-1) // 打开 11 号小孔，并沿逆 y=-x 方向照入光线，光线轨迹为 11-7-5，从 5 号小孔射出\n>b.open(11,1) // 从 11 号小孔沿 y=x 方向照入光线，光线轨迹为 11-1，从 1 号小孔射出\n>b.close(1) // 关闭 1 号小孔\n>b.open(11,1) // 从 11 号小孔沿 y=x 方向照入光线，光线轨迹为 11-1-5，从 5 号小孔射出\n>b.close(5) // 关闭 5 号小孔\n>b.open(11,-1) // 从 11 号小孔沿 y=-x 方向照入光线，光线轨迹为 11-1-5-7-11，从 11 号小孔射出\n\n\n\n**提示：**\n- `1 <= n, m <= 10000`\n- `1 <= 操作次数 <= 10000`\n- `direction` 仅为 `1` 或 `-1`\n- `0 <= index < 2*(m+n)`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2809.采购方案",
+        "hardRate": "EASY",
+        "passRate": "31.84%",
+        "problemsUrl": "https://leetcode.cn/problems/4xy4Wx/",
+        "solutionsUrl": "https://leetcode.cn/problems/4xy4Wx/solution",
+        "problemsDesc": "小力将 N 个零件的报价存于数组 `nums`。小力预算为 `target`，假定小力仅购买两个零件，要求购买零件的花费不超过预算，请问他有多少种采购方案。\n\n注意：答案需要以 `1e9 + 7 (1000000007)` 为底取模，如：计算初始结果为：`1000000008`，请返回 `1`\n\n\n**示例 1：**\n>输入：`nums = [2,5,3,5], target = 6`\n>\n>输出：`1`\n>\n>解释：预算内仅能购买 nums[0] 与 nums[2]。\n\n**示例 2：**\n>输入：`nums = [2,2,1,9], target = 10`\n>\n>输出：`4`\n>\n>解释：符合预算的采购方案如下：\n>nums[0] + nums[1] = 4\n>nums[0] + nums[2] = 3\n>nums[1] + nums[2] = 3\n>nums[2] + nums[3] = 10\n\n**提示：**\n- `2 <= nums.length <= 10^5`\n- `1 <= nums[i], target <= 10^5`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2810.乐团站位",
+        "hardRate": "MEDIUM",
+        "passRate": "21.18%",
+        "problemsUrl": "https://leetcode.cn/problems/SNJvJP/",
+        "solutionsUrl": "https://leetcode.cn/problems/SNJvJP/solution",
+        "problemsDesc": "某乐团的演出场地可视作 `num * num` 的二维矩阵 `grid`（左上角坐标为 `[0,0]`)，每个位置站有一位成员。乐团共有 `9` 种乐器，乐器编号为 `1~9`，每位成员持有 `1` 个乐器。\n\n为保证声乐混合效果，成员站位规则为：自 `grid` 左上角开始顺时针螺旋形向内循环以 `1，2，...，9` 循环重复排列。例如当 num = `5` 时，站位如图所示\n\n![image.png](https://pic.leetcode-cn.com/1616125411-WOblWH-image.png)\n\n\n请返回位于场地坐标 [`Xpos`,`Ypos`] 的成员所持乐器编号。\n\n**示例 1：**\n>输入：`num = 3, Xpos = 0, Ypos = 2`\n>\n>输出：`3`\n>\n>解释：\n![image.png](https://pic.leetcode-cn.com/1616125437-WUOwsu-image.png)\n\n\n**示例 2：**\n>输入：`num = 4, Xpos = 1, Ypos = 2`\n>\n>输出：`5`\n>\n>解释：\n![image.png](https://pic.leetcode-cn.com/1616125453-IIDpxg-image.png)\n\n\n**提示：**\n- `1 <= num <= 10^9`\n- `0 <= Xpos, Ypos < num`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2811.魔塔游戏",
+        "hardRate": "MEDIUM",
+        "passRate": "37.69%",
+        "problemsUrl": "https://leetcode.cn/problems/p0NxJO/",
+        "solutionsUrl": "https://leetcode.cn/problems/p0NxJO/solution",
+        "problemsDesc": "小扣当前位于魔塔游戏第一层，共有 `N` 个房间，编号为 `0 ~ N-1`。每个房间的补血道具/怪物对于血量影响记于数组 `nums`，其中正数表示道具补血数值，即血量增加对应数值；负数表示怪物造成伤害值，即血量减少对应数值；`0` 表示房间对血量无影响。\n\n**小扣初始血量为 1，且无上限**。假定小扣原计划按房间编号升序访问所有房间补血/打怪，**为保证血量始终为正值**，小扣需对房间访问顺序进行调整，**每次仅能将一个怪物房间（负数的房间）调整至访问顺序末尾**。请返回小扣最少需要调整几次，才能顺利访问所有房间。若调整顺序也无法访问完全部房间，请返回 -1。\n\n\n**示例 1：**\n>输入：`nums = [100,100,100,-250,-60,-140,-50,-50,100,150]`\n>\n>输出：`1`\n>\n>解释：初始血量为 1。至少需要将 nums[3] 调整至访问顺序末尾以满足要求。\n\n**示例 2：**\n>输入：`nums = [-200,-300,400,0]`\n>\n>输出：`-1`\n>\n>解释：调整访问顺序也无法完成全部房间的访问。\n\n**提示：**\n- `1 <= nums.length <= 10^5`\n- `-10^5 <= nums[i] <= 10^5`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2812.变换的迷宫",
+        "hardRate": "HARD",
+        "passRate": "29.30%",
+        "problemsUrl": "https://leetcode.cn/problems/Db3wC1/",
+        "solutionsUrl": "https://leetcode.cn/problems/Db3wC1/solution",
+        "problemsDesc": "某解密游戏中，有一个 N\\*M 的迷宫，迷宫地形会随时间变化而改变，迷宫出口一直位于 `(n-1,m-1)` 位置。迷宫变化规律记录于 `maze` 中，`maze[i]` 表示 `i` 时刻迷宫的地形状态，`\".\"` 表示可通行空地，`\"#\"` 表示陷阱。\n\n地形图初始状态记作 `maze[0]`，此时小力位于起点 `(0,0)`。此后每一时刻可选择往上、下、左、右其一方向走一步，或者停留在原地。\n\n小力背包有以下两个魔法卷轴（卷轴使用一次后消失）：\n+ 临时消除术：将指定位置在下一个时刻变为空地；\n+ 永久消除术：将指定位置永久变为空地。\n\n请判断在迷宫变化结束前（含最后时刻），小力能否在不经过任意陷阱的情况下到达迷宫出口呢？\n\n**注意： 输入数据保证起点和终点在所有时刻均为空地。**\n\n**示例 1：**\n>输入：`maze = [[\".#.\",\"#..\"],[\"...\",\".#.\"],[\".##\",\".#.\"],[\"..#\",\".#.\"]]`\n>\n>输出：`true`\n>\n>解释：\n![maze.gif](https://pic.leetcode-cn.com/1615892239-SCIjyf-maze.gif)\n\n\n**示例 2：**\n>输入：`maze = [[\".#.\",\"...\"],[\"...\",\"...\"]]`\n>\n>输出：`false`\n>\n>解释：由于时间不够，小力无法到达终点逃出迷宫。\n\n**示例 3：**\n>输入：`maze = [[\"...\",\"...\",\"...\"],[\".##\",\"###\",\"##.\"],[\".##\",\"###\",\"##.\"],[\".##\",\"###\",\"##.\"],[\".##\",\"###\",\"##.\"],[\".##\",\"###\",\"##.\"],[\".##\",\"###\",\"##.\"]]`\n>\n>输出：`false`\n>\n>解释：由于道路不通，小力无法到达终点逃出迷宫。\n\n**提示：**\n- `1 <= maze.length <= 100`\n- `1 <= maze[i].length, maze[i][j].length <= 50`\n- `maze[i][j]` 仅包含 `\".\"`、`\"#\"`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2813.批量处理任务",
+        "hardRate": "HARD",
+        "passRate": "42.58%",
+        "problemsUrl": "https://leetcode.cn/problems/t3fKg1/",
+        "solutionsUrl": "https://leetcode.cn/problems/t3fKg1/solution",
+        "problemsDesc": "某实验室计算机待处理任务以 `[start,end,period]` 格式记于二维数组 `tasks`，表示完成该任务的时间范围为起始时间 `start` 至结束时间 `end` 之间，需要计算机投入 `period` 的时长，注意：\n1. `period` 可为不连续时间\n2. 首尾时间均包含在内\n\n处于开机状态的计算机可同时处理任意多个任务，请返回电脑最少开机多久，可处理完所有任务。\n\n**示例 1：**\n>输入：`tasks = [[1,3,2],[2,5,3],[5,6,2]]`\n>\n>输出：`4`\n>\n>解释：\n>tasks[0] 选择时间点 2、3；\n>tasks[1] 选择时间点 2、3、5；\n>tasks[2] 选择时间点 5、6；\n>因此计算机仅需在时间点 2、3、5、6 四个时刻保持开机即可完成任务。\n\n**示例 2：**\n>输入：`tasks = [[2,3,1],[5,5,1],[5,6,2]]`\n>\n>输出：`3`\n>\n>解释：\n>tasks[0] 选择时间点 2 或 3；\n>tasks[1] 选择时间点 5；\n>tasks[2] 选择时间点 5、6；\n>因此计算机仅需在时间点 2、5、6 或 3、5、6 三个时刻保持开机即可完成任务。\n\n**提示：**\n- `2 <= tasks.length <= 10^5`\n- `tasks[i].length == 3`\n- `0 <= tasks[i][0] <= tasks[i][1] <= 10^9`\n- `1 <= tasks[i][2] <= tasks[i][1]-tasks[i][0] + 1`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2814.蓄水",
+        "hardRate": "EASY",
+        "passRate": "34.81%",
+        "problemsUrl": "https://leetcode.cn/problems/o8SXZn/",
+        "solutionsUrl": "https://leetcode.cn/problems/o8SXZn/solution",
+        "problemsDesc": "给定 N 个无限容量且初始均空的水缸，每个水缸配有一个水桶用来打水，第 `i` 个水缸配备的水桶容量记作 `bucket[i]`。小扣有以下两种操作：\n-  升级水桶：选择任意一个水桶，使其容量增加为 `bucket[i]+1`\n-  蓄水：将全部水桶接满水，倒入各自对应的水缸\n\n每个水缸对应最低蓄水量记作 `vat[i]`，返回小扣至少需要多少次操作可以完成所有水缸蓄水要求。\n\n注意：实际蓄水量 **达到或超过** 最低蓄水量，即完成蓄水要求。\n\n**示例 1：**\n>输入：`bucket = [1,3], vat = [6,8]`\n>\n>输出：`4`\n>\n>解释：\n>第 1 次操作升级 bucket[0]；\n>第 2 ~ 4 次操作均选择蓄水，即可完成蓄水要求。\n![vat1.gif](https://pic.leetcode-cn.com/1616122992-RkDxoL-vat1.gif)\n\n\n\n**示例 2：**\n>输入：`bucket = [9,0,1], vat = [0,2,2]`\n>\n>输出：`3`\n>\n>解释：\n>第 1 次操作均选择升级 bucket[1]\n>第 2~3 次操作选择蓄水，即可完成蓄水要求。\n\n**提示：**\n- `1 <= bucket.length == vat.length <= 100`\n- `0 <= bucket[i], vat[i] <= 10^4`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2815.二叉树染色",
+        "hardRate": "MEDIUM",
+        "passRate": "56.07%",
+        "problemsUrl": "https://leetcode.cn/problems/er-cha-shu-ran-se-UGC/",
+        "solutionsUrl": "https://leetcode.cn/problems/er-cha-shu-ran-se-UGC/solution",
+        "problemsDesc": "小扣有一个根结点为 `root` 的二叉树模型，初始所有结点均为白色，可以用蓝色染料给模型结点染色，模型的每个结点有一个 `val` 价值。小扣出于美观考虑，希望最后二叉树上每个蓝色相连部分的结点个数不能超过 `k` 个，求所有染成蓝色的结点价值总和最大是多少？\n\n\n**示例 1：**\n> 输入：`root = [5,2,3,4], k = 2`\n>\n> 输出：`12`\n>\n> 解释：`结点 5、3、4 染成蓝色，获得最大的价值 5+3+4=12`\n![image.png](https://pic.leetcode-cn.com/1616126267-BqaCRj-image.png)\n\n\n**示例 2：**\n> 输入：`root = [4,1,3,9,null,null,2], k = 2`\n>\n> 输出：`16`\n>\n> 解释：结点 4、3、9 染成蓝色，获得最大的价值 4+3+9=16\n![image.png](https://pic.leetcode-cn.com/1616126301-gJbhba-image.png)\n\n\n\n**提示：**\n+ `1 <= k <= 10`\n+ `1 <= val <= 10000`\n+ `1 <= 结点数量 <= 10000`\n    ",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2816.电动车游城市",
+        "hardRate": "HARD",
+        "passRate": "48.39%",
+        "problemsUrl": "https://leetcode.cn/problems/DFPeFJ/",
+        "solutionsUrl": "https://leetcode.cn/problems/DFPeFJ/solution",
+        "problemsDesc": "小明的电动车电量充满时可行驶距离为 `cnt`，每行驶 1 单位距离消耗 1 单位电量，且花费 1 单位时间。小明想选择电动车作为代步工具。地图上共有 N 个景点，景点编号为 0 ~ N-1。他将地图信息以 `[城市 A 编号,城市 B 编号,两城市间距离]` 格式整理在在二维数组 `paths`，表示城市 A、B 间存在双向通路。初始状态，电动车电量为 0。每个城市都设有充电桩，`charge[i]` 表示第 i 个城市每充 1 单位电量需要花费的单位时间。请返回小明最少需要花费多少单位时间从起点城市 `start` 抵达终点城市 `end`。\n\n\n**示例 1：**\n>输入：`paths = [[1,3,3],[3,2,1],[2,1,3],[0,1,4],[3,0,5]], cnt = 6, start = 1, end = 0, charge = [2,10,4,1]`\n>\n>输出：`43`\n>\n>解释：最佳路线为：1->3->0。\n>在城市 1 仅充 3 单位电至城市 3，然后在城市 3 充 5 单位电，行驶至城市 5。\n>充电用时共 3\\*10 + 5\\*1= 35\n>行驶用时 3 + 5 = 8，此时总用时最短 43。\n![image.png](https://pic.leetcode-cn.com/1616125304-mzVxIV-image.png)\n\n\n\n\n**示例 2：**\n>输入：`paths = [[0,4,2],[4,3,5],[3,0,5],[0,1,5],[3,2,4],[1,2,8]], cnt = 8, start = 0, end = 2, charge = [4,1,1,3,2]`\n>\n>输出：`38`\n>\n>解释：最佳路线为：0->4->3->2。\n>城市 0 充电 2 单位，行驶至城市 4 充电 8 单位，行驶至城市 3 充电 1 单位，最终行驶至城市 2。\n>充电用时 4\\*2+2\\*8+3\\*1 = 27\n>行驶用时 2+5+4 = 11，总用时最短 38。\n\n**提示：**\n- `1 <= paths.length <= 200`\n- `paths[i].length == 3`\n- `2 <= charge.length == n <= 100`\n- `0 <= path[i][0],path[i][1],start,end < n`\n- `1 <= cnt <= 100`\n- `1 <= path[i][2] <= cnt`\n- `1 <= charge[i] <= 100`\n- 题目保证所有城市相互可以到达",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2817.最多牌组数",
+        "hardRate": "HARD",
+        "passRate": "34.67%",
+        "problemsUrl": "https://leetcode.cn/problems/Up5XYM/",
+        "solutionsUrl": "https://leetcode.cn/problems/Up5XYM/solution",
+        "problemsDesc": "麻将的游戏规则中，共有两种方式凑成「一组牌」：\n- 顺子：三张牌面数字连续的麻将，例如 [4,5,6]\n- 刻子：三张牌面数字相同的麻将，例如 [10,10,10]\n\n给定若干数字作为麻将牌的数值（记作一维数组 `tiles`），请返回所给 `tiles` 最多可组成的牌组数。\n\n注意：凑成牌组时，每张牌仅能使用一次。\n\n**示例 1：**\n>输入：`tiles = [2,2,2,3,4]`\n>\n>输出：`1`\n>\n>解释：最多可以组合出 [2,2,2] 或者 [2,3,4] 其中一组牌。\n\n**示例 2：**\n>输入：`tiles = [2,2,2,3,4,1,3]`\n>\n>输出：`2`\n>\n>解释：最多可以组合出 [1,2,3] 与 [2,3,4] 两组牌。\n\n**提示：**\n- `1 <= tiles.length <= 10^5`\n- `1 <= tiles[i] <= 10^9`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2818.最小矩形面积",
+        "hardRate": "HARD",
+        "passRate": "24.94%",
+        "problemsUrl": "https://leetcode.cn/problems/zui-xiao-ju-xing-mian-ji/",
+        "solutionsUrl": "https://leetcode.cn/problems/zui-xiao-ju-xing-mian-ji/solution",
+        "problemsDesc": "二维平面上有 $N$ 条直线，形式为 `y = kx + b`，其中 `k`、`b`为整数 且 `k > 0`。所有直线以 `[k,b]` 的形式存于二维数组 `lines` 中，不存在重合的两条直线。两两直线之间可能存在一个交点，最多会有 $C_N^2$ 个交点。我们用一个平行于坐标轴的矩形覆盖所有的交点，请问这个矩形最小面积是多少。若直线之间无交点、仅有一个交点或所有交点均在同一条平行坐标轴的直线上，则返回0。\n\n注意：返回结果是浮点数，与标准答案 **绝对误差或相对误差** 在 10^-4 以内的结果都被视为正确结果\n\n\n**示例 1：**\n> 输入：`lines = [[2,3],[3,0],[4,1]]`\n>\n> 输出：`48.00000`\n>\n> 解释：三条直线的三个交点为 (3, 9) (1, 5) 和 (-1, -3)。最小覆盖矩形左下角为 (-1, -3) 右上角为 (3,9)，面积为 48\n\n\n**示例 2：**\n> 输入：`lines = [[1,1],[2,3]]`\n>\n> 输出：`0.00000`\n>\n> 解释：仅有一个交点 (-2，-1）\n\n\n**限制：**\n+ `1 <= lines.length <= 10^5 且 lines[i].length == 2`\n+ `1 <= lines[0] <= 10000`\n+ `-10000 <= lines[1] <= 10000`\n+ `与标准答案绝对误差或相对误差在 10^-4 以内的结果都被视为正确结果`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2819.守卫城堡",
+        "hardRate": "HARD",
+        "passRate": "56.02%",
+        "problemsUrl": "https://leetcode.cn/problems/7rLGCR/",
+        "solutionsUrl": "https://leetcode.cn/problems/7rLGCR/solution",
+        "problemsDesc": "城堡守卫游戏的胜利条件为使恶魔无法从出生点到达城堡。游戏地图可视作 `2*N` 的方格图，记作字符串数组 `grid`，其中：\n- `\".\"` 表示恶魔可随意通行的平地；\n- `\"#\"` 表示恶魔不可通过的障碍物，玩家可通过在 **平地** 上设置障碍物，即将  `\".\"` 变为 `\"#\"` 以阻挡恶魔前进；\n- `\"S\"` 表示恶魔出生点，将有大量的恶魔该点生成，恶魔可向上/向下/向左/向右移动，且无法移动至地图外；\n- `\"P\"` 表示瞬移点，移动到 `\"P\"` 点的恶魔可被传送至任意一个 `\"P\"` 点，也可选择不传送；\n- `\"C\"` 表示城堡。\n\n然而在游戏中用于建造障碍物的金钱是有限的，请返回玩家最少需要放置几个障碍物才能获得胜利。若无论怎样放置障碍物均无法获胜，请返回 `-1`。\n\n**注意：**\n- 地图上可能有一个或多个出生点\n- 地图上有且只有一个城堡\n\n**示例 1**\n>输入：`grid = [\"S.C.P#P.\", \".....#.S\"]`\n>\n>输出：`3`\n>\n>解释：至少需要放置三个障碍物\n![image.png](https://pic.leetcode-cn.com/1614828255-uuNdNJ-image.png)\n\n\n**示例 2：**\n>输入：`grid = [\"SP#P..P#PC#.S\", \"..#P..P####.#\"]`\n>\n>输出：`-1`\n>\n>解释：无论怎样修筑障碍物，均无法阻挡最左侧出生的恶魔到达城堡位置\n![image.png](https://pic.leetcode-cn.com/1614828208-oFlpVs-image.png)\n\n**示例 3：**\n>输入：`grid = [\"SP#.C.#PS\", \"P.#...#.P\"]`\n>\n>输出：`0`\n>\n>解释：无需放置障碍物即可获得胜利\n![image.png](https://pic.leetcode-cn.com/1614828242-oveClu-image.png)\n\n**示例 4：**\n>输入：`grid = [\"CP.#.P.\", \"...S..S\"]`\n>\n>输出：`4`\n>\n>解释：至少需要放置 4 个障碍物，示意图为放置方法之一\n![image.png](https://pic.leetcode-cn.com/1614828218-sIAYkb-image.png)\n\n\n**提示：**\n- `grid.length == 2`\n- `2 <= grid[0].length == grid[1].length <= 10^4`\n- `grid[i][j]` 仅包含字符 `\".\"`、`\"#\"`、`\"C\"`、`\"P\"`、`\"S\"`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2820.无人机方阵",
+        "hardRate": "EASY",
+        "passRate": "55.55%",
+        "problemsUrl": "https://leetcode.cn/problems/0jQkd0/",
+        "solutionsUrl": "https://leetcode.cn/problems/0jQkd0/solution",
+        "problemsDesc": "在 「力扣挑战赛」 开幕式的压轴节目 「无人机方阵」中，每一架无人机展示一种灯光颜色。 无人机方阵通过两种操作进行颜色图案变换：\n- 调整无人机的位置布局\n- 切换无人机展示的灯光颜色\n\n\n给定两个大小均为 `N*M` 的二维数组 `source` 和 `target` 表示无人机方阵表演的两种颜色图案，由于无人机切换灯光颜色的耗能很大，请返回从 `source` 到 `target` 最少需要多少架无人机切换灯光颜色。\n\n\n**注意：** 调整无人机的位置布局时无人机的位置可以随意变动。\n\n\n**示例 1：**\n> 输入：`source = [[1,3],[5,4]], target = [[3,1],[6,5]]`\n>\n> 输出：`1`\n>\n> 解释：\n> 最佳方案为\n将 `[0,1]` 处的无人机移动至 `[0,0]` 处；\n将 `[0,0]` 处的无人机移动至 `[0,1]` 处；\n将 `[1,0]` 处的无人机移动至 `[1,1]` 处；\n将 `[1,1]` 处的无人机移动至 `[1,0]` 处，其灯光颜色切换为颜色编号为 `6` 的灯光；\n因此从`source` 到 `target` 所需要的最少灯光切换次数为 1。\n>![8819ccdd664e91c78cde3bba3c701986.gif](https://pic.leetcode-cn.com/1628823765-uCDaux-8819ccdd664e91c78cde3bba3c701986.gif){:height=300px}\n\n\n\n\n\n**示例 2：**\n> 输入：`source = [[1,2,3],[3,4,5]], target = [[1,3,5],[2,3,4]]`\n>\n> 输出：`0`\n> 解释：\n> 仅需调整无人机的位置布局，便可完成图案切换。因此不需要无人机切换颜色\n\n\n**提示：**\n`n == source.length == target.length`\n`m == source[i].length == target[i].length`\n`1 <= n, m <=100`\n`1 <= source[i][j], target[i][j] <=10^4`\n\n\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2821.心算挑战",
+        "hardRate": "EASY",
+        "passRate": "31.23%",
+        "problemsUrl": "https://leetcode.cn/problems/uOAnQW/",
+        "solutionsUrl": "https://leetcode.cn/problems/uOAnQW/solution",
+        "problemsDesc": "「力扣挑战赛」心算项目的挑战比赛中，要求选手从 `N` 张卡牌中选出 `cnt` 张卡牌，若这 `cnt` 张卡牌数字总和为偶数，则选手成绩「有效」且得分为 `cnt` 张卡牌数字总和。\n给定数组 `cards` 和 `cnt`，其中 `cards[i]` 表示第 `i` 张卡牌上的数字。 请帮参赛选手计算最大的有效得分。若不存在获取有效得分的卡牌方案，则返回 0。\n\n**示例 1：**\n>输入：`cards = [1,2,8,9], cnt = 3`\n>\n>输出：`18`\n>\n>解释：选择数字为 1、8、9 的这三张卡牌，此时可获得最大的有效得分 1+8+9=18。\n\n**示例 2：**\n>输入：`cards = [3,3,1], cnt = 1`\n>\n>输出：`0`\n>\n>解释：不存在获取有效得分的卡牌方案。\n\n**提示：**\n- `1 <= cnt <= cards.length <= 10^5`\n- `1 <= cards[i] <= 1000`\n\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2822.黑白翻转棋",
+        "hardRate": "MEDIUM",
+        "passRate": "68.39%",
+        "problemsUrl": "https://leetcode.cn/problems/fHi6rV/",
+        "solutionsUrl": "https://leetcode.cn/problems/fHi6rV/solution",
+        "problemsDesc": "在 `n*m` 大小的棋盘中，有黑白两种棋子，黑棋记作字母 `\"X\"`, 白棋记作字母 `\"O\"`，空余位置记作 `\".\"`。当落下的棋子与其他相同颜色的棋子在行、列或对角线完全包围（中间不存在空白位置）另一种颜色的棋子，则可以翻转这些棋子的颜色。\n\n\n\n![1.gif](https://pic.leetcode-cn.com/1630396029-eTgzpN-6da662e67368466a96d203f67bb6e793.gif){:height=170px}![2.gif](https://pic.leetcode-cn.com/1630396240-nMvdcc-8e4261afe9f60e05a4f740694b439b6b.gif){:height=170px}![3.gif](https://pic.leetcode-cn.com/1630396291-kEtzLL-6fcb682daeecb5c3f56eb88b23c81d33.gif){:height=170px}\n\n「力扣挑战赛」黑白翻转棋项目中，将提供给选手一个未形成可翻转棋子的棋盘残局，其状态记作 `chessboard`。若下一步可放置一枚黑棋，请问选手最多能翻转多少枚白棋。\n\n**注意：**\n- 若翻转白棋成黑棋后，棋盘上仍存在可以翻转的白棋，将可以 **继续** 翻转白棋\n- 输入数据保证初始棋盘状态无可以翻转的棋子且存在空余位置\n\n**示例 1：**\n> 输入：`chessboard = [\"....X.\",\"....X.\",\"XOOO..\",\"......\",\"......\"]`\n> \n> 输出：`3`\n> \n> 解释：\n> 可以选择下在 `[2,4]` 处，能够翻转白方三枚棋子。\n\n**示例 2：**\n> 输入：`chessboard = [\".X.\",\".O.\",\"XO.\"]`\n> \n> 输出：`2`\n> \n> 解释：\n> 可以选择下在 `[2,2]` 处，能够翻转白方两枚棋子。\n![2126c1d21b1b9a9924c639d449cc6e65.gif](https://pic.leetcode-cn.com/1626683255-OBtBud-2126c1d21b1b9a9924c639d449cc6e65.gif)\n\n**示例 3：**\n> 输入：`chessboard = [\".......\",\".......\",\".......\",\"X......\",\".O.....\",\"..O....\",\"....OOX\"]`\n> \n> 输出：`4`\n> \n> 解释：\n> 可以选择下在 `[6,3]` 处，能够翻转白方四枚棋子。\n![803f2f04098b6174397d6c696f54d709.gif](https://pic.leetcode-cn.com/1630393770-Puyked-803f2f04098b6174397d6c696f54d709.gif)\n\n\n\n**提示：**\n- `1 <= chessboard.length, chessboard[i].length <= 8`\n- `chessboard[i]` 仅包含 `\".\"、\"O\"` 和 `\"X\"`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2823.玩具套圈",
+        "hardRate": "HARD",
+        "passRate": "28.49%",
+        "problemsUrl": "https://leetcode.cn/problems/vFjcfV/",
+        "solutionsUrl": "https://leetcode.cn/problems/vFjcfV/solution",
+        "problemsDesc": "「力扣挑战赛」场地外，小力组织了一个套玩具的游戏。所有的玩具摆在平地上，`toys[i]` 以 `[xi,yi,ri]` 的形式记录了第 `i` 个玩具的坐标 `(xi,yi)` 和半径 `ri`。小扣试玩了一下，他扔了若干个半径均为 `r` 的圈，`circles[j]` 记录了第 `j` 个圈的坐标 `(xj,yj)`。套圈的规则如下：\n- 若一个玩具被某个圈完整覆盖了（即玩具的任意部分均在圈内或者圈上），则该玩具被套中。\n- 若一个玩具被多个圈同时套中，最终仅计算为套中一个玩具\n\n请帮助小扣计算，他成功套中了多少玩具。\n\n**注意：**\n- 输入数据保证任意两个玩具的圆心不会重合，但玩具之间可能存在重叠。\n\n\n**示例 1：**\n\n> 输入：`toys = [[3,3,1],[3,2,1]], circles = [[4,3]], r = 2`\n>\n> 输出：`1`\n> \n> 解释： 如图所示，仅套中一个玩具\n![image.png](https://pic.leetcode-cn.com/1629194140-ydKiGF-image.png)\n\n\n**示例 2：**\n\n> 输入：`toys = [[1,3,2],[4,3,1],[7,1,2]], circles = [[1,0],[3,3]], r = 4`\n>\n> 输出：`2`\n> \n> 解释： 如图所示，套中两个玩具\n![image.png](https://pic.leetcode-cn.com/1629194157-RiOAuy-image.png){:width=\"400px\"}\n\n\n\n**提示：** \n- `1 <= toys.length <= 10^4`\n- `0 <= toys[i][0], toys[i][1] <= 10^9`\n- `1 <= circles.length <= 10^4`\n- `0 <= circles[i][0], circles[i][1] <= 10^9`\n- `1 <= toys[i][2], r <= 10`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2824.十字路口的交通",
+        "hardRate": "HARD",
+        "passRate": "51.59%",
+        "problemsUrl": "https://leetcode.cn/problems/Y1VbOX/",
+        "solutionsUrl": "https://leetcode.cn/problems/Y1VbOX/solution",
+        "problemsDesc": "前往「力扣挑战赛」场馆的道路上，有一个拥堵的十字路口，该十字路口由两条双向两车道的路交叉构成。由于信号灯故障，交警需要手动指挥拥堵车辆。假定路口没有新的来车且一辆车从一个车道驶入另一个车道所需的时间恰好为一秒钟，长度为 4 的一维字符串数组 `directions` 中按照 **东、南、西、北** 顺序记录了四个方向从最靠近路口到最远离路口的车辆计划开往的方向。其中：\n- `\"E\"` 表示向东行驶；\n- `\"S\"` 表示向南行驶；\n- `\"W\"` 表示向西行驶；\n- `\"N\"` 表示向北行驶。\n\n交警每秒钟只能指挥各个车道距离路口最近的一辆车，且每次指挥需要满足如下规则：\n- 同一秒钟内，一个方向的车道只允许驶出一辆车；\n- 同一秒钟内，一个方向的车道只允许驶入一辆车；\n- 同一秒钟内，车辆的行驶路线不可相交。\n\n请返回最少需要几秒钟，该十字路口等候的车辆才能全部走完。\n\n各个车道驶出的车辆可能的行驶路线如图所示：\n\n\n![图片.png](https://pic.leetcode-cn.com/1630393755-gyPeMM-%E5%9B%BE%E7%89%87.png){:height=\"350px\"}\n\n**注意：**\n- 测试数据保证不会出现掉头行驶指令，即某一方向的行驶车辆计划开往的方向不会是当前车辆所在的车道的方向;\n- 表示堵塞车辆行驶方向的字符串仅用大写字母 `\"E\"`，`\"N\"`，`\"W\"`，`\"S\"` 表示。\n\n**示例 1：**\n>输入：`directions = [\"W\",\"N\",\"ES\",\"W\"]`\n>\n>输出：`2`\n>\n>解释：\n>第 1 秒：东西方向排在最前的车先行，剩余车辆状态 `[\"\",\"N\",\"S\",\"W\"]`；\n>第 2 秒：南、西、北方向的车行驶，路口无等待车辆；\n>因此最少需要 2 秒，返回 2。\n\n**示例 2：**\n>输入：`directions = [\"NS\",\"WE\",\"SE\",\"EW\"]`\n>\n>输出：`3`\n>\n>解释：\n>第 1 秒：四个方向排在最前的车均可驶出；\n>第 2 秒：东南方向的车驶出，剩余车辆状态 `[\"\",\"\",\"E\",\"W\"]`；\n>第 3 秒：西北方向的车驶出。\n\n\n**提示：**\n- `directions.length = 4`\n- `0 <= directions[i].length <= 20`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2825.开幕式焰火",
+        "hardRate": "EASY",
+        "passRate": "78.59%",
+        "problemsUrl": "https://leetcode.cn/problems/sZ59z6/",
+        "solutionsUrl": "https://leetcode.cn/problems/sZ59z6/solution",
+        "problemsDesc": "「力扣挑战赛」开幕式开始了，空中绽放了一颗二叉树形的巨型焰火。\n给定一棵二叉树 `root` 代表焰火，节点值表示巨型焰火这一位置的颜色种类。请帮小扣计算巨型焰火有多少种不同的颜色。\n\n\n**示例 1：**\n>输入：`root = [1,3,2,1,null,2]`\n>\n>输出：`3`\n>\n>解释：焰火中有 3 个不同的颜色，值分别为 1、2、3\n\n**示例 2：**\n>输入：`root = [3,3,3]`\n>\n>输出：`1`\n>\n>解释：焰火中仅出现 1 个颜色，值为 3\n\n**提示：**\n- `1 <= 节点个数 <= 1000`\n- `1 <= Node.val <= 1000`\n\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2826.自行车炫技赛场",
+        "hardRate": "MEDIUM",
+        "passRate": "29.69%",
+        "problemsUrl": "https://leetcode.cn/problems/kplEvH/",
+        "solutionsUrl": "https://leetcode.cn/problems/kplEvH/solution",
+        "problemsDesc": "「力扣挑战赛」中 `N*M` 大小的自行车炫技赛场的场地由一片连绵起伏的上下坡组成，场地的高度值记录于二维数组 `terrain` 中，场地的减速值记录于二维数组 `obstacle` 中。\n- 若选手骑着自行车从高度为 `h1` 且减速值为 `o1` 的位置到高度为 `h2` 且减速值为 `o2` 的相邻位置（上下左右四个方向），速度变化值为 `h1-h2-o2`（负值减速，正值增速）。\n\n选手初始位于坐标 `position` 处且初始速度为 1，请问选手可以刚好到其他哪些位置时速度依旧为 1。请以二维数组形式返回这些位置。若有多个位置则按行坐标升序排列，若有多个位置行坐标相同则按列坐标升序排列。\n\n**注意：** 骑行过程中速度不能为零或负值\n\n**示例 1：**\n> 输入\b：`position = [0,0], terrain = [[0,0],[0,0]], obstacle = [[0,0],[0,0]]`\n> \n> 输出：`[[0,1],[1,0],[1,1]]`\n> \n> 解释：\n> 由于当前场地属于平地，根据上面的规则，选手从`[0,0]`的位置出发都能刚好在其他处的位置速度为 1。\n\n**示例 2：**\n> 输入\b：`position = [1,1], terrain = [[5,0],[0,6]], obstacle = [[0,6],[7,0]]`\n> \n> 输出：`[[0,1]]`\n> \n> 解释：\n> 选手从 `[1,1]` 处的位置出发，到 `[0,1]` 处的位置时恰好速度为 1。\n\n\n**提示：**\n- `n == terrain.length == obstacle.length`\n- `m == terrain[i].length == obstacle[i].length`\n- `1 <= n <= 100`\n- `1 <= m <= 100`\n- `0 <= terrain[i][j], obstacle[i][j] <= 100`\n- `position.length == 2`\n- `0 <= position[0] < n`\n- `0 <= position[1] < m`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2827.志愿者调配",
+        "hardRate": "MEDIUM",
+        "passRate": "49.23%",
+        "problemsUrl": "https://leetcode.cn/problems/05ZEDJ/",
+        "solutionsUrl": "https://leetcode.cn/problems/05ZEDJ/solution",
+        "problemsDesc": "「力扣挑战赛」有 `n` 个比赛场馆（场馆编号从 `0` 开始），场馆之间的通道分布情况记录于二维数组 `edges` 中，`edges[i]= [x, y]` 表示第 `i` 条通道连接场馆 `x` 和场馆 `y`(即两个场馆相邻)。初始每个场馆中都有一定人数的志愿者（不同场馆人数可能不同），后续 `m` 天每天均会根据赛事热度进行志愿者人数调配。调配方案分为如下三种：\n1. 将编号为 `idx` 的场馆内的志愿者人数减半；\n2. 将编号为 `idx` 的场馆相邻的场馆的志愿者人数都加上编号为 `idx` 的场馆的志愿者人数；\n3. 将编号为 `idx` 的场馆相邻的场馆的志愿者人数都减去编号为 `idx` 的场馆的志愿者人数。\n\n所有的调配信息记录于数组 `plans` 中，`plans[i] = [num,idx]` 表示第 `i` 天对编号 `idx` 的场馆执行了第 `num` 种调配方案。\n在比赛结束后对调配方案进行复盘时，不慎将第 `0` 个场馆的**最终**志愿者人数丢失，只保留了**初始**所有场馆的志愿者总人数 `totalNum` ，以及记录了第 `1 ~ n-1` 个场馆的**最终**志愿者人数的一维数组 `finalCnt`。请你根据现有的信息求出初始每个场馆的志愿者人数，并按场馆编号顺序返回志愿者人数列表。\n\n**注意：**\n- 测试数据保证当某场馆进行第一种调配时，该场馆的志愿者人数一定为偶数；\n- 测试数据保证当某场馆进行第三种调配时，该场馆的相邻场馆志愿者人数不为负数；\n- 测试数据保证比赛开始时每个场馆的志愿者人数都不超过 `10^9`；\n- 测试数据保证给定的场馆间的道路分布情况中不会出现自环、重边的情况。\n\n\n**示例 1：**\n>![image.png](https://pic.leetcode-cn.com/1630061228-gnZsOz-image.png)\n> 输入：\n>`finalCnt = [1,16], totalNum = 21, edges = [[0,1],[1,2]], plans = [[2,1],[1,0],[3,0]]`\n>\n> 输出：`[5,7,9]`\n>\n> 解释：\n> ![image.png](https://pic.leetcode-cn.com/1630061300-WuVkeF-image.png){:height=200}\n\n\n**示例 2 ：**\n> 输入：\n>`finalCnt = [4,13,4,3,8], totalNum = 54, edges = [[0,3],[1,3],[4,3],[2,3],[2,5]], plans = [[1,1],[3,3],[2,5],[1,0]]`\n>\n> 输出：`[10,16,9,4,7,8]`\n\n\n\n**提示：**\n- `2 <= n <= 5*10^4`\n- `1 <= edges.length <= min((n * (n - 1)) / 2, 5*10^4)`\n- `0 <= edges[i][0], edges[i][1] < n`\n- `1 <= plans.length <= 10`\n- `1 <= plans[i][0] <=3`\n- `0 <= plans[i][1] < n`\n- `finalCnt.length = n-1`\n- `0 <= finalCnt[i] < 10^9`\n- `0 <= totalNum < 5*10^13`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2828.入场安检",
+        "hardRate": "HARD",
+        "passRate": "45.07%",
+        "problemsUrl": "https://leetcode.cn/problems/oPs9Bm/",
+        "solutionsUrl": "https://leetcode.cn/problems/oPs9Bm/solution",
+        "problemsDesc": "「力扣挑战赛」 的入场仪式马上就要开始了，由于安保工作的需要，设置了可容纳人数总和为 `M` 的 `N` 个安检室，`capacities[i]` 记录第 `i` 个安检室可容纳人数。安检室拥有两种类型：\n- 先进先出：在安检室中的所有观众中，最早进入安检室的观众最先离开\n- 后进先出：在安检室中的所有观众中，最晚进入安检室的观众最先离开\n\n![c24754f1a5ff56989340ba5004dc5eda.gif](https://pic.leetcode-cn.com/1628843202-cdFPSt-c24754f1a5ff56989340ba5004dc5eda.gif)\n\n\n\n恰好 `M+1` 位入场的观众（编号从 0 开始）需要排队**依次**入场安检， 入场安检的规则如下：\n- 观众需要先进入编号 `0` 的安检室\n- 当观众将进入编号 `i` 的安检室时（`0 <= i < N`)，\n    - 若安检室未到达可容纳人数上限，该观众可直接进入；\n    - 若安检室已到达可容纳人数上限，在该观众进入安检室之前需根据当前安检室类型选择一位观众离开后才能进入；\n- 当观众离开编号 `i` 的安检室时 （`0 <= i < N-1`)，将进入编号 `i+1` 的安检室接受安检。\n\n若可以任意设定每个安检室的类型，请问有多少种设定安检室类型的方案可以使得编号 `k` 的观众第一个通过最后一个安检室入场。\n\n\n**注意：** \n- 观众不可主动离开安检室，只有当安检室容纳人数达到上限，且又有新观众需要进入时，才可根据安检室的类型选择一位观众离开；\n- 由于方案数可能过大，请将答案对 `1000000007` 取模后返回。\n\n\n**示例 1：**\n> 输入：`capacities = [2,2,3], k = 2`\n>\n> 输出：`2`\n> 解释：\n> 存在两种设定的 `2` 种方案：\n> - 方案 1：将编号为 `0` 、`1` 的实验室设置为 **后进先出** 的类型，编号为 `2` 的实验室设置为 **先进先出** 的类型；\n> - 方案 2：将编号为 `0` 、`1` 的实验室设置为 **先进先出** 的类型，编号为 `2` 的实验室设置为 **后进先出** 的类型。\n>\n> 以下是方案 1 的示意图：\n>![c60e38199a225ad62f13b954872edf9b.gif](https://pic.leetcode-cn.com/1628841618-bFKsnt-c60e38199a225ad62f13b954872edf9b.gif)\n\n\n\n**示例 2：**\n> 输入：`capacities = [3,3], k = 3`\n>\n> 输出：`0`\n\n**示例 3：**\n> 输入：`capacities = [4,3,2,2], k = 6`\n>\n> 输出：`2`\n\n**提示:**\n+ `1 <= capacities.length <= 200`\n+ `1 <= capacities[i] <= 200`\n+ `0 <= k <= sum(capacities)`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2829.无限棋局",
+        "hardRate": "HARD",
+        "passRate": "27.36%",
+        "problemsUrl": "https://leetcode.cn/problems/fsa7oZ/",
+        "solutionsUrl": "https://leetcode.cn/problems/fsa7oZ/solution",
+        "problemsDesc": "小力正在通过残局练习来备战「力扣挑战赛」中的「五子棋」项目，他想请你能帮他预测当前残局的输赢情况。棋盘中的棋子分布信息记录于二维数组 `pieces` 中，其中 `pieces[i] = [x,y,color]` 表示第 `i` 枚棋子的横坐标为 `x`，纵坐标为 `y`，棋子颜色为 `color`(`0` 表示黑棋，`1` 表示白棋)。假如黑棋先行，并且黑棋和白棋都按最优策略落子，请你求出当前棋局在三步（按 **黑、白、黑** 的落子顺序）之内的输赢情况（三步之内先构成同行、列或对角线连续同颜色的至少 5 颗即为获胜）：\n- 黑棋胜, 请返回 `\"Black\"`\n- 白棋胜, 请返回 `\"White\"`\n- 仍无胜者, 请返回 `\"None\"`\n\n**注意：** \n- 和传统的五子棋项目不同，「力扣挑战赛」中的「五子棋」项目 **不存在边界限制**，即可在 **任意位置** 落子；\n- 黑棋和白棋均按 3 步内的输赢情况进行最优策略的选择\n- 测试数据保证所给棋局目前无胜者；\n- 测试数据保证不会存在坐标一样的棋子。\n\n**示例 1：**\n> 输入：\n> `pieces = [[0,0,1],[1,1,1],[2,2,0]]`\n>\n> 输出：`\"None\"`\n>\n> 解释：无论黑、白棋以何种方式落子，三步以内都不会产生胜者。\n\n**示例 2：**\n> 输入：\n> `pieces = [[1,2,1],[1,4,1],[1,5,1],[2,1,0],[2,3,0],[2,4,0],[3,2,1],[3,4,0],[4,2,1],[5,2,1]]`\n>\n> 输出：`\"Black\"`\n>\n> 解释：三步之内黑棋必胜，以下是一种可能的落子情况：\n>![902b87df29998b1c181146c8fdb3a4b6.gif](https://pic.leetcode-cn.com/1629800639-KabOfY-902b87df29998b1c181146c8fdb3a4b6.gif){:width=\"300px\"}\n\n\n\n**提示：**\n- `0 <= pieces.length <= 1000`\n- `pieces[i].length = 3`\n- `-10^9 <= pieces[i][0], pieces[i][1] <=10^9` \n- `0 <= pieces[i][2] <=1`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2830.环形闯关游戏",
+        "hardRate": "HARD",
+        "passRate": "35.49%",
+        "problemsUrl": "https://leetcode.cn/problems/K8GULz/",
+        "solutionsUrl": "https://leetcode.cn/problems/K8GULz/solution",
+        "problemsDesc": "「力扣挑战赛」中有一个由 `N` 个关卡组成的**环形**闯关游戏，关卡编号为 `0`~`N-1`，编号 `0` 的关卡和编号 `N-1` 的关卡相邻。每个关卡均有积分要求，`challenge[i]` 表示挑战编号 `i` 的关卡最少需要拥有的积分。\n![图片.png](https://pic.leetcode-cn.com/1630392170-ucncVS-%E5%9B%BE%E7%89%87.png){:width=\"240px\"}\n\n\n小扣想要挑战关卡，闯关具体规则如下：\n\n- 初始小扣可以指定其中一个关卡为「开启」状态，其余关卡将处于「未开启」状态。\n- 小扣可以挑战处于「开启」状态且**满足最少积分要求**的关卡，若小扣挑战该关卡前积分为 `score`，挑战结束后，积分将增长为 `score|challenge[i]`（即位运算中的 `\"OR\"` 运算）\n- 在挑战某个关卡后，该关卡两侧相邻的关卡将会开启（若之前未开启）\n\n请帮助小扣进行计算，初始最少需要多少积分，可以挑战 **环形闯关游戏** 的所有关卡。\n\n**示例1：**\n\n> 输入：`challenge = [5,4,6,2,7]`\n>\n> 输出：`4`\n> \n> 解释： 初始选择编号 3 的关卡开启，积分为 4\n>挑战编号 3 的关卡，积分变为 $4 | 2 = 6$，开启 2、4 处的关卡\n>挑战编号 2 的关卡，积分变为 $6 | 6 = 6$，开启 1 处的关卡\n>挑战编号 1 的关卡，积分变为 $6 | 4 = 6$，开启 0 处的关卡\n>挑战编号 0 的关卡，积分变为 $6 | 5 = 7$\n>挑战编号 4 的关卡，顺利完成全部的关卡\n\n\n**示例2：**\n\n> 输入：`challenge = [12,7,11,3,9]`\n>\n> 输出：`8`\n>\n> 解释： 初始选择编号 3 的关卡开启，积分为 8\n>挑战编号 3 的关卡，积分变为 $8 | 3 = 11$，开启 2、4 处的关卡\n>挑战编号 2 的关卡，积分变为 $11 | 11 = 11$，开启 1 处的关卡\n>挑战编号 4 的关卡，积分变为 $11 | 9 = 11$，开启 0 处的关卡\n>挑战编号 1 的关卡，积分变为 $11 | 7 = 15$\n>挑战编号 0 的关卡，顺利完成全部的关卡\n\n**示例3：**\n\n> 输入：`challenge = [1,1,1]`\n>\n> 输出：`1`\n\n**提示：** \n- `1 <= challenge.length <= 5*10^4`\n- `1 <= challenge[i] <= 10^14`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2831.宝石补给",
+        "hardRate": "EASY",
+        "passRate": "68.36%",
+        "problemsUrl": "https://leetcode.cn/problems/WHnhjV/",
+        "solutionsUrl": "https://leetcode.cn/problems/WHnhjV/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣新手村，在开始试炼之前，请各位勇者先进行「宝石补给」。\n\n每位勇者初始都拥有一些能量宝石， `gem[i]` 表示第 `i` 位勇者的宝石数量。现在这些勇者们进行了一系列的赠送，`operations[j] = [x, y]` 表示在第 `j` 次的赠送中 第 `x` 位勇者将自己一半的宝石（需向下取整）赠送给第 `y` 位勇者。\n\n在完成所有的赠送后，请找到拥有**最多**宝石的勇者和拥有**最少**宝石的勇者，并返回他们二者的宝石数量**之差**。\n\n**注意：**\n- 赠送将按顺序逐步进行。\n\n**示例 1：**\n>输入：`gem = [3,1,2], operations = [[0,2],[2,1],[2,0]]`\n>\n>输出：`2`\n>\n>解释：\n>第 1 次操作，勇者 `0` 将一半的宝石赠送给勇者 `2`， `gem = [2,1,3]`\n>第 2 次操作，勇者 `2` 将一半的宝石赠送给勇者 `1`， `gem = [2,2,2]`\n>第 3 次操作，勇者 `2` 将一半的宝石赠送给勇者 `0`， `gem = [3,2,1]`\n>返回 3 - 1 = 2\n\n**示例 2：**\n>输入：`gem = [100,0,50,100], operations = [[0,2],[0,1],[3,0],[3,0]]`\n>\n>输出：`75`\n>\n>解释：\n>第 1 次操作，勇者 `0` 将一半的宝石赠送给勇者 `2`， `gem = [50,0,100,100]`\n>第 2 次操作，勇者 `0` 将一半的宝石赠送给勇者 `1`， `gem = [25,25,100,100]`\n>第 3 次操作，勇者 `3` 将一半的宝石赠送给勇者 `0`， `gem = [75,25,100,50]`\n>第 4 次操作，勇者 `3` 将一半的宝石赠送给勇者 `0`， `gem = [100,25,100,25]`\n>返回 100 - 25 = 75\n\n**示例 3：**\n>输入：`gem = [0,0,0,0], operations = [[1,2],[3,1],[1,2]]`\n>\n>输出：`0`\n\n**提示：**\n- `2 <= gem.length <= 10^3`\n- `0 <= gem[i] <= 10^3`\n- `0 <= operations.length <= 10^4`\n- `operations[i].length == 2`\n- `0 <= operations[i][0], operations[i][1] < gem.length`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2832.烹饪料理",
+        "hardRate": "EASY",
+        "passRate": "48.14%",
+        "problemsUrl": "https://leetcode.cn/problems/UEcfPD/",
+        "solutionsUrl": "https://leetcode.cn/problems/UEcfPD/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，城内设有烹饪锅供勇者制作料理，为自己恢复状态。\n\n勇者背包内共有编号为 `0 ~ 4` 的五种食材，其中 `materials[j]` 表示第 `j` 种食材的数量。通过这些食材可以制作若干料理，`cookbooks[i][j]` 表示制作第 `i` 种料理需要第 `j` 种食材的数量，而 `attribute[i] = [x,y]` 表示第 `i` 道料理的美味度 `x` 和饱腹感 `y`。\n\n在饱腹感不小于 `limit` 的情况下，请返回勇者可获得的最大美味度。如果无法满足饱腹感要求，则返回 `-1`。\n\n**注意：**\n- 每种料理只能制作一次。\n\n\n**示例 1：**\n>输入：`materials = [3,2,4,1,2]`\n>`cookbooks = [[1,1,0,1,2],[2,1,4,0,0],[3,2,4,1,0]]`\n>`attribute = [[3,2],[2,4],[7,6]]`\n>`limit = 5`\n>\n>输出：`7`\n>\n>解释：\n>食材数量可以满足以下两种方案：\n>方案一：制作料理 0 和料理 1，可获得饱腹感 2+4、美味度 3+2\n>方案二：仅制作料理 2， 可饱腹感为 6、美味度为 7\n>因此在满足饱腹感的要求下，可获得最高美味度 7\n\n**示例 2：**\n>输入：`materials = [10,10,10,10,10]`\n>`cookbooks = [[1,1,1,1,1],[3,3,3,3,3],[10,10,10,10,10]]`\n>`attribute = [[5,5],[6,6],[10,10]]`\n>`limit = 1`\n>\n>输出：`11`\n>\n>解释：通过制作料理 0 和 1，可满足饱腹感，并获得最高美味度 11\n\n**提示：**\n+ `materials.length == 5`\n+ `1 <= cookbooks.length == attribute.length <= 8`\n+ `cookbooks[i].length == 5`\n+ `attribute[i].length == 2`\n+ `0 <= materials[i], cookbooks[i][j], attribute[i][j] <= 20`\n+ `1 <= limit <= 100`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2833.二叉搜索树染色",
+        "hardRate": "MEDIUM",
+        "passRate": "28.69%",
+        "problemsUrl": "https://leetcode.cn/problems/QO5KpG/",
+        "solutionsUrl": "https://leetcode.cn/problems/QO5KpG/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「二叉搜索树染色」。\n\n每位勇士面前设有一个**二叉搜索树**的模型，模型的根节点为 `root`，树上的各个节点值均不重复。初始时，所有节点均为蓝色。现在按顺序对这棵二叉树进行若干次操作， `ops[i] = [type, x, y]` 表示第 `i` 次操作为：\n+ `type` 等于 0 时，将节点值范围在 `[x, y]` 的节点均染蓝\n+ `type` 等于 1 时，将节点值范围在 `[x, y]` 的节点均染红\n\n请返回完成所有染色后，该二叉树中红色节点的数量。\n\n\n**注意：**\n+ 题目保证对于每个操作的 `x`、`y` 值定出现在二叉搜索树节点中\n\n**示例 1：**\n>输入：`root = [1,null,2,null,3,null,4,null,5], ops = [[1,2,4],[1,1,3],[0,3,5]]`\n>\n>输出：`2`\n>\n>解释：\n>第 0 次操作，将值为 2、3、4 的节点染红；\n>第 1 次操作，将值为 1、2、3 的节点染红；\n>第 2 次操作，将值为 3、4、5 的节点染蓝；\n>因此，最终值为 1、2 的节点为红色节点，返回数量 2\n![image.png](https://pic.leetcode-cn.com/1649833948-arSlXd-image.png){:width=230px}\n\n\n**示例 2：**\n>输入：`root = [4,2,7,1,null,5,null,null,null,null,6]` \n>`ops = [[0,2,2],[1,1,5],[0,4,5],[1,5,7]]`\n>\n>输出：`5`\n>\n>解释：\n>第 0 次操作，将值为 2 的节点染蓝；\n>第 1 次操作，将值为 1、2、4、5 的节点染红；\n>第 2 次操作，将值为 4、5 的节点染蓝；\n>第 3 次操作，将值为 5、6、7 的节点染红；\n>因此，最终值为 1、2、5、6、7 的节点为红色节点，返回数量 5\n![image.png](https://pic.leetcode-cn.com/1649833763-BljEbP-image.png){:width=230px}\n\n**提示：**\n+ `1 <= 二叉树节点数量 <= 10^5`\n+ `1 <= ops.length <= 10^5`\n+ `ops[i].length == 3`\n+ `ops[i][0]` 仅为 `0` or `1`\n+ `0 <= ops[i][1] <= ops[i][2] <= 10^9`\n+ `0 <= 节点值 <= 10^9`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2834.守护太空城",
+        "hardRate": "HARD",
+        "passRate": "44.84%",
+        "problemsUrl": "https://leetcode.cn/problems/EJvmW4/",
+        "solutionsUrl": "https://leetcode.cn/problems/EJvmW4/solution",
+        "problemsDesc": "各位勇者请注意，力扣太空城发布陨石雨红色预警。\n\n太空城中的一些舱室将要受到陨石雨的冲击，这些舱室按照编号 `0 ~ N` 的顺序依次排列。为了阻挡陨石损毁舱室，太空城可以使用能量展开防护屏障，具体消耗如下：\n\n- 选择一个舱室开启屏障，能量消耗为 `2` \n- 选择相邻两个舱室开启联合屏障，能量消耗为 `3`\n- 对于已开启的**一个**屏障，**多维持一时刻**，能量消耗为 `1`\n\n已知陨石雨的影响范围和到达时刻，`time[i]` 和 `position[i]` 分别表示该陨石的到达时刻和冲击位置。请返回太空舱能够守护所有舱室所需要的最少能量。\n\n**注意：** \n- 同一时间，一个舱室不能被多个屏障覆盖\n- 陨石雨仅在到达时刻对冲击位置处的舱室有影响\n\n\n**示例 1：**\n>输入：`time = [1,2,1], position = [6,3,3]`\n>\n>输出：`5`\n>\n>解释：\n> 时刻 1，分别开启编号 3、6 舱室的屏障，能量消耗 2*2 = 4\n> 时刻 2，维持编号 3 舱室的屏障，能量消耗 1\n> 因此，最少需要能量 5\n\n**示例 2：**\n>输入：`time = [1,1,1,2,2,3,5], position = [1,2,3,1,2,1,3]`\n>\n>输出：`9`\n>\n>解释：\n> 时刻 1，开启编号 1、2 舱室的联合屏障，能量消耗 3\n> 时刻 1，开启编号 3 舱室的屏障，能量消耗 2\n> 时刻 2，维持编号 1、2 舱室的联合屏障，能量消耗 1\n> 时刻 3，维持编号 1、2 舱室的联合屏障，能量消耗 1\n> 时刻 5，重新开启编号 3 舱室的联合屏障，能量消耗 2\n> 因此，最少需要能量 9\n\n**提示：**\n+ `1 <= time.length == position.length <= 500`\n+ `1 <= time[i] <= 5`\n+ `0 <= position[i] <= 100`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2835.夺回据点",
+        "hardRate": "HARD",
+        "passRate": "40.82%",
+        "problemsUrl": "https://leetcode.cn/problems/s5kipK/",
+        "solutionsUrl": "https://leetcode.cn/problems/s5kipK/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「夺回据点」。\n\n魔物了占领若干据点，这些据点被若干条道路相连接，`roads[i] = [x, y]` 表示编号 `x`、`y` 的两个据点通过一条道路连接。\n\n现在勇者要将按照以下原则将这些据点逐一夺回：\n\n- 在开始的时候，勇者可以花费资源先夺回一些据点，初始夺回第 `j` 个据点所需消耗的资源数量为 `cost[j]` \n\n- 接下来，勇者在不消耗资源情况下，每次可以夺回**一个**和「已夺回据点」相连接的魔物据点，并对其进行夺回\n\n> 注：为了防止魔物暴动，勇者在每一次夺回据点后（包括花费资源夺回据点后），需要保证剩余的所有魔物据点之间是相连通的（不经过「已夺回据点」）。\n\n请返回勇者夺回所有据点需要消耗的最少资源数量。\n\n**注意：**\n- 输入保证初始所有据点都是连通的，且不存在重边和自环\n\n**示例 1：**\n>输入：\n>`cost = [1,2,3,4,5,6]`\n>`roads = [[0,1],[0,2],[1,3],[2,3],[1,2],[2,4],[2,5]]`\n>\n>输出：`6`\n>\n>解释：\n>勇者消耗资源 `6` 夺回据点 `0` 和 `4`，魔物据点 `1、2、3、5` 相连通；\n>第一次夺回据点 `1`，魔物据点 `2、3、5` 相连通；\n>第二次夺回据点 `3`，魔物据点 `2、5` 相连通；\n>第三次夺回据点 `2`，剩余魔物据点 `5`；\n>第四次夺回据点 `5`，无剩余魔物据点；\n>因此最少需要消耗资源为 `6`，可占领所有据点。\n![image.png](https://pic.leetcode-cn.com/1648706944-KJstUN-image.png){:height=170px}\n\n\n**示例 2：**\n>输入：\n>`cost = [3,2,1,4]`\n>`roads = [[0,2],[2,3],[3,1]]`\n>\n>输出：`2`\n>\n>解释：\n>勇者消耗资源 `2` 夺回据点 `1`，魔物据点 `0、2、3` 相连通；\n>第一次夺回据点 `3`，魔物据点 `2、0` 相连通；\n>第二次夺回据点 `2`，剩余魔物据点 `0`；\n>第三次夺回据点 `0`，无剩余魔物据点；\n>因此最少需要消耗资源为 `2`，可占领所有据点。\n![image.png](https://pic.leetcode-cn.com/1648707186-LJRwzU-image.png){:height=60px}\n\n\n**提示：**\n- `1 <= roads.length, cost.length <= 10^5`\n- `0 <= roads[i][0], roads[i][1] < cost.length`\n- `1 <= cost[i] <= 10^9`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2836.采集果实",
+        "hardRate": "EASY",
+        "passRate": "73.48%",
+        "problemsUrl": "https://leetcode.cn/problems/PTXy4P/",
+        "solutionsUrl": "https://leetcode.cn/problems/PTXy4P/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣新手村，本次训练内容为「采集果实」。\n\n在新手村中，各位勇者需要采集一些果实来制作药剂。`time[i]` 表示勇者每次采集 `1～limit` 颗第 `i` 种类型的果实需要的时间（即每次最多可以采集 `limit` 颗果实）。\n\n当前勇者需要完成「采集若干批果实」的任务， `fruits[j] = [type, num]` 表示第 `j` 批需要采集 `num` 颗 `type` 类型的果实。采集规则如下：\n- 按 `fruits` 给定的顺序**依次**采集每一批次\n- 采集完当前批次的果实才能开始采集下一批次\n- 勇者完成当前批次的采集后将**清空背包**（即多余的果实将清空）\n\n请计算并返回勇者完成采集任务最少需要的时间。\n\n\n**示例 1：**\n>输入：`time = [2,3,2], fruits = [[0,2],[1,4],[2,1]], limit = 3`\n>\n>输出：`10`\n>\n>解释：\n>由于单次最多采集 3 颗\n>第 0 批需要采集 2 颗第 0 类型果实，需要采集 1 次，耗时为 2\\*1=2\n>第 1 批需要采集 4 颗第 1 类型果实，需要采集 2 次，耗时为 3\\*2=6\n>第 2 批需要采集 1 颗第 2 类型果实，需要采集 1 次，耗时为 2\\*1=2\n>返回总耗时 2+6+2=10\n\n**示例 2：**\n>输入：`time = [1], fruits = [[0,3],[0,5]], limit = 2`\n>\n>输出：`5`\n>\n>解释：\n>由于单次最多采集 2 颗\n>第 0 批需要采集 3 颗第 0 类型果实，需要采集 2 次，耗时为 1\\*2=2\n>第 1 批需要采集 5 颗第 0 类型果实，需要采集 3 次，耗时为 1\\*3=3\n>需按照顺序依次采集，返回 2+3=5\n\n**提示：**\n- `1 <= time.length <= 100`\n- `1 <= time[i] <= 100`\n- `1 <= fruits.length <= 10^3`\n- `0 <= fruits[i][0] < time.length`\n- `1 <= fruits[i][1] < 10^3`\n- `1 <= limit <= 100`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2837.信物传送",
+        "hardRate": "MEDIUM",
+        "passRate": "43.71%",
+        "problemsUrl": "https://leetcode.cn/problems/6UEx57/",
+        "solutionsUrl": "https://leetcode.cn/problems/6UEx57/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「信物传送」。\n\n本次试炼场地设有若干传送带，`matrix[i][j]` 表示第 `i` 行 `j` 列的传送带运作方向，`\"^\",\"v\",\"<\",\">\"` 这四种符号分别表示 **上、下、左、右** 四个方向。信物会随传送带的方向移动。勇者**每一次**施法操作，可**临时**变更一处传送带的方向，在物品经过后传送带恢复原方向。\n![lcp (2).gif](https://pic.leetcode-cn.com/1649835246-vfupSL-lcp%20\\(2\\).gif){:width=300px}\n\n通关信物初始位于坐标 `start`处，勇者需要将其移动到坐标 `end` 处，请返回勇者施法操作的最少次数。\n\n\n\n**注意：**\n- `start` 和 `end` 的格式均为 `[i,j]`\n\n**示例 1:**\n> 输入：`matrix = [\">>v\",\"v^<\",\"<><\"], start = [0,1], end = [2,0]`\n>\n> 输出：`1`\n>\n> 解释：\n> 如上图所示\n> 当信物移动到 `[1,1]` 时，勇者施法一次将 `[1,1]` 的传送方向 `^` 从变更为 `<`\n> 从而信物移动到 `[1,0]`，后续到达 `end` 位置\n> 因此勇者最少需要施法操作 1 次\n\n**示例 2:**\n> 输入：`matrix = [\">>v\",\">>v\",\"^<<\"], start = [0,0], end = [1,1]`\n>\n> 输出：`0`\n>\n> 解释：勇者无需施法，信物将自动传送至 `end` 位置\n\n**示例 3:**\n> 输入：`matrix = [\">^^>\",\"<^v>\",\"^v^<\"], start = [0,0], end = [1,3]`\n>\n> 输出：`3`\n\n**提示：**\n- `matrix` 中仅包含 `'^'、'v'、'<'、'>'`\n- `0 < matrix.length <= 100`\n- `0 < matrix[i].length <= 100`\n- `0 <= start[0],end[0] < matrix.length`\n- `0 <= start[1],end[1] < matrix[i].length`\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2838.打地鼠",
+        "hardRate": "HARD",
+        "passRate": "27.24%",
+        "problemsUrl": "https://leetcode.cn/problems/ZbAuEH/",
+        "solutionsUrl": "https://leetcode.cn/problems/ZbAuEH/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「打地鼠」。\n![middle_img_v2_d5d09656-0616-4a80-845e-ece461c5ba9g.png](https://pic.leetcode-cn.com/1650273183-nZIijm-middle_img_v2_d5d09656-0616-4a80-845e-ece461c5ba9g.png){:height=\"200px\"}\n勇者面前有一个大小为 `3*3` 的打地鼠游戏机，地鼠将随机出现在各个位置，`moles[i] = [t,x,y]` 表示在第 `t` 秒会有地鼠出现在 `(x,y)` 位置上，并于第 `t+1` 秒该地鼠消失。\n\n勇者有一把可敲打地鼠的锤子，初始时刻（即第 `0` 秒）锤子位于正中间的格子 `(1,1)`，锤子的使用规则如下：\n- 锤子每经过 `1` 秒可以往上、下、左、右中的一个方向移动一格，也可以不移动\n- 锤子只可敲击所在格子的地鼠，**敲击不耗时**\n\n请返回勇者**最多**能够敲击多少只地鼠。\n\n**注意：** \n- 输入用例保证在相同时间相同位置最多仅有一只地鼠\n\n\n**示例 1：**\n>输入： `moles = [[1,1,0],[2,0,1],[4,2,2]]`\n>\n>输出： `2`\n>\n>解释：\n>第 0 秒，锤子位于 (1,1)\n>第 1 秒，锤子移动至 (1,0) 并敲击地鼠\n>第 2 秒，锤子移动至 (2,0)\n>第 3 秒，锤子移动至 (2,1)\n>第 4 秒，锤子移动至 (2,2) 并敲击地鼠\n>因此勇者最多可敲击 2 只地鼠\n\n\n**示例 2：**\n>输入：`moles = [[2,0,2],[5,2,0],[4,1,0],[1,2,1],[3,0,2]]`\n>\n>输出：`3`\n>\n>解释：\n>第 0 秒，锤子位于 (1,1)\n>第 1 秒，锤子移动至 (2,1) 并敲击地鼠\n>第 2 秒，锤子移动至 (1,1)\n>第 3 秒，锤子移动至 (1,0)\n>第 4 秒，锤子在 (1,0) 不移动并敲击地鼠\n>第 5 秒，锤子移动至 (2,0) 并敲击地鼠\n>因此勇者最多可敲击 3 只地鼠\n\n\n**示例 3：**\n>输入：`moles = [[0,1,0],[0,0,1]]`\n>\n>输出：`0`\n>\n>解释：\n>第 0 秒，锤子初始位于 (1,1)，此时并不能敲击 (1,0)、(0,1) 位置处的地鼠\n\n\n**提示：**\n+ `1 <= moles.length <= 10^5`\n+ `moles[i].length == 3`\n+ `0 <= moles[i][0] <= 10^9`\n+ `0 <= moles[i][1], moles[i][2] < 3`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2839.积木拼接",
+        "hardRate": "HARD",
+        "passRate": "35.37%",
+        "problemsUrl": "https://leetcode.cn/problems/De4qBB/",
+        "solutionsUrl": "https://leetcode.cn/problems/De4qBB/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「积木拼接」。\n勇者面前有 `6` 片积木（厚度均为 1），每片积木的形状记录于二维字符串数组 `shapes` 中，`shapes[i]` 表示第 `i` 片积木，其中 `1` 表示积木对应位置无空缺，`0` 表示积木对应位置有空缺。\n例如 `[\"010\",\"111\",\"010\"]` 对应积木形状为\n![image.png](https://pic.leetcode-cn.com/1616125620-nXMCxX-image.png)\n\n拼接积木的规则如下：\n- 积木片可以旋转、翻面\n- 积木片边缘必须完全吻合才能拼接在一起\n- **每片积木片 `shapes[i]` 的中心点在拼接时必须处于正方体对应面的中心点**\n\n例如 `3*3`、`4*4` 的积木片的中心点如图所示（红色点）：\n![middle_img_v2_c2d91eb5-9beb-4c06-9726-f7dae149d86g.png](https://pic.leetcode-cn.com/1650509082-wObiEp-middle_img_v2_c2d91eb5-9beb-4c06-9726-f7dae149d86g.png){:height=\"150px\"}\n\n\n请返回这 6 片积木能否拼接成一个**严丝合缝的正方体**且每片积木正好对应正方体的一个面。\n\n**注意：**\n- 输入确保每片积木均无空心情况（即输入数据保证对于大小 `N*N` 的 `shapes[i]`，内部的 `(N-2)*(N-2)` 的区域必然均为 1）\n- 输入确保每片积木的所有 `1` 位置均连通\n\n**示例 1：**\n>输入：`shapes = [[\"000\",\"110\",\"000\"],[\"110\",\"011\",\"000\"],[\"110\",\"011\",\"110\"],[\"000\",\"010\",\"111\"],[\"011\",\"111\",\"011\"],[\"011\",\"010\",\"000\"]]`\n>\n>输出：`true`\n>\n>解释：\n![cube.gif](https://pic.leetcode-cn.com/1616125823-hkXAeN-cube.gif)\n\n**示例 2：**\n>输入：`shapes = [[\"101\",\"111\",\"000\"],[\"000\",\"010\",\"111\"],[\"010\",\"011\",\"000\"],[\"010\",\"111\",\"010\"],[\"101\",\"111\",\"010\"],[\"000\",\"010\",\"011\"]]`\n>\n>输出：`false`\n>\n>解释： \n>由于每片积木片的中心点在拼接时必须处于正方体对应面的中心点，积木片 `[\"010\",\"011\",\"000\"]` 不能作为 `[\"100\",\"110\",\"000\"]` 使用，因此无法构成正方体\n\n\n**提示：**\n- `shapes.length == 6`\n- `shapes[i].length == shapes[j].length`\n- `shapes[i].length == shapes[i][j].length`\n- `3 <= shapes[i].length <= 10`\n\n\n\n\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2840.搭桥过河",
+        "hardRate": "HARD",
+        "passRate": "35.92%",
+        "problemsUrl": "https://leetcode.cn/problems/NfY1m5/",
+        "solutionsUrl": "https://leetcode.cn/problems/NfY1m5/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「搭桥过河」。\n\n勇者面前有一段长度为 `num` 的河流，河流可以划分为若干河道。每条河道上恰有一块浮木，`wood[i]` 记录了第 `i` 条河道上的浮木初始的覆盖范围。\n\n- 当且仅当浮木与相邻河道的浮木覆盖范围有重叠时，勇者才可以在两条浮木间移动\n- 勇者 **仅能在岸上** 通过花费一点「自然之力」，使任意一条浮木沿着河流移动一个单位距离\n\n请问勇者跨越这条河流，最少需要花费多少「自然之力」。\n\n\n**示例 1：**\n> 输入： `num = 10, wood = [[1,2],[4,7],[8,9]]`\n> 输出： `3`\n> 解释：如下图所示，\n> 将 [1,2] 浮木移动至 [3,4]，花费 2「自然之力」，\n> 将 [8,9] 浮木移动至 [7,8]，花费 1「自然之力」，\n> 此时勇者可以顺着 [3,4]->[4,7]->[7,8] 跨越河流，\n> 因此，勇者最少需要花费 3 点「自然之力」跨越这条河流\n![wood (2).gif](https://pic.leetcode-cn.com/1648196478-ophADL-wood%20\\(2\\).gif){:width=650px}\n\n\n**示例 2：**\n> 输入： `num = 10, wood = [[1,5],[1,1],[10,10],[6,7],[7,8]]`\n> 输出： `10`\n> 解释：\n> 将 [1,5] 浮木移动至 [2,6]，花费 1「自然之力」，\n> 将 [1,1] 浮木移动至 [6,6]，花费 5「自然之力」，\n> 将 [10,10] 浮木移动至 [6,6]，花费 4「自然之力」，\n> 此时勇者可以顺着 [2,6]->[6,6]->[6,6]->[6,7]->[7,8] 跨越河流，\n> 因此，勇者最少需要花费 10 点「自然之力」跨越这条河流\n\n\n**示例 3：**\n> 输入： `num = 5, wood = [[1,2],[2,4]]`\n> 输出： `0`\n> 解释：勇者不需要移动浮木，仍可以跨越这条河流\n\n**提示:**\n- `1 <= num <= 10^9`\n- `1 <= wood.length <= 10^5`\n- `wood[i].length == 2`\n- `1 <= wood[i][0] <= wood[i][1] <= num`\n\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2841.力扣泡泡龙",
+        "hardRate": "HARD",
+        "passRate": "19.86%",
+        "problemsUrl": "https://leetcode.cn/problems/WInSav/",
+        "solutionsUrl": "https://leetcode.cn/problems/WInSav/solution",
+        "problemsDesc": "欢迎各位勇者来到力扣城，本次试炼主题为「力扣泡泡龙」。\n\n游戏初始状态的泡泡形如二叉树 `root`，每个节点值对应了该泡泡的分值。勇者最多可以击破一个节点泡泡，要求满足：\n- 被击破的节点泡泡 **至多** 只有一个子节点泡泡\n- 当被击破的节点泡泡有子节点泡泡时，则子节点泡泡将取代被击破泡泡的位置\n    > 注：即整棵子树泡泡上移\n\n请问在击破一个节点泡泡操作或无击破操作后，二叉泡泡树的最大「层和」是多少。\n\n**注意：**\n- 「层和」为同一高度的所有节点的分值之和\n\n**示例 1：**\n> 输入：`root = [6,0,3,null,8]`\n>\n> 输出：`11`\n>\n> 解释：勇者的最佳方案如图所示\n>![image.png](https://pic.leetcode-cn.com/1648180809-XSWPLu-image.png){:height=\"100px\"}\n\n\n\n**示例 2：**\n> 输入：`root = [5,6,2,4,null,null,1,3,5]`\n>\n> 输出：`9`\n>\n> 解释：勇者击破 6 节点，此时「层和」最大为 3+5+1 = 9\n>![image.png](https://pic.leetcode-cn.com/1648180769-TLpYop-image.png){:height=\"200px\"}\n\n\n\n**示例 3：**\n> 输入：`root = [-5,1,7]`\n>\n> 输出：`8`\n>\n> 解释：勇者不击破节点，「层和」最大为 1+7 = 8\n\n\n**提示**：\n- `2 <= 树中节点个数 <= 10^5`\n- `-10000 <= 树中节点的值 <= 10000`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2842.气温变化趋势",
+        "hardRate": "EASY",
+        "passRate": "61.38%",
+        "problemsUrl": "https://leetcode.cn/problems/6CE719/",
+        "solutionsUrl": "https://leetcode.cn/problems/6CE719/solution",
+        "problemsDesc": "力扣城计划在两地设立「力扣嘉年华」的分会场，气象小组正在分析两地区的气温变化趋势，对于第 `i ~ (i+1)` 天的气温变化趋势，将根据以下规则判断：\n- 若第 `i+1` 天的气温 **高于** 第 `i` 天，为 **上升** 趋势\n- 若第 `i+1` 天的气温 **等于** 第 `i` 天，为 **平稳** 趋势\n- 若第 `i+1` 天的气温 **低于** 第 `i` 天，为 **下降** 趋势\n\n已知 `temperatureA[i]` 和 `temperatureB[i]` 分别表示第 `i` 天两地区的气温。\n组委会希望找到一段天数尽可能多，且两地气温变化趋势相同的时间举办嘉年华活动。请分析并返回两地气温变化趋势**相同的最大连续天数**。\n> 即最大的 `n`，使得第 `i~i+n` 天之间，两地气温变化趋势相同\n\n**示例 1：**\n>输入：\n>`temperatureA = [21,18,18,18,31]`\n>`temperatureB = [34,32,16,16,17]`\n>\n>输出：`2`\n>\n>解释：如下表所示， 第 `2～4` 天两地气温变化趋势相同，且持续时间最长，因此返回 `4-2=2`\n![image.png](https://pic.leetcode-cn.com/1663902654-hlrSvs-image.png){:width=1000px}\n\n\n**示例 2：**\n>输入：\n>`temperatureA = [5,10,16,-6,15,11,3]`\n>`temperatureB = [16,22,23,23,25,3,-16]`\n>\n>输出：`3`\n\n**提示：**\n- `2 <= temperatureA.length == temperatureB.length <= 1000`\n- `-20 <= temperatureA[i], temperatureB[i] <= 40`\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2843.交通枢纽",
+        "hardRate": "MEDIUM",
+        "passRate": "62.52%",
+        "problemsUrl": "https://leetcode.cn/problems/D9PW8w/",
+        "solutionsUrl": "https://leetcode.cn/problems/D9PW8w/solution",
+        "problemsDesc": "为了缓解「力扣嘉年华」期间的人流压力，组委会在活动期间开设了一些交通专线。`path[i] = [a, b]` 表示有一条从地点 `a`通往地点 `b` 的 **单向** 交通专线。\n若存在一个地点，满足以下要求，我们则称之为 **交通枢纽**：\n- 所有地点（除自身外）均有一条 **单向** 专线 **直接** 通往该地点；\n- 该地点不存在任何 **通往其他地点** 的单向专线。\n\n请返回交通专线的 **交通枢纽**。若不存在，则返回 `-1`。\n\n**注意：**\n- 对于任意一个地点，至少被一条专线连通。\n\n**示例 1：**\n>输入：`path = [[0,1],[0,3],[1,3],[2,0],[2,3]]`\n>\n>输出：`3`\n>\n>解释：如下图所示：\n> 地点 `0,1,2` 各有一条通往地点 `3` 的交通专线，\n> 且地点 `3` 不存在任何**通往其他地点**的交通专线。\n>![image.png](https://pic.leetcode-cn.com/1663902572-yOlUCr-image.png){:width=200px}\n\n\n**示例 2：**\n>输入：`path = [[0,3],[1,0],[1,3],[2,0],[3,0],[3,2]]`\n>\n>输出：`-1`\n>\n>解释：如下图所示：不存在满足 **交通枢纽** 的地点。\n>![image.png](https://pic.leetcode-cn.com/1663902595-McsEkY-image.png){:width=200px}\n\n**提示：**\n- `1 <= path.length <= 1000`\n- `0 <= path[i][0], path[i][1] <= 1000`\n- `path[i][0]` 与 `path[i][1]` 不相等",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2844.弹珠游戏",
+        "hardRate": "MEDIUM",
+        "passRate": "26.63%",
+        "problemsUrl": "https://leetcode.cn/problems/EXvqDp/",
+        "solutionsUrl": "https://leetcode.cn/problems/EXvqDp/solution",
+        "problemsDesc": "欢迎各位来到「力扣嘉年华」，接下来将为各位介绍在活动中广受好评的弹珠游戏。\n\n`N*M` 大小的弹珠盘的初始状态信息记录于一维字符串型数组 `plate` 中，数组中的每个元素为仅由 `\"O\"`、`\"W\"`、`\"E\"`、`\".\"` 组成的字符串。其中：\n- `\"O\"` 表示弹珠洞（弹珠到达后会落入洞中，并停止前进）；\n- `\"W\"` 表示逆时针转向器（弹珠经过时方向将逆时针旋转 90 度）；\n- `\"E\"` 表示顺时针转向器（弹珠经过时方向将顺时针旋转 90 度）；\n- `\".\"` 表示空白区域（弹珠可通行）。\n\n游戏规则要求仅能在边缘位置的 **空白区域** 处（弹珠盘的四角除外）沿 **与边缘垂直** 的方向打入弹珠，并且打入后的每颗弹珠最多能 **前进** `num` 步。请返回符合上述要求且可以使弹珠最终入洞的所有打入位置。你可以 **按任意顺序** 返回答案。\n\n**注意：**\n- 若弹珠已到达弹珠盘边缘并且仍沿着出界方向继续前进，则将直接出界。\n\n**示例 1：**\n> 输入\b：\n>`num = 4`\n>`plate = [\"..E.\",\".EOW\",\"..W.\"]`\n> \n> 输出：`[[2,1]]`\n> \n> 解释：\n> 在 `[2,1]` 处打入弹珠，弹珠前进 1 步后遇到转向器，前进方向顺时针旋转 90 度，再前进 1 步进入洞中。\n![b054955158a99167b8d51da0e22a54da.gif](https://pic.leetcode-cn.com/1630392649-BoQncz-b054955158a99167b8d51da0e22a54da.gif){:width=\"300px\"}\n\n**示例 2：**\n> 输入\b：\n>`num = 5`\n>`plate = [\".....\",\"..E..\",\".WO..\",\".....\"]`\n> \n> 输出：`[[0,1],[1,0],[2,4],[3,2]]`\n> \n> 解释：\n> 在 `[0,1]` 处打入弹珠，弹珠前进 2 步，遇到转向器后前进方向逆时针旋转 90 度，再前进 1 步进入洞中。\n> 在 `[1,0]` 处打入弹珠，弹珠前进 2 步，遇到转向器后前进方向顺时针旋转 90 度，再前进 1 步进入洞中。\n> 在 `[2,4]` 处打入弹珠，弹珠前进 2 步后进入洞中。\n> 在 `[3,2]` 处打入弹珠，弹珠前进 1 步后进入洞中。\n![b44e9963239ae368badf3d00b7563087.gif](https://pic.leetcode-cn.com/1630392625-rckbdy-b44e9963239ae368badf3d00b7563087.gif){:width=\"350px\"}\n\n\n**示例 3：**\n> 输入\b：\n>`num = 3`\n>`plate = [\".....\",\"....O\",\"....O\",\".....\"]`\n> \n> 输出：`[]`\n> \n> 解释：\n> 由于弹珠被击中后只能前进 3 步，且不能在弹珠洞和弹珠盘四角打入弹珠，故不存在能让弹珠入洞的打入位置。\n\n\n**提示：**\n- `1 <= num <= 10^6`\n- `1 <= plate.length, plate[i].length <= 1000`\n- `plate[i][j]` 仅包含 `\"O\"`、`\"W\"`、`\"E\"`、`\".\"` ",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2845.二叉树灯饰",
+        "hardRate": "MEDIUM",
+        "passRate": "35.86%",
+        "problemsUrl": "https://leetcode.cn/problems/U7WvvU/",
+        "solutionsUrl": "https://leetcode.cn/problems/U7WvvU/solution",
+        "problemsDesc": "「力扣嘉年华」的中心广场放置了一个巨型的二叉树形状的装饰树。每个节点上均有一盏灯和三个开关。节点值为 `0` 表示灯处于「关闭」状态，节点值为 `1` 表示灯处于「开启」状态。每个节点上的三个开关各自功能如下：\n- 开关 `1`：切换当前节点的灯的状态；\n- 开关 `2`：切换 **以当前节点为根** 的子树中，所有节点上的灯的状态，；\n- 开关 `3`：切换 **当前节点及其左右子节点**（若存在的话） 上的灯的状态；\n\n给定该装饰的初始状态 `root`，请返回最少需要操作多少次开关，可以关闭所有节点的灯。\n\n**示例 1：**\n>输入：`root = [1,1,0,null,null,null,1]`\n>\n>输出：`2`\n>\n>解释：以下是最佳的方案之一，如图所示\n![b71b95bf405e3b223e00b2820a062ba4.gif](https://pic.leetcode-cn.com/1629357030-GSbzpY-b71b95bf405e3b223e00b2820a062ba4.gif){:width=\"300px\"}\n\n**示例 2：**\n>输入：`root = [1,1,1,1,null,null,1]`\n>\n>输出：`1`\n>\n>解释：以下是最佳的方案，如图所示\n![a4091b6448a0089b4d9e8f0390ff9ac6.gif](https://pic.leetcode-cn.com/1629356950-HZsKZC-a4091b6448a0089b4d9e8f0390ff9ac6.gif){:width=\"300px\"}\n\n**示例 3：**\n>输入：`root = [0,null,0]`\n>\n>输出：`0`\n>\n>解释：无需操作开关，当前所有节点上的灯均已关闭\n\n**提示：**\n- `1 <= 节点个数 <= 10^5`\n- `0 <= Node.val <= 1`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2846.舒适的湿度",
+        "hardRate": "HARD",
+        "passRate": "45.69%",
+        "problemsUrl": "https://leetcode.cn/problems/3aqs1c/",
+        "solutionsUrl": "https://leetcode.cn/problems/3aqs1c/solution",
+        "problemsDesc": "力扣嘉年华为了确保更舒适的游览环境条件，在会场的各处设置了湿度调节装置，这些调节装置受控于总控室中的一台控制器。\n控制器中已经预设了一些调节指令，整数数组`operate[i]` 表示第 `i` 条指令增加空气湿度的大小。现在你可以将任意数量的指令修改为降低湿度（变化的数值不变），以确保湿度尽可能的适宜：\n- 控制器会选择 **一段连续的指令** ，从而进行湿度调节的操作；\n- 这段指令最终对湿度影响的绝对值，即为当前操作的「不适宜度」\n- 在控制器所有可能的操作中，**最大** 的「不适宜度」即为「整体不适宜度」\n\n请返回在所有修改指令的方案中，可以得到的 **最小** 「整体不适宜度」。\n\n**示例 1：**\n> 输入：`operate = [5,3,7]`\n>\n> 输出：`8`\n>\n> 解释：对于方案 `2` 的 `[5,3,-7]`\n>操作指令 `[5],[3],[-7]` 的「不适宜度」分别为 `5,3,7`\n>操作指令 `[5,3],[3,-7]` 的「不适宜度」分别为 `8,4`\n>操作指令 `[5,3,-7]` 的「不适宜度」为 `1`，\n>因此对于方案 `[5,3,-7]`的「整体不适宜度」为 `8`，其余方案的「整体不适宜度」均不小于 `8`，如下表所示：\n![image.png](https://pic.leetcode-cn.com/1663902759-dgDCxn-image.png){:width=650px}\n\n**示例 2：**\n> 输入：`operate = [20,10]`\n>\n> 输出：`20`\n\n**提示：**\n- `1 <= operate.length <= 1000`\n- `1 <= operate[i] <= 1000`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2847.最小展台数量",
+        "hardRate": "EASY",
+        "passRate": "77.44%",
+        "problemsUrl": "https://leetcode.cn/problems/600YaG/",
+        "solutionsUrl": "https://leetcode.cn/problems/600YaG/solution",
+        "problemsDesc": "力扣嘉年华将举办一系列展览活动，后勤部将负责为每场展览提供所需要的展台。\n已知后勤部得到了一份需求清单，记录了近期展览所需要的展台类型， `demand[i][j]` 表示第 `i` 天展览时第 `j` 个展台的类型。\n在满足每一天展台需求的基础上，请返回后勤部需要准备的 **最小** 展台数量。\n\n**注意：**\n- 同一展台在不同天中可以重复使用。\n\n**示例 1：**\n>输入：`demand = [\"acd\",\"bed\",\"accd\"]`\n>\n>输出：`6`\n>\n>解释：\n>第 `0` 天需要展台 `a、c、d`；\n>第 `1` 天需要展台 `b、e、d`；\n>第 `2` 天需要展台 `a、c、c、d`；\n>因此，后勤部准备 `abccde` 的展台，可以满足每天的展览需求;\n\n**示例 2：**\n>输入：`demand = [\"abc\",\"ab\",\"ac\",\"b\"]`\n>\n>输出：`3`\n\n\n**提示：**\n- `1 <= demand.length,demand[i].length <= 100`\n- `demand[i][j]` 仅为小写字母",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2848.装饰树",
+        "hardRate": "MEDIUM",
+        "passRate": "87.78%",
+        "problemsUrl": "https://leetcode.cn/problems/KnLfVT/",
+        "solutionsUrl": "https://leetcode.cn/problems/KnLfVT/solution",
+        "problemsDesc": "力扣嘉年华上的 DIY 手工展位准备了一棵缩小版的 **二叉** 装饰树 `root` 和灯饰，你需要将灯饰逐一插入装饰树中，要求如下：\n\n- 完成装饰的二叉树根结点与 `root` 的根结点值相同\n- 若一个节点拥有父节点，则在该节点和他的父节点之间插入一个灯饰（即插入一个值为 `-1` 的节点）。具体地：\n    - 在一个 父节点 x 与其左子节点 y 之间添加 -1 节点， 节点 -1、节点 y 为各自父节点的左子节点，\n    - 在一个 父节点 x 与其右子节点 y 之间添加 -1 节点， 节点 -1、节点 y 为各自父节点的右子节点，\n    \n现给定二叉树的根节点 `root` ，请返回完成装饰后的树的根节点。\n**示例 1：**\n>输入：\n>`root = [7,5,6]`\n>\n>输出：`[7,-1,-1,5,null,null,6]`\n>\n>解释：如下图所示，\n>![image.png](https://pic.leetcode-cn.com/1663575757-yRLGaq-image.png){:width=400px}\n\n**示例 2：**\n>输入：\n>`root = [3,1,7,3,8,null,4]`\n>\n>输出：`[3,-1,-1,1,null,null,7,-1,-1,null,-1,3,null,null,8,null,4]`\n>\n>解释：如下图所示\n![image.png](https://pic.leetcode-cn.com/1663577920-sjrAYH-image.png){:width=500px}\n\n**提示：**\n>`0 <= root.Val <= 1000`\n>`root` 节点数量范围为 `[1, 10^5]`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2849.美观的花束",
+        "hardRate": "MEDIUM",
+        "passRate": "50.86%",
+        "problemsUrl": "https://leetcode.cn/problems/1GxJYY/",
+        "solutionsUrl": "https://leetcode.cn/problems/1GxJYY/solution",
+        "problemsDesc": "力扣嘉年华的花店中从左至右摆放了一排鲜花，记录于整型一维矩阵 `flowers` 中每个数字表示该位置所种鲜花的品种编号。你可以选择一段区间的鲜花做成插花，且不能丢弃。\n在你选择的插花中，如果每一品种的鲜花数量都不超过 `cnt` 朵，那么我们认为这束插花是 「美观的」。\n> - 例如：`[5,5,5,6,6]` 中品种为 `5` 的花有 `3` 朵， 品种为 `6` 的花有 `2` 朵，**每一品种** 的数量均不超过 `3`\n\n请返回在这一排鲜花中，共有多少种可选择的区间，使得插花是「美观的」。\n\n**注意：**\n- 答案需要以 `1e9 + 7 (1000000007)` 为底取模，如：计算初始结果为：`1000000008`，请返回 `1`\n\n**示例 1：**\n>输入：`flowers = [1,2,3,2], cnt = 1`\n>\n>输出：`8`\n>\n>解释：相同的鲜花不超过 `1` 朵，共有 `8` 种花束是美观的；\n>长度为 `1` 的区间 `[1]、[2]、[3]、[2]` 均满足条件，共 `4` 种可选择区间\n>长度为 `2` 的区间 `[1,2]、[2,3]、[3,2]` 均满足条件，共 `3` 种可选择区间\n>长度为 `3` 的区间 `[1,2,3]` 满足条件，共 `1` 种可选择区间。\n>区间 `[2,3,2],[1,2,3,2]` 都包含了 `2` 朵鲜花 `2` ，不满足条件。\n>返回总数 `4+3+1 = 8`\n\n**示例 2：**\n>输入：`flowers = [5,3,3,3], cnt = 2`\n>\n>输出：`8`\n\n**提示：**\n- `1 <= flowers.length <= 10^5`\n- `1 <= flowers[i] <= 10^5`\n- `1 <= cnt <= 10^5`",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 2850.Hello LeetCode!",
+        "hardRate": "HARD",
+        "passRate": "34.05%",
+        "problemsUrl": "https://leetcode.cn/problems/rMeRt2/",
+        "solutionsUrl": "https://leetcode.cn/problems/rMeRt2/solution",
+        "problemsDesc": "力扣嘉年华同样准备了纪念品展位，参观者只需要集齐 `helloleetcode` 的 `13` 张字母卡片即可获得力扣纪念章。\n\n在展位上有一些由字母卡片拼成的单词，`words[i][j]` 表示第 `i` 个单词的第 `j` 个字母。\n\n你可以从这些单词中取出一些卡片，但每次拿取卡片都需要消耗游戏代币，规则如下：\n\n- 从一个单词中取一个字母所需要的代币数量，为该字母左边和右边字母数量之积\n\n- 可以从一个单词中多次取字母，每个字母仅可被取一次\n\n> 例如：从 `example` 中取出字母 `a`，需要消耗代币 `2*4=8`，字母取出后单词变为 `exmple`；\n再从中取出字母 `m`，需要消耗代币 `2*3=6`，字母取出后单词变为 `exple`；\n\n请返回取得 `helloleetcode` 这些字母需要消耗代币的 **最少** 数量。如果无法取得，返回 `-1`。\n\n**注意：**\n- 取出字母的顺序没有要求\n- 取出的所有字母恰好可以拼成 `helloleetcode` \n\n**示例 1：**\n>输入：`words = [\"hold\",\"engineer\",\"cost\",\"level\"]`\n>\n>输出：`5`\n>\n>解释：最优方法为：\n>从 `hold` 依次取出 `h`、`o`、`l`、`d`， 代价均为 `0`\n>从 `engineer` 依次取出第 `1` 个 `e` 与最后一个 `e`， 代价为 `0` 和 `5*1=5`\n>从 `cost` 取出 `c`、`o`、`t`， 代价均为 `0`\n>从 `level` 依次取出 `l`、`l`、`e`、`e`， 代价均为 `0`\n>所有字母恰好可以拼成 `helloleetcode`，因此最小的代价为 `5`\n\n**示例 2：**\n>输入：`words = [\"hello\",\"leetcode\"]`\n>\n>输出：`0`\n\n**提示：**\n+ `n == words.length`\n+ `m == words[i].length`\n+ `1 <= n <= 24`\n+ `1 <= m <= 8`\n+ `words[i][j]` 仅为小写字母",
+        "isPlus": false
+    }
+]
