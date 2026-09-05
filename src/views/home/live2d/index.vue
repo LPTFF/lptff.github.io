@@ -2,7 +2,7 @@
   <div class="live2d-view">
     <h2 class="page-title">看板娘</h2>
     <p class="page-desc">
-      复刻自 2018–2019 年 hexo 博客时代的 live2d 看板娘，开启后在站点右下角悬浮展示，可点击模型触发随机动作，移动端不显示（沿用旧站设定）。共 {{ models.length }} 款官方免费示例模型可选。
+      复刻自 2018–2019 年 hexo 博客时代的 live2d 看板娘，开启后在站点右下角悬浮展示；直接拖动模型可调整位置，轻点模型仍会触发随机动作，也可使用角色旁的按钮快捷关闭。移动端不显示（沿用旧站设定）。共 {{ models.length }} 款官方免费示例模型可选。
     </p>
 
     <div class="control-card">
@@ -49,7 +49,7 @@
       <ul class="info-list">
         <li>hijiki 模型与运行库提取自仓库历史分支 hexo-backup；其余模型来自 live2d-widget 生态的官方免费示例模型包（Cubism2 时代官方示例素材，遵循各自的使用许可，限个人非商用），全本地加载、无外部 CDN 依赖</li>
         <li>初始化参数沿用旧站配置：右侧悬浮、150×300、idle 待机动作 + 8 组点击动作</li>
-        <li>显示状态记忆在浏览器本地（localStorage），不影响其他访客</li>
+        <li>显示状态、模型选择和拖动位置记忆在浏览器本地（localStorage），不影响其他访客</li>
       </ul>
     </div>
   </div>
@@ -66,6 +66,7 @@ import {
   enableLive2d,
   disableLive2d,
   switchLive2dModel,
+  LIVE2D_DISABLED_EVENT,
 } from "../../../utils/live2d";
 
 const enabled = ref(false);
@@ -74,6 +75,9 @@ const errorMessage = ref("");
 const models = ref<Live2dModelOption[]>([]);
 const selectedModel = ref("hijiki");
 const failedPreviews = new Set<HTMLImageElement>();
+const handleWidgetDisabled = () => {
+  enabled.value = false;
+};
 
 const loadPreview = (image: HTMLImageElement) => {
   const source = image.dataset.previewSrc;
@@ -136,6 +140,7 @@ const vLazyPreview: Directive<HTMLImageElement, string | undefined> = {
 
 onMounted(async () => {
   window.addEventListener("online", retryFailedPreviews);
+  window.addEventListener(LIVE2D_DISABLED_EVENT, handleWidgetDisabled);
   enabled.value = isLive2dEnabled();
   models.value = await loadLive2dModels();
   selectedModel.value = await getSelectedModelId();
@@ -143,6 +148,7 @@ onMounted(async () => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("online", retryFailedPreviews);
+  window.removeEventListener(LIVE2D_DISABLED_EVENT, handleWidgetDisabled);
   previewObserver.disconnect();
   failedPreviews.clear();
 });
