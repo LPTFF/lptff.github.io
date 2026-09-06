@@ -36,6 +36,11 @@ const tools = [
     name: "JSON 格式化",
     description: "格式化 / 压缩 / 校验，错误定位到行列",
   },
+  {
+    path: "/devtools/research-bookmarks",
+    name: "研究资料",
+    description: "导入浏览器书签，复制格式后到 Issue 补充",
+  },
 ];
 
 const route = useRoute();

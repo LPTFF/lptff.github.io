@@ -131,6 +131,12 @@ const routes = [
             component: () => import("../views/home/devtools/JsonFormatter.vue"),
             meta: { title: "JSON 格式化", product: "开发工具" },
           },
+          {
+            path: "research-bookmarks",
+            name: "devtools-research-bookmarks",
+            component: () => import("../views/home/devtools/ResearchBookmarks.vue"),
+            meta: { title: "研究资料", product: "开发工具" },
+          },
         ],
       },
     ],
