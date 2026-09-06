@@ -46,6 +46,12 @@ jobs:
         run: |
           npm ci
           python -m pip install --requirement project-support/requirements-crawl.txt
+      - name: Set up browser display
+        run: |
+          if ! command -v xvfb-run >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install --yes xvfb
+          fi
       - name: Type check
         run: npm run typecheck
       - name: Restore previously published crawler data
@@ -64,7 +70,7 @@ jobs:
         run: |
           chmod +x project-support/build.sh
           if [[ "$EVENT_NAME" == "schedule" && "$EVENT_SCHEDULE" != "17 22 * * *" ]]; then
-            ./project-support/build.sh \
+            xvfb-run -a ./project-support/build.sh \
               --only welfare \
               --only 0818tuan \
               --only 0818tuanTop \
@@ -73,13 +79,15 @@ jobs:
               --only daydayzhuan \
               --only daydayzhuanTop \
               --only zhujiceping \
+              --only xianyu \
               --only keywordSearch \
               --only infzm \
               --only weibo \
               --only douyinHot \
+              --only xiaohongshu \
               --summary .artifacts/collectors/python-ci.json
           else
-            ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
+            xvfb-run -a ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
           fi
       - name: Analyze 52pojie ecosystem signals
         if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
