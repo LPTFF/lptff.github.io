@@ -1,40 +1,45 @@
 <template>
   <section class="entertainment-section">
-    <header class="section-header">
-      <div>
-        <p class="eyebrow">ENTERTAINMENT UPDATES</p>
-        <h1>娱乐专区</h1>
-        <p class="section-intro">豆瓣动画与关注作者的新作品集中呈现，打开清单就能看到最近值得追的内容。</p>
-      </div>
-      <div class="source-summary" aria-label="内容来源概览">
-        <strong>{{ contentCount }}</strong>
-        <span>部内容 · 3 个来源</span>
-      </div>
-    </header>
+    <section class="entertainment-panel" aria-labelledby="entertainment-title">
+      <header class="entertainment-overview">
+        <div class="overview-copy">
+          <h1 id="entertainment-title">娱乐专区</h1>
+          <p class="section-intro">豆瓣动画与关注作者内容集中呈现；快手当前保留历史热度快照。</p>
+        </div>
+        <div class="overview-stats" aria-label="内容来源概览">
+          <span><strong>{{ contentCount }}</strong> 条内容</span>
+          <span><strong>{{ platformCount }}</strong> 个来源</span>
+        </div>
+      </header>
 
-    <div class="snapshot-note">
-      <span class="note-dot" aria-hidden="true"></span>
-      豆瓣只跟踪首页“最近热门电视剧”中的动画更新；抖音优先跟踪李子栗、独孤十一，快手暂时保留历史热度快照。
-    </div>
+      <section class="entertainment-filters" aria-label="筛选娱乐内容">
+        <div class="filter-row">
+          <span class="filter-label">内容来源</span>
+          <div class="platform-tabs" role="group" aria-label="选择内容来源">
+            <button
+              v-for="tab in platformTabs"
+              :key="tab.key"
+              class="platform-tab"
+              :class="{ active: activePlatform === tab.key }"
+              type="button"
+              :aria-pressed="activePlatform === tab.key"
+              @click="activePlatform = tab.key"
+            >
+              {{ tab.label }}
+              <span>{{ tab.count }}</span>
+            </button>
+          </div>
+          <span class="filter-result" role="status" aria-live="polite" aria-atomic="true">
+            {{ filteredItems.length }} 条当前结果
+          </span>
+        </div>
+      </section>
 
-    <div class="toolbar">
-      <div class="platform-tabs" role="tablist" aria-label="选择娱乐平台">
-        <button
-          v-for="tab in platformTabs"
-          :key="tab.key"
-          class="platform-tab"
-          :class="{ active: activePlatform === tab.key }"
-          type="button"
-          role="tab"
-          :aria-selected="activePlatform === tab.key"
-          @click="activePlatform = tab.key"
-        >
-          {{ tab.label }}
-          <span>{{ tab.count }}</span>
-        </button>
-      </div>
-
-    </div>
+      <details class="source-details">
+        <summary>更新范围与来源说明</summary>
+        <p>豆瓣只跟踪首页“最近热门电视剧”中的动画更新；抖音优先跟踪李子栗、独孤十一，快手暂时保留历史热度快照。</p>
+      </details>
+    </section>
 
     <div v-if="visibleItems.length" class="content-grid">
       <EntertainmentCard v-for="item in visibleItems" :key="item.key" :item="item" />
@@ -141,6 +146,7 @@ const itemsByPlatform: Record<EntertainmentPlatform, EntertainmentItem[]> = {
 
 const featuredItems = interleave(douyinItems, movieItems, kuaishouItems);
 const contentCount = movieItems.length + kuaishouItems.length + douyinItems.length;
+const platformCount = Object.values(itemsByPlatform).filter((items) => items.length).length;
 
 const platformTabs = computed(() => [
   { key: "all" as const, label: "全部", count: contentCount },
@@ -189,121 +195,174 @@ function interleave(...groups: EntertainmentItem[][]) {
   color: var(--ink);
 }
 
-.section-header {
+.entertainment-panel {
+  margin-bottom: 12px;
+  padding: 16px 18px;
+  overflow: hidden;
+  border: 1px solid #d8e5f5;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f3f8ff 100%);
+}
+
+.entertainment-overview {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
   gap: 24px;
-  padding: 12px 4px 24px;
+  margin-bottom: 12px;
 }
 
-.eyebrow {
-  margin: 0 0 8px;
-  color: var(--accent);
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 0.16em;
+.overview-copy {
+  min-width: 0;
+  flex: 1;
 }
 
-h1 {
+.entertainment-overview h1 {
   margin: 0;
-  font-size: clamp(30px, 5vw, 48px);
-  line-height: 1.08;
-  letter-spacing: -0.04em;
+  color: #30486f;
+  font-size: 20px;
+  line-height: 1.3;
 }
 
 .section-intro {
-  max-width: 590px;
-  margin: 12px 0 0;
-  color: var(--muted);
-  font-size: 15px;
-  line-height: 1.7;
+  max-width: 720px;
+  margin: 4px 0 0;
+  color: #65738a;
+  font-size: 13px;
+  line-height: 1.55;
 }
 
-.source-summary {
-  min-width: 170px;
-  padding: 16px 18px;
-  border: 1px solid #ebe5dd;
-  border-radius: 16px;
-  background: #fffaf4;
-}
-
-.source-summary strong,
-.source-summary span {
-  display: block;
-}
-
-.source-summary strong {
-  font-size: 26px;
-}
-
-.source-summary span {
-  margin-top: 3px;
-  color: var(--muted);
+.overview-stats {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-shrink: 0;
+  color: #607895;
   font-size: 12px;
 }
 
-.snapshot-note {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: 11px 14px;
-  border-radius: 10px;
-  background: #f6f7f9;
-  color: #666970;
-  font-size: 13px;
-  line-height: 1.5;
+.overview-stats span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
 }
 
-.note-dot {
-  flex: 0 0 auto;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: #ef8b4d;
+.overview-stats strong {
+  color: #3471c9;
+  font-size: 16px;
 }
 
-.toolbar {
+.entertainment-filters {
+  margin-bottom: 7px;
+  padding: 9px 12px;
+  border: 1px solid #e4e9f2;
+  border-radius: 9px;
+  background: #fff;
+}
+
+.filter-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 18px;
-  margin: 22px 0 18px;
+  gap: 8px;
+}
+
+.filter-label {
+  flex: 0 0 64px;
+  color: #52657c;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .platform-tabs {
   display: flex;
-  gap: 8px;
+  min-width: 0;
+  gap: 6px;
   overflow-x: auto;
   scrollbar-width: none;
+}
+
+.platform-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .platform-tab {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
+  gap: 4px;
   flex: 0 0 auto;
-  padding: 9px 13px;
-  border: 1px solid #dedfe3;
+  min-height: 26px;
+  padding: 2px 9px;
+  border: 1px solid #d8e0ec;
   border-radius: 999px;
-  background: #fff;
-  color: #555961;
+  background: #f8fafc;
+  color: #52647d;
+  font: inherit;
+  font-size: 12px;
   cursor: pointer;
+  transition: border-color 0.16s, color 0.16s, background 0.16s;
 }
 
 .platform-tab span {
-  color: #989ba1;
+  color: inherit;
   font-size: 11px;
+  opacity: 0.82;
+}
+
+.platform-tab:hover {
+  border-color: #8eb8ee;
+  color: #337ecc;
+}
+
+.platform-tab:focus-visible {
+  outline: 2px solid #8cb8f4;
+  outline-offset: 2px;
 }
 
 .platform-tab.active {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: #409eff;
+  background: #409eff;
   color: #fff;
 }
 
 .platform-tab.active span {
-  color: #d6d7da;
+  color: inherit;
+}
+
+.filter-result {
+  margin-left: auto;
+  flex-shrink: 0;
+  color: #4a74ad;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.source-details {
+  margin-bottom: 0;
+  color: #60758e;
+  font-size: 12px;
+}
+
+.source-details summary {
+  width: max-content;
+  cursor: pointer;
+  color: #57708e;
+  user-select: none;
+}
+
+.source-details[open] summary {
+  color: #3471c9;
+}
+
+.source-details p {
+  margin: 8px 0 0;
+  padding: 9px 12px;
+  border: 1px solid #e1e9f3;
+  border-radius: 8px;
+  color: #65738a;
+  background: #f8fbff;
+  line-height: 1.55;
 }
 
 .content-grid {
@@ -324,12 +383,29 @@ h1 {
 }
 
 @media (max-width: 768px) {
-  .section-header { align-items: flex-start; padding-top: 2px; }
-  .source-summary { display: none; }
-  .toolbar { align-items: flex-start; flex-direction: column; }
-  .platform-tabs { width: 100%; }
+  .entertainment-panel {
+    padding: 13px;
+  }
+  .entertainment-overview {
+    display: block;
+  }
+  .entertainment-overview h1 { font-size: 19px; }
+  .section-intro { font-size: 12px; }
+  .overview-stats {
+    gap: 7px 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+  .overview-stats strong { font-size: 14px; }
+  .entertainment-filters { padding: 8px 9px; }
+  .filter-label { flex-basis: 60px; }
+  .platform-tabs { flex: 1; }
+  .platform-tab {
+    min-height: 32px;
+    padding: 4px 9px;
+  }
+  .filter-result { display: none; }
   .content-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .snapshot-note { align-items: flex-start; }
-  .note-dot { margin-top: 6px; }
 }
 </style>

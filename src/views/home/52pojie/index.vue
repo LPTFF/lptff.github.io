@@ -1,56 +1,58 @@
 <template>
   <div>
-    <section class="ecosystem-radar">
-      <div>
-        <div class="radar-title">吾爱破解生态雷达</div>
-        <div class="radar-description">
-          保留全部近期资讯，观察真实需求、工具链与攻防热点，不以“学术深度”删帖。
+    <section class="ecosystem-panel">
+      <div class="ecosystem-radar">
+        <div>
+          <div class="radar-title">吾爱破解生态雷达</div>
+          <div class="radar-description">
+            保留全部近期资讯，观察真实需求、工具链与攻防热点，不以“学术深度”删帖。
+          </div>
+        </div>
+        <div class="radar-stats">
+          <span>{{ newsGuide.length }} 条资讯</span>
+          <span>{{ analyzedCount }} 条已分析</span>
+          <span>{{ categoryCount }} 个生态主题</span>
         </div>
       </div>
-      <div class="radar-stats">
-        <span>{{ newsGuide.length }} 条资讯</span>
-        <span>{{ analyzedCount }} 条已分析</span>
-        <span>{{ categoryCount }} 个生态主题</span>
-      </div>
-    </section>
-    <section class="radar-filters" v-if="analyzedCount">
-      <div class="filter-row">
-        <span class="filter-label">生态主题</span>
-        <button
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedCategory === 'all' }"
-          :aria-pressed="selectedCategory === 'all'"
-          @click="selectedCategory = 'all'"
-        >
-          全部 {{ analyzedCount }}
-        </button>
-        <button
-          v-for="category in categoryOptions"
-          :key="category.name"
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedCategory === category.name }"
-          :aria-pressed="selectedCategory === category.name"
-          @click="selectedCategory = category.name"
-        >
-          {{ category.name }} {{ category.count }}
-        </button>
-      </div>
-      <div class="filter-row">
-        <span class="filter-label">观察视角</span>
-        <button
-          v-for="focus in focusOptions"
-          :key="focus.key"
-          type="button"
-          class="filter-tag focus-tag"
-          :class="{ active: selectedFocus === focus.key }"
-          :aria-pressed="selectedFocus === focus.key"
-          @click="selectedFocus = focus.key"
-        >
-          {{ focus.label }}
-        </button>
-        <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+      <div class="radar-filters" v-if="analyzedCount">
+        <div class="filter-row">
+          <span class="filter-label">生态主题</span>
+          <button
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedCategory === 'all' }"
+            :aria-pressed="selectedCategory === 'all'"
+            @click="selectedCategory = 'all'"
+          >
+            全部 {{ analyzedCount }}
+          </button>
+          <button
+            v-for="category in categoryOptions"
+            :key="category.name"
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedCategory === category.name }"
+            :aria-pressed="selectedCategory === category.name"
+            @click="selectedCategory = category.name"
+          >
+            {{ category.name }} {{ category.count }}
+          </button>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">观察视角</span>
+          <button
+            v-for="focus in focusOptions"
+            :key="focus.key"
+            type="button"
+            class="filter-tag focus-tag"
+            :class="{ active: selectedFocus === focus.key }"
+            :aria-pressed="selectedFocus === focus.key"
+            @click="selectedFocus = focus.key"
+          >
+            {{ focus.label }}
+          </button>
+          <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+        </div>
       </div>
     </section>
     <div class="filter-empty" v-if="analyzedCount && filteredNews.length === 0">
@@ -506,16 +508,23 @@ export default {
 </script>
 
 <style scoped>
+.ecosystem-panel {
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  overflow: hidden;
+  border: 1px solid #d8e5f5;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f3f8ff 100%);
+}
 .ecosystem-radar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 14px;
-  padding: 18px 20px;
-  border: 1px solid #d9e7ff;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f7faff, #eef5ff);
+}
+.ecosystem-radar > div:first-child {
+  min-width: 0;
+  flex: 1;
 }
 .radar-title {
   color: #30486f;
@@ -538,11 +547,11 @@ export default {
   font-weight: 600;
 }
 .radar-filters {
-  margin-bottom: 14px;
-  padding: 13px 16px;
-  border: 1px solid #e4e9f2;
-  border-radius: 8px;
-  background: #fff;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: 1px solid #dce6f2;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
 }
 .filter-row {
   display: flex;
@@ -569,6 +578,7 @@ export default {
   font: inherit;
   font-size: 12px;
   line-height: 1.2;
+  white-space: nowrap;
   transition: 0.16s ease;
 }
 .filter-tag:hover {
@@ -737,25 +747,44 @@ export default {
 }
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
+  .ecosystem-panel {
+    padding: 13px;
+  }
   .ecosystem-radar {
     align-items: flex-start;
     flex-direction: column;
     gap: 10px;
-    padding: 14px;
   }
   .radar-stats {
     flex-wrap: wrap;
     gap: 8px 14px;
   }
   .radar-filters {
-    padding: 12px;
+    margin-top: 10px;
+    padding: 10px;
+  }
+  .radar-filters .filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+  .radar-filters .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+  .radar-filters .filter-label,
+  .radar-filters .filter-tag,
+  .radar-filters .filter-result {
+    flex: 0 0 auto;
   }
   .filter-label {
-    flex-basis: 100%;
+    min-width: 60px;
+  }
+  .filter-tag {
+    min-height: 32px;
   }
   .filter-result {
-    flex-basis: 100%;
-    margin: 2px 0 0;
+    margin-left: 6px;
   }
   .ecosystem-tags,
   .ecosystem-summary,

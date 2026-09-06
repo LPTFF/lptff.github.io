@@ -2,89 +2,88 @@
   <div class="">
     <section class="collector-panel" aria-labelledby="collector-title">
       <div class="collector-intro">
-        <div>
+        <div class="collector-copy">
           <div class="collector-eyebrow">后台采集器</div>
           <h2 id="collector-title">多路福利采集</h2>
           <p>
-            定时采集固定来源，定向发现 VPS、域名、云服务、AI 订阅与额度优惠。
-            银行优惠优先由 AI 筛选，不可用时仅按标题保守筛选，可能减少收录。
-            定向搜索保留的旧结果也会按当前范围重新筛选，没有符合项时显示 0 条；
-            主机优惠未能更新时保留已有结果。收录不代表已核实厂商官网的参与条件与有效期，请查看原文确认。
+            固定来源采集银行优惠、低价 VPS 与闲鱼指定需求；Google RSS 定向发现基础设施和 AI 优惠。
           </p>
         </div>
-        <div class="collector-total">{{ welfareSourceCount }} 条当前结果</div>
+        <div class="collector-stats" aria-label="采集结果统计">
+          <span><strong>{{ welfareSourceCount }}</strong> 条结果</span>
+          <span><strong>{{ directSourceCount }}</strong> 条固定来源</span>
+          <span><strong>{{ directedSourceCount }}</strong> 条定向发现</span>
+        </div>
       </div>
-      <div class="collector-lanes">
-        <article class="collector-lane direct-lane">
-          <div class="lane-heading">
-            <div>
-              <span class="lane-kicker">指定页面数据源</span>
-              <h3>固定来源直接采集</h3>
+      <div class="collector-controls">
+        <div class="filter-row" role="group" aria-label="按采集方式查看">
+          <span class="filter-label">采集方式</span>
+          <button
+            v-for="mode in collectionModes"
+            :key="mode.id"
+            type="button"
+            class="filter-chip"
+            :class="{ active: selectedSource === mode.id }"
+            :aria-pressed="selectedSource === mode.id"
+            @click="selectedSource = mode.id"
+          >
+            {{ mode.label }} <small>{{ mode.count }}</small>
+          </button>
+          <span class="current-filter-count">{{ selectedSourceCount }} 条当前结果</span>
+        </div>
+        <div class="filter-row source-scroll-row" role="group" aria-label="按固定来源查看">
+          <span class="filter-label">固定来源</span>
+          <button
+            v-for="source in directSources"
+            :key="source.id"
+            type="button"
+            class="filter-chip direct-chip"
+            :class="{ active: selectedSource === source.id }"
+            :aria-pressed="selectedSource === source.id"
+            title="固定来源直采"
+            @click="selectedSource = source.id"
+          >
+            {{ source.label }} <small>{{ source.count }}</small>
+          </button>
+        </div>
+        <div class="filter-row source-scroll-row" role="group" aria-label="按定向来源查看">
+          <span class="filter-label">定向来源</span>
+          <button
+            v-for="source in searchSources"
+            :key="source.id"
+            type="button"
+            class="filter-chip search-chip"
+            :class="{ active: selectedSource === source.id }"
+            :aria-pressed="selectedSource === source.id"
+            :title="`Google RSS · site:${source.domain}`"
+            @click="selectedSource = source.id"
+          >
+            {{ source.label }} <small>{{ source.count }}</small>
+          </button>
+        </div>
+      </div>
+      <details class="collector-details">
+        <summary>采集范围与更新规则</summary>
+        <div class="collector-detail-grid">
+          <div>
+            <strong>固定来源</strong>
+            <p>线报站筛选银行优惠，主机站筛选年费不超过 20 美元的 VPS；闲鱼仅关注 115 网盘会员、迅雷会员和 QQ 阅读充值优惠。</p>
+            <div class="detail-sources">
+              <span v-for="source in directCollectorSources" :key="source.id">{{ source.label }}</span>
             </div>
-            <small>{{ directSourceCount }} 条</small>
           </div>
-          <p>从线报站筛选银行 App 和银行卡的立减、返现、红包、积分、抽奖及开户开卡奖励，并从主机资讯站发现年费不超过 20 美元的低价 VPS。</p>
-          <div class="lane-sources">
-            <span v-for="source in directCollectorSources" :key="source.id">
-              {{ source.label }}
-            </span>
-          </div>
-          <div class="collector-flow" aria-label="指定页面采集流程">
-            <span>公开页面 / API</span><span class="flow-arrow">→</span>
-            <span>结构解析</span><span class="flow-arrow">→</span>
-            <span>优惠筛选</span><span class="flow-arrow">→</span>
-            <span>福利列表</span>
-          </div>
-        </article>
-        <article class="collector-lane search-lane">
-          <div class="lane-heading">
-            <div>
-              <span class="lane-kicker">Google 定向发现</span>
-              <h3><code>site:</code> 来源搜索</h3>
+          <div>
+            <strong>Google 定向发现</strong>
+            <p>发现 VPS、域名、云服务额度，以及 AI 订阅促销和活动性额度重置。</p>
+            <div class="detail-sources search-detail-sources">
+              <span v-for="source in collectorSources" :key="source.id">
+                {{ source.label }} <code>site:{{ source.domain }}</code>
+              </span>
             </div>
-            <small>{{ directedSourceCount }} 条</small>
           </div>
-          <p>通过 Google 新闻 RSS 定向发现厂商的 VPS 打折、域名降价、云服务额度，以及 AI 订阅促销和额度重置活动。</p>
-          <div class="lane-sources search-source-list">
-            <span v-for="source in collectorSources" :key="source.id">
-              {{ source.label }} <code>site:{{ source.domain }}</code>
-            </span>
-          </div>
-          <div class="collector-flow" aria-label="Google 定向采集流程">
-            <span>Google RSS</span><span class="flow-arrow">→</span>
-            <span><code>site:</code> 限定</span><span class="flow-arrow">→</span>
-            <span>Gemini 筛选</span><span class="flow-arrow">→</span>
-            <span>福利列表</span>
-          </div>
-        </article>
-      </div>
-      <div class="filter-heading">
-        <strong>查看结果</strong>
-        <span>可查看全部福利，或按来源查看基础设施与 AI 服务优惠</span>
-      </div>
-      <div class="source-filters" aria-label="选择采集源">
-        <button
-          type="button"
-          class="source-filter"
-          :class="{ active: selectedSource === 'all' }"
-          @click="selectedSource = 'all'"
-        >
-          <strong>全部福利</strong>
-          <small>{{ welfareSourceCount }} 条</small>
-        </button>
-        <button
-          v-for="source in searchSources"
-          :key="source.id"
-          type="button"
-          class="source-filter"
-          :class="{ active: selectedSource === source.id }"
-          @click="selectedSource = source.id"
-        >
-          <strong>{{ source.label }}</strong>
-          <code>site:{{ source.domain }}</code>
-          <small>{{ source.count }} 条已收录</small>
-        </button>
-      </div>
+        </div>
+        <p class="collector-note">旧结果会按当前范围重新筛选；来源暂不可用时保留已有结果。参与条件与有效期请查看原文。</p>
+      </details>
     </section>
     <div v-if="welfareLimited.length === 0" class="source-empty">
       <strong>{{ selectedSourceLabel }} 暂无通过筛选的福利</strong>
@@ -178,6 +177,8 @@ import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
 import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
 import keywordSearchSource from "../../../data/welfare/keyword-search.json";
+import xianyuSource from "../../../data/welfare/xianyu.json";
+import keywordSearchConfig from "../../../../project-support/crawl/welfare/keyword_search_config.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import { ElRow, ElCol, ElCard, ElIcon, ElDivider, ElAvatar } from "element-plus";
@@ -191,16 +192,13 @@ welfareInitSource = [
   ...daydayzhuanSource,
   ...zhujicepingSource,
   ...keywordSearchSource,
+  ...xianyuSource,
 ];
 welfareTopSource = [...zhuanyesTopSource, ...daydayzhuanTopSource];
 welfareSource = [...welfareTopSource, ...welfareInitSource].sort(
   (a, b) => b.timestamp - a.timestamp
 ); // 合并全部来源后全局排序，保证默认展示真正最新的数据
-const collectorSources = [
-  { id: "github", label: "GitHub", domain: "github.com" },
-  { id: "telegram", label: "Telegram", domain: "t.me" },
-  { id: "bilibili", label: "Bilibili", domain: "bilibili.com" },
-];
+const collectorSources = keywordSearchConfig.searchSources;
 const directCollectorSources = [
   { id: "hxm5", label: "线报屋" },
   { id: "mutouxb", label: "86收线报网" },
@@ -209,6 +207,7 @@ const directCollectorSources = [
   { id: "zhuanyes", label: "好赚网" },
   { id: "daydayzhuan", label: "天天线报网" },
   { id: "zhujiceping", label: "国外主机测评" },
+  { id: "xianyu", label: "闲鱼" },
 ];
 export default {
   props: {
@@ -225,14 +224,37 @@ export default {
     const searchSources = computed(() =>
       collectorSources.map((source) => ({
         ...source,
+        kind: "search",
         count: welfareSource.filter(
           (item) => item.website === "keyword-search" && item.searchSourceId === source.id
         ).length,
       }))
     );
+    const directSources = computed(() =>
+      directCollectorSources.map((source) => ({
+        ...source,
+        kind: "direct",
+        domain: "",
+        count: welfareSource.filter((item) => item.website === source.id).length,
+      }))
+    );
+    const sourceFilters = computed(() => [...directSources.value, ...searchSources.value]);
+    const collectionModes = computed(() => [
+      { id: "all", label: "全部", count: welfareSourceCount },
+      { id: "direct", label: "固定来源", count: directSourceCount },
+      { id: "directed", label: "Google 定向", count: directedSourceCount },
+    ]);
+    const selectedSourceCount = computed(
+      () =>
+        [...collectionModes.value, ...sourceFilters.value].find(
+          (source) => source.id === selectedSource.value
+        )?.count || 0
+    );
     const selectedSourceLabel = computed(
       () =>
-        collectorSources.find((source) => source.id === selectedSource.value)?.label ||
+        [...collectionModes.value, ...sourceFilters.value].find(
+          (source) => source.id === selectedSource.value
+        )?.label ||
         "当前来源"
     );
     const handleMonth = (item: any) => {
@@ -318,6 +340,13 @@ export default {
             websiteImg: "https://www.zhujiceping.com/favicon.ico",
           };
           break;
+        case "xianyu":
+          websiteInfo = {
+            websiteName: "闲鱼",
+            mainWebsite: "https://www.goofish.com/",
+            websiteImg: "https://img.alicdn.com/tfs/TB19WObTNv1gK0jSZFFXXb0sXXa-144-144.png",
+          };
+          break;
         case "keyword-search":
           const sourceIcons: Record<string, string> = {
             github: "https://github.com/favicon.ico",
@@ -384,16 +413,27 @@ export default {
             : welfareSource.length
         );
         const aiOffers = welfareSource.filter(
-          (item) => ["zhujiceping", "keyword-search"].includes(item.website)
+          (item) => ["zhujiceping", "keyword-search", "xianyu"].includes(item.website)
         );
         const regularOffers = welfareTmpAll.filter(
-          (item) => !["zhujiceping", "keyword-search"].includes(item.website)
+          (item) => !["zhujiceping", "keyword-search", "xianyu"].includes(item.website)
         );
         visibleItems = [...aiOffers, ...regularOffers].sort(
           (a, b) => b.timestamp - a.timestamp
         );
       }
       if (selectedSource.value === "all") return visibleItems;
+      if (selectedSource.value === "direct") {
+        return visibleItems.filter((item) => item.website !== "keyword-search");
+      }
+      if (selectedSource.value === "directed") {
+        return visibleItems.filter((item) => item.website === "keyword-search");
+      }
+      if (directCollectorSources.some((source) => source.id === selectedSource.value)) {
+        return visibleItems
+          .filter((item) => item.website === selectedSource.value)
+          .sort((a, b) => b.timestamp - a.timestamp);
+      }
       return visibleItems.filter(
         (item) =>
           item.website === "keyword-search" && item.searchSourceId === selectedSource.value
@@ -411,6 +451,10 @@ export default {
       logoUrl,
       selectedSource,
       searchSources,
+      directSources,
+      sourceFilters,
+      collectionModes,
+      selectedSourceCount,
       selectedSourceLabel,
       welfareSourceCount,
       directSourceCount,
@@ -445,181 +489,181 @@ export default {
 </script>
 <style scoped>
 .collector-panel {
-  margin-bottom: 18px;
-  padding: 22px;
+  margin-bottom: 12px;
+  padding: 16px 18px;
   overflow: hidden;
   border: 1px solid #d8e5f5;
-  border-radius: 14px;
-  background:
-    radial-gradient(circle at 88% 8%, rgba(91, 143, 249, 0.17), transparent 32%),
-    linear-gradient(135deg, #f8fbff 0%, #f3f8ff 52%, #fbfcff 100%);
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f3f8ff 100%);
 }
 .collector-intro {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
-  gap: 28px;
+  gap: 24px;
+}
+.collector-copy {
+  min-width: 0;
+  flex: 1;
 }
 .collector-eyebrow {
-  margin-bottom: 4px;
+  margin-bottom: 2px;
   color: #3471c9;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
 }
 .collector-panel h2 {
   margin: 0;
   color: #23354d;
-  font-size: 24px;
+  font-size: 20px;
+  line-height: 1.3;
 }
 .collector-panel p {
-  max-width: 620px;
-  margin: 8px 0 0;
+  margin: 4px 0 0;
   color: #64748b;
-  font-size: 14px;
-  line-height: 1.7;
+  font-size: 13px;
+  line-height: 1.55;
 }
-.collector-total {
+.collector-stats {
+  display: flex;
+  align-items: center;
+  gap: 18px;
   flex-shrink: 0;
-  margin-top: 8px;
-  padding: 7px 11px;
-  border: 1px solid #cbdcf1;
-  border-radius: 999px;
-  color: #315c94;
-  background: rgba(255, 255, 255, 0.72);
+  color: #607895;
   font-size: 12px;
-  font-weight: 700;
+}
+.collector-stats span {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+}
+.collector-stats strong {
+  color: #3471c9;
+  font-size: 16px;
 }
 .collector-panel code {
   color: #315c94;
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
 }
-.collector-lanes {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-top: 18px;
-}
-.collector-lane {
-  min-width: 0;
-  padding: 16px;
-  border: 1px solid #d8e1ec;
-  border-radius: 12px;
+.collector-controls {
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: 1px solid #dce6f2;
+  border-radius: 9px;
   background: rgba(255, 255, 255, 0.78);
 }
-.direct-lane {
-  border-top: 3px solid #5ad8a6;
-}
-.search-lane {
-  border-top: 3px solid #5b8ff9;
-}
-.lane-heading {
+.filter-row {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-.lane-heading h3 {
-  margin: 3px 0 0;
-  color: #2c405a;
-  font-size: 17px;
-}
-.lane-heading small {
-  flex-shrink: 0;
-  color: #66809f;
-  font-weight: 700;
-}
-.lane-kicker {
-  color: #71839a;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-}
-.collector-lane p {
-  min-height: 48px;
-  margin-top: 8px;
-  font-size: 13px;
-  line-height: 1.55;
-}
-.lane-sources {
-  display: flex;
+  align-items: center;
   flex-wrap: wrap;
   gap: 6px;
-  margin-top: 11px;
 }
-.lane-sources > span {
-  padding: 5px 8px;
-  border-radius: 7px;
+.filter-row + .filter-row {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #edf1f6;
+}
+.filter-label {
+  width: 64px;
+  flex: 0 0 64px;
+  color: #52657c;
+  font-size: 12px;
+  font-weight: 700;
+}
+.filter-chip {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 26px;
+  padding: 2px 9px;
+  border: 1px solid #cedbea;
+  border-radius: 999px;
+  color: #52657c;
+  background: #fff;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.filter-chip:hover {
+  border-color: #7eaaf0;
+  color: #3471c9;
+}
+.filter-chip:focus-visible {
+  outline: 2px solid #8cb8f4;
+  outline-offset: 2px;
+}
+.filter-chip.active {
+  border-color: #4b95f5;
+  color: #fff;
+  background: #4b95f5;
+}
+.filter-chip small {
+  color: inherit;
+  font-size: 11px;
+  opacity: 0.85;
+}
+.current-filter-count {
+  margin-left: auto;
+  color: #3471c9;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.collector-details {
+  margin-top: 7px;
+  color: #60758e;
+  font-size: 12px;
+}
+.collector-details summary {
+  width: max-content;
+  cursor: pointer;
+  color: #57708e;
+  user-select: none;
+}
+.collector-details[open] summary {
+  color: #3471c9;
+}
+.collector-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e1e9f3;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.72);
+}
+.collector-detail-grid > div {
+  min-width: 0;
+}
+.collector-detail-grid strong {
+  color: #344b66;
+}
+.collector-detail-grid p {
+  margin-top: 3px;
+  font-size: 12px;
+}
+.detail-sources {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 6px;
+}
+.detail-sources span {
+  padding: 2px 6px;
+  border-radius: 5px;
   color: #3d5d54;
   background: #edf8f3;
-  font-size: 11px;
-  font-weight: 650;
+  font-size: 10px;
 }
-.search-source-list > span {
+.search-detail-sources span {
   color: #385d8d;
   background: #edf4fd;
 }
-.collector-flow {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  flex-wrap: wrap;
-  margin-top: 14px;
-  color: #49627f;
-  font-size: 12px;
-  font-weight: 650;
-}
-.flow-arrow {
-  color: #91a5bd;
-}
-.filter-heading {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  margin-top: 20px;
-  color: #34475f;
-}
-.filter-heading span {
-  color: #7c8b9d;
-  font-size: 12px;
-}
-.source-filters {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 10px;
-}
-.source-filter {
-  display: flex;
-  min-width: 0;
-  min-height: 72px;
-  padding: 12px 14px;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  border: 1px solid #d8e1ec;
-  border-radius: 10px;
-  color: #334155;
-  background: rgba(255, 255, 255, 0.78);
-  cursor: pointer;
-  text-align: left;
-  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-}
-.source-filter:hover {
-  border-color: #8cb3ea;
-  transform: translateY(-1px);
-}
-.source-filter.active {
-  border-color: #5b8ff9;
-  background: #fff;
-  box-shadow: 0 5px 16px rgba(57, 104, 169, 0.13);
-}
-.source-filter strong {
-  font-size: 14px;
-}
-.source-filter small {
-  margin-top: auto;
-  color: #8795a8;
+.collector-panel .collector-note {
+  margin-top: 6px;
   font-size: 11px;
 }
 .discovery-badge {
@@ -767,45 +811,69 @@ export default {
 
 @media screen and (max-width: 768px) {
   .collector-panel {
-    padding: 16px;
+    padding: 13px;
   }
 
   .collector-intro {
     display: block;
   }
 
-  .collector-total {
-    display: inline-flex;
-    margin-top: 12px;
-  }
-
   .collector-panel h2 {
-    font-size: 21px;
+    font-size: 19px;
   }
 
-  .collector-lanes {
+  .collector-panel p {
+    font-size: 12px;
+  }
+
+  .collector-stats {
+    gap: 7px 12px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+    font-size: 11px;
+  }
+
+  .collector-stats strong {
+    font-size: 14px;
+  }
+
+  .collector-controls {
+    padding: 8px 9px;
+  }
+
+  .collector-controls .filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
+  }
+
+  .collector-controls .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .collector-controls .filter-label,
+  .collector-controls .filter-chip {
+    flex: 0 0 auto;
+  }
+
+  .collector-controls .filter-label {
+    width: auto;
+    min-width: 60px;
+  }
+
+  .current-filter-count {
+    display: none;
+  }
+
+  .filter-chip {
+    min-height: 32px;
+    padding: 4px 9px;
+  }
+
+  .collector-detail-grid {
     grid-template-columns: 1fr;
-  }
-
-  .collector-lane p {
-    min-height: 0;
-  }
-
-  .filter-heading {
-    display: block;
-  }
-
-  .filter-heading span {
-    display: block;
-    margin-top: 4px;
-  }
-
-  .source-filters {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .source-filter {
-    min-height: 76px;
+    gap: 10px;
   }
 
   :deep(.el-card__body) {

@@ -1,83 +1,87 @@
 <template>
   <div>
-    <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
-      <div>
-        <div class="radar-title" id="guide-radar-title">热门资讯生态雷达</div>
-        <div class="radar-description">
-          汇集抖音热榜、微博热搜与南方周末，观察公共注意力、跨平台共振和深度议题。
+    <div class="ecosystem-panel">
+      <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
+        <div>
+          <div class="radar-title" id="guide-radar-title">热门资讯生态雷达</div>
+          <div class="radar-description">
+            汇集抖音热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。
+          </div>
         </div>
-      </div>
-      <div class="radar-stats">
-        <span>{{ totalNewsCount }} 条信号</span>
-        <span>{{ sourceFilters.length }} 个来源</span>
-        <span>{{ categoryOptions.length }} 个生态主题</span>
-      </div>
-    </section>
-    <section class="radar-filters" aria-label="热门资讯生态筛选">
-      <div class="filter-row">
-        <span class="filter-label">资讯来源</span>
-        <button
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedSource === 'all' }"
-          :aria-pressed="selectedSource === 'all'"
-          @click="selectedSource = 'all'"
-        >
-          全部 {{ totalNewsCount }}
-        </button>
-        <button
-          v-for="source in sourceFilters"
-          :key="source.id"
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedSource === source.id }"
-          :aria-pressed="selectedSource === source.id"
-          @click="selectedSource = source.id"
-        >
-          {{ source.label }} {{ source.count }}
-        </button>
-      </div>
-      <div class="filter-row">
-        <span class="filter-label">生态主题</span>
-        <button
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedCategory === 'all' }"
-          :aria-pressed="selectedCategory === 'all'"
-          @click="selectedCategory = 'all'"
-        >
-          全部 {{ totalNewsCount }}
-        </button>
-        <button
-          v-for="category in categoryOptions"
-          :key="category.name"
-          type="button"
-          class="filter-tag"
-          :class="{ active: selectedCategory === category.name }"
-          :aria-pressed="selectedCategory === category.name"
-          @click="selectedCategory = category.name"
-        >
-          {{ category.name }} {{ category.count }}
-        </button>
-      </div>
-      <div class="filter-row">
-        <span class="filter-label">观察视角</span>
-        <button
-          v-for="focus in focusOptions"
-          :key="focus.key"
-          type="button"
-          class="filter-tag focus-tag"
-          :class="{ active: selectedFocus === focus.key }"
-          :aria-pressed="selectedFocus === focus.key"
-          @click="selectedFocus = focus.key"
-        >
-          {{ focus.label }}
-        </button>
-        <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
-      </div>
-    </section>
+        <div class="radar-stats">
+          <span>{{ totalNewsCount }} 条信号</span>
+          <span>{{ sourceFilters.length }} 个来源</span>
+          <span>{{ categoryOptions.length }} 个生态主题</span>
+        </div>
+      </section>
+      <section class="radar-filters" aria-label="热门资讯生态筛选">
+        <div class="filter-row">
+          <span class="filter-label">资讯来源</span>
+          <button
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedSource === 'all' }"
+            :aria-pressed="selectedSource === 'all'"
+            @click="selectedSource = 'all'"
+          >
+            全部 {{ totalNewsCount }}
+          </button>
+          <button
+            v-for="source in sourceFilters"
+            :key="source.id"
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedSource === source.id }"
+            :aria-pressed="selectedSource === source.id"
+            @click="selectedSource = source.id"
+          >
+            {{ source.label }} {{ source.count }}
+          </button>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">生态主题</span>
+          <button
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedCategory === 'all' }"
+            :aria-pressed="selectedCategory === 'all'"
+            @click="selectedCategory = 'all'"
+          >
+            全部 {{ totalNewsCount }}
+          </button>
+          <button
+            v-for="category in categoryOptions"
+            :key="category.name"
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedCategory === category.name }"
+            :aria-pressed="selectedCategory === category.name"
+            @click="selectedCategory = category.name"
+          >
+            {{ category.name }} {{ category.count }}
+          </button>
+        </div>
+        <div class="filter-row">
+          <span class="filter-label">观察视角</span>
+          <button
+            v-for="focus in focusOptions"
+            :key="focus.key"
+            type="button"
+            class="filter-tag focus-tag"
+            :class="{ active: selectedFocus === focus.key }"
+            :aria-pressed="selectedFocus === focus.key"
+            @click="selectedFocus = focus.key"
+          >
+            {{ focus.label }}
+          </button>
+          <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+        </div>
+      </section>
+    </div>
     <div class="filter-empty" v-if="filteredNews.length === 0">
-      当前筛选组合暂无资讯，可以切换来源、主题或观察视角。
+      {{ selectedSource === 'xiaohongshu' && !xiaohongshuNewsCount
+        ? '小红书暂无可用资讯。'
+        : '当前筛选组合暂无资讯，可以切换来源、主题或观察视角。' }}
     </div>
     <el-row>
       <el-col
@@ -217,6 +221,7 @@
                   :src="handleWebsiteImg(item)"
                   alt="网站"
                   class="welfare-img-link mobile-welfare-img"
+                  @error="handleImageError"
                 />
                 <div>{{ handleWebsiteName(item) }}</div>
               </div>
@@ -250,6 +255,7 @@ import { Calendar, Timer } from "@element-plus/icons-vue";
 import infzmNews from "../../../data/infzm.json";
 import weiboNews from "../../../data/weibo.json";
 import douyinHotNews from "../../../data/douyinHot.json";
+import xiaohongshuNews from "../../../data/xiaohongshu.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
@@ -286,6 +292,7 @@ export default {
     const selectedSource = ref("all");
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
+    const xiaohongshuNewsCount = xiaohongshuNews.length;
     const rawSourceDefinitions = [
       {
         id: "douyinHot",
@@ -296,6 +303,11 @@ export default {
         id: "weibo",
         label: "微博热搜",
         items: weiboNews as any[],
+      },
+      {
+        id: "xiaohongshu",
+        label: "小红书",
+        items: xiaohongshuNews as any[],
       },
       {
         id: "infzm",
@@ -389,14 +401,18 @@ export default {
         const sourceBreadth = categorySources.get(item.ecosystem.category)?.size || 1;
         const rankText = item.rank
           ? `榜单第 ${item.rank} 位`
-          : source.id === "infzm"
-            ? "深度内容"
-            : "置顶信号";
-        const observation = item.ecosystem.isDeep
-          ? `来自南方周末的深度追踪，为当前${item.ecosystem.category}补充事件背景与后续。`
-          : sourceBreadth > 1
-            ? `当前快照中，这类${item.ecosystem.category}同时出现在 ${sourceBreadth} 个来源；本条为${source.label}${rankText}。`
-            : `本条为${source.label}${rankText}，反映该平台此刻的注意力。`;
+          : source.id === "xiaohongshu"
+            ? "公开发现内容"
+            : source.id === "infzm"
+              ? "深度内容"
+              : "置顶信号";
+        const observation = source.id === "xiaohongshu"
+          ? `来自小红书的${item.ecosystem.category}内容。`
+          : item.ecosystem.isDeep
+            ? `来自南方周末的深度追踪，为当前${item.ecosystem.category}补充事件背景与后续。`
+            : sourceBreadth > 1
+              ? `当前快照中，这类${item.ecosystem.category}同时出现在 ${sourceBreadth} 个来源；本条为${source.label}${rankText}。`
+              : `本条为${source.label}${rankText}，反映该平台此刻的注意力。`;
         return {
           ...item,
           ecosystem: { ...item.ecosystem, sourceBreadth, observation },
@@ -514,6 +530,7 @@ export default {
         case "githubTrending":
         case "52pojie":
         case "douyinHot":
+        case "xiaohongshu":
           websiteUrl = item.url;
           break;
         case "hxm5":
@@ -552,6 +569,9 @@ export default {
           break;
         case "douyinHot":
           websiteName = "抖音热榜";
+          break;
+        case "xiaohongshu":
+          websiteName = "小红书";
           break;
         case "githubTrending":
           websiteName = "githubTrending";
@@ -601,6 +621,9 @@ export default {
           break;
         case "douyinHot":
           websiteImg = "https://www.douyin.com/favicon.ico";
+          break;
+        case "xiaohongshu":
+          websiteImg = "https://fe-video-qc.xhscdn.com/fe-platform/ed8fe781ce9e16c1bfac2cd962f0721edabe2e49.ico";
           break;
         default:
           websiteImg = "羊毛";
@@ -689,6 +712,7 @@ export default {
       return guideTmpAll;
     });
     return {
+      xiaohongshuNewsCount,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -723,16 +747,20 @@ export default {
 </script>
 
 <style scoped>
+.ecosystem-panel {
+  min-width: 0;
+  margin-bottom: 14px;
+  padding: 16px 18px;
+  overflow: hidden;
+  border: 1px solid #d8e5f5;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f8fbff 0%, #f3f8ff 100%);
+}
 .ecosystem-radar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
-  margin-bottom: 14px;
-  padding: 18px 20px;
-  border: 1px solid #d9e7ff;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #f7faff, #eef5ff);
 }
 .radar-title {
   color: #30486f;
@@ -755,32 +783,38 @@ export default {
   font-weight: 600;
 }
 .radar-filters {
-  margin-bottom: 14px;
-  padding: 13px 16px;
-  border: 1px solid #e4e9f2;
-  border-radius: 8px;
-  background: #fff;
+  min-width: 0;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border: 1px solid #dce6f2;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.78);
 }
 .filter-row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 6px;
+  min-width: 0;
 }
 .filter-row + .filter-row {
-  margin-top: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #edf1f6;
 }
 .filter-label {
-  min-width: 60px;
-  color: #65738a;
+  width: 64px;
+  flex: 0 0 64px;
+  color: #52657c;
   font-size: 12px;
   font-weight: 700;
 }
 .filter-tag {
-  padding: 4px 9px;
-  border: 1px solid #d8e0ec;
+  min-height: 26px;
+  padding: 2px 9px;
+  border: 1px solid #cedbea;
   border-radius: 999px;
-  background: #f8fafc;
+  background: #fff;
   color: #52647d;
   cursor: pointer;
   font: inherit;
@@ -789,8 +823,12 @@ export default {
   transition: 0.16s ease;
 }
 .filter-tag:hover {
-  border-color: #8eb8ee;
-  color: #337ecc;
+  border-color: #7eaaf0;
+  color: #3471c9;
+}
+.filter-tag:focus-visible {
+  outline: 2px solid #8cb8f4;
+  outline-offset: 2px;
 }
 .filter-tag.active {
   border-color: #409eff;
@@ -947,25 +985,55 @@ export default {
 }
 /* 响应式布局 */
 @media screen and (max-width: 768px) {
+  .ecosystem-panel {
+    padding: 13px;
+  }
+
   .ecosystem-radar {
     align-items: flex-start;
     flex-direction: column;
-    gap: 10px;
-    padding: 14px;
+    gap: 8px;
   }
+
   .radar-stats {
     flex-wrap: wrap;
-    gap: 8px 14px;
+    gap: 7px 12px;
+    font-size: 11px;
   }
+
   .radar-filters {
-    padding: 12px;
+    padding: 8px 9px;
   }
-  .filter-label,
-  .filter-result {
-    flex-basis: 100%;
+
+  .radar-filters .filter-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 1px;
+    scrollbar-width: none;
   }
+
+  .radar-filters .filter-row::-webkit-scrollbar {
+    display: none;
+  }
+
+  .radar-filters .filter-label,
+  .radar-filters .filter-tag,
+  .radar-filters .filter-result {
+    flex: 0 0 auto;
+  }
+
+  .radar-filters .filter-label {
+    width: auto;
+    min-width: 60px;
+  }
+
+  .filter-tag {
+    min-height: 32px;
+    padding: 4px 9px;
+  }
+
   .filter-result {
-    margin: 2px 0 0;
+    margin-left: 6px;
   }
   .ecosystem-tags,
   .ecosystem-summary {
