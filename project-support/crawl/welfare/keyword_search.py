@@ -5,6 +5,7 @@ import argparse
 import html
 import json
 import os
+import random
 import re
 import sys
 import time
@@ -39,6 +40,11 @@ DEFAULT_MODEL = "gemini-3.5-flash-lite"
 BEIJING = pytz.timezone("Asia/Shanghai")
 MAX_RESULTS_PER_QUERY = 100
 MAX_CANDIDATES = 80
+AI_MAX_ATTEMPTS = 5
+AI_BACKOFF_SECONDS = 10
+AI_RETRY_BUDGET_SECONDS = 420
+# The parent collector has a 600s hard timeout; reserve time to preserve/write its snapshot.
+COLLECTOR_WORK_BUDGET_SECONDS = 570
 POSITIVE_SIGNAL = re.compile(
     r"优惠|立减|返现|折扣|打折|[\d.]+\s*折|半价|降价|特价|促销|免费|试用|赠送|赠金|"
     r"重置|翻倍|加赠|补偿|代金券|抵扣金|领取|兑换|(?:\$|美元|元).{0,12}(?:年付|月付|/年|/月)|"
@@ -340,8 +346,37 @@ def fetch_candidates(config: dict[str, object]) -> list[Candidate]:
     return [item for item in merge_candidates(candidates) if source_guard_allows(item)][:MAX_CANDIDATES]
 
 
+def retry_after_seconds(value: str | None) -> float:
+    """Honor both forms of Retry-After; invalid values use the local backoff."""
+    if not value:
+        return 0
+    value = value.strip()
+    if re.fullmatch(r"[0-9]+", value):
+        return float(value)
+    try:
+        retry_at = parsedate_to_datetime(value)
+        if retry_at.tzinfo is None:
+            retry_at = retry_at.replace(tzinfo=timezone.utc)
+        return max(0, (retry_at - datetime.now(timezone.utc)).total_seconds())
+    except (TypeError, ValueError, OverflowError):
+        return 0
+
+
+def report_ai_attempt(
+    *, attempt: int, outcome: str, http_status: int | None, reason: str | None,
+    retry_delay: float, duration: float,
+) -> None:
+    # Only fixed categories and numbers enter logs, never exception text or response bodies.
+    print(json.dumps({
+        "event": "ai-attempt", "name": NAME, "attempt": attempt, "outcome": outcome,
+        "httpStatus": http_status, "reason": reason,
+        "retryDelaySeconds": round(retry_delay, 2), "durationSeconds": round(duration, 2),
+    }), flush=True)
+
+
 def classify_candidates(
-    candidates: list[Candidate], *, api_key: str, model: str, session: requests.Session | None = None
+    candidates: list[Candidate], *, api_key: str, model: str,
+    session: requests.Session | None = None, deadline: float | None = None,
 ) -> dict[str, dict[str, object]]:
     payload_items = [
         {
@@ -377,19 +412,35 @@ def classify_candidates(
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     expected_ids = {item.identifier for item in candidates}
     client = session or requests.Session()
-    last_error: Exception | None = None
-    for attempt in range(3):
+    deadline = min(
+        deadline if deadline is not None else float("inf"),
+        time.monotonic() + AI_RETRY_BUDGET_SECONDS,
+    )
+    last_reason = "Gemini retry budget exhausted"
+    for attempt in range(1, AI_MAX_ATTEMPTS + 1):
+        remaining = deadline - time.monotonic()
+        if remaining <= 1:
+            break
+        started = time.monotonic()
+        response = None
+        http_status = None
+        reason = None
+        retryable = True
         try:
+            # Leave room for connection setup within the remaining retry budget.
+            connect_timeout = min(10, remaining / 2)
             response = client.post(
                 endpoint,
                 headers={"Content-Type": "application/json", "x-goog-api-key": api_key},
                 json=payload,
-                timeout=(10, 120),
+                timeout=(connect_timeout, min(120, remaining - connect_timeout)),
+                allow_redirects=False,
             )
-            if response.status_code == 429 or response.status_code >= 500:
-                raise RuntimeError(f"Gemini temporarily unavailable (HTTP {response.status_code})")
-            if not response.ok:
-                raise RuntimeError(f"Gemini request failed (HTTP {response.status_code})")
+            http_status = response.status_code
+            if http_status != 200:
+                reason = "http"
+                retryable = http_status in {408, 429} or 500 <= http_status < 600
+                raise RuntimeError("Gemini HTTP request failed")
             body = response.json()
             classified = json.loads(body["candidates"][0]["content"]["parts"][0]["text"])
             results = classified.get("results") if isinstance(classified, dict) else None
@@ -400,12 +451,51 @@ def classify_candidates(
                 raise ValueError("Gemini response ids do not exactly match the input")
             if any(not isinstance(item.get("isEligible"), bool) for item in results):
                 raise ValueError("Gemini response contains an invalid classification")
+            report_ai_attempt(
+                attempt=attempt, outcome="success", http_status=http_status, reason=None,
+                retry_delay=0, duration=time.monotonic() - started,
+            )
+            if session is None:
+                client.close()
             return {str(item["id"]): item for item in results}
         except (KeyError, IndexError, TypeError, ValueError, requests.RequestException, RuntimeError) as error:
-            last_error = error
-            if attempt < 2:
-                time.sleep(2**attempt)
-    raise RuntimeError(f"Gemini keyword classification failed after 3 attempts: {last_error}") from last_error
+            if reason == "http":
+                last_reason = f"Gemini unavailable (HTTP {http_status})"
+            elif isinstance(error, requests.exceptions.SSLError):
+                reason, last_reason, retryable = "tls", "Gemini TLS connection failed", False
+            elif isinstance(error, requests.exceptions.Timeout):
+                reason, last_reason = "timeout", "Gemini request timeout"
+            elif isinstance(error, (
+                requests.exceptions.ConnectionError, requests.exceptions.ChunkedEncodingError,
+                requests.exceptions.ContentDecodingError,
+            )):
+                reason, last_reason = "connection", "Gemini connection failed"
+            elif isinstance(error, requests.RequestException) and http_status != 200:
+                reason, last_reason, retryable = "request", "Gemini request failed", False
+            else:
+                reason, last_reason = "invalid-response", "Gemini response validation failed"
+        finally:
+            if response is not None:
+                response.close()
+
+        delay = 0.0
+        if retryable and attempt < AI_MAX_ATTEMPTS:
+            delay = AI_BACKOFF_SECONDS * (2 ** (attempt - 1)) + random.uniform(0, 2)
+            if response is not None:
+                delay = max(delay, retry_after_seconds(response.headers.get("Retry-After")))
+            # Do not shorten a server-requested wait just to squeeze in another request.
+            if delay + 1 >= deadline - time.monotonic():
+                delay = 0.0
+        report_ai_attempt(
+            attempt=attempt, outcome="retry" if delay else "failed", http_status=http_status,
+            reason=reason, retry_delay=delay, duration=time.monotonic() - started,
+        )
+        if not delay:
+            break
+        time.sleep(delay)
+    if session is None:
+        client.close()
+    raise RuntimeError(f"Gemini keyword classification failed: {last_reason}") from None
 
 
 def build_items(
@@ -556,6 +646,7 @@ def deduplicate_items(items: list[dict[str, object]]) -> list[dict[str, object]]
 
 
 def collect() -> list[dict[str, object]]:
+    deadline = time.monotonic() + COLLECTOR_WORK_BUDGET_SECONDS
     api_key = gemini_api_key()
     if not api_key:
         raise RuntimeError("GEMINI_API_KEY is not configured")
@@ -564,7 +655,7 @@ def collect() -> list[dict[str, object]]:
     candidates = fetch_candidates(config)
     if not candidates:
         return []
-    decisions = classify_candidates(candidates, api_key=api_key, model=model)
+    decisions = classify_candidates(candidates, api_key=api_key, model=model, deadline=deadline)
     return build_items(candidates, decisions, model=model)
 
 

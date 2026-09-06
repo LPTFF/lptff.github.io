@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
@@ -144,6 +145,47 @@ def parse_result(stdout: str, spec: CollectorSpec) -> CollectorResult | None:
     return None
 
 
+def parse_ai_attempts(stdout: str, spec: CollectorSpec) -> list[dict[str, object]]:
+    """Retain only bounded, structured diagnostics; never forward raw AI output."""
+    fields = (
+        "event", "name", "attempt", "outcome", "httpStatus", "reason",
+        "retryDelaySeconds", "durationSeconds",
+    )
+    attempts = []
+    seen = set()
+    for line in stdout.splitlines():
+        try:
+            payload = json.loads(line)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if not isinstance(payload, dict) or any(field not in payload for field in fields):
+            continue
+        if payload["event"] != "ai-attempt" or payload["name"] != spec.name:
+            continue
+        attempt = payload["attempt"]
+        if type(attempt) is not int or not 1 <= attempt <= 5 or attempt in seen:
+            continue
+        if payload["outcome"] not in ("retry", "success", "failed"):
+            continue
+        status = payload["httpStatus"]
+        if status is not None and (type(status) is not int or not 100 <= status <= 599):
+            continue
+        if payload["reason"] not in (
+            None, "http", "timeout", "connection", "tls", "invalid-response", "request", "budget",
+        ):
+            continue
+        if any(
+            type(payload[field]) not in (int, float)
+            or not 0 <= payload[field] <= spec.timeout
+            or not math.isfinite(payload[field])
+            for field in ("retryDelaySeconds", "durationSeconds")
+        ):
+            continue
+        attempts.append({field: payload[field] for field in fields})
+        seen.add(attempt)
+    return attempts
+
+
 def run_collector(spec: CollectorSpec) -> dict[str, object]:
     path = DATA_ROOT / spec.output
     before_digest = digest_path(path)
@@ -190,6 +232,7 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
     after_usable = after_count > 0 or empty_snapshot
     after_metrics = snapshot_metrics(path, spec.kind)
     parsed = parse_result(stdout, spec)
+    ai_attempts = parse_ai_attempts(stdout, spec)
     if timed_out:
         state = "preserved" if after_usable else "failed"
         reason = "collector exceeded its configured timeout"
@@ -240,6 +283,7 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
         "timedOut": timed_out,
         "stdoutBytes": len(stdout.encode("utf-8")),
         "stderrBytes": len(stderr.encode("utf-8")),
+        **({"aiAttempts": ai_attempts} if ai_attempts else {}),
         **({"reason": reason} if reason else {}),
     }
 
