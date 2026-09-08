@@ -51,7 +51,7 @@ COLLECTORS = (
     CollectorSpec("daydayzhuan", "welfare/daydayzhuan.py", "welfare/daydayzhuan.json", "welfare", optional=True),
     CollectorSpec("daydayzhuanTop", "welfare/daydayzhuanTop.py", "welfare/daydayzhuanTop.json", "welfare", optional=True),
     CollectorSpec("zhujiceping", "welfare/zhujiceping.py", "welfare/zhujiceping.json", "welfare", optional=True),
-    CollectorSpec("xianyu", "welfare/xianyu.py", "welfare/xianyu.json", "welfare", timeout=180, optional=True),
+    CollectorSpec("xianyu", "welfare/xianyu.py", "welfare/xianyu.json", "welfare", timeout=180, optional=True, group="archived"),
     CollectorSpec("keywordSearch", "welfare/keyword_search.py", "welfare/keyword-search.json", "welfare", min_items=0, timeout=600, optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),

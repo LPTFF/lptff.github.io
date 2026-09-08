@@ -95,8 +95,8 @@ jobs:
         run: python -B project-support/crawl/classify_52pojie_ecosystem.py --summary .artifacts/collectors/ecosystem.json
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-      - name: Keep only bank offers in welfare data
-        # AI 不可用时仍执行保守规则筛选，不让辅助分类阻断网站发布。
+      - name: Analyze welfare signals with Gemini
+        # AI 不可用时仍执行规则分类提取，不让辅助分类阻断网站发布。
         run: python -B project-support/crawl/filter_welfare_with_gemini.py --summary .artifacts/collectors/welfare-filter.json
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}

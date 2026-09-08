@@ -26,7 +26,7 @@ def send_notification(key: str, message: dict[str, object]) -> dict[str, object]
 AI_MODULES = {
     "keywordSearch": "关键词福利筛选",
     "zhujiceping": "主机优惠筛选",
-    "welfare-filter": "银行福利筛选",
+    "welfare-filter": "福利资讯标签分析",
     "52pojie-ecosystem": "52pojie 生态分析",
 }
 AI_STATES = {"success", "degraded", "preserved", "skipped", "failed"}

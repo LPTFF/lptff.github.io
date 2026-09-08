@@ -154,12 +154,21 @@ const menuConfig = [
 ];
 
 const previousRoute = ref("");
-const isPCRes = computed(() => isPC());
+const isPCRes = ref(isPC());
+const windowHeight = ref(typeof window !== "undefined" ? window.innerHeight : 900);
 const backtopTarget = computed(() =>
   isPCRes.value ? ".scroll-home-container" : ".inner-container"
 );
 const backtopRight = ref(16);
 let backtopResizeObserver: ResizeObserver | null = null;
+
+const updateWindowDimensions = () => {
+  if (typeof window !== "undefined") {
+    windowHeight.value = window.innerHeight;
+    isPCRes.value = isPC();
+  }
+  updateBacktopPosition();
+};
 
 const updateBacktopPosition = () => {
   const content = document.querySelector<HTMLElement>(".news-aggregator");
@@ -282,20 +291,20 @@ onMounted(() => {
   document.title = menuConfig.find((item) => item.key === selectIndex.value)?.label || "";
   void scrollActiveMenuIntoView();
   void nextTick(() => {
-    updateBacktopPosition();
+    updateWindowDimensions();
     const content = document.querySelector<HTMLElement>(".news-aggregator");
     if (content) {
       backtopResizeObserver = new ResizeObserver(updateBacktopPosition);
       backtopResizeObserver.observe(content);
     }
-    window.addEventListener("resize", updateBacktopPosition);
+    window.addEventListener("resize", updateWindowDimensions);
   });
 });
 
 onUnmounted(() => {
   clearTimeout(clickTimer);
   backtopResizeObserver?.disconnect();
-  window.removeEventListener("resize", updateBacktopPosition);
+  window.removeEventListener("resize", updateWindowDimensions);
 });
 
 const contentLocation = ref(0);
@@ -313,9 +322,14 @@ const handleScroll = (event: Event) => {
   previousScroll = currentScroll;
 };
 
-const containerStyle = computed(() => ({
-  height: `${window.innerHeight - 16}px`,
-}));
+const containerStyle = computed(() => {
+  if (!isPCRes.value) {
+    return {};
+  }
+  return {
+    height: `${Math.max(200, windowHeight.value - 16)}px`,
+  };
+});
 
 // 当前激活的懒加载组件
 const currentComponent = computed(() =>
@@ -336,10 +350,12 @@ const currentYear = new Date(
 
 <style scoped>
 .outer-container {
-  width: 97vw;
-  height: 97vh;
+  width: 100vw;
+  height: 100vh;
+  height: 100dvh;
   position: relative;
   overflow: hidden;
+  box-sizing: border-box;
 }
 
 .inner-container {
@@ -350,11 +366,17 @@ const currentYear = new Date(
   bottom: 0;
   overflow-x: hidden;
   overflow-y: scroll;
+  box-sizing: border-box;
 }
 
 .scroll-home-container {
-  height: 921px;
-  overflow: auto;
+  height: calc(100vh - 16px);
+  height: calc(100dvh - 16px);
+  max-height: calc(100vh - 16px);
+  max-height: calc(100dvh - 16px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .header-el {
@@ -601,7 +623,8 @@ const currentYear = new Date(
 
 .main-content {
   padding-top: 135px;
-  padding-bottom: 92px;
+  padding-bottom: 110px;
+  box-sizing: border-box;
 }
 
 /* 响应式布局 */
@@ -617,6 +640,7 @@ const currentYear = new Date(
 
   .main-content {
     padding-top: 115px;
+    padding-bottom: 110px;
   }
 
   .navigation :deep(.el-menu-item) {

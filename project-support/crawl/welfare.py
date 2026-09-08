@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import json
 import time
+import re
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from urllib.parse import urlencode, urljoin
 
@@ -117,44 +118,62 @@ def parse_hxm5(html: str) -> list[dict[str, object]]:
     return items
 
 
-def parse_mutouxb(html: str) -> list[dict[str, object]]:
-    soup = BeautifulSoup(html, "html.parser")
-    items: list[dict[str, object]] = []
-    for article in soup.select("main#main article"):
-        link = article.select_one("header a.u-url")
-        time_node = article.select_one("time.dt-published")
-        if not link or not time_node or not time_node.get("datetime"):
-            continue
+
+
+def parse_yqhd8_time(raw_time: str, now: datetime) -> datetime | None:
+    raw = raw_time.strip()
+    m = re.match(r"^(\d+)\s*秒前$", raw)
+    if m:
+        return now - timedelta(seconds=int(m.group(1)))
+    m = re.match(r"^(\d+)\s*分钟前$", raw)
+    if m:
+        return now - timedelta(minutes=int(m.group(1)))
+    m = re.match(r"^(\d+)\s*小时前$", raw)
+    if m:
+        return now - timedelta(hours=int(m.group(1)))
+    m = re.match(r"^昨天(?:\s*(\d{1,2}):(\d{2}))?$", raw)
+    if m:
+        dt = now - timedelta(days=1)
+        if m.group(1) and m.group(2):
+            return dt.replace(hour=int(m.group(1)), minute=int(m.group(2)), second=0, microsecond=0)
+        return dt
+    m = re.match(r"^前天(?:\s*(\d{1,2}):(\d{2}))?$", raw)
+    if m:
+        dt = now - timedelta(days=2)
+        if m.group(1) and m.group(2):
+            return dt.replace(hour=int(m.group(1)), minute=int(m.group(2)), second=0, microsecond=0)
+        return dt
+    m = re.match(r"^(\d+)\s*天前$", raw)
+    if m:
+        return now - timedelta(days=int(m.group(1)))
+    m = re.match(r"^(\d+)\s*月前$", raw)
+    if m:
+        return now - timedelta(days=int(m.group(1)) * 30)
+    m = re.match(r"^(\d{1,2}):(\d{2})$", raw)
+    if m:
+        return now.replace(hour=int(m.group(1)), minute=int(m.group(2)), second=0, microsecond=0)
+    for fmt in ("%Y-%m-%d %H:%M:%S", "%Y-%m-%d %H:%M", "%m-%d %H:%M"):
         try:
-            date = datetime.fromisoformat(str(time_node["datetime"]).replace("Z", "+00:00"))
+            dt = datetime.strptime(raw, fmt)
+            if fmt == "%m-%d %H:%M":
+                dt = dt.replace(year=now.year)
+            return BEIJING.localize(dt) if dt.tzinfo is None else dt
         except ValueError:
-            continue
-        items.append(
-            {
-                "link": str(link.get("href") or ""),
-                "title": link.get_text(" ", strip=True),
-                "img_src": "",
-                "time": date.strftime("%Y-%m-%d %H:%M:%S"),
-                "timestamp": int(date.timestamp() * 1000),
-                "website": "mutouxb",
-            }
-        )
-    return items
+            pass
+    return None
 
 
 def parse_yqhd8(html: str, now: datetime | None = None) -> list[dict[str, object]]:
     soup = BeautifulSoup(html, "html.parser")
-    today = (now or datetime.now(BEIJING)).astimezone(BEIJING).date()
+    current_time = (now or datetime.now(BEIJING)).astimezone(BEIJING)
     items: list[dict[str, object]] = []
     for link in soup.select("div.li-t a.top-five.copy"):
         title = link.select_one("p.today-tittle")
         time_node = link.select_one("p.today-time")
         if not title or not time_node:
             continue
-        try:
-            parsed_time = datetime.strptime(time_node.get_text(strip=True), "%H:%M").time()
-            date = BEIJING.localize(datetime.combine(today, parsed_time))
-        except ValueError:
+        date = parse_yqhd8_time(time_node.get_text(strip=True), current_time)
+        if date is None:
             continue
         items.append(
             {
@@ -174,6 +193,7 @@ def collect_hxm5() -> list[dict[str, object]]:
         allowed_hostnames=["www.hxm5.com"],
         max_bytes=3_000_000,
         retries=1,
+        trust_env=False,
     ).post(
         HXM5_URL,
         expected_content_types=["application/json"],
@@ -191,21 +211,14 @@ def collect_hxm5() -> list[dict[str, object]]:
 def collect() -> list[dict[str, object]]:
     sources = (
         collect_hxm5,
-        lambda: parse_mutouxb(
-            decode_response(
-                HttpClient(
-                    allowed_hostnames=["www.mutouxb.com"],
-                    max_bytes=3_000_000,
-                    retries=1,
-                ).get("https://www.mutouxb.com/", expected_content_types=["text/html"])
-            )
-        ),
         lambda: parse_yqhd8(
             decode_response(
                 HttpClient(
                     allowed_hostnames=["www.yqhd8.com"],
                     max_bytes=3_000_000,
                     retries=1,
+                    trust_env=False,
+                    user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
                 ).get("https://www.yqhd8.com/xb", expected_content_types=["text/html"])
             )
         ),
@@ -223,7 +236,7 @@ def collect() -> list[dict[str, object]]:
     if not successful_sources:
         raise RuntimeError("all welfare sources failed or returned unusable data")
     unique: dict[str, dict[str, object]] = {}
-    priority = {"hxm5": 3, "mutouxb": 2, "yqhd8": 1}
+    priority = {"hxm5": 2, "yqhd8": 1}
     for item in items:
         title = str(item["title"])
         existing = unique.get(title)

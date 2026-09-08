@@ -84,6 +84,7 @@ class HttpClient:
         session: requests.Session | None = None,
         user_agent: str = "lptff.github.io collector/1.0",
         allowed_schemes: Iterable[str] = ("https",),
+        trust_env: bool = True,
     ) -> None:
         self.allowed_hostnames = tuple(allowed_hostnames)
         self._allowed_hostname_set = {hostname.lower() for hostname in self.allowed_hostnames}
@@ -92,6 +93,8 @@ class HttpClient:
         self.retries = retries
         self.timeout = timeout
         self.session = session or requests.Session()
+        if not trust_env:
+            self.session.trust_env = False
         self.user_agent = user_agent
 
     def request(
