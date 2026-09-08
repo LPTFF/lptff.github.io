@@ -51,7 +51,7 @@ COLLECTORS = (
     CollectorSpec("zhuanyesTop", "welfare/zhuanyesTop.py", "welfare/zhuanyesTop.json", "welfare", optional=True),
     CollectorSpec("daydayzhuan", "welfare/daydayzhuan.py", "welfare/daydayzhuan.json", "welfare", optional=True),
     CollectorSpec("daydayzhuanTop", "welfare/daydayzhuanTop.py", "welfare/daydayzhuanTop.json", "welfare", optional=True),
-    CollectorSpec("zhujiceping", "welfare/zhujiceping.py", "welfare/zhujiceping.json", "welfare", optional=True),
+    CollectorSpec("zhujiceping", "welfare/zhujiceping.py", "welfare/zhujiceping.json", "welfare", timeout=210, optional=True),
     CollectorSpec("xianyu", "welfare/xianyu.py", "welfare/xianyu.json", "welfare", timeout=180, optional=True, group="archived"),
     CollectorSpec("keywordSearch", "welfare/keyword_search.py", "welfare/keyword-search.json", "welfare", min_items=0, timeout=600, optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
@@ -234,6 +234,16 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
     after_metrics = snapshot_metrics(path, spec.kind)
     parsed = parse_result(stdout, spec)
     ai_attempts = parse_ai_attempts(stdout, spec)
+    stages = []
+    for line in stdout.splitlines():
+        try:
+            event = json.loads(line)
+        except (ValueError, TypeError):
+            continue
+        if not isinstance(event, dict) or event.get("event") != "collector-stage" or event.get("name") != spec.name:
+            continue
+        if event.get("stage") in {"source", "ai"} and event.get("outcome") in {"started", "success", "failed"}:
+            stages.append({"stage": event["stage"], "outcome": event["outcome"]})
     if timed_out:
         state = "preserved" if after_usable else "failed"
         reason = "collector exceeded its configured timeout"
@@ -285,6 +295,7 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
         "stdoutBytes": len(stdout.encode("utf-8")),
         "stderrBytes": len(stderr.encode("utf-8")),
         **({"aiAttempts": ai_attempts} if ai_attempts else {}),
+        **({"stages": stages[-6:]} if stages else {}),
         **({"reason": reason} if reason else {}),
     }
 
