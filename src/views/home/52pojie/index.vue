@@ -787,6 +787,11 @@ export default {
 }
 .day-week-welfare {
   margin: 0px 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
 }
 .welfare-day {
   color: #737373;

@@ -1030,7 +1030,7 @@ export default {
 }
 .welfare-card {
   margin-bottom: 10px;
-  transition: transform 0.15s, box-shadow 0.15s;
+  transition: box-shadow 0.15s;
 }
 :deep(.el-card__body) {
   justify-content: space-between;
@@ -1039,8 +1039,11 @@ export default {
 }
 .el-card.is-hover-shadow:focus,
 .el-card.is-hover-shadow:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  background: linear-gradient(45deg, #f1f1f1, #f1f1f1 50%, #e8e8e8 50%, #e8e8e8),
+    linear-gradient(45deg, #d9d9d9, #d9d9d9 50%, #ffffff 50%, #ffffff),
+    linear-gradient(45deg, #cccccc, #cccccc 50%, #f1f1f1 50%, #f1f1f1);
+  background-size: 100% 100px;
+  background-repeat: repeat-y;
 }
 
 @media screen and (max-width: 768px) {
