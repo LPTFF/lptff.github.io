@@ -130,7 +130,7 @@ const menuConfig = [
   },
   {
     key: "pojie",
-    label: "吾爱破解",
+    label: "安全社区",
     component: createAsyncTab("pojie"),
     propName: "pojieLocation",
   },
@@ -308,18 +308,16 @@ onUnmounted(() => {
 });
 
 const contentLocation = ref(0);
-let currentScroll = 0;
 let previousScroll = 0;
 
 const handleScroll = (event: Event) => {
   const target = event.target as HTMLElement;
-  const { scrollTop, scrollHeight } = target;
+  const { scrollTop } = target;
   sessionStorage.setItem(`scrollInfoLocation-${selectIndex.value}`, JSON.stringify(scrollTop));
-  currentScroll = scrollHeight - scrollTop;
-  if (currentScroll - previousScroll < 0) {
+  if (scrollTop > previousScroll) {
     contentLocation.value = Math.floor(isPCRes.value ? scrollTop / 200 : scrollTop / 100);
   }
-  previousScroll = currentScroll;
+  previousScroll = scrollTop;
 };
 
 const containerStyle = computed(() => {

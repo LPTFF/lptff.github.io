@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -27,8 +28,9 @@ def parse_page(html: str) -> list[dict[str, object]]:
     if not table:
         return []
     items = []
-    for row in table.select("tbody"):
-        article = row.select_one("th.new")
+    seen = set()
+    for row in table.select('tbody[id^="normalthread_"]'):
+        article = row.select_one("th")
         link = article.select_one("a.s.xst") if article else None
         time_node = article.select_one("p.res-ti") if article else None
         if not link or not time_node:
@@ -39,6 +41,13 @@ def parse_page(html: str) -> list[dict[str, object]]:
         except ValueError:
             continue
         title = link.get_text(" ", strip=True)
+        href = str(link.get("href") or "")
+        if not title or not re.fullmatch(r"thread-\d+-1-1\.html", href):
+            continue
+        url = urljoin(URL, href)
+        if url in seen:
+            continue
+        seen.add(url)
         items.append(
             {
                 "time": date.strftime("%Y-%m-%d %H:%M:%S"),
@@ -46,7 +55,7 @@ def parse_page(html: str) -> list[dict[str, object]]:
                 "title": title,
                 "desc": title,
                 "image": "",
-                "url": urljoin(URL, str(link.get("href") or "")),
+                "url": url,
                 "website": NAME,
             }
         )

@@ -90,7 +90,7 @@ jobs:
           else
             xvfb-run -a ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json
           fi
-      - name: Analyze 52pojie ecosystem signals
+      - name: Analyze security community ecosystem signals with Gemini
         if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
         run: python -B project-support/crawl/classify_52pojie_ecosystem.py --summary .artifacts/collectors/ecosystem.json
         env:

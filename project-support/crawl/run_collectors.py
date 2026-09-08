@@ -42,6 +42,7 @@ COLLECTORS = (
     CollectorSpec("xiaohongshu", "xiaohongshu.py", "xiaohongshu.json", "article", optional=True),
     CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3, group="archived"),
     CollectorSpec("52pojie", "52pojie.py", "52pojie.json", "article", 3),
+    CollectorSpec("kanxue", "kanxue.py", "kanxue.json", "article", 3, timeout=240, optional=True),
     CollectorSpec("meituanTech", "meituanTech.py", "techForum/meituanTech.json", "article", 3, group="archived"),
     CollectorSpec("v2ex", "v2ex.py", "v2ex.json", "article", 3, optional=True, group="archived"),
     CollectorSpec("0818tuan", "welfare/0818tuan.py", "welfare/0818tuan.json", "welfare", 3, optional=True),

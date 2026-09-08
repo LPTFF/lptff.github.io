@@ -27,7 +27,7 @@ AI_MODULES = {
     "keywordSearch": "关键词福利筛选",
     "zhujiceping": "主机优惠筛选",
     "welfare-filter": "福利资讯标签分析",
-    "52pojie-ecosystem": "52pojie 生态分析",
+    "52pojie-ecosystem": "安全社区 Gemini 生态分析",
 }
 AI_STATES = {"success", "degraded", "preserved", "skipped", "failed"}
 

@@ -3,19 +3,16 @@
     <section class="ecosystem-panel">
       <div class="ecosystem-radar">
         <div>
-          <div class="radar-title">吾爱破解生态雷达</div>
-          <div class="radar-description">
-            保留全部近期资讯，观察真实需求、工具链与攻防热点，不以“学术深度”删帖。
-          </div>
+          <div class="radar-title">安全社区生态雷达</div>
         </div>
         <div class="radar-stats">
           <span>{{ newsGuide.length }} 条资讯</span>
-          <span>{{ analyzedCount }} 条已分析</span>
+          <span>{{ analyzedCount }} 条 Gemini 已分析</span>
           <span>{{ categoryCount }} 个生态主题</span>
         </div>
       </div>
-      <div class="radar-filters" v-if="analyzedCount">
-        <div class="filter-row">
+      <div class="radar-filters">
+        <div class="filter-row" v-if="analyzedCount">
           <span class="filter-label">生态主题</span>
           <button
             type="button"
@@ -24,7 +21,7 @@
             :aria-pressed="selectedCategory === 'all'"
             @click="selectedCategory = 'all'"
           >
-            全部 {{ analyzedCount }}
+            全部 {{ newsGuide.length }}
           </button>
           <button
             v-for="category in categoryOptions"
@@ -38,7 +35,7 @@
             {{ category.name }} {{ category.count }}
           </button>
         </div>
-        <div class="filter-row">
+        <div class="filter-row" v-if="analyzedCount">
           <span class="filter-label">观察视角</span>
           <button
             v-for="focus in focusOptions"
@@ -51,20 +48,43 @@
           >
             {{ focus.label }}
           </button>
+        </div>
+        <div class="filter-row" role="group" aria-label="按观察源筛选">
+          <span class="filter-label">观察源</span>
+          <button
+            v-for="source in sourceOptions"
+            :key="source.id"
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedSource === source.id }"
+            :aria-pressed="selectedSource === source.id"
+            @click="selectedSource = source.id"
+          >
+            {{ source.label }} {{ source.count }}
+          </button>
           <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
         </div>
       </div>
+      <details class="collector-details">
+        <summary>Gemini 标签逻辑与更新规则</summary>
+        <p>吾爱破解与看雪采集后统一交由 Gemini 智能分析。模型根据帖子标题、来源和时间含义，从预设主题中选择分类，并生成摘要、评分、用途判断和相近主题分组；不读取帖子全文。</p>
+        <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
+        <p>观察视角按 Gemini 结果筛选：高生态信号＝生态评分 ≥85；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
+        <p>两个来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。看雪发帖时间来自公开帖子接口的原始创建时间，不使用采集时间、最后回复时间或“几天前”推算。</p>
+        <p>每日更新，来源异常时保留上次快照；日期与时分按原有样式展示。</p>
+        <p>分析结果经条目完整性、主题与评分校验后发布。Gemini 不可用时保留上次分析，尚无结果的帖子标为“生态信号待分析”，仍可在全部主题、全部视角中查看；这些标签是模型判断，不代表人工核实。</p>
+      </details>
     </section>
-    <div class="filter-empty" v-if="analyzedCount && filteredNews.length === 0">
-      当前标签组合暂无资讯，可切换主题或观察视角。
+    <div class="filter-empty" v-if="filteredNews.length === 0">
+      当前标签组合暂无资讯，可切换观察源，或将生态主题与观察视角设为全部。
     </div>
     <el-row>
       <el-col
         :span="24"
         :md="24"
         :lg="24"
-        v-for="(item, sonIndex) in guideNewsLimited"
-        :key="sonIndex"
+        v-for="item in guideNewsLimited"
+        :key="item.url"
       >
         <el-card shadow="hover" class="welfare-card">
           <div class="welfare-date">
@@ -100,6 +120,10 @@
               >
                 {{ item.title }}
               </a>
+              <div class="ecosystem-tags" v-if="item.website === 'kanxue'">
+                <el-tag size="small">本周热榜 #{{ item.rank }}</el-tag>
+                <el-tag size="small" type="warning">热度 {{ item.heat }}</el-tag>
+              </div>
               <div class="ecosystem-tags" v-if="item.ecosystem">
                 <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
                 <el-tag size="small" type="success">
@@ -135,6 +159,9 @@
                 >
                   {{ handleWeiboIconDesc(item) }}
                 </div>
+                <SourceIcon v-else-if="item.website === 'kanxue'" :size="30" :src="handleWebsiteImg(item)" fit="contain" alt="看雪社区" class="welfare-img-link source-icon kanxue-source-icon">
+                  <span class="icon-fallback" :style="{ backgroundColor: fallbackColor('看雪社区') }">看</span>
+                </SourceIcon>
                 <img
                   :src="handleAuthorImg(item)"
                   alt="作者"
@@ -147,7 +174,9 @@
             </div>
           </div>
           <div class="welfare-div-website">
-            <img :src="handleWebsiteImg(item)" alt="网站" class="welfare-img-link" />
+            <SourceIcon :size="30" :src="handleWebsiteImg(item)" fit="contain" :alt="handleWebsiteName(item)" class="welfare-img-link source-icon" :class="{ 'kanxue-source-icon': item.website === 'kanxue' }">
+              <span class="icon-fallback" :style="{ backgroundColor: fallbackColor(handleWebsiteName(item)) }">{{ handleWebsiteName(item).charAt(0) }}</span>
+            </SourceIcon>
             <div class="welfare-name-link">
               {{ handleWebsiteName(item) }}
             </div>
@@ -159,6 +188,7 @@
                   {{ handleMobileTitle(item) }}
                 </div>
                 <div class="mobile-ecosystem-signal">
+                  <span v-if="item.website === 'kanxue'">本周 #{{ item.rank }} · 热度 {{ item.heat }}</span>
                   <span>{{ item.ecosystem?.category || "生态信号待分析" }}</span>
                   <span v-if="item.ecosystem">生态 {{ item.ecosystem.ecosystemValue }}</span>
                 </div>
@@ -170,6 +200,9 @@
               >
                 {{ handleWeiboIconDesc(item) }}
               </div>
+              <SourceIcon v-else-if="item.website === 'kanxue'" :size="30" :src="handleWebsiteImg(item)" fit="contain" alt="看雪社区" class="welfare-img-link mobile-img-link source-icon kanxue-source-icon">
+                <span class="icon-fallback" :style="{ backgroundColor: fallbackColor('看雪社区') }">看</span>
+              </SourceIcon>
               <img
                 :src="handleAuthorImg(item)"
                 alt="作者"
@@ -199,11 +232,16 @@
                 <div>{{ handleHour(item) }}</div>
               </div>
               <div class="mobile-bt-detail">
-                <img
+                <SourceIcon
+                  :size="30"
+                  fit="contain"
                   :src="handleWebsiteImg(item)"
-                  alt="网站"
-                  class="welfare-img-link mobile-welfare-img"
-                />
+                  :alt="handleWebsiteName(item)"
+                  class="welfare-img-link mobile-welfare-img source-icon"
+                  :class="{ 'kanxue-source-icon': item.website === 'kanxue' }"
+                >
+                  <span class="icon-fallback" :style="{ backgroundColor: fallbackColor(handleWebsiteName(item)) }">{{ handleWebsiteName(item).charAt(0) }}</span>
+                </SourceIcon>
                 <div>{{ handleWebsiteName(item) }}</div>
               </div>
             </div>
@@ -234,6 +272,8 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
+import SourceIcon from "./SourceIcon.vue";
+import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
@@ -251,6 +291,7 @@ export default {
     pojieLocation: [String, Number],
   },
   components: {
+    SourceIcon,
     ElCol,
     ElRow,
     ElDialog,
@@ -271,9 +312,14 @@ export default {
     const ecosystemByUrl = new Map(
       ecosystemRadar.items.map((item: any) => [item.url, item])
     );
-    const newsGuide = [...pojieNews]
+    const pojieItems = [...pojieNews]
       .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
       .sort((a: any, b: any) => b.timestamp - a.timestamp);
+    const kanxueItems = [...kanxueNews]
+      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
+      .sort((a, b) => a.rank - b.rank);
+    const newsGuide: any[] = [...pojieItems, ...kanxueItems]
+      .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url));
     const analyzedCount = computed(
       () => newsGuide.filter((item: any) => item.ecosystem).length
     );
@@ -282,6 +328,12 @@ export default {
     );
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
+    const selectedSource = ref("all");
+    const sourceOptions = [
+      { id: "all", label: "全部", count: newsGuide.length },
+      { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
+      { id: "kanxue", label: "看雪本周热榜", count: kanxueItems.length },
+    ];
     const categoryOptions = computed(() => {
       const counts = new Map<string, number>();
       newsGuide.forEach((item: any) => {
@@ -302,6 +354,7 @@ export default {
     ];
     const filteredNews = computed(() =>
       newsGuide.filter((item: any) => {
+        if (selectedSource.value !== "all" && item.website !== selectedSource.value) return false;
         const ecosystem = item.ecosystem;
         if (!ecosystem) return selectedCategory.value === "all" && selectedFocus.value === "all";
         if (
@@ -361,6 +414,7 @@ export default {
       let websiteUrl = "";
       switch (String(item.website)) {
         case "52pojie":
+        case "kanxue":
           websiteUrl = item.url;
           break;
       }
@@ -378,12 +432,17 @@ export default {
         case "52pojie":
           websiteName = "吾爱破解";
           break;
+        case "kanxue":
+          websiteName = "看雪社区";
+          break;
         default:
           websiteName = "随风而逝";
       }
       return websiteName;
     };
     const handleWebsiteImg = (item: any) => {
+      // The post page declares this snowflake favicon; version avoids stale cached artwork.
+      if (item.website === "kanxue") return "https://bbs.kanxue.com/view/img/favicon.ico?v=20260908-noreferrer";
       let websiteImg = "";
       switch (String(item.website)) {
         case "52pojie":
@@ -401,7 +460,15 @@ export default {
       return month + "月";
     };
     const handleImageError = (event: any) => {
+      event.target.onerror = null;
+      if (event.target.src === logoUrl) return;
       event.target.src = logoUrl;
+    };
+    const fallbackColor = (name: string) => {
+      const palette = ["#5b8ff9", "#5ad8a6", "#f6bd16", "#e8684a", "#6dc8ec", "#9270ca"];
+      let hash = 0;
+      for (const char of name) hash = (hash * 31 + char.charCodeAt(0)) % 997;
+      return palette[hash % palette.length];
     };
     const handleYearColor = (item: any) => {
       const date = new Date(item.timestamp);
@@ -482,6 +549,7 @@ export default {
       handleMonth,
       handleYearColor,
       handleImageError,
+      fallbackColor,
       handleMobileTitle,
       gotoMobileWebsite,
       dialogGuideVisible,
@@ -498,6 +566,8 @@ export default {
       analyzedCount,
       categoryCount,
       selectedCategory,
+      selectedSource,
+      sourceOptions,
       selectedFocus,
       categoryOptions,
       focusOptions,
@@ -531,12 +601,18 @@ export default {
   font-size: 19px;
   font-weight: 700;
 }
-.radar-description {
-  max-width: 700px;
-  margin-top: 6px;
+.collector-details {
+  margin-top: 12px;
   color: #65738a;
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.6;
+}
+.collector-details summary {
+  cursor: pointer;
+  color: #4a74ad;
+}
+.collector-details p {
+  margin: 8px 0 0;
 }
 .radar-stats {
   display: flex;
@@ -665,6 +741,26 @@ export default {
   width: 30px;
   border-radius: 50%;
   margin-right: 10px;
+}
+.kanxue-source-icon {
+  border-radius: 0;
+}
+.source-icon {
+  flex-shrink: 0;
+  background: transparent;
+}
+.source-icon :deep(img) {
+  object-fit: contain;
+}
+.icon-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
 }
 .weibo-img-link {
   color: rgb(255, 255, 255);

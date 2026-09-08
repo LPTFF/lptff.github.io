@@ -105,6 +105,7 @@ class HttpClient:
         expected_content_types: Iterable[str] = DEFAULT_CONTENT_TYPES,
         headers: dict[str, str] | None = None,
         fallback_urls: Iterable[str] = (),
+        deadline: float | None = None,
         **kwargs: object,
     ) -> requests.Response:
         urls = (url, *fallback_urls)
@@ -119,14 +120,24 @@ class HttpClient:
 
         for request_url in urls:
             for attempt in range(self.retries + 1):
+                request_timeout = self.timeout
+                if deadline is not None:
+                    remaining = deadline - time.monotonic()
+                    if remaining <= 1:
+                        raise HttpError("source timeout budget exhausted")
+                    connect = min(self.timeout[0], remaining / 2)
+                    request_timeout = (connect, min(self.timeout[1], remaining - connect))
                 try:
                     response = self.session.request(
                         method,
                         request_url,
                         headers=request_headers,
-                        timeout=self.timeout,
+                        timeout=request_timeout,
                         **kwargs,
                     )
+                    if deadline is not None and time.monotonic() >= deadline:
+                        response.close()
+                        raise HttpError("source timeout budget exhausted")
                     for redirect in response.history:
                         assert_allowed_url(
                             redirect.url,
