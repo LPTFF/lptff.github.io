@@ -37,6 +37,6 @@
 ## 页面特例
 
 - **Investment Review**：使用 Chrome DevTools MCP 接管用户实际 Chrome；验收真实页面、IndexedDB、来源附件、刷新与恢复。未部署代码只能取得 `LOCAL_BROWSER_PASS`，真实数据验证只回传脱敏结论。
-- **BOSS 直聘扩展**：反自动化环境下禁止 DevTools/CDP/WebDriver，严格按[BOSS 专用手册](../verification/boss-extension-real-validation.md)使用普通 Chrome 和 OS 级操作。
+- **BOSS 直聘扩展**：默认按 [BOSS 专用手册](../verification/boss-extension-real-validation.md)使用普通 Chrome 和 OS 级操作；加载本项目防关闭逻辑并刷新页面后，可按 [DevTools 调试指南](../verification/boss-devtools-debugging.md)使用 Chrome DevTools MCP。只声明实际执行的浏览器、扩展版本和场景；防护源码或本地模拟通过不能代替真实 BOSS 验收，调试权限不扩大外发权限。
 
 除此之外，根据主张选择能直接观察目标环境的 DevTools、浏览器、桌面操作、接口或运行时；工具名称不是目的，证据等价性才是判断标准。

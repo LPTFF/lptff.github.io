@@ -13,4 +13,4 @@
 ## 浏览器特例
 
 - **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](agent/product/investment-review.md) 与 [真实环境验收原则](agent/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
-- **BOSS 直聘扩展**：必须先读并执行 [BOSS 真实验收手册](agent/verification/boss-extension-real-validation.md) 中的默认执行约定、自闭环验收和交付要求。BOSS 禁止使用 DevTools/CDP/WebDriver 控制线上页面，只使用普通 Chrome 与 OS 级截图、鼠标和键盘。
+- **BOSS 直聘扩展**：必须先读并执行 [BOSS 真实验收手册](agent/verification/boss-extension-real-validation.md) 中的默认执行约定、自闭环验收和交付要求。默认使用普通 Chrome 与 OS 级操作；已加载本项目防关闭逻辑并完成页面刷新后，允许按 [DevTools 调试指南](agent/verification/boss-devtools-debugging.md) 使用 Chrome DevTools MCP 受控调试。浏览器调试授权不包含发送、投递或其他对外动作。

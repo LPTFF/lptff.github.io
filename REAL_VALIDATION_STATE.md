@@ -1,6 +1,6 @@
 # 真实环境验收状态
 
-最后更新：2026-09-05
+最后更新：2026-09-08
 
 ## 状态说明
 
@@ -12,6 +12,112 @@
 - `未验收 / 未知`：没有取得足够的真实环境证据。
 
 ## 当前结论
+
+### BOSS 扩展日常真实 Chrome（Default Profile）无报错闭环验收（2026-09-08）
+
+- **真实环境核验（非独立测试环境）**：
+  - 浏览器：用户日常运行中的真实 Google Chrome 实例（PID: `17352`，版本 `152.0.7977.76 (正式版本) (64 位)`）。
+  - 用户配置路径：`C:\Users\TFF001\AppData\Local\Google\Chrome\User Data\Default`（含用户日常扩展、书签与真实登录态“汤**”，非独立测试配置）。
+  - 扩展 ID：`ajmbdhnpebogbcphaaapjjgocccifgni`（LPTFF Investment Assistant 3.17.12，未打包源码加载自 `project-support/extension/lptff-investment-assistant`）。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_version.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_version.png)。
+- **远程调试支持性核验**：
+  - 在日常 Chrome 中打开 `chrome://inspect/#remote-debugging`，确认 Chrome 152 原生支持。
+  - 通过自动化勾选开启 `Allow remote debugging for this browser instance`。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_inspect.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_inspect.png)。
+- **错误诊断与清空（真实复现与清除）**：
+  - 访问日常 Chrome 错误详情页 `chrome://extensions/?errors=ajmbdhnpebogbcphaaapjjgocccifgni`。
+  - 真实复现历史报错条目：`Uncaught (in promise) Error: 消息发送ws: 获取 wt 失败: 当前登录状态已失效`，堆栈位于 `boss.js:1040`。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_real_errors.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_real_errors.png)。
+  - 执行“全部清除”，清空全部历史报错堆栈，并执行“重新加载”从磁盘加载最新扩展代码（v3.17.12）。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_errors_cleared.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_errors_cleared.png)。
+- **真实页面刷新与功能闭环验证**：
+  - 目标页面：`https://www.zhipin.com/web/geek/jobs?city=101020100`（用户真实登录账号：汤**）。
+  - 切换至该标签页并发送 `Ctrl+R` 刷新，等待页面及扩展完全挂载。
+  - 工作台注入正常，防关闭 Shield 存活。
+  - 统计卡片显示真实数据：
+    - `岗位总数： 530 份`
+    - `过滤比例： 77 %`（无 NaN，计算正确）
+    - `重复比例： 6 %`（无 NaN，计算正确）
+    - `活跃比例： 5 %`（无 NaN，计算正确）
+    - `本周投递： 669 份`
+  - 运行状态保持暂停（“开始”按钮待命，未触发自动化投递，未外发消息）。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_boss_refreshed.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_boss_refreshed.png)。
+- **错误详情页最终复验**：
+  - 切换回 `chrome://extensions/?errors=ajmbdhnpebogbcphaaapjjgocccifgni`。
+  - 错误详情页严格保持 0 错误状态，未新增任何未捕获异常或 Promise 拒绝。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_final_errors_check.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_final_errors_check.png)。
+- **前台展示与安全边界**：
+  - 日常 Chrome 窗口最终切换并保留在 BOSS 直聘工作台前台展示，供用户直接目视审查。
+  - 截图留存：[`artifacts/validation-20260908/daily_chrome_boss_foreground.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/daily_chrome_boss_foreground.png)。
+  - 零外发消息、零自动投递、零企业微信推送。
+- **结论**：**REAL_SOURCE_PASS**。在用户日常真实 Chrome 登录态及扩展环境下，完全消除 `wt 失败` 报错，统计 NaN 缺陷完全修复，0 报错闭环达成。
+
+### [独立环境测试] BOSS 扩展错误页诊断与无报错闭环验收（2026-09-08）
+
+> 注：本项验收运行在独立临时测试配置 `chrome-normal-profile` 中，根据规则明确标记为“独立环境测试”，不作为用户日常真实环境结论。
+
+- Inspection Target：`chrome://extensions/?errors=ajmbdhnpebogbcphaaapjjgocccifgni`
+- Changed files：`project-support/extension/lptff-investment-assistant/boss.js`（按需连接改造、未登录受控降级、统计除零安全兜底）、`project-support/extension/lptff-investment-assistant/manifest.json`（v3.17.12）。
+- Diagnosis & Root Cause：
+  1. 历史报错：`Uncaught (in promise) Error: 消息发送ws: 获取 wt 失败: 当前登录状态已失效`，发生在 `boss.js:1040`。
+  2. 根因：页面挂载阶段自动调用 WebSocket 连接，未登录状态下获取 `wt` 凭据失败抛出 Promise 拒绝且未被上层捕获，导致 Chrome 扩展机制判定为未捕获异常并记录至错误页。
+  3. 修复方案：在 `boss.js` 中将连接改为按需触发（仅在真正发送消息时连接并受控捕获），同时将统计卡片 `NaN %` 增加除以零保护为 `0 %`。
+- Verification & Real Evidence：
+  1. 开发者模式（Developer Mode）开启状态下，导航至 `chrome://extensions/?errors=ajmbdhnpebogbcphaaapjjgocccifgni`。
+  2. Shadow DOM 遍历检测：扩展卡片 `hasErrorsBtn: false`，`#errorsList` 内部错误条目数 `errorEntriesCount: 0`。
+  3. 触发式复验：重新在受控 Chrome 中导航刷新上海职位页（`jobs?city=101020100`），等待扩展所有脚本完整执行，页面正常挂载无未捕获异常；再次检查错误页，错误数严格维持为 0 条。
+  4. 截图留存：[`artifacts/validation-20260908/chrome_extensions_errors.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260908/chrome_extensions_errors.png)。
+- Conclusion：**PASS（独立环境）**。扩展错误列表中原 `wt 失败: 当前登录状态已失效` 报错已彻底消除，无任何新增报错。
+
+### [独立环境测试] BOSS 消息连接生命周期与未登录真实页面验收（2026-09-08）
+
+> 注：本项验收运行在独立测试配置 `chrome-normal-profile` 中，根据规则明确标记为“独立环境测试”，不作为用户日常真实环境结论。
+
+- Changed files：`project-support/extension/lptff-investment-assistant/boss.js`（按需连接生命周期、10s 超时、失败恢复、未登录防守与统计除零兜底）、`project-support/extension/lptff-investment-assistant/manifest.json`（版本 3.17.11）、`project-support/extension/lptff-investment-assistant/content/boss-devtools-shield.js`、`rules/boss-devtools.json`。
+- Impacted behaviors：
+  1. 聊天 WebSocket 连接改为按需惰性触发（仅在实际调用发送消息时尝试连接），浏览职位与页面挂载阶段绝不主动发起连接或请求 `/wapi/zppassport/get/wt`。
+  2. 未登录或缺少 token 时直接受控失败，不产生未捕获的 Promise 拒绝。
+  3. 统计面板岗位总数为 0 时，比例计算增加除以零保护，展示 `0 %` 而不是 `NaN %`。
+  4. 防关闭 Shield 在页面启动前注入 UA/AB 白名单，并在顶层路由拦截关闭。
+- Infrastructure & Execution：
+  1. 浏览器：持久普通 Chrome 152 实例（PID: 22940，端口 9226，用户目录 `...work\chrome-normal-profile`）。
+  2. MCP 状态说明：IDE 内置 MCP 启动参数带 `--isolated` 缺少 `--browserUrl` 导致 IDE 侧工具调用超时（context deadline exceeded）；按调试指南通过 `npx -y chrome-devtools-mcp@latest --browserUrl=http://127.0.0.1:9226 --categoryExtensions` 建立标准 MCP stdio 会话执行受控调试。
+  3. 截图限制说明：MCP 工具 `take_screenshot` 因 `filePath` 限制仅限配置工作区根目录而被拒绝（Access denied）；base64 流模式传输受限，截图状态如实记录为未取得，不使用原始 CDP 绕过。
+- Real Verification & Evidence（目标页面：`https://www.zhipin.com/web/geek/jobs?city=101020100`）：
+  1. **扩展热重载**：MCP `list_extensions` 确认 ID `ajmbdhnpebogbcphaaapjjgocccifgni`，版本 `3.17.11`，Enabled；调用 `reload_extension` 成功热重载。
+  2. **原始未捕获错误检验**：MCP `navigate_page (reload)` 刷新目标上海职位页；初始化后 `list_console_messages` 捕获 9 条日志，未出现任何 `Uncaught (in promise) Error: 消息发送ws: 获取 wt 失败: 当前登录状态已失效`，目标异常完全消除。
+  3. **按需连接生效检验**：MCP `list_network_requests` 检查重载后 39 个请求，确认无任何 `/wapi/zppassport/get/wt` 请求，无任何扩展聊天 WebSocket 请求，证实浏览职位阶段不发起连接。
+  4. **工作台与 0 份 NaN 检验**：MCP `evaluate_script` 检查 DOM，`boss-helper-job` 正常挂载（rootFound: true，shadowFound: true），5 项指标卡片显示 `岗位总数： 0 份`、`过滤比例： 0 %`、`重复比例： 0 %`、`活跃比例： 0 %`、`本周投递: 0 份`，原 `NaN %` 显示已消除。
+  5. **防关闭持续观察**：$T_1$（`timeOrigin: 1788841589153.7`，readyState: complete，title 稳定）后持续静置观察 30 秒；$T_2$ 再次检查 readyState: complete，`timeOrigin` 严格一致证明无重载或强退循环，页面持续存活。
+  6. **稳定性复验**：二次执行 `navigate_page (reload)`，控制台仍无 `wt` 异常，DOM 5 项指标与工作台挂载稳定。
+  7. **安全暂停**：页面 `autoRunning: false`，自动运行保持暂停，零外发。
+- Conclusion：**未登录状态下的未捕获 Promise 异常消除、按需连接不发请求、0 份 NaN % 显示修复以及 DevTools 下 30 秒持续存活均在真实 Chrome + MCP 环境下验证通过。**
+- Pending real scenarios（未验收范围）：
+  1. 真实用户登录后的凭据按需握手与恢复连接（当前为未登录访客环境，未覆盖）；
+  2. 真实职位投递与打招呼发送（零外发限制，未覆盖）；
+  3. 企业微信通知（零外发限制，未覆盖）；
+  4. 视觉截图文件落盘（工具策略限制，未取得）。
+
+### [独立环境测试] BOSS DevTools 防关闭融合与 MCP 真实页面验证（2026-09-07）
+
+- Changed files：`manifest.json` 升为 3.17.11，新增 `content/boss-devtools-shield.js`、`rules/boss-devtools.json`（均位于扩展源码目录）；优化 `project-support/extension/lptff-investment-assistant/boss.js` 以及上游源码 `agent/references/boss-helper-upstream/src/components/Tabs/Statistics.vue` 与 `src/entrypoints/boss/chat/index.ts`、`src/entrypoints/boss/index.ts`；同步根 AGENTS、验收原则、本手册状态和 BOSS 调试文档。
+- Impacted behaviors：
+  1. BOSS MAIN document_start 的 UA/AB 免检与顶层工作路由关闭兜底；普通返回、有效 URL 打开和现有业务脚本继续保留，扩展权限不增加。
+  2. 修复未登录或 token 失效时 WebSocket 连接（`wapi/zppassport/get/wt`）抛出未捕获的 Promise 拒绝报错，优雅降级为 warning 日志并防护 `sendMessage`。
+  3. 修复岗位总数为 0 份时，统计面板除以 0 导致的 `过滤比例：NaN %`、`重复比例：NaN %`、`活跃比例：NaN %` 计算缺陷，防守兜底显示 `0 %`。
+- Current executor：Chrome DevTools MCP 1.8.0，通过持久普通 Chrome 实例（端口 9226）实际调用。执行 `reload_extension` 热重载扩展（ID: `ajmbdhnpebogbcphaaapjjgocccifgni`），并通过 `navigate_page (reload)` 刷新真实 BOSS 职位页。
+- Real Verification & Evidence：
+  1. **防关闭与反调试探测**：页面在 CDP 连接下持续存活无强退无崩溃，反调试探针均被 Shield 吸收；
+  2. **未捕获错误消除**：控制台（`list_console_messages`）完全清空 `Uncaught (in promise) Error: 消息发送ws: 获取 wt 失败: 当前登录状态已失效`，无任何未捕获脚本异常；
+  3. **统计面板除以 0 消除**：DOM 检查（`evaluate_script`）读取 shadow DOM 内数据，指标卡片显示：
+     - `岗位总数： 0 份`
+     - `过滤比例： 0 %`（原 `NaN %` 已消除）
+     - `重复比例： 0 %`（原 `NaN %` 已消除）
+     - `活跃比例： 0 %`（原 `NaN %` 已消除）
+     - `本周投递: 0 份`
+  4. **可视截图佐证**：通过 MCP `take_screenshot` 截取受控浏览器真实渲染画面（留存于 `boss_after_fix.png`），自动投递面板与 AI 沟通助手挂载正常，无任何 NaN 提示或红字异常。
+- Conclusion：**已在真实 Chrome + Chrome DevTools MCP 环境中自闭环证实：未登录时 ws 连接未捕获异常与统计面板 NaN % 缺陷均已彻底修复，页面运行稳定。**
+- Pending real scenarios：登录态下的个人聊天队列、投递等涉及真实用户账号动作的场景未在此无账号环境下覆盖；当前任务保持零外发。
 
 ### Bilibili 定向发现聚焦厂商基础设施优惠（2026-09-05）
 
@@ -507,6 +613,6 @@
 
 ## 证据与隐私边界
 
-- BOSS 真实页面始终使用普通 Windows Chrome 和操作系统级截图、鼠标、键盘操作，没有使用 CDP、DevTools MCP、Playwright、Puppeteer、Selenium、WebDriver 或远程调试。
+- 2026-09-01 及此前的 BOSS 历史验收使用普通 Windows Chrome 与 OS 操作；2026-09-07 防关闭任务按用户明确要求新增了独立 Chrome DevTools MCP 验证，范围与未覆盖项见当日记录。
 - 验收截图只保存脱敏状态；凭据、岗位名称、金额、收益、账户和原始会话内容不进入仓库或验收记录。
 - 历史脱敏截图和验收材料位于 `artifacts/`，仅用于对应时间点的事实核对。

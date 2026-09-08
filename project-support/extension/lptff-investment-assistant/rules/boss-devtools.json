@@ -1,0 +1,19 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "action": {
+      "type": "modifyHeaders",
+      "requestHeaders": [
+        { "header": "user-agent", "operation": "append", "value": " BZLFE" }
+      ]
+    },
+    "condition": {
+      "urlFilter": "||zhipin.com/",
+      "resourceTypes": [
+        "main_frame", "sub_frame", "stylesheet", "script", "image", "font",
+        "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "other"
+      ]
+    }
+  }
+]

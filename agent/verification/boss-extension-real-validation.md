@@ -1,6 +1,6 @@
 # BOSS 直聘扩展自闭环测试手册
 
-目标：把 `project-support/extension/lptff-investment-assistant/` 的每项 UI 承诺转成可观察结果，在普通 Windows Chrome 的真实 BOSS 页面中完成“复现 → 修复 → 重载 → 重测”，直到本次变更涉及的场景收敛。
+目标：把 `project-support/extension/lptff-investment-assistant/` 的每项 UI 承诺转成可观察结果，在 Windows Chrome 的真实 BOSS 页面中完成“复现 → 修复 → 重载 → 重测”，直到本次变更涉及的场景收敛。
 
 ## 0. 默认执行约定：不要再让用户补充机械步骤
 
@@ -32,6 +32,22 @@
 - 需要验证活动态时，优先临时切到“安全预览（不发送）”、使用不可能命中的条件或其他无外发路径。活动态证据取得后立即暂停，恢复用户原配置但不要自行恢复运行。
 - 如果暂停生效前已有外发完成，报告实际聚合数量和发生阶段，不展示会话内容，也不能把它写成测试成功。
 
+### 0.3 消息连接生命周期与未登录受控降级原则
+
+- **按需惰性触发连接**：聊天 WebSocket 连接必须在真正需要发送消息时才惰性建立并请求 `/wapi/zppassport/get/wt` 获取凭据。在职位浏览、页面挂载与组件初始化阶段，严禁主动发起连接，避免无意义的鉴权请求。
+- **杜绝未捕获 Promise 拒绝**：未登录或凭据失效属于正常状态机分支，必须在调用链最外层与 Promise 内部受控处理，记录友好提示并安全退出发送流。严禁向全局泄漏异常导致扩展错误页（`chrome://extensions/?errors=<ID>`）产生 `Uncaught (in promise) Error: 消息发送ws: 获取 wt 失败: 当前登录状态已失效`。
+- **错误页 0 报错验证**：验收未登录或登录态场景时，必须导航至目标扩展的错误详情页，完成“清空历史错误 → 刷新 BOSS 页面 → 复验错误页”，确保错误计数持续保持为 0。
+
+### 0.4 指标卡片除零与 NaN 防守原则
+
+- 自动投递工作台的各项比率（如过滤比例、重复比例、活跃比例）必须严格处理分母为 0 的初始态（如岗位总数为 0 份）。
+- 当分母为 0 或计算结果为非有限数字时，必须兜底展示 `0 %`，严禁在用户界面暴露 `NaN %`。
+
+### 0.5 真实环境优先与拒绝自写测试产物
+
+- **日常真实环境为唯一准绳**：验收必须优先复用用户日常使用、带有日常扩展与登录状态的真实 Chrome 实例（Default 配置目录）。严禁为了通过测试而自动创建独立用户沙箱伪装成日常环境；独立配置测试只能明确标注为“独立环境测试”。
+- **严禁自写测试产物进入仓库**：本项目只认真实环境执行的脱敏事实与截图证据，不接受自己撰写的测试脚本（如 `test-*.js`、`.ps1` 自动化脚本等）作为项目产物提交。
+
 ## 1. 保存状态并确定范围
 
 先查看 `git status --short`、`git diff`、`git diff --stat`，然后在仓库根目录 `REAL_VALIDATION_STATE.md` 维护：
@@ -52,11 +68,13 @@
 
 这些检查只用于避免把无法加载的产物送入真实环境，不作为功能通过证据。
 
-## 3. 获得普通桌面执行能力
+## 3. 获得浏览器执行能力
 
-最终 BOSS 验收使用普通 Chrome 与 OS 级截图、鼠标和键盘。不要给 Chrome 添加 remote debugging、WebDriver 或 automation 参数，也不研究或修改站点反自动化指纹。
+默认使用普通 Chrome 与 OS 级截图、鼠标和键盘。需要 Chrome DevTools MCP 时，先按 [DevTools 调试指南](boss-devtools-debugging.md)加载本项目防关闭逻辑、刷新页面并确认目标扩展版本，再进行受控调试；保留普通 Chrome 作为防护失效时的恢复路径。该例外针对本项目的 BOSS 防关闭功能，不扩大为其他指纹伪装或 WebDriver 测试授权。
 
-按以下顺序取得执行器，成功即进入第 4 节：
+先发现当前可用的 Chrome DevTools MCP 工具，并实际尝试连接。无法使用时记录发现范围、调用失败点和未验收场景，继续使用实际可用的普通桌面路径；不得将源码或模拟结果记为真实页面通过。
+
+使用普通桌面路径时，按以下顺序取得执行器，成功即进入第 4 节：
 
 1. 连接当前环境已有的 Desktop/Computer Use 能力。
 2. 当前任务与 Chrome 在同一交互用户 Session 时，运行用户态 Desktop Runner。
@@ -83,7 +101,7 @@ Runner 至少支持：`screenshot`、`list_windows`、`focus_window`、`maximize
 
 1. 在现有普通 Chrome 打开 `chrome://extensions/`。
 2. 核对扩展名称、版本、ID和加载目录，目录必须是当前工作区的 `project-support/extension/lptff-investment-assistant/`。
-3. 记录其他会注入 BOSS 的扩展开关，测试期间关闭，结束时恢复。
+3. 记录其他会注入 BOSS 的扩展开关，测试期间关闭，结束时恢复；尤其关闭 `research/zhipin/extension` 独立参考扩展，避免它掩盖本项目防护是否生效。
 4. 点击当前扩展的“重新加载”，回到 BOSS 页面后刷新。
 5. 首屏先核对产品结构：保留统计、筛选、配置、AI、日志、对话、职位队列和自动处理；不再出现关于/赞赏、反馈和帮助模式。
 
@@ -93,6 +111,7 @@ Runner 至少支持：`screenshot`、`list_windows`、`focus_window`、`maximize
 
 ### 页面生命周期与岗位获取
 
+- 涉及防关闭逻辑时，补测 [DevTools 调试指南](boss-devtools-debugging.md)中的持续存活、刷新、正常返回、打开详情和非 BOSS 页面场景；单次快照不能证明没有循环刷新。
 - 初次进入职位列表后只出现一个工作台，职位卡片无需用户先手工滚动就开始获取。
 - 自动加载/翻页时显示“当前页面处理数、今日成功数、运行/暂停状态”，用户能判断仍在工作、已完成还是失败。
 - 滚动、异步替换、搜索条件变化、SPA 切换、扩展重载和页面刷新后不会重复挂载，处理能够恢复。
@@ -158,9 +177,11 @@ Runner 至少支持：`screenshot`、`list_windows`、`focus_window`、`maximize
 
 ```text
 Execution: ordinary Windows Chrome + OS screenshot/mouse/keyboard
-Forbidden browser-control tools used: NO
+Extension version: <实际加载版本>
 REAL_BOSS_VALIDATION: EXECUTED — PASS
 ```
+
+使用防护后的 Chrome DevTools MCP 时，把 `Execution` 改成 `Windows Chrome + Chrome DevTools MCP + BOSS shield`，并注明实际连接方式、观察时间及覆盖场景。未实际执行的场景写“未验收”，不能套用以上通过示例。
 
 任一 P0 仍失败则整体写 `EXECUTED — FAIL`，并留下具体未收敛项和下一步。
 
