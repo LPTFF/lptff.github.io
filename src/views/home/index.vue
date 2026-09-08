@@ -1,6 +1,13 @@
 <template>
   <div :class="isPCRes ? '' : 'outer-container'">
-    <div @scroll="handleScroll" :class="isPCRes ? 'scroll-home-container' : 'inner-container'" :style="containerStyle">
+    <div
+      @scroll="handleScroll"
+      :class="[
+        isPCRes ? 'scroll-home-container' : 'inner-container',
+        { 'is-switching': isTabSwitching },
+      ]"
+      :style="containerStyle"
+    >
       <div class="news-aggregator">
         <el-header class="header-el">
           <div class="common-flex">
@@ -311,6 +318,7 @@ const contentLocation = ref(0);
 let previousScroll = 0;
 
 const handleScroll = (event: Event) => {
+  if (isTabSwitching.value) return;
   const target = event.target as HTMLElement;
   const { scrollTop } = target;
   sessionStorage.setItem(`scrollInfoLocation-${selectIndex.value}`, JSON.stringify(scrollTop));
@@ -375,6 +383,10 @@ const currentYear = new Date(
   overflow-y: auto;
   overflow-x: hidden;
   box-sizing: border-box;
+}
+
+.scroll-home-container.is-switching {
+  overflow-y: hidden;
 }
 
 .header-el {
@@ -457,6 +469,12 @@ const currentYear = new Date(
   min-height: 260px;
 }
 
+.tab-stage.is-switching {
+  overflow: hidden;
+  max-height: calc(100vh - 305px);
+  max-height: calc(100dvh - 305px);
+}
+
 .tab-progress {
   position: absolute;
   z-index: 2;
@@ -510,13 +528,18 @@ const currentYear = new Date(
 .tab-loading-overlay {
   position: absolute;
   z-index: 1;
-  inset: 0 0 auto;
-  min-height: 480px;
+  inset: 0;
   background: #fff;
+  overflow: hidden;
 }
 
 .tab-placeholder {
   min-height: 480px;
+}
+
+.tab-stage.is-switching .tab-placeholder {
+  min-height: unset;
+  height: 100%;
 }
 
 .tab-loading-fade-enter-active,
@@ -557,7 +580,9 @@ const currentYear = new Date(
 
 .loading-card {
   display: flex;
-  min-height: 96px;
+  box-sizing: border-box;
+  height: 96px;
+  min-height: unset;
   margin-bottom: 10px;
   padding: 18px;
   align-items: center;
@@ -623,6 +648,7 @@ const currentYear = new Date(
   padding-top: 135px;
   padding-bottom: 110px;
   box-sizing: border-box;
+  overflow: visible;
 }
 
 /* 响应式布局 */
@@ -650,13 +676,25 @@ const currentYear = new Date(
     min-height: 220px;
   }
 
+  .tab-stage.is-switching {
+    max-height: calc(100vh - 275px);
+    max-height: calc(100dvh - 275px);
+  }
+
   .tab-loading-overlay,
   .tab-placeholder {
     min-height: 400px;
   }
 
+  .tab-stage.is-switching .tab-loading-overlay,
+  .tab-stage.is-switching .tab-placeholder {
+    min-height: unset;
+  }
+
   .loading-card {
-    min-height: 82px;
+    box-sizing: border-box;
+    height: 82px;
+    min-height: unset;
     padding: 14px;
     gap: 14px;
   }
