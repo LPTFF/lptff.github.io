@@ -30,26 +30,24 @@
         </el-header>
         <el-main class="main-content">
           <div class="component-div">
-            <div class="tab-stage" :class="{ 'is-switching': isTabSwitching }">
+            <div ref="tabStage" class="tab-stage" :class="{ 'is-switching': isTabSwitching }">
               <div class="tab-progress" aria-hidden="true"></div>
-              <Transition name="tab-loading-fade">
-                <div
-                  v-if="isTabSwitching"
-                  class="tab-loading tab-loading-overlay"
-                  role="status"
-                  aria-live="polite"
-                >
-                  <div class="loading-heading"></div>
-                  <div v-for="index in 4" :key="index" class="loading-card">
-                    <div class="loading-date"></div>
-                    <div class="loading-copy">
-                      <span></span>
-                      <span></span>
-                    </div>
+              <div
+                v-if="isTabSwitching"
+                class="tab-loading tab-loading-overlay"
+                role="status"
+                aria-live="polite"
+              >
+                <div class="loading-heading"></div>
+                <div v-for="index in loadingCardCount" :key="index" class="loading-card">
+                  <div class="loading-date"></div>
+                  <div class="loading-copy">
+                    <span></span>
+                    <span></span>
                   </div>
-                  <span class="sr-only">正在加载{{ currentTabLabel }}</span>
                 </div>
-              </Transition>
+                <span class="sr-only">正在加载{{ currentTabLabel }}</span>
+              </div>
               <Suspense @pending="handleTabPending" @resolve="handleTabResolved">
                 <Transition
                   name="tab-content"
@@ -90,6 +88,7 @@
 <script setup lang="ts">
 import {
   ref,
+  shallowRef,
   onMounted,
   onUnmounted,
   computed,
@@ -100,6 +99,7 @@ import {
 import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
+import TabLoadError from "./TabLoadError.vue";
 import {
   ElMenu,
   ElMenuItem,
@@ -120,11 +120,28 @@ const tabLoaders: Record<TabKey, () => Promise<TabModule>> = {
   welfare: () => import("./welfare/index.vue"),
 };
 
+const pendingTabs = new Map<TabKey, Promise<TabModule>>();
+
+const loadTab = (key: TabKey): Promise<TabModule> => {
+  const existing = pendingTabs.get(key);
+  if (existing) return existing;
+  // Suspense 下 defineAsyncComponent 的 timeout 不生效，因此在请求层限时。
+  const request = new Promise<TabModule>((resolve, reject) => {
+    const timer = window.setTimeout(() => reject(new Error("栏目加载超时")), 30_000);
+    tabLoaders[key]().then(resolve, reject).finally(() => window.clearTimeout(timer));
+  }).catch((error: unknown) => {
+    pendingTabs.delete(key);
+    throw error;
+  });
+  pendingTabs.set(key, request);
+  return request;
+};
+
 const createAsyncTab = (key: TabKey) =>
   defineAsyncComponent({
-    loader: tabLoaders[key],
+    // 将分包请求失败收敛为可操作的页面，Suspense 正常结束，避免永久骨架屏。
+    loader: () => loadTab(key).catch(() => TabLoadError),
     suspensible: true,
-    timeout: 30_000,
   });
 
 // 子组件继续按需分包；用户指向标签时提前请求目标分包。
@@ -204,13 +221,18 @@ const defaultTab = menuConfig.some((item) => item.key === queryTab)
   : "tools";
 const selectIndex = ref(defaultTab);
 const isTabSwitching = ref(true);
+const tabStage = shallowRef<HTMLElement | null>(null);
+const loadingCardCount = ref(4);
+let loadingResizeObserver: ResizeObserver | null = null;
 const currentTabLabel = computed(
   () => menuConfig.find((item) => item.key === selectIndex.value)?.label || "栏目"
 );
 
 const preloadTab = (key: string) => {
-  const loader = tabLoaders[key as TabKey];
-  if (loader) void loader();
+  if (Object.prototype.hasOwnProperty.call(tabLoaders, key)) {
+    // 悬停预加载是尽力而为；只有实际进入栏目时才展示失败提示。
+    void loadTab(key as TabKey).catch(() => undefined);
+  }
 };
 
 const handleTabPending = () => {
@@ -289,6 +311,13 @@ const gotoIssue = () => {
 };
 
 onMounted(() => {
+  loadingResizeObserver = new ResizeObserver(([entry]) => {
+    if (!entry || !isTabSwitching.value) return;
+    const rowHeight = window.matchMedia("(max-width: 768px)").matches ? 92 : 106;
+    // 标题与间距占 48px；其余空间均分给完整卡片，避免半张卡片被裁掉。
+    loadingCardCount.value = Math.max(1, Math.floor((entry.contentRect.height - 48) / rowHeight));
+  });
+  if (tabStage.value) loadingResizeObserver.observe(tabStage.value);
   const requestedTab = route.query.tab ? String(route.query.tab) : "";
   const currentTab = requestedTab === "douban" ? "entertainment" : requestedTab;
   if (currentTab && menuConfig.some((item) => item.key === currentTab)) {
@@ -309,6 +338,7 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  loadingResizeObserver?.disconnect();
   clearTimeout(clickTimer);
   backtopResizeObserver?.disconnect();
   window.removeEventListener("resize", updateWindowDimensions);
@@ -356,9 +386,9 @@ const currentYear = new Date(
 
 <style scoped>
 .outer-container {
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
+  width: 100%;
+  height: calc(100vh - 16px);
+  height: calc(100dvh - 16px);
   position: relative;
   overflow: hidden;
   box-sizing: border-box;
@@ -385,8 +415,24 @@ const currentYear = new Date(
   box-sizing: border-box;
 }
 
-.scroll-home-container.is-switching {
+.scroll-home-container.is-switching,
+.inner-container.is-switching {
   overflow-y: hidden;
+}
+
+/* 加载态沿滚动容器传递确定高度，不依赖异步组件或旧栏目撑开。 */
+.is-switching > .news-aggregator,
+.is-switching > .news-aggregator > .main-content,
+.is-switching .component-div {
+  height: 100%;
+}
+
+.is-switching > .news-aggregator > .main-content {
+  padding-bottom: var(--el-footer-height, 60px);
+}
+
+.is-switching .component-div {
+  margin-bottom: 0;
 }
 
 .header-el {
@@ -471,8 +517,8 @@ const currentYear = new Date(
 
 .tab-stage.is-switching {
   overflow: hidden;
-  max-height: calc(100vh - 305px);
-  max-height: calc(100dvh - 305px);
+  height: 100%;
+  min-height: 0;
 }
 
 .tab-progress {
@@ -521,6 +567,9 @@ const currentYear = new Date(
 }
 
 .tab-loading {
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
   padding: 4px 0;
   animation: tab-fade-in 0.18s ease both;
 }
@@ -540,16 +589,6 @@ const currentYear = new Date(
 .tab-stage.is-switching .tab-placeholder {
   min-height: unset;
   height: 100%;
-}
-
-.tab-loading-fade-enter-active,
-.tab-loading-fade-leave-active {
-  transition: opacity 0.16s ease;
-}
-
-.tab-loading-fade-enter-from,
-.tab-loading-fade-leave-to {
-  opacity: 0;
 }
 
 .loading-heading,
@@ -572,6 +611,7 @@ const currentYear = new Date(
 }
 
 .loading-heading {
+  flex-shrink: 0;
   width: 180px;
   height: 24px;
   margin-bottom: 16px;
@@ -579,10 +619,10 @@ const currentYear = new Date(
 }
 
 .loading-card {
+  flex: 1;
   display: flex;
   box-sizing: border-box;
-  height: 96px;
-  min-height: unset;
+  min-height: 0;
   margin-bottom: 10px;
   padding: 18px;
   align-items: center;
@@ -590,6 +630,10 @@ const currentYear = new Date(
   border: 1px solid #ebeef5;
   border-radius: 8px;
   background: #fff;
+}
+
+.loading-card:last-of-type {
+  margin-bottom: 0;
 }
 
 .loading-date {
@@ -676,11 +720,6 @@ const currentYear = new Date(
     min-height: 220px;
   }
 
-  .tab-stage.is-switching {
-    max-height: calc(100vh - 275px);
-    max-height: calc(100dvh - 275px);
-  }
-
   .tab-loading-overlay,
   .tab-placeholder {
     min-height: 400px;
@@ -693,8 +732,6 @@ const currentYear = new Date(
 
   .loading-card {
     box-sizing: border-box;
-    height: 82px;
-    min-height: unset;
     padding: 14px;
     gap: 14px;
   }
@@ -719,8 +756,6 @@ const currentYear = new Date(
 
   .tab-content-enter-active,
   .tab-content-leave-active,
-  .tab-loading-fade-enter-active,
-  .tab-loading-fade-leave-active,
   .tab-progress {
     transition-duration: 0.01ms;
   }
