@@ -13,6 +13,7 @@
 | 部署 | 实际生产 URL、资源、路由、网络和用户路径；本地构建不代表部署完成 |
 | Investment Review | 用户实际 Chrome + Chrome DevTools MCP；只输出脱敏状态和聚合计数，未部署代码仅可声明 `LOCAL_BROWSER_PASS` |
 | BOSS 扩展 | 改用[BOSS 专用手册](boss-extension-real-validation.md)，禁止 DevTools/CDP/WebDriver 控制线上页面 |
+| Web 与扩展桥接（如求职工作台、AI 助手共用） | 改用[Web 与扩展桥接验收指南](chrome-extension-web-bridge-validation.md)；在真实日常 Chrome 中完成 MV3 热重载、Proxy 克隆防护与无感验证 |
 
 ## 一次闭环
 

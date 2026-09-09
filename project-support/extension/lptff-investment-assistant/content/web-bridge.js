@@ -40,12 +40,25 @@
   });
 
   function postResponse(message, responseType, response) {
-    window.postMessage({
-      source: "lptff-investment-assistant",
-      type: responseType,
-      requestId: message.requestId,
-      response,
-    }, location.origin);
+    try {
+      const cleanResponse = response !== undefined && response !== null ? JSON.parse(JSON.stringify(response)) : response;
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: responseType,
+        requestId: message.requestId,
+        response: cleanResponse,
+      }, location.origin);
+    } catch (err) {
+      console.error("[web-bridge] postResponse serialization error:", err);
+      try {
+        window.postMessage({
+          source: "lptff-investment-assistant",
+          type: responseType,
+          requestId: message.requestId,
+          response: { ok: false, error: "扩展响应序列化失败: " + (err instanceof Error ? err.message : String(err)) },
+        }, location.origin);
+      } catch {}
+    }
   }
 
   function hasRuntimeContext() {
@@ -139,6 +152,63 @@
     }
     if (event.data?.type === "LPTFF_BINANCE_STOP_COLLECTION") {
       forward({ type: "STOP_OBSERVATION", platform: "binance", requestId: event.data.requestId }, "LPTFF_BINANCE_COLLECTION_STOPPED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_CHECK_STATUS") {
+      forward({ type: "GET_CAREER_STATUS", requestId: event.data.requestId }, "LPTFF_CAREER_STATUS");
+    }
+    if (event.data?.type === "LPTFF_CAREER_EXTRACT_PROFILE") {
+      forward({
+        type: "EXTRACT_CAREER_PROFILE",
+        requestId: event.data.requestId,
+        resumeText: event.data.resumeText,
+        meta: event.data.meta,
+      }, "LPTFF_CAREER_PROFILE_EXTRACTED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_MATCH_DIRECTIONS") {
+      forward({
+        type: "MATCH_CAREER_DIRECTIONS",
+        requestId: event.data.requestId,
+        profile: event.data.profile,
+        marketSnapshot: event.data.marketSnapshot,
+        preferences: event.data.preferences,
+      }, "LPTFF_CAREER_DIRECTIONS_MATCHED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_GET_SAVED") {
+      forward({ type: "GET_CAREER_SAVED", requestId: event.data.requestId }, "LPTFF_CAREER_SAVED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_CLEAR_DATA") {
+      forward({ type: "CLEAR_CAREER_DATA", requestId: event.data.requestId }, "LPTFF_CAREER_DATA_CLEARED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_SYNC_AUTOPILOT") {
+      forward({
+        type: "SYNC_CAREER_AUTOPILOT",
+        requestId: event.data.requestId,
+        snippet: event.data.snippet,
+      }, "LPTFF_CAREER_AUTOPILOT_SYNCED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_GET_GEMINI_CONFIG") {
+      forward({ type: "GET_CAREER_GEMINI_CONFIG", requestId: event.data.requestId }, "LPTFF_CAREER_GEMINI_CONFIG");
+    }
+    if (event.data?.type === "LPTFF_CAREER_REVEAL_GEMINI_KEY") {
+      forward({ type: "REVEAL_CAREER_GEMINI_KEY", requestId: event.data.requestId }, "LPTFF_CAREER_GEMINI_KEY_REVEALED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_SAVE_GEMINI_CONFIG") {
+      forward({
+        type: "SAVE_CAREER_GEMINI_CONFIG",
+        requestId: event.data.requestId,
+        model: event.data.model,
+        geminiKey: event.data.geminiKey,
+      }, "LPTFF_CAREER_GEMINI_CONFIG_SAVED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_TEST_GEMINI") {
+      forward({
+        type: "TEST_CAREER_GEMINI",
+        requestId: event.data.requestId,
+        config: event.data.config,
+      }, "LPTFF_CAREER_GEMINI_TESTED");
+    }
+    if (event.data?.type === "LPTFF_CAREER_CLEAR_GEMINI_KEY") {
+      forward({ type: "CLEAR_CAREER_GEMINI_KEY", requestId: event.data.requestId }, "LPTFF_CAREER_GEMINI_KEY_CLEARED");
     }
   });
 

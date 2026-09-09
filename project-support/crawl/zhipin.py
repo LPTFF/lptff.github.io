@@ -187,6 +187,10 @@ def parse_public_page(html: str, *, source_url: str) -> list[dict[str, object]]:
                 "timestamp": int(updated_at.timestamp() * 1000),
                 "website": "zhipin",
                 "sourcePage": parsed_source.path,
+                "capturedAt": datetime.now(BEIJING).strftime("%Y-%m-%d %H:%M:%S"),
+                "pageUpdatedAt": updated_at.strftime("%Y-%m-%d %H:%M:%S"),
+                "jobPostTime": "",
+                "sourceStatus": "active",
             }
         )
     return items

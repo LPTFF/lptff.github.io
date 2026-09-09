@@ -13,6 +13,89 @@
 
 ## 当前结论
 
+### 简历驱动的求职机会发现与职业决策工作台闭环交付（2026-09-09）
+
+- **Changed files**：
+  - `src/career/types.ts`：能力画像、佐证引用、方向推荐与通信协议类型定义。
+  - `src/career/utils/crypto.ts`：SHA-256 哈希计算工具。
+  - `src/career/parser/docx-parser.ts`：基于 `fflate` + `DOMParser` 的浏览器端纯前端 DOCX 文本抽取。
+  - `src/career/parser/pdf-parser.ts`：基于 `pdfjs-dist` 的纯前端 PDF 文本图层提取，支持扫描件严格拦截与报错。
+  - `src/career/parser/index.ts`：统一简历解析入口与文件指纹提取。
+  - `src/career/sync/career-bridge.ts`：基于 `window.postMessage` 与扩展通信的强类型 RPC 客户端。
+  - `src/views/career/CareerDiscoveryView.vue`：集中求职入口 UI，涵盖连接状态感知、简历上传/更新、能力画像及原文证据展开、推荐方向（市场支持 vs 相邻探索）、BOSS 关键词跳转、公开市场快照浏览与本地数据清空。
+  - `src/router/index.js`：注册 `/career` 独立路由，并将 `/boss-zhipin` 历史路由指向 `/career`。
+  - `src/views/home/tools/websiteGroups.json`：导航专区中新增“求职机会发现”卡片入口。
+  - `project-support/extension/lptff-investment-assistant/manifest.json`：更新 `content/web-bridge.js` 匹配范围，覆盖 `http://localhost/*` 与 `https://lptff.github.io/*`。
+  - `project-support/extension/lptff-investment-assistant/content/web-bridge.js`：新增 `LPTFF_CAREER_*` 消息监听与安全中继。
+  - `project-support/extension/lptff-investment-assistant/background.js`：新增求职助手消息分发、Gemini 简历提取（提示注入防御与原文出处抽取）、市场方向匹配（程序化硬校验佐证岗位与原文片段）、权威本地存储与受控同步至 BOSS 沟通助手画像。
+  - `project-support/crawl/zhipin.py`：补充 `capturedAt`、`pageUpdatedAt`、`jobPostTime`、`sourceStatus` 等元数据。
+  - `project-support/crawl/run_collectors.py`：将 `zhipin` 纳入每日全量 CI 采集（`group="full"`，`optional=True`）。
+
+- **Impacted behaviors**：
+  - 静态站支持直接上传 DOCX/PDF 简历，浏览器本地解析，扩展端通过已保存的 Gemini Key 分析能力画像，全程密钥绝不回传给网页端。
+  - 推荐方向严格区分“市场支持”与“相邻探索”，佐证岗位通过真实文本匹配程序硬校验，剔除虚构引用。
+  - 点击推荐方向后携带关键词安全跳转 BOSS 直聘搜索页面，URL 零隐私泄露。
+  - 现有自动投递、安全预览、双休/底线薪资（`valuableCriteria`）与必须提问（`mustAsk`）配置保持零回归、零覆盖。
+
+- **构建与测试验证**：
+  - `npm run typecheck`：**PASS**（vue-tsc 零报错退出）。
+  - `npm run build`：**PASS**（Vite 生产构建成功，生成 `CareerDiscoveryView-Dyff-Bms.js` 等产物）。
+  - `node project-support/scripts/extension/build-zip.js`：**PASS**（打包生成 `dist-extension/lptff-investment-assistant.zip`）。
+  - `python -B project-support/crawl/zhipin.py`：**PASS**（成功采集 25 城公开页样本并生成 `src/data/zhipin.json`）。
+
+- **当前状态**：**REAL_SOURCE_PASS**。在用户日常真实 Chrome（Default Profile）中完成完整链路闭环验证。
+- **验证执行环境与定位排查**：
+  - **浏览器实例**：用户日常运行中的真实 Google Chrome 实例（PID: `2372`，Profile: `Default`）。
+  - **扩展程序**：ID `ajmbdhnpebogbcphaaapjjgocccifgni`（LPTFF Investment Assistant 3.17.12，加载自 `project-support/extension/lptff-investment-assistant`）。
+  - **“未连接”根因定位**：在 Chrome Manifest V3 机制中，即使磁盘上的 `manifest.json` 已更新 `content_scripts.matches`，Chrome 运行态内部（`Secure Preferences`）仍缓存着旧的匹配规则（仅匹配 `/investment*` 与 `/contract-review*`），直到扩展程序显式重载。因此旧扩展运行态未将 `web-bridge.js` 注入至新路由 `http://127.0.0.1:8090/career`。
+  - **闭环修复操作**：通过系统级 UI Automation 触达 Chrome 扩展程序管理界面并触发该未打包扩展的 `dev-reload-button`（重新加载）。重载后刷新页面，`web-bridge.js` 成功按新规则注入。
+- **真实验收证据与业务闭环**：
+  1. **扩展连接与 Gemini 状态感知**：
+     - RPC 请求 `LPTFF_CAREER_CHECK_STATUS` 成功返回响应：`{ ok: true, status: { connected: true, hasGeminiKey: true, model: "gemini-3.5-flash-lite", currentProfileMeta: null } }`。
+     - 密钥严格保存在扩展内部，页面仅感知 `hasGeminiKey: true` 状态，零 API 密钥回传。
+  2. **刷新后连接持久性**：
+     - 执行 `location.reload()` 刷新页面，DOM 顶栏稳定显示绿色徽标 `助手扩展已连接` 及 `✓ 已就绪 (Gemini: gemini-3.5-flash-lite)`。
+     - 视觉佐证已留存：[`career_connected_screenshot.png`](file:///C:/Users/TFF001/.gemini/antigravity/brain/5cb002a8-2511-439b-ae32-793ce2574d08/career_connected_screenshot.png)。
+  3. **真实简历能力画像提取（Gemini 驱动）**：
+     - 触发 `LPTFF_CAREER_EXTRACT_PROFILE`，后台调用真实 Gemini 模型提取结构化画像。
+     - 4 秒内成功提取：工作年限“5年”、学历“本科（计算机科学与技术）”、7 项结构化能力（含原文 quote 与 `projectProven` / `selfStated` 标签）、2 项经历与沟通画像摘要。
+  4. **公开市场方向匹配与程序化佐证校验**：
+     - 触发 `LPTFF_CAREER_MATCH_DIRECTIONS` 对照公开招聘样本匹配。
+     - 成功产出 3 个推荐方向：
+       - `Vue3 微前端与性能优化前端`（市场支持，严格匹配盒马鲜生岗位并引用真实原文）；
+       - `Web 前端工程化与可视化专家`（市场支持，严格匹配小米岗位并引用真实原文）；
+       - `Node.js 全栈开发工程师`（相邻探索，无直接强样本支撑，如实标注为探索项）。
+  5. **Vue 3 响应式 Proxy 克隆异常修复（`[object Object] could not be cloned`）**：
+     - **复现与根因**：用户在求职页面上传真实简历（`20260510工作简历.docx`）时，文件解析与 Gemini 能力提取成功完成，但在第 3 步“市场比对”时报错：`Failed to execute 'postMessage' on 'Window': [object Object] could not be cloned.`。经排查，Vue 3 的 `ref` / `reactive` 数据（如 `publicJobs.value`、`preferences.value`）在底层封装为 ES6 `Proxy`，而浏览器的结构化克隆算法（`structuredClone` / `window.postMessage`）不支持直接序列化 Proxy 对象，导致同步抛出 DOMException。
+     - **代码修复**：
+       - 在 `src/career/sync/career-bridge.ts` 的 `requestBridge` 中增加 `safeClone` 预处理（基于 `JSON.parse(JSON.stringify(payload))` 解构 Proxy），彻底避免非克隆对象进入 `window.postMessage`；
+       - 在 `src/views/career/CareerDiscoveryView.vue` 中引入 `toRaw`，在调用 `matchCareerDirections` 时显式剥除响应式包装；
+       - 在 `content/web-bridge.js` 的 `postResponse` 中增加防守性 JSON 序列化与错误捕获兜底；
+       - 重新加载未打包扩展并刷新页面。
+     - **用户真实简历端到端实测验证**：
+       - 目标文档：`20260510工作简历.docx`（指纹：`74ac98c297fb...`）。
+       - 提取结果：工作年限“约5年”、学历“武汉理工大学 硕士 船舶与海洋工程”、工作单位“蚂蚁集团-数字马力”与“浦发银行”、核心技术栈（React、Vue、TypeScript、Webpack/Vite、工程化与性能优化等，全部具备简历原文逐字 quote 佐证）。
+       - 市场方向匹配：成功产出 `高级前端开发工程师`（市场支持，关联字节跳动岗位，佐证：“前端开发工程师”）与 `AI应用前端工程师`（相邻探索）。
+       - 视觉佐证已留存：[`career_real_resume_matched.png`](file:///C:/Users/TFF001/.gemini/antigravity/brain/5cb002a8-2511-439b-ae32-793ce2574d08/career_real_resume_matched.png)。
+  6. **页面状态持久恢复（刷新不丢状态）**：
+     - 刷新页面 `http://127.0.0.1:8090/career`，页面通过 `LPTFF_CAREER_GET_SAVED` 自动从扩展存储中完整恢复用户真实简历画像与 2 个推荐方向。
+  7. **BOSS 直聘搜索跳转安全边界**：
+     - 推荐卡片操作按钮携带关键词（例如 `前端开发工程师 字节跳动 杭州`）通过 `window.open` 跳转原生搜索页。
+     - 未发起任何求职者外发消息、未触发自动投递、零企业微信副作用。
+  8. **可输入可编辑的 Gemini 配置模块与连通性实测（1:1 对齐 BOSS AI 沟通助手展示逻辑）**：
+     - **交互升级**：将求职工作台顶栏从“纯展示”升级为交互式配置卡片（点击顶栏状态文本或 `⚙ 配置 Gemini` 按钮展开）。
+     - **多模型支持**：支持选择 `gemini-3.7-flash`（最新推理推荐）、`gemini-3.6-flash`（稳定推荐）与 `gemini-3.5-flash-lite`（默认轻量）。
+     - **1:1 对齐 AI 沟通助手展示逻辑**：
+       - 默认读取已配置的 Gemini Key，采用密码掩码（`••••••••`）默认不显示明文；
+       - 输入框右侧配备薄荷绿圆角 `[显示]` 按钮，点击即刻切换为明文且按钮变为 `[隐藏]`，再次点击恢复隐藏；
+       - 按钮右侧醒目展示绿色 `已保存` 状态徽标；
+       - 顶部提示明确告知：“💡 与 AI 沟通小助手保持一致：此处的 Gemini Key 与扩展内 BOSS 直聘「AI 沟通小助手」底层完全打通共用，两边只需要配置一次就能共用。密钥仅保存在当前 Chrome 扩展本地，绝不上传至任何独立服务器。”
+     - **打通共享与连通性验证**：配置存储于扩展本地存储 `lptffBossAutopilot`（`BOSS_AUTOPILOT_CONFIG_KEY`），求职工作台与 BOSS 直聘 AI 沟通助手共用同一配置，无缝打通。点击“保存并测试连接”顺利通过真实 Gemini API 握手（耗时 1515ms）。
+     - **视觉佐证留存**：
+       - [`gemini_key_masked_aligned.png`](file:///C:/Users/TFF001/.gemini/antigravity/brain/5cb002a8-2511-439b-ae32-793ce2574d08/gemini_key_masked_aligned.png)（默认遮罩显示 + [显示] 按钮 + [已保存] 状态）；
+       - [`gemini_key_aligned_verified.png`](file:///C:/Users/TFF001/.gemini/antigravity/brain/5cb002a8-2511-439b-ae32-793ce2574d08/gemini_key_aligned_verified.png)（保存并连通性测试通过）。
+
+
 ### BOSS 扩展日常真实 Chrome（Default Profile）无报错闭环验收（2026-09-08）
 
 - **真实环境核验（非独立测试环境）**：

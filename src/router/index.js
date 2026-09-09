@@ -78,7 +78,19 @@ const routes = [
       },
     ],
   },
-  { path: "/boss-zhipin", redirect: "/blog/articles/career-decision-system" },
+  {
+    path: "/career",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "求职机会发现", product: "职业决策系统" },
+    children: [
+      {
+        path: "",
+        name: "career-discovery",
+        component: () => import("../views/career/CareerDiscoveryView.vue"),
+      },
+    ],
+  },
+  { path: "/boss-zhipin", redirect: "/career" },
   {
     path: "/pending",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),

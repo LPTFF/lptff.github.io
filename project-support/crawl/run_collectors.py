@@ -56,7 +56,7 @@ COLLECTORS = (
     CollectorSpec("keywordSearch", "welfare/keyword_search.py", "welfare/keyword-search.json", "welfare", min_items=0, timeout=600, optional=True),
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
-    CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, group="archived"),
+    CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, optional=True, group="full"),
     CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True),
     CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "full"),
 )

@@ -22,6 +22,7 @@
 | 页面交互、滚动条与动态加载验收 | [浏览器 UI 验收指南](verification/browser-ui-validation.md) |
 | 外部资讯源、AI 筛选或定时采集接入 | [外部资讯源接入手册](verification/external-content-source-integration.md) |
 | BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |
+| Web 与扩展桥接验收 | [Web 与扩展桥接验收指南](verification/chrome-extension-web-bridge-validation.md) |
 | 代码或产品组织 | [代码组织](standards/code-organization.md)、[产品设计](standards/product-design.md) |
 | 外部项目商业研究 | [研究入口](product/research/README.md) |
 
