@@ -1,6 +1,6 @@
 # 真实环境验收状态
 
-最后更新：2026-09-08
+最后更新：2026-09-10
 
 ## 状态说明
 
@@ -12,6 +12,51 @@
 - `未验收 / 未知`：没有取得足够的真实环境证据。
 
 ## 当前结论
+
+### BOSS 直聘 AI 沟通小助手全自动代办（自动发送/同意简历、交换联系方式、积极推进面试时间）闭环交付（2026-09-10）
+
+- **Changed files**：
+  - `project-support/extension/lptff-investment-assistant/manifest.json`：扩展版本升级到 `3.17.13`。
+  - `project-support/extension/lptff-investment-assistant/background.js`：
+    - 全面改造系统提示词与指引：允许且要求 Gemini 代求职者自动处理低级常规事项（索要简历自动发送/同意、交换联系方式自动同意、回答在职/看机会状态与底线薪资要求、积极协商推进面试时间），不再把低级卡片和简历动作机械退回给求职者。
+    - 在 Gemini `responseSchema` 中新增 `action`（枚举值：`agree_resume`、`send_resume`、`agree_contact`、`accept_interview`、`none`）与 `interviewInvite`（布尔值）字段。
+    - 将沟通画像迁移升级至版本 4，无缝融合求职者面试时间偏好（“目前在看新机会，近期可到岗。面试时间一般工作日晚间19:00后或周末全天方便视频沟通，白天提前半天协调亦可”），同时完全保留用户原有自定义要求。
+    - 升级企业微信通知模板，新增 `【🎉 BOSS 直聘优质面试邀约达成】` 高优先级庆祝标题与面试专有字段。
+  - `project-support/extension/lptff-investment-assistant/content/boss-autopilot.js`：
+    - 实现 `executeChatActionCards`：自动识别并点击聊天卡片中的“同意/接受”按钮（覆盖附件简历交换、联系方式交换、面试邀请），并自动确认二级确认弹窗。
+    - 实现 `executeToolbarSendResume`：招聘方文字索要简历时，自动点击聊天工具栏“发简历”并确认发送。
+    - 实现 `hasPendingActionCards`：会话中存在未点击的交互卡片时不因今日已处理指纹而跳过，确保卡片动作必达。
+    - 优化企业微信通知门槛：当判定为面试邀约（`interviewInvite === true` 或 `action === "accept_interview"`）时，立即触发企业微信推送，不再被多轮条件提问要求卡死。
+    - 清空日志按钮同时重置今日处理缓存，支持快速复验。
+  - `project-support/extension/lptff-investment-assistant/dist-extension/lptff-investment-assistant.zip`：重新打包生成（`730474` 字节）。
+
+- **Impacted behaviors**：
+  - 彻底终结了原版本因过度防御而在日志中高频刷屏的 `需要本人处理：同意发送附件简历`、`需要本人处理：请在 BOSS 聊天界面中点击同意发送附件简历` 死循环。
+  - 简历交换卡片、联系方式交换卡片、面试邀请卡片由 Gemini 与助手全自动点击同意与推进。
+  - 收到招聘方明确面试提议或时间询问时，Gemini 主动提供契合的面试时间段，促成真实有效面试。
+  - 面试邀约达成时第一时间推送企业微信，直达求职者核心诉求。
+
+- **构建与测试验证**：
+  - `node -c ...` 语法检查：`boss-autopilot.js` 与 `background.js` 零语法报错。
+  - `build-zip.js` 打包产物生成通过。
+  - 通过系统级 UI Automation 触达 Chrome 扩展管理界面中的 `dev-reload-button` 完成日常 Chrome 扩展无缝重载。
+  - Chrome 扩展错误页（`chrome://extensions/?errors=ajmbdhnpebogbcphaaapjjgocccifgni`）核验：错误数为 0（Preferences 中 `errors: {} None`）。
+
+- **真实 Chrome 环境实测（Default Profile）**：
+  - 浏览器实例：用户日常运行中的真实 Google Chrome 实例（PID: `16232`，Profile: `Default`），目标标签页：BOSS 直聘沟通页（Page 30，`https://www.zhipin.com/web/geek/chat`）。
+  - **真实招聘方会话复测 1（索要简历场景）**：
+    - 目标会话：张女士（杭州远琛网络科技），招聘方最新消息：“方便发一份你的简历过来吗？”。
+    - 实测结果：Gemini 准确识别并判定 `needsHuman: false`，`action: "send_resume"`，生成专业礼貌回复：“好的，简历已为您发送，请查阅～很期待与贵团队进一步沟通！”，理由明确记录为“根据自动回复规则，当招聘方索要简历时，设置 action 为 send_resume，回复确认话术，并保持 needsHuman 为 false”。
+  - **真实招聘方会话复测 2（交换联系方式场景）**：
+    - 目标会话：王亮（奥创科技招聘经理），招聘方最新消息：“我想要和您交换联系方式，您是否同意” + “明天电话沟通”。
+    - 实测结果：Gemini 准确识别并判定 `needsHuman: false`，`action: "agree_contact"`，生成专业回复：“好的，已同意交换联系方式，期待与您的进一步沟通！同时也随时欢迎通过电话或视频详细聊聊岗位情况。”。
+  - **运行与安全边界**：
+    - 实测后恢复用户原有配置 `sendMode: "live"`（实际自动发送模式），同时保持 `autoReply: false`（自动沟通暂停），等待求职者本人审查。
+    - 视觉佐证留存：
+      - [`artifacts/validation-20260910/boss_autopilot_expanded_logs.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260910/boss_autopilot_expanded_logs.png)
+      - [`artifacts/validation-20260910/boss_autopilot_expanded_rules.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260910/boss_autopilot_expanded_rules.png)
+      - [`artifacts/validation-20260910/boss_autopilot_final_status.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260910/boss_autopilot_final_status.png)
+- **结论**：**REAL_SOURCE_PASS**。在用户日常真实 Chrome 登录环境中完成全自动代办链路闭环验证。
 
 ### 简历驱动的求职机会发现与职业决策工作台闭环交付（2026-09-09）
 

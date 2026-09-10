@@ -10,11 +10,11 @@ const LPTFF_CONFIG_KEY = "lptffConfig";
 const BOSS_AUTOPILOT_CONFIG_KEY = "lptffBossAutopilot";
 const BOSS_AUTOPILOT_STATE_KEY = "lptffBossAutopilotState";
 const BOSS_FEATURES_KEY = "lptffBossFeatures";
-const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 3;
+const BOSS_AUTOPILOT_OPTIMIZATION_VERSION = 4;
 const GEMINI_REQUEST_TIMEOUT_MS = 45000;
 const GEMINI_MAX_ATTEMPTS = 3;
 const GEMINI_MODELS = new Set(["gemini-3.7-flash", "gemini-3.6-flash", "gemini-3.5-flash-lite"]);
-const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，最熟悉 React 和 Vue。下一份工作优先以前端为主，也接受架构、工程化、性能优化、可视化、低代码、AI 应用、前端偏全栈、技术决策或带团队等工作内容。不限行业和公司规模，不以职位名称作为硬门槛。求职优先级依次是收入、业务前景、稳定性；税前年收入至少 25 万，理想为 30 万以上，可接受月薪 18K 且 13–14 薪有明确制度或可靠兑现记录。工作地点由求职者在 BOSS 原生筛选中自行选择。`;
+const RESUME_OPTIMIZED_PROFILE = `6年前端开发经验，硕士学历，最熟悉 React 和 Vue。下一份工作优先以前端为主，也接受架构、工程化、性能优化、可视化、低代码、AI 应用、前端偏全栈、技术决策或带团队等工作内容。不限行业和公司规模，不以职位名称作为硬门槛。求职优先级依次是收入、业务前景、稳定性；税前年收入至少 25 万，理想为 30 万以上，可接受月薪 18K 且 13–14 薪有明确制度或可靠兑现记录。目前在看新机会，近期可到岗。面试时间一般工作日晚间19:00后或周末全天方便视频沟通，白天提前半天协调亦可。工作地点由求职者在 BOSS 原生筛选中自行选择。`;
 const RESUME_OPTIMIZED_MUST_ASK = "分阶段了解，不要一次问完：先确认实际工作是否以前端为主、月薪范围与固定薪数；有继续沟通价值后，再了解业务是否有持续需求、公司经营与团队裁员情况、岗位是否长期正式、是否与招聘公司直签、社保公积金、双休与加班情况、是否有值班或夜间响应；信息未写明时先继续沟通，不因缺失信息直接否定机会";
 const RESUME_OPTIMIZED_CRITERIA = "收入为第一优先级：税前年收入至少 25 万，理想 30 万以上；月薪 18K 配合有明确制度或历史兑现依据的 13–14 薪可接受，不用口头承诺、不确定奖金或浮动绩效凑年包。其次看业务是否有真实且持续的需求，不限行业。稳定性要求公司经营正常、团队不频繁裁员、岗位不是临时项目、正常缴纳社保公积金并与实际招聘公司直签；明确排除外包、劳务派遣、驻场和创业早期公司。工作强度是硬底线：必须双休，不接受加班、大小周、值班或夜间响应。招聘信息未写明时先投递并后续确认；只有明确冲突才提前排除。";
 const DEFAULT_BOSS_AUTOPILOT_CONFIG = Object.freeze({
@@ -62,11 +62,15 @@ async function loadBossAutopilotConfig() {
   const stored = await chrome.storage.local.get(BOSS_AUTOPILOT_CONFIG_KEY);
   const raw = stored[BOSS_AUTOPILOT_CONFIG_KEY] || {};
   if (Number(raw.optimizationVersion || 0) < BOSS_AUTOPILOT_OPTIMIZATION_VERSION) {
+    let nextProfile = raw.profile || RESUME_OPTIMIZED_PROFILE;
+    if (!nextProfile.includes("近期可到岗") && !nextProfile.includes("面试时间")) {
+      nextProfile = nextProfile.trim() + "\n目前在看新机会，近期可到岗。面试时间一般工作日晚间19:00后或周末全天方便视频沟通，白天提前半天协调亦可。";
+    }
     const migrated = normalizeBossAutopilotConfig({
       ...raw,
-      profile: RESUME_OPTIMIZED_PROFILE,
-      mustAsk: RESUME_OPTIMIZED_MUST_ASK,
-      valuableCriteria: RESUME_OPTIMIZED_CRITERIA,
+      profile: nextProfile,
+      mustAsk: raw.mustAsk || RESUME_OPTIMIZED_MUST_ASK,
+      valuableCriteria: raw.valuableCriteria || RESUME_OPTIMIZED_CRITERIA,
       dailyReplyLimit: Math.max(300, Number(raw.dailyReplyLimit) || 0),
       perConversationLimit: Math.max(30, Number(raw.perConversationLimit) || 0),
       replyDelaySeconds: Math.max(20, Number(raw.replyDelaySeconds) || 0),
@@ -178,23 +182,46 @@ async function analyzeBossConversation(input) {
   const config = await loadBossAutopilotConfig();
   if (!config.profile) throw new Error("请先填写并保存个人画像");
   return callBossGemini({
-    system: `你代表求职者与招聘方进行简短、真诚、对等的求职沟通。首要目标是让值得了解的招聘方愿意继续沟通，并高效判断双方是否可能共赢；不要把对话变成条件审查或问卷。
+    system: `你代表求职者与招聘方进行高效、真诚、专业、推进结果的求职沟通。首要目标是代求职者全自动处理低级沟通事务，促成继续了解并最终约到高质量面试。
 
-回复规则：
-1. 先回应招聘方刚提供的有效信息；能结合求职者经历指出一处具体匹配时，再自然推进下一步。
-2. 每次通常只问一个最影响去留的问题。只有两个问题强相关、都很容易回答时才可一起问，绝不连续罗列薪资、社保、用工性质、面试流程等清单。
-3. 按阶段推进：初聊优先了解岗位核心职责、业务目标或关键技术方向；发现可能匹配后再问职责空间、薪资总包、工作安排和用工性质；临近面试再确认细节。不要为了补齐配置中的所有字段而破坏交流节奏。
-4. 语气像有经验的候选人本人：自然、简洁、专业、有选择但不傲慢。避免每条都以“您好”开头，避免“请问该岗位是否属于”“另外，具体……是怎样的呢”等审讯式模板，也不要复述大段招聘方原话。
-5. 不编造经历、数字或意愿，不替求职者承诺入职、确定面试时间、发送简历或提供敏感个人信息。对方索要简历、电话、微信、身份证明，或要求立即约面时，设置 needsHuman=true、reply 留空，并用 humanAction 简短说明本人需要完成的动作；不要用追问阻拦正常推进。其他场景 needsHuman=false、humanAction 留空。
-6. 招聘方只发“你好”、表情、已读提示或没有实质内容时，用一句轻量回复表达兴趣并邀请介绍岗位重点，不展开盘问。对方已经回答的问题绝不重复询问。
-7. 遇到收费、培训贷、代付、验证码、账户或身份敏感信息索取、明显欺诈时 stop=true；礼貌结束，不继续套取信息。
+全自动代办与回复规则：
+1. 简历处理（高优先级）：
+   - 当招聘方索要简历、询问“方便发一份简历吗”、或发送附件简历请求卡片（如“我想要一份您的附件简历”）时：
+     - 设置 action = "agree_resume"（若对方发了卡片）或 "send_resume"（若纯文本索要）；
+     - reply 生成热情、简洁、专业的确认回复（如：“好的，简历已为您发送，请查阅～期待与您进一步交流！”或“好的，已同意发送附件简历，请查阅。很期待与贵团队进一步沟通！”）；
+     - 设置 needsHuman = false，严禁置空 reply！
+2. 联系方式交换（推进沟通）：
+   - 当招聘方提出“交换微信”、“电话聊聊”或发送交换联系方式卡片时：
+     - 设置 action = "agree_contact"；
+     - reply 生成友好推进回复（如：“好的，已同意交换联系方式，方便后续随时沟通～”）；
+     - 设置 needsHuman = false。
+3. 积极推进面试约面（终极目标）：
+   - 当招聘方询问面试意向、空闲时间、提议视频面/电话面、或发送正式面试邀请卡片时：
+     - 设置 action = "accept_interview"，设置 interviewInvite = true，设置 valuable = true；
+     - reply 积极接洽并提供求职者常规空闲时段：“感谢邀请！我工作日晚间19:00后或周末全天均可安排视频面试；工作日白天如有合适时段也可提前半天协调。请问您那边方便约在哪个时间段呢？”；
+     - 设置 needsHuman = false，严禁置空 reply 错失约面机会！
+4. 常见初筛问题智能代答：
+   - 询问在职/离职状态与到岗时间：根据求职者画像代答（如：“目前在看新机会，沟通合适近期即可到岗。”）；
+   - 询问当前薪资与期望薪资：根据画像中的税前年薪 25–30W+ 或月薪 18K×13-14 薪代答（如：“目前期望年包在 25–30W 左右，具体结合团队职级与业务空间灵活沟通。”）；
+   - 询问技术栈/核心经历：基于画像突出 React/Vue 大前端、架构、性能优化或工程化落地优势；
+   - 绝不因上述正常初筛而置空 reply 或抛给人工，全部直接代答！
+5. 日常交流节奏：
+   - 结合求职者经历回应对方关心的具体业务或技术点；每次最多顺带了解一个核心关注点，绝不搞查户口式盘问；
+   - 语气如经验丰富的工程师：自然、自信、清晰、有合作态度。避免机械模板腔；对方已回答的问题不重复追问。
+6. 安全底线与人工接管：
+   - 遇到收费、培训贷、刷单、资金凭据、索取密码/验证码/身份证原件照片等欺诈风险时，设置 stop = true，礼貌结束；
+   - 仅当遇到要求现场即时在线答题（不可逆且限时试卷链接）等确实无法代办的个性化要求时，才设置 needsHuman = true 并说明 humanAction。发简历、换联系方式、约面试时间必须全部自动代办！
 
-判断规则：missingQuestions 只记录仍需在后续阶段了解的事项，不代表下一条回复必须逐项追问。只有需要确认的每一项都已有明确答案、每一项有价值标准都明确满足、且没有待确认问题时，requirementsComplete、allCriteriaMet 和 valuable 才能同时为 true；信息缺失、含糊或仅凭推测时必须为 false。reply 尽量控制在 20–80 个汉字，除必要的礼貌回应外不写空泛套话。`,
+判断规则：
+- 当招聘方发起约面或提供面试安排时，必须设置 interviewInvite = true、valuable = true；
+- reply 尽量控制在 20–90 个汉字，真诚得体，直奔推进。`,
     prompt: `求职者画像：\n${config.profile}\n\n后续阶段仍需了解的事项（不要在当前回复中一次问完）：\n${config.mustAsk}\n\n最终有价值标准：\n${config.valuableCriteria}\n\nBOSS 会话定位：\n${String(input?.conversationLabel || "未识别").slice(0, 300)}\n\n当前会话可见摘要：\n${String(input?.conversation || "").slice(-6000)}\n\n招聘方最新消息：\n${String(input?.latestMessage || "").slice(0, 1500)}`,
     schema: {
       type: "OBJECT",
       properties: {
         reply: { type: "STRING" },
+        action: { type: "STRING" },
+        interviewInvite: { type: "BOOLEAN" },
         valuable: { type: "BOOLEAN" },
         requirementsComplete: { type: "BOOLEAN" },
         allCriteriaMet: { type: "BOOLEAN" },
@@ -218,7 +245,7 @@ async function analyzeBossConversation(input) {
         matchedCriteria: STRING_ARRAY_SCHEMA,
         missingQuestions: STRING_ARRAY_SCHEMA,
       },
-      required: ["reply", "valuable", "requirementsComplete", "allCriteriaMet", "stop", "needsHuman", "humanAction", "summary", "reason", "job", "matchedCriteria", "missingQuestions"],
+      required: ["reply", "action", "interviewInvite", "valuable", "requirementsComplete", "allCriteriaMet", "stop", "needsHuman", "humanAction", "summary", "reason", "job", "matchedCriteria", "missingQuestions"],
     },
   });
 }
@@ -239,9 +266,12 @@ function compactWecomLine(value, fallback = "未明确") {
 function bossWecomText(payload, test = false) {
   if (test) return "【BOSS 求职助手连接测试】\n企业微信文本消息链路可用，本消息不包含岗位或聊天数据。";
   const job = payload?.job || {};
+  const isInterview = payload?.interviewInvite === true || Boolean(payload?.isInterview);
   const matchedCriteria = Array.isArray(payload?.matchedCriteria) ? payload.matchedCriteria.map((item) => compactWecomLine(item, "")).filter(Boolean).slice(0, 12) : [];
+  const header = isInterview ? "【🎉 BOSS 直聘优质面试邀约达成】" : "【BOSS 有价值岗位待人工审核】";
+  const actionPrompt = isInterview ? "🎉 招聘方已发起约面/提供面试安排！请及时打开 BOSS 直聘确认最终参会细节。" : "请打开 BOSS 直聘，按岗位或会话定位进行人工审核。";
   return [
-    "【BOSS 有价值岗位待人工审核】",
+    header,
     `岗位：${compactWecomLine(job.title)}`,
     `公司：${compactWecomLine(job.company)}`,
     `薪资：${compactWecomLine(job.salary)}`,
@@ -251,7 +281,7 @@ function bossWecomText(payload, test = false) {
     `BOSS 会话定位：${compactWecomLine(payload?.conversationLabel)}`,
     `推送理由：${compactWecomLine(payload?.reason)}`,
     matchedCriteria.length ? `已满足条件：${matchedCriteria.join("；")}` : "",
-    "请打开 BOSS 直聘，按岗位或会话定位进行人工审核。",
+    actionPrompt,
   ].filter(Boolean).join("\n").slice(0, 4000);
 }
 

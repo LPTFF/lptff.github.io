@@ -332,6 +332,7 @@
       reason: redactCommunicationText(sample.reason, 1200),
       humanAction: redactCommunicationText(sample.humanAction, 500),
       valuable: sample.valuable === true,
+      interviewInvite: sample.interviewInvite === true,
       requirementsComplete: sample.requirementsComplete === true,
       allCriteriaMet: sample.allCriteriaMet === true,
       missingQuestions: Array.isArray(sample.missingQuestions) ? sample.missingQuestions.map((item) => redactCommunicationText(item, 200)).filter(Boolean).slice(0, 20) : [],
@@ -411,7 +412,7 @@
           </article>
           <article class="lptff-card lptff-tab-panel" data-tab-panel="rules" hidden>
             <h3>无人值守沟通规则</h3>
-            <p class="lptff-help">只补齐岗位事实，不承诺入职、不约面试、不发简历。安全预览不会向招聘方发送；实际发送需显式切换。</p>
+            <p class="lptff-help">全自动代办：自动发送/同意简历、顺畅交换联系方式、积极推进面试时间，直达优质面试邀约。安全预览不会向招聘方发送；实际发送需显式切换。</p>
             <label for="lptff-profile">沟通参考画像</label>
             <textarea id="lptff-profile" data-field="profile" placeholder="填写目标岗位、技能、城市、薪资、工作方式和明确排除项，仅用于 Gemini 判断与沟通，不会改变职位筛选。"></textarea>
             <label>必须确认的问题</label><textarea class="lptff-small-area" data-field="mustAsk"></textarea>
@@ -656,8 +657,15 @@
       if (action === "tab") { switchTab(button.dataset.tab); void persistUiState(); return; }
       if (action === "open-chat") { location.assign(CHAT_URL); return; }
       if (action === "clear-logs") {
-        if (!window.confirm("确定清空 AI 沟通小助手的运行日志吗？沟通优化样本不会受影响。")) return;
-        void storageRemove(LOCAL_LOG_KEY).then(() => renderLogs());
+        if (!window.confirm("确定清空 AI 沟通小助手的运行日志并重置今日处理缓存吗？沟通优化样本不会受影响。")) return;
+        void (async () => {
+          const state = await stateForToday();
+          state.seen = [];
+          await storageSet({ [LOCAL_STATE_KEY]: state });
+          await storageRemove(LOCAL_LOG_KEY);
+          renderLogs();
+          setStatus("运行日志与今日已处理记录已重置", "success");
+        })();
         return;
       }
       if (action === "clear-samples") {
@@ -753,6 +761,9 @@
   }
 
   function notificationEligible(analysis) {
+    if (analysis?.interviewInvite === true || analysis?.action === "accept_interview") {
+      return analysis?.stop !== true;
+    }
     return analysis?.valuable === true
       && analysis?.requirementsComplete === true
       && analysis?.allCriteriaMet === true
@@ -762,12 +773,90 @@
   }
 
   function notificationFromAnalysis(analysis, label) {
+    const isInterview = Boolean(analysis?.interviewInvite || analysis?.action === "accept_interview");
     return {
       job: analysis.job || {},
       conversationLabel: label,
-      reason: String(analysis.reason || analysis.summary || "全部已配置条件均满足").slice(0, 1000),
+      interviewInvite: isInterview,
+      reason: String(analysis.reason || analysis.summary || (isInterview ? "🎉 招聘方发起面试邀约/提供面试安排" : "全部已配置条件均满足")).slice(0, 1000),
       matchedCriteria: Array.isArray(analysis.matchedCriteria) ? analysis.matchedCriteria.slice(0, 20) : [],
     };
+  }
+
+  function hasPendingActionCards() {
+    const buttons = [...document.querySelectorAll(".chat-record .message-card-wrap .card-btn, .chat-record .message-dialog-both .card-btn, .chat-record [class*='message-dialog'] .card-btn, .chat-record .message-card-buttons span")].filter((b) => {
+      const text = (b.textContent || "").trim();
+      return /^(?:同意|接受|确认)$/.test(text) && b.offsetParent;
+    });
+    return buttons.length > 0;
+  }
+
+  async function executeChatActionCards(preferredType = "") {
+    const buttons = [...document.querySelectorAll(".chat-record .message-card-wrap .card-btn, .chat-record .message-dialog-both .card-btn, .chat-record [class*='message-dialog'] .card-btn, .chat-record .message-card-buttons span")].filter((b) => {
+      const text = (b.textContent || "").trim();
+      return /^(?:同意|接受|确认)$/.test(text);
+    });
+    if (!buttons.length) return null;
+
+    const executed = [];
+    const seen = new Set();
+    for (const agreeBtn of buttons) {
+      if (seen.has(agreeBtn) || !agreeBtn.offsetParent) continue;
+      seen.add(agreeBtn);
+      const card = agreeBtn.closest(".message-card-wrap, .message-dialog-both, .message-item") || agreeBtn.parentElement;
+      const cardText = (card?.textContent || "").replace(/\s+/g, " ").trim();
+
+      let actionLabel = "确认卡片";
+      if (/简历|附件/.test(cardText)) actionLabel = "同意发送附件简历";
+      else if (/微信|电话|联系方式/.test(cardText)) actionLabel = "同意交换联系方式";
+      else if (/面试|约面/.test(cardText)) actionLabel = "接受面试邀请";
+
+      agreeBtn.scrollIntoView({ block: "nearest" });
+      for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+        agreeBtn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, button: 0, buttons: type.endsWith("down") ? 1 : 0 }));
+      }
+      agreeBtn.click();
+      await new Promise((resolve) => setTimeout(resolve, 800));
+
+      const dialogSureBtn = document.querySelector(".dialog-wrap:not([style*='display: none']) .btn-sure, .dialog-container:not([style*='display: none']) .btn-sure, .dialog-wrap:not([style*='display: none']) .btn-confirm, .dialog-wrap:not([style*='display: none']) button.btn-primary");
+      if (dialogSureBtn && dialogSureBtn.offsetParent) {
+        dialogSureBtn.click();
+        await new Promise((resolve) => setTimeout(resolve, 500));
+      }
+      executed.push(actionLabel);
+    }
+    return executed.length ? executed.join("及") : null;
+  }
+
+  async function executeToolbarSendResume() {
+    const resumeBtn = [...document.querySelectorAll(".chat-controls .toolbar-btn, .chat-controls [class*='toolbar-btn']")].find((b) => {
+      const text = (b.textContent || "").trim();
+      return /发简历/.test(text) && b.offsetParent;
+    });
+    if (!resumeBtn) return false;
+
+    resumeBtn.scrollIntoView({ block: "nearest" });
+    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
+      resumeBtn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, button: 0, buttons: type.endsWith("down") ? 1 : 0 }));
+    }
+    resumeBtn.click();
+    await new Promise((resolve) => setTimeout(resolve, 800));
+
+    const selectDialog = document.querySelector(".upload-select-dialog:not([style*='display: none']), .dialog-wrap:not([style*='display: none'])");
+    if (selectDialog && selectDialog.offsetParent) {
+      const options = [...selectDialog.querySelectorAll(".select-one, .btn, button, .main-title")];
+      const targetOption = options.find((el) => /发送在线简历|在线简历|附件简历|确认/i.test(el.textContent || ""));
+      if (targetOption && targetOption.offsetParent) {
+        targetOption.click();
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+      const confirmBtn = selectDialog.querySelector(".btn-sure, .btn-primary, .btns button");
+      if (confirmBtn && confirmBtn.offsetParent) {
+        confirmBtn.click();
+        await new Promise((resolve) => setTimeout(resolve, 600));
+      }
+    }
+    return true;
   }
 
   async function flushPendingNotifications(state) {
@@ -781,7 +870,7 @@
       state.pendingNotifications = state.pendingNotifications.filter((item) => item.id !== pending.id);
       if (!state.notified.includes(pending.id)) state.notified.push(pending.id);
       await storageSet({ [LOCAL_STATE_KEY]: state });
-      await appendLog("企业微信通知", "岗位线索通知已发送", "success", pending.notification?.conversationLabel || "");
+      await appendLog("企业微信通知", pending.notification?.interviewInvite ? "🎉 面试邀约已推送企业微信" : "岗位线索通知已发送", "success", pending.notification?.conversationLabel || "");
       return true;
     } catch (error) {
       pending.attempts = Number(pending.attempts || 0) + 1;
@@ -807,7 +896,8 @@
     const cid = conversationId();
     const fingerprint = `${cid}|${latestMessage}`;
     const state = await stateForToday();
-    if (state.seen.includes(fingerprint)) {
+    const hasPendingCards = hasPendingActionCards();
+    if (state.seen.includes(fingerprint) && !hasPendingCards) {
       markQueueItemCompleted(fingerprint);
       setQueuePhase("查找下一条", "当前会话今天已处理，已跳过重复分析", Date.now() + 500);
       refreshRuntimeStatus();
@@ -830,23 +920,54 @@
       const analysis = response.analysis;
       const reply = String(analysis.reply || "").trim();
       const needsHuman = analysis.needsHuman === true;
-      let outcome = needsHuman
-        ? `需要本人处理：${String(analysis.humanAction || analysis.reason || "请查看当前会话").replace(/\s+/g, " ").trim().slice(0, 120)}`
-        : (analysis.stop ? "已停止本会话" : "无需回复");
+      const action = String(analysis.action || "").trim();
+      const isInterview = analysis.interviewInvite === true || action === "accept_interview";
+
+      let cardActionExecuted = "";
+      if (config.sendMode === "live" && !analysis.stop) {
+        if (action === "agree_resume" || action === "send_resume" || /简历|附件/.test(latestMessage)) {
+          cardActionExecuted = await executeChatActionCards("resume");
+          if (!cardActionExecuted && (action === "send_resume" || /简历|附件/.test(latestMessage))) {
+            const sent = await executeToolbarSendResume();
+            if (sent) cardActionExecuted = "主动发送简历";
+          }
+        } else if (action === "agree_contact" || /微信|电话/.test(latestMessage)) {
+          cardActionExecuted = await executeChatActionCards("contact");
+        } else if (isInterview || /面试|约面/.test(latestMessage)) {
+          cardActionExecuted = await executeChatActionCards("interview");
+        }
+        if (!cardActionExecuted && hasPendingActionCards()) {
+          cardActionExecuted = await executeChatActionCards();
+        }
+      }
+
+      let outcome = "";
+      if (needsHuman) {
+        outcome = `需要本人处理：${String(analysis.humanAction || analysis.reason || "请查看当前会话").replace(/\s+/g, " ").trim().slice(0, 120)}`;
+      } else if (analysis.stop) {
+        outcome = "已停止本会话";
+      } else if (cardActionExecuted && !reply) {
+        outcome = `已自动完成：${cardActionExecuted}`;
+      } else if (!reply) {
+        outcome = "无需回复";
+      }
+
       if (!analysis.stop && !needsHuman && reply) {
         if (config.sendMode === "live") {
           const sendAt = Date.now() + config.replyDelaySeconds * 1000;
-          setQueuePhase("等待发送", "Gemini 已完成分析，保留人工暂停时间", sendAt);
-          setStatus(`Gemini 分析完成，${config.replyDelaySeconds} 秒后发送…`);
+          setQueuePhase("等待发送", `${cardActionExecuted ? `${cardActionExecuted}，` : ""}Gemini 已完成分析，保留人工暂停时间`, sendAt);
+          setStatus(`Gemini 分析完成${cardActionExecuted ? `（已${cardActionExecuted}）` : ""}，${config.replyDelaySeconds} 秒后发送…`);
           await new Promise((resolve) => setTimeout(resolve, config.replyDelaySeconds * 1000));
           if (!config.autoReply || config.sendMode !== "live") throw new Error("发送前已被暂停");
           if (conversationId() !== cid) throw new Error("等待期间会话已切换，本条未发送");
           await sendChatReply(reply);
           state.total += 1; state.conversations[cid] = Number(state.conversations[cid] || 0) + 1;
-          outcome = "已发送并确认输入框清空";
+          outcome = cardActionExecuted
+            ? `已${cardActionExecuted}并发送回复`
+            : (isInterview ? "已积极回复推进面试时间" : "已发送并确认输入框清空");
         } else {
-          showPreview(reply, analysis);
-          outcome = "已生成安全预览";
+          showPreview(reply, analysis, cardActionExecuted);
+          outcome = cardActionExecuted ? `安全预览（含${cardActionExecuted}）` : (isInterview ? "安全预览（约面推进）" : "已生成安全预览");
         }
       }
       state.seen.push(fingerprint);
@@ -858,7 +979,9 @@
       }
       await storageSet({ [LOCAL_STATE_KEY]: state });
       const notified = eligible ? await flushPendingNotifications(state) : false;
-      const valueStatus = eligible ? (notified ? " · 全部条件满足，已推送企业微信" : " · 全部条件满足，通知待重试") : (analysis.valuable ? " · 尚未满足全部通知条件" : "");
+      const valueStatus = isInterview
+        ? (notified ? " · 🎉 面试邀约已推送企业微信" : " · 🎉 面试邀约已记录")
+        : (eligible ? (notified ? " · 全部条件满足，已推送企业微信" : " · 全部条件满足，通知待重试") : (analysis.valuable ? " · 尚未满足全部通知条件" : ""));
       const outcomeTone = needsHuman || (eligible && !notified) ? "error" : "success";
       await appendCommunicationSample({
         conversationId: cid,
@@ -870,6 +993,7 @@
         reason: analysis.reason || analysis.summary,
         humanAction: analysis.humanAction,
         valuable: analysis.valuable,
+        interviewInvite: isInterview,
         requirementsComplete: analysis.requirementsComplete,
         allCriteriaMet: analysis.allCriteriaMet,
         missingQuestions: analysis.missingQuestions,
@@ -900,11 +1024,13 @@
     }
   }
 
-  function showPreview(reply, analysis) {
+  function showPreview(reply, analysis, cardAction = "") {
     const plan = qs("[data-role='plan']");
     plan.dataset.show = "true";
     const notificationStatus = notificationEligible(analysis) ? "全部通知条件已满足（预览模式不推送）" : "尚未满足全部通知条件";
-    plan.textContent = `安全预览（未发送）\n${reply}\n\n判断：${analysis.valuable ? "值得关注" : "继续了解"}\n通知：${notificationStatus}\n${analysis.reason || ""}`;
+    const actionNotice = cardAction ? `\n待执行动作：${cardAction}` : (analysis.action && analysis.action !== "none" ? `\n建议动作：${analysis.action}` : "");
+    const interviewNotice = (analysis.interviewInvite || analysis.action === "accept_interview") ? "\n🎉 判定为面试邀约推进" : "";
+    plan.textContent = `安全预览（未发送）\n${reply}\n\n判断：${analysis.valuable ? "值得关注" : "继续了解"}${interviewNotice}${actionNotice}\n通知：${notificationStatus}\n${analysis.reason || ""}`;
   }
 
   async function sendChatReply(reply) {
