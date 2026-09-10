@@ -153,377 +153,911 @@
       </el-collapse-transition>
     </section>
 
-    <!-- 主工作区：左侧分析与画像，右侧推荐方向与机会 -->
-    <div class="career-layout">
-      <!-- 个人端：简历上传与处理控制台 -->
-      <div class="career-col left-col">
-        <!-- 简历版本与上传卡片 -->
-        <el-card shadow="never" class="career-card">
-          <template #header>
-            <div class="card-header">
-              <span class="header-title">📄 简历管理与分析</span>
-              <div v-if="profile" class="version-badge">
-                <el-tag size="small" type="primary">v{{ profile.version }}</el-tag>
-              </div>
-            </div>
-          </template>
-
-          <!-- 尚未连接扩展时的醒目引导 -->
-          <div v-if="!bridgeStatus.connected" class="not-connected-guide">
-            <el-alert
-              title="需要连接 LPTFF 助手扩展"
-              type="info"
-              :closable="false"
-              show-icon
-              description="简历深度解析、原文证据提取及市场机会匹配需复用扩展的 Gemini 本地能力。未连接扩展时仅可浏览右侧的公开招聘市场快照，不会伪造分析进度。"
-            />
-            <div class="guide-actions">
-              <a href="https://github.com/LPTFF/lptff.github.io/tree/master/project-support/extension/lptff-investment-assistant" target="_blank" class="guide-link">
-                查看扩展加载说明 →
-              </a>
-            </div>
+    <!-- 顶部四步操作流程与决策导航栏 -->
+    <nav class="workflow-stepper-bar" aria-label="求职决策操作流程">
+      <div
+        class="stepper-item"
+        :class="{ 'is-completed': !!profile, 'is-active': !profile }"
+        @click="scrollToStep('step-1-resume')"
+      >
+        <div class="step-num">1</div>
+        <div class="step-info">
+          <div class="step-title">
+            <span>简历管理与分析</span>
+            <el-tag size="small" :type="profile ? 'success' : 'primary'" effect="plain" class="step-status-tag">
+              {{ profile ? '已就绪 (v' + profile.version + ')' : '待上传' }}
+            </el-tag>
           </div>
+          <div class="step-desc">
+            {{ profile ? profile.fileName : '本地解析 · 隐私优先' }}
+          </div>
+        </div>
+      </div>
 
-          <!-- 已连接扩展：上传与处理区 -->
-          <div v-else class="upload-zone">
-            <div v-if="profile" class="profile-meta-bar">
-              <div class="meta-row">
-                <span class="meta-label">已加载文档：</span>
-                <span class="meta-value font-medium">{{ profile.fileName }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">更新时间：</span>
-                <span class="meta-value">{{ formatDate(profile.updatedAt) }}</span>
-              </div>
-              <div class="meta-row">
-                <span class="meta-label">文本指纹：</span>
-                <span class="meta-value text-mono text-muted">{{ profile.fingerprint.slice(0, 12) }}...</span>
-              </div>
-            </div>
+      <div class="stepper-arrow">➔</div>
 
-            <!-- 文件选择与拖拽区 -->
-            <div
-              class="drop-area"
-              :class="{ 'is-dragover': isDragOver, 'is-disabled': isProcessing }"
-              @dragover.prevent="isDragOver = true"
-              @dragleave.prevent="isDragOver = false"
-              @drop.prevent="handleFileDrop"
-              @click="triggerFileInput"
-            >
-              <input
-                ref="fileInputRef"
-                type="file"
-                accept=".docx,.pdf"
-                style="display: none"
-                @change="handleFileSelect"
+      <div
+        class="stepper-item is-core-step"
+        :class="{ 'is-completed': directions.length > 0, 'is-active': !!profile && directions.length > 0 }"
+        @click="scrollToStep('step-2-directions')"
+      >
+        <div class="step-num">2</div>
+        <div class="step-info">
+          <div class="step-title">
+            <span>推荐搜索方向</span>
+            <span class="core-step-badge">核心交互</span>
+            <el-tag size="small" :type="directions.length ? 'success' : 'info'" effect="plain" class="step-status-tag">
+              {{ directions.length ? directions.length + ' 条推荐' : '待生成' }}
+            </el-tag>
+          </div>
+          <div class="step-desc">智能匹配 · 直达 BOSS 搜索</div>
+        </div>
+      </div>
+
+      <div class="stepper-arrow">➔</div>
+
+      <div
+        class="stepper-item"
+        :class="{ 'is-completed': !!profile }"
+        @click="scrollToStep('step-3-evidence')"
+      >
+        <div class="step-num">3</div>
+        <div class="step-info">
+          <div class="step-title">
+            <span>能力画像与佐证</span>
+            <el-tag size="small" :type="profile ? 'primary' : 'info'" effect="plain" class="step-status-tag">
+              {{ profile ? profile.capabilities.length + ' 项实证' : '待核验' }}
+            </el-tag>
+          </div>
+          <div class="step-desc">原文证据 · 经历溯源</div>
+        </div>
+      </div>
+
+      <div class="stepper-arrow">➔</div>
+
+      <div
+        class="stepper-item is-completed"
+        @click="scrollToStep('step-4-snapshot')"
+      >
+        <div class="step-num">4</div>
+        <div class="step-info">
+          <div class="step-title">
+            <span>公开招聘需求快照</span>
+            <el-tag size="small" type="warning" effect="plain" class="step-status-tag">
+              {{ publicJobs.length }} 条样本
+            </el-tag>
+          </div>
+          <div class="step-desc">25 城探针 · 多维筛选</div>
+        </div>
+      </div>
+    </nav>
+
+    <!-- 阶段一：核心交互与决策区 (步骤 1 简历管理 ➔ 步骤 2 推荐搜索方向) -->
+    <section class="workflow-zone zone-interactive">
+      <div class="zone-badge-bar">
+        <div class="badge-title-wrap">
+          <span class="badge-pill core-action">🎯 核心交互与决策区</span>
+          <span class="zone-heading">步骤 1 · 简历管理与分析 ➔ 步骤 2 · 推荐搜索方向</span>
+        </div>
+        <span class="zone-hint text-muted">
+          优先聚焦核心输入与行动产出：上传简历或微调偏好后，即刻在此完成求职方向决策并一键跳转 BOSS 直聘精准检索
+        </span>
+      </div>
+
+      <div class="career-layout">
+        <!-- 步骤 1：简历管理与分析 -->
+        <div id="step-1-resume" class="career-col left-col">
+          <el-card shadow="never" class="career-card interactive-card">
+            <template #header>
+              <div class="card-header">
+                <div class="title-with-step">
+                  <el-tag size="small" type="primary" effect="dark" class="step-num-tag">步骤 1 · 输入</el-tag>
+                  <span class="header-title">📄 简历管理与分析</span>
+                </div>
+                <div v-if="profile" class="version-badge">
+                  <el-tag size="small" type="primary">v{{ profile.version }}</el-tag>
+                </div>
+              </div>
+            </template>
+
+            <!-- 尚未连接扩展时的醒目引导 -->
+            <div v-if="!bridgeStatus.connected" class="not-connected-guide">
+              <el-alert
+                title="需要连接 LPTFF 助手扩展"
+                type="info"
+                :closable="false"
+                show-icon
+                description="简历深度解析、原文证据提取及市场机会匹配需复用扩展的 Gemini 本地能力。未连接扩展时仅可浏览右侧的公开招聘市场快照，不会伪造分析进度。"
               />
-              <div class="drop-icon">📤</div>
-              <div class="drop-title">
-                {{ profile ? "点击或拖拽新文件更新简历" : "点击或拖拽上传简历 (DOCX / PDF)" }}
-              </div>
-              <div class="drop-desc">
-                支持 DOCX 及包含文字图层的 PDF 简历（纯图片扫描件暂不支持）
+              <div class="guide-actions">
+                <a href="https://github.com/LPTFF/lptff.github.io/tree/master/project-support/extension/lptff-investment-assistant" target="_blank" class="guide-link">
+                  查看扩展加载说明 →
+                </a>
               </div>
             </div>
 
-            <!-- 分析进度条与状态机 -->
-            <div v-if="isProcessing || processStep > 0" class="process-section">
-              <el-steps :active="processStep" finish-status="success" simple size="small">
-                <el-step title="文件解析" />
-                <el-step title="能力提取" />
-                <el-step title="市场比对" />
-              </el-steps>
-              <div v-if="processMessage" class="process-msg" :class="{ 'is-error': processError }">
-                <span v-if="isProcessing" class="loading-spinner">⏳</span>
-                {{ processMessage }}
-              </div>
-            </div>
-
-            <!-- 异常与恢复 -->
-            <div v-if="processError" class="error-action-box">
-              <el-alert :title="processError" type="error" :closable="false" show-icon />
-              <div class="retry-bar">
-                <el-button size="small" type="primary" @click="retryCurrentTask">重新分析</el-button>
-              </div>
-            </div>
-
-            <!-- 选填偏好（保留未知） -->
-            <div class="preferences-box">
-              <div class="preferences-header">
-                <span class="pref-title">🎯 意向补充（选填）</span>
-                <span class="pref-tip">未填写的条件保持未知，不强制排查，亦不默认作为排除项</span>
-              </div>
-              <div class="pref-inputs">
-                <el-input
-                  v-model="preferences.city"
-                  size="small"
-                  placeholder="期望城市（例如：上海、杭州、远程，留空不限）"
-                  clearable
-                  @change="handlePreferencesChange"
-                />
-                <el-input
-                  v-model="preferences.salaryExpectation"
-                  size="small"
-                  placeholder="薪资预期（例如：25K+、年包30W，留空不限）"
-                  clearable
-                  @change="handlePreferencesChange"
-                />
-              </div>
-            </div>
-
-            <!-- 清除本地数据操作 -->
-            <div v-if="profile" class="clear-data-bar">
-              <el-button size="small" text type="danger" @click="handleClearData">
-                清空本地简历与画像数据
-              </el-button>
-            </div>
-          </div>
-        </el-card>
-
-        <!-- 可展开的能力画像与原文证据 -->
-        <el-card v-if="profile" shadow="never" class="career-card mt-4">
-          <template #header>
-            <div class="card-header">
-              <span class="header-title">🧠 提取的能力画像与来源证据</span>
-              <el-button size="small" type="success" plain @click="handleSyncAutopilot">
-                同步至 BOSS 沟通助手
-              </el-button>
-            </div>
-          </template>
-
-          <div class="profile-overview">
-            <div class="overview-item">
-              <span class="label">工作年限：</span>
-              <span class="val font-semibold">{{ profile.workYears }}</span>
-            </div>
-            <div class="overview-item">
-              <span class="label">学历：</span>
-              <span class="val">{{ profile.education }}</span>
-            </div>
-            <div class="overview-item">
-              <span class="label">求职意向：</span>
-              <span class="val font-semibold text-primary">{{ profile.targetIntention }}</span>
-            </div>
-          </div>
-
-          <div class="profile-summary-text">
-            <strong>画像总述：</strong>{{ profile.summary }}
-          </div>
-
-          <el-collapse v-model="activeCollapsePanels" class="evidence-collapse">
-            <!-- 技术栈与能力证据 -->
-            <el-collapse-item title="🔍 技术栈实证与自述（含原文佐证）" name="capabilities">
-              <div class="capabilities-list">
-                <div
-                  v-for="(cap, idx) in profile.capabilities"
-                  :key="idx"
-                  class="capability-item"
-                  :class="cap.evidenceType"
-                >
-                  <div class="cap-header">
-                    <span class="cap-name font-medium">{{ cap.skillName }}</span>
-                    <el-tag size="small" :type="evidenceTagType(cap.evidenceType)">
-                      {{ evidenceLabel(cap.evidenceType) }}
-                    </el-tag>
-                    <span class="cap-cat text-muted">[{{ cap.category }}]</span>
-                  </div>
-                  <div v-if="cap.quote" class="cap-quote">
-                    “{{ cap.quote }}”
-                  </div>
-                </div>
-              </div>
-            </el-collapse-item>
-
-            <!-- 工作与项目经历时间线 -->
-            <el-collapse-item title="💼 项目与工作经历核验" name="experiences">
-              <div class="experiences-list">
-                <div v-for="(exp, idx) in profile.experiences" :key="idx" class="experience-card">
-                  <div class="exp-title-row">
-                    <span class="exp-comp font-semibold">{{ exp.companyOrProject }}</span>
-                    <span class="exp-role text-primary"> · {{ exp.role }}</span>
-                    <span class="exp-time text-muted">{{ exp.timeRange }}</span>
-                  </div>
-                  <div v-if="exp.techStack && exp.techStack.length" class="exp-tech-row">
-                    <el-tag v-for="tech in exp.techStack" :key="tech" size="small" class="mr-1">
-                      {{ tech }}
-                    </el-tag>
-                  </div>
-                  <ul class="exp-resp-list">
-                    <li v-for="(resp, rIdx) in exp.responsibilities" :key="rIdx">
-                      {{ resp }}
-                    </li>
-                  </ul>
-                  <div v-if="exp.quote" class="exp-quote text-muted">
-                    出处佐证：{{ exp.quote }}
-                  </div>
-                </div>
-              </div>
-            </el-collapse-item>
-
-            <!-- 未知信息与待核实项 -->
-            <el-collapse-item v-if="profile.unknowns && profile.unknowns.length" title="❓ 简历未注明的未知信息" name="unknowns">
-              <ul class="unknowns-list">
-                <li v-for="(item, idx) in profile.unknowns" :key="idx" class="text-muted">
-                  {{ item }}
-                </li>
-              </ul>
-            </el-collapse-item>
-          </el-collapse>
-        </el-card>
-      </div>
-
-      <!-- 机会端：推荐搜索方向与公开市场快照 -->
-      <div class="career-col right-col">
-        <!-- 推荐方向展示面板 -->
-        <el-card shadow="never" class="career-card">
-          <template #header>
-            <div class="card-header">
-              <div>
-                <span class="header-title">🚀 推荐搜索方向</span>
-                <span class="header-sub text-muted">（点击方向可直接携关键词前往 BOSS 直聘精准搜索）</span>
-              </div>
-              <div v-if="directions.length" class="direction-filter-tabs">
-                <el-radio-group v-model="directionFilter" size="small">
-                  <el-radio-button label="all">全部 ({{ directions.length }})</el-radio-button>
-                  <el-radio-button label="market">市场支持 ({{ marketSupportedCount }})</el-radio-button>
-                  <el-radio-button label="adjacent">相邻探索 ({{ adjacentCount }})</el-radio-button>
-                </el-radio-group>
-              </div>
-            </div>
-          </template>
-
-          <div v-if="!profile && directions.length === 0" class="empty-direction-hint">
-            <div class="empty-icon">🧭</div>
-            <div class="empty-text">上传简历并完成能力提取后，系统将结合实时市场需求推荐匹配方向</div>
-          </div>
-
-          <div v-else-if="filteredDirections.length === 0" class="empty-direction-hint">
-            <div class="empty-text">当前分类下暂无推荐方向</div>
-          </div>
-
-          <!-- 方向卡片列表 -->
-          <div v-else class="direction-cards-grid">
-            <div
-              v-for="dir in filteredDirections"
-              :key="dir.id"
-              class="direction-card"
-              :class="{ 'is-adjacent': dir.isAdjacent }"
-            >
-              <div class="direction-card-top">
-                <div class="dir-title-row">
-                  <h3 class="dir-title">{{ dir.title }}</h3>
-                  <el-tag size="small" :type="dir.isAdjacent ? 'warning' : 'success'">
-                    {{ dir.isAdjacent ? "相邻探索" : "市场支持" }}
-                  </el-tag>
-                </div>
-                <div class="dir-reason">
-                  <strong>为什么适合：</strong>{{ dir.fitReason }}
-                </div>
-                <div class="dir-basis text-muted">
-                  <strong>市场依据：</strong>{{ dir.marketBasis }}
-                </div>
-              </div>
-
-              <!-- 沟通待核实条件 -->
-              <div v-if="dir.conditionsToVerify && dir.conditionsToVerify.length" class="dir-verify-box">
-                <span class="verify-title">待核实条件：</span>
-                <el-tag
-                  v-for="(cond, cIdx) in dir.conditionsToVerify"
-                  :key="cIdx"
-                  size="small"
-                  type="info"
-                  class="verify-tag"
-                >
-                  {{ cond }}
-                </el-tag>
-              </div>
-
-              <!-- 市场支撑岗位与原文引用佐证 -->
-              <div v-if="dir.supportingJobs && dir.supportingJobs.length" class="supporting-jobs-box">
-                <div class="supporting-jobs-head">
-                  <span>📊 对应市场岗位佐证（{{ dir.supportingJobs.length }} 个）：</span>
-                </div>
-                <div class="citation-cards">
-                  <div v-for="(cite, cIdx) in dir.supportingJobs" :key="cIdx" class="citation-card">
-                    <div class="citation-meta">
-                      <span class="cite-company font-medium">{{ cite.brandName }}</span>
-                      <span class="cite-title"> · {{ cite.jobTitle }}</span>
-                      <span v-if="cite.salaryDesc" class="cite-salary text-primary">{{ cite.salaryDesc }}</span>
+            <!-- 已连接扩展：上传与处理区 -->
+            <!-- 已连接扩展：上传与处理区 -->
+            <div v-else class="upload-zone">
+              <!-- 一级层级：当前已加载简历核心状态卡片 -->
+              <div v-if="profile" class="active-profile-card">
+                <div class="active-profile-header">
+                  <div class="file-icon">📄</div>
+                  <div class="file-main">
+                    <div class="file-title-row">
+                      <span class="file-name font-semibold">{{ profile.fileName }}</span>
+                      <el-tag size="small" type="success" effect="light">已生效</el-tag>
                     </div>
-                    <blockquote class="citation-quote">
-                      “{{ cite.exactQuote }}”
-                    </blockquote>
+                    <div class="file-sub text-muted">
+                      <span>更新时间：{{ formatDate(profile.updatedAt) }}</span>
+                      <span class="text-mono ml-2">指纹: {{ profile.fingerprint.slice(0, 10) }}...</span>
+                    </div>
                   </div>
+                </div>
+
+                <div class="active-profile-actions">
+                  <el-button
+                    size="small"
+                    type="primary"
+                    :loading="isProcessing"
+                    @click="retryCurrentTask"
+                  >
+                    🔄 重新分析
+                  </el-button>
+                  <el-button
+                    size="small"
+                    :type="showUploadDropzone ? 'primary' : 'default'"
+                    plain
+                    @click="showUploadDropzone = !showUploadDropzone"
+                  >
+                    {{ showUploadDropzone ? "收起更换 ▴" : "更换文件 ▾" }}
+                  </el-button>
+                  <el-button
+                    size="small"
+                    :type="showPreferenceEdit ? 'primary' : 'default'"
+                    plain
+                    @click="showPreferenceEdit = !showPreferenceEdit"
+                  >
+                    {{ showPreferenceEdit ? "收起意向 ▴" : "🎯 意向偏好 ▾" }}
+                  </el-button>
                 </div>
               </div>
 
-              <!-- BOSS 搜索按钮 -->
-              <div class="dir-action-footer">
-                <el-button
-                  type="primary"
-                  @click="handleJumpToBoss(dir.bossSearchKeyword)"
+              <!-- 二级层级：文件选择与拖拽区（无简历时常驻，有简历时点击「更换文件」展开） -->
+              <el-collapse-transition>
+                <div
+                  v-show="!profile || showUploadDropzone"
+                  class="drop-area"
+                  :class="{ 'is-dragover': isDragOver, 'is-disabled': isProcessing, 'mt-3': !!profile }"
+                  @dragover.prevent="isDragOver = true"
+                  @dragleave.prevent="isDragOver = false"
+                  @drop.prevent="handleFileDrop"
+                  @click="triggerFileInput"
                 >
-                  前往 BOSS 搜索此方向 ({{ dir.bossSearchKeyword }}) ↗
+                  <input
+                    ref="fileInputRef"
+                    type="file"
+                    accept=".docx,.pdf"
+                    style="display: none"
+                    @change="handleFileSelect"
+                  />
+                  <div class="drop-icon">📤</div>
+                  <div class="drop-title">
+                    {{ profile ? "点击或拖拽新文件替换当前简历" : "点击或拖拽上传简历 (DOCX / PDF)" }}
+                  </div>
+                  <div class="drop-desc">
+                    支持 DOCX 及包含文字图层的 PDF 简历（纯图片扫描件暂不支持）
+                  </div>
+                </div>
+              </el-collapse-transition>
+
+              <!-- 分析进度条与状态机 -->
+              <div v-if="isProcessing || processStep > 0" class="process-section">
+                <el-steps :active="processStep" finish-status="success" simple size="small">
+                  <el-step title="文件解析" />
+                  <el-step title="能力提取" />
+                  <el-step title="市场比对" />
+                </el-steps>
+                <div v-if="processMessage" class="process-msg" :class="{ 'is-error': processError }">
+                  <span v-if="isProcessing" class="loading-spinner">⏳</span>
+                  {{ processMessage }}
+                </div>
+              </div>
+
+              <!-- 异常与恢复 -->
+              <div v-if="processError" class="error-action-box">
+                <el-alert :title="processError" type="error" :closable="false" show-icon />
+                <div class="retry-bar">
+                  <el-button size="small" type="primary" @click="retryCurrentTask">重新分析</el-button>
+                </div>
+              </div>
+
+              <!-- 一级层级：意向偏好摘要栏；二级层级：展开表单编辑 -->
+              <div class="preferences-box">
+                <div class="preferences-summary-row" @click="showPreferenceEdit = !showPreferenceEdit">
+                  <div class="pref-summary-left">
+                    <span class="pref-icon">🎯</span>
+                    <span class="pref-summary-title font-medium">求职意向偏好：</span>
+                    <el-tag size="small" type="info" effect="plain">
+                      {{ preferences.city ? preferences.city : '城市不限' }}
+                    </el-tag>
+                    <el-tag size="small" type="info" effect="plain" class="ml-1">
+                      {{ preferences.salaryExpectation ? preferences.salaryExpectation : '薪资不限' }}
+                    </el-tag>
+                  </div>
+                  <el-button size="small" text type="primary">
+                    {{ showPreferenceEdit ? '收起 ▴' : '编辑 ▾' }}
+                  </el-button>
+                </div>
+
+                <el-collapse-transition>
+                  <div v-show="!profile || showPreferenceEdit" class="preferences-edit-body">
+                    <div class="pref-tip text-muted">
+                      未填写的条件保持未知，不强制排查，亦不默认作为排除项
+                    </div>
+                    <div class="pref-inputs mt-2">
+                      <el-input
+                        v-model="preferences.city"
+                        size="small"
+                        placeholder="期望城市（例如：上海、杭州、远程，留空不限）"
+                        clearable
+                        @change="handlePreferencesChange"
+                      />
+                      <el-input
+                        v-model="preferences.salaryExpectation"
+                        size="small"
+                        placeholder="薪资预期（例如：25K+、年包30W，留空不限）"
+                        clearable
+                        @change="handlePreferencesChange"
+                      />
+                    </div>
+                  </div>
+                </el-collapse-transition>
+              </div>
+
+              <!-- 清除本地数据操作 -->
+              <div v-if="profile" class="clear-data-bar">
+                <el-button size="small" text type="danger" @click="handleClearData">
+                  清空本地简历与画像数据
                 </el-button>
               </div>
             </div>
-          </div>
-        </el-card>
+          </el-card>
+        </div>
 
-        <!-- 公开招聘市场快照浏览（无插件用户亦可查看） -->
-        <el-card shadow="never" class="career-card mt-4">
-          <template #header>
-            <div class="card-header">
-              <div>
-                <span class="header-title">🌐 公开招聘市场需求快照</span>
-                <span class="header-sub text-muted">（由 GitHub Actions 每日自动抓取去重）</span>
+        <!-- 步骤 2：推荐搜索方向（核心决策） -->
+        <div id="step-2-directions" class="career-col right-col">
+          <el-card shadow="never" class="career-card interactive-card">
+            <template #header>
+              <div class="card-header">
+                <div class="title-with-step">
+                  <el-tag size="small" type="success" effect="dark" class="step-num-tag">步骤 2 · 核心决策</el-tag>
+                  <span class="header-title">🚀 推荐搜索方向</span>
+                  <span class="core-step-badge">★ 核心行动交互</span>
+                  <span class="header-sub text-muted">（点击直接携关键词前往 BOSS 直聘精准搜索）</span>
+                </div>
+                <div v-if="directions.length" class="direction-filter-tabs">
+                  <el-radio-group v-model="directionFilter" size="small">
+                    <el-radio-button label="all">全部 ({{ directions.length }})</el-radio-button>
+                    <el-radio-button label="market">市场支持 ({{ marketSupportedCount }})</el-radio-button>
+                    <el-radio-button label="adjacent">相邻探索 ({{ adjacentCount }})</el-radio-button>
+                  </el-radio-group>
+                </div>
               </div>
-              <el-tag size="small" type="info">共 {{ publicJobs.length }} 条样本</el-tag>
+            </template>
+
+            <div v-if="!profile && directions.length === 0" class="empty-direction-hint">
+              <div class="empty-icon">🧭</div>
+              <div class="empty-text font-medium">等待简历输入以生成匹配方向</div>
+              <div class="empty-sub text-muted">
+                请在左侧「步骤 1」上传简历或补充求职偏好，Gemini 将在此立即呈现为你定制的技术研发搜索方向与 BOSS 直聘精准检索入口。
+              </div>
+              <div class="empty-actions mt-3">
+                <el-button type="primary" size="small" @click="triggerFileInput">
+                  📤 立即上传简历
+                </el-button>
+              </div>
             </div>
-          </template>
 
-          <div class="snapshot-summary-bar">
-            <span class="snapshot-desc text-muted">
-              覆盖北上广深杭等 25 个主要城市公开展现页。本快照如实展示当前采样范围，不夸大市场热度。
-            </span>
-            <span v-if="snapshotLastTime" class="snapshot-time text-muted">
-              最后更新：{{ snapshotLastTime }}
-            </span>
-          </div>
+            <div v-else-if="filteredDirections.length === 0" class="empty-direction-hint">
+              <div class="empty-text">当前分类下暂无推荐方向</div>
+            </div>
 
-          <div class="public-jobs-list">
-            <div v-for="job in publicJobs" :key="job.job_detail" class="public-job-item">
-              <div class="job-item-main">
-                <div class="job-title-line">
-                  <a :href="job.job_detail" target="_blank" class="job-link font-semibold">
-                    {{ job.bossTitle }}
-                  </a>
-                  <span class="job-salary text-primary">{{ job.salaryDesc }}</span>
+            <!-- 方向卡片列表（一级层级：核心决策与行动；二级层级：展开市场佐证与依据） -->
+            <div v-else class="direction-cards-grid">
+              <div
+                v-for="dir in filteredDirections"
+                :key="dir.id"
+                class="direction-card"
+                :class="{ 'is-adjacent': dir.isAdjacent }"
+              >
+                <!-- 一级决策主视图：方向、适合理由、证据摘要与 BOSS 搜索行动 -->
+                <div class="direction-card-primary">
+                  <div class="dir-title-row">
+                    <div class="dir-title-left">
+                      <h3 class="dir-title font-semibold">{{ dir.title }}</h3>
+                      <el-tag size="small" :type="dir.isAdjacent ? 'warning' : 'success'" class="ml-2">
+                        {{ dir.isAdjacent ? "相邻探索" : "市场支持" }}
+                      </el-tag>
+                    </div>
+                    <el-tag size="small" type="info" effect="plain" class="dir-keyword-tag">
+                      搜索词: {{ dir.bossSearchKeyword }}
+                    </el-tag>
+                  </div>
+
+                  <div class="dir-fit-highlight">
+                    <span class="label font-medium">🎯 为什么适合：</span>
+                    <span class="text">{{ dir.fitReason }}</span>
+                  </div>
+
+                  <!-- 关键佐证与核查聚合指示条 -->
+                  <div class="dir-meta-pills-row">
+                    <span class="meta-pill">
+                      📊 市场岗位佐证: <strong>{{ dir.supportingJobs ? dir.supportingJobs.length : 0 }}</strong> 个
+                    </span>
+                    <span v-if="dir.conditionsToVerify && dir.conditionsToVerify.length" class="meta-pill">
+                      ❓ 待核查条件: <strong>{{ dir.conditionsToVerify.length }}</strong> 项
+                    </span>
+                  </div>
+
+                  <!-- 决策操作栏：左侧展开佐证，右侧一键去 BOSS 搜索 -->
+                  <div class="dir-action-bar">
+                    <el-button
+                      size="small"
+                      text
+                      type="primary"
+                      @click="toggleDirectionEvidence(dir.id)"
+                    >
+                      {{ expandedDirectionEvidence[dir.id] ? "收起依据与出处佐证 ▴" : `展开依据与出处佐证 (${dir.supportingJobs ? dir.supportingJobs.length : 0}) ▾` }}
+                    </el-button>
+
+                    <el-button
+                      type="primary"
+                      size="default"
+                      class="boss-search-btn"
+                      @click="handleJumpToBoss(dir.bossSearchKeyword)"
+                    >
+                      前往 BOSS 搜索此方向 ↗
+                    </el-button>
+                  </div>
                 </div>
-                <div class="job-company-line text-muted">
-                  <span>{{ job.brandName }}</span>
-                  <span v-if="job.brandIndustry"> · {{ job.brandIndustry }}</span>
-                  <span v-if="job.sourcePage"> · {{ job.sourcePage.replace(/\//g, "") }}</span>
+
+                <!-- 二级详情视图：可折叠的市场依据、待核查项与逐条真实岗位佐证 -->
+                <el-collapse-transition>
+                  <div v-show="expandedDirectionEvidence[dir.id]" class="direction-card-secondary">
+                    <!-- 市场依据 -->
+                    <div class="dir-basis-box">
+                      <div class="basis-title font-medium">📈 市场依据：</div>
+                      <div class="basis-text text-muted">{{ dir.marketBasis }}</div>
+                    </div>
+
+                    <!-- 沟通待核实条件 -->
+                    <div v-if="dir.conditionsToVerify && dir.conditionsToVerify.length" class="dir-verify-box mt-2">
+                      <span class="verify-title">待核实条件：</span>
+                      <el-tag
+                        v-for="(cond, cIdx) in dir.conditionsToVerify"
+                        :key="cIdx"
+                        size="small"
+                        type="info"
+                        class="verify-tag"
+                      >
+                        {{ cond }}
+                      </el-tag>
+                    </div>
+
+                    <!-- 对应市场岗位佐证与原文引用 -->
+                    <div v-if="dir.supportingJobs && dir.supportingJobs.length" class="supporting-jobs-box mt-2">
+                      <div class="supporting-jobs-head">
+                        <span>📊 市场真实岗位匹配佐证（{{ dir.supportingJobs.length }} 个）：</span>
+                      </div>
+                      <div class="citation-cards">
+                        <div v-for="(cite, cIdx) in dir.supportingJobs" :key="cIdx" class="citation-card">
+                          <div class="citation-meta">
+                            <span class="cite-company font-medium">{{ cite.brandName }}</span>
+                            <span class="cite-title"> · {{ cite.jobTitle }}</span>
+                            <span v-if="cite.salaryDesc" class="cite-salary text-primary">{{ cite.salaryDesc }}</span>
+                          </div>
+                          <blockquote class="citation-quote">
+                            “{{ cite.exactQuote }}”
+                          </blockquote>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </el-collapse-transition>
+              </div>
+            </div>
+          </el-card>
+        </div>
+      </div>
+    </section>
+
+    <!-- 阶段二：证据核验与市场底座 (步骤 3 能力画像 ➔ 步骤 4 招聘需求快照) -->
+    <section class="workflow-zone zone-grounding mt-4">
+      <div class="zone-badge-bar">
+        <div class="badge-title-wrap">
+          <span class="badge-pill neutral">🔍 证据核验与市场底座</span>
+          <span class="zone-heading">步骤 3 · 能力画像与来源证据 ➔ 步骤 4 · 公开招聘需求快照</span>
+        </div>
+        <span class="zone-hint text-muted">
+          深入下钻能力实证原文与全网热门技术研发岗位宏观需求探针，为求职决策提供客观、可溯源的底座支撑
+        </span>
+      </div>
+
+      <div class="career-layout">
+        <!-- 步骤 3：提取的能力画像与来源证据 -->
+        <div id="step-3-evidence" class="career-col left-col">
+          <el-card shadow="never" class="career-card grounding-card">
+            <template #header>
+              <div class="card-header">
+                <div class="title-with-step">
+                  <el-tag size="small" type="info" effect="plain" class="step-num-tag">步骤 3 · 原文佐证</el-tag>
+                  <span class="header-title">🧠 提取的能力画像与来源证据</span>
                 </div>
-                <div v-if="job.jobDesc" class="job-desc-line text-muted">
-                  {{ job.jobDesc }}
+                <el-button v-if="profile" size="small" type="success" plain @click="handleSyncAutopilot">
+                  同步至 BOSS 沟通助手
+                </el-button>
+              </div>
+            </template>
+
+            <template v-if="profile">
+              <!-- 一级层级：基本画像度量与总述摘要 -->
+              <div class="profile-overview-strip">
+                <div class="overview-metric">
+                  <span class="label">经验年限</span>
+                  <span class="value font-semibold">{{ profile.workYears }}</span>
                 </div>
-                <div class="job-skills-line">
-                  <el-tag v-for="sk in job.skills" :key="sk" size="small" class="mr-1">
-                    {{ sk }}
+                <div class="overview-metric">
+                  <span class="label">学历背景</span>
+                  <span class="value">{{ profile.education }}</span>
+                </div>
+                <div class="overview-metric flex-1">
+                  <span class="label">求职意向</span>
+                  <span class="value font-semibold text-primary">{{ profile.targetIntention }}</span>
+                </div>
+              </div>
+
+              <!-- 画像总述 -->
+              <div class="profile-summary-box">
+                <div class="summary-label font-medium">📋 画像总述：</div>
+                <div class="summary-content text-muted">{{ profile.summary }}</div>
+              </div>
+
+              <!-- 一级层级：实证技能全景标签云（实证 vs 自述） -->
+              <div class="skills-matrix-bar">
+                <div class="matrix-title-row">
+                  <span class="matrix-title font-medium">🧩 技能图谱与实证概览</span>
+                  <span class="text-muted" style="font-size: 11px;">
+                    实证 {{ projectProvenCaps.length }} 项 · 自述 {{ selfStatedCaps.length }} 项
+                  </span>
+                </div>
+                <div class="skills-tags-cluster">
+                  <el-tag
+                    v-for="cap in projectProvenCaps"
+                    :key="cap.skillName"
+                    size="small"
+                    type="success"
+                    effect="light"
+                    class="skill-pill proven"
+                    @click="activeEvidenceTab = 'capabilities'"
+                  >
+                    ✓ {{ cap.skillName }} (实证)
+                  </el-tag>
+                  <el-tag
+                    v-for="cap in selfStatedCaps"
+                    :key="cap.skillName"
+                    size="small"
+                    type="info"
+                    effect="plain"
+                    class="skill-pill stated"
+                    @click="activeEvidenceTab = 'capabilities'"
+                  >
+                    {{ cap.skillName }}
                   </el-tag>
                 </div>
               </div>
-              <div class="job-item-action">
-                <el-button size="small" text @click="handleJumpToBoss(job.bossTitle)">
-                  搜相似 ↗
+
+              <!-- 二级层级：分标签页下钻核查（技术实证 / 经历核查 / 未知项） -->
+              <div class="evidence-tabs-section mt-3">
+                <el-tabs v-model="activeEvidenceTab" class="evidence-segmented-tabs">
+                  <!-- 标签页 1：技术实证列表 -->
+                  <el-tab-pane :label="`🔍 技术实证 (${profile.capabilities.length})`" name="capabilities">
+                    <div class="capabilities-compact-list">
+                      <div
+                        v-for="(cap, idx) in profile.capabilities"
+                        :key="idx"
+                        class="cap-compact-item"
+                        :class="cap.evidenceType"
+                      >
+                        <div class="cap-header-line">
+                          <span class="cap-name font-medium">{{ cap.skillName }}</span>
+                          <el-tag size="small" :type="evidenceTagType(cap.evidenceType)">
+                            {{ evidenceLabel(cap.evidenceType) }}
+                          </el-tag>
+                          <span class="cap-cat text-muted">[{{ cap.category }}]</span>
+                        </div>
+                        <div v-if="cap.quote" class="cap-quote-box text-muted">
+                          “{{ cap.quote }}”
+                        </div>
+                      </div>
+                    </div>
+                  </el-tab-pane>
+
+                  <!-- 标签页 2：经历核验时间线 -->
+                  <el-tab-pane :label="`💼 经历核验 (${profile.experiences.length})`" name="experiences">
+                    <div class="experiences-compact-list">
+                      <div
+                        v-for="(exp, idx) in profile.experiences"
+                        :key="idx"
+                        class="experience-compact-card"
+                      >
+                        <div class="exp-title-row">
+                          <span class="exp-comp font-semibold">{{ exp.companyOrProject }}</span>
+                          <span class="exp-role text-primary"> · {{ exp.role }}</span>
+                          <span class="exp-time text-muted">{{ exp.timeRange }}</span>
+                        </div>
+                        <div v-if="exp.techStack && exp.techStack.length" class="exp-tech-row">
+                          <el-tag v-for="tech in exp.techStack" :key="tech" size="small" class="mr-1">
+                            {{ tech }}
+                          </el-tag>
+                        </div>
+                        <ul class="exp-resp-list">
+                          <li v-for="(resp, rIdx) in exp.responsibilities" :key="rIdx">
+                            {{ resp }}
+                          </li>
+                        </ul>
+                        <div v-if="exp.quote" class="exp-quote text-muted">
+                          出处佐证：{{ exp.quote }}
+                        </div>
+                      </div>
+                    </div>
+                  </el-tab-pane>
+
+                  <!-- 标签页 3：未知信息与待核实项 -->
+                  <el-tab-pane
+                    :label="`❓ 未知项 (${profile.unknowns ? profile.unknowns.length : 0})`"
+                    name="unknowns"
+                  >
+                    <div v-if="profile.unknowns && profile.unknowns.length" class="unknowns-box">
+                      <ul class="unknowns-list">
+                        <li v-for="(item, idx) in profile.unknowns" :key="idx" class="text-muted">
+                          {{ item }}
+                        </li>
+                      </ul>
+                    </div>
+                    <div v-else class="text-muted p-2" style="font-size: 12px;">
+                      简历信息完整，暂无待排查的未知盲区。
+                    </div>
+                  </el-tab-pane>
+                </el-tabs>
+              </div>
+            </template>
+
+            <!-- 尚未生成画像的占位引导 -->
+            <div v-else class="empty-grounding-hint">
+              <div class="empty-icon">📑</div>
+              <div class="empty-title font-medium">尚未生成能力画像</div>
+              <div class="empty-desc text-muted">
+                在上方「步骤 1」上传简历后，Gemini 将在此展示工作年限、学历、项目实证技术栈及出处原文佐证，并支持一键同步至自动沟通助手。
+              </div>
+            </div>
+          </el-card>
+        </div>
+
+        <!-- 步骤 4：公开招聘需求快照（热门技术研发岗位） -->
+        <div id="step-4-snapshot" class="career-col right-col">
+          <el-card shadow="never" class="career-card grounding-card">
+            <template #header>
+              <div class="card-header snapshot-header-wrap">
+                <div class="header-left">
+                  <div class="title-row">
+                    <el-tag size="small" type="warning" effect="plain" class="step-num-tag">步骤 4 · 市场底座</el-tag>
+                    <span class="header-title">🌐 公开招聘需求快照（热门技术研发岗位）</span>
+                    <el-tag size="small" type="primary" effect="plain" class="ml-2">
+                      共 {{ publicJobs.length }} 条去重样本
+                    </el-tag>
+                    <el-tag size="small" type="info" class="ml-2">
+                      25 城公开落地页探针
+                    </el-tag>
+                  </div>
+                  <div class="header-sub text-muted">
+                    数据来源：BOSS 直聘 25 城免登录公开 SEO 落地页 · GitHub Actions 每日 06:17 自动抓取研发需求样本并严格去重
+                  </div>
+                </div>
+                <div class="header-actions">
+                  <el-button
+                    size="small"
+                    :type="showSnapshotRules ? 'primary' : 'default'"
+                    plain
+                    @click="showSnapshotRules = !showSnapshotRules"
+                  >
+                    {{ showSnapshotRules ? "收起采集规则 ▴" : "查看采集与去重规则 ▾" }}
+                  </el-button>
+                </div>
+              </div>
+            </template>
+
+            <!-- 规则透明化展开面板 -->
+            <el-collapse-transition>
+              <div v-show="showSnapshotRules" class="snapshot-rules-panel">
+                <div class="rules-panel-header">
+                  <span class="rules-title">📐 底层真实采集、研发过滤去重与智能匹配规则白皮书</span>
+                  <span class="rules-version text-muted text-mono">CRAWLER: zhipin.py · PIPELINE: ci.yml · SCHEDULE: 06:17 UTC+8</span>
+                </div>
+                
+                <div class="rules-grid">
+                  <div class="rule-box">
+                    <div class="rule-box-title">1. 采样来源与公开页特性</div>
+                    <div class="rule-box-content">
+                      <p>抓取目标为 BOSS 直聘 <strong>25 个核心城市未登录公开静态落地页</strong>（<code>/beijing/</code>、<code>/shanghai/</code> 等，非站内全量搜索库）。未登录页面仅静态露出极少数名企推荐卡片（单城仅 0~3 条公开岗位），本快照如实呈现公开外显情况，不人为夸大市场热度。</p>
+                      <div class="rule-tag-list mt-1">
+                        <span class="tag-label">覆盖 25 城：</span>
+                        <el-tag v-for="c in SNAPSHOT_TARGET_CITIES" :key="c" size="small" type="info" class="mr-1 mb-1">
+                          {{ c }}
+                        </el-tag>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="rule-box">
+                    <div class="rule-box-title">2. 热门技术研发岗位采样与白名单</div>
+                    <div class="rule-box-content">
+                      <p>爬虫以<strong>市场热门技术研发需求</strong>为核心目标（过滤非技术职位），白名单覆盖前端、后端、移动端、AI/大模型、全栈、数据工程与云原生等核心研发类别：</p>
+                      <div class="rule-tag-list mt-1">
+                        <el-tag v-for="m in SNAPSHOT_ROLE_MARKERS" :key="m" size="small" type="warning" effect="plain" class="mr-1 mb-1">
+                          {{ m }}
+                        </el-tag>
+                      </div>
+                      <p class="mt-1 text-muted" style="font-size: 11px;">
+                        💡 <strong>职责分工</strong>：快照负责客观采集全网技术研发需求底池；<strong>具体求职搜索方向由上方 Gemini 结合候选人简历画像智能匹配推荐</strong>（无论候选人是前端、后端、AI、全栈均可匹配）。
+                      </p>
+                    </div>
+                  </div>
+
+                  <div class="rule-box">
+                    <div class="rule-box-title">3. 去重机制与排序规则</div>
+                    <div class="rule-box-content">
+                      <p>• <strong>跨城市强去重</strong>：使用职位详情页唯一链接 <code>job_detail</code> 作为主键进行全局去重，多城重复展示仅保留一条。</p>
+                      <p>• <strong>发布时间排序</strong>：依据页面微数据 <code>upDate / dateModified</code> 时间戳倒序排列，真实反映公开发布先后，并编排 <code>jobNum</code> 索引。</p>
+                    </div>
+                  </div>
+
+                  <div class="rule-box">
+                    <div class="rule-box-title">4. 真实性保障与 Gemini 智能匹配</div>
+                    <div class="rule-box-content">
+                      <p>• <strong>真实薪资口径</strong>：公开落地页常对薪资做防爬遮蔽，系统恪守真实原则不捏造，如实标注“薪资以 Boss 职位页为准”。</p>
+                      <p>• <strong>Preserved 熔断保活</strong>：若 CI 采集遇反爬中断或有效数 &lt; 3 条，自动触发保护保留上一版稳定快照，绝不破坏前端。</p>
+                      <p>• <strong>Gemini 简历驱动推荐</strong>：用户上传简历后，Gemini 提取个人结构化技术能力，对照本快照完成硬校验，生成精准的“市场支持方向”与“相邻探索方向”。</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </el-collapse-transition>
+
+            <!-- 数据概览与多维筛选工具栏（分层优化：精炼高频城市与技术栈，支持更多展开） -->
+            <div class="snapshot-toolbar">
+              <div class="snapshot-summary-bar">
+                <div class="summary-left">
+                  <span class="snapshot-desc">
+                    呈现 <strong>{{ filteredPublicJobs.length }}</strong> / {{ publicJobs.length }} 条样本 · 
+                    覆盖 <strong>{{ distinctCitiesInSnapshot.length }}</strong> 个城市 · 
+                    涉及 <strong>{{ distinctCompaniesCount }}</strong> 家企业
+                  </span>
+                </div>
+                <div class="summary-right text-muted">
+                  <span v-if="snapshotLastTime" class="snapshot-time">
+                    快照更新时间：{{ snapshotLastTime }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="filter-controls-row">
+                <div class="filter-search-box">
+                  <el-input
+                    v-model="snapshotSearchQuery"
+                    placeholder="搜索职位名、企业、技能或工作区域..."
+                    size="small"
+                    clearable
+                  >
+                    <template #prefix>🔍</template>
+                  </el-input>
+                </div>
+
+                <!-- 城市筛选：显示全部 + 前 5 城市，点击「更多城市」展开剩余 -->
+                <div class="filter-pills-row">
+                  <span class="filter-label">城市筛选：</span>
+                  <el-button
+                    size="small"
+                    :type="snapshotSelectedCity === 'all' ? 'primary' : 'default'"
+                    :plain="snapshotSelectedCity !== 'all'"
+                    @click="snapshotSelectedCity = 'all'"
+                  >
+                    全部 ({{ publicJobs.length }})
+                  </el-button>
+                  <el-button
+                    v-for="item in topCitiesInSnapshot"
+                    :key="item.city"
+                    size="small"
+                    :type="snapshotSelectedCity === item.city ? 'primary' : 'default'"
+                    :plain="snapshotSelectedCity !== item.city"
+                    @click="snapshotSelectedCity = item.city"
+                  >
+                    {{ item.city }} ({{ item.count }})
+                  </el-button>
+                  <template v-if="showMoreCities">
+                    <el-button
+                      v-for="item in moreCitiesInSnapshot"
+                      :key="item.city"
+                      size="small"
+                      :type="snapshotSelectedCity === item.city ? 'primary' : 'default'"
+                      :plain="snapshotSelectedCity !== item.city"
+                      @click="snapshotSelectedCity = item.city"
+                    >
+                      {{ item.city }} ({{ item.count }})
+                    </el-button>
+                  </template>
+                  <el-button
+                    v-if="hasMoreCities"
+                    size="small"
+                    text
+                    type="primary"
+                    @click="showMoreCities = !showMoreCities"
+                  >
+                    {{ showMoreCities ? '收起城市 ▴' : `更多 (${moreCitiesInSnapshot.length}) ▾` }}
+                  </el-button>
+                </div>
+
+                <!-- 技术标签：显示全部 + 前 6 核心技术，点击「更多技术」展开剩余 -->
+                <div class="filter-pills-row">
+                  <span class="filter-label">技术标签：</span>
+                  <el-button
+                    size="small"
+                    :type="snapshotSelectedSkill === 'all' ? 'primary' : 'default'"
+                    :plain="snapshotSelectedSkill !== 'all'"
+                    @click="snapshotSelectedSkill = 'all'"
+                  >
+                    全部
+                  </el-button>
+                  <el-button
+                    v-for="item in topSkillsInSnapshot"
+                    :key="item.skill"
+                    size="small"
+                    :type="snapshotSelectedSkill === item.skill ? 'primary' : 'default'"
+                    :plain="snapshotSelectedSkill !== item.skill"
+                    @click="snapshotSelectedSkill = item.skill"
+                  >
+                    {{ item.skill }} ({{ item.count }})
+                  </el-button>
+                  <template v-if="showMoreSkills">
+                    <el-button
+                      v-for="item in moreSkillsInSnapshot"
+                      :key="item.skill"
+                      size="small"
+                      :type="snapshotSelectedSkill === item.skill ? 'primary' : 'default'"
+                      :plain="snapshotSelectedSkill !== item.skill"
+                      @click="snapshotSelectedSkill = item.skill"
+                    >
+                      {{ item.skill }} ({{ item.count }})
+                    </el-button>
+                  </template>
+                  <el-button
+                    v-if="hasMoreSkills"
+                    size="small"
+                    text
+                    type="primary"
+                    @click="showMoreSkills = !showMoreSkills"
+                  >
+                    {{ showMoreSkills ? '收起技术 ▴' : `更多 (${moreSkillsInSnapshot.length}) ▾` }}
+                  </el-button>
+
+                  <el-button
+                    v-if="snapshotSearchQuery || snapshotSelectedCity !== 'all' || snapshotSelectedSkill !== 'all'"
+                    size="small"
+                    type="info"
+                    text
+                    @click="resetSnapshotFilters"
+                  >
+                    重置筛选
+                  </el-button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 职位卡片列表（一级层级：核心岗位摘要与 BOSS 跳转；二级层级：点击展开详细标签与落地页源） -->
+            <div v-if="filteredPublicJobs.length" class="public-jobs-list">
+              <div
+                v-for="job in displayedPublicJobs"
+                :key="job.job_detail"
+                class="public-job-item"
+              >
+                <div class="job-item-main">
+                  <div class="job-title-line">
+                    <span class="job-num-badge">#{{ job.jobNum }}</span>
+                    <a :href="job.job_detail" target="_blank" class="job-link font-semibold">
+                      {{ job.bossTitle }}
+                    </a>
+                    <el-tag size="small" type="success" effect="plain" class="job-city-tag">
+                      {{ formatCityName(job) }}
+                    </el-tag>
+                    <span class="job-salary text-primary font-medium">{{ job.salaryDesc }}</span>
+                  </div>
+                  
+                  <div class="job-company-line text-muted">
+                    <span class="company-name font-medium">{{ job.brandName }}</span>
+                    <span v-if="job.brandIndustry"> · {{ job.brandIndustry }}</span>
+                    <span class="ml-2 font-mono" style="font-size: 11px;">
+                      {{ (job.skills || []).slice(0, 3).join(" / ") }}
+                    </span>
+                  </div>
+
+                  <!-- 可折叠的完整标签与落地页溯源 -->
+                  <el-collapse-transition>
+                    <div v-show="expandedJobDetails[job.job_detail]" class="job-details-expand-box">
+                      <div v-if="job.jobDesc" class="job-desc-tags-line">
+                        <span
+                          v-for="(chip, chipIdx) in parseJobDescChips(job.jobDesc)"
+                          :key="chipIdx"
+                          class="desc-chip mr-1"
+                        >
+                          {{ chip }}
+                        </span>
+                      </div>
+                      <div class="job-skills-line">
+                        <el-tag v-for="sk in job.skills" :key="sk" size="small" class="mr-1">
+                          {{ sk }}
+                        </el-tag>
+                      </div>
+                      <div class="source-link mt-1">来源落地页: {{ job.sourcePage }}</div>
+                    </div>
+                  </el-collapse-transition>
+                </div>
+
+                <div class="job-item-action">
+                  <el-button
+                    size="small"
+                    text
+                    type="info"
+                    @click="toggleJobDetail(job.job_detail)"
+                  >
+                    {{ expandedJobDetails[job.job_detail] ? '收起详情 ▴' : '详情 ▾' }}
+                  </el-button>
+                  <el-button
+                    type="primary"
+                    size="small"
+                    plain
+                    @click="handleJumpToBoss(job.bossTitle)"
+                  >
+                    前往 BOSS 搜相似 ↗
+                  </el-button>
+                </div>
+              </div>
+
+              <!-- 渐进展示更多按钮 -->
+              <div v-if="filteredPublicJobs.length > 5" class="snapshot-pagination-bar">
+                <el-button
+                  size="small"
+                  type="primary"
+                  plain
+                  class="load-more-btn"
+                  @click="toggleSnapshotLimit"
+                >
+                  {{ hasMorePublicJobs ? `查看更多样本（当前已展示 ${displayedPublicJobs.length} / ${filteredPublicJobs.length} 条）▾` : '收起样本（显示前 5 条）▴' }}
                 </el-button>
               </div>
             </div>
-          </div>
-        </el-card>
+
+            <!-- 筛选无结果空状态 -->
+            <div v-else class="snapshot-empty-wrap">
+              <el-empty description="未找到符合当前筛选条件的公开招聘样本">
+                <el-button type="primary" size="small" @click="resetSnapshotFilters">
+                  清空筛选条件
+                </el-button>
+              </el-empty>
+            </div>
+          </el-card>
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
@@ -732,6 +1266,189 @@ const snapshotLastTime = computed(() => {
   return publicJobs.value[0].time || publicJobs.value[0].capturedAt || "";
 });
 
+// 模块 1：简历上传展开与意向偏好折叠控制
+const showUploadDropzone = ref(false);
+const showPreferenceEdit = ref(false);
+
+// 模块 2：推荐方向展开证据与市场岗位控制
+const expandedDirectionEvidence = ref<Record<string, boolean>>({});
+const toggleDirectionEvidence = (dirId: string) => {
+  expandedDirectionEvidence.value[dirId] = !expandedDirectionEvidence.value[dirId];
+};
+
+// 模块 3：能力画像分层标签页与技能实证控制
+const activeEvidenceTab = ref<"capabilities" | "experiences" | "unknowns">("capabilities");
+const projectProvenCaps = computed(() =>
+  profile.value?.capabilities.filter((c) => c.evidenceType === "projectProven") || []
+);
+const selfStatedCaps = computed(() =>
+  profile.value?.capabilities.filter((c) => c.evidenceType !== "projectProven") || []
+);
+
+// 模块 4：快照筛选紧凑折叠与列表渐进展示
+const showMoreCities = ref(false);
+const showMoreSkills = ref(false);
+const snapshotDisplayLimit = ref(5);
+const expandedJobDetails = ref<Record<string, boolean>>({});
+const toggleJobDetail = (jobId: string) => {
+  expandedJobDetails.value[jobId] = !expandedJobDetails.value[jobId];
+};
+
+// 25 目标城市与 15 岗位关键词（用于白皮书展示）
+const SNAPSHOT_TARGET_CITIES = [
+  "北京", "上海", "广州", "深圳", "杭州",
+  "成都", "武汉", "南京", "苏州", "郑州",
+  "青岛", "天津", "西安", "厦门", "长沙",
+  "合肥", "重庆", "济南", "佛山", "东莞",
+  "昆明", "南昌", "石家庄", "宁波", "福州",
+];
+
+const SNAPSHOT_ROLE_MARKERS = [
+  "前端开发", "React / Vue", "JavaScript / TypeScript", "Android / iOS",
+  "鸿蒙开发", "Flutter", "Java 后端", "Go / Golang", "Python", "C++",
+  "微服务 / 云原生", "架构设计", "AI / 大模型", "算法工程师", "机器学习",
+  "数据开发 / 大数据", "全栈工程师", "测试开发", "DevOps / SRE", "嵌入式"
+];
+
+const CITY_NAME_MAP: Record<string, string> = {
+  beijing: "北京",
+  shanghai: "上海",
+  tianjin: "天津",
+  xian: "西安",
+  suzhou: "苏州",
+  wuhan: "武汉",
+  nanjing: "南京",
+  zhengzhou: "郑州",
+  qingdao: "青岛",
+  hangzhou: "杭州",
+  xiamen: "厦门",
+  changsha: "长沙",
+  chengdu: "成都",
+  guangzhou: "广州",
+  shenzhen: "深圳",
+  hefei: "合肥",
+  chongqing: "重庆",
+  jinan: "济南",
+  foshan: "佛山",
+  dongguan: "东莞",
+  kunming: "昆明",
+  nanchang: "南昌",
+  shijiazhuang: "石家庄",
+  ningbo: "宁波",
+  fuzhou: "福州",
+};
+
+// 市场快照多维筛选与规则面板控制状态
+const showSnapshotRules = ref(false);
+const snapshotSearchQuery = ref("");
+const snapshotSelectedCity = ref("all");
+const snapshotSelectedSkill = ref("all");
+
+const formatCityName = (job: MarketJobItem): string => {
+  if (job.cityName) return job.cityName;
+  if (!job.sourcePage) return "全网";
+  const slug = job.sourcePage.replace(/\//g, "").toLowerCase();
+  return CITY_NAME_MAP[slug] || slug;
+};
+
+const parseJobDescChips = (desc: string): string[] => {
+  if (!desc) return [];
+  return desc
+    .split("·")
+    .map((s) => s.trim())
+    .filter((s) => Boolean(s));
+};
+
+const distinctCitiesInSnapshot = computed(() => {
+  const map = new Map<string, number>();
+  for (const job of publicJobs.value) {
+    const city = formatCityName(job);
+    map.set(city, (map.get(city) || 0) + 1);
+  }
+  return Array.from(map.entries()).map(([city, count]) => ({ city, count }));
+});
+
+const topCitiesInSnapshot = computed(() => distinctCitiesInSnapshot.value.slice(0, 5));
+const moreCitiesInSnapshot = computed(() => distinctCitiesInSnapshot.value.slice(5));
+const hasMoreCities = computed(() => distinctCitiesInSnapshot.value.length > 5);
+
+const distinctSkillsInSnapshot = computed(() => {
+  const map = new Map<string, number>();
+  for (const job of publicJobs.value) {
+    for (const skill of job.skills || []) {
+      map.set(skill, (map.get(skill) || 0) + 1);
+    }
+  }
+  return Array.from(map.entries()).map(([skill, count]) => ({ skill, count }));
+});
+
+const topSkillsInSnapshot = computed(() => distinctSkillsInSnapshot.value.slice(0, 6));
+const moreSkillsInSnapshot = computed(() => distinctSkillsInSnapshot.value.slice(6));
+const hasMoreSkills = computed(() => distinctSkillsInSnapshot.value.length > 6);
+
+const distinctCompaniesCount = computed(() => {
+  const set = new Set<string>();
+  for (const job of publicJobs.value) {
+    if (job.brandName) set.add(job.brandName);
+  }
+  return set.size;
+});
+
+const filteredPublicJobs = computed(() => {
+  return publicJobs.value.filter((job) => {
+    if (snapshotSelectedCity.value !== "all") {
+      const city = formatCityName(job);
+      if (city !== snapshotSelectedCity.value) return false;
+    }
+    if (snapshotSelectedSkill.value !== "all") {
+      if (!job.skills || !job.skills.includes(snapshotSelectedSkill.value)) {
+        return false;
+      }
+    }
+    if (snapshotSearchQuery.value.trim()) {
+      const q = snapshotSearchQuery.value.trim().toLowerCase();
+      const city = formatCityName(job).toLowerCase();
+      const title = (job.bossTitle || "").toLowerCase();
+      const company = (job.brandName || "").toLowerCase();
+      const industry = (job.brandIndustry || "").toLowerCase();
+      const desc = (job.jobDesc || "").toLowerCase();
+      const skills = (job.skills || []).join(" ").toLowerCase();
+      const match =
+        city.includes(q) ||
+        title.includes(q) ||
+        company.includes(q) ||
+        industry.includes(q) ||
+        desc.includes(q) ||
+        skills.includes(q);
+      if (!match) return false;
+    }
+    return true;
+  });
+});
+
+const displayedPublicJobs = computed(() =>
+  filteredPublicJobs.value.slice(0, snapshotDisplayLimit.value)
+);
+
+const hasMorePublicJobs = computed(
+  () => filteredPublicJobs.value.length > snapshotDisplayLimit.value
+);
+
+const toggleSnapshotLimit = () => {
+  if (snapshotDisplayLimit.value >= filteredPublicJobs.value.length) {
+    snapshotDisplayLimit.value = 5;
+  } else {
+    snapshotDisplayLimit.value = filteredPublicJobs.value.length;
+  }
+};
+
+const resetSnapshotFilters = () => {
+  snapshotSearchQuery.value = "";
+  snapshotSelectedCity.value = "all";
+  snapshotSelectedSkill.value = "all";
+  snapshotDisplayLimit.value = 5;
+};
+
 const marketSupportedCount = computed(
   () => directions.value.filter((d) => !d.isAdjacent).length
 );
@@ -919,6 +1636,9 @@ const handleClearData = async () => {
     directions.value = [];
     processStep.value = 0;
     processMessage.value = "";
+    showUploadDropzone.value = false;
+    showPreferenceEdit.value = false;
+    expandedDirectionEvidence.value = {};
     ElMessage.success("本地求职数据已安全清除");
   } catch {
     // cancelled
@@ -944,6 +1664,17 @@ const formatDate = (isoStr: string) => {
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")} ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`;
   } catch {
     return isoStr;
+  }
+};
+
+const scrollToStep = (stepId: string) => {
+  const el = document.getElementById(stepId);
+  if (el) {
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    el.classList.add("highlight-pulse");
+    setTimeout(() => {
+      el.classList.remove("highlight-pulse");
+    }, 1200);
   }
 };
 
@@ -1154,6 +1885,203 @@ onMounted(() => {
   border: 1px solid #fde2e2;
 }
 
+/* 流程导航栏 */
+.workflow-stepper-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  overflow-x: auto;
+  gap: 8px;
+}
+
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex: 1;
+  min-width: 170px;
+  border: 1px solid transparent;
+  user-select: none;
+}
+
+.stepper-item:hover {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+
+.stepper-item.is-active {
+  background: #f0f9ff;
+  border-color: #bae6fd;
+}
+
+.stepper-item.is-core-step {
+  background: #f0fdf4;
+  border-color: #bbf7d0;
+}
+
+.stepper-item.is-core-step:hover {
+  background: #dcfce7;
+  border-color: #86efac;
+}
+
+.step-num {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #475569;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.stepper-item.is-active .step-num {
+  background: #0284c7;
+  color: #ffffff;
+}
+
+.stepper-item.is-completed .step-num {
+  background: #10b981;
+  color: #ffffff;
+}
+
+.stepper-item.is-core-step .step-num {
+  background: #059669;
+  color: #ffffff;
+}
+
+.step-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.step-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.step-desc {
+  font-size: 11px;
+  color: #64748b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 170px;
+}
+
+.core-step-badge {
+  font-size: 10px;
+  background: #fef08a;
+  color: #854d0e;
+  border: 1px solid #fde047;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-weight: 700;
+}
+
+.step-status-tag {
+  font-size: 10px;
+  padding: 0 4px;
+  height: 18px;
+  line-height: 18px;
+}
+
+.stepper-arrow {
+  color: #cbd5e1;
+  font-size: 14px;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+/* 阶段工作区 */
+.workflow-zone {
+  margin-bottom: 24px;
+}
+
+.zone-badge-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 0 2px;
+}
+
+.badge-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.badge-pill {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 12px;
+  letter-spacing: 0.2px;
+}
+
+.badge-pill.core-action {
+  background: #eff6ff;
+  color: #1d4ed8;
+  border: 1px solid #bfdbfe;
+}
+
+.badge-pill.neutral {
+  background: #f8fafc;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+
+.badge-pill.grounding {
+  background: #f3f4f6;
+  color: #374151;
+  border: 1px solid #d1d5db;
+}
+
+.zone-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.zone-hint {
+  font-size: 12px;
+}
+
+.title-with-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.step-num-tag {
+  font-weight: 700;
+  font-size: 11px;
+}
+
 .career-layout {
   display: grid;
   grid-template-columns: 460px 1fr;
@@ -1169,6 +2097,58 @@ onMounted(() => {
 
 .career-card {
   border-radius: 8px;
+}
+
+.interactive-card {
+  border-top: 3px solid #3b82f6;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+}
+
+.right-col .interactive-card {
+  border-top-color: #10b981;
+}
+
+.grounding-card {
+  border-top: 3px solid #64748b;
+  background: #ffffff;
+}
+
+.right-col .grounding-card {
+  border-top-color: #8b5cf6;
+}
+
+.empty-grounding-hint {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+}
+
+.empty-grounding-hint .empty-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+}
+
+.empty-grounding-hint .empty-title {
+  font-size: 14px;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.empty-grounding-hint .empty-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  max-width: 380px;
+  margin: 0 auto;
+}
+
+@keyframes stepPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(64, 158, 255, 0.5); }
+  50% { transform: scale(1.008); box-shadow: 0 0 0 8px rgba(64, 158, 255, 0); }
+  100% { transform: scale(1); box-shadow: none; }
+}
+
+.highlight-pulse {
+  animation: stepPulse 1s ease;
 }
 
 .card-header {
@@ -1209,22 +2189,66 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-.profile-meta-bar {
-  background: #f8fafc;
-  padding: 10px 14px;
-  border-radius: 6px;
-  margin-bottom: 14px;
-  font-size: 13px;
+/* 当前已就绪简历卡片（一级分层） */
+.active-profile-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
 }
 
-.meta-row {
+.active-profile-header {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.file-icon {
+  font-size: 28px;
+  line-height: 1;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 6px;
+}
+
+.file-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.file-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-bottom: 4px;
 }
 
-.meta-row:last-child {
-  margin-bottom: 0;
+.file-name {
+  font-size: 14px;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-sub {
+  font-size: 11px;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.active-profile-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px dashed #cbd5e1;
 }
 
 .drop-area {
@@ -1297,17 +2321,44 @@ onMounted(() => {
   border-top: 1px solid #f1f5f9;
 }
 
-.preferences-header {
+/* 意向偏好摘要栏（折叠与展开） */
+.preferences-summary-row {
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 
-.pref-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
+.preferences-summary-row:hover {
+  background: #f1f5f9;
+}
+
+.pref-summary-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.pref-icon {
+  font-size: 14px;
+}
+
+.pref-summary-title {
+  color: #334155;
+}
+
+.preferences-edit-body {
+  margin-top: 10px;
+  padding: 10px 12px;
+  background: #fafbfc;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
 }
 
 .pref-tip {
@@ -1326,82 +2377,164 @@ onMounted(() => {
   text-align: center;
 }
 
-/* 能力画像 */
-.profile-overview {
+/* 能力画像（分层与实证概览） */
+.profile-overview-strip {
   display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 16px;
   background: #f8fafc;
-  padding: 10px 14px;
+  border: 1px solid #e2e8f0;
   border-radius: 6px;
+  padding: 10px 14px;
   margin-bottom: 12px;
-  font-size: 13px;
 }
 
-.profile-summary-text {
-  font-size: 13px;
-  line-height: 1.6;
-  color: #334155;
-  margin-bottom: 14px;
-}
-
-.evidence-collapse {
-  border-top: none;
-}
-
-.capabilities-list {
+.overview-metric {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 2px;
 }
 
-.capability-item {
+.overview-metric .label {
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.overview-metric .value {
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.profile-summary-box {
+  background: #fafbfc;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+
+.summary-label {
+  color: #334155;
+  margin-bottom: 4px;
+}
+
+.summary-content {
+  line-height: 1.6;
+}
+
+.skills-matrix-bar {
+  background: #f8fafc;
   border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-bottom: 12px;
+}
+
+.matrix-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.matrix-title {
+  font-size: 12px;
+  color: #334155;
+}
+
+.skills-tags-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.skill-pill {
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+
+.skill-pill:hover {
+  transform: translateY(-1px);
+}
+
+.skill-pill.proven {
+  font-weight: 500;
+}
+
+.evidence-segmented-tabs :deep(.el-tabs__header) {
+  margin-bottom: 12px;
+}
+
+.capabilities-compact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.cap-compact-item {
+  background: #fafbfc;
+  border: 1px solid #f1f5f9;
   border-left: 3px solid #94a3b8;
   border-radius: 6px;
-  padding: 8px 12px;
-  background-color: #fafbfc;
+  padding: 8px 10px;
 }
 
-.capability-item.projectProven {
-  border-left-color: #67c23a;
-  background-color: #f6ffed;
+.cap-compact-item.projectProven {
+  border-left-color: #10b981;
+  background-color: #f0fdf4;
 }
 
-.capability-item.selfStated {
-  border-left-color: #409eff;
+.cap-compact-item.selfStated {
+  border-left-color: #3b82f6;
+  background-color: #f0f7ff;
 }
 
-.cap-header {
+.cap-header-line {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 13px;
-}
-
-.cap-quote {
-  margin-top: 4px;
   font-size: 12px;
-  color: #64748b;
-  background: rgba(0, 0, 0, 0.02);
-  padding: 4px 8px;
-  border-radius: 4px;
 }
 
-.experiences-list {
+.cap-name {
+  color: #1e293b;
+}
+
+.cap-cat {
+  font-size: 11px;
+}
+
+.cap-quote-box {
+  margin-top: 4px;
+  font-size: 11px;
+  font-style: italic;
+  padding-left: 6px;
+  border-left: 2px solid #cbd5e1;
+}
+
+.experiences-compact-list {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  max-height: 480px;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
-.experience-card {
+.experience-compact-card {
+  background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 6px;
-  padding: 10px 14px;
-  background-color: #ffffff;
+  padding: 10px 12px;
 }
 
 .exp-title-row {
-  font-size: 14px;
+  font-size: 13px;
   margin-bottom: 6px;
 }
 
@@ -1422,10 +2555,40 @@ onMounted(() => {
   font-size: 11px;
 }
 
+.unknowns-box {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
 .unknowns-list {
   margin: 0;
   padding-left: 18px;
   font-size: 12px;
+  line-height: 1.6;
+}
+
+.empty-grounding-hint {
+  text-align: center;
+  padding: 40px 20px;
+  color: #94a3b8;
+}
+
+.empty-grounding-hint .empty-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.empty-grounding-hint .empty-title {
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.empty-grounding-hint .empty-desc {
+  font-size: 12px;
+  max-width: 360px;
+  margin: 0 auto;
   line-height: 1.6;
 }
 
@@ -1452,53 +2615,130 @@ onMounted(() => {
 }
 
 .direction-card {
-  border: 1px solid #dcdfe6;
-  border-left: 4px solid #67c23a;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #10b981;
   border-radius: 8px;
-  padding: 16px;
+  padding: 14px 16px;
   background-color: #ffffff;
-  transition: box-shadow 0.2s;
+  transition: all 0.2s ease;
 }
 
 .direction-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
 }
 
 .direction-card.is-adjacent {
-  border-left-color: #e6a23c;
+  border-left-color: #f59e0b;
+}
+
+.direction-card-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .dir-title-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+}
+
+.dir-title-left {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 .dir-title {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   color: #1e293b;
 }
 
-.dir-reason {
+.dir-keyword-tag {
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.dir-fit-highlight {
   font-size: 13px;
   line-height: 1.6;
-  color: #334155;
+  color: #1e293b;
+  background: #f8fafc;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
+}
+
+.dir-fit-highlight .label {
+  color: #1d4ed8;
+}
+
+.dir-meta-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 12px;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.meta-pill {
+  background: #f1f5f9;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.dir-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.boss-search-btn {
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25);
+}
+
+.direction-card-secondary {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px dashed #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.dir-basis-box {
+  background: #fdfbf7;
+  border: 1px solid #fef3c7;
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+
+.basis-title {
+  font-size: 12px;
+  color: #b45309;
   margin-bottom: 4px;
 }
 
-.dir-basis {
+.basis-text {
   font-size: 12px;
-  line-height: 1.5;
-  margin-bottom: 10px;
+  line-height: 1.55;
+  color: #475569;
 }
 
 .dir-verify-box {
   background: #f8fafc;
   padding: 8px 12px;
   border-radius: 6px;
-  margin-bottom: 12px;
   font-size: 12px;
   display: flex;
   align-items: center;
@@ -1516,7 +2756,6 @@ onMounted(() => {
   border: 1px solid #f1f5f9;
   border-radius: 6px;
   padding: 10px 12px;
-  margin-bottom: 14px;
 }
 
 .supporting-jobs-head {
@@ -1537,11 +2776,24 @@ onMounted(() => {
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 4px;
-  padding: 6px 10px;
+  padding: 8px 10px;
 }
 
 .citation-meta {
   margin-bottom: 4px;
+}
+
+.cite-company {
+  color: #1e293b;
+}
+
+.cite-title {
+  color: #475569;
+}
+
+.cite-salary {
+  margin-left: 6px;
+  font-weight: 500;
 }
 
 .citation-quote {
@@ -1550,14 +2802,101 @@ onMounted(() => {
   border-left: 2px solid #cbd5e1;
   color: #64748b;
   font-style: italic;
-}
-
-.dir-action-footer {
-  text-align: right;
-  margin-top: 12px;
+  line-height: 1.5;
 }
 
 /* 市场快照 */
+.snapshot-header-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.title-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.snapshot-rules-panel {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+}
+
+.rules-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.rules-title {
+  font-weight: 600;
+  font-size: 13px;
+  color: #1e293b;
+}
+
+.rules-version {
+  font-size: 11px;
+}
+
+.rules-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+
+.rule-box {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.rule-box-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 6px;
+}
+
+.rule-box-content {
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.55;
+}
+
+.rule-box-content p {
+  margin: 0 0 4px 0;
+}
+
+.rule-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px;
+}
+
+.tag-label {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-right: 4px;
+}
+
+.snapshot-toolbar {
+  margin-bottom: 16px;
+}
+
 .snapshot-summary-bar {
   display: flex;
   justify-content: space-between;
@@ -1565,9 +2904,37 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 8px;
   font-size: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 12px;
   padding-bottom: 8px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.filter-controls-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #fafbfc;
+  border: 1px solid #f1f5f9;
+  border-radius: 6px;
+  padding: 12px 14px;
+}
+
+.filter-search-box {
+  max-width: 440px;
+}
+
+.filter-pills-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.filter-label {
+  color: #64748b;
+  font-weight: 500;
+  min-width: 68px;
 }
 
 .public-jobs-list {
@@ -1580,14 +2947,17 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: 12px 16px;
   border: 1px solid #f1f5f9;
   border-radius: 6px;
   background-color: #fafbfc;
+  transition: all 0.2s ease;
 }
 
 .public-job-item:hover {
-  background-color: #f1f5f9;
+  background-color: #ffffff;
+  border-color: #e2e8f0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
 .job-item-main {
@@ -1597,8 +2967,31 @@ onMounted(() => {
 .job-title-line {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 4px;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+
+.job-num-badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: #94a3b8;
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.job-city-tag {
+  font-weight: 600;
+}
+
+.job-salary {
+  font-size: 12px;
+  white-space: nowrap;
+  background: #f0f7ff;
+  border: 1px solid #d0e7ff;
+  padding: 1px 8px;
+  border-radius: 4px;
 }
 
 .job-link {
@@ -1613,12 +3006,32 @@ onMounted(() => {
 
 .job-company-line {
   font-size: 12px;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
 }
 
-.job-desc-line {
+.company-name {
+  color: #334155;
+}
+
+.source-link {
+  font-family: monospace;
   font-size: 11px;
+  color: #94a3b8;
+}
+
+.job-desc-tags-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
   margin-bottom: 6px;
+}
+
+.desc-chip {
+  font-size: 11px;
+  color: #475569;
+  background: #edf2f7;
+  padding: 2px 8px;
+  border-radius: 4px;
 }
 
 .job-skills-line {
@@ -1626,7 +3039,31 @@ onMounted(() => {
   gap: 4px;
 }
 
+.job-details-expand-box {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.snapshot-pagination-bar {
+  text-align: center;
+  padding-top: 14px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.load-more-btn {
+  width: 100%;
+  max-width: 400px;
+  font-weight: 500;
+}
+
+.snapshot-empty-wrap {
+  padding: 24px 0;
+}
+
 /* 工具类 */
+.mt-1 { margin-top: 4px; }
+.mb-1 { margin-bottom: 4px; }
 .mt-4 { margin-top: 16px; }
 .mr-1 { margin-right: 4px; }
 .ml-2 { margin-left: 8px; }

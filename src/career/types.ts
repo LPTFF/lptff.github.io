@@ -76,6 +76,7 @@ export interface MarketJobItem {
   timestamp: number;
   website: string;
   sourcePage: string;
+  cityName?: string;
   capturedAt?: string;
   pageUpdatedAt?: string;
   jobPostTime?: string | null;
