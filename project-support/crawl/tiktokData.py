@@ -24,13 +24,73 @@ OUTPUT = "tiktok.json"
 PROFILES = (
     (
         "李子栗",
-        "https://www.douyin.com/user/MS4wLjABAAAArX12ZxuOajsvfGvjJlscWW4CoRzRGWVQzg3Dl7rTyRk",
+        "https://www.douyin.com/video/7671467943355632947",
     ),
     (
         "独孤十一",
         "https://www.douyin.com/user/MS4wLjABAAAAy2jwiZb2MrkuPrx3Ppp7Mf6wK7-FeUDbhFILKtJ-GKN5DlWlyliPV03MdFKjQr5M",
     ),
 )
+
+
+def extract_mix_items_from_driver(
+    driver: webdriver.Chrome,
+    author_name: str,
+    profile_url: str,
+) -> list[dict[str, object]]:
+    script = """
+    const el = document.querySelector('[data-e2e="aweme-mix"]');
+    if (!el) return null;
+    const fiberKey = Object.keys(el).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
+    if (!fiberKey) return null;
+    let fiber = el[fiberKey];
+    let mixInfo = null;
+    while (fiber) {
+        if (fiber.memoizedProps?.mixInfo) {
+            mixInfo = fiber.memoizedProps.mixInfo;
+            break;
+        }
+        fiber = fiber.return;
+    }
+    if (!mixInfo || !mixInfo.data) return null;
+    return mixInfo.data.map(item => {
+        const stats = item.stats || {};
+        const authorInfo = item.authorInfo || {};
+        const video = item.video || {};
+        const coverList = video.coverUrlList || [];
+        const bitRateList = video.bitRateList || [];
+        const playAddr = bitRateList[0]?.playAddr || video.playAddr || [];
+        const playSrc = playAddr[0]?.src || '';
+        const ts = (item.createTime || 0) * 1000;
+        return {
+            detailUrl: `https://www.douyin.com/video/${item.awemeId}`,
+            captionUrl: coverList[0] || "",
+            videoUrl: playSrc,
+            desc: item.desc || "",
+            authorName: authorInfo.nickname || "",
+            authorPage: authorInfo.secUid ? `https://www.douyin.com/user/${authorInfo.secUid}` : "",
+            likeCount: stats.diggCount || 0,
+            collectCount: stats.collectCount || 0,
+            timestamp: ts,
+            website: "douyin"
+        };
+    });
+    """
+    try:
+        raw_items = driver.execute_script(script)
+        if raw_items:
+            items = []
+            for item in raw_items:
+                ts = int(item.get("timestamp") or 0)
+                item["authorName"] = item.get("authorName") or author_name
+                item["authorPage"] = item.get("authorPage") or profile_url
+                if ts:
+                    item["time"] = datetime.fromtimestamp(ts / 1000).strftime("%Y-%m-%d %H:%M:%S")
+                items.append(item)
+            return items
+    except Exception:
+        pass
+    return []
 
 
 def parse_video_page(
@@ -89,14 +149,47 @@ def collect(cookie: str, *, max_scrolls: int = 12, deadline_seconds: int = 150) 
     options.add_argument("--window-size=1440,1200")
     driver = None
     started = time.monotonic()
+    direct_items: list[dict[str, object]] = []
+    profile_links: list[tuple[str, str, str]] = []
     try:
         driver = webdriver.Chrome(options=options)
         driver.set_page_load_timeout(30)
-        profile_links: list[tuple[str, str, str]] = []
         for author_name, profile_url in PROFILES:
             driver.get(profile_url)
             if looks_like_challenge(driver.page_source):
                 raise RuntimeError(f"Douyin returned a login or challenge page for {author_name}")
+
+            is_video_or_mix = "/video/" in profile_url or "/collection/" in profile_url
+            if is_video_or_mix:
+                expand_script = """
+                const el = document.querySelector('[data-e2e="aweme-mix"]');
+                if (el) {
+                    const btn = el.querySelector('button, [class*="load-more"], [class*="btn"]');
+                    if (btn && btn.innerText.includes('加载更多')) btn.click();
+                }
+                """
+                for _ in range(5):
+                    try:
+                        driver.execute_script(expand_script)
+                        time.sleep(0.5)
+                    except Exception:
+                        break
+
+                mix_items = extract_mix_items_from_driver(driver, author_name, profile_url)
+                if mix_items:
+                    direct_items.extend(mix_items)
+                    continue
+
+                mix_elements = driver.find_elements(By.CSS_SELECTOR, '[data-e2e="aweme-mix"] a[href*="/video/"]')
+                if mix_elements:
+                    links = {
+                        el.get_attribute("href").split("?", 1)[0]
+                        for el in mix_elements
+                        if el.get_attribute("href")
+                    }
+                    profile_links.extend((link, author_name, profile_url) for link in sorted(links)[:50])
+                    continue
+
             stable_scrolls = 0
             last_height = driver.execute_script("return document.documentElement.scrollHeight")
             for _ in range(max_scrolls):
@@ -121,19 +214,37 @@ def collect(cookie: str, *, max_scrolls: int = 12, deadline_seconds: int = 150) 
 
     client = HttpClient(allowed_hostnames=["www.douyin.com"], max_bytes=5_000_000, retries=1)
     headers = {"Cookie": cookie, "Referer": "https://www.douyin.com/"}
-    items = []
+    items = list(direct_items)
     for link, author_name, profile_url in profile_links:
-        response = client.get(link, headers=headers, expected_content_types=["text/html"])
-        items.append(
-            parse_video_page(
-                response.text,
-                detail_url=link,
-                author_name=author_name,
-                author_page=profile_url,
+        try:
+            response = client.get(link, headers=headers, expected_content_types=["text/html"])
+            items.append(
+                parse_video_page(
+                    response.text,
+                    detail_url=link,
+                    author_name=author_name,
+                    author_page=profile_url,
+                )
             )
-        )
+        except Exception:
+            continue
+
     unique = {str(item["detailUrl"]): item for item in items}
-    return sorted(unique.values(), key=lambda item: int(item["timestamp"]), reverse=True)
+    by_author: dict[str, list[dict[str, object]]] = {}
+    for author_name, _ in PROFILES:
+        by_author[author_name] = []
+    for item in sorted(unique.values(), key=lambda item: int(item.get("timestamp") or 0), reverse=True):
+        auth = str(item.get("authorName") or "")
+        by_author.setdefault(auth, []).append(item)
+
+    interleaved: list[dict[str, object]] = []
+    max_len = max((len(v) for v in by_author.values()), default=0)
+    for idx in range(max_len):
+        for author_name, _ in PROFILES:
+            author_list = by_author.get(author_name, [])
+            if idx < len(author_list):
+                interleaved.append(author_list[idx])
+    return interleaved
 
 
 def main() -> int:

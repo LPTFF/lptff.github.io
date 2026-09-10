@@ -59,6 +59,7 @@ COLLECTORS = (
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, optional=True, group="full"),
     CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True),
     CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "full"),
+    CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 180, True, "full"),
 )
 
 

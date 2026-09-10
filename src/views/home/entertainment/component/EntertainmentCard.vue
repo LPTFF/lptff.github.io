@@ -6,6 +6,7 @@
         :alt="`${platformLabel}：${item.title}`"
         class="cover-image"
         loading="lazy"
+        referrerpolicy="no-referrer"
         @error="handleImageError"
       />
       <span class="platform-badge" :class="`badge-${item.platform}`">{{ platformLabel }}</span>
@@ -33,7 +34,7 @@
 import { computed, onMounted, ref } from "vue";
 import fallbackImage from "../../../../assets/bg.jpg";
 
-export type EntertainmentPlatform = "movie" | "kuaishou" | "douyin";
+export type EntertainmentPlatform = "movie" | "kuaishou" | "douyin" | "bilibili";
 
 export interface EntertainmentItem {
   key: string;
@@ -58,6 +59,7 @@ const platformLabel = computed(() => ({
   movie: "豆瓣动画",
   kuaishou: "快手",
   douyin: "抖音",
+  bilibili: "哔哩视频",
 }[props.item.platform]));
 
 const date = computed(() => new Date(props.item.publishedAt));
@@ -135,6 +137,7 @@ const handleImageError = () => {
 .badge-movie { background: rgba(24, 115, 73, 0.9); }
 .badge-kuaishou { background: rgba(255, 73, 41, 0.9); }
 .badge-douyin { background: rgba(28, 29, 34, 0.9); }
+.badge-bilibili { background: rgba(251, 114, 153, 0.95); }
 
 .card-content { padding: 13px 14px 14px; }
 
