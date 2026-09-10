@@ -39,6 +39,7 @@ COLLECTORS = (
     CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3, group="archived"),
     CollectorSpec("weibo", "weibo.py", "weibo.json", "article", 5),
     CollectorSpec("douyinHot", "douyinHot.py", "douyinHot.json", "article", 5, 90, True),
+    CollectorSpec("kuaishouHot", "kuaishouHot.py", "kuaishouHot.json", "article", 5, optional=True),
     CollectorSpec("xiaohongshu", "xiaohongshu.py", "xiaohongshu.json", "article", optional=True),
     CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3, group="archived"),
     CollectorSpec("52pojie", "52pojie.py", "52pojie.json", "article", 3),
@@ -57,7 +58,7 @@ COLLECTORS = (
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, optional=True, group="full"),
-    CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True),
+    CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True, group="archived"),
     CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "full"),
     CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 180, True, "full"),
 )

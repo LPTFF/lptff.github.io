@@ -95,6 +95,11 @@ jobs:
         run: python -B project-support/crawl/classify_52pojie_ecosystem.py --summary .artifacts/collectors/ecosystem.json
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      - name: Analyze hot news ecosystem signals with Gemini
+        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
+        run: python -B project-support/crawl/classify_guide_ecosystem.py --summary .artifacts/collectors/guide-ecosystem.json
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       - name: Analyze welfare signals with Gemini
         # AI 不可用时仍执行规则分类提取，不让辅助分类阻断网站发布。
         run: python -B project-support/crawl/filter_welfare_with_gemini.py --summary .artifacts/collectors/welfare-filter.json
@@ -108,6 +113,7 @@ jobs:
           python -B project-support/crawl/sendNotify.py
           --ai-status .artifacts/collectors/python-ci.json
           --ai-status .artifacts/collectors/ecosystem.json
+          --ai-status .artifacts/collectors/guide-ecosystem.json
           --ai-status .artifacts/collectors/welfare-filter.json
         env:
           QYWX_KEY: ${{ secrets.QYWX_KEY }}

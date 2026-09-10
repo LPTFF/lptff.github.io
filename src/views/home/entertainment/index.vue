@@ -4,7 +4,7 @@
       <header class="entertainment-overview">
         <div class="overview-copy">
           <h1 id="entertainment-title">娱乐专区</h1>
-          <p class="section-intro">豆瓣动画与哔哩、抖音精选作者内容集中呈现；快手当前保留历史热度快照。</p>
+          <p class="section-intro">豆瓣动画与哔哩、抖音精选作者内容集中呈现。</p>
         </div>
         <div class="overview-stats" aria-label="内容来源概览">
           <span><strong>{{ contentCount }}</strong> 条内容</span>
@@ -37,7 +37,7 @@
 
       <details class="source-details">
         <summary>更新范围与来源说明</summary>
-        <p>豆瓣跟踪热门动画更新；哔哩视频跟踪百科老王、杨博士说AI；抖音跟踪李子栗、独孤十一；快手保留历史热度快照。</p>
+        <p>豆瓣跟踪热门动画更新；哔哩视频跟踪百科老王、杨博士说AI；抖音跟踪李子栗、独孤十一。</p>
       </details>
     </section>
 
@@ -55,7 +55,6 @@
 import { computed, ref } from "vue";
 import { isPC } from "../../../utils/utils";
 import movieData from "../../../data/movie.json";
-import kuaishouData from "../../../data/kuaishouData.json";
 import douyinData from "../../../data/tiktok.json";
 import bilibiliData from "../../../data/bilibili.json";
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
@@ -98,27 +97,6 @@ const movieItems: EntertainmentItem[] = movieData
     isNew: movie.is_new,
   }))
   .slice(0, 50);
-
-const kuaishouItems: EntertainmentItem[] = kuaishouData
-  .map((video, index) => {
-    const viewCount = toNumber(video.viewCount);
-    const likeCount = toNumber(video.likeCount);
-    const detailUrl = "detailUrl" in video ? String(video.detailUrl || "") : "";
-    return {
-      key: `kuaishou-${video.timestamp}-${index}`,
-      platform: "kuaishou" as const,
-      title: video.originCaption || "快手作品",
-      coverUrl: video.captionUrl,
-      url: detailUrl || "https://www.kuaishou.com/",
-      actionLabel: detailUrl ? "查看作品" : "前往快手",
-      primaryMetric: `${formatCompactNumber(viewCount)} 播放`,
-      secondaryMetric: `${formatCompactNumber(likeCount)} 喜欢 · 历史快照`,
-      qualityScore: viewCount + likeCount * 4,
-      publishedAt: timestampOf(video.timestamp),
-    };
-  })
-  .sort((left, right) => right.publishedAt - left.publishedAt)
-  .slice(0, 18);
 
 const douyinItems: EntertainmentItem[] = douyinData
   .map((video, index) => {
@@ -167,20 +145,18 @@ const bilibiliItems: EntertainmentItem[] = (bilibiliData as Array<Record<string,
 
 const itemsByPlatform: Record<EntertainmentPlatform, EntertainmentItem[]> = {
   movie: movieItems,
-  kuaishou: kuaishouItems,
   douyin: douyinItems,
   bilibili: bilibiliItems,
 };
 
-const featuredItems = [...douyinItems, ...bilibiliItems, ...movieItems, ...kuaishouItems]
+const featuredItems = [...douyinItems, ...bilibiliItems, ...movieItems]
   .sort((left, right) => right.publishedAt - left.publishedAt);
-const contentCount = movieItems.length + kuaishouItems.length + douyinItems.length + bilibiliItems.length;
+const contentCount = movieItems.length + douyinItems.length + bilibiliItems.length;
 const platformCount = Object.values(itemsByPlatform).filter((items) => items.length).length;
 
 const platformTabs = computed(() => [
   { key: "all" as const, label: "全部", count: contentCount },
   { key: "movie" as const, label: "豆瓣动画", count: movieItems.length },
-  { key: "kuaishou" as const, label: "快手", count: kuaishouItems.length },
   { key: "douyin" as const, label: "抖音", count: douyinItems.length },
   { key: "bilibili" as const, label: "哔哩视频", count: bilibiliItems.length },
 ]);

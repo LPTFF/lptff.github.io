@@ -56,7 +56,7 @@ export default defineConfig({
     open: false,
     host: '0.0.0.0',
     port: 8090,
-    strictPort: true,
+    strictPort: false,
     proxy: {
       "/Run": {
         target: "https://www.runoob.com",

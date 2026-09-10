@@ -5,39 +5,16 @@
         <div>
           <div class="radar-title" id="guide-radar-title">热门资讯生态雷达</div>
           <div class="radar-description">
-            汇集抖音热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。
+            汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。
           </div>
         </div>
         <div class="radar-stats">
-          <span>{{ totalNewsCount }} 条信号</span>
-          <span>{{ sourceFilters.length }} 个来源</span>
+          <span>{{ totalNewsCount }} 条资讯</span>
+          <span>{{ analyzedCount }} 条 Gemini 已分析</span>
           <span>{{ categoryOptions.length }} 个生态主题</span>
         </div>
       </section>
       <section class="radar-filters" aria-label="热门资讯生态筛选">
-        <div class="filter-row">
-          <span class="filter-label">资讯来源</span>
-          <button
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedSource === 'all' }"
-            :aria-pressed="selectedSource === 'all'"
-            @click="selectedSource = 'all'"
-          >
-            全部 {{ totalNewsCount }}
-          </button>
-          <button
-            v-for="source in sourceFilters"
-            :key="source.id"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedSource === source.id }"
-            :aria-pressed="selectedSource === source.id"
-            @click="selectedSource = source.id"
-          >
-            {{ source.label }} {{ source.count }}
-          </button>
-        </div>
         <div class="filter-row">
           <span class="filter-label">生态主题</span>
           <button
@@ -74,14 +51,46 @@
           >
             {{ focus.label }}
           </button>
+        </div>
+        <div class="filter-row" role="group" aria-label="按资讯来源筛选">
+          <span class="filter-label">观察源</span>
+          <button
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedSource === 'all' }"
+            :aria-pressed="selectedSource === 'all'"
+            @click="selectedSource = 'all'"
+          >
+            全部 {{ totalNewsCount }}
+          </button>
+          <button
+            v-for="source in sourceFilters"
+            :key="source.id"
+            type="button"
+            class="filter-tag"
+            :class="{ active: selectedSource === source.id }"
+            :aria-pressed="selectedSource === source.id"
+            @click="selectedSource = source.id"
+          >
+            {{ source.label }} {{ source.count }}
+          </button>
           <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
         </div>
       </section>
+      <details class="collector-details">
+        <summary>Gemini 标签逻辑与更新规则</summary>
+        <p>汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末 5 个观察源，统一直接由 Gemini 3.5 智能模型进行全量语义理解，生成生态主题分类与观察摘要。</p>
+        <p>模型根据各平台新闻标题、事件背景及跨平台热度，归类至政务与时事、社会与民生、科技与产业、文娱与影视、消费与生活、教育与职场、财经与商业、体育与竞技、深度特稿与网络潮流 10 大生态主题，真实反映当下公共注意力分布。</p>
+        <p>观察视角根据 Gemini 分析结果生成：跨来源共振＝同一主题在 2 个及以上来源同时上榜发酵；热榜前列＝各平台 Top 10 核心关注；深度特稿＝南方周末深度调查特稿与事件背景追踪。</p>
+        <p>列表严格按最新发布与采集时间倒序呈现，各来源保留原始榜单名次与热度值；数据随采集流水线由 Gemini 每日自动分析并更新发布。</p>
+      </details>
     </div>
     <div class="filter-empty" v-if="filteredNews.length === 0">
       {{ selectedSource === 'xiaohongshu' && !xiaohongshuNewsCount
         ? '小红书暂无可用资讯。'
-        : '当前筛选组合暂无资讯，可以切换来源、主题或观察视角。' }}
+        : selectedSource === 'kuaishou' && !kuaishouNewsCount
+          ? '快手热榜暂无可用资讯。'
+          : '当前筛选组合暂无资讯，可以切换来源、主题或观察视角。' }}
     </div>
     <el-row>
       <el-col
@@ -126,35 +135,21 @@
                 {{ item.title }}
               </a>
               <div class="ecosystem-tags">
-                <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
-                <el-tag size="small" type="success" v-if="item.rank">
-                  榜单 #{{ item.rank }}
+                <el-tag size="small" type="danger" v-if="handleRankLabel(item)">
+                  {{ handleRankLabel(item) }}
                 </el-tag>
+                <el-tag size="small" type="warning" v-if="handleHeatLabel(item)">
+                  {{ handleHeatLabel(item) }}
+                </el-tag>
+                <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
                 <el-tag size="small" type="primary" v-if="item.ecosystem.sourceBreadth > 1">
                   {{ item.ecosystem.sourceBreadth }} 源共振
                 </el-tag>
-                <el-tag size="small" type="warning" v-if="item.ecosystem.isDeep">
-                  深度追踪
+                <el-tag size="small" type="success" v-if="item.ecosystem.isDeep">
+                  深度特稿
                 </el-tag>
               </div>
               <div class="ecosystem-summary">{{ item.ecosystem.observation }}</div>
-              <div class="welfare-div-link">
-                <div
-                  v-if="item.website == 'weibo'"
-                  class="weibo-img-link"
-                  :style="`background:${item.image.small_icon_desc_color}`"
-                >
-                  {{ item.image.small_icon_desc }}
-                </div>
-                <img
-                  :src="handleAuthorImg(item)"
-                  alt="作者"
-                  class="welfare-img-link"
-                  @error="handleImageError"
-                  referrerPolicy="no-referrer"
-                  v-else
-                />
-              </div>
             </div>
           </div>
           <div class="welfare-div-website">
@@ -256,6 +251,8 @@ import infzmNews from "../../../data/infzm.json";
 import weiboNews from "../../../data/weibo.json";
 import douyinHotNews from "../../../data/douyinHot.json";
 import xiaohongshuNews from "../../../data/xiaohongshu.json";
+import kuaishouHotNews from "../../../data/kuaishouHot.json";
+import guideEcosystem from "../../../data/guide-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
@@ -293,7 +290,13 @@ export default {
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
     const xiaohongshuNewsCount = xiaohongshuNews.length;
+    const kuaishouNewsCount = kuaishouHotNews.length;
     const rawSourceDefinitions = [
+      {
+        id: "kuaishou",
+        label: "快手热榜",
+        items: kuaishouHotNews as any[],
+      },
       {
         id: "douyinHot",
         label: "抖音热榜",
@@ -315,122 +318,164 @@ export default {
         items: infzmNews as any[],
       },
     ];
+    const ecosystemByUrl = new Map<string, any>(
+      ((guideEcosystem as any).items || []).map((item: any) => [item.url, item])
+    );
     const topicDefinitions = [
       {
-        name: "灾害与安全",
+        name: "深度特稿",
+        keywords: ["南方周末", "调查", "特稿", "深度追踪", "独家调查", "记者调查"],
+      },
+      {
+        name: "政务与时事",
         keywords: [
-          "泥石流", "山体滑坡", "遇难", "失联", "被埋", "灾害", "救援", "犯罪",
-          "罪案", "勒索", "拘禁", "枪声", "逮捕", "被查", "罚单", "造假", "谣言",
-          "走失", "男童", "儿童",
+          "总书记", "习近平", "中方", "外交部", "政策", "政府", "国务院", "证监会",
+          "法院", "检察院", "人大", "政协", "医保", "养老", "税收", "宏观调控",
+          "联合声明", "美联储", "菲律宾", "尼泊尔", "美国反对", "中俄蒙", "台海",
+          "国防部", "国家安全", "党纪", "驻华使馆", "双边关系", "峰会", "指示",
+          "反华", "两岸", "军官", "被处理", "落马", "纪委", "运河", "基建", "新规",
         ],
       },
       {
-        name: "教育与职场",
+        name: "社会与民生",
         keywords: [
-          "教育", "会计", "开学", "学校", "同学", "应届生", "上班", "就业", "职场",
-          "写字", "读懂", "主科",
+          "泥石流", "滑坡", "火灾", "遇难", "失联", "被埋", "灾害", "救援", "坍塌",
+          "事故", "货轮火灾", "消防", "搜救", "暴雨", "台风", "地震", "洪涝", "走失",
+          "被拐", "抓捕", "立案", "通报", "被查", "拘留", "涉案", "造谣", "诈骗",
+          "民警", "警方", "交警", "医患", "医院", "食品安全", "青岛货轮", "死亡",
+          "猝死", "离世", "逝世", "去世", "患病", "重症", "感染", "癌症", "病例",
+          "性侵", "获刑", "判刑", "殴打", "被拘", "未成年", "叮咬", "垃圾", "出狱",
         ],
       },
       {
-        name: "体育竞技",
+        name: "体育与竞技",
         keywords: [
-          "足球", "篮球", "比赛", "冠军", "全运会", "奥运", "世界杯", "英超", "拳王",
-          "赛道", "比分", "圣日耳曼", "利物浦", "贝林厄姆", "姆巴佩", "赵心童",
+          "足球", "篮球", "比赛", "冠军", "亚军", "全运会", "奥运", "世界杯", "英超",
+          "西甲", "欧冠", "NBA", "CBA", "拳王", "乒乓球", "羽毛球", "网球", "赛道",
+          "比分", "绝杀", "圣日耳曼", "利物浦", "贝林厄姆", "姆巴佩", "赵心童", "郑钦文",
+          "破纪录", "夺冠", "男排", "女排", "男足", "女足", "男篮", "女篮", "亚锦赛",
+          "库里", "詹姆斯", "陈芋汐", "全红婵", "严子怡",
         ],
       },
       {
-        name: "科技产业",
+        name: "科技与产业",
         keywords: [
-          "科技", "人工智能", "AI", "机器人", "芯片", "手机", "商业航天", "暗物质",
-          "DLSS", "产品发布", "企业AI",
+          "科技", "人工智能", "AI", "大模型", "机器人", "芯片", "算力", "半导体",
+          "华为", "苹果", "iPhone", "英伟达", "商业航天", "火箭", "卫星", "暗物质",
+          "DLSS", "产品发布", "企业AI", "自动驾驶", "新能源", "电池", "量子", "低空经济",
         ],
       },
       {
-        name: "国际与政策",
+        name: "财经与商业",
         keywords: [
-          "总书记", "中方", "政策", "政府", "法院", "税", "证监会", "经济", "医保",
-          "养老", "住房", "演习", "美联储", "菲律宾", "尼泊尔", "美国反对", "中俄蒙",
+          "股市", "A股", "港股", "美股", "基金", "理财", "银行", "降息", "加息",
+          "财报", "营收", "利润", "上市", "IPO", "破产", "收购", "并购", "油价",
+          "汇率", "人民币", "黄金", "楼市", "房价", "房贷", "首付", "恒大", "万科",
+          "投资", "双向投资", "外贸", "贸易", "关税", "资产", "千亿", "商界",
+        ],
+      },
+      {
+        name: "文娱与影视",
+        keywords: [
+          "电影", "电视剧", "剧集", "综艺", "演员", "明星", "歌手", "演唱会", "音乐",
+          "舞台", "MV", "粉丝", "拍摄", "造型", "口碑", "票房", "实体专", "广告",
+          "订婚", "结婚", "离婚", "分手", "恋情", "花少", "极限挑战", "早春晴朗",
+          "披荆斩棘", "说唱", "舞蹈", "角色", "首映", "首播", "金鸡奖", "百花奖",
+          "定档", "国庆档", "刘亦菲", "女星", "小猪佩奇", "动漫", "入驻快手",
         ],
       },
       {
         name: "消费与生活",
         keywords: [
-          "消费", "钱", "文旅", "旅游", "追秋", "妆容", "穿搭", "通勤", "打卡", "油价",
-          "手环", "豪宅", "雪花牛肉", "肥皂", "小猫", "小狗", "天气", "减肥", "外套",
+          "消费", "文旅", "旅游", "景区", "追秋", "秋日", "妆容", "穿搭", "通勤",
+          "打卡", "美食", "餐厅", "小吃", "月饼", "中秋", "奶茶", "咖啡", "露营",
+          "宠物", "小猫", "小狗", "天气", "降温", "减肥", "外套", "优衣库", "买菜",
+          "超市", "八角", "向日葵", "种植", "见老丈人", "怀孕", "官宣", "家常",
         ],
       },
       {
-        name: "文娱舆情",
+        name: "教育与职场",
         keywords: [
-          "电影", "电视剧", "综艺", "演员", "明星", "歌手", "演唱会", "音乐", "舞台",
-          "MV", "粉丝", "拍摄", "造型", "口碑", "实体专", "广告", "订婚", "点赞",
-          "分手", "花少", "极限挑战", "早春晴朗", "披荆斩棘", "说唱", "舞蹈", "角色展示",
+          "教育", "开学", "学校", "大学", "中学", "小学", "老师", "教师", "好老师",
+          "同学", "学生", "应届生", "找工作", "招聘", "求职", "上班", "下班", "职场",
+          "考公", "考研", "高考", "中考", "写字", "军训", "校服", "主科", "课外班",
+          "清华", "北大", "复旦", "硕士", "附中", "读懂",
+        ],
+      },
+      {
+        name: "网络与潮流",
+        keywords: [
+          "流行", "热梗", "抽象", "网友", "热评", "搞笑", "整活", "模仿", "挑战",
+          "短视频", "日常", "手滑", "点赞", "出圈", "治愈", "神仙操作", "功夫", "武术",
         ],
       },
     ];
     const classifyTopic = (item: any) => {
+      if (item.website === "infzm") return "深度特稿";
       const content = String(item.title || "").toUpperCase();
       return (
         topicDefinitions.find((topic) =>
           topic.keywords.some((keyword) => content.includes(keyword.toUpperCase()))
-        )?.name || "平台流行"
+        )?.name || "网络与潮流"
       );
     };
-    const categorizedGroups = rawSourceDefinitions.map((source) => ({
-      ...source,
-      items: source.items.map((item) => ({
-        ...item,
-        ecosystem: {
-          category: classifyTopic(item),
-          isTop: Number(item.rank) > 0 && Number(item.rank) <= 10,
-          isDeep: item.website === "infzm" && String(item.desc || "").length >= 50,
-        },
-      })),
-    }));
-    const categorySources = new Map<string, Set<string>>();
-    categorizedGroups.forEach((source) => {
-      source.items.forEach((item) => {
-        const category = item.ecosystem.category;
-        if (!categorySources.has(category)) categorySources.set(category, new Set());
-        categorySources.get(category)?.add(source.id);
-      });
-    });
-    const sourceDefinitions = categorizedGroups.map((source) => ({
+    const sourceDefinitions = rawSourceDefinitions.map((source) => ({
       ...source,
       items: source.items.map((item) => {
-        const sourceBreadth = categorySources.get(item.ecosystem.category)?.size || 1;
+        const eco = ecosystemByUrl.get(item.url) as any;
+        const category = eco?.category || classifyTopic(item);
+        const isTop = eco
+          ? eco.isTop
+          : Number(item.rank) > 0 && Number(item.rank) <= 10;
+        const isDeep = eco
+          ? eco.isDeep
+          : source.id === "infzm" && String(item.desc || "").length >= 50;
+        const sourceBreadth = eco?.sourceBreadth || 1;
         const rankText = item.rank
-          ? `榜单第 ${item.rank} 位`
+          ? `第 ${item.rank} 位`
           : source.id === "xiaohongshu"
             ? "公开发现内容"
             : source.id === "infzm"
-              ? "深度内容"
+              ? "深度特稿"
               : "置顶信号";
-        const observation = source.id === "xiaohongshu"
-          ? `来自小红书的${item.ecosystem.category}内容。`
-          : item.ecosystem.isDeep
-            ? `来自南方周末的深度追踪，为当前${item.ecosystem.category}补充事件背景与后续。`
+        const heatText = item.hotValue ? ` · 热度 ${item.hotValue}` : "";
+        const observation = eco
+          ? eco.observation
+          : isDeep
+            ? `来自南方周末的深度特稿，为当前${category}补充事件背景与后续。`
             : sourceBreadth > 1
-              ? `当前快照中，这类${item.ecosystem.category}同时出现在 ${sourceBreadth} 个来源；本条为${source.label}${rankText}。`
-              : `本条为${source.label}${rankText}，反映该平台此刻的注意力。`;
+              ? `当前快照中，这类${category}同时出现在 ${sourceBreadth} 个来源；本条为${source.label}${rankText}${heatText}。`
+              : `本条为${source.label}${rankText}${heatText}，反映该平台此刻的注意力。`;
+
         return {
           ...item,
-          ecosystem: { ...item.ecosystem, sourceBreadth, observation },
+          website: item.website || source.id,
+          ecosystem: {
+            category,
+            isTop,
+            isDeep,
+            sourceBreadth,
+            observation,
+          },
         };
       }),
     }));
-    const interleaveSources = (groups: any[][]) => {
-      const result: any[] = [];
-      const maxLength = Math.max(...groups.map((group) => group.length), 0);
-      for (let index = 0; index < maxLength; index += 1) {
-        groups.forEach((group) => {
-          if (group[index]) result.push(group[index]);
-        });
-      }
-      return result;
-    };
-    const newsGuide = interleaveSources(sourceDefinitions.map((source) => source.items));
+
+    // Strictly sort by timestamp descending (newest first).
+    // If same timestamp / batch, sort by rank ascending (rank 0 / 1 first).
+    const allItems = sourceDefinitions.flatMap((source) => source.items);
+    const newsGuide = allItems.sort((a, b) => {
+      const timeDiff = (Number(b.timestamp) || 0) - (Number(a.timestamp) || 0);
+      if (timeDiff !== 0) return timeDiff;
+      const rankA = Number(a.rank) > 0 ? Number(a.rank) : (a.rank === 0 || a.rank === "0" ? 0 : 999);
+      const rankB = Number(b.rank) > 0 ? Number(b.rank) : (b.rank === 0 || b.rank === "0" ? 0 : 999);
+      return rankA - rankB;
+    });
+
     const totalNewsCount = newsGuide.length;
+    const analyzedCount = computed(
+      () => newsGuide.filter((item: any) => item.ecosystem).length
+    );
     const sourceFilters = sourceDefinitions.map((source) => ({
       id: source.id,
       label: source.label,
@@ -450,7 +495,7 @@ export default {
       { key: "all", label: "全部视角" },
       { key: "resonance", label: "跨来源共振" },
       { key: "top", label: "热榜前列" },
-      { key: "deep", label: "深度报道" },
+      { key: "deep", label: "深度特稿" },
     ];
     const filteredNews = computed(() =>
       newsGuide.filter((item) => {
@@ -475,6 +520,29 @@ export default {
         }
       })
     );
+    const handleRankLabel = (item: any) => {
+      const rankVal = item.rank;
+      if (rankVal === undefined || rankVal === null || rankVal === "") return "";
+      const rankNum = Number(rankVal);
+      if (item.website === "kuaishou") {
+        return rankNum > 0 ? `快手热榜 #${rankNum}` : "快手置顶";
+      }
+      if (item.website === "douyinHot") {
+        return rankNum > 0 ? `抖音热榜 #${rankNum}` : "抖音置顶";
+      }
+      if (item.website === "weibo") {
+        return rankNum > 0 ? `微博热搜 #${rankNum}` : "微博置顶";
+      }
+      return rankNum > 0 ? `榜单 #${rankNum}` : "置顶信号";
+    };
+    const handleHeatLabel = (item: any) => {
+      if (item.hotValue) return `热度 ${item.hotValue}`;
+      if (item.heat) return `热度 ${item.heat}`;
+      if (item.website === "weibo" && item.image?.small_icon_desc) {
+        return item.image.small_icon_desc;
+      }
+      return "";
+    };
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -502,6 +570,9 @@ export default {
         case "hxm5":
         case "mutouxb":
           websiteLogo = item.img_src ? item.img_src : logoUrl;
+          break;
+        case "kuaishou":
+          websiteLogo = item.poster || item.captionUrl || item.image || logoUrl;
           break;
         default:
           websiteLogo = logoUrl;
@@ -531,6 +602,7 @@ export default {
         case "52pojie":
         case "douyinHot":
         case "xiaohongshu":
+        case "kuaishou":
           websiteUrl = item.url;
           break;
         case "hxm5":
@@ -569,6 +641,9 @@ export default {
           break;
         case "douyinHot":
           websiteName = "抖音热榜";
+          break;
+        case "kuaishou":
+          websiteName = "快手热榜";
           break;
         case "xiaohongshu":
           websiteName = "小红书";
@@ -621,6 +696,9 @@ export default {
           break;
         case "douyinHot":
           websiteImg = "https://www.douyin.com/favicon.ico";
+          break;
+        case "kuaishou":
+          websiteImg = "https://www.kuaishou.com/favicon.ico";
           break;
         case "xiaohongshu":
           websiteImg = "https://fe-video-qc.xhscdn.com/fe-platform/ed8fe781ce9e16c1bfac2cd962f0721edabe2e49.ico";
@@ -713,6 +791,10 @@ export default {
     });
     return {
       xiaohongshuNewsCount,
+      kuaishouNewsCount,
+      analyzedCount,
+      handleRankLabel,
+      handleHeatLabel,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -755,6 +837,19 @@ export default {
   border: 1px solid #d8e5f5;
   border-radius: 12px;
   background: linear-gradient(135deg, #f8fbff 0%, #f3f8ff 100%);
+}
+.collector-details {
+  margin-top: 12px;
+  color: #65738a;
+  font-size: 12px;
+  line-height: 1.6;
+}
+.collector-details summary {
+  cursor: pointer;
+  color: #4a74ad;
+}
+.collector-details p {
+  margin: 8px 0 0;
 }
 .ecosystem-radar {
   display: flex;
