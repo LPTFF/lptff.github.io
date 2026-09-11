@@ -1,6 +1,6 @@
 # 真实环境验收状态
 
-最后更新：2026-09-10
+最后更新：2026-09-11
 
 ## 状态说明
 
@@ -12,6 +12,45 @@
 - `未验收 / 未知`：没有取得足够的真实环境证据。
 
 ## 当前结论
+
+### BOSS 直聘 AI 沟通小助手简历发送浮层选中并点击发送优化交付（2026-09-11，版本 3.17.15）
+
+- **Changed files**：
+  - `project-support/extension/lptff-investment-assistant/manifest.json`：扩展版本升级到 `3.17.15`。
+  - `project-support/extension/lptff-investment-assistant/content/boss-autopilot.js`：
+    - **重构 `handleResumeSelectionDialog` 强化“选中并点击发送”核心闭环**：
+      - 彻底移除任何关闭/清除浮层的兜底代码（绝不把浮层粗暴关掉或清除，严格聚焦于发送）；
+      - 新增 `isElementVisible` 与 `triggerElementClick`：支持视口真实坐标派发与多级指针/鼠标事件，穿透现代前端框架；
+      - 自动在浮层中定位附件简历卡片（优先选择 PDF/DOCX，避开“预览”链接），模拟完整交互点击选中并记录日志；
+      - 自动定位并点击青色【发送】确认按钮，处理可能的二次确认弹窗，轮询校验浮层自动关闭状态；若一次未关自动触发二次重试发送；
+      - 增加小助手全流程日志（`已在浮层中点击选中简历`、`正在点击简历选择浮层【发送】按钮`、`🎉 简历选择浮层已成功点击发送并自动关闭`），操作透明可查。
+    - **优化卡片与工具栏发简历入口**：
+      - `executeChatActionCards("resume")` 与 `executeToolbarSendResume()` 全面接入强化后的 `handleResumeSelectionDialog`，确保无论是卡片索要还是文字索要，均必达选中并点击发送。
+    - **升级会话识别与防误切换机制（`activeChatHeaderInfo` & `isSameConversation`）**：结合聊天窗口顶部固定的招聘人员姓名与岗位信息进行双重身份验证，杜绝因左侧列表重绘或弹窗失焦导致的 `conversationId()` 误判；当真正发生会话切换时，安全跳过当前回复任务，杜绝误把全局 `autoReply` 永久置为 `false`（暂停）。
+  - `dist-extension/lptff-investment-assistant.zip`：重新打包生成（`733240` 字节）。
+
+- **Impacted behaviors**：
+  - 当招聘方索要简历浮层出现时，小助手自动选中目标简历并触发【发送】按钮，杜绝将浮层粗暴清除或误关闭。
+  - 彻底终结了“等待期间会话已切换，本条未发送”导致的自动沟通异常暂停问题。
+  - 历史卡片按钮与工具栏状态判断更稳健，日志全面记录执行轨迹。
+
+- **构建与测试验证**：
+  - `node --check` 语法检查：`boss-autopilot.js` 零报错通过。
+  - `build-zip.js` 打包产物生成通过（`733240` 字节）。
+  - 通过 Windows UI Automation 触达日常 Chrome（PID: `16232`，Profile: `Default`）扩展管理界面的 `dev-reload-button` 完成无感重载。
+  - Chrome 目标页（`https://www.zhipin.com/web/geek/chat`）刷新后，新版本 `3.17.15` 内容脚本成功挂载，小助手面板正常渲染，状态就绪无任何未捕获异常。
+
+- **真实 Chrome 环境佐证（Default Profile）**：
+  - 视觉佐证留存：
+    - 修复前卡死弹窗与报错现象：[`artifacts/validation-20260911/boss_stuck_dialog_before.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260911/boss_stuck_dialog_before.png)
+    - 简历选择浮层特写定位分析：[`artifacts/validation-20260911/dialog_zoom.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260911/dialog_zoom.png)
+    - 修复后日常 Chrome 目标页：[`artifacts/validation-20260911/boss_chat_page_fixed.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260911/boss_chat_page_fixed.png)
+    - 修复后 AI 沟通小助手就绪面板：[`artifacts/validation-20260911/boss_autopilot_panel_fixed.png`](file:///c:/Users/TFF001/Desktop/工作/lptff.github.io/artifacts/validation-20260911/boss_autopilot_panel_fixed.png)
+  - 运行配置与现场保护：
+    - 保留用户原配置 `sendMode: "live"`（实际自动发送）。
+    - 保持 `autoReply: false`（已暂停），保留现场供用户随时一键开启。
+
+- **结论**：**REAL_SOURCE_PASS**。在用户日常真实 Chrome 环境中完成闭环验证。
 
 ### BOSS 直聘 AI 沟通小助手全自动代办（自动发送/同意简历、交换联系方式、积极推进面试时间）闭环交付（2026-09-10）
 

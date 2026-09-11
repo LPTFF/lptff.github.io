@@ -732,21 +732,49 @@
     return /item-friend|left|other|friend|boss|receive|incoming/.test(chain) || !/right|self|mine/.test(chain);
   }
 
+  function activeChatHeaderInfo() {
+    const header = document.querySelector(".chat-conversation .top-info, .chat-conversation .chat-header, .chat-header, .chat-title, .user-name, [class*='top-info'], [class*='chat-header']");
+    const name = header?.querySelector(".name, .name-text, [class*='name']")?.textContent || "";
+    const job = header?.querySelector(".job-name, .job-title, [class*='job']")?.textContent || "";
+    return `${name} ${job}`.replace(/\s+/g, " ").trim();
+  }
+
   function conversationId() {
-    const active = document.querySelector(".user-list .friend-content.selected,.friend-item.active,.chat-item.active,[class*='friend'][class*='active'],[class*='chat'][class*='active']");
+    const active = document.querySelector(".user-list .friend-content.selected, .user-list li.selected, .friend-item.active, .chat-item.active, [class*='friend'][class*='active'], [class*='chat'][class*='active'], [class*='friend-content'][class*='selected']");
     const row = active?.closest("li") || active;
     const stableAttribute = ["data-id", "data-uid", "data-mid", "data-encrypt-id", "data-boss-id"].map((name) => row?.getAttribute(name) || active?.getAttribute(name)).find(Boolean);
     const avatar = row?.querySelector(".figure img,img")?.getAttribute("src") || "";
-    const identity = row?.querySelector(".title-box,.name-box,.name-text")?.textContent || "";
-    return String(stableAttribute || `${avatar}|${identity}` || location.pathname).trim().slice(0, 500);
+    const identity = (row?.querySelector(".title-box,.name-box,.name-text")?.textContent || "").trim();
+    const chatHeader = activeChatHeaderInfo();
+
+    if (stableAttribute) return String(stableAttribute).trim().slice(0, 500);
+    if (identity) return `${avatar}|${identity}`.trim().slice(0, 500);
+    if (chatHeader) return `chat|${chatHeader}`.slice(0, 500);
+    return location.pathname;
   }
 
   function conversationLabel() {
-    const active = document.querySelector(".user-list .friend-content.selected,.friend-item.active,.chat-item.active,[class*='friend'][class*='active'],[class*='chat'][class*='active']");
+    const active = document.querySelector(".user-list .friend-content.selected, .user-list li.selected, .friend-item.active, .chat-item.active, [class*='friend'][class*='active'], [class*='chat'][class*='active'], [class*='friend-content'][class*='selected']");
     const row = active?.closest("li") || active;
     const title = row?.querySelector(".name-text,.name-box,.title-box")?.textContent || "";
     const subtitle = row?.querySelector(".last-msg,.gray,.source-job,.job-name")?.textContent || "";
-    return `${title} ${subtitle}`.replace(/\s+/g, " ").trim().slice(0, 300) || "当前 BOSS 会话";
+    const listLabel = `${title} ${subtitle}`.replace(/\s+/g, " ").trim().slice(0, 300);
+    const chatHeader = activeChatHeaderInfo();
+    return listLabel || chatHeader || "当前 BOSS 会话";
+  }
+
+  function isSameConversation(cidBefore, labelBefore) {
+    const currentCid = conversationId();
+    if (currentCid === cidBefore) return true;
+    const currentHeader = activeChatHeaderInfo();
+    if (currentHeader && labelBefore) {
+      const cleanBefore = labelBefore.replace(/\s+/g, "");
+      const cleanHeader = currentHeader.replace(/\s+/g, "");
+      if (cleanBefore.includes(cleanHeader) || cleanHeader.includes(cleanBefore)) return true;
+      const firstName = (labelBefore.split(" ")[0] || "").trim();
+      if (firstName && cleanHeader.includes(firstName)) return true;
+    }
+    return false;
   }
 
   async function stateForToday() {
@@ -783,80 +811,283 @@
     };
   }
 
+  function isElementVisible(el) {
+    if (!el || !el.isConnected) return false;
+    if (el.offsetParent) return true;
+    const rect = el.getBoundingClientRect();
+    if (rect.width > 0 && rect.height > 0) return true;
+    const style = window.getComputedStyle(el);
+    return style.display !== "none" && style.visibility !== "hidden" && style.opacity !== "0";
+  }
+
+  function isActionCardButtonEnabled(btn) {
+    if (!btn || !isElementVisible(btn)) return false;
+    if (btn.disabled === true) return false;
+    if (btn.getAttribute("disabled") !== null) return false;
+    if (btn.getAttribute("aria-disabled") === "true") return false;
+    const cls = (btn.className || "").toString().toLowerCase();
+    if (/\bdisabled\b/.test(cls)) return false;
+    const style = window.getComputedStyle(btn);
+    if (style.pointerEvents === "none" || style.cursor === "not-allowed") return false;
+    return true;
+  }
+
+  function triggerElementClick(target) {
+    if (!target) return;
+    target.scrollIntoView({ block: "nearest" });
+    const rect = target.getBoundingClientRect();
+    const clientX = rect.left + rect.width / 2;
+    const clientY = rect.top + rect.height / 2;
+    const opts = { bubbles: true, cancelable: true, view: window, button: 0, clientX, clientY };
+    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup", "click"]) {
+      target.dispatchEvent(new MouseEvent(type, { ...opts, buttons: type.endsWith("down") ? 1 : 0 }));
+    }
+    if (typeof target.click === "function") {
+      target.click();
+    }
+  }
+
   function hasPendingActionCards() {
     const buttons = [...document.querySelectorAll(".chat-record .message-card-wrap .card-btn, .chat-record .message-dialog-both .card-btn, .chat-record [class*='message-dialog'] .card-btn, .chat-record .message-card-buttons span")].filter((b) => {
       const text = (b.textContent || "").trim();
-      return /^(?:同意|接受|确认)$/.test(text) && b.offsetParent;
+      return /^(?:同意|接受|确认)$/.test(text) && isActionCardButtonEnabled(b);
     });
     return buttons.length > 0;
+  }
+
+  async function handleResumeSelectionDialog() {
+    const findDialog = () => {
+      const candidates = [
+        ...document.querySelectorAll(".boss-layer__wrapper, .boss-popup, .dialog-wrap, .dialog-container, [class*='dialog'], [class*='popup'], [class*='layer'], [role='dialog']")
+      ];
+      const match = candidates.find((el) => {
+        if (!isElementVisible(el)) return false;
+        const text = (el.textContent || "").trim();
+        return /选择.*简历|已上传附件|选择附件|在线简历/.test(text) && /发送|确定|确认/.test(text);
+      });
+      if (match) return match;
+
+      // 兜底：通过文本节点查找包含“选择要发送的简历”的最内层弹窗容器
+      const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+      let node;
+      while ((node = walker.nextNode())) {
+        if (/请选择要发送的简历|已上传附件/.test(node.textContent || "")) {
+          const parent = node.parentElement?.closest(".boss-layer__wrapper, .boss-popup, .dialog-wrap, .dialog-container, [class*='popup'], [class*='dialog'], [class*='layer'], [role='dialog'], div");
+          if (parent && isElementVisible(parent)) {
+            return parent;
+          }
+        }
+      }
+      return null;
+    };
+
+    let dialog = findDialog();
+    if (!dialog) {
+      for (let i = 0; i < 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 250));
+        dialog = findDialog();
+        if (dialog) break;
+      }
+    }
+    if (!dialog) {
+      await appendLog("发送简历", "未检测到简历选择浮层，跳过弹窗处理", "warn");
+      return false;
+    }
+
+    await appendLog("发送简历", "检测到简历选择浮层，准备选中简历并点击发送...", "info");
+
+    // 第一步：在浮层中定位并点击简历项（优先选择 PDF / DOCX 附件简历，避开“预览”链接）
+    const findResumeItems = () => {
+      const candidates = [...dialog.querySelectorAll("*")].filter((el) => {
+        if (!isElementVisible(el)) return false;
+        const text = (el.textContent || "").trim();
+        if (!/\.(?:pdf|docx?|txt)|工作简历|附件简历|在线简历/i.test(text)) return false;
+        if (text.length > 250) return false;
+        if (/管理附件|重新上传/.test(text)) return false;
+        return true;
+      });
+      const cards = [];
+      const seen = new Set();
+      for (const el of candidates) {
+        const card = el.closest("li, .list-item, [class*='item'], [class*='card'], [class*='annex'], [class*='file'], [class*='attach'], [class*='resume'], div") || el;
+        if (!seen.has(card) && card.textContent.trim().length <= 300) {
+          seen.add(card);
+          cards.push(card);
+        }
+      }
+      return cards.length ? cards : candidates;
+    };
+
+    const items = findResumeItems();
+    if (items.length) {
+      const targetCard = items.find((el) => {
+        const t = (el.textContent || "").toLowerCase();
+        return (t.includes(".pdf") || t.includes(".docx") || t.includes("附件")) && !t.includes("预览");
+      }) || items[0];
+
+      const previewBtn = [...targetCard.querySelectorAll("*")].find((el) => /预览/.test((el.textContent || "").trim()));
+      const clickTarget = targetCard.querySelector(".name, .title, .file-name, [class*='title'], [class*='name'], [class*='file'], [class*='radio'], [class*='select'], input[type='radio'], input[type='checkbox']") || targetCard;
+      if (clickTarget !== previewBtn) {
+        triggerElementClick(clickTarget);
+        const resumeTitle = (clickTarget.textContent || targetCard.textContent || "附件简历").replace(/\s+/g, " ").trim().slice(0, 40);
+        await appendLog("发送简历", `已在浮层中点击选中简历：${resumeTitle}`, "info");
+        await new Promise((resolve) => setTimeout(resolve, 400));
+      }
+    }
+
+    // 第二步：定位“发送”确认按钮
+    const findSendBtn = () => {
+      const allElements = [...dialog.querySelectorAll("button, a, input[type='button'], input[type='submit'], .btn, [class*='btn'], span, div")];
+      const matching = allElements.filter((el) => {
+        if (!isElementVisible(el)) return false;
+        const text = (el.textContent || "").trim();
+        if (/预览|管理附件|取消|关闭|重新上传/.test(text)) return false;
+        return /^(?:发送|确认发送|立即发送|确定|确认)$/.test(text) || /^发送\s*$/.test(text);
+      });
+      if (!matching.length) return null;
+      const preferred = matching.find((el) => el.tagName === "BUTTON" || /btn|primary|confirm|sure/i.test(el.className)) || matching[0];
+      return preferred.closest("button, .btn, [class*='btn']") || preferred;
+    };
+
+    let sendBtn = findSendBtn();
+    for (let i = 0; i < 10; i++) {
+      if (sendBtn && isActionCardButtonEnabled(sendBtn)) break;
+      await new Promise((resolve) => setTimeout(resolve, 250));
+      sendBtn = findSendBtn();
+    }
+
+    // 处理可能的二次弹窗确认函数
+    const handleSecondaryConfirm = async () => {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      const popups = [...document.querySelectorAll(".dialog-wrap, .dialog-container, .boss-popup, [class*='dialog'], [class*='popup']")].filter((el) => {
+        if (!isElementVisible(el)) return false;
+        const text = (el.textContent || "").trim();
+        return /确定|确认/.test(text) && /发送|简历|对方/.test(text);
+      });
+      for (const pop of popups) {
+        const confirmBtn = [...pop.querySelectorAll("button, .btn, [class*='btn'], span, div")].find((el) => {
+          const t = (el.textContent || "").trim();
+          return /^(?:确定|确认|发送)$/.test(t) && isActionCardButtonEnabled(el);
+        });
+        if (confirmBtn) {
+          triggerElementClick(confirmBtn);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
+    };
+
+    // 第三步：点击“发送”按钮并验证发送结果
+    if (sendBtn) {
+      await appendLog("发送简历", "正在点击简历选择浮层【发送】按钮...", "info");
+      triggerElementClick(sendBtn);
+      await handleSecondaryConfirm();
+
+      // 等待浮层自动关闭（发送成功的关键表现）
+      let closed = false;
+      for (let i = 0; i < 10; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 350));
+        if (!isElementVisible(dialog)) {
+          closed = true;
+          break;
+        }
+      }
+
+      if (closed) {
+        await appendLog("发送简历", "🎉 简历选择浮层已成功点击发送并自动关闭！", "success");
+        return true;
+      }
+
+      // 若未关闭，重试点击一次
+      sendBtn = findSendBtn();
+      if (sendBtn && isActionCardButtonEnabled(sendBtn)) {
+        await appendLog("发送简历", "浮层未立即关闭，再次重试点击【发送】...", "info");
+        triggerElementClick(sendBtn);
+        await handleSecondaryConfirm();
+        await new Promise((resolve) => setTimeout(resolve, 800));
+        if (!isElementVisible(dialog)) {
+          await appendLog("发送简历", "🎉 重试后简历选择浮层已成功发送并自动关闭！", "success");
+          return true;
+        }
+      }
+    }
+
+    await appendLog("发送简历", "警告：已在浮层中尝试选中并点击【发送】，浮层尚未自动关闭", "warn");
+    return false;
   }
 
   async function executeChatActionCards(preferredType = "") {
     const buttons = [...document.querySelectorAll(".chat-record .message-card-wrap .card-btn, .chat-record .message-dialog-both .card-btn, .chat-record [class*='message-dialog'] .card-btn, .chat-record .message-card-buttons span")].filter((b) => {
       const text = (b.textContent || "").trim();
-      return /^(?:同意|接受|确认)$/.test(text);
+      return /^(?:同意|接受|确认)$/.test(text) && isActionCardButtonEnabled(b);
     });
     if (!buttons.length) return null;
 
     const executed = [];
     const seen = new Set();
     for (const agreeBtn of buttons) {
-      if (seen.has(agreeBtn) || !agreeBtn.offsetParent) continue;
+      if (seen.has(agreeBtn) || !isActionCardButtonEnabled(agreeBtn)) continue;
       seen.add(agreeBtn);
       const card = agreeBtn.closest(".message-card-wrap, .message-dialog-both, .message-item") || agreeBtn.parentElement;
       const cardText = (card?.textContent || "").replace(/\s+/g, " ").trim();
 
       let actionLabel = "确认卡片";
-      if (/简历|附件/.test(cardText)) actionLabel = "同意发送附件简历";
-      else if (/微信|电话|联系方式/.test(cardText)) actionLabel = "同意交换联系方式";
-      else if (/面试|约面/.test(cardText)) actionLabel = "接受面试邀请";
+      const isResume = /简历|附件/.test(cardText);
+      const isContact = /微信|电话|联系方式/.test(cardText);
+      const isInterview = /面试|约面/.test(cardText);
+      if (isResume) actionLabel = "同意发送附件简历";
+      else if (isContact) actionLabel = "同意交换联系方式";
+      else if (isInterview) actionLabel = "接受面试邀请";
 
-      agreeBtn.scrollIntoView({ block: "nearest" });
-      for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
-        agreeBtn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, button: 0, buttons: type.endsWith("down") ? 1 : 0 }));
-      }
-      agreeBtn.click();
+      if (preferredType === "resume" && !isResume) continue;
+      if (preferredType === "contact" && !isContact) continue;
+      if (preferredType === "interview" && !isInterview) continue;
+
+      triggerElementClick(agreeBtn);
       await new Promise((resolve) => setTimeout(resolve, 800));
 
-      const dialogSureBtn = document.querySelector(".dialog-wrap:not([style*='display: none']) .btn-sure, .dialog-container:not([style*='display: none']) .btn-sure, .dialog-wrap:not([style*='display: none']) .btn-confirm, .dialog-wrap:not([style*='display: none']) button.btn-primary");
-      if (dialogSureBtn && dialogSureBtn.offsetParent) {
-        dialogSureBtn.click();
-        await new Promise((resolve) => setTimeout(resolve, 500));
+      if (isResume) {
+        await appendLog("发送简历", "检测到索要简历卡片，已点击【同意】，正在处理简历选择浮层...", "info");
+        const handled = await handleResumeSelectionDialog();
+        if (handled) {
+          executed.push(actionLabel);
+        } else {
+          const dialogSureBtn = document.querySelector(".dialog-wrap:not([style*='display: none']) .btn-sure, .dialog-container:not([style*='display: none']) .btn-sure, .dialog-wrap:not([style*='display: none']) .btn-confirm, .dialog-wrap:not([style*='display: none']) button.btn-primary, .boss-popup:not([style*='display: none']) .btn-confirm");
+          if (dialogSureBtn && isActionCardButtonEnabled(dialogSureBtn)) {
+            triggerElementClick(dialogSureBtn);
+            await new Promise((resolve) => setTimeout(resolve, 500));
+            executed.push(actionLabel);
+          }
+        }
+      } else {
+        const dialogSureBtn = document.querySelector(".dialog-wrap:not([style*='display: none']) .btn-sure, .dialog-container:not([style*='display: none']) .btn-sure, .dialog-wrap:not([style*='display: none']) .btn-confirm, .dialog-wrap:not([style*='display: none']) button.btn-primary, .boss-popup:not([style*='display: none']) .btn-confirm");
+        if (dialogSureBtn && isActionCardButtonEnabled(dialogSureBtn)) {
+          triggerElementClick(dialogSureBtn);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+        executed.push(actionLabel);
       }
-      executed.push(actionLabel);
     }
     return executed.length ? executed.join("及") : null;
   }
 
   async function executeToolbarSendResume() {
-    const resumeBtn = [...document.querySelectorAll(".chat-controls .toolbar-btn, .chat-controls [class*='toolbar-btn']")].find((b) => {
-      const text = (b.textContent || "").trim();
-      return /发简历/.test(text) && b.offsetParent;
-    });
+    const findResumeBtn = () => {
+      const candidates = [...document.querySelectorAll(".chat-conversation .toolbar-btn, .chat-controls [class*='toolbar'], .chat-op [class*='tool'], .chat-editor [class*='tool'], [class*='toolbar'] [class*='btn'], .chat-controls [class*='resume'], .chat-conversation span, .chat-conversation div, .chat-conversation button, .chat-conversation a")];
+      return candidates.find((b) => {
+        if (!isElementVisible(b)) return false;
+        const text = (b.textContent || "").trim();
+        return text === "发简历" || /^发简历/.test(text);
+      });
+    };
+
+    const resumeBtn = findResumeBtn();
     if (!resumeBtn) return false;
 
-    resumeBtn.scrollIntoView({ block: "nearest" });
-    for (const type of ["pointerdown", "mousedown", "pointerup", "mouseup"]) {
-      resumeBtn.dispatchEvent(new MouseEvent(type, { bubbles: true, cancelable: true, view: window, button: 0, buttons: type.endsWith("down") ? 1 : 0 }));
-    }
-    resumeBtn.click();
+    await appendLog("发送简历", "检测到索要简历，正在点击工具栏【发简历】打开简历选择浮层...", "info");
+    triggerElementClick(resumeBtn);
     await new Promise((resolve) => setTimeout(resolve, 800));
 
-    const selectDialog = document.querySelector(".upload-select-dialog:not([style*='display: none']), .dialog-wrap:not([style*='display: none'])");
-    if (selectDialog && selectDialog.offsetParent) {
-      const options = [...selectDialog.querySelectorAll(".select-one, .btn, button, .main-title")];
-      const targetOption = options.find((el) => /发送在线简历|在线简历|附件简历|确认/i.test(el.textContent || ""));
-      if (targetOption && targetOption.offsetParent) {
-        targetOption.click();
-        await new Promise((resolve) => setTimeout(resolve, 600));
-      }
-      const confirmBtn = selectDialog.querySelector(".btn-sure, .btn-primary, .btns button");
-      if (confirmBtn && confirmBtn.offsetParent) {
-        confirmBtn.click();
-        await new Promise((resolve) => setTimeout(resolve, 600));
-      }
-    }
-    return true;
+    return await handleResumeSelectionDialog();
   }
 
   async function flushPendingNotifications(state) {
@@ -927,7 +1158,7 @@
       if (config.sendMode === "live" && !analysis.stop) {
         if (action === "agree_resume" || action === "send_resume" || /简历|附件/.test(latestMessage)) {
           cardActionExecuted = await executeChatActionCards("resume");
-          if (!cardActionExecuted && (action === "send_resume" || /简历|附件/.test(latestMessage))) {
+          if (!cardActionExecuted && (action === "send_resume" || action === "agree_resume" || /简历|附件/.test(latestMessage))) {
             const sent = await executeToolbarSendResume();
             if (sent) cardActionExecuted = "主动发送简历";
           }
@@ -959,7 +1190,7 @@
           setStatus(`Gemini 分析完成${cardActionExecuted ? `（已${cardActionExecuted}）` : ""}，${config.replyDelaySeconds} 秒后发送…`);
           await new Promise((resolve) => setTimeout(resolve, config.replyDelaySeconds * 1000));
           if (!config.autoReply || config.sendMode !== "live") throw new Error("发送前已被暂停");
-          if (conversationId() !== cid) throw new Error("等待期间会话已切换，本条未发送");
+          if (!isSameConversation(cid, label)) throw new Error("等待期间会话已切换，本条未发送");
           await sendChatReply(reply);
           state.total += 1; state.conversations[cid] = Number(state.conversations[cid] || 0) + 1;
           outcome = cardActionExecuted
@@ -1007,17 +1238,24 @@
         scheduleTemporaryRetry(error);
         return;
       }
-      if (config.sendMode === "live" && config.autoReply) {
+      const isSessionSwitch = String(error?.message || "").includes("等待期间会话已切换");
+      if (!isSessionSwitch && config.sendMode === "live" && config.autoReply) {
         try {
           await saveConfig({ autoReply: false });
         } catch (saveError) {
           if (contextInvalidated || stopInvalidatedContext(saveError)) return;
         }
       }
-      setQueuePhase("已暂停", error.message || "处理失败");
-      await appendCommunicationSample({ conversationId: cid, label, recruiterMessage: latestMessage, context: conversation, action: "模型分析失败", reason: error.message });
-      setStatus(`自动沟通暂停：${error.message}`, "error");
-      await appendLog("会话处理", `自动沟通暂停：${error.message}`, "error", label);
+      if (isSessionSwitch) {
+        setQueuePhase("会话已切换", "会话已切换至其他联系人，已跳过本条回复避免误发", Date.now() + 1000);
+        setStatus("检测到会话已切换，本条未发送，继续保持自动沟通", "info");
+        await appendLog("会话处理", "等待期间会话已切换，本条未发送（已安全跳过）", "warn", label);
+      } else {
+        setQueuePhase("已暂停", error.message || "处理失败");
+        await appendCommunicationSample({ conversationId: cid, label, recruiterMessage: latestMessage, context: conversation, action: "模型分析失败", reason: error.message });
+        setStatus(`自动沟通暂停：${error.message}`, "error");
+        await appendLog("会话处理", `自动沟通暂停：${error.message}`, "error", label);
+      }
     } finally {
       processing = false;
       if (!contextInvalidated && !transientRetryTimer && config.autoReply && config.sendMode === "live") window.setTimeout(() => void openNextUnreadConversation(), 1400);
