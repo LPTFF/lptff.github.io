@@ -418,14 +418,17 @@ def retry_after_seconds(value: str | None) -> float:
 
 def report_ai_attempt(
     *, attempt: int, outcome: str, http_status: int | None, reason: str | None,
-    retry_delay: float, duration: float,
+    retry_delay: float, duration: float, tokens: dict[str, int] | None = None,
 ) -> None:
     # Only fixed categories and numbers enter logs, never exception text or response bodies.
-    print(json.dumps({
+    record: dict[str, object] = {
         "event": "ai-attempt", "name": NAME, "attempt": attempt, "outcome": outcome,
         "httpStatus": http_status, "reason": reason,
         "retryDelaySeconds": round(retry_delay, 2), "durationSeconds": round(duration, 2),
-    }), flush=True)
+    }
+    if tokens:
+        record["tokens"] = tokens
+    print(json.dumps(record), flush=True)
 
 
 def classify_candidates(
@@ -496,6 +499,12 @@ def classify_candidates(
                 retryable = http_status in {408, 429} or 500 <= http_status < 600
                 raise RuntimeError("Gemini HTTP request failed")
             body = response.json()
+            usage = body.get("usageMetadata", {}) if isinstance(body, dict) else {}
+            tokens = {
+                "prompt": int(usage.get("promptTokenCount") or 0),
+                "candidates": int(usage.get("candidatesTokenCount") or 0),
+                "total": int(usage.get("totalTokenCount") or 0),
+            } if usage else None
             classified = json.loads(body["candidates"][0]["content"]["parts"][0]["text"])
             results = classified.get("results") if isinstance(classified, dict) else None
             if not isinstance(results, list):
@@ -507,7 +516,7 @@ def classify_candidates(
                 raise ValueError("Gemini response contains an invalid classification")
             report_ai_attempt(
                 attempt=attempt, outcome="success", http_status=http_status, reason=None,
-                retry_delay=0, duration=time.monotonic() - started,
+                retry_delay=0, duration=time.monotonic() - started, tokens=tokens,
             )
             if session is None:
                 client.close()

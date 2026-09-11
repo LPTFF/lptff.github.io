@@ -16,6 +16,7 @@ if __package__ in (None, ""):
 
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from crawl.lib.gemini_tracker import GeminiTracker
 from crawl.lib.output import DATA_ROOT, write_json_atomically
 from crawl.lib.runner import failure_reason
 from crawl.lib.status import report_result
@@ -289,6 +290,9 @@ def _request_batch(
     model: str,
     entries: list[WelfareEntry],
     timeout: float,
+    batch_index: int = 1,
+    total_batches: int = 1,
+    tracker: GeminiTracker | None = None,
 ) -> list[dict[str, object]]:
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
     input_items = [
@@ -319,10 +323,16 @@ def _request_batch(
         },
     }
     expected_ids = {entry.identifier for entry in entries}
+    payload_bytes = len(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
     last_error: Exception | None = None
     timeout_count = 0
 
     for attempt in range(_MAX_ATTEMPTS):
+        started = time.monotonic()
+        if tracker:
+            started = tracker.log_batch_start(
+                batch_index, total_batches, len(entries), attempt=attempt + 1, max_attempts=_MAX_ATTEMPTS, payload_bytes=payload_bytes
+            )
         try:
             response = session.post(
                 endpoint,
@@ -330,6 +340,7 @@ def _request_batch(
                 json=payload,
                 timeout=timeout,
             )
+            duration = time.monotonic() - started
             if response.status_code == 429 or response.status_code >= 500:
                 raise RuntimeError(f"Gemini temporarily unavailable (HTTP {response.status_code})")
             if not response.ok:
@@ -344,11 +355,25 @@ def _request_batch(
             if len(returned_ids) != len(results) or set(returned_ids) != expected_ids:
                 raise ValueError("Gemini response ids do not match the input batch")
             by_id = {str(item["id"]): item for item in results}
+            if tracker:
+                tracker.log_batch_success(
+                    batch_index,
+                    total_batches,
+                    len(entries),
+                    duration,
+                    response_body=body,
+                    status_code=response.status_code,
+                    attempts=attempt + 1,
+                    extra_info=f"有效解析条目: {len(results)}/{len(entries)}",
+                )
             batch_classified: list[dict[str, object]] = []
             for entry in entries:
                 item_ai = by_id[entry.identifier]
                 cat = item_ai["category"]
                 sigs = [str(s) for s in item_ai.get("signals", []) if s != cat][:4]
+                conf = float(item_ai.get("confidence", 0.95))
+                if tracker:
+                    tracker.record_item_result(category=cat, confidence=conf)
                 batch_classified.append(
                     {
                         "link": entry.link,
@@ -358,7 +383,7 @@ def _request_batch(
                         "signals": sigs,
                         "isBankOffer": bool(item_ai.get("isBankOffer", False)),
                         "summary": str(item_ai.get("summary") or entry.title)[:160],
-                        "confidence": float(item_ai.get("confidence", 0.95)),
+                        "confidence": conf,
                     }
                 )
             return batch_classified
@@ -367,30 +392,57 @@ def _request_batch(
             timeout_count += 1
             if timeout_count >= 2 and len(entries) > _MIN_BATCH_SIZE:
                 mid = len(entries) // 2
-                print(f"[filter_welfare] 批次超时，对半拆分至 {mid} 条重试…", flush=True)
+                if tracker:
+                    tracker.log_batch_split(batch_index, total_batches, mid, len(entries) - mid)
+                else:
+                    print(f"[filter_welfare] 批次超时，对半拆分至 {mid} 条重试…", flush=True)
                 left = _request_batch(
-                    session, api_key=api_key, model=model, entries=entries[:mid], timeout=timeout
+                    session,
+                    api_key=api_key,
+                    model=model,
+                    entries=entries[:mid],
+                    timeout=timeout,
+                    batch_index=batch_index,
+                    total_batches=total_batches,
+                    tracker=tracker,
                 )
                 right = _request_batch(
-                    session, api_key=api_key, model=model, entries=entries[mid:], timeout=timeout
+                    session,
+                    api_key=api_key,
+                    model=model,
+                    entries=entries[mid:],
+                    timeout=timeout,
+                    batch_index=batch_index,
+                    total_batches=total_batches,
+                    tracker=tracker,
                 )
                 return left + right
             sleep_secs = _BACKOFF_BASE * (2**attempt)
-            print(f"[filter_welfare] 超时（第 {attempt + 1} 次），{sleep_secs:.0f}s 后重试…", flush=True)
+            if tracker:
+                tracker.log_batch_retry(batch_index, total_batches, attempt + 1, _MAX_ATTEMPTS, "请求超时", sleep_secs)
+            else:
+                print(f"[filter_welfare] 超时（第 {attempt + 1} 次），{sleep_secs:.0f}s 后重试…", flush=True)
             time.sleep(sleep_secs)
         except (KeyError, IndexError, TypeError, ValueError, requests.RequestException, RuntimeError) as error:
             last_error = error
             if isinstance(error, requests.HTTPError) and error.response is not None:
                 status = error.response.status_code
                 if 400 <= status < 500 and status not in (408, 429):
+                    if tracker:
+                        tracker.record_failure()
                     raise RuntimeError(f"Gemini unavailable (HTTP {status})") from error
             if attempt < _MAX_ATTEMPTS - 1:
                 sleep_secs = _BACKOFF_BASE * (2**attempt)
-                print(
-                    f"[filter_welfare] 请求失败（第 {attempt + 1} 次）：{failure_reason(error)}，{sleep_secs:.0f}s 后重试…",
-                    flush=True,
-                )
+                if tracker:
+                    tracker.log_batch_retry(batch_index, total_batches, attempt + 1, _MAX_ATTEMPTS, failure_reason(error), sleep_secs)
+                else:
+                    print(
+                        f"[filter_welfare] 请求失败（第 {attempt + 1} 次）：{failure_reason(error)}，{sleep_secs:.0f}s 后重试…",
+                        flush=True,
+                    )
                 time.sleep(sleep_secs)
+    if tracker:
+        tracker.record_failure()
     raise RuntimeError(f"Gemini classification failed after {_MAX_ATTEMPTS} attempts: {last_error}") from last_error
 
 
@@ -402,10 +454,12 @@ def classify_entries(
     batch_size: int,
     timeout: float,
     session: requests.Session | None = None,
+    tracker: GeminiTracker | None = None,
 ) -> list[dict[str, object]]:
     classified: list[dict[str, object]] = []
     client = session or requests.Session()
-    for start in range(0, len(entries), batch_size):
+    total_batches = (len(entries) + batch_size - 1) // batch_size if entries else 0
+    for batch_idx, start in enumerate(range(0, len(entries), batch_size), start=1):
         chunk = entries[start : start + batch_size]
         classified.extend(
             _request_batch(
@@ -414,6 +468,9 @@ def classify_entries(
                 model=model,
                 entries=chunk,
                 timeout=timeout,
+                batch_index=batch_idx,
+                total_batches=total_batches,
+                tracker=tracker,
             )
         )
     return classified
@@ -445,6 +502,9 @@ def main() -> int:
     entries = load_entries()
     ai_items: list[dict[str, object]] | None = None
     fallback_reason = ""
+    tracker = GeminiTracker("welfare-filter", model=args.model, total_items=len(entries))
+    if entries and api_key:
+        tracker.log_start(expected_batches=(len(entries) + args.batch_size - 1) // args.batch_size)
 
     if entries:
         try:
@@ -456,6 +516,7 @@ def main() -> int:
                 model=args.model,
                 batch_size=args.batch_size,
                 timeout=args.timeout,
+                tracker=tracker,
             )
         except RuntimeError as exc:
             fallback_reason = failure_reason(exc)
@@ -465,8 +526,18 @@ def main() -> int:
     # 组合输出条目：AI 成功时用 AI 结果；异常或无 Key 时用本地规则兜底
     if ai_items is not None:
         items = ai_items
+        bank_offers = sum(1 for item in items if item.get("isBankOffer"))
+        avg_val = round(sum(int(item.get("welfareValue") or 0) for item in items) / len(items), 1) if items else 0
+        avg_diff = round(sum(int(item.get("difficulty") or 0) for item in items) / len(items), 1) if items else 0
+        tracker.record_custom_metric("银行专属活动数", f"{bank_offers} 条")
+        tracker.record_custom_metric("平均福利价值分", f"{avg_val} / 100")
+        tracker.record_custom_metric("平均参与门槛分", f"{avg_diff} / 100")
+        tracker.print_summary()
     else:
         items = [fallback_classify_entry(e) for e in entries]
+        for item in items:
+            tracker.record_item_result(category=str(item.get("category") or "其他福利"))
+        tracker.print_summary(degraded=True, degraded_reason=fallback_reason or "GEMINI_API_KEY 未配置")
 
     payload = {
         "version": 1,
@@ -491,6 +562,7 @@ def main() -> int:
         "inputCount": len(entries),
         "analyzedCount": len(items),
         "categoryCounts": category_counts,
+        "telemetry": tracker.to_dict() if ai_items is not None else None,
     }
     report_result(result, args.summary)
     if args.summary is None and ai_items is None and fallback_reason and "not configured" not in fallback_reason:

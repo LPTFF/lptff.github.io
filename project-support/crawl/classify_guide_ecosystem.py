@@ -14,6 +14,7 @@ import requests
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from crawl.lib.gemini_tracker import GeminiTracker
 from crawl.lib.output import DATA_ROOT, write_json_atomically
 from crawl.lib.status import report_result
 
@@ -203,13 +204,19 @@ def load_api_key() -> str:
 
 
 def request_gemini_analysis(
-    items: list[dict[str, object]], *, api_key: str, model: str = DEFAULT_MODEL, timeout: float = 120.0
+    items: list[dict[str, object]],
+    *,
+    api_key: str,
+    model: str = DEFAULT_MODEL,
+    timeout: float = 120.0,
+    tracker: GeminiTracker | None = None,
 ) -> list[dict[str, object]]:
     chunk_size = 60
     results: list[dict[str, object]] = []
     endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+    total_chunks = (len(items) + chunk_size - 1) // chunk_size if items else 0
 
-    for i in range(0, len(items), chunk_size):
+    for chunk_idx, i in enumerate(range(0, len(items), chunk_size), start=1):
         chunk = items[i : i + chunk_size]
         inputs = [
             {
@@ -240,7 +247,13 @@ def request_gemini_analysis(
                 "responseJsonSchema": RESPONSE_SCHEMA,
             },
         }
+        payload_bytes = len(json.dumps(payload, ensure_ascii=False).encode("utf-8"))
         for attempt in range(3):
+            started = time.monotonic()
+            if tracker:
+                started = tracker.log_batch_start(
+                    chunk_idx, total_chunks, len(chunk), attempt=attempt + 1, max_attempts=3, payload_bytes=payload_bytes
+                )
             try:
                 resp = requests.post(
                     endpoint,
@@ -248,12 +261,24 @@ def request_gemini_analysis(
                     json=payload,
                     timeout=timeout,
                 )
+                duration = time.monotonic() - started
                 if not resp.ok:
                     raise RuntimeError(f"Gemini API returned HTTP {resp.status_code}")
                 body = resp.json()
                 text = body["candidates"][0]["content"]["parts"][0]["text"]
                 parsed = json.loads(text)
                 chunk_results = {str(r["id"]): r for r in parsed.get("results", [])}
+                if tracker:
+                    tracker.log_batch_success(
+                        chunk_idx,
+                        total_chunks,
+                        len(chunk),
+                        duration,
+                        response_body=body,
+                        status_code=resp.status_code,
+                        attempts=attempt + 1,
+                        extra_info=f"解析匹配条目: {len(chunk_results)}/{len(chunk)}",
+                    )
                 for idx, item in enumerate(chunk):
                     ai_data = chunk_results.get(str(idx), {})
                     category = ai_data.get("category") or classify_by_rules(
@@ -262,31 +287,48 @@ def request_gemini_analysis(
                         str(item.get("_source_id") or ""),
                     )
                     obs = ai_data.get("observation") or ""
+                    conf = float(ai_data.get("confidence") or 0.95)
+                    if tracker:
+                        tracker.record_item_result(category=category, confidence=conf)
                     results.append({
                         "item": item,
                         "category": category,
                         "aiObservation": obs,
-                        "confidence": ai_data.get("confidence", 0.95),
+                        "confidence": conf,
                     })
                 break
             except Exception as err:
+                delay = 2**attempt
+                if tracker and attempt < 2:
+                    tracker.log_batch_retry(chunk_idx, total_chunks, attempt + 1, 3, err, delay)
                 if attempt == 2:
+                    if tracker:
+                        tracker.record_failure()
                     raise
-                time.sleep(2**attempt)
+                time.sleep(delay)
     return results
 
 
-def generate_ecosystem_dataset(api_key: str = "", model: str = DEFAULT_MODEL) -> dict[str, object]:
+def generate_ecosystem_dataset(
+    api_key: str = "", model: str = DEFAULT_MODEL, tracker: GeminiTracker | None = None
+) -> dict[str, object]:
     raw_items = load_all_sources()
     category_sources: dict[str, set[str]] = {}
 
     ai_results = None
     if api_key:
         try:
-            print(f"Directly analyzing {len(raw_items)} hot news items using Gemini ({model})...")
-            ai_results = request_gemini_analysis(raw_items, api_key=api_key, model=model)
+            if tracker is None:
+                tracker = GeminiTracker("guide-ecosystem", model=model, total_items=len(raw_items))
+            elif tracker.total_items == 0:
+                tracker.total_items = len(raw_items)
+            expected_batches = (len(raw_items) + 60 - 1) // 60 if raw_items else 0
+            tracker.log_start(expected_batches=expected_batches)
+            ai_results = request_gemini_analysis(raw_items, api_key=api_key, model=model, tracker=tracker)
         except Exception as err:
             print(f"Gemini analysis error: {err}, using structured analyzer", file=sys.stderr)
+            if tracker:
+                tracker.print_summary(title="Gemini 追踪监控汇总 (执行异常)")
 
     classified_records: list[dict[str, object]] = []
     for idx, item in enumerate(raw_items):
@@ -364,7 +406,7 @@ def generate_ecosystem_dataset(api_key: str = "", model: str = DEFAULT_MODEL) ->
     return {
         "version": 1,
         "generatedAt": datetime.now(UTC).isoformat(),
-        "model": DEFAULT_MODEL,
+        "model": model,
         "totalSignals": len(final_items),
         "items": final_items,
     }
@@ -390,12 +432,32 @@ def main() -> int:
     args = parser.parse_args()
 
     api_key = load_api_key()
-    dataset = generate_ecosystem_dataset(api_key=api_key, model=args.model)
+    tracker: GeminiTracker | None = None
+    if api_key:
+        tracker = GeminiTracker("guide-ecosystem", model=args.model)
+    dataset = generate_ecosystem_dataset(api_key=api_key, model=args.model, tracker=tracker)
     write_json_atomically(OUTPUT_PATH, dataset, validate=validate_output)
     print(f"Directly generated {len(dataset['items'])} Gemini ecosystem items to {OUTPUT_PATH}")
 
+    if tracker and api_key:
+        tracker.print_summary()
+    elif not api_key:
+        rule_tracker = GeminiTracker("guide-ecosystem", model="rule-fallback", total_items=len(dataset["items"]))
+        rule_tracker.print_summary(degraded=True, degraded_reason="GEMINI_API_KEY 未配置")
+
+    report_payload: dict[str, object] = {
+        "name": "guide-ecosystem",
+        "state": "success",
+        "model": args.model if api_key else "rule-fallback",
+        "items": len(dataset["items"]),
+    }
+    if tracker and api_key:
+        report_payload["telemetry"] = tracker.to_dict()
+
     if args.summary:
-        report_result({"name": "guide-ecosystem", "state": "success", "items": len(dataset["items"])}, args.summary)
+        report_result(report_payload, args.summary)
+    else:
+        report_result(report_payload)
     return 0
 
 
