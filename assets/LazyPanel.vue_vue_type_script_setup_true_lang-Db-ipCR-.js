@@ -1,0 +1,1 @@
+import{A as n,r as o,c as r,E as c,R as p}from"./vue-vendor-Cg0-gsbe.js";const f=n({__name:"LazyPanel",props:{active:{type:Boolean}},setup(s){const a=s,t=o(a.active);return r(()=>a.active,e=>{e&&(t.value=!0)},{flush:"sync"}),(e,u)=>t.value?c(e.$slots,"default",{key:0}):p("",!0)}});export{f as _};
