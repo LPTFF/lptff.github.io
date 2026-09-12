@@ -9,11 +9,12 @@
   </section>
 </template>
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, watchEffect, onMounted, onUnmounted } from "vue";
 import catalog from "../../project-support/extension/lptff-investment-assistant/content-sources.json";
 import { authorizedRequest, authorizedCollectionMeta, saveAuthorizedItems } from "../utils/authorizedContent";
 import { collectionFreshness } from "../utils/collectionFreshness";
 const props = defineProps<{ tab: string }>();
+const emit = defineEmits<{ change: [statuses: Record<string, { state: string; label: string }>] }>();
 const sources = catalog.filter(item => item.tab === props.tab);
 const platforms = [...new Set(sources.map(item => item.platform))];
 const remote = ref<Record<string, any>>({}), now = ref(Date.now()), message = ref(""), refreshing = ref("");
@@ -34,6 +35,11 @@ const status = (platform: string) => {
   return collectionFreshness(meta, sources.filter(item => item.platform === platform).map(item => item.uid), now.value);
 };
 const newer = (platform: string) => remote.value[platform]?.count > 0 && (remote.value[platform]?.updatedAt > authorizedCollectionMeta(platform).updatedAt || !authorizedCollectionMeta(platform).sources.length);
+watchEffect(() => emit("change", Object.fromEntries(platforms.map(platform => {
+  const current = status(platform);
+  return [platform, refreshing.value === platform ? { ...current, state: "running", label: "正在采集" }
+    : newer(platform) && current.state === "fresh" ? { ...current, state: "ready", label: "有已采集结果，可载入更新" } : current];
+}))));
 async function check() {
   clearTimeout(timer);
   now.value = Date.now();
@@ -76,7 +82,7 @@ onUnmounted(() => { disposed = true; clearTimeout(timer); window.removeEventList
 <style scoped>
 .collection-freshness { margin: 12px 0; font-size: 12px; color: #626c68; }
 .freshness-row { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin: 6px 0; }
-[data-state="stale"], [data-state="failed"], [data-state="soon"] { color: #ad681c; }
+[data-state="stale"], [data-state="failed"], [data-state="soon"], [data-state="unknown"] { color: #ad681c; }
 button { padding: 5px 10px; border: 1px solid #cbded3; border-radius: 8px; color: #17624f; background: #fff; cursor: pointer; }
 button:disabled { opacity: .55; cursor: default; } small { font-size: inherit; }
 </style>

@@ -61,9 +61,10 @@
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
             title="固定来源直采"
-            @click="selectedSource = source.id"
+            @click="selectedSource = source.id; revealCollection(source.id)"
           >
             {{ source.label }} <small>{{ source.count }}</small>
+            <CollectionStatusBadge :status="collectionStatuses[source.id.replace(/^direct:/, '')]" />
           </button>
         </div>
 
@@ -78,7 +79,7 @@
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
             :title="`Google RSS · site:${source.domain}`"
-            @click="selectedSource = source.id"
+            @click="selectedSource = source.id; revealCollection(source.id)"
           >
             {{ source.label }} <small>{{ source.count }}</small>
           </button>
@@ -86,11 +87,11 @@
       </div>
 
       <!-- 采集规则说明展开 -->
-      <details class="collector-details">
+      <details ref="collectionDetails" class="collector-details">
         <summary>采集范围与更新规则</summary>
         <p>顶部统计为去重后的全部资讯；来源按钮数量按当前标签和观察视角统计，当前结果再叠加所选来源。固定来源与 Google 定向发现分别计数，同一平台的两种采集方式独立筛选。</p>
         <p>保留全部多路采集源资讯，由 Gemini 智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。</p>
-        <CollectionFreshness tab="welfare" />
+        <CollectionFreshness tab="welfare" @change="collectionStatuses = $event" />
         <ContentAnalysis domain="welfare" :items="welfareSource" @analyzed="applyAnalysis" />
         <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新。这里指采集记录的新鲜度，不代表福利活动或登录状态的有效期；失败保留原内容。</p>
         <div class="collector-detail-grid">
@@ -235,9 +236,11 @@
 import { ref, computed, reactive } from "vue";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import ContentAnalysis from "../../../components/ContentAnalysis.vue";
+import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
+import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
 import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
-import { analysisFor } from "../../../utils/contentAnalysis";
+import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../data/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
@@ -316,6 +319,7 @@ export default {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
+    const indicators = useCollectionIndicators();
     const applyAnalysis = (results: any[]) => {
       for (const result of results) for (const item of welfareSource) {
         if (item.link === result.url) item.ecosystem = result.analysis;
@@ -333,7 +337,7 @@ export default {
 
     const tagCounts = computed(() => countContentTags(welfareSource));
     const analyzedCount = computed(
-      () => welfareSource.filter((item: any) => item.ecosystem).length
+      () => welfareSource.filter((item: any) => hasContentAnalysis("welfare", item.ecosystem)).length
     );
 
     const selectedCategory = ref("all");
@@ -652,6 +656,7 @@ export default {
       selectedCategory,
       logoUrl,
       selectedSource,
+      ...indicators,
       welfareSource,
       welfareSourceCount,
       directSourceCount,
@@ -678,6 +683,7 @@ export default {
   },
   components: {
     CollectionFreshness,
+    CollectionStatusBadge,
     ContentAnalysis,
     TagCategoryPicker,
     ElRow,

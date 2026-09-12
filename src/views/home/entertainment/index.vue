@@ -22,10 +22,11 @@
               :class="{ active: activePlatform === tab.key }"
               type="button"
               :aria-pressed="activePlatform === tab.key"
-              @click="activePlatform = tab.key"
+              @click="activePlatform = tab.key; revealCollection(tab.key)"
             >
               {{ tab.label }}
               <span>{{ tab.count }}</span>
+              <CollectionStatusBadge :status="collectionStatuses[tab.key]" />
             </button>
           </div>
           <span class="filter-result" role="status" aria-live="polite" aria-atomic="true">
@@ -34,10 +35,10 @@
         </div>
       </section>
 
-      <details class="source-details">
+      <details ref="collectionDetails" class="source-details">
         <summary>更新范围与来源说明</summary>
         <p>追踪豆瓣动画、抖音作者作品与哔哩视频更新。</p>
-        <CollectionFreshness tab="entertainment" />
+        <CollectionFreshness tab="entertainment" @change="collectionStatuses = $event" />
         <p>豆瓣与 B 站公开内容和薅羊毛共用每小时采集任务；抖音作者改为插件授权采集。来源不可用时保留上次内容，授权结果仅在本机显示。</p>
       </details>
     </section>
@@ -54,6 +55,8 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
+import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
 import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { isPC } from "../../../utils/utils";
 import movieData from "../../../data/movie.json";
@@ -70,6 +73,7 @@ const props = defineProps<{
   entertainmentLocation?: string | number;
 }>();
 
+const { collectionStatuses, collectionDetails, revealCollection } = useCollectionIndicators();
 const activePlatform = ref<PlatformFilter>("all");
 
 const toNumber = (value: unknown) => {
@@ -289,7 +293,7 @@ function interleave(...groups: EntertainmentItem[][]) {
   display: flex;
   min-width: 0;
   gap: 6px;
-  overflow-x: auto;
+  flex-wrap: wrap;
   scrollbar-width: none;
 }
 
@@ -314,7 +318,7 @@ function interleave(...groups: EntertainmentItem[][]) {
   transition: border-color 0.16s, color 0.16s, background 0.16s;
 }
 
-.platform-tab span {
+.platform-tab > span:not(.collection-status-badge) {
   color: inherit;
   font-size: 11px;
   opacity: 0.82;
@@ -336,7 +340,7 @@ function interleave(...groups: EntertainmentItem[][]) {
   color: #fff;
 }
 
-.platform-tab.active span {
+.platform-tab.active > span:not(.collection-status-badge) {
   color: inherit;
 }
 

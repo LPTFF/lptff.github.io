@@ -13,6 +13,7 @@ declare module 'vue' {
   export interface GlobalComponents {
     BackTop: typeof import('./src/components/backTop.vue')['default']
     CollectionFreshness: typeof import('./src/components/CollectionFreshness.vue')['default']
+    CollectionStatusBadge: typeof import('./src/components/CollectionStatusBadge.vue')['default']
     ContentAnalysis: typeof import('./src/components/ContentAnalysis.vue')['default']
     ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAvatar: typeof import('element-plus/es')['ElAvatar']

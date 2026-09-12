@@ -1,3 +1,7 @@
+// “待分类” is a completed judgment when the public information is insufficient.
+export function hasContentAnalysis(domain: string, analysis: any): boolean {
+  return Boolean(analysis) && !(domain === "welfare" && analysis.category === "其他福利");
+}
 const key = "lptff-content-analysis-v1";
 export function analysisFor(domain: string, url: string, title: string) {
   try {

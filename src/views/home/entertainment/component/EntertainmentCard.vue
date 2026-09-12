@@ -1,6 +1,6 @@
 <template>
   <article class="entertainment-card">
-    <a class="cover-link" :class="{ 'video-cover': item.platform === 'bilibili' }" :href="item.url" target="_blank" rel="noopener noreferrer">
+    <a class="cover-link" :href="item.url" target="_blank" rel="noopener noreferrer">
       <img
         :src="resolvedCover"
         :alt="`${platformLabel}：${item.title}`"
@@ -14,12 +14,12 @@
     </a>
 
     <div class="card-content">
-      <a class="item-title" :href="item.url" target="_blank" rel="noopener noreferrer">
+      <a class="item-title" :title="item.title" :href="item.url" target="_blank" rel="noopener noreferrer">
         {{ item.title }}
       </a>
       <div class="metrics">
-        <strong>{{ item.primaryMetric }}</strong>
-        <span>{{ item.secondaryMetric }}</span>
+        <strong :title="item.primaryMetric">{{ item.primaryMetric }}</strong>
+        <span :title="item.secondaryMetric">{{ item.secondaryMetric }}</span>
       </div>
       <div class="card-footer">
         <time v-if="item.publishedAt" :datetime="isoDate">{{ displayDate }}</time>
@@ -90,6 +90,8 @@ const handleImageError = () => {
 
 <style scoped>
 .entertainment-card {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
   overflow: hidden;
   border: 1px solid #e7e5e1;
@@ -108,11 +110,10 @@ const handleImageError = () => {
   position: relative;
   display: block;
   overflow: hidden;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 4 / 3;
+  flex-shrink: 0;
   background: #f2f0ec;
 }
-
-.cover-link.video-cover { aspect-ratio: 16 / 9; }
 
 .cover-image {
   width: 100%;
@@ -142,11 +143,12 @@ const handleImageError = () => {
 .badge-douyin { background: rgba(28, 29, 34, 0.9); }
 .badge-bilibili { background: rgba(251, 114, 153, 0.95); }
 
-.card-content { padding: 13px 14px 14px; }
+.card-content { display: flex; flex-direction: column; padding: 13px 14px 14px; }
 
 .item-title {
   display: -webkit-box;
-  min-height: 44px;
+  height: 44px;
+  flex-shrink: 0;
   overflow: hidden;
   color: #25272d;
   font-size: 15px;
@@ -162,10 +164,13 @@ const handleImageError = () => {
 .metrics {
   display: flex;
   align-items: baseline;
+  height: 20px;
+  line-height: 20px;
   gap: 8px;
   margin-top: 10px;
 }
 
+.metrics strong, .metrics span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .metrics strong { color: #e45a36; font-size: 14px; }
 .metrics span { color: #92959a; font-size: 12px; }
 
@@ -179,14 +184,17 @@ const handleImageError = () => {
   border-top: 1px solid #f0efec;
   color: #9a9ca1;
   font-size: 11px;
+  line-height: 16px;
+  white-space: nowrap;
 }
 
 .card-footer a { color: #555960; font-weight: 600; text-decoration: none; }
 
 @media (max-width: 768px) {
   .card-content { padding: 11px; }
-  .item-title { min-height: 42px; font-size: 14px; }
-  .metrics { align-items: flex-start; flex-direction: column; gap: 2px; }
+  .item-title { height: 42px; font-size: 14px; }
+  .metrics { height: 42px; align-items: stretch; flex-direction: column; gap: 2px; }
+  .metrics strong, .metrics span { flex-shrink: 0; }
   .card-footer a { max-width: 70px; text-align: right; }
 }
 </style>

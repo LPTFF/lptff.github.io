@@ -23,7 +23,7 @@ async function analyzeLocalContent(domain, input, cacheOnly = false) {
   }
   const contract = (await (await fetch(chrome.runtime.getURL("content-analysis.json"))).json())[domain];
   const categories = contract.schema.properties.results.items.properties.category.enum;
-  const usable = value => value && categories.includes(value.category) && (cacheOnly || value.category !== "待分类");
+  const usable = value => value && categories.includes(value.category);
   const entries = input.map((item, index) => {
     const url = new URL(item.url);
     if (!["https:", "http:"].includes(url.protocol) || url.username || url.password || !String(item.title || "").trim()) throw new Error("资讯格式无效");

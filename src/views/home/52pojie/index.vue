@@ -37,16 +37,17 @@
             class="filter-tag"
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
-            @click="selectedSource = source.id"
+            @click="selectedSource = source.id; revealCollection(source.id)"
           >
             {{ source.label }} {{ source.count }}
+            <CollectionStatusBadge :status="collectionStatuses[source.id.replace(/^direct:/, '')]" />
           </button>
           <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
         </div>
       </div>
-      <details class="collector-details">
+      <details ref="collectionDetails" class="collector-details">
         <summary>Gemini 标签逻辑与更新规则</summary>
-        <CollectionFreshness tab="pojie" />
+        <CollectionFreshness tab="pojie" @change="collectionStatuses = $event" />
         <ContentAnalysis domain="pojie" :items="newsGuide" @analyzed="applyAnalysis" />
         <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新；不以帖子发布时间判断，失败保留原内容。采集记录的新鲜度不代表登录状态的有效期。</p>
         <p>吾爱破解与看雪采集后统一交由 Gemini 智能分析。模型根据帖子标题、来源和时间含义，从预设主题中选择分类，并生成摘要、评分、用途判断和相近主题分组；不读取帖子全文。</p>
@@ -261,9 +262,11 @@ import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import ContentAnalysis from "../../../components/ContentAnalysis.vue";
+import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
+import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
 import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
-import { analysisFor } from "../../../utils/contentAnalysis";
+import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis";
 import { reactive } from "vue";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
@@ -282,6 +285,7 @@ export default {
   },
   components: {
     CollectionFreshness,
+    CollectionStatusBadge,
     ContentAnalysis,
     TagCategoryPicker,
     SourceIcon,
@@ -297,6 +301,7 @@ export default {
     Timer,
   },
   setup(props: any) {
+    const indicators = useCollectionIndicators();
     const logoUrl = logoImageUrl;
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
@@ -323,7 +328,7 @@ export default {
     };
     const tagCounts = computed(() => countContentTags(newsGuide));
     const analyzedCount = computed(
-      () => newsGuide.filter((item: any) => item.ecosystem).length
+      () => newsGuide.filter((item: any) => hasContentAnalysis("pojie", item.ecosystem)).length
     );
     const categoryCount = computed(
       () => new Set(newsGuide.map((item: any) => item.ecosystem?.category).filter(Boolean)).size
@@ -551,6 +556,7 @@ export default {
       focusOptions,
       categoryOptions,
       selectedSource,
+      ...indicators,
       selectedFocus,
       selectedCategory,
       handleDay,
