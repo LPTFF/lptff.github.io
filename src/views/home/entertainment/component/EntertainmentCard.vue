@@ -1,6 +1,6 @@
 <template>
   <article class="entertainment-card">
-    <a class="cover-link" :href="item.url" target="_blank" rel="noopener noreferrer">
+    <a class="cover-link" :class="{ 'video-cover': item.platform === 'bilibili' }" :href="item.url" target="_blank" rel="noopener noreferrer">
       <img
         :src="resolvedCover"
         :alt="`${platformLabel}：${item.title}`"
@@ -31,7 +31,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import fallbackImage from "../../../../assets/bg.jpg";
 
 export type EntertainmentPlatform = "movie" | "douyin" | "bilibili";
@@ -55,6 +55,9 @@ export interface EntertainmentItem {
 const props = defineProps<{ item: EntertainmentItem }>();
 
 const resolvedCover = ref(props.item.platform === "movie" ? fallbackImage : (props.item.coverUrl || fallbackImage));
+watch(() => props.item.coverUrl, (cover) => {
+  if (props.item.platform !== "movie") resolvedCover.value = cover || fallbackImage;
+});
 const platformLabel = computed(() => ({
   movie: "豆瓣动画",
   douyin: "抖音",
@@ -108,6 +111,8 @@ const handleImageError = () => {
   aspect-ratio: 4 / 5;
   background: #f2f0ec;
 }
+
+.cover-link.video-cover { aspect-ratio: 16 / 9; }
 
 .cover-image {
   width: 100%;

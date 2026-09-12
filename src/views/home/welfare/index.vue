@@ -4,43 +4,18 @@
       <div class="ecosystem-radar">
         <div>
           <div class="radar-title" id="welfare-radar-title">薅羊毛福利雷达</div>
-          <div class="radar-description">
-            保留全部多路采集源资讯，由 Gemini 智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。
-          </div>
         </div>
         <div class="radar-stats" aria-label="福利数据统计">
           <span><strong>{{ welfareSourceCount }}</strong> 条线报资讯</span>
           <span><strong>{{ directSourceCount }}</strong> 条固定来源</span>
           <span><strong>{{ directedSourceCount }}</strong> 条定向发现</span>
-          <span><strong>{{ categoryCount }}</strong> 个福利主题</span>
+          <span :title="'统计全部资讯的细分标签，本机和定时采集共同计入'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
         </div>
       </div>
 
       <div class="radar-filters">
         <!-- 核心分类 (生态雷达) -->
-        <div class="filter-row" role="group" aria-label="按福利分类筛选">
-          <span class="filter-label">福利分类</span>
-          <button
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === 'all' }"
-            :aria-pressed="selectedCategory === 'all'"
-            @click="selectedCategory = 'all'"
-          >
-            全部 <small>{{ analyzedCount }}</small>
-          </button>
-          <button
-            v-for="category in categoryOptions"
-            :key="category.name"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === category.name }"
-            :aria-pressed="selectedCategory === category.name"
-            @click="selectedCategory = category.name"
-          >
-            {{ category.name }} <small>{{ category.count }}</small>
-          </button>
-        </div>
+        <TagCategoryPicker domain="welfare" :options="categoryOptions" :total="welfareSourceCount" v-model="selectedCategory" />
 
         <!-- 观察视角 -->
         <div class="filter-row" role="group" aria-label="按观察视角筛选">
@@ -66,8 +41,8 @@
             :key="mode.id"
             type="button"
             class="filter-tag mode-tag"
-            :class="{ active: selectedSource === mode.id }"
-            :aria-pressed="selectedSource === mode.id"
+            :class="{ active: selectedSource === mode.id || (mode.id !== 'all' && selectedSource.startsWith(`${mode.id}:`)) }"
+            :aria-pressed="selectedSource === mode.id || (mode.id !== 'all' && selectedSource.startsWith(`${mode.id}:`))"
             @click="selectedSource = mode.id"
           >
             {{ mode.label }} <small>{{ mode.count }}</small>
@@ -94,7 +69,7 @@
 
         <!-- 定向来源 -->
         <div class="filter-row source-scroll-row" role="group" aria-label="按定向来源筛选">
-          <span class="filter-label">定向来源</span>
+          <span class="filter-label">定向发现</span>
           <button
             v-for="source in searchSources"
             :key="source.id"
@@ -113,6 +88,11 @@
       <!-- 采集规则说明展开 -->
       <details class="collector-details">
         <summary>采集范围与更新规则</summary>
+        <p>顶部统计为去重后的全部资讯；来源按钮数量按当前标签和观察视角统计，当前结果再叠加所选来源。固定来源与 Google 定向发现分别计数，同一平台的两种采集方式独立筛选。</p>
+        <p>保留全部多路采集源资讯，由 Gemini 智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。</p>
+        <CollectionFreshness tab="welfare" />
+        <ContentAnalysis domain="welfare" :items="welfareSource" @analyzed="applyAnalysis" />
+        <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新。这里指采集记录的新鲜度，不代表福利活动或登录状态的有效期；失败保留原内容。</p>
         <div class="collector-detail-grid">
           <div>
             <strong>固定来源</strong>
@@ -201,10 +181,11 @@
                 <el-tag
                   size="small"
                   type="info"
-                  v-for="sig in (item.ecosystem.signals || []).filter((s: string) => s !== item.ecosystem.category).slice(0, 3)"
+                  v-for="sig in contentTags(item)"
+                  :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签（含本机分析）`"
                   :key="sig"
                 >
-                  {{ sig }}
+                  {{ sig }} · {{ tagCounts.get(sig) || 0 }} 条
                 </el-tag>
               </div>
               <div class="ecosystem-tags" v-else>
@@ -251,9 +232,15 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, reactive } from "vue";
+import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
+import ContentAnalysis from "../../../components/ContentAnalysis.vue";
+import CollectionFreshness from "../../../components/CollectionFreshness.vue";
+import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
+import { analysisFor } from "../../../utils/contentAnalysis";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../data/welfare.json";
+import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import tuanSource from "../../../data/welfare/0818tuan.json";
 import tuanTopSource from "../../../data/welfare/0818tuanTop.json";
 import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
@@ -281,6 +268,7 @@ const collectorSources = keywordSearchConfig.searchSources;
 
 // 固定直采来源配置
 const directCollectorSources = [
+  { id: "bilibili", label: "bilibili · 百科老王 / 国外主机测评" },
   { id: "hxm5", label: "线报屋" },
   { id: "yqhd8", label: "实时线报" },
   { id: "0818tuan", label: "0818团" },
@@ -294,6 +282,7 @@ const ecosystemByLink = new Map(
 );
 
 const rawInitSource = [
+  ...bilibiliItemsFor("welfare"),
   ...oldSource,
   ...tuanSource,
   ...zhuanyesSource,
@@ -317,20 +306,22 @@ for (const item of [...rawTopSource, ...rawInitSource]) {
   uniqueWelfare.push({
     ...item,
     link,
-    ecosystem: ecosystemByLink.get(link),
+    ecosystem: analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
   });
 }
-const welfareSource = uniqueWelfare.sort((a, b) => b.timestamp - a.timestamp);
+const welfareSource = reactive(uniqueWelfare.sort((a, b) => b.timestamp - a.timestamp));
 
 export default {
   props: {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
+    const applyAnalysis = (results: any[]) => {
+      for (const result of results) for (const item of welfareSource) {
+        if (item.link === result.url) item.ecosystem = result.analysis;
+      }
+    };
     const logoUrl = logoImageUrl;
-    const selectedCategory = ref("all");
-    const selectedFocus = ref("all");
-    const selectedSource = ref("all");
 
     const welfareSourceCount = computed(() => welfareSource.length);
     const directSourceCount = computed(
@@ -340,29 +331,17 @@ export default {
       () => welfareSource.filter((item) => item.website === "keyword-search").length
     );
 
+    const tagCounts = computed(() => countContentTags(welfareSource));
     const analyzedCount = computed(
       () => welfareSource.filter((item: any) => item.ecosystem).length
     );
 
-    const categoryCount = computed(
-      () =>
-        new Set(
-          welfareSource.map((item: any) => item.ecosystem?.category).filter(Boolean)
-        ).size
-    );
-
-    const categoryOptions = computed(() => {
-      const counts = new Map<string, number>();
-      welfareSource.forEach((item: any) => {
-        const cat = item.ecosystem?.category;
-        if (cat) {
-          counts.set(cat, (counts.get(cat) || 0) + 1);
-        }
-      });
-      return [...counts.entries()]
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
-    });
+    const selectedCategory = ref("all");
+    const selectedFocus = ref("all");
+    const selectedSource = ref("all");
+    const categoryOptions = computed(() => [...countContentTags(welfareSource, true).entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN")));
 
     const focusOptions = [
       { key: "all", label: "全部视角" },
@@ -374,24 +353,26 @@ export default {
     ];
 
     const collectionModes = computed(() => [
-      { id: "all", label: "全部", count: welfareSourceCount.value },
-      { id: "direct", label: "固定来源", count: directSourceCount.value },
-      { id: "directed", label: "Google 定向", count: directedSourceCount.value },
+      { id: "all", label: "全部", count: matchingWelfare.value.length },
+      { id: "direct", label: "固定来源", count: matchingWelfare.value.filter((item) => item.website !== "keyword-search").length },
+      { id: "directed", label: "定向发现", count: matchingWelfare.value.filter((item) => item.website === "keyword-search").length },
     ]);
 
     const directSources = computed(() =>
       directCollectorSources.map((source) => ({
         ...source,
+        id: `direct:${source.id}`,
         kind: "direct",
-        count: welfareSource.filter((item) => item.website === source.id).length,
+        count: matchingWelfare.value.filter((item) => item.website === source.id).length,
       }))
     );
 
     const searchSources = computed(() =>
       collectorSources.map((source) => ({
         ...source,
+        id: `directed:${source.id}`,
         kind: "search",
-        count: welfareSource.filter(
+        count: matchingWelfare.value.filter(
           (item) => item.website === "keyword-search" && item.searchSourceId === source.id
         ).length,
       }))
@@ -406,32 +387,13 @@ export default {
       return allSources.find((s) => s.id === selectedSource.value)?.label || "当前来源";
     });
 
-    const filteredWelfare = computed(() =>
+    const matchingWelfare = computed(() =>
       welfareSource.filter((item: any) => {
         const ecosystem = item.ecosystem;
 
-        // 1. 来源筛选
-        if (selectedSource.value === "direct") {
-          if (item.website === "keyword-search") return false;
-        } else if (selectedSource.value === "directed") {
-          if (item.website !== "keyword-search") return false;
-        } else if (selectedSource.value !== "all") {
-          const isDirect = directCollectorSources.some((s) => s.id === selectedSource.value);
-          if (isDirect) {
-            if (item.website !== selectedSource.value) return false;
-          } else {
-            if (
-              item.website !== "keyword-search" ||
-              item.searchSourceId !== selectedSource.value
-            ) {
-              return false;
-            }
-          }
-        }
-
         // 2. 分类筛选
         if (selectedCategory.value !== "all") {
-          if (!ecosystem || ecosystem.category !== selectedCategory.value) {
+          if (!ecosystem || !allContentCategories(item).includes(selectedCategory.value)) {
             return false;
           }
         }
@@ -470,6 +432,15 @@ export default {
         }
       })
     );
+
+    const filteredWelfare = computed(() => matchingWelfare.value.filter((item: any) => {
+      const source = selectedSource.value;
+      const directed = item.website === "keyword-search";
+      if (source === "all") return true;
+      if (source === "direct") return !directed;
+      if (source === "directed") return directed;
+      return source === `${directed ? "directed" : "direct"}:${directed ? item.searchSourceId : item.website}`;
+    }));
 
     const isPCRes = computed(() => isPC());
     let maxLength = 0;
@@ -544,6 +515,13 @@ export default {
     const getWebsiteInfo = (item: any): any => {
       let websiteInfo = {};
       switch (String(item.website)) {
+        case "bilibili":
+          websiteInfo = {
+            websiteName: `bilibili · ${item.authorName || "UP主"}`,
+            mainWebsite: item.authorPage,
+            websiteImg: "https://www.bilibili.com/favicon.ico",
+          };
+          break;
         case "hxm5":
           websiteInfo = {
             websiteName: "线报屋",
@@ -662,21 +640,23 @@ export default {
     };
 
     return {
-      logoUrl,
-      selectedCategory,
+      applyAnalysis,
+      contentTags,
+      tagCounts,
+      searchSources,
+      directSources,
+      collectionModes,
+      focusOptions,
+      categoryOptions,
       selectedFocus,
+      selectedCategory,
+      logoUrl,
       selectedSource,
       welfareSource,
       welfareSourceCount,
       directSourceCount,
       directedSourceCount,
       analyzedCount,
-      categoryCount,
-      categoryOptions,
-      focusOptions,
-      collectionModes,
-      directSources,
-      searchSources,
       selectedFilterLabel,
       directCollectorSources,
       collectorSources,
@@ -697,6 +677,9 @@ export default {
     };
   },
   components: {
+    CollectionFreshness,
+    ContentAnalysis,
+    TagCategoryPicker,
     ElRow,
     ElCol,
     ElCard,

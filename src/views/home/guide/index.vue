@@ -4,9 +4,6 @@
       <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
         <div>
           <div class="radar-title" id="guide-radar-title">热门资讯生态雷达</div>
-          <div class="radar-description">
-            汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。
-          </div>
         </div>
         <div class="radar-stats">
           <span>{{ totalNewsCount }} 条资讯</span>
@@ -15,29 +12,14 @@
         </div>
       </section>
       <section class="radar-filters" aria-label="热门资讯生态筛选">
-        <div class="filter-row">
-          <span class="filter-label">生态主题</span>
-          <button
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === 'all' }"
-            :aria-pressed="selectedCategory === 'all'"
-            @click="selectedCategory = 'all'"
-          >
-            全部 {{ totalNewsCount }}
-          </button>
-          <button
-            v-for="category in categoryOptions"
-            :key="category.name"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === category.name }"
-            :aria-pressed="selectedCategory === category.name"
-            @click="selectedCategory = category.name"
-          >
-            {{ category.name }} {{ category.count }}
-          </button>
-        </div>
+        <TagCategoryPicker
+          v-model="selectedCategory"
+          domain="guide"
+          label="生态主题"
+          search-placeholder="输入主题名称，如 科技、生活"
+          :options="categoryOptions"
+          :total="totalNewsCount"
+        />
         <div class="filter-row">
           <span class="filter-label">观察视角</span>
           <button
@@ -79,7 +61,8 @@
       </section>
       <details class="collector-details">
         <summary>Gemini 标签逻辑与更新规则</summary>
-        <p>汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末 5 个观察源，统一直接由 Gemini 3.5 智能模型进行全量语义理解，生成生态主题分类与观察摘要。</p>
+        <p>汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。</p>
+        <p>这 5 个观察源统一由 Gemini 3.5 智能模型进行语义理解，生成生态主题分类与观察摘要。</p>
         <p>模型根据各平台新闻标题、事件背景及跨平台热度，归类至政务与时事、社会与民生、科技与产业、文娱与影视、消费与生活、教育与职场、财经与商业、体育与竞技、深度特稿与网络潮流 10 大生态主题，真实反映当下公共注意力分布。</p>
         <p>观察视角根据 Gemini 分析结果生成：跨来源共振＝同一主题在 2 个及以上来源同时上榜发酵；热榜前列＝各平台 Top 10 核心关注；深度特稿＝南方周末深度调查特稿与事件背景追踪。</p>
         <p>列表严格按最新发布与采集时间倒序呈现，各来源保留原始榜单名次与热度值；数据随采集流水线由 Gemini 每日自动分析并更新发布。</p>
@@ -264,11 +247,13 @@ import {
   ElDivider,
   ElTag,
 } from "element-plus";
+import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 export default {
   props: {
     guideLocation: [String, Number],
   },
   components: {
+    TagCategoryPicker,
     ElCol,
     ElRow,
     ElDialog,

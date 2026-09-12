@@ -6,7 +6,7 @@ on:
       - master
 
   schedule:
-    # GitHub Actions 使用 UTC；除北京时间 06:17 外，每小时刷新福利和热门资讯。
+    # GitHub Actions 使用 UTC；除北京时间 06:17 外，每小时共同刷新福利、娱乐和热门资讯。
     - cron: "17 0-21,23 * * *"
     # 每天北京时间 06:17 保留一次全量采集，避免其他站点数据停止更新。
     - cron: "17 22 * * *"
@@ -66,26 +66,12 @@ jobs:
           EVENT_SCHEDULE: ${{ github.event.schedule }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           KUAISHOU_COOKIE: ${{ secrets.KUAISHOU_COOKIE }}
-          DOUYIN_COOKIE: ${{ secrets.DOUYIN_COOKIE }}
           LEETCODE_COOKIE: ${{ secrets.LEETCODE_COOKIE }}
         run: |
           chmod +x project-support/build.sh
           if [[ "$EVENT_NAME" == "schedule" && "$EVENT_SCHEDULE" != "17 22 * * *" ]]; then
             xvfb-run -a ./project-support/build.sh \
-              --only welfare \
-              --only 0818tuan \
-              --only 0818tuanTop \
-              --only zhuanyes \
-              --only zhuanyesTop \
-              --only daydayzhuan \
-              --only daydayzhuanTop \
-              --only zhujiceping \
-              --only xianyu \
-              --only keywordSearch \
-              --only infzm \
-              --only weibo \
-              --only douyinHot \
-              --only xiaohongshu \
+              --hourly \
               --summary .artifacts/collectors/python-ci.json
           else
             xvfb-run -a ./project-support/build.sh --full --summary .artifacts/collectors/python-ci.json

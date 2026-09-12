@@ -59,9 +59,16 @@ COLLECTORS = (
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, optional=True, group="full"),
     CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True, group="archived"),
-    CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "full"),
-    CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 180, True, "full"),
+    CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "authorized"),
+    CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 360, True, "full"),
 )
+
+# Welfare and entertainment share one hourly selection and one workflow trigger.
+HOURLY_COLLECTORS = {
+    "welfare", "0818tuan", "0818tuanTop", "zhuanyes", "zhuanyesTop",
+    "daydayzhuan", "daydayzhuanTop", "zhujiceping", "xianyu", "keywordSearch",
+    "infzm", "weibo", "douyinHot", "xiaohongshu", "douban", "bilibili",
+}
 
 
 def digest_path(path: Path) -> str | None:
@@ -98,7 +105,7 @@ def snapshot_metrics(path: Path, kind: str) -> dict[str, object]:
         return {"keys": set(), "maxTimestamp": None}
     unique_key = UNIQUE_KEYS.get(kind)
     keys = {
-        str(item[unique_key])
+        str(item.get("detailUrl") or item[unique_key]) if kind == "video" else str(item[unique_key])
         for item in items
         if unique_key and isinstance(item, dict) and item.get(unique_key)
     }
@@ -296,10 +303,23 @@ def run_collector(spec: CollectorSpec) -> dict[str, object]:
         "timedOut": timed_out,
         "stdoutBytes": len(stdout.encode("utf-8")),
         "stderrBytes": len(stderr.encode("utf-8")),
+        "sourceDiagnostics": source_diagnostics(stdout),
         **({"aiAttempts": ai_attempts} if ai_attempts else {}),
         **({"stages": stages[-6:]} if stages else {}),
         **({"reason": reason} if reason else {}),
     }
+
+
+def source_diagnostics(stdout: str) -> list[dict[str, object]]:
+    results = []
+    for line in stdout.splitlines():
+        try:
+            item = json.loads(line)
+        except ValueError:
+            continue
+        if isinstance(item, dict) and ("source" in item or "uid" in item) and item.get("state") in {"success", "failed", "preserved"}:
+            results.append({key: item[key] for key in ("source", "uid", "state", "count", "maxTimestamp", "reason") if key in item})
+    return results
 
 
 def select_collectors(*, include_full: bool, only: list[str]) -> list[CollectorSpec]:
@@ -341,8 +361,13 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--full", action="store_true", help="include long-running collectors")
     parser.add_argument("--only", action="append", default=[])
+    parser.add_argument("--hourly", action="store_true", help="shared welfare and entertainment refresh")
     parser.add_argument("--summary", type=Path)
     args = parser.parse_args()
+    if args.hourly:
+        if args.only or args.full:
+            parser.error("--hourly cannot be combined with --only or --full")
+        args.only = sorted(HOURLY_COLLECTORS)
     selected = select_collectors(include_full=args.full, only=args.only)
     unknown = set(args.only) - {spec.name for spec in COLLECTORS}
     if unknown:

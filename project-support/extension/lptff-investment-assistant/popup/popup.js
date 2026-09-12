@@ -71,7 +71,7 @@ for (const [name, tab] of Object.entries(modeTabs)) {
   tab.addEventListener("click", () => setMode(name));
 }
 try {
-  const saved = localStorage.getItem("lptff-ext-mode");
+  const saved = new URLSearchParams(location.search).get("mode") || localStorage.getItem("lptff-ext-mode");
   setMode(saved === "market" || saved === "entertainment" ? saved : "finance");
 } catch {
   setMode("finance");

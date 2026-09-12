@@ -3,16 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>多领域来源采集</title>
+    <title>平台授权与 AI</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <main class="popup">
-      <h1>LPTFF Investment OS</h1>
+      <h1>LPTFF 平台授权与 AI</h1>
+      <p>按平台登录并授权所需范围；Gemini 配置供全站资讯分析与各助手共用。</p>
       <div class="mode-tabs" role="tablist">
-        <button id="mode-finance" class="mode-tab active" type="button" role="tab" aria-selected="true">金融</button>
-        <button id="mode-market" class="mode-tab" type="button" role="tab" aria-selected="false">市场需求</button>
-        <button id="mode-entertainment" class="mode-tab" type="button" role="tab" aria-selected="false">娱乐</button>
+        <button id="mode-finance" class="mode-tab active" type="button" role="tab" aria-selected="true">基金 / 币安</button>
+        <button id="mode-market" class="mode-tab" type="button" role="tab" aria-selected="false">BOSS 直聘</button>
+        <button id="mode-entertainment" class="mode-tab" type="button" role="tab" aria-selected="false">内容平台授权</button>
       </div>
 
       <section id="finance-mode">
@@ -78,11 +79,26 @@
       </section>
 
       <section id="entertainment-mode" hidden>
-        <p>娱乐领域：从快手/抖音登录态视频流提取正式离线清单——包含封面、文案、统计、作者、时长和直达链接，按兴趣直接消费内容。</p>
+        <p>先在来源平台登录，再授权采集作品或动态。登录凭据不会导出，结果仅保存在本机。</p>
+        <div id="authorized-platforms"></div>
+        <h2>其他平台与采集范围</h2>
         <div id="obs-group-entertainment" class="observation-group"></div>
       </section>
 
+      <details class="advanced">
+        <summary>全站 Gemini 配置</summary>
+        <p>安全社区、薅羊毛与已有助手共用本机密钥；资讯分析仅发送公开标题与链接。</p>
+        <label>模型 <select id="shared-ai-model"><option>gemini-3.5-flash-lite</option><option>gemini-3.6-flash</option><option>gemini-3.7-flash</option></select></label>
+        <label>Gemini API Key <input id="shared-ai-key" type="password" autocomplete="off" placeholder="请输入 Gemini API Key" /></label>
+        <button id="shared-ai-reveal" type="button" aria-label="显示 Gemini Key">显示</button>
+        <span id="shared-ai-saved"></span>
+        <button id="shared-ai-save" type="button">保存并测试</button>
+        <button id="shared-ai-clear" type="button">清除 Key</button>
+        <p id="shared-ai-state" role="status"></p>
+      </details>
+
     </main>
     <script src="popup.js"></script>
+    <script src="authorized-panel.js"></script>
   </body>
 </html>

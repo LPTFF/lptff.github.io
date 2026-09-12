@@ -1,4 +1,6 @@
 importScripts(
+  "local-ai.js",
+  "authorized-content.js",
   "boss-playbook.js",
   "source-capture.js",
   "collection-policy.js",
@@ -125,12 +127,12 @@ function geminiJsonText(response) {
   }
 }
 
-async function callBossGemini({ system, prompt, schema }) {
-  const config = await loadBossAutopilotConfig();
+async function callLocalGemini({ system, prompt, schema, maxOutputTokens = 1600, maxAttempts = GEMINI_MAX_ATTEMPTS }) {
+  const config = await loadLocalGeminiConfig();
   if (!config.geminiKey) throw new Error("请先录入 Gemini Key");
   const modelCandidates = [config.model, ...GEMINI_MODELS].filter((model, index, models) => models.indexOf(model) === index).slice(0, GEMINI_MAX_ATTEMPTS);
   let lastTemporaryError = "Gemini 临时不可用";
-  for (let attempt = 0; attempt < GEMINI_MAX_ATTEMPTS; attempt += 1) {
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
     const requestModel = modelCandidates[attempt] || config.model;
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), GEMINI_REQUEST_TIMEOUT_MS);
@@ -145,7 +147,7 @@ async function callBossGemini({ system, prompt, schema }) {
           contents: [{ role: "user", parts: [{ text: prompt }] }],
           generationConfig: {
             temperature: 0.2,
-            maxOutputTokens: 1600,
+            maxOutputTokens,
             responseMimeType: "application/json",
             responseSchema: schema,
           },
@@ -155,7 +157,7 @@ async function callBossGemini({ system, prompt, schema }) {
       const temporary = error?.name === "AbortError" || error instanceof TypeError || /network|fetch|连接|超时|代理/i.test(String(error?.message || error || ""));
       if (!temporary) throw error;
       lastTemporaryError = error?.name === "AbortError" ? `Gemini ${requestModel} 连接超时` : `Gemini ${requestModel} 网络连接中断`;
-      if (attempt < GEMINI_MAX_ATTEMPTS - 1) {
+      if (attempt < maxAttempts - 1) {
         await new Promise((resolve) => setTimeout(resolve, 1800 * (attempt + 1)));
         continue;
       }
@@ -172,7 +174,7 @@ async function callBossGemini({ system, prompt, schema }) {
     const detail = String(body?.error?.message || `HTTP ${response.status}`).replace(config.geminiKey, "[已隐藏]");
     const temporary = response.status === 429 || response.status === 500 || response.status === 503 || /high demand|overload|temporar|稍后重试|繁忙/i.test(detail);
     if (temporary) lastTemporaryError = `Gemini ${requestModel} 临时服务异常：${detail.slice(0, 180)}`;
-    if (temporary && attempt < GEMINI_MAX_ATTEMPTS - 1) {
+    if (temporary && attempt < maxAttempts - 1) {
       const retryAfterSeconds = Math.min(15, Math.max(0, Number(response.headers?.get?.("retry-after")) || 0));
       await new Promise((resolve) => setTimeout(resolve, Math.max(retryAfterSeconds * 1000, 1800 * (attempt + 1))));
       continue;
@@ -180,8 +182,11 @@ async function callBossGemini({ system, prompt, schema }) {
     if (temporary) break;
     throw new Error(`Gemini 请求失败：${detail.slice(0, 300)}`);
   }
-  throw new Error(`${lastTemporaryError}，已自动尝试 ${modelCandidates.length} 个模型`);
+  throw new Error(`${lastTemporaryError}，已尝试 ${maxAttempts} 次，请稍后重试`);
 }
+
+// Compatibility for existing BOSS/career callers; all domains use the same client.
+const callBossGemini = callLocalGemini;
 
 const STRING_ARRAY_SCHEMA = { type: "ARRAY", items: { type: "STRING" } };
 

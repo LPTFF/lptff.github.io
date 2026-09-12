@@ -4,7 +4,6 @@
       <header class="entertainment-overview">
         <div class="overview-copy">
           <h1 id="entertainment-title">娱乐专区</h1>
-          <p class="section-intro">豆瓣动画与哔哩、抖音精选作者内容集中呈现。</p>
         </div>
         <div class="overview-stats" aria-label="内容来源概览">
           <span><strong>{{ contentCount }}</strong> 条内容</span>
@@ -37,7 +36,9 @@
 
       <details class="source-details">
         <summary>更新范围与来源说明</summary>
-        <p>豆瓣跟踪热门动画更新；哔哩视频跟踪百科老王、杨博士说AI；抖音跟踪李子栗、独孤十一。</p>
+        <p>追踪豆瓣动画、抖音作者作品与哔哩视频更新。</p>
+        <CollectionFreshness tab="entertainment" />
+        <p>豆瓣与 B 站公开内容和薅羊毛共用每小时采集任务；抖音作者改为插件授权采集。来源不可用时保留上次内容，授权结果仅在本机显示。</p>
       </details>
     </section>
 
@@ -53,10 +54,14 @@
 
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { isPC } from "../../../utils/utils";
 import movieData from "../../../data/movie.json";
-import douyinData from "../../../data/tiktok.json";
-import bilibiliData from "../../../data/bilibili.json";
+import douyinSnapshot from "../../../data/tiktok.json";
+import { mergeAuthorizedItems } from "../../../utils/authorizedContent";
+const douyinData = mergeAuthorizedItems("douyin", douyinSnapshot);
+import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
+const bilibiliData = bilibiliItemsFor("entertainment");
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
 
 type PlatformFilter = "all" | EntertainmentPlatform;

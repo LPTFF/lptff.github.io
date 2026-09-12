@@ -117,6 +117,12 @@
 
   window.addEventListener("message", (event) => {
     if (event.source !== window || event.origin !== location.origin) return;
+    if (event.data?.type === "LPTFF_AUTHORIZED_CONTENT_REQUEST") {
+      const actions = ["STATUS", "START", "STOP", "LOGIN", "RESULT", "OPEN_ASSISTANT", "AI_CONFIG", "AI_REVEAL", "AI_CLEAR", "AI_TEST", "AI_CACHED", "AI_SAVE", "AI_ANALYZE"];
+      if (!actions.includes(event.data.action)) return;
+      forward({ type: `AUTHORIZED_CONTENT_${event.data.action}`, platform: event.data.platform,
+        mode: event.data.mode, config: event.data.config, domain: event.data.domain, items: event.data.items, requestId: event.data.requestId }, "LPTFF_AUTHORIZED_CONTENT_RESPONSE");
+    }
     if (event.data?.type === "LPTFF_INVESTMENT_GET_STAGING") {
       forward({ type: "GET_INVESTMENT_STAGING", requestId: event.data.requestId }, "LPTFF_INVESTMENT_STAGING");
     }

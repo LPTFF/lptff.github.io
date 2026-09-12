@@ -1,9 +1,11 @@
 <template>
   <router-view />
+  <FloatingAuthorization />
 </template>
 
 <script setup lang="ts">
 import { onMounted } from "vue";
+import FloatingAuthorization from "./components/FloatingAuthorization.vue";
 
 onMounted(async () => {
   if (localStorage.getItem("live2d-widget-enabled") !== "1") return;

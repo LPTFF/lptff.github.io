@@ -9,32 +9,11 @@
           <span>{{ newsGuide.length }} 条资讯</span>
           <span>{{ analyzedCount }} 条 Gemini 已分析</span>
           <span>{{ categoryCount }} 个生态主题</span>
+          <span title="统计全部资讯的细分标签，本机和定时采集共同计入">{{ tagCounts.size }} 个细分标签</span>
         </div>
       </div>
       <div class="radar-filters">
-        <div class="filter-row" v-if="analyzedCount">
-          <span class="filter-label">生态主题</span>
-          <button
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === 'all' }"
-            :aria-pressed="selectedCategory === 'all'"
-            @click="selectedCategory = 'all'"
-          >
-            全部 {{ newsGuide.length }}
-          </button>
-          <button
-            v-for="category in categoryOptions"
-            :key="category.name"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedCategory === category.name }"
-            :aria-pressed="selectedCategory === category.name"
-            @click="selectedCategory = category.name"
-          >
-            {{ category.name }} {{ category.count }}
-          </button>
-        </div>
+        <TagCategoryPicker domain="pojie" :options="categoryOptions" :total="newsGuide.length" v-model="selectedCategory" />
         <div class="filter-row" v-if="analyzedCount">
           <span class="filter-label">观察视角</span>
           <button
@@ -67,9 +46,12 @@
       </div>
       <details class="collector-details">
         <summary>Gemini 标签逻辑与更新规则</summary>
+        <CollectionFreshness tab="pojie" />
+        <ContentAnalysis domain="pojie" :items="newsGuide" @analyzed="applyAnalysis" />
+        <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新；不以帖子发布时间判断，失败保留原内容。采集记录的新鲜度不代表登录状态的有效期。</p>
         <p>吾爱破解与看雪采集后统一交由 Gemini 智能分析。模型根据帖子标题、来源和时间含义，从预设主题中选择分类，并生成摘要、评分、用途判断和相近主题分组；不读取帖子全文。</p>
         <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
-        <p>观察视角按 Gemini 结果筛选：高生态信号＝生态评分 ≥85；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
+        <p>观察视角按 Gemini 结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
         <p>两个来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。看雪发帖时间来自公开帖子接口的原始创建时间，不使用采集时间、最后回复时间或“几天前”推算。</p>
         <p>每日更新，来源异常时保留上次快照；日期与时分按原有样式展示。</p>
         <p>分析结果经条目完整性、主题与评分校验后发布。Gemini 不可用时保留上次分析，尚无结果的帖子标为“生态信号待分析”，仍可在全部主题、全部视角中查看；这些标签是模型判断，不代表人工核实。</p>
@@ -138,6 +120,7 @@
                 <el-tag size="small" type="warning" v-if="item.ecosystem.duplicateGroup">
                   主题演化
                 </el-tag>
+                <el-tag v-for="sig in contentTags(item)" :key="sig" size="small" type="info" :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签（含本机分析）`">{{ sig }} · {{ tagCounts.get(sig) || 0 }} 条</el-tag>
               </div>
               <div class="ecosystem-tags" v-else>
                 <el-tag size="small" type="info">生态信号待分析</el-tag>
@@ -272,9 +255,16 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
+import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import SourceIcon from "./SourceIcon.vue";
 import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
+import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
+import ContentAnalysis from "../../../components/ContentAnalysis.vue";
+import CollectionFreshness from "../../../components/CollectionFreshness.vue";
+import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
+import { analysisFor } from "../../../utils/contentAnalysis";
+import { reactive } from "vue";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,
@@ -291,6 +281,9 @@ export default {
     pojieLocation: [String, Number],
   },
   components: {
+    CollectionFreshness,
+    ContentAnalysis,
+    TagCategoryPicker,
     SourceIcon,
     ElCol,
     ElRow,
@@ -318,8 +311,17 @@ export default {
     const kanxueItems = [...kanxueNews]
       .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
       .sort((a, b) => a.rank - b.rank);
-    const newsGuide: any[] = [...pojieItems, ...kanxueItems]
-      .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url));
+    const bilibiliItems = bilibiliItemsFor("pojie")
+      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }));
+    const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems]
+      .map(item => ({ ...item, ecosystem: analysisFor("pojie", item.url, item.title || "") || item.ecosystem }))
+      .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
+    const applyAnalysis = (results: any[]) => {
+      for (const result of results) for (const item of newsGuide) {
+        if (item.url === result.url) item.ecosystem = result.analysis;
+      }
+    };
+    const tagCounts = computed(() => countContentTags(newsGuide));
     const analyzedCount = computed(
       () => newsGuide.filter((item: any) => item.ecosystem).length
     );
@@ -333,21 +335,17 @@ export default {
       { id: "all", label: "全部", count: newsGuide.length },
       { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
       { id: "kanxue", label: "看雪本周热榜", count: kanxueItems.length },
+      { id: "bilibili", label: "bilibili · 小迪老师", count: bilibiliItems.length },
     ];
-    const categoryOptions = computed(() => {
-      const counts = new Map<string, number>();
-      newsGuide.forEach((item: any) => {
-        if (item.ecosystem?.category) {
-          counts.set(item.ecosystem.category, (counts.get(item.ecosystem.category) || 0) + 1);
-        }
-      });
-      return [...counts.entries()]
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN"));
-    });
+    const categoryOptions = computed(() => [...countContentTags(newsGuide, true).entries()]
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN")));
+
     const focusOptions = [
       { key: "all", label: "全部视角" },
       { key: "high", label: "高生态信号" },
+      { key: "technical", label: "技术深入" },
+      { key: "trend", label: "新趋势" },
       { key: "evolution", label: "主题演化" },
       { key: "gray", label: "灰色用途" },
       { key: "beginner", label: "入门生态" },
@@ -359,13 +357,17 @@ export default {
         if (!ecosystem) return selectedCategory.value === "all" && selectedFocus.value === "all";
         if (
           selectedCategory.value !== "all" &&
-          ecosystem.category !== selectedCategory.value
+          !allContentCategories(item).includes(selectedCategory.value)
         ) {
           return false;
         }
         switch (selectedFocus.value) {
           case "high":
             return ecosystem.ecosystemValue >= 85;
+          case "technical":
+            return ecosystem.technicalDepth >= 75;
+          case "trend":
+            return ecosystem.trendNovelty >= 75;
           case "evolution":
             return Boolean(ecosystem.duplicateGroup);
           case "gray":
@@ -415,6 +417,7 @@ export default {
       switch (String(item.website)) {
         case "52pojie":
         case "kanxue":
+        case "bilibili":
           websiteUrl = item.url;
           break;
       }
@@ -427,6 +430,7 @@ export default {
       }
     };
     const handleWebsiteName = (item: any) => {
+      if (item.website === "bilibili") return `bilibili · ${item.authorName || "UP主"}`;
       let websiteName = "";
       switch (String(item.website)) {
         case "52pojie":
@@ -441,6 +445,7 @@ export default {
       return websiteName;
     };
     const handleWebsiteImg = (item: any) => {
+      if (item.website === "bilibili") return "https://www.bilibili.com/favicon.ico";
       // The post page declares this snowflake favicon; version avoids stale cached artwork.
       if (item.website === "kanxue") return "https://bbs.kanxue.com/view/img/favicon.ico?v=20260908-noreferrer";
       let websiteImg = "";
@@ -539,6 +544,15 @@ export default {
       return guideTmpAll;
     });
     return {
+      applyAnalysis,
+      contentTags,
+      tagCounts,
+      sourceOptions,
+      focusOptions,
+      categoryOptions,
+      selectedSource,
+      selectedFocus,
+      selectedCategory,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -565,12 +579,6 @@ export default {
       newsGuide,
       analyzedCount,
       categoryCount,
-      selectedCategory,
-      selectedSource,
-      sourceOptions,
-      selectedFocus,
-      categoryOptions,
-      focusOptions,
       filteredNews,
     };
   },
