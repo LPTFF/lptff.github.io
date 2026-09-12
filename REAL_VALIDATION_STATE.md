@@ -1,3 +1,26 @@
+# 追加授权 · 3.17.17
+
+- Changed files: boss-playbook.js、background.js、content/boss-autopilot.js、manifest.json。
+- Impacted behaviors: 招聘方明确请求时允许发送已保存简历和原生联系方式交换；其他越界继续接管。
+- Pending real scenarios: 新增两项的真实外发尚未执行；真实页面剧本显示和规则检查通过。
+- Current executor: Codex；日常 Chrome MCP autoConnect。
+- Next action: 保留暂停和剧本页面供审查，未提交/推送。
+- Report: [附截图报告](C:/Users/TFF001/.codex/visualizations/2026/09/12/01a09585-5dae-7510-9b64-706eb5951942/boss-script/walkthrough.md)
+
+---
+
+# BOSS 剧本沟通改造 · 2026-09-12
+
+- Changed files: background.js、boss-playbook.js、content/boss-autopilot.js、content/boss-autopilot.css、boss-notification.png、manifest.json。
+- Impacted behaviors: 剧本问答、全部动作拦截、持久化接管、本地通知、候选确认。
+- Pending real scenarios: 两个真实安全 case 已通过；实际发送、完整人工回复学习和跨标签竞态未覆盖。
+- Infrastructure issue/attempts: 内置 MCP 是 isolated；已通过官方 MCP CLI --autoConnect 接入日常 Chrome。chrome: 内部错误页被工具禁止导航，未验收。
+- Current executor: Codex 主执行者；未委派。
+- Issues found: 通知图标、状态覆盖和接管进度已修复。
+- Next action: 用户审查本地 3.17.16；当前暂停，保留实际发送模式和一个待接管会话，未提交/推送。
+- Report: [截图与完成报告](C:/Users/TFF001/.codex/visualizations/2026/09/12/01a09585-5dae-7510-9b64-706eb5951942/boss-script/walkthrough.md)
+
+---
 # 真实环境验收状态
 
 最后更新：2026-09-11
