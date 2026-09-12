@@ -1,0 +1,452 @@
+[
+    {
+        "problemsName": " 1501.可以放心投资的国家",
+        "hardRate": "MEDIUM",
+        "passRate": "57.99%",
+        "problemsUrl": "https://leetcode.cn/problems/countries-you-can-safely-invest-in/",
+        "solutionsUrl": "https://leetcode.cn/problems/countries-you-can-safely-invest-in/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1502.判断能否形成等差数列",
+        "hardRate": "EASY",
+        "passRate": "69.37%",
+        "problemsUrl": "https://leetcode.cn/problems/can-make-arithmetic-progression-from-sequence/",
+        "solutionsUrl": "https://leetcode.cn/problems/can-make-arithmetic-progression-from-sequence/solution",
+        "problemsDesc": "<p>给你一个数字数组 <code>arr</code> 。</p>\n\n<p>如果一个数列中，任意相邻两项的差总等于同一个常数，那么这个数列就称为 <strong>等差数列</strong> 。</p>\n\n<p>如果可以重新排列数组形成等差数列，请返回 <code>true</code> ；否则，返回 <code>false</code> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [3,5,1]\n<strong>输出：</strong>true\n<strong>解释：</strong>对数组重新排序得到 [1,3,5] 或者 [5,3,1] ，任意相邻两项的差分别为 2 或 -2 ，可以形成等差数列。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,2,4]\n<strong>输出：</strong>false\n<strong>解释：</strong>无法通过重新排序得到等差数列。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= arr.length &lt;= 1000</code></li>\n\t<li><code>-10^6 &lt;= arr[i] &lt;= 10^6</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1503.所有蚂蚁掉下来前的最后一刻",
+        "hardRate": "MEDIUM",
+        "passRate": "53.80%",
+        "problemsUrl": "https://leetcode.cn/problems/last-moment-before-all-ants-fall-out-of-a-plank/",
+        "solutionsUrl": "https://leetcode.cn/problems/last-moment-before-all-ants-fall-out-of-a-plank/solution",
+        "problemsDesc": "<p>有一块木板，长度为 <code>n</code> 个 <strong>单位</strong> 。一些蚂蚁在木板上移动，每只蚂蚁都以 <strong>每秒一个单位</strong> 的速度移动。其中，一部分蚂蚁向 <strong>左</strong> 移动，其他蚂蚁向 <strong>右</strong> 移动。</p>\n\n<p>当两只向 <strong>不同</strong> 方向移动的蚂蚁在某个点相遇时，它们会同时改变移动方向并继续移动。假设更改方向不会花费任何额外时间。</p>\n\n<p>而当蚂蚁在某一时刻 <code>t</code> 到达木板的一端时，它立即从木板上掉下来。</p>\n\n<p>给你一个整数 <code>n</code> 和两个整数数组 <code>left</code> 以及 <code>right</code> 。两个数组分别标识向左或者向右移动的蚂蚁在 <code>t = 0</code> 时的位置。请你返回最后一只蚂蚁从木板上掉下来的时刻。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p>&nbsp;</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/06/17/ants.jpg\" style=\"height: 610px; width: 450px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 4, left = [4,3], right = [0,1]\n<strong>输出：</strong>4\n<strong>解释：</strong>如上图所示：\n-下标 0 处的蚂蚁命名为 A 并向右移动。\n-下标 1 处的蚂蚁命名为 B 并向右移动。\n-下标 3 处的蚂蚁命名为 C 并向左移动。\n-下标 4 处的蚂蚁命名为 D 并向左移动。\n请注意，蚂蚁在木板上的最后时刻是 t = 4 秒，之后蚂蚁立即从木板上掉下来。（也就是说在 t = 4.0000000001 时，木板上没有蚂蚁）。</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/06/17/ants2.jpg\" style=\"height: 101px; width: 639px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 7, left = [], right = [0,1,2,3,4,5,6,7]\n<strong>输出：</strong>7\n<strong>解释：</strong>所有蚂蚁都向右移动，下标为 0 的蚂蚁需要 7 秒才能从木板上掉落。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/06/17/ants3.jpg\" style=\"height: 100px; width: 639px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 7, left = [0,1,2,3,4,5,6,7], right = []\n<strong>输出：</strong>7\n<strong>解释：</strong>所有蚂蚁都向左移动，下标为 7 的蚂蚁需要 7 秒才能从木板上掉落。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= n &lt;= 10^4</code></li>\n\t<li><code>0 &lt;= left.length &lt;= n + 1</code></li>\n\t<li><code>0 &lt;= left[i] &lt;= n</code></li>\n\t<li><code>0 &lt;= right.length &lt;= n + 1</code></li>\n\t<li><code>0 &lt;= right[i] &lt;= n</code></li>\n\t<li><code>1 &lt;= left.length + right.length &lt;= n + 1</code></li>\n\t<li><code>left</code> 和 <code>right</code> 中的所有值都是唯一的，并且每个值 <strong>只能出现在二者之一</strong> 中。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1504.统计全 1 子矩形",
+        "hardRate": "MEDIUM",
+        "passRate": "62.47%",
+        "problemsUrl": "https://leetcode.cn/problems/count-submatrices-with-all-ones/",
+        "solutionsUrl": "https://leetcode.cn/problems/count-submatrices-with-all-ones/solution",
+        "problemsDesc": "<p>给你一个&nbsp;<code>m x n</code>&nbsp;的二进制矩阵&nbsp;<code>mat</code>&nbsp;，请你返回有多少个&nbsp;<strong>子矩形</strong>&nbsp;的元素全部都是 1 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img src=\"https://assets.leetcode.com/uploads/2021/10/27/ones1-grid.jpg\" /></p>\n\n<pre>\n<strong>输入：</strong>mat = [[1,0,1],[1,1,0],[1,1,0]]\n<strong>输出：</strong>13\n<strong>解释：\n</strong>有 <strong>6</strong>&nbsp;个 1x1 的矩形。\n有 <strong>2</strong> 个 1x2 的矩形。\n有 <strong>3</strong> 个 2x1 的矩形。\n有 <strong>1</strong> 个 2x2 的矩形。\n有 <strong>1</strong> 个 3x1 的矩形。\n矩形数目总共 = 6 + 2 + 3 + 1 + 1 = <strong>13</strong>&nbsp;。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img src=\"https://assets.leetcode.com/uploads/2021/10/27/ones2-grid.jpg\" /></p>\n\n<pre>\n<strong>输入：</strong>mat = [[0,1,1,0],[0,1,1,1],[1,1,1,0]]\n<strong>输出：</strong>24\n<strong>解释：</strong>\n有 <strong>8</strong> 个 1x1 的子矩形。\n有 <strong>5</strong> 个 1x2 的子矩形。\n有 <strong>2</strong> 个 1x3 的子矩形。\n有 <strong>4</strong> 个 2x1 的子矩形。\n有 <strong>2</strong> 个 2x2 的子矩形。\n有 <strong>2</strong> 个 3x1 的子矩形。\n有 <strong>1</strong> 个 3x2 的子矩形。\n矩形数目总共 = 8 + 5 + 2 + 4 + 2 + 2 + 1 = <strong>24</strong><strong> 。</strong>\n\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= m, n &lt;= 150</code></li>\n\t<li><code>mat[i][j]</code>&nbsp;仅包含&nbsp;<code>0</code>&nbsp;或&nbsp;<code>1</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1505.最多 K 次交换相邻数位后得到的最小整数",
+        "hardRate": "HARD",
+        "passRate": "39.92%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-possible-integer-after-at-most-k-adjacent-swaps-on-digits/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-possible-integer-after-at-most-k-adjacent-swaps-on-digits/solution",
+        "problemsDesc": "<p>给你一个字符串&nbsp;<code>num</code> 和一个整数&nbsp;<code>k</code> 。其中，<code>num</code> 表示一个很大的整数，字符串中的每个字符依次对应整数上的各个 <strong>数位</strong> 。</p>\n\n<p>你可以交换这个整数相邻数位的数字 <strong>最多</strong>&nbsp;<code>k</code>&nbsp;次。</p>\n\n<p>请你返回你能得到的最小整数，并以字符串形式返回。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode.com/uploads/2020/06/17/q4_1.jpg\" style=\"height:40px; width:500px\" /></p>\n\n<pre>\n<strong>输入：</strong>num = &quot;4321&quot;, k = 4\n<strong>输出：</strong>&quot;1342&quot;\n<strong>解释：</strong>4321 通过 4 次交换相邻数位得到最小整数的步骤如上图所示。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>num = &quot;100&quot;, k = 1\n<strong>输出：</strong>&quot;010&quot;\n<strong>解释：</strong>输出可以包含前导 0 ，但输入保证不会有前导 0 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>num = &quot;36789&quot;, k = 1000\n<strong>输出：</strong>&quot;36789&quot;\n<strong>解释：</strong>不需要做任何交换。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre>\n<strong>输入：</strong>num = &quot;22&quot;, k = 22\n<strong>输出：</strong>&quot;22&quot;\n</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre>\n<strong>输入：</strong>num = &quot;9438957234785635408&quot;, k = 23\n<strong>输出：</strong>&quot;0345989723478563548&quot;\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= num.length &lt;= 30000</code></li>\n\t<li><code>num</code>&nbsp;只包含&nbsp;<strong>数字</strong>&nbsp;且不含有<strong>&nbsp;前导 0&nbsp;</strong>。</li>\n\t<li><code>1 &lt;= k &lt;= 10^9</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1506.找到 N 叉树的根节点",
+        "hardRate": "MEDIUM",
+        "passRate": "81.14%",
+        "problemsUrl": "https://leetcode.cn/problems/find-root-of-n-ary-tree/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-root-of-n-ary-tree/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1507.转变日期格式",
+        "hardRate": "EASY",
+        "passRate": "58.95%",
+        "problemsUrl": "https://leetcode.cn/problems/reformat-date/",
+        "solutionsUrl": "https://leetcode.cn/problems/reformat-date/solution",
+        "problemsDesc": "<p>给你一个字符串&nbsp;<code>date</code>&nbsp;，它的格式为&nbsp;<code>Day Month Year</code>&nbsp;，其中：</p>\n\n<ul>\n\t<li><code>Day</code>&nbsp;是集合&nbsp;<code>{&quot;1st&quot;, &quot;2nd&quot;, &quot;3rd&quot;, &quot;4th&quot;, ..., &quot;30th&quot;, &quot;31st&quot;}</code>&nbsp;中的一个元素。</li>\n\t<li><code>Month</code>&nbsp;是集合&nbsp;<code>{&quot;Jan&quot;, &quot;Feb&quot;, &quot;Mar&quot;, &quot;Apr&quot;, &quot;May&quot;, &quot;Jun&quot;, &quot;Jul&quot;, &quot;Aug&quot;, &quot;Sep&quot;, &quot;Oct&quot;, &quot;Nov&quot;, &quot;Dec&quot;}</code>&nbsp;中的一个元素。</li>\n\t<li><code>Year</code>&nbsp;的范围在 ​<code>[1900, 2100]</code>&nbsp;之间。</li>\n</ul>\n\n<p>请你将字符串转变为&nbsp;<code>YYYY-MM-DD</code>&nbsp;的格式，其中：</p>\n\n<ul>\n\t<li><code>YYYY</code>&nbsp;表示 4 位的年份。</li>\n\t<li><code>MM</code>&nbsp;表示 2 位的月份。</li>\n\t<li><code>DD</code>&nbsp;表示 2 位的天数。</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>date = &quot;20th Oct 2052&quot;\n<strong>输出：</strong>&quot;2052-10-20&quot;\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>date = &quot;6th Jun 1933&quot;\n<strong>输出：</strong>&quot;1933-06-06&quot;\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>date = &quot;26th May 1960&quot;\n<strong>输出：</strong>&quot;1960-05-26&quot;\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li>给定日期保证是合法的，所以不需要处理异常输入。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1508.子数组和排序后的区间和",
+        "hardRate": "MEDIUM",
+        "passRate": "57.72%",
+        "problemsUrl": "https://leetcode.cn/problems/range-sum-of-sorted-subarray-sums/",
+        "solutionsUrl": "https://leetcode.cn/problems/range-sum-of-sorted-subarray-sums/solution",
+        "problemsDesc": "<p>给你一个数组&nbsp;<code>nums</code>&nbsp;，它包含&nbsp;<code>n</code>&nbsp;个正整数。你需要计算所有非空连续子数组的和，并将它们按升序排序，得到一个新的包含&nbsp;<code>n * (n + 1) / 2</code>&nbsp;个数字的数组。</p>\n\n<p>请你返回在新数组中下标为<em>&nbsp;</em><code>left</code>&nbsp;到&nbsp;<code>right</code> <strong>（下标从 1 开始）</strong>的所有数字和（包括左右端点）。由于答案可能很大，请你将它对 10^9 + 7 取模后返回。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3,4], n = 4, left = 1, right = 5\n<strong>输出：</strong>13 \n<strong>解释：</strong>所有的子数组和为 1, 3, 6, 10, 2, 5, 9, 3, 7, 4 。将它们升序排序后，我们得到新的数组 [1, 2, 3, 3, 4, 5, 6, 7, 9, 10] 。下标从 le = 1 到 ri = 5 的和为 1 + 2 + 3 + 3 + 4 = 13 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3,4], n = 4, left = 3, right = 4\n<strong>输出：</strong>6\n<strong>解释：</strong>给定数组与示例 1 一样，所以新数组为 [1, 2, 3, 3, 4, 5, 6, 7, 9, 10] 。下标从 le = 3 到 ri = 4 的和为 3 + 3 = 6 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,2,3,4], n = 4, left = 1, right = 10\n<strong>输出：</strong>50\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 10^3</code></li>\n\t<li><code>nums.length == n</code></li>\n\t<li><code>1 &lt;= nums[i] &lt;= 100</code></li>\n\t<li><code>1 &lt;= left &lt;= right&nbsp;&lt;= n * (n + 1) / 2</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1509.三次操作后最大值与最小值的最小差",
+        "hardRate": "MEDIUM",
+        "passRate": "55.44%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-difference-between-largest-and-smallest-value-in-three-moves/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-difference-between-largest-and-smallest-value-in-three-moves/solution",
+        "problemsDesc": "<p>给你一个数组&nbsp;<code>nums</code>&nbsp;。</p>\n\n<p>每次操作你可以选择&nbsp;<code>nums</code>&nbsp;中的任意一个元素并将它改成 <strong>任意值</strong> 。</p>\n\n<p>在&nbsp;<strong>执行最多三次移动后&nbsp;</strong>，返回&nbsp;<code>nums</code>&nbsp;中最大值与最小值的最小差值。</p>\n\n<p>&nbsp;</p>\n\n<p><strong class=\"example\">示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [5,3,2,4]\n<strong>输出：</strong>0\n<strong>解释：</strong>我们最多可以走 3 步。\n第一步，将 2 变为 3 。 nums 变成 [5,3,3,4] 。\n第二步，将 4 改为 3 。 nums 变成 [5,3,3,3] 。\n第三步，将 5 改为 3 。 nums 变成 [3,3,3,3] 。\n执行 3 次移动后，最小值和最大值之间的差值为 3 - 3 = 0 。</pre>\n\n<p><strong class=\"example\">示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [1,5,0,10,14]\n<strong>输出：</strong>1\n<strong>解释：</strong>我们最多可以走 3 步。\n第一步，将 5 改为 0 。 nums变成 [1,0,0,10,14] 。\n第二步，将 10 改为 0 。 nums变成 [1,0,0,0,14] 。\n第三步，将 14 改为 1 。 nums变成 [1,0,0,0,1] 。\n执行 3 步后，最小值和最大值之间的差值为 1 - 0 = 1 。\n可以看出，没有办法可以在 3 步内使差值变为0。\n</pre>\n\n<p><strong class=\"example\">示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>nums = [3,100,20]\n<strong>输出：</strong>0\n<strong>解释：</strong>我们最多可以走 3 步。\n第一步，将 100 改为 7 。 nums 变成 [3,7,20] 。\n第二步，将 20 改为 7 。 nums 变成 [3,7,7] 。\n第三步，将 3 改为 7 。 nums 变成 [7,7,7] 。\n执行 3 步后，最小值和最大值之间的差值是 7 - 7 = 0。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 10<sup>5</sup></code></li>\n\t<li><code>-10<sup>9</sup> &lt;= nums[i] &lt;= 10<sup>9</sup></code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1510.石子游戏 IV",
+        "hardRate": "HARD",
+        "passRate": "60.20%",
+        "problemsUrl": "https://leetcode.cn/problems/stone-game-iv/",
+        "solutionsUrl": "https://leetcode.cn/problems/stone-game-iv/solution",
+        "problemsDesc": "<p>Alice 和 Bob 两个人轮流玩一个游戏，Alice 先手。</p>\n\n<p>一开始，有 <code>n</code>&nbsp;个石子堆在一起。每个人轮流操作，正在操作的玩家可以从石子堆里拿走 <strong>任意</strong>&nbsp;非零 <strong>平方数</strong>&nbsp;个石子。</p>\n\n<p>如果石子堆里没有石子了，则无法操作的玩家输掉游戏。</p>\n\n<p>给你正整数&nbsp;<code>n</code>&nbsp;，且已知两个人都采取最优策略。如果 Alice 会赢得比赛，那么返回&nbsp;<code>True</code>&nbsp;，否则返回&nbsp;<code>False</code>&nbsp;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 1\n<strong>输出：</strong>true\n<strong>解释：</strong>Alice 拿走 1 个石子并赢得胜利，因为 Bob 无法进行任何操作。</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 2\n<strong>输出：</strong>false\n<strong>解释：</strong>Alice 只能拿走 1 个石子，然后 Bob 拿走最后一个石子并赢得胜利（2 -&gt; 1 -&gt; 0）。</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 4\n<strong>输出：</strong>true\n<strong>解释：</strong>n 已经是一个平方数，Alice 可以一次全拿掉 4 个石子并赢得胜利（4 -&gt; 0）。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 7\n<strong>输出：</strong>false\n<strong>解释：</strong>当 Bob 采取最优策略时，Alice 无法赢得比赛。\n如果 Alice 一开始拿走 4 个石子， Bob 会拿走 1 个石子，然后 Alice 只能拿走 1 个石子，Bob 拿走最后一个石子并赢得胜利（7 -&gt; 3 -&gt; 2 -&gt; 1 -&gt; 0）。\n如果 Alice 一开始拿走 1 个石子， Bob 会拿走 4 个石子，然后 Alice 只能拿走 1 个石子，Bob 拿走最后一个石子并赢得胜利（7 -&gt; 6 -&gt; 2 -&gt; 1 -&gt; 0）。</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 17\n<strong>输出：</strong>false\n<strong>解释：</strong>如果 Bob 采取最优策略，Alice 无法赢得胜利。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= n &lt;= 10^5</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1511.消费者下单频率",
+        "hardRate": "EASY",
+        "passRate": "68.79%",
+        "problemsUrl": "https://leetcode.cn/problems/customer-order-frequency/",
+        "solutionsUrl": "https://leetcode.cn/problems/customer-order-frequency/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1512.好数对的数目",
+        "hardRate": "EASY",
+        "passRate": "84.33%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-good-pairs/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-good-pairs/solution",
+        "problemsDesc": "<p>给你一个整数数组 <code>nums</code> 。</p>\n\n<p>如果一组数字 <code>(i,j)</code> 满足 <code>nums[i]</code> == <code>nums[j]</code> 且 <code>i</code> &lt; <code>j</code> ，就可以认为这是一组 <strong>好数对</strong> 。</p>\n\n<p>返回好数对的数目。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>nums = [1,2,3,1,1,3]\n<strong>输出：</strong>4\n<strong>解释：</strong>有 4 组好数对，分别是 (0,3), (0,4), (3,4), (2,5) ，下标从 0 开始\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums = [1,1,1,1]\n<strong>输出：</strong>6\n<strong>解释：</strong>数组中的每组数字都是好数对</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>nums = [1,2,3]\n<strong>输出：</strong>0\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;= 100</code></li>\n\t<li><code>1 &lt;= nums[i] &lt;= 100</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1513.仅含 1 的子串数",
+        "hardRate": "MEDIUM",
+        "passRate": "39.57%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-substrings-with-only-1s/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-substrings-with-only-1s/solution",
+        "problemsDesc": "<p>给你一个二进制字符串 <code>s</code>（仅由 &#39;0&#39; 和 &#39;1&#39; 组成的字符串）。</p>\n\n<p>返回所有字符都为 1 的子字符串的数目。</p>\n\n<p>由于答案可能很大，请你将它对 10^9 + 7 取模后返回。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;0110111&quot;\n<strong>输出</strong>：9\n<strong>解释：</strong>共有 9 个子字符串仅由 &#39;1&#39; 组成\n&quot;1&quot; -&gt; 5 次\n&quot;11&quot; -&gt; 3 次\n&quot;111&quot; -&gt; 1 次</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;101&quot;\n<strong>输出：</strong>2\n<strong>解释：</strong>子字符串 &quot;1&quot; 在 s 中共出现 2 次\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;111111&quot;\n<strong>输出：</strong>21\n<strong>解释：</strong>每个子字符串都仅由 &#39;1&#39; 组成\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;000&quot;\n<strong>输出：</strong>0\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>s[i] == &#39;0&#39;</code> 或 <code>s[i] == &#39;1&#39;</code></li>\n\t<li><code>1 &lt;= s.length &lt;= 10^5</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1514.概率最大的路径",
+        "hardRate": "MEDIUM",
+        "passRate": "40.79%",
+        "problemsUrl": "https://leetcode.cn/problems/path-with-maximum-probability/",
+        "solutionsUrl": "https://leetcode.cn/problems/path-with-maximum-probability/solution",
+        "problemsDesc": "<p>给你一个由 <code>n</code> 个节点（下标从 0 开始）组成的无向加权图，该图由一个描述边的列表组成，其中 <code>edges[i] = [a, b]</code> 表示连接节点 a 和 b 的一条无向边，且该边遍历成功的概率为 <code>succProb[i]</code> 。</p>\n\n<p>指定两个节点分别作为起点 <code>start</code> 和终点 <code>end</code> ，请你找出从起点到终点成功概率最大的路径，并返回其成功概率。</p>\n\n<p>如果不存在从 <code>start</code> 到 <code>end</code> 的路径，请 <strong>返回 0</strong> 。只要答案与标准答案的误差不超过 <strong>1e-5 </strong>，就会被视作正确答案。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/1558_ex1.png\" style=\"height: 186px; width: 187px;\"></strong></p>\n\n<pre><strong>输入：</strong>n = 3, edges = [[0,1],[1,2],[0,2]], succProb = [0.5,0.5,0.2], start = 0, end = 2\n<strong>输出：</strong>0.25000\n<strong>解释：</strong>从起点到终点有两条路径，其中一条的成功概率为 0.2 ，而另一条为 0.5 * 0.5 = 0.25\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/1558_ex2.png\" style=\"height: 186px; width: 189px;\"></strong></p>\n\n<pre><strong>输入：</strong>n = 3, edges = [[0,1],[1,2],[0,2]], succProb = [0.5,0.5,0.3], start = 0, end = 2\n<strong>输出：</strong>0.30000\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/1558_ex3.png\" style=\"height: 191px; width: 215px;\"></strong></p>\n\n<pre><strong>输入：</strong>n = 3, edges = [[0,1]], succProb = [0.5], start = 0, end = 2\n<strong>输出：</strong>0.00000\n<strong>解释：</strong>节点 0 和 节点 2 之间不存在路径\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= n &lt;= 10^4</code></li>\n\t<li><code>0 &lt;= start, end &lt; n</code></li>\n\t<li><code>start != end</code></li>\n\t<li><code>0 &lt;= a, b &lt; n</code></li>\n\t<li><code>a != b</code></li>\n\t<li><code>0 &lt;= succProb.length == edges.length &lt;= 2*10^4</code></li>\n\t<li><code>0 &lt;= succProb[i] &lt;= 1</code></li>\n\t<li>每两个节点之间最多有一条边</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1515.服务中心的最佳位置",
+        "hardRate": "HARD",
+        "passRate": "35.27%",
+        "problemsUrl": "https://leetcode.cn/problems/best-position-for-a-service-centre/",
+        "solutionsUrl": "https://leetcode.cn/problems/best-position-for-a-service-centre/solution",
+        "problemsDesc": "<p>一家快递公司希望在新城市建立新的服务中心。公司统计了该城市所有客户在二维地图上的坐标，并希望能够以此为依据为新的服务中心选址：使服务中心 <strong>到所有客户的欧几里得距离的总和最小</strong> 。</p>\n\n<p>给你一个数组 <code>positions</code> ，其中 <code>positions[i] = [x<sub>i</sub>, y<sub>i</sub>]</code> 表示第 <code>i</code> 个客户在二维地图上的位置，返回到所有客户的 <strong>欧几里得距离的最小总和 。</strong></p>\n\n<p>换句话说，请你为服务中心选址，该位置的坐标 <code>[x<sub>centre</sub>, y<sub>centre</sub>]</code> 需要使下面的公式取到最小值：</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/q4_edited.jpg\" /></p>\n\n<p>与真实值误差在 <code>10<sup>-5</sup></code>之内的答案将被视作正确答案。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/q4_e1.jpg\" /></p>\n\n<pre>\n<strong>输入：</strong>positions = [[0,1],[1,0],[1,2],[2,1]]\n<strong>输出：</strong>4.00000\n<strong>解释：</strong>如图所示，你可以选 [x<sub>centre</sub>, y<sub>centre</sub>] = [1, 1] 作为新中心的位置，这样一来到每个客户的距离就都是 1，所有距离之和为 4 ，这也是可以找到的最小值。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/12/q4_e3.jpg\" /></p>\n\n<pre>\n<strong>输入：</strong>positions = [[1,1],[3,3]]\n<strong>输出：</strong>2.82843\n<strong>解释：</strong>欧几里得距离可能的最小总和为 sqrt(2) + sqrt(2) = 2.82843\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= positions.length &lt;= 50</code></li>\n\t<li><code>positions[i].length == 2</code></li>\n\t<li><code>0 &lt;= x<sub>i</sub>, y<sub>i</sub>&nbsp;&lt;= 100</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1516.移动 N 叉树的子树",
+        "hardRate": "HARD",
+        "passRate": "55.99%",
+        "problemsUrl": "https://leetcode.cn/problems/move-sub-tree-of-n-ary-tree/",
+        "solutionsUrl": "https://leetcode.cn/problems/move-sub-tree-of-n-ary-tree/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1517.查找拥有有效邮箱的用户",
+        "hardRate": "EASY",
+        "passRate": "50.60%",
+        "problemsUrl": "https://leetcode.cn/problems/find-users-with-valid-e-mails/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-users-with-valid-e-mails/solution",
+        "problemsDesc": "<p>用户表：&nbsp;Users</p>\n\n<pre>\n+---------------+---------+\n| Column Name   | Type    |\n+---------------+---------+\n| user_id       | int     |\n| name          | varchar |\n| mail          | varchar | \n+---------------+---------+\nuser_id （用户 ID）是该表的主键。\n这个表包含用户在某网站上注册的信息。有些邮箱是无效的。</pre>\n\n<p>&nbsp;</p>\n\n<p>写一条&nbsp;SQL 语句，查询拥有<strong>有效邮箱</strong>的用户。</p>\n\n<p>有效的邮箱包含符合下列条件的前缀名和域名：</p>\n\n<ul>\n\t<li><strong>前缀名</strong>是包含字母（大写或小写）、数字、下划线&nbsp;<code>&#39;_&#39;</code>、句点&nbsp;<code>&#39;.&#39;</code>&nbsp;和/或横杠&nbsp;<code>&#39;-&#39;</code>&nbsp;的字符串。前缀名<strong>必须</strong>以字母开头。</li>\n\t<li><strong>域名</strong>是&nbsp;<code>&#39;@leetcode.com&#39;</code>&nbsp;。</li>\n</ul>\n\n<p>按任意顺序返回结果表。</p>\n\n<p>&nbsp;</p>\n\n<p>查询格式如下所示：</p>\n\n<pre>\n<code>Users</code>\n+---------+-----------+-------------------------+\n| user_id | name      | mail                    |\n+---------+-----------+-------------------------+\n| 1       | Winston   | winston@leetcode.com    |\n| 2       | Jonathan  | jonathanisgreat         |\n| 3       | Annabelle | bella-@leetcode.com     |\n| 4       | Sally     | sally.come@leetcode.com |\n| 5       | Marwan    | quarz#2020@leetcode.com |\n| 6       | David     | david69@gmail.com       |\n| 7       | Shapiro   | .shapo@leetcode.com     |\n+---------+-----------+-------------------------+\n\n结果表：\n+---------+-----------+-------------------------+\n| user_id | name      | mail                    |\n+---------+-----------+-------------------------+\n| 1       | Winston   | winston@leetcode.com    |\n| 3       | Annabelle | bella-@leetcode.com     |\n| 4       | Sally     | sally.come@leetcode.com |\n+---------+-----------+-------------------------+\n2 号用户的邮箱没有域名。\n5 号用户的邮箱包含非法字符 #。\n6 号用户的邮箱的域名不是 leetcode。\n7 号用户的邮箱以句点（.）开头。\n</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1518.换水问题",
+        "hardRate": "EASY",
+        "passRate": "69.58%",
+        "problemsUrl": "https://leetcode.cn/problems/water-bottles/",
+        "solutionsUrl": "https://leetcode.cn/problems/water-bottles/solution",
+        "problemsDesc": "<p>超市正在促销，你可以用 <code>numExchange</code> 个空水瓶从超市兑换一瓶水。最开始，你一共购入了 <code>numBottles</code> 瓶水。</p>\n\n<p>如果喝掉了水瓶中的水，那么水瓶就会变成空的。</p>\n\n<p>给你两个整数 <code>numBottles</code> 和 <code>numExchange</code> ，返回你 <strong>最多</strong> 可以喝到多少瓶水。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/sample_1_1875.png\" style=\"height: 240px; width: 480px;\" /></strong></p>\n\n<pre>\n<strong>输入：</strong>numBottles = 9, numExchange = 3\n<strong>输出：</strong>13\n<strong>解释：</strong>你可以用 <code>3</code> 个空瓶兑换 1 瓶水。\n所以最多能喝到 9 + 3 + 1 = 13 瓶水。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/sample_2_1875.png\" style=\"height: 240px; width: 790px;\" /></p>\n\n<pre>\n<strong>输入：</strong>numBottles = 15, numExchange = 4\n<strong>输出：</strong>19\n<strong>解释：</strong>你可以用 <code>4</code> 个空瓶兑换 1 瓶水。\n所以最多能喝到 15 + 3 + 1 = 19 瓶水。\n</pre>\n\n<p>&nbsp;</p>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= numBottles &lt;= 100</code></li>\n\t<li><code>2 &lt;= numExchange &lt;= 100</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1519.子树中标签相同的节点数",
+        "hardRate": "MEDIUM",
+        "passRate": "33.29%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-nodes-in-the-sub-tree-with-the-same-label/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-nodes-in-the-sub-tree-with-the-same-label/solution",
+        "problemsDesc": "<p>给你一棵树（即，一个连通的无环无向图），这棵树由编号从 <code>0</code>&nbsp; 到 <code>n - 1</code> 的 n 个节点组成，且恰好有 <code>n - 1</code> 条 <code>edges</code> 。树的根节点为节点 <code>0</code> ，树上的每一个节点都有一个标签，也就是字符串 <code>labels</code> 中的一个小写字符（编号为 <code>i</code> 的 节点的标签就是 <code>labels[i]</code> ）</p>\n\n<p>边数组 <code>edges</code> 以 <code>edges[i] = [a<sub>i</sub>, b<sub>i</sub>]</code> 的形式给出，该格式表示节点 <code>a<sub>i</sub></code> 和 <code>b<sub>i</sub></code> 之间存在一条边。</p>\n\n<p>返回一个大小为 <em><code>n</code></em> 的数组，其中 <code>ans[i]</code> 表示第 <code>i</code> 个节点的子树中与节点 <code>i</code> 标签相同的节点数。</p>\n\n<p>树 <code>T</code> 中的子树是由 <code>T</code> 中的某个节点及其所有后代节点组成的树。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/q3e1.jpg\" style=\"height: 321px; width: 441px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 7, edges = [[0,1],[0,2],[1,4],[1,5],[2,3],[2,6]], labels = \"abaedcd\"\n<strong>输出：</strong>[2,1,1,1,1,1,1]\n<strong>解释：</strong>节点 0 的标签为 'a' ，以 'a' 为根节点的子树中，节点 2 的标签也是 'a' ，因此答案为 2 。注意树中的每个节点都是这棵子树的一部分。\n节点 1 的标签为 'b' ，节点 1 的子树包含节点 1、4 和 5，但是节点 4、5 的标签与节点 1 不同，故而答案为 1（即，该节点本身）。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/q3e2.jpg\" style=\"height: 321px; width: 381px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 4, edges = [[0,1],[1,2],[0,3]], labels = \"bbbb\"\n<strong>输出：</strong>[4,2,1,1]\n<strong>解释：</strong>节点 2 的子树中只有节点 2 ，所以答案为 1 。\n节点 3 的子树中只有节点 3 ，所以答案为 1 。\n节点 1 的子树中包含节点 1 和 2 ，标签都是 'b' ，因此答案为 2 。\n节点 0 的子树中包含节点 0、1、2 和 3，标签都是 'b'，因此答案为 4 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/q3e3.jpg\" style=\"height: 321px; width: 381px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 5, edges = [[0,1],[0,2],[1,3],[0,4]], labels = \"aabab\"\n<strong>输出：</strong>[3,2,1,1,1]\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= n &lt;= 10^5</code></li>\n\t<li><code>edges.length == n - 1</code></li>\n\t<li><code>edges[i].length == 2</code></li>\n\t<li><code>0 &lt;= a<sub>i</sub>,&nbsp;b<sub>i</sub> &lt; n</code></li>\n\t<li><code>a<sub>i</sub> !=&nbsp;b<sub>i</sub></code></li>\n\t<li><code>labels.length == n</code></li>\n\t<li><code>labels</code> 仅由小写英文字母组成</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1520.最多的不重叠子字符串",
+        "hardRate": "HARD",
+        "passRate": "35.73%",
+        "problemsUrl": "https://leetcode.cn/problems/maximum-number-of-non-overlapping-substrings/",
+        "solutionsUrl": "https://leetcode.cn/problems/maximum-number-of-non-overlapping-substrings/solution",
+        "problemsDesc": "<p>给你一个只包含小写字母的字符串&nbsp;<code>s</code>&nbsp;，你需要找到 <code>s</code>&nbsp;中最多数目的非空子字符串，满足如下条件：</p>\n\n<ol>\n\t<li>这些字符串之间互不重叠，也就是说对于任意两个子字符串&nbsp;<code>s[i..j]</code> 和&nbsp;<code>s[x..y]</code>&nbsp;，要么&nbsp;<code>j &lt; x</code>&nbsp;要么&nbsp;<code>i &gt; y</code>&nbsp;。</li>\n\t<li>如果一个子字符串包含字符&nbsp;<code>char</code> ，那么&nbsp;<code>s</code>&nbsp;中所有&nbsp;<code>char</code> 字符都应该在这个子字符串中。</li>\n</ol>\n\n<p>请你找到满足上述条件的最多子字符串数目。如果有多个解法有相同的子字符串数目，请返回这些子字符串总长度最小的一个解。可以证明最小总长度解是唯一的。</p>\n\n<p>请注意，你可以以 <strong>任意</strong>&nbsp;顺序返回最优解的子字符串。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"adefaddaccc\"\n<strong>输出：</strong>[\"e\",\"f\",\"ccc\"]\n<strong>解释：</strong>下面为所有满足第二个条件的子字符串：\n[\n&nbsp; \"adefaddaccc\"\n&nbsp; \"adefadda\",\n&nbsp; \"ef\",\n&nbsp; \"e\",\n  \"f\",\n&nbsp; \"ccc\",\n]\n如果我们选择第一个字符串，那么我们无法再选择其他任何字符串，所以答案为 1 。如果我们选择 \"adefadda\" ，剩下子字符串中我们只可以选择 \"ccc\" ，它是唯一不重叠的子字符串，所以答案为 2 。同时我们可以发现，选择 \"ef\" 不是最优的，因为它可以被拆分成 2 个子字符串。所以最优解是选择 [\"e\",\"f\",\"ccc\"] ，答案为 3 。不存在别的相同数目子字符串解。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"abbaccd\"\n<strong>输出：</strong>[\"d\",\"bb\",\"cc\"]\n<strong>解释：</strong>注意到解 [\"d\",\"abba\",\"cc\"] 答案也为 3 ，但它不是最优解，因为它的总长度更长。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= s.length &lt;= 10^5</code></li>\n\t<li><code>s</code>&nbsp;只包含小写英文字母。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1521.找到最接近目标值的函数值",
+        "hardRate": "HARD",
+        "passRate": "43.71%",
+        "problemsUrl": "https://leetcode.cn/problems/find-a-value-of-a-mysterious-function-closest-to-target/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-a-value-of-a-mysterious-function-closest-to-target/solution",
+        "problemsDesc": "<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/19/change.png\" style=\"height: 312px; width: 635px;\"></p>\n\n<p>Winston 构造了一个如上所示的函数&nbsp;<code>func</code>&nbsp;。他有一个整数数组&nbsp;<code>arr</code>&nbsp;和一个整数&nbsp;<code>target</code>&nbsp;，他想找到让&nbsp;<code>|func(arr, l, r) - target|</code>&nbsp;最小的 <code>l</code>&nbsp;和 <code>r</code>&nbsp;。</p>\n\n<p>请你返回&nbsp;<code>|func(arr, l, r) - target|</code>&nbsp;的最小值。</p>\n\n<p>请注意，&nbsp;<code>func</code> 的输入参数&nbsp;<code>l</code> 和&nbsp;<code>r</code>&nbsp;需要满足&nbsp;<code>0 &lt;= l, r &lt; arr.length</code>&nbsp;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [9,12,3,7,15], target = 5\n<strong>输出：</strong>2\n<strong>解释：</strong>所有可能的 [l,r] 数对包括 [[0,0],[1,1],[2,2],[3,3],[4,4],[0,1],[1,2],[2,3],[3,4],[0,2],[1,3],[2,4],[0,3],[1,4],[0,4]]， Winston 得到的相应结果为 [9,12,3,7,15,8,0,3,7,0,0,3,0,0,0] 。最接近 5 的值是 7 和 3，所以最小差值为 2 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1000000,1000000,1000000], target = 1\n<strong>输出：</strong>999999\n<strong>解释：</strong>Winston 输入函数的所有可能 [l,r] 数对得到的函数值都为 1000000 ，所以最小差值为 999999 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,2,4,8,16], target = 0\n<strong>输出：</strong>0\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= arr.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= arr[i] &lt;= 10^6</code></li>\n\t<li><code>0 &lt;= target &lt;= 10^7</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1522.N 叉树的直径",
+        "hardRate": "MEDIUM",
+        "passRate": "71.45%",
+        "problemsUrl": "https://leetcode.cn/problems/diameter-of-n-ary-tree/",
+        "solutionsUrl": "https://leetcode.cn/problems/diameter-of-n-ary-tree/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1523.在区间范围内统计奇数数目",
+        "hardRate": "EASY",
+        "passRate": "49.26%",
+        "problemsUrl": "https://leetcode.cn/problems/count-odd-numbers-in-an-interval-range/",
+        "solutionsUrl": "https://leetcode.cn/problems/count-odd-numbers-in-an-interval-range/solution",
+        "problemsDesc": "<p>给你两个非负整数&nbsp;<code>low</code> 和&nbsp;<code>high</code>&nbsp;。请你返回<em>&nbsp;</em><code>low</code><em> </em>和<em>&nbsp;</em><code>high</code><em>&nbsp;</em>之间（包括二者）奇数的数目。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>low = 3, high = 7\n<strong>输出：</strong>3\n<strong>解释：</strong>3 到 7 之间奇数数字为 [3,5,7] 。</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>low = 8, high = 10\n<strong>输出：</strong>1\n<strong>解释：</strong>8 到 10 之间奇数数字为 [9] 。</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>0 &lt;= low &lt;= high&nbsp;&lt;= 10^9</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1524.和为奇数的子数组数目",
+        "hardRate": "MEDIUM",
+        "passRate": "45.75%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-sub-arrays-with-odd-sum/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-sub-arrays-with-odd-sum/solution",
+        "problemsDesc": "<p>给你一个整数数组&nbsp;<code>arr</code>&nbsp;。请你返回和为 <strong>奇数</strong>&nbsp;的子数组数目。</p>\n\n<p>由于答案可能会很大，请你将结果对&nbsp;<code>10^9 + 7</code>&nbsp;取余后返回。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,3,5]\n<strong>输出：</strong>4\n<strong>解释：</strong>所有的子数组为 [[1],[1,3],[1,3,5],[3],[3,5],[5]] 。\n所有子数组的和为 [1,4,9,3,8,5].\n奇数和包括 [1,9,3,5] ，所以答案为 4 。\n</pre>\n\n<p><strong>示例 2 ：</strong></p>\n\n<pre><strong>输入：</strong>arr = [2,4,6]\n<strong>输出：</strong>0\n<strong>解释：</strong>所有子数组为 [[2],[2,4],[2,4,6],[4],[4,6],[6]] 。\n所有子数组和为 [2,6,12,4,10,6] 。\n所有子数组和都是偶数，所以答案为 0 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,2,3,4,5,6,7]\n<strong>输出：</strong>16\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>arr = [100,100,99,99]\n<strong>输出：</strong>4\n</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre><strong>输入：</strong>arr = [7]\n<strong>输出：</strong>1\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= arr.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= arr[i] &lt;= 100</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1525.字符串的好分割数目",
+        "hardRate": "MEDIUM",
+        "passRate": "66.06%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-good-ways-to-split-a-string/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-good-ways-to-split-a-string/solution",
+        "problemsDesc": "<p>给你一个字符串&nbsp;<code>s</code>&nbsp;，一个分割被称为 「好分割」&nbsp;当它满足：将&nbsp;<code>s</code>&nbsp;分割成 2 个字符串&nbsp;<code>p</code> 和&nbsp;<code>q</code>&nbsp;，它们连接起来等于&nbsp;<code>s</code>&nbsp;且 <code>p</code>&nbsp;和 <code>q</code>&nbsp;中不同字符的数目相同。</p>\n\n<p>请你返回 <code>s</code>&nbsp;中好分割的数目。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;aacaba&quot;\n<strong>输出：</strong>2\n<strong>解释：</strong>总共有 5 种分割字符串 <code>&quot;aacaba&quot;</code> 的方法，其中 2 种是好分割。\n(&quot;a&quot;, &quot;acaba&quot;) 左边字符串和右边字符串分别包含 1 个和 3 个不同的字符。\n(&quot;aa&quot;, &quot;caba&quot;) 左边字符串和右边字符串分别包含 1 个和 3 个不同的字符。\n(&quot;aac&quot;, &quot;aba&quot;) 左边字符串和右边字符串分别包含 2 个和 2 个不同的字符。这是一个好分割。\n(&quot;aaca&quot;, &quot;ba&quot;) 左边字符串和右边字符串分别包含 2 个和 2 个不同的字符。这是一个好分割。\n(&quot;aacab&quot;, &quot;a&quot;) 左边字符串和右边字符串分别包含 3 个和 1 个不同的字符。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;abcd&quot;\n<strong>输出：</strong>1\n<strong>解释：</strong>好分割为将字符串分割成 (&quot;ab&quot;, &quot;cd&quot;) 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;aaaaa&quot;\n<strong>输出：</strong>4\n<strong>解释：</strong>所有分割都是好分割。</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;acbadbaada&quot;\n<strong>输出：</strong>2\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>s</code>&nbsp;只包含小写英文字母。</li>\n\t<li><code>1 &lt;= s.length &lt;= 10^5</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1526.形成目标数组的子数组最少增加次数",
+        "hardRate": "HARD",
+        "passRate": "64.99%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-number-of-increments-on-subarrays-to-form-a-target-array/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-number-of-increments-on-subarrays-to-form-a-target-array/solution",
+        "problemsDesc": "<p>给你一个整数数组&nbsp;<code>target</code>&nbsp;和一个数组&nbsp;<code>initial</code>&nbsp;，<code>initial</code>&nbsp;数组与 <code>target</code>&nbsp; 数组有同样的维度，且一开始全部为 0 。</p>\n\n<p>请你返回从 <code>initial</code>&nbsp;得到&nbsp; <code>target</code>&nbsp;的最少操作次数，每次操作需遵循以下规则：</p>\n\n<ul>\n\t<li>在 <code>initial</code>&nbsp;中选择 <strong>任意</strong>&nbsp;子数组，并将子数组中每个元素增加 1 。</li>\n</ul>\n\n<p>答案保证在 32 位有符号整数以内。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>target = [1,2,3,2,1]\n<strong>输出：</strong>3\n<strong>解释：</strong>我们需要至少 3 次操作从 intial 数组得到 target 数组。\n[0,0,0,0,0] 将下标为 0 到 4&nbsp;的元素（包含二者）加 1 。\n[1,1,1,1,1] 将下标为 1 到 3 的元素（包含二者）加 1 。\n[1,2,2,2,1] 将下表为 2 的元素增加 1 。\n[1,2,3,2,1] 得到了目标数组。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>target = [3,1,1,2]\n<strong>输出：</strong>4\n<strong>解释：</strong>(initial)[0,0,0,0] -&gt; [1,1,1,1] -&gt; [1,1,1,2] -&gt; [2,1,1,2] -&gt; [3,1,1,2] (target) 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>target = [3,1,5,4,2]\n<strong>输出：</strong>7\n<strong>解释：</strong>(initial)[0,0,0,0,0] -&gt; [1,1,1,1,1] -&gt; [2,1,1,1,1] -&gt; [3,1,1,1,1] \n                                  -&gt; [3,1,2,2,2] -&gt; [3,1,3,3,2] -&gt; [3,1,4,4,2] -&gt; [3,1,5,4,2] (target)。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>target = [1,1,1,1]\n<strong>输出：</strong>1\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= target.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= target[i] &lt;= 10^5</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1527.患某种疾病的患者",
+        "hardRate": "EASY",
+        "passRate": "46.68%",
+        "problemsUrl": "https://leetcode.cn/problems/patients-with-a-condition/",
+        "solutionsUrl": "https://leetcode.cn/problems/patients-with-a-condition/solution",
+        "problemsDesc": "<p>患者信息表：&nbsp;<code>Patients</code></p>\n\n<pre>\n+--------------+---------+\n| Column Name  | Type    |\n+--------------+---------+\n| patient_id   | int     |\n| patient_name | varchar |\n| conditions   | varchar |\n+--------------+---------+\npatient_id （患者 ID）是该表的主键。\n'conditions' （疾病）包含 0 个或以上的疾病代码，以空格分隔。\n这个表包含医院中患者的信息。</pre>\n\n<p>&nbsp;</p>\n\n<p>写一条&nbsp;SQL 语句，查询患有 I 类糖尿病的患者&nbsp;ID （patient_id）、患者姓名（patient_name）以及其患有的所有疾病代码（conditions）。I 类糖尿病的代码总是包含前缀&nbsp;<code>DIAB1</code>&nbsp;。</p>\n\n<p>按 <strong>任意顺序</strong> 返回结果表。</p>\n\n<p>查询结果格式如下示例所示。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1:</strong></p>\n\n<pre>\n<code><strong>输入：\n</strong>Patients表：</code>\n+------------+--------------+--------------+\n| patient_id | patient_name | conditions   |\n+------------+--------------+--------------+\n| 1          | Daniel      &nbsp;| YFEV COUGH   |\n| 2    &nbsp;     | Alice        |            &nbsp; |\n| 3    &nbsp;     | Bob         &nbsp;| DIAB100 MYOP&nbsp;|\n| 4 &nbsp;        | George      &nbsp;| ACNE DIAB100&nbsp;|\n| 5 &nbsp;        | Alain       &nbsp;| DIAB201     &nbsp;|\n+------------+--------------+--------------+\n<strong>输出：</strong>\n+------------+--------------+--------------+\n| patient_id | patient_name | conditions   |\n+------------+--------------+--------------+\n| 3    &nbsp;     | Bob         &nbsp;| DIAB100 MYOP&nbsp;|\n| 4 &nbsp;        | George   &nbsp;   | ACNE DIAB100&nbsp;| \n+------------+--------------+--------------+\n<strong>解释：</strong>Bob 和 George 都患有代码以 DIAB1 开头的疾病。</pre>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1528.重新排列字符串",
+        "hardRate": "EASY",
+        "passRate": "78.44%",
+        "problemsUrl": "https://leetcode.cn/problems/shuffle-string/",
+        "solutionsUrl": "https://leetcode.cn/problems/shuffle-string/solution",
+        "problemsDesc": "<p>给你一个字符串 <code>s</code> 和一个 <strong>长度相同</strong> 的整数数组 <code>indices</code> 。</p>\n\n<p>请你重新排列字符串 <code>s</code> ，其中第 <code>i</code> 个字符需要移动到 <code>indices[i]</code> 指示的位置。</p>\n\n<p>返回重新排列后的字符串。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/26/q1.jpg\" /></p>\n\n<pre>\n<strong>输入：</strong>s = \"codeleet\", <code>indices</code> = [4,5,6,7,0,2,1,3]\n<strong>输出：</strong>\"leetcode\"\n<strong>解释：</strong>如图所示，\"codeleet\" 重新排列后变为 \"leetcode\" 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"abc\", <code>indices</code> = [0,1,2]\n<strong>输出：</strong>\"abc\"\n<strong>解释：</strong>重新排列后，每个字符都还留在原来的位置上。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>s.length == indices.length == n</code></li>\n\t<li><code>1 &lt;= n &lt;= 100</code></li>\n\t<li><code>s</code> 仅包含小写英文字母</li>\n\t<li><code>0 &lt;= indices[i] &lt;&nbsp;n</code></li>\n\t<li><code>indices</code> 的所有的值都是 <strong>唯一</strong> 的</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1529.最少的后缀翻转次数",
+        "hardRate": "MEDIUM",
+        "passRate": "70.33%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-suffix-flips/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-suffix-flips/solution",
+        "problemsDesc": "<p>给你一个长度为 <code>n</code> 、下标从 <strong>0</strong> 开始的二进制字符串 <code>target</code> 。你自己有另一个长度为 <code>n</code> 的二进制字符串 <code>s</code> ，最初每一位上都是 0 。你想要让 <code>s</code> 和 <code>target</code> 相等。</p>\n\n<p>在一步操作，你可以选择下标 <code>i</code>（<code>0 &lt;= i &lt; n</code>）并翻转在 <strong>闭区间</strong> <code>[i, n - 1]</code> 内的所有位。翻转意味着 <code>'0'</code> 变为 <code>'1'</code> ，而 <code>'1'</code> 变为 <code>'0'</code> 。</p>\n\n<div class=\"original__bRMd\">\n<div>\n<p>返回使<em> </em><code>s</code><em> </em>与<em> </em><code>target</code> 相等需要的最少翻转次数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = \"10111\"\n<strong>输出：</strong>3\n<strong>解释：</strong>最初，s = \"00000\" 。\n选择下标 i = 2: \"00<em><strong>000</strong></em>\" -&gt; \"00<em><strong>111</strong></em>\"\n选择下标 i = 0: \"<em><strong>00111</strong></em>\" -&gt; \"<em><strong>11000</strong></em>\"\n选择下标 i = 1: \"1<em><strong>1000</strong></em>\" -&gt; \"1<em><strong>0111</strong></em>\"\n要达成目标，需要至少 3 次翻转。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = \"101\"\n<strong>输出：</strong>3\n<strong>解释：</strong>最初，s = \"000\" 。\n选择下标 i = 0: \"<em><strong>000</strong></em>\" -&gt; \"<em><strong>111</strong></em>\"\n选择下标 i = 1: \"1<em><strong>11</strong></em>\" -&gt; \"1<em><strong>00</strong></em>\"\n选择下标 i = 2: \"10<em><strong>0</strong></em>\" -&gt; \"10<em><strong>1</strong></em>\"\n要达成目标，需要至少 3 次翻转。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>target = \"00000\"\n<strong>输出：</strong>0\n<strong>解释：</strong>由于 s 已经等于目标，所以不需要任何操作\n</pre>\n</div>\n</div>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>n == target.length</code></li>\n\t<li><code>1 &lt;= n &lt;= 10<sup>5</sup></code></li>\n\t<li><code>target[i]</code> 为 <code>'0'</code> 或 <code>'1'</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1530.好叶子节点对的数量",
+        "hardRate": "MEDIUM",
+        "passRate": "58.49%",
+        "problemsUrl": "https://leetcode.cn/problems/number-of-good-leaf-nodes-pairs/",
+        "solutionsUrl": "https://leetcode.cn/problems/number-of-good-leaf-nodes-pairs/solution",
+        "problemsDesc": "<p>给你二叉树的根节点 <code>root</code> 和一个整数 <code>distance</code> 。</p>\n\n<p>如果二叉树中两个 <strong>叶</strong> 节点之间的 <strong>最短路径长度</strong> 小于或者等于 <code>distance</code> ，那它们就可以构成一组 <strong>好叶子节点对</strong> 。</p>\n\n<p>返回树中 <strong>好叶子节点对的数量</strong> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p>&nbsp;</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/26/e1.jpg\" style=\"height: 321px; width: 321px;\"></p>\n\n<pre><strong>输入：</strong>root = [1,2,3,null,4], distance = 3\n<strong>输出：</strong>1\n<strong>解释：</strong>树的叶节点是 3 和 4 ，它们之间的最短路径的长度是 3 。这是唯一的好叶子节点对。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/26/e2.jpg\" style=\"height: 321px; width: 441px;\"></p>\n\n<pre><strong>输入：</strong>root = [1,2,3,4,5,6,7], distance = 3\n<strong>输出：</strong>2\n<strong>解释：</strong>好叶子节点对为 [4,5] 和 [6,7] ，最短路径长度都是 2 。但是叶子节点对 [4,6] 不满足要求，因为它们之间的最短路径长度为 4 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>root = [7,1,4,6,null,5,3,null,null,null,null,null,2], distance = 3\n<strong>输出：</strong>1\n<strong>解释：</strong>唯一的好叶子节点对是 [2,5] 。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>root = [100], distance = 1\n<strong>输出：</strong>0\n</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre><strong>输入：</strong>root = [1,1,1], distance = 2\n<strong>输出：</strong>1\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>tree</code> 的节点数在 <code>[1, 2^10]</code> 范围内。</li>\n\t<li>每个节点的值都在 <code>[1, 100]</code> 之间。</li>\n\t<li><code>1 &lt;= distance &lt;= 10</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1531.压缩字符串 II",
+        "hardRate": "HARD",
+        "passRate": "38.10%",
+        "problemsUrl": "https://leetcode.cn/problems/string-compression-ii/",
+        "solutionsUrl": "https://leetcode.cn/problems/string-compression-ii/solution",
+        "problemsDesc": "<p><a href=\"https://baike.baidu.com/item/%E8%A1%8C%E7%A8%8B%E9%95%BF%E5%BA%A6%E7%BC%96%E7%A0%81/2931940?fr=aladdin\" target=\"_blank\">行程长度编码</a> 是一种常用的字符串压缩方法，它将连续的相同字符（重复 2 次或更多次）替换为字符和表示字符计数的数字（行程长度）。例如，用此方法压缩字符串 <code>&quot;aabccc&quot;</code> ，将 <code>&quot;aa&quot;</code> 替换为 <code>&quot;a2&quot;</code> ，<code>&quot;ccc&quot;</code> 替换为` <code>&quot;c3&quot;</code> 。因此压缩后的字符串变为 <code>&quot;a2bc3&quot;</code> 。</p>\n\n<p>注意，本问题中，压缩时没有在单个字符后附加计数 <code>&#39;1&#39;</code> 。</p>\n\n<p>给你一个字符串 <code>s</code> 和一个整数 <code>k</code> 。你需要从字符串 <code>s</code> 中删除最多 <code>k</code> 个字符，以使 <code>s</code> 的行程长度编码长度最小。</p>\n\n<p>请你返回删除最多 <code>k</code> 个字符后，<code>s</code> <strong>行程长度编码的最小长度</strong> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;aaabcccd&quot;, k = 2\n<strong>输出：</strong>4\n<strong>解释：</strong>在不删除任何内容的情况下，压缩后的字符串是 &quot;a3bc3d&quot; ，长度为 6 。最优的方案是删除 &#39;b&#39; 和 &#39;d&#39;，这样一来，压缩后的字符串为 &quot;a3c3&quot; ，长度是 4 。</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;aabbaa&quot;, k = 2\n<strong>输出：</strong>2\n<strong>解释：</strong>如果删去两个 &#39;b&#39; 字符，那么压缩后的字符串是长度为 2 的 &quot;a4&quot; 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;aaaaaaaaaaa&quot;, k = 0\n<strong>输出：</strong>3\n<strong>解释：</strong>由于 k 等于 0 ，不能删去任何字符。压缩后的字符串是 &quot;a11&quot; ，长度为 3 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= s.length &lt;= 100</code></li>\n\t<li><code>0 &lt;= k &lt;= s.length</code></li>\n\t<li><code>s</code> 仅包含小写英文字母</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1532.最近的三笔订单",
+        "hardRate": "MEDIUM",
+        "passRate": "63.11%",
+        "problemsUrl": "https://leetcode.cn/problems/the-most-recent-three-orders/",
+        "solutionsUrl": "https://leetcode.cn/problems/the-most-recent-three-orders/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1533.找到最大整数的索引",
+        "hardRate": "MEDIUM",
+        "passRate": "58.24%",
+        "problemsUrl": "https://leetcode.cn/problems/find-the-index-of-the-large-integer/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-the-index-of-the-large-integer/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1534.统计好三元组",
+        "hardRate": "EASY",
+        "passRate": "77.02%",
+        "problemsUrl": "https://leetcode.cn/problems/count-good-triplets/",
+        "solutionsUrl": "https://leetcode.cn/problems/count-good-triplets/solution",
+        "problemsDesc": "<p>给你一个整数数组 <code>arr</code> ，以及 <code>a</code>、<code>b</code> 、<code>c</code> 三个整数。请你统计其中好三元组的数量。</p>\n\n<p>如果三元组 <code>(arr[i], arr[j], arr[k])</code> 满足下列全部条件，则认为它是一个 <strong>好三元组</strong> 。</p>\n\n<ul>\n\t<li><code>0 &lt;= i &lt; j &lt; k &lt;&nbsp;arr.length</code></li>\n\t<li><code>|arr[i] - arr[j]| &lt;= a</code></li>\n\t<li><code>|arr[j] - arr[k]| &lt;= b</code></li>\n\t<li><code>|arr[i] - arr[k]| &lt;= c</code></li>\n</ul>\n\n<p>其中 <code>|x|</code> 表示 <code>x</code> 的绝对值。</p>\n\n<p>返回 <strong>好三元组的数量</strong> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [3,0,1,1,9,7], a = 7, b = 2, c = 3\n<strong>输出：</strong>4\n<strong>解释：</strong>一共有 4 个好三元组：[(3,0,1), (3,0,1), (3,1,1), (0,1,1)] 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,1,2,2,3], a = 0, b = 0, c = 1\n<strong>输出：</strong>0\n<strong>解释：</strong>不存在满足所有条件的三元组。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>3 &lt;= arr.length &lt;= 100</code></li>\n\t<li><code>0 &lt;= arr[i] &lt;= 1000</code></li>\n\t<li><code>0 &lt;= a, b, c &lt;= 1000</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1535.找出数组游戏的赢家",
+        "hardRate": "MEDIUM",
+        "passRate": "46.17%",
+        "problemsUrl": "https://leetcode.cn/problems/find-the-winner-of-an-array-game/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-the-winner-of-an-array-game/solution",
+        "problemsDesc": "<p>给你一个由 <strong>不同</strong> 整数组成的整数数组 <code>arr</code> 和一个整数 <code>k</code> 。</p>\n\n<p>每回合游戏都在数组的前两个元素（即 <code>arr[0]</code> 和 <code>arr[1]</code> ）之间进行。比较 <code>arr[0]</code> 与 <code>arr[1]</code> 的大小，较大的整数将会取得这一回合的胜利并保留在位置 <code>0</code> ，较小的整数移至数组的末尾。当一个整数赢得 <code>k</code> 个连续回合时，游戏结束，该整数就是比赛的 <strong>赢家</strong> 。</p>\n\n<p>返回赢得比赛的整数。</p>\n\n<p>题目数据 <strong>保证</strong> 游戏存在赢家。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [2,1,3,5,4,6,7], k = 2\n<strong>输出：</strong>5\n<strong>解释：</strong>一起看一下本场游戏每回合的情况：\n<img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/07/30/q-example.png\" style=\"height: 90px; width: 400px;\">\n因此将进行 4 回合比赛，其中 5 是赢家，因为它连胜 2 回合。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [3,2,1], k = 10\n<strong>输出：</strong>3\n<strong>解释：</strong>3 将会在前 10 个回合中连续获胜。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,9,8,2,3,7,6,4,5], k = 7\n<strong>输出：</strong>9\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,11,22,33,44,55,66,77,88,99], k = 1000000000\n<strong>输出：</strong>99\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 &lt;= arr.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= arr[i] &lt;= 10^6</code></li>\n\t<li><code>arr</code> 所含的整数 <strong>各不相同</strong> 。</li>\n\t<li><code>1 &lt;= k &lt;= 10^9</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1536.排布二进制网格的最少交换次数",
+        "hardRate": "MEDIUM",
+        "passRate": "46.33%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-swaps-to-arrange-a-binary-grid/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-swaps-to-arrange-a-binary-grid/solution",
+        "problemsDesc": "<p>给你一个&nbsp;<code>n&nbsp;x n</code>&nbsp;的二进制网格&nbsp;<code>grid</code>，每一次操作中，你可以选择网格的&nbsp;<strong>相邻两行</strong>&nbsp;进行交换。</p>\n\n<p>一个符合要求的网格需要满足主对角线以上的格子全部都是 <strong>0</strong>&nbsp;。</p>\n\n<p>请你返回使网格满足要求的最少操作次数，如果无法使网格符合要求，请你返回 <strong>-1</strong>&nbsp;。</p>\n\n<p>主对角线指的是从&nbsp;<code>(1, 1)</code>&nbsp;到&nbsp;<code>(n, n)</code>&nbsp;的这些格子。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/02/fw.jpg\" style=\"height: 141px; width: 750px;\"></p>\n\n<pre><strong>输入：</strong>grid = [[0,0,1],[1,1,0],[1,0,0]]\n<strong>输出：</strong>3\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/02/e2.jpg\" style=\"height: 270px; width: 270px;\"></p>\n\n<pre><strong>输入：</strong>grid = [[0,1,1,0],[0,1,1,0],[0,1,1,0],[0,1,1,0]]\n<strong>输出：</strong>-1\n<strong>解释：</strong>所有行都是一样的，交换相邻行无法使网格符合要求。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/02/e3.jpg\" style=\"height: 210px; width: 210px;\"></p>\n\n<pre><strong>输入：</strong>grid = [[1,0,0],[1,1,0],[1,1,1]]\n<strong>输出：</strong>0\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>n == grid.length</code></li>\n\t<li><code>n == grid[i].length</code></li>\n\t<li><code>1 &lt;= n&nbsp;&lt;= 200</code></li>\n\t<li><code>grid[i][j]</code>&nbsp;要么是&nbsp;<code>0</code>&nbsp;要么是&nbsp;<code>1</code>&nbsp;。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1537.最大得分",
+        "hardRate": "HARD",
+        "passRate": "40.17%",
+        "problemsUrl": "https://leetcode.cn/problems/get-the-maximum-score/",
+        "solutionsUrl": "https://leetcode.cn/problems/get-the-maximum-score/solution",
+        "problemsDesc": "<p>你有两个 <strong>有序</strong>&nbsp;且数组内元素互不相同的数组&nbsp;<code>nums1</code> 和&nbsp;<code>nums2</code>&nbsp;。</p>\n\n<p>一条&nbsp;<strong>合法路径</strong>&nbsp;定义如下：</p>\n\n<ul>\n\t<li>选择数组 nums1 或者 nums2 开始遍历（从下标 0 处开始）。</li>\n\t<li>从左到右遍历当前数组。</li>\n\t<li>如果你遇到了 <code>nums1</code>&nbsp;和 <code>nums2</code>&nbsp;中都存在的值，那么你可以切换路径到另一个数组对应数字处继续遍历（但在合法路径中重复数字只会被统计一次）。</li>\n</ul>\n\n<p>得分定义为合法路径中不同数字的和。</p>\n\n<p>请你返回所有可能合法路径中的最大得分。</p>\n\n<p>由于答案可能很大，请你将它对 10^9 + 7 取余后返回。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><strong><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/02/sample_1_1893.png\" style=\"height: 163px; width: 538px;\"></strong></p>\n\n<pre><strong>输入：</strong>nums1 = [2,4,5,8,10], nums2 = [4,6,8,9]\n<strong>输出：</strong>30\n<strong>解释：</strong>合法路径包括：\n[2,4,5,8,10], [2,4,5,8,9], [2,4,6,8,9], [2,4,6,8,10],（从 nums1 开始遍历）\n[4,6,8,9], [4,5,8,10], [4,5,8,9], [4,6,8,10]  （从 nums2 开始遍历）\n最大得分为上图中的绿色路径 <strong>[2,4,6,8,10]</strong>&nbsp;。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums1 = [1,3,5,7,9], nums2 = [3,5,100]\n<strong>输出：</strong>109\n<strong>解释：</strong>最大得分由路径 <strong>[1,3,5,100]</strong> 得到。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>nums1 = [1,2,3,4,5], nums2 = [6,7,8,9,10]\n<strong>输出：</strong>40\n<strong>解释：</strong>nums1 和 nums2 之间无相同数字。\n最大得分由路径 <strong>[6,7,8,9,10]</strong> 得到。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>nums1 = [1,4,5,8,9,11,19], nums2 = [2,3,4,11,12]\n<strong>输出：</strong>61\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums1.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= nums2.length &lt;= 10^5</code></li>\n\t<li><code>1 &lt;= nums1[i], nums2[i] &lt;= 10^7</code></li>\n\t<li><code>nums1</code> 和&nbsp;<code>nums2</code>&nbsp;都是严格递增的数组。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1538.找出隐藏数组中出现次数最多的元素",
+        "hardRate": "MEDIUM",
+        "passRate": "57.99%",
+        "problemsUrl": "https://leetcode.cn/problems/guess-the-majority-in-a-hidden-array/",
+        "solutionsUrl": "https://leetcode.cn/problems/guess-the-majority-in-a-hidden-array/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1539.第 k 个缺失的正整数",
+        "hardRate": "EASY",
+        "passRate": "54.00%",
+        "problemsUrl": "https://leetcode.cn/problems/kth-missing-positive-number/",
+        "solutionsUrl": "https://leetcode.cn/problems/kth-missing-positive-number/solution",
+        "problemsDesc": "<p>给你一个 <strong>严格升序排列</strong>&nbsp;的正整数数组 <code>arr</code>&nbsp;和一个整数&nbsp;<code>k</code>&nbsp;。</p>\n\n<p>请你找到这个数组里第&nbsp;<code>k</code>&nbsp;个缺失的正整数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>arr = [2,3,4,7,11], k = 5\n<strong>输出：</strong>9\n<strong>解释：</strong>缺失的正整数包括 [1,5,6,8,9,10,12,13,...] 。第 5 个缺失的正整数为 9 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>arr = [1,2,3,4], k = 2\n<strong>输出：</strong>6\n<strong>解释：</strong>缺失的正整数包括 [5,6,7,...] 。第 2 个缺失的正整数为 6 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= arr.length &lt;= 1000</code></li>\n\t<li><code>1 &lt;= arr[i] &lt;= 1000</code></li>\n\t<li><code>1 &lt;= k &lt;= 1000</code></li>\n\t<li>对于所有&nbsp;<code>1 &lt;= i &lt; j &lt;= arr.length</code>&nbsp;的 <code>i</code>&nbsp;和 <code>j</code> 满足&nbsp;<code>arr[i] &lt; arr[j]</code>&nbsp;</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>进阶：</strong></p>\n\n<p>你可以设计一个时间复杂度小于 O(n) 的算法解决此问题吗？</p>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1540.K 次操作转变字符串",
+        "hardRate": "MEDIUM",
+        "passRate": "33.43%",
+        "problemsUrl": "https://leetcode.cn/problems/can-convert-string-in-k-moves/",
+        "solutionsUrl": "https://leetcode.cn/problems/can-convert-string-in-k-moves/solution",
+        "problemsDesc": "<p>给你两个字符串&nbsp;<code>s</code>&nbsp;和&nbsp;<code>t</code>&nbsp;，你的目标是在 <code>k</code>&nbsp;次操作以内把字符串&nbsp;<code>s</code>&nbsp;转变成&nbsp;<code>t</code>&nbsp;。</p>\n\n<p>在第 <code>i</code>&nbsp;次操作时（<code>1 &lt;= i &lt;= k</code>），你可以选择进行如下操作：</p>\n\n<ul>\n\t<li>选择字符串 <code>s</code>&nbsp;中满足 <code>1 &lt;= j &lt;= s.length</code>&nbsp;且之前未被选过的任意下标 <code>j</code>&nbsp;（下标从 1 开始），并将此位置的字符切换 <code>i</code>&nbsp;次。</li>\n\t<li>不进行任何操作。</li>\n</ul>\n\n<p>切换 1 个字符的意思是用字母表中该字母的下一个字母替换它（字母表环状接起来，所以 <code>'z'</code>&nbsp;切换后会变成 <code>'a'</code>）。第 <code>i</code>&nbsp;次操作意味着该字符应切换&nbsp;<code>i</code>&nbsp;次</p>\n\n<p>请记住任意一个下标 <code>j</code>&nbsp;最多只能被操作&nbsp;1 次。</p>\n\n<p>如果在不超过 <code>k</code>&nbsp;次操作内可以把字符串 <code>s</code>&nbsp;转变成 <code>t</code>&nbsp;，那么请你返回&nbsp;<code>true</code>&nbsp;，否则请你返回&nbsp;<code>false</code>&nbsp;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"input\", t = \"ouput\", k = 9\n<strong>输出：</strong>true\n<strong>解释：</strong>第 6 次操作时，我们将 'i' 切换 6 次得到 'o' 。第 7 次操作时，我们将 'n' 切换 7 次得到 'u' 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"abc\", t = \"bcd\", k = 10\n<strong>输出：</strong>false\n<strong>解释：</strong>我们需要将每个字符切换 1 次才能得到 t 。我们可以在第 1 次操作时将 'a' 切换成 'b' ，但另外 2 个字母在剩余操作中无法再转变为 t 中对应字母。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"aab\", t = \"bbb\", k = 27\n<strong>输出：</strong>true\n<strong>解释：</strong>第 1 次操作时，我们将第一个 'a' 切换 1 次得到 'b' 。在第 27 次操作时，我们将第二个字母 'a' 切换 27 次得到 'b' 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= s.length, t.length &lt;= 10^5</code></li>\n\t<li><code>0 &lt;= k &lt;= 10^9</code></li>\n\t<li><code>s</code>&nbsp;和&nbsp;<code>t</code>&nbsp;只包含小写英文字母。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1541.平衡括号字符串的最少插入次数",
+        "hardRate": "MEDIUM",
+        "passRate": "48.80%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-insertions-to-balance-a-parentheses-string/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-insertions-to-balance-a-parentheses-string/solution",
+        "problemsDesc": "<p>给你一个括号字符串&nbsp;<code>s</code>&nbsp;，它只包含字符&nbsp;<code>&#39;(&#39;</code> 和&nbsp;<code>&#39;)&#39;</code>&nbsp;。一个括号字符串被称为平衡的当它满足：</p>\n\n<ul>\n\t<li>任何左括号&nbsp;<code>&#39;(&#39;</code>&nbsp;必须对应两个连续的右括号&nbsp;<code>&#39;))&#39;</code>&nbsp;。</li>\n\t<li>左括号&nbsp;<code>&#39;(&#39;</code>&nbsp;必须在对应的连续两个右括号&nbsp;<code>&#39;))&#39;</code>&nbsp;之前。</li>\n</ul>\n\n<p>比方说&nbsp;<code>&quot;())&quot;</code>，&nbsp;<code>&quot;())(())))&quot;</code> 和&nbsp;<code>&quot;(())())))&quot;</code>&nbsp;都是平衡的，&nbsp;<code>&quot;)()&quot;</code>，&nbsp;<code>&quot;()))&quot;</code> 和&nbsp;<code>&quot;(()))&quot;</code>&nbsp;都是不平衡的。</p>\n\n<p>你可以在任意位置插入字符 &#39;(&#39; 和 &#39;)&#39; 使字符串平衡。</p>\n\n<p>请你返回让 <code>s</code>&nbsp;平衡的最少插入次数。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;(()))&quot;\n<strong>输出：</strong>1\n<strong>解释：</strong>第二个左括号有与之匹配的两个右括号，但是第一个左括号只有一个右括号。我们需要在字符串结尾额外增加一个 &#39;)&#39; 使字符串变成平衡字符串 &quot;(())))&quot; 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;())&quot;\n<strong>输出：</strong>0\n<strong>解释：</strong>字符串已经平衡了。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;))())(&quot;\n<strong>输出：</strong>3\n<strong>解释：</strong>添加 &#39;(&#39; 去匹配最开头的 &#39;))&#39; ，然后添加 &#39;))&#39; 去匹配最后一个 &#39;(&#39; 。\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;((((((&quot;\n<strong>输出：</strong>12\n<strong>解释：</strong>添加 12 个 &#39;)&#39; 得到平衡字符串。\n</pre>\n\n<p><strong>示例 5：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;)))))))&quot;\n<strong>输出：</strong>5\n<strong>解释：</strong>在字符串开头添加 4 个 &#39;(&#39; 并在结尾添加 1 个 &#39;)&#39; ，字符串变成平衡字符串 &quot;(((())))))))&quot; 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= s.length &lt;= 10^5</code></li>\n\t<li><code>s</code>&nbsp;只包含&nbsp;<code>&#39;(&#39;</code> 和&nbsp;<code>&#39;)&#39;</code>&nbsp;。</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1542.找出最长的超赞子字符串",
+        "hardRate": "HARD",
+        "passRate": "43.93%",
+        "problemsUrl": "https://leetcode.cn/problems/find-longest-awesome-substring/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-longest-awesome-substring/solution",
+        "problemsDesc": "<p>给你一个字符串 <code>s</code> 。请返回 <code>s</code> 中最长的 <strong>超赞子字符串</strong> 的长度。</p>\n\n<p>「超赞子字符串」需满足满足下述两个条件：</p>\n\n<ul>\n\t<li>该字符串是 <code>s</code> 的一个非空子字符串</li>\n\t<li>进行任意次数的字符交换后，该字符串可以变成一个回文字符串</li>\n</ul>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;3242415&quot;\n<strong>输出：</strong>5\n<strong>解释：</strong>&quot;24241&quot; 是最长的超赞子字符串，交换其中的字符后，可以得到回文 &quot;24142&quot;\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;12345678&quot;\n<strong>输出：</strong>1\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;213123&quot;\n<strong>输出：</strong>6\n<strong>解释：</strong>&quot;213123&quot; 是最长的超赞子字符串，交换其中的字符后，可以得到回文 &quot;231132&quot;\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>s = &quot;00&quot;\n<strong>输出：</strong>2\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= s.length &lt;= 10^5</code></li>\n\t<li><code>s</code> 仅由数字组成</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1543.产品名称格式修复",
+        "hardRate": "EASY",
+        "passRate": "55.41%",
+        "problemsUrl": "https://leetcode.cn/problems/fix-product-name-format/",
+        "solutionsUrl": "https://leetcode.cn/problems/fix-product-name-format/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1544.整理字符串",
+        "hardRate": "EASY",
+        "passRate": "56.00%",
+        "problemsUrl": "https://leetcode.cn/problems/make-the-string-great/",
+        "solutionsUrl": "https://leetcode.cn/problems/make-the-string-great/solution",
+        "problemsDesc": "<p>给你一个由大小写英文字母组成的字符串 <code>s</code> 。</p>\n\n<p>一个整理好的字符串中，两个相邻字符 <code>s[i]</code> 和 <code>s[i+1]</code>，其中 <code>0<= i <= s.length-2</code> ，要满足如下条件:</p>\n\n<ul>\n\t<li>若 <code>s[i]</code> 是小写字符，则 <code>s[i+1]</code> 不可以是相同的大写字符。</li>\n\t<li>若 <code>s[i]</code> 是大写字符，则 <code>s[i+1]</code> 不可以是相同的小写字符。</li>\n</ul>\n\n<p>请你将字符串整理好，每次你都可以从字符串中选出满足上述条件的 <strong>两个相邻</strong> 字符并删除，直到字符串整理好为止。</p>\n\n<p>请返回整理好的 <strong>字符串</strong> 。题目保证在给出的约束条件下，测试样例对应的答案是唯一的。</p>\n\n<p><strong>注意：</strong>空字符串也属于整理好的字符串，尽管其中没有任何字符。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"leEeetcode\"\n<strong>输出：</strong>\"leetcode\"\n<strong>解释：</strong>无论你第一次选的是 i = 1 还是 i = 2，都会使 \"leEeetcode\" 缩减为 \"leetcode\" 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"abBAcC\"\n<strong>输出：</strong>\"\"\n<strong>解释：</strong>存在多种不同情况，但所有的情况都会导致相同的结果。例如：\n\"abBAcC\" --> \"aAcC\" --> \"cC\" --> \"\"\n\"abBAcC\" --> \"abBA\" --> \"aA\" --> \"\"\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>s = \"s\"\n<strong>输出：</strong>\"s\"\n</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 <= s.length <= 100</code></li>\n\t<li><code>s</code> 只包含小写和大写英文字母</li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1545.找出第 N 个二进制字符串中的第 K 位",
+        "hardRate": "MEDIUM",
+        "passRate": "58.97%",
+        "problemsUrl": "https://leetcode.cn/problems/find-kth-bit-in-nth-binary-string/",
+        "solutionsUrl": "https://leetcode.cn/problems/find-kth-bit-in-nth-binary-string/solution",
+        "problemsDesc": "<p>给你两个正整数 <code>n</code> 和 <code>k</code>，二进制字符串  <code>S<sub>n</sub></code> 的形成规则如下：</p>\n\n<ul>\n\t<li><code>S<sub>1</sub> = \"0\"</code></li>\n\t<li>当 <code>i > 1</code> 时，<code>S<sub>i</sub> = S<sub>i-1</sub> + \"1\" + reverse(invert(S<sub>i-1</sub>))</code></li>\n</ul>\n\n<p>其中 <code>+</code> 表示串联操作，<code>reverse(x)</code> 返回反转 <code>x</code> 后得到的字符串，而 <code>invert(x)</code> 则会翻转 x 中的每一位（0 变为 1，而 1 变为 0）。</p>\n\n<p>例如，符合上述描述的序列的前 4 个字符串依次是：</p>\n\n<ul>\n\t<li><code>S<sub>1 </sub>= \"0\"</code></li>\n\t<li><code>S<sub>2 </sub>= \"0<strong>1</strong>1\"</code></li>\n\t<li><code>S<sub>3 </sub>= \"011<strong>1</strong>001\"</code></li>\n\t<li><code>S<sub>4</sub> = \"0111001<strong>1</strong>0110001\"</code></li>\n</ul>\n\n<p>请你返回  <code>S<sub>n</sub></code> 的 <strong>第 <code>k</code> 位字符</strong> ，题目数据保证 <code>k</code> 一定在 <code>S<sub>n</sub></code> 长度范围以内。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 3, k = 1\n<strong>输出：</strong>\"0\"\n<strong>解释：</strong>S<sub>3</sub> 为 \"<strong>0</strong>111001\"，其第 1 位为 \"0\" 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 4, k = 11\n<strong>输出：</strong>\"1\"\n<strong>解释：</strong>S<sub>4</sub> 为 \"0111001101<strong>1</strong>0001\"，其第 11 位为 \"1\" 。\n</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 1, k = 1\n<strong>输出：</strong>\"0\"\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 2, k = 3\n<strong>输出：</strong>\"1\"\n</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 <= n <= 20</code></li>\n\t<li><code>1 <= k <= 2<sup>n</sup> - 1</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1546.和为目标值且不重叠的非空子数组的最大数目",
+        "hardRate": "MEDIUM",
+        "passRate": "44.84%",
+        "problemsUrl": "https://leetcode.cn/problems/maximum-number-of-non-overlapping-subarrays-with-sum-equals-target/",
+        "solutionsUrl": "https://leetcode.cn/problems/maximum-number-of-non-overlapping-subarrays-with-sum-equals-target/solution",
+        "problemsDesc": "<p>给你一个数组&nbsp;<code>nums</code>&nbsp;和一个整数&nbsp;<code>target</code>&nbsp;。</p>\n\n<p>请你返回&nbsp;<strong>非空不重叠</strong>&nbsp;子数组的最大数目，且每个子数组中数字和都为 <code>target</code>&nbsp;。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>nums = [1,1,1,1,1], target = 2\n<strong>输出：</strong>2\n<strong>解释：</strong>总共有 2 个不重叠子数组（加粗数字表示） [<strong>1,1</strong>,1,<strong>1,1</strong>] ，它们的和为目标值 2 。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>nums = [-1,3,5,1,4,2,-9], target = 6\n<strong>输出：</strong>2\n<strong>解释：</strong>总共有 3 个子数组和为 6 。\n([5,1], [4,2], [3,5,1,4,2,-9]) 但只有前 2 个是不重叠的。</pre>\n\n<p><strong>示例 3：</strong></p>\n\n<pre><strong>输入：</strong>nums = [-2,6,6,3,5,4,1,2,8], target = 10\n<strong>输出：</strong>3\n</pre>\n\n<p><strong>示例 4：</strong></p>\n\n<pre><strong>输入：</strong>nums = [0,0,0], target = 0\n<strong>输出：</strong>3\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= nums.length &lt;=&nbsp;10^5</code></li>\n\t<li><code>-10^4 &lt;= nums[i] &lt;=&nbsp;10^4</code></li>\n\t<li><code>0 &lt;= target &lt;= 10^6</code></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1547.切棍子的最小成本",
+        "hardRate": "HARD",
+        "passRate": "56.66%",
+        "problemsUrl": "https://leetcode.cn/problems/minimum-cost-to-cut-a-stick/",
+        "solutionsUrl": "https://leetcode.cn/problems/minimum-cost-to-cut-a-stick/solution",
+        "problemsDesc": "<p>有一根长度为 <code>n</code> 个单位的木棍，棍上从 <code>0</code> 到 <code>n</code> 标记了若干位置。例如，长度为 <strong>6</strong> 的棍子可以标记如下：</p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/09/statement.jpg\" style=\"height: 111px; width: 521px;\" /></p>\n\n<p>给你一个整数数组 <code>cuts</code> ，其中 <code>cuts[i]</code> 表示你需要将棍子切开的位置。</p>\n\n<p>你可以按顺序完成切割，也可以根据需要更改切割的顺序。</p>\n\n<p>每次切割的成本都是当前要切割的棍子的长度，切棍子的总成本是历次切割成本的总和。对棍子进行切割将会把一根木棍分成两根较小的木棍（这两根木棍的长度和就是切割前木棍的长度）。请参阅第一个示例以获得更直观的解释。</p>\n\n<p>返回切棍子的 <strong>最小总成本</strong> 。</p>\n\n<p> </p>\n\n<p><strong>示例 1：</strong></p>\n\n<p><img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/09/e1.jpg\" style=\"height: 284px; width: 350px;\" /></p>\n\n<pre>\n<strong>输入：</strong>n = 7, cuts = [1,3,4,5]\n<strong>输出：</strong>16\n<strong>解释：</strong>按 [1, 3, 4, 5] 的顺序切割的情况如下所示：\n<img alt=\"\" src=\"https://assets.leetcode-cn.com/aliyun-lc-upload/uploads/2020/08/09/e11.jpg\" style=\"height: 284px; width: 350px;\" />\n第一次切割长度为 7 的棍子，成本为 7 。第二次切割长度为 6 的棍子（即第一次切割得到的第二根棍子），第三次切割为长度 4 的棍子，最后切割长度为 3 的棍子。总成本为 7 + 6 + 4 + 3 = 20 。\n而将切割顺序重新排列为 [3, 5, 1, 4] 后，总成本 = 16（如示例图中 7 + 4 + 3 + 2 = 16）。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre>\n<strong>输入：</strong>n = 9, cuts = [5,6,1,4,2]\n<strong>输出：</strong>22\n<strong>解释：</strong>如果按给定的顺序切割，则总成本为 25 。总成本 <= 25 的切割顺序很多，例如，[4, 6, 5, 2, 1] 的总成本 = 22，是所有可能方案中成本最小的。</pre>\n\n<p> </p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>2 <= n <= 10^6</code></li>\n\t<li><code>1 <= cuts.length <= min(n - 1, 100)</code></li>\n\t<li><code>1 <= cuts[i] <= n - 1</code></li>\n\t<li><code>cuts</code> 数组中的所有整数都 <strong>互不相同</strong></li>\n</ul>\n",
+        "isPlus": false
+    },
+    {
+        "problemsName": " 1548.图中最相似的路径",
+        "hardRate": "HARD",
+        "passRate": "67.54%",
+        "problemsUrl": "https://leetcode.cn/problems/the-most-similar-path-in-a-graph/",
+        "solutionsUrl": "https://leetcode.cn/problems/the-most-similar-path-in-a-graph/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1549.每件商品的最新订单",
+        "hardRate": "MEDIUM",
+        "passRate": "67.73%",
+        "problemsUrl": "https://leetcode.cn/problems/the-most-recent-orders-for-each-product/",
+        "solutionsUrl": "https://leetcode.cn/problems/the-most-recent-orders-for-each-product/solution",
+        "problemsDesc": null,
+        "isPlus": true
+    },
+    {
+        "problemsName": " 1550.存在连续三个奇数的数组",
+        "hardRate": "EASY",
+        "passRate": "65.60%",
+        "problemsUrl": "https://leetcode.cn/problems/three-consecutive-odds/",
+        "solutionsUrl": "https://leetcode.cn/problems/three-consecutive-odds/solution",
+        "problemsDesc": "<p>给你一个整数数组 <code>arr</code>，请你判断数组中是否存在连续三个元素都是奇数的情况：如果存在，请返回 <code>true</code> ；否则，返回 <code>false</code> 。</p>\n\n<p>&nbsp;</p>\n\n<p><strong>示例 1：</strong></p>\n\n<pre><strong>输入：</strong>arr = [2,6,4,1]\n<strong>输出：</strong>false\n<strong>解释：</strong>不存在连续三个元素都是奇数的情况。\n</pre>\n\n<p><strong>示例 2：</strong></p>\n\n<pre><strong>输入：</strong>arr = [1,2,34,3,4,5,7,23,12]\n<strong>输出：</strong>true\n<strong>解释：</strong>存在连续三个元素都是奇数的情况，即 [5,7,23] 。\n</pre>\n\n<p>&nbsp;</p>\n\n<p><strong>提示：</strong></p>\n\n<ul>\n\t<li><code>1 &lt;= arr.length &lt;= 1000</code></li>\n\t<li><code>1 &lt;= arr[i] &lt;= 1000</code></li>\n</ul>\n",
+        "isPlus": false
+    }
+]
