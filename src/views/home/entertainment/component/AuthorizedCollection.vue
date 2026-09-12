@@ -30,7 +30,7 @@
         <span>{{ !aiLoaded ? '待确认' : ai.hasKey ? '已保存' : '未配置' }}</span>
       </div>
       <button v-if="!aiLoaded" type="button" :disabled="aiLoading" @click="loadAi">{{ aiLoading ? '正在读取…' : '重新读取本机配置' }}</button>
-      <p class="ai-status" role="status">{{ aiStatus }}{{ keyVisible ? ' · 30 秒后自动隐藏' : '' }}</p>
+      <p class="ai-status" role="status">{{ aiStatus }}</p>
       <button type="button" :disabled="!connected || aiBusy || !aiLoaded" @click="saveAi">{{ aiBusy ? '请稍候…' : '保存并测试' }}</button>
       <button type="button" :disabled="aiBusy || !aiLoaded || !ai.hasKey" @click="clearKey">清除 Key</button>
     </section>
@@ -90,9 +90,7 @@ async function loadAi() {
     if (!disposed) aiStatus.value = `读取失败：${(error as Error).message}。连接恢复后可点击重新读取。`;
   } finally { aiLoading.value = false; }
 }
-let keyTimer: ReturnType<typeof setTimeout> | undefined;
 function hideKey() {
-  clearTimeout(keyTimer);
   keyVisible.value = false;
 
 }
@@ -107,7 +105,6 @@ async function toggleKey() {
       apiKey.value = result.value;
     }
     keyVisible.value = true;
-    keyTimer = setTimeout(hideKey, 30000);
   } catch (error) { aiStatus.value = (error as Error).message; }
   finally { aiBusy.value = false; }
 }
@@ -197,7 +194,7 @@ async function loadResult(platform: string) {
   } catch (error) { message.value = (error as Error).message; }
 }
 onMounted(() => { void loadAi(); void connect(); });
-onUnmounted(() => { disposed = true; clearTimeout(timer); clearTimeout(keyTimer); apiKey.value = ""; });
+onUnmounted(() => { disposed = true; clearTimeout(timer); apiKey.value = ""; });
 </script>
 
 <style scoped>
