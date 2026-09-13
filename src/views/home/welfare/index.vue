@@ -98,7 +98,7 @@
           <div>
             <strong>固定来源</strong>
             <p>
-              线报站筛选银行优惠与各类高优福利，主机站筛选年费不超过 20 美元的 VPS；闲鱼仅关注 115 网盘会员、迅雷会员和 QQ 阅读充值优惠。
+              线报站筛选银行优惠与各类高优福利，主机站筛选年费不超过 20 美元的 VPS；闲鱼仅关注 115 网盘会员、迅雷会员和 QQ 阅读充值优惠；Hamibot 关注脚本市场畅销榜并接入 Gemini 生态标签。目前固定来源中仅 bilibili 需由本地用户手动执行采集，其余固定源均由自动化管线拉取并统一由 Gemini 标注生态属性。
             </p>
             <div class="detail-sources">
               <span v-for="source in directCollectorSources" :key="source.id">{{ source.label }}</span>
@@ -253,6 +253,7 @@ import zhuanyesTopSource from "../../../data/welfare/zhuanyesTop.json";
 import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
 import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
 import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
+import hamibotSource from "../../../data/welfare/hamibot.json";
 import keywordSearchSource from "../../../data/welfare/keyword-search.json";
 import keywordSearchConfig from "../../../../project-support/crawl/welfare/keyword_search_config.json";
 import welfareRadar from "../../../data/welfare-ecosystem.json";
@@ -280,6 +281,7 @@ const directCollectorSources = [
   { id: "zhuanyes", label: "好赚网" },
   { id: "daydayzhuan", label: "天天线报网" },
   { id: "zhujiceping", label: "国外主机测评" },
+  { id: "hamibot", label: "Hamibot" },
 ];
 
 const ecosystemByLink = new Map(
@@ -293,6 +295,7 @@ const rawInitSource = [
   ...zhuanyesSource,
   ...daydayzhuanSource,
   ...zhujicepingSource,
+  ...hamibotSource,
   ...keywordSearchSource,
 ];
 const rawTopSource = [
@@ -612,6 +615,13 @@ export default {
             websiteName: "国外主机测评",
             mainWebsite: "https://www.zhujiceping.com/",
             websiteImg: "https://www.zhujiceping.com/favicon.ico",
+          };
+          break;
+        case "hamibot":
+          websiteInfo = {
+            websiteName: "Hamibot",
+            mainWebsite: "https://hamibot.com/marketplace/category/top-grossing",
+            websiteImg: "https://assets.hamibot.cn/icon.png",
           };
           break;
         case "xianyu":

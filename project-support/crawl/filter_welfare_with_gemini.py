@@ -36,6 +36,7 @@ WELFARE_FILES = (
     "welfare/daydayzhuan.json",
     "welfare/daydayzhuanTop.json",
     "welfare/zhujiceping.json",
+    "welfare/hamibot.json",
     "welfare/keyword-search.json",
     "bilibili.json",
 )

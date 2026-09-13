@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 
-NAMES = set('welfare infzm juejin weibo douyinHot xiaohongshu githubTrending 52pojie meituanTech v2ex 0818tuan 0818tuanTop zhuanyes zhuanyesTop daydayzhuan daydayzhuanTop zhujiceping xianyu keywordSearch douban leetCode zhipin kuaishou tiktok'.split())
+NAMES = set('welfare infzm juejin weibo douyinHot xiaohongshu githubTrending 52pojie meituanTech v2ex 0818tuan 0818tuanTop zhuanyes zhuanyesTop daydayzhuan daydayzhuanTop zhujiceping hamibot xianyu keywordSearch douban leetCode zhipin kuaishou tiktok'.split())
 STATES = {'success', 'preserved', 'skipped', 'failed'}
 
 
