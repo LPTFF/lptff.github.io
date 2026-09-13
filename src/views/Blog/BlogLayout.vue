@@ -9,6 +9,7 @@
           <RouterLink to="/blog/archives">归档</RouterLink>
           <RouterLink to="/blog/reading">阅读</RouterLink>
           <RouterLink to="/blog/about">关于</RouterLink>
+          <a href="javascript:void(0)" class="portal-link" @click="showPortalModal = true">我的空间</a>
         </nav>
         <div class="header-actions">
           <el-input v-model="query" clearable placeholder="搜索文章" :prefix-icon="Search" @keyup.enter="search"
@@ -22,12 +23,14 @@
         <RouterLink to="/blog/archives" @click="menuOpen = false">归档</RouterLink>
         <RouterLink to="/blog/reading" @click="menuOpen = false">阅读</RouterLink>
         <RouterLink to="/blog/about" @click="menuOpen = false">关于</RouterLink>
+        <a href="javascript:void(0)" class="portal-link" @click="showPortalModal = true; menuOpen = false">我的空间</a>
       </nav>
     </header>
     <main class="blog-main">
       <RouterView />
     </main>
     <footer class="blog-footer">记录学习，分享思考 · tangff</footer>
+    <PrivatePortalModal v-model="showPortalModal" />
   </div>
 </template>
 
@@ -35,10 +38,12 @@
 import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { Menu, Search } from "@element-plus/icons-vue";
+import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
 
 const router = useRouter();
 const query = ref("");
 const menuOpen = ref(false);
+const showPortalModal = ref(false);
 const search = () => {
   router.push({ path: "/blog/search", query: query.value.trim() ? { q: query.value.trim() } : undefined });
 };
@@ -112,6 +117,13 @@ const search = () => {
 .desktop-nav a:hover,
 .mobile-nav a:hover {
   color: var(--blog-green);
+}
+
+.desktop-nav a.portal-link,
+.mobile-nav a.portal-link {
+  color: var(--blog-green);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .header-actions {

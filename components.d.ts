@@ -60,6 +60,7 @@ declare module 'vue' {
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     FloatingAuthorization: typeof import('./src/components/FloatingAuthorization.vue')['default']
+    PrivatePortalModal: typeof import('./src/components/PrivatePortalModal.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     TagCategoryPicker: typeof import('./src/components/TagCategoryPicker.vue')['default']

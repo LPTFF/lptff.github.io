@@ -27,6 +27,11 @@
               {{ item.label }}
             </el-menu-item>
           </el-menu>
+          <div class="header-portal">
+            <el-button class="portal-btn" size="small" type="primary" plain @click="showPortalModal = true">
+              我的空间
+            </el-button>
+          </div>
         </el-header>
         <el-main class="main-content">
           <div class="component-div">
@@ -80,6 +85,7 @@
           :bottom="88"
           aria-label="回到顶部"
         />
+        <PrivatePortalModal v-model="showPortalModal" />
       </div>
     </div>
   </div>
@@ -100,6 +106,7 @@ import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
 import TabLoadError from "./TabLoadError.vue";
+import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
 import {
   ElMenu,
   ElMenuItem,
@@ -107,6 +114,7 @@ import {
   ElFooter,
   ElMain,
   ElBacktop,
+  ElButton,
 } from "element-plus";
 
 type TabKey = "guide" | "pojie" | "tools" | "entertainment" | "welfare";
@@ -177,6 +185,7 @@ const menuConfig = [
   },
 ];
 
+const showPortalModal = ref(false);
 const previousRoute = ref("");
 const isPCRes = ref(isPC());
 const windowHeight = ref(typeof window !== "undefined" ? window.innerHeight : 900);
@@ -442,6 +451,17 @@ const currentYear = new Date(
   background-color: var(--el-menu-bg-color);
   width: 100%;
   max-width: 1200px;
+}
+
+.header-portal {
+  position: absolute;
+  right: 16px;
+  top: 14px;
+}
+
+.portal-btn {
+  font-weight: 500;
+  border-radius: 16px;
 }
 
 .logo-title {
