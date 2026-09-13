@@ -1,4 +1,5 @@
 importScripts(
+  "build-info.js",
   "local-ai.js",
   "authorized-content.js",
   "boss-playbook.js",
@@ -2184,3 +2185,29 @@ async function syncCareerAutopilotHandler(snippet) {
   }
   return undefined;
 });
+
+// 自动向已打开的网站标签页注入 web-bridge，实现安装/重载后免刷新秒连
+async function autoInjectWebBridge() {
+  try {
+    const tabs = await chrome.tabs.query({
+      url: [
+        "https://lptff.github.io/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*",
+      ],
+    });
+    for (const tab of tabs) {
+      if (!tab.id) continue;
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        files: ["content/web-bridge.js"],
+      }).catch(() => {});
+    }
+  } catch {}
+}
+
+chrome.runtime.onInstalled.addListener(() => {
+  autoInjectWebBridge();
+});
+autoInjectWebBridge();
+

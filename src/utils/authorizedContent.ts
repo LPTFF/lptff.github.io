@@ -4,13 +4,22 @@ const KEY = "lptff-authorized-content-v1";
 const PER_AUTHOR_LIMIT = 60;
 type Item = Record<string, any>;
 
+const inFlightQueries = new Map<string, Promise<any>>();
+
 export function authorizedRequest(action: string, payload: Record<string, unknown> = {}): Promise<any> {
-  return new Promise((resolve, reject) => {
+  const isQuery = action === "STATUS" && Object.keys(payload).length === 0;
+  if (isQuery && inFlightQueries.has(action)) {
+    return inFlightQueries.get(action)!;
+  }
+
+  const p = new Promise((resolve, reject) => {
     const requestId = crypto.randomUUID();
+    const isAi = ["AI_ANALYZE", "AI_TEST"].includes(action);
+    const timeoutMs = isAi ? 65000 : action === "STATUS" ? 2500 : 8000;
     const timer = window.setTimeout(() => {
       window.removeEventListener("message", receive);
-      reject(new Error("尚未连接新版采集扩展，请安装或重载扩展后刷新页面"));
-    }, ["AI_ANALYZE", "AI_TEST"].includes(action) ? 65000 : 8000);
+      reject(new Error("尚未检测到采集扩展，请确认扩展已启用；若已安装可稍候或点击检查连接"));
+    }, timeoutMs);
 
     function receive(event: MessageEvent) {
       if (event.source !== window || event.origin !== location.origin
@@ -25,6 +34,13 @@ export function authorizedRequest(action: string, payload: Record<string, unknow
     window.addEventListener("message", receive);
     window.postMessage({ type: "LPTFF_AUTHORIZED_CONTENT_REQUEST", action, requestId, ...JSON.parse(JSON.stringify(payload)) }, location.origin);
   });
+
+  if (isQuery) {
+    inFlightQueries.set(action, p);
+    p.finally(() => inFlightQueries.delete(action));
+  }
+
+  return p;
 }
 
 export function normalizeContentCover(platform: string, value: unknown): string {

@@ -448,11 +448,30 @@
     } catch {}
   }
 
-  async function persistSnapshot(snapshot) {
-    try {
-      await chrome.storage.local.set({ [TASK_KEY]: snapshot });
-      await broadcastSnapshot(snapshot);
-    } catch {}
+  function getExtensionBuildTag() {
+    return (typeof self !== "undefined" && self.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
+      || (typeof window !== "undefined" && window.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
+      || "cand-3.25.0-unknown";
+  }
+  let snapshotSequence = 0;
+  let persistQueue = Promise.resolve();
+
+  function persistSnapshot(snapshot) {
+    // 明确固定当前快照内容并递增序号，消除并发快照入队时引用突变
+    const frozenSnapshot = JSON.parse(JSON.stringify(snapshot));
+    frozenSnapshot.seq = ++snapshotSequence;
+
+    persistQueue = persistQueue.then(async () => {
+      try {
+        await chrome.storage.local.set({ [TASK_KEY]: frozenSnapshot });
+        await broadcastSnapshot(frozenSnapshot);
+      } catch (err) {
+        console.error("[lptff-authorized] persistSnapshot storage failure:", err);
+        // 存储异常显式记录，杜绝静默假成功
+        frozenSnapshot.persistError = String(err?.message || err);
+      }
+    });
+    return persistQueue;
   }
 
   function summarizeSnapshot(snapshot) {
@@ -518,6 +537,7 @@
       running: true,
       cancelled: false,
       loginTabId: null,
+      loginTabIds: new Map(),
       openTabIds: new Set(),
     };
     activeExecution = execution;
@@ -559,106 +579,127 @@
 
     const platformsToRun = scope === "all" ? ["bilibili", "douyin"] : [scope];
 
+    async function processAuthor(author) {
+      if (execution.cancelled) {
+        if (author.status !== "completed") {
+          author.status = "cancelled";
+          author.endReason = "已停止采集";
+        }
+        return;
+      }
+      if (author.status === "completed") return; // 断点续采：跳过已完成作者
+
+      author.status = "running";
+      author.endReason = "采集中…";
+      snapshot.updatedAt = Date.now();
+      snapshot.elapsedMs = Date.now() - startTime;
+      snapshot.summary = summarizeSnapshot(snapshot);
+      await persistSnapshot(snapshot);
+
+      const sourceDef = targetSources.find((s) => s.uid === author.uid);
+      const startAuthorTime = Date.now();
+      let tab = null;
+
+      try {
+        tab = await chrome.tabs.create({ url: sourceUrl(sourceDef), active: false });
+        execution.openTabIds.add(tab.id);
+
+        // 等待标签页加载
+        for (let i = 0; i < 60; i++) {
+          if (execution.cancelled) break;
+          try {
+            const state = await chrome.tabs.get(tab.id);
+            if (state.status === "complete") break;
+          } catch {
+            break;
+          }
+          await new Promise((r) => setTimeout(r, 250));
+        }
+
+        if (execution.cancelled) {
+          author.status = "cancelled";
+          author.endReason = "已停止采集";
+          return;
+        }
+
+        const resultList = await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          world: "MAIN",
+          func: extract,
+          args: [sourceDef, DEFAULT_TARGET_COUNT],
+        });
+        const res = resultList[0]?.result || { items: [], reason: "execute-script-failed" };
+
+        author.durationMs = Date.now() - startAuthorTime;
+        author.pageCount = res.pageCount || 1;
+        author.rawCount = res.rawCount || 0;
+        author.duplicateCount = res.duplicateCount || 0;
+        author.mode = res.mode || author.mode;
+
+        if (res.reason === "needs-login") {
+          author.status = "needs-login";
+          author.endReason = "等待登录/验证";
+          // 仅保留该平台首个登录标签页供用户操作，并发时不重复打开多余标签页
+          if (!execution.loginTabIds.has(author.platform)) {
+            execution.loginTabIds.set(author.platform, tab.id);
+            execution.loginTabId = tab.id;
+            tab = null;
+          }
+        } else if (res.reason === "source-page-changed" || res.reason === "login-or-feed-unavailable") {
+          author.status = "failed";
+          author.endReason = res.reason === "source-page-changed" ? "页面跳转异常" : "来源不可用";
+        } else {
+          // 过滤并校验有效条目
+          const valid = (res.items || []).filter((item) =>
+            item.website === author.platform
+            && item.authorPage === sourceUrl(sourceDef)
+            && Number.isFinite(item.timestamp) && item.timestamp > 0
+            && typeof item.desc === "string"
+            && (author.platform === "douyin" ? /^https:\/\/www\.douyin\.com\/video\/\d+$/ : /^https:\/\/(?:www\.bilibili\.com\/video\/BV[\da-z]+|t\.bilibili\.com\/\d+)$/i).test(item.detailUrl)
+          );
+
+          author.itemsCount = valid.length;
+          author.validCount = valid.length;
+          author.endReason = res.reason || (valid.length ? `最近 ${valid.length} 条已完成` : "完成 · 暂无公开内容");
+
+          if (res.reason?.includes("部分") || res.reason?.includes("受限") || res.reason?.includes("超时")) {
+            author.status = "partial";
+          } else {
+            author.status = "completed";
+            author.lastSuccessAt = Date.now();
+          }
+
+          // 合并到平台数据池，执行按作者截断（每作者 60 条）
+          platformItems[author.platform] = enforcePerAuthorRetention(platformItems[author.platform], valid, sourceUrl(sourceDef));
+        }
+      } catch (err) {
+        author.status = "failed";
+        author.endReason = String(err.message || "采集异常").slice(0, 100);
+        author.durationMs = Date.now() - startAuthorTime;
+      } finally {
+        if (tab?.id) {
+          execution.openTabIds.delete(tab.id);
+          await chrome.tabs.remove(tab.id).catch(() => {});
+        }
+      }
+
+      snapshot.updatedAt = Date.now();
+      snapshot.elapsedMs = Date.now() - startTime;
+      snapshot.summary = summarizeSnapshot(snapshot);
+      snapshot.platforms[author.platform].completed = authors.filter((a) => a.platform === author.platform && a.status === "completed").length;
+      snapshot.platforms[author.platform].storedCount = platformItems[author.platform].length;
+      await persistSnapshot(snapshot);
+    }
+
     async function runPlatformLane(platform) {
       const platformAuthors = authors.filter((a) => a.platform === platform);
 
-      for (const author of platformAuthors) {
-        if (execution.cancelled) break;
-        if (author.status === "completed") continue; // 断点续采：跳过已完成作者
-
-        author.status = "running";
-        author.endReason = "采集中…";
-        snapshot.updatedAt = Date.now();
-        snapshot.elapsedMs = Date.now() - startTime;
-        snapshot.summary = summarizeSnapshot(snapshot);
-        await persistSnapshot(snapshot);
-
-        const sourceDef = targetSources.find((s) => s.uid === author.uid);
-        const startAuthorTime = Date.now();
-        let tab = null;
-
-        try {
-          tab = await chrome.tabs.create({ url: sourceUrl(sourceDef), active: false });
-          execution.openTabIds.add(tab.id);
-
-          // 等待标签页加载
-          for (let i = 0; i < 60; i++) {
-            if (execution.cancelled) break;
-            const state = await chrome.tabs.get(tab.id);
-            if (state.status === "complete") break;
-            await new Promise((r) => setTimeout(r, 250));
-          }
-
-          if (execution.cancelled) {
-            author.status = "cancelled";
-            author.endReason = "已停止采集";
-            break;
-          }
-
-          const resultList = await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            world: "MAIN",
-            func: extract,
-            args: [sourceDef, DEFAULT_TARGET_COUNT],
-          });
-          const res = resultList[0]?.result || { items: [], reason: "execute-script-failed" };
-
-          author.durationMs = Date.now() - startAuthorTime;
-          author.pageCount = res.pageCount || 1;
-          author.rawCount = res.rawCount || 0;
-          author.duplicateCount = res.duplicateCount || 0;
-          author.mode = res.mode || author.mode;
-
-          if (res.reason === "needs-login") {
-            author.status = "needs-login";
-            author.endReason = "等待登录/验证";
-            execution.loginTabId = tab.id;
-            tab = null; // 保留登录页面供用户操作
-          } else if (res.reason === "source-page-changed" || res.reason === "login-or-feed-unavailable") {
-            author.status = "failed";
-            author.endReason = res.reason === "source-page-changed" ? "页面跳转异常" : "来源不可用";
-          } else {
-            // 过滤并校验有效条目
-            const valid = (res.items || []).filter((item) =>
-              item.website === author.platform
-              && item.authorPage === sourceUrl(sourceDef)
-              && Number.isFinite(item.timestamp) && item.timestamp > 0
-              && typeof item.desc === "string"
-              && (author.platform === "douyin" ? /^https:\/\/www\.douyin\.com\/video\/\d+$/ : /^https:\/\/(?:www\.bilibili\.com\/video\/BV[\da-z]+|t\.bilibili\.com\/\d+)$/i).test(item.detailUrl)
-            );
-
-            author.itemsCount = valid.length;
-            author.validCount = valid.length;
-            author.endReason = res.reason || (valid.length ? `最近 ${valid.length} 条已完成` : "完成 · 暂无公开内容");
-
-            if (res.reason?.includes("部分") || res.reason?.includes("受限") || res.reason?.includes("超时")) {
-              author.status = "partial";
-            } else {
-              author.status = "completed";
-              author.lastSuccessAt = Date.now();
-            }
-
-            // 合并到平台数据池，执行按作者截断（每作者 60 条）
-            platformItems[author.platform] = enforcePerAuthorRetention(platformItems[author.platform], valid, sourceUrl(sourceDef));
-          }
-        } catch (err) {
-          author.status = "failed";
-          author.endReason = String(err.message || "采集异常").slice(0, 100);
-          author.durationMs = Date.now() - startAuthorTime;
-        } finally {
-          if (tab?.id) {
-            execution.openTabIds.delete(tab.id);
-            await chrome.tabs.remove(tab.id).catch(() => {});
-          }
-        }
-
-        snapshot.updatedAt = Date.now();
-        snapshot.elapsedMs = Date.now() - startTime;
-        snapshot.summary = summarizeSnapshot(snapshot);
-        snapshot.platforms[platform].completed = authors.filter((a) => a.platform === platform && a.status === "completed").length;
-        snapshot.platforms[platform].storedCount = platformItems[platform].length;
-        await persistSnapshot(snapshot);
-      }
+      // 并行并发调度该平台下所有作者采集（80ms 微错峰开启新标签页，兼顾极致并发与浏览器平稳性）
+      await Promise.all(
+        platformAuthors.map((author, index) =>
+          new Promise((resolve) => setTimeout(resolve, index * 80)).then(() => processAuthor(author))
+        )
+      );
 
       // 泳道结束，记录平台最终状态
       const pAuthors = authors.filter((a) => a.platform === platform);
@@ -758,6 +799,8 @@
         return {
           ok: true,
           version: manifestVersion,
+          buildTag: getExtensionBuildTag(),
+          extensionId: chrome.runtime?.id || "mobngggdpoodbnippllglhekfoneapao",
           task: taskSnapshot,
           resultVersion: stored.resultVersion || 0,
           platforms: Object.fromEntries(["douyin", "bilibili"].map((id) => [id, {
@@ -806,9 +849,10 @@
         const platform = message.platform || "bilibili";
         const cat = await catalog();
         const source = cat.find((item) => item.platform === platform) || cat[0];
-        if (activeExecution?.loginTabId) {
+        const existingLoginTab = activeExecution?.loginTabIds?.get(platform) || activeExecution?.loginTabId;
+        if (existingLoginTab) {
           try {
-            await chrome.tabs.update(activeExecution.loginTabId, { active: true });
+            await chrome.tabs.update(existingLoginTab, { active: true });
             return { ok: true };
           } catch {}
         }

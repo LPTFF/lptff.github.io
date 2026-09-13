@@ -7,7 +7,7 @@
     "serve": "vite",
     "preview": "vite preview",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
-    "build": "vite build"
+    "build": "node project-support/scripts/generate-build-tags.mjs && vite build"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

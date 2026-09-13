@@ -5,31 +5,43 @@
 
   if (!isAllowedOrigin) return;
 
+  if (typeof window !== "undefined" && window.__LPTFF_WEB_BRIDGE_DISPOSE__) {
+    try { window.__LPTFF_WEB_BRIDGE_DISPOSE__(); } catch {}
+  }
+
   const CONTEXT_INVALIDATED_MESSAGE = "采集插件已重新加载或更新，当前页面旧连接已失效。请刷新当前页面后重试";
   let contextInvalidated = false;
   let lifecyclePort = null;
 
   function connectLifecyclePort() {
-    if (lifecyclePort || contextInvalidated) return;
+    if (lifecyclePort) return;
+    if (!hasRuntimeContext()) return;
 
     try {
       const port = chrome.runtime.connect({ name: "lptff-web-bridge-lifecycle" });
       lifecyclePort = port;
       port.onDisconnect.addListener(() => {
-        let disconnectMessage = "";
+        if (lifecyclePort === port) lifecyclePort = null;
         try {
-          // Reading lastError prevents Chrome from reporting an unchecked error.
-          disconnectMessage = chrome.runtime.lastError?.message || "";
+          void chrome.runtime.lastError;
+        } catch {}
+
+        // 仅当 chrome.runtime.id 真正失效（如扩展在扩展管理页被重载或卸载）时，才标记 contextInvalidated。
+        // 若 service worker 仅仅是正常闲置休眠，chrome.runtime.id 依然存在且完全有效，切勿误判失效！
+        try {
+          if (!chrome.runtime?.id) {
+            contextInvalidated = true;
+          }
         } catch {
           contextInvalidated = true;
         }
-
-        if (lifecyclePort === port) lifecyclePort = null;
-        if (/back\/forward cache/i.test(disconnectMessage)) return;
-        contextInvalidated = true;
       });
     } catch {
-      contextInvalidated = true;
+      try {
+        if (!chrome.runtime?.id) contextInvalidated = true;
+      } catch {
+        contextInvalidated = true;
+      }
     }
   }
 
@@ -62,11 +74,22 @@
   }
 
   function hasRuntimeContext() {
-    if (contextInvalidated) return false;
+    if (contextInvalidated) {
+      try {
+        if (chrome.runtime?.id) {
+          contextInvalidated = false;
+          return true;
+        }
+      } catch {
+        return false;
+      }
+      return false;
+    }
     try {
       if (chrome.runtime?.id) return true;
     } catch {
-      // An extension reload invalidates the old content-script context.
+      contextInvalidated = true;
+      return false;
     }
     contextInvalidated = true;
     return false;
@@ -115,8 +138,12 @@
     }
   }
 
-  window.addEventListener("message", (event) => {
+  function onWindowMessage(event) {
     if (event.source !== window || event.origin !== location.origin) return;
+    if (!hasRuntimeContext()) {
+      window.removeEventListener("message", onWindowMessage);
+      return;
+    }
     if (event.data?.type === "LPTFF_AUTHORIZED_CONTENT_REQUEST") {
       const actions = ["STATUS", "START", "START_ALL", "RESUME", "STOP", "LOGIN", "RESULT", "OPEN_ASSISTANT", "AI_CONFIG", "AI_REVEAL", "AI_CLEAR", "AI_TEST", "AI_CACHED", "AI_SAVE", "AI_ANALYZE"];
       if (!actions.includes(event.data.action)) return;
@@ -216,9 +243,13 @@
     if (event.data?.type === "LPTFF_CAREER_CLEAR_GEMINI_KEY") {
       forward({ type: "CLEAR_CAREER_GEMINI_KEY", requestId: event.data.requestId }, "LPTFF_CAREER_GEMINI_KEY_CLEARED");
     }
-  });
+  }
 
-  chrome.runtime.onMessage.addListener((message) => {
+  function onRuntimeMessage(message) {
+    if (!hasRuntimeContext()) {
+      try { chrome.runtime.onMessage.removeListener(onRuntimeMessage); } catch {}
+      return;
+    }
     if (message?.type === "AUTHORIZED_CONTENT_PROGRESS") {
       window.postMessage({
         source: "lptff-investment-assistant",
@@ -237,5 +268,38 @@
       type: "LPTFF_INVESTMENT_COLLECTION_PROGRESS",
       progress: message,
     }, location.origin);
-  });
+  }
+
+  window.addEventListener("message", onWindowMessage);
+  chrome.runtime.onMessage.addListener(onRuntimeMessage);
+
+  window.__LPTFF_WEB_BRIDGE_DISPOSE__ = () => {
+    window.removeEventListener("message", onWindowMessage);
+    try { chrome.runtime.onMessage.removeListener(onRuntimeMessage); } catch {}
+    if (lifecyclePort) {
+      try { lifecyclePort.disconnect(); } catch {}
+      lifecyclePort = null;
+    }
+  };
+
+  // 广播就绪事件，通知页面扩展已在线，实现免刷新秒连
+  try {
+    const manifest = (typeof chrome !== "undefined" && chrome.runtime?.getManifest) ? chrome.runtime.getManifest() : {};
+    const version = manifest?.version || "3.25.0";
+    const buildTag = (typeof window !== "undefined" && window.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
+      || (typeof self !== "undefined" && self.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
+      || "cand-3.25.0-bridge";
+    const detail = {
+      source: "lptff-investment-assistant",
+      type: "LPTFF_EXTENSION_READY",
+      version,
+      buildTag,
+      extensionId: (typeof chrome !== "undefined" && chrome.runtime?.id) ? chrome.runtime.id : "mobngggdpoodbnippllglhekfoneapao",
+      timestamp: Date.now()
+    };
+    window.postMessage(detail, location.origin);
+    try {
+      window.dispatchEvent(new CustomEvent("LPTFF_EXTENSION_READY", { detail }));
+    } catch {}
+  } catch {}
 })();

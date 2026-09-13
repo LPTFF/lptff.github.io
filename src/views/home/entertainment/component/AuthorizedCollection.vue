@@ -6,7 +6,10 @@
         <p>在来源网站完成登录，再选择采集范围。登录态留在 Chrome，采集结果保存在本机。</p>
       </div>
       <div class="header-actions">
-        <button type="button" @click="connect">{{ connected ? `扩展已连接 · ${version}` : '检查扩展连接' }}</button>
+        <button type="button" :disabled="connecting" @click="connect">
+          {{ connecting ? '正在检查连接…' : connected ? `扩展已连接 · ${version}${extensionBuildTag ? ' (' + extensionBuildTag.slice(-8) + ')' : ''}` : '检查扩展连接' }}
+        </button>
+        <span class="web-build-badge" :title="'网页构建标识: ' + webBuildTag">Web: {{ webBuildTag.slice(-8) }}</span>
       </div>
     </header>
 
@@ -117,7 +120,7 @@
     <p v-if="message" role="status" class="message-status">{{ message }}</p>
     <details v-if="!connected">
       <summary>安装或更新采集扩展</summary>
-      <p>下载并解压，在 Chrome 扩展管理页加载已解压的扩展，或重载已有扩展，再刷新本页。需要 3.24.0 或更新版本。</p>
+      <p>下载并解压，在 Chrome 扩展管理页加载已解压的扩展，或重载已有扩展，再刷新本页。需要 3.25.0 或更新版本（支持全并行采集）。</p>
       <button type="button" @click="downloadPlugin">下载采集扩展</button>
       <p v-if="pluginHint">{{ pluginHint.title }}：{{ pluginHint.desc }}</p>
     </details>
@@ -130,10 +133,14 @@ import { authorizedRequest, authorizedCollectionMeta, getSavedResultVersion, sav
 import { collectionFreshness } from "../../../../utils/collectionFreshness";
 import catalog from "../../../../../project-support/extension/lptff-investment-assistant/content-sources.json";
 import { usePluginGuide } from "../../../../investment/composables/use-plugin-guide";
+import { WEB_BUILD_TAG, EXPECTED_EXTENSION_BUILD_TAG } from "../../../../build-info";
 
 const { downloadPlugin, pluginHint } = usePluginGuide();
 const connected = ref(false);
+const connecting = ref(false);
 const version = ref("");
+const extensionBuildTag = ref("");
+const webBuildTag = WEB_BUILD_TAG;
 const ai = ref({ hasKey: false, model: "gemini-3.5-flash-lite" });
 const apiKey = ref("");
 const keyVisible = ref(false);
@@ -253,28 +260,46 @@ async function checkAndAutoImport(newVersion: number, force = false) {
   }
 }
 
+let connectingPromise: Promise<void> | null = null;
+
 async function connect() {
+  if (connectingPromise) return connectingPromise;
   clearTimeout(timer);
-  try {
-    const result = await authorizedRequest("STATUS");
-    if (disposed) return;
-    connected.value = true;
-    version.value = result.version;
-    states.value = result.platforms || {};
-    taskSnapshot.value = result.task || null;
+  connecting.value = true;
+  connectingPromise = (async () => {
+    try {
+      const result = await authorizedRequest("STATUS");
+      if (disposed) return;
+      connected.value = true;
+      version.value = result.version;
+      extensionBuildTag.value = result.buildTag || "";
+      states.value = result.platforms || {};
+      taskSnapshot.value = result.task || null;
+      message.value = ""; // 连接成功清空错误提示
 
-    if (!aiLoaded.value && !aiLoading.value) void loadAi();
+      if (!aiLoaded.value && !aiLoading.value) void loadAi();
 
-    if (result.resultVersion) {
-      await checkAndAutoImport(result.resultVersion);
+      if (result.resultVersion) {
+        await checkAndAutoImport(result.resultVersion);
+      }
+
+      const running = isRunning.value;
+      if (!disposed) {
+        timer = setTimeout(connect, running ? 2000 : 30000);
+      }
+    } catch (error) {
+      connected.value = false;
+      message.value = String((error as Error).message);
+      // 未连接时使用指数退避或平稳重试，扩展就绪时通过事件立即唤醒，避免过度轮询掩盖错误
+      if (!disposed) {
+        timer = setTimeout(connect, 5000);
+      }
+    } finally {
+      connecting.value = false;
+      connectingPromise = null;
     }
-
-    const running = isRunning.value;
-    timer = setTimeout(connect, running ? 2000 : 30000);
-  } catch (error) {
-    connected.value = false;
-    message.value = String((error as Error).message);
-  }
+  })();
+  return connectingPromise;
 }
 
 async function startAll() {
@@ -327,17 +352,23 @@ async function loadResult(platform: string) {
   }
 }
 
-// 侦听从 web-bridge 转发的实时推送
+// 侦听从 web-bridge 转发的实时推送与扩展就绪通知
 function onWindowMessage(event: MessageEvent) {
   if (event.source !== window || event.origin !== location.origin) return;
-  if (event.data?.source === "lptff-investment-assistant" && event.data?.type === "LPTFF_AUTHORIZED_CONTENT_PROGRESS") {
-    if (event.data.snapshot) {
-      taskSnapshot.value = event.data.snapshot;
-      if (event.data.snapshot.phase === "completed") {
-        void connect();
-      }
-      if (event.data.snapshot.resultVersion) {
-        void checkAndAutoImport(event.data.snapshot.resultVersion, event.data.snapshot.phase === "completed");
+  if (event.data?.source === "lptff-investment-assistant") {
+    if (event.data?.type === "LPTFF_EXTENSION_READY") {
+      void connect();
+      return;
+    }
+    if (event.data?.type === "LPTFF_AUTHORIZED_CONTENT_PROGRESS") {
+      if (event.data.snapshot) {
+        taskSnapshot.value = event.data.snapshot;
+        if (event.data.snapshot.phase === "completed") {
+          void connect();
+        }
+        if (event.data.snapshot.resultVersion) {
+          void checkAndAutoImport(event.data.snapshot.resultVersion, event.data.snapshot.phase === "completed");
+        }
       }
     }
   }
@@ -431,10 +462,23 @@ async function clearKey() {
   }
 }
 
+function onExtensionReadyCustomEvent(e: Event) {
+  const customEvent = e as CustomEvent;
+  if (customEvent.detail?.buildTag) {
+    extensionBuildTag.value = customEvent.detail.buildTag;
+  }
+  void connect();
+}
+
 onMounted(() => {
+  if (typeof window !== "undefined") {
+    (window as any).__LPTFF_WEB_BUILD_TAG__ = WEB_BUILD_TAG;
+    (window as any).__LPTFF_EXPECTED_EXT_BUILD_TAG__ = EXPECTED_EXTENSION_BUILD_TAG;
+  }
   void loadAi();
   void connect();
   window.addEventListener("message", onWindowMessage);
+  window.addEventListener("LPTFF_EXTENSION_READY", onExtensionReadyCustomEvent);
 });
 
 onUnmounted(() => {
@@ -442,6 +486,11 @@ onUnmounted(() => {
   clearTimeout(timer);
   apiKey.value = "";
   window.removeEventListener("message", onWindowMessage);
+  window.removeEventListener("LPTFF_EXTENSION_READY", onExtensionReadyCustomEvent);
+  if (typeof window !== "undefined") {
+    delete (window as any).__LPTFF_WEB_BUILD_TAG__;
+    delete (window as any).__LPTFF_EXPECTED_EXT_BUILD_TAG__;
+  }
 });
 </script>
 
