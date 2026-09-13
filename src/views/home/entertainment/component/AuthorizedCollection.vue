@@ -18,10 +18,18 @@
         <button
           type="button"
           class="btn-primary"
-          :disabled="!connected || isRunning"
+          :disabled="!connected || isRunning || isAiAnalyzing"
           @click="startAll"
         >
           一键采集刷新（全平台作者）
+        </button>
+        <button
+          type="button"
+          class="btn-ai-analyze"
+          :disabled="!connected || isRunning || isAiAnalyzing"
+          @click="startAiAnalyze"
+        >
+          {{ isAiAnalyzing ? `Gemini 分析中 (${aiDoneCount}/${aiTotalCandidates})` : `一键 AI 分析待标注内容${pendingCandidateCount > 0 ? ` (${pendingCandidateCount})` : ''}` }}
         </button>
         <button
           v-if="isRunning"
@@ -32,14 +40,34 @@
           停止采集
         </button>
         <button
+          v-else-if="isAiAnalyzing"
+          type="button"
+          class="btn-danger"
+          @click="stopAiAnalyze"
+        >
+          停止 AI 分析
+        </button>
+        <button
           v-else-if="canResume"
           type="button"
           class="btn-resume"
-          :disabled="!connected"
+          :disabled="!connected || isAiAnalyzing"
           @click="resumeTask"
         >
           继续未完成作者
         </button>
+        <label class="auto-ai-toggle" title="全平台作者采集完成后，自动触发对待标注内容的 Gemini 分析">
+          <input type="checkbox" v-model="autoAiAnalyze" @change="saveAutoAiOption" />
+          <span>采集完成后自动执行 AI 分析</span>
+        </label>
+      </div>
+
+      <!-- AI 分析进度与状态展示 -->
+      <div v-if="aiAnalysisMessage" class="ai-summary-card" role="status">
+        <div class="ai-summary-line">
+          <span class="ai-badge">Gemini AI</span>
+          <span class="ai-text">{{ aiAnalysisMessage }}</span>
+        </div>
       </div>
 
       <!-- 总任务三级分支进度展示 -->
@@ -53,6 +81,7 @@
         <div class="metrics-line">
           <span>本轮数据：{{ taskSummary.validUniqueCount || 0 }} 条有效 · 跨页去重 {{ taskSummary.duplicateCount || 0 }} · 耗时 {{ ((taskSnapshot.elapsedMs || 0) / 1000).toFixed(1) }}s</span>
           <span v-if="importMessage" class="import-status"> · {{ importMessage }}</span>
+          <span v-if="pendingCandidateCount > 0" class="pending-badge"> · 待 AI 标注: {{ pendingCandidateCount }} 条 (薅羊毛 {{ pendingWelfareCount }} · 安全社区 {{ pendingPojieCount }})</span>
         </div>
       </div>
     </div>
@@ -87,7 +116,10 @@
       </article>
     </div>
 
-    <p class="catalog-hint">抖音作品进入“娱乐专区”；百科老王与国外主机测评进入薅羊毛“固定来源”，小迪老师进入安全社区“观察源”，杨博士说AI进入“娱乐专区”。</p>
+    <p class="catalog-hint">
+      抖音作品进入“娱乐专区”；百科老王与国外主机测评进入薅羊毛“固定来源”，小迪老师进入安全社区“观察源”，杨博士说AI进入“娱乐专区”。
+      点击上方“一键 AI 分析待标注内容”可自动为全平台作者动态及全站待标注资讯批量生成 Gemini 生态标签与价值评级。
+    </p>
 
     <!-- 全站 Gemini 配置 -->
     <section aria-label="全站 Gemini 配置" class="gemini-config-section">
@@ -133,6 +165,8 @@ import { collectionFreshness } from "../../../../utils/collectionFreshness";
 import catalog from "../../../../../project-support/extension/lptff-investment-assistant/content-sources.json";
 import { usePluginGuide } from "../../../../investment/composables/use-plugin-guide";
 import { WEB_BUILD_TAG, EXPECTED_EXTENSION_BUILD_TAG } from "../../../../build-info";
+import { getPendingAnalysisCandidates } from "../../../../utils/pendingAnalysis";
+import { saveAnalyses } from "../../../../utils/contentAnalysis";
 
 const { downloadPlugin, pluginHint } = usePluginGuide();
 const connected = ref(false);
@@ -148,6 +182,17 @@ const aiBusy = ref(false);
 const aiStatus = ref("正在读取本机配置…");
 const aiLoaded = ref(false);
 const aiLoading = ref(false);
+
+const isAiAnalyzing = ref(false);
+const stoppingAi = ref(false);
+const aiDoneCount = ref(0);
+const aiTotalCandidates = ref(0);
+const aiAnalysisMessage = ref("");
+const pendingCandidateCount = ref(0);
+const pendingWelfareCount = ref(0);
+const pendingPojieCount = ref(0);
+const AUTO_AI_KEY = "lptff-auto-ai-after-collect";
+const autoAiAnalyze = ref(typeof window !== "undefined" ? localStorage.getItem(AUTO_AI_KEY) === "1" : false);
 
 const message = ref("");
 const importMessage = ref("");
@@ -253,6 +298,7 @@ async function checkAndAutoImport(newVersion: number, force = false) {
       }
       lastImportedVersion.value = newVersion;
       importMessage.value = `结果更新：已写入本机 · 当前页面已更新（共保留 ${importedCount} 条）`;
+      updatePendingCounts();
     } catch (err) {
       console.warn("自动导入结果失败", err);
     }
@@ -346,9 +392,105 @@ async function loadResult(platform: string) {
     const result = await authorizedRequest("RESULT", { platform });
     const count = saveAuthorizedItems(platform, result.items, result);
     message.value = count ? `已保存 ${count} 条到本机，页面已更新。` : "没有可载入的新结果，保留已有内容。";
+    updatePendingCounts();
   } catch (error) {
     message.value = (error as Error).message;
   }
+}
+
+function saveAutoAiOption() {
+  try {
+    localStorage.setItem(AUTO_AI_KEY, autoAiAnalyze.value ? "1" : "0");
+  } catch {}
+}
+
+function updatePendingCounts() {
+  try {
+    const res = getPendingAnalysisCandidates();
+    pendingWelfareCount.value = res.welfare.length;
+    pendingPojieCount.value = res.pojie.length;
+    pendingCandidateCount.value = res.total;
+  } catch {}
+}
+
+async function startAiAnalyze() {
+  if (isAiAnalyzing.value || isRunning.value) return;
+  if (!connected.value) {
+    message.value = "请先连接采集扩展";
+    return;
+  }
+  if (!aiLoaded.value) {
+    await loadAi();
+  }
+  if (!ai.value.hasKey) {
+    aiStatus.value = "请在下方输入并保存 Gemini API Key 后再发起一键 AI 分析";
+    message.value = "尚未配置 Gemini API Key，请在下方全站 Gemini 配置区域保存 Key";
+    return;
+  }
+
+  updatePendingCounts();
+  const pending = getPendingAnalysisCandidates();
+  const allTotal = pending.total;
+  if (allTotal === 0) {
+    aiAnalysisMessage.value = "当前全站所有来源（包含全平台作者动态与各专区资讯）均已完成 AI 标注与分析，无需重复分析。";
+    return;
+  }
+
+  isAiAnalyzing.value = true;
+  stoppingAi.value = false;
+  aiDoneCount.value = 0;
+  aiTotalCandidates.value = allTotal;
+  aiAnalysisMessage.value = `开始一键分析待标注内容（共 ${allTotal} 条：薅羊毛 ${pending.welfare.length} 条 · 安全社区 ${pending.pojie.length} 条）…`;
+
+  let done = 0;
+  try {
+    // 1. 先分析薅羊毛专区（包含百科老王、国外主机测评动态等）
+    for (let offset = 0; offset < pending.welfare.length && !stoppingAi.value && !disposed; offset += 6) {
+      const chunk = pending.welfare.slice(offset, offset + 6);
+      aiAnalysisMessage.value = `Gemini 分析中 [薅羊毛]：已完成 ${done}/${allTotal} 条，结果逐批写入本机…`;
+      const result = await authorizedRequest("AI_ANALYZE", {
+        domain: "welfare",
+        items: chunk.map((c) => ({ url: c.url, title: c.title })),
+      });
+      if (result?.results?.length) {
+        saveAnalyses("welfare", result.results);
+        done += result.results.length;
+        aiDoneCount.value = done;
+      }
+    }
+
+    // 2. 再分析安全社区专区（包含小迪老师动态等）
+    for (let offset = 0; offset < pending.pojie.length && !stoppingAi.value && !disposed; offset += 6) {
+      const chunk = pending.pojie.slice(offset, offset + 6);
+      aiAnalysisMessage.value = `Gemini 分析中 [安全社区]：已完成 ${done}/${allTotal} 条，结果逐批写入本机…`;
+      const result = await authorizedRequest("AI_ANALYZE", {
+        domain: "pojie",
+        items: chunk.map((c) => ({ url: c.url, title: c.title })),
+      });
+      if (result?.results?.length) {
+        saveAnalyses("pojie", result.results);
+        done += result.results.length;
+        aiDoneCount.value = done;
+      }
+    }
+
+    if (stoppingAi.value) {
+      aiAnalysisMessage.value = `AI 分析已手动停止，本次已成功保存 ${done} 条分析结果至本机。`;
+    } else {
+      aiAnalysisMessage.value = `一键 AI 分析完成！共为 ${done} 条待标注内容生成 Gemini 生态标签与价值评分，已保存至本机并在各专区实时生效。`;
+    }
+  } catch (error) {
+    aiAnalysisMessage.value = `AI 分析中断：${(error as Error).message}（已成功保存 ${done} 条）`;
+  } finally {
+    isAiAnalyzing.value = false;
+    stoppingAi.value = false;
+    updatePendingCounts();
+  }
+}
+
+function stopAiAnalyze() {
+  stoppingAi.value = true;
+  aiAnalysisMessage.value = "正在完成当前批次后停止 AI 分析…";
 }
 
 // 侦听从 web-bridge 转发的实时推送与扩展就绪通知
@@ -364,6 +506,10 @@ function onWindowMessage(event: MessageEvent) {
         taskSnapshot.value = event.data.snapshot;
         if (event.data.snapshot.phase === "completed") {
           void connect();
+          updatePendingCounts();
+          if (autoAiAnalyze.value && !isAiAnalyzing.value && ai.value.hasKey) {
+            void startAiAnalyze();
+          }
         }
         if (event.data.snapshot.resultVersion) {
           void checkAndAutoImport(event.data.snapshot.resultVersion, event.data.snapshot.phase === "completed");
@@ -476,8 +622,11 @@ onMounted(() => {
   }
   void loadAi();
   void connect();
+  updatePendingCounts();
   window.addEventListener("message", onWindowMessage);
   window.addEventListener("LPTFF_EXTENSION_READY", onExtensionReadyCustomEvent);
+  window.addEventListener("lptff-analysis-updated", updatePendingCounts);
+  window.addEventListener("lptff-authorized-content-updated", updatePendingCounts);
 });
 
 onUnmounted(() => {
@@ -486,6 +635,8 @@ onUnmounted(() => {
   apiKey.value = "";
   window.removeEventListener("message", onWindowMessage);
   window.removeEventListener("LPTFF_EXTENSION_READY", onExtensionReadyCustomEvent);
+  window.removeEventListener("lptff-analysis-updated", updatePendingCounts);
+  window.removeEventListener("lptff-authorized-content-updated", updatePendingCounts);
   if (typeof window !== "undefined") {
     delete (window as any).__LPTFF_WEB_BUILD_TAG__;
     delete (window as any).__LPTFF_EXPECTED_EXT_BUILD_TAG__;
@@ -528,6 +679,70 @@ p { font-size: 13px; color: #626c68; line-height: 1.8; margin: 8px 0; }
   background: #e6a23c;
   color: #fff;
   border-color: #e6a23c;
+}
+.btn-ai-analyze {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff;
+  font-weight: 600;
+  border: 1px solid #6366f1;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.2);
+  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+}
+.btn-ai-analyze:hover:not(:disabled) {
+  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+.btn-ai-analyze:active:not(:disabled) {
+  transform: translateY(1px);
+}
+.auto-ai-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #4b5563;
+  cursor: pointer;
+  user-select: none;
+  margin-left: 6px;
+}
+.auto-ai-toggle input {
+  margin: 0;
+  cursor: pointer;
+}
+.ai-summary-card {
+  margin-top: 10px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  background: #f5f3ff;
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #4c1d95;
+  line-height: 1.5;
+}
+.ai-summary-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  background: #7c3aed;
+  color: #fff;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+.pending-badge {
+  color: #7c3aed;
+  font-weight: 600;
 }
 .task-summary-card {
   font-size: 13px;

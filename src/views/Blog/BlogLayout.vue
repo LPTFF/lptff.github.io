@@ -9,7 +9,6 @@
           <RouterLink to="/blog/archives">归档</RouterLink>
           <RouterLink to="/blog/reading">阅读</RouterLink>
           <RouterLink to="/blog/about">关于</RouterLink>
-          <a href="javascript:void(0)" class="portal-link" @click="showPortalModal = true">我的空间</a>
         </nav>
         <div class="header-actions">
           <el-input v-model="query" clearable placeholder="搜索文章" :prefix-icon="Search" @keyup.enter="search"
@@ -23,7 +22,6 @@
         <RouterLink to="/blog/archives" @click="menuOpen = false">归档</RouterLink>
         <RouterLink to="/blog/reading" @click="menuOpen = false">阅读</RouterLink>
         <RouterLink to="/blog/about" @click="menuOpen = false">关于</RouterLink>
-        <a href="javascript:void(0)" class="portal-link" @click="showPortalModal = true; menuOpen = false">我的空间</a>
       </nav>
     </header>
     <main class="blog-main">
@@ -35,10 +33,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, onMounted, onUnmounted } from "vue";
 import { useRouter } from "vue-router";
 import { Menu, Search } from "@element-plus/icons-vue";
 import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
+import { PORTAL_OPEN_EVENT } from "../../utils/devTools";
 
 const router = useRouter();
 const query = ref("");
@@ -47,6 +46,18 @@ const showPortalModal = ref(false);
 const search = () => {
   router.push({ path: "/blog/search", query: query.value.trim() ? { q: query.value.trim() } : undefined });
 };
+
+const handlePortalEvent = () => {
+  showPortalModal.value = true;
+};
+
+onMounted(() => {
+  window.addEventListener(PORTAL_OPEN_EVENT, handlePortalEvent);
+});
+
+onUnmounted(() => {
+  window.removeEventListener(PORTAL_OPEN_EVENT, handlePortalEvent);
+});
 </script>
 
 <style>
@@ -117,13 +128,6 @@ const search = () => {
 .desktop-nav a:hover,
 .mobile-nav a:hover {
   color: var(--blog-green);
-}
-
-.desktop-nav a.portal-link,
-.mobile-nav a.portal-link {
-  color: var(--blog-green);
-  font-weight: 600;
-  cursor: pointer;
 }
 
 .header-actions {

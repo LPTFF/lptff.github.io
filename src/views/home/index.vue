@@ -27,14 +27,6 @@
               {{ item.label }}
             </el-menu-item>
           </el-menu>
-          <div class="header-portal">
-            <el-button class="portal-btn" size="small" type="primary" plain @click="showPortalModal = true">
-              我的空间
-            </el-button>
-            <el-button class="observation-btn" size="small" type="info" plain @click="showObservationModal = true">
-              功能使用观察
-            </el-button>
-          </div>
         </el-header>
         <el-main class="main-content">
           <div class="component-div">
@@ -114,6 +106,10 @@ import TabLoadError from "./TabLoadError.vue";
 import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
 import FeatureObservationModal from "../../components/FeatureObservationModal.vue";
 import { recordFeatureView, initSessionManager } from "../../utils/observation";
+import {
+  PORTAL_OPEN_EVENT,
+  OBSERVATION_OPEN_EVENT,
+} from "../../utils/devTools";
 import {
   ElMenu,
   ElMenuItem,
@@ -234,6 +230,10 @@ const router = useRouter();
 
 const handleOpenObservationModal = () => {
   showObservationModal.value = true;
+};
+
+const handleOpenPortalModal = () => {
+  showPortalModal.value = true;
 };
 
 watch(
@@ -379,10 +379,14 @@ onMounted(() => {
     window.addEventListener("resize", updateWindowDimensions);
   });
   window.addEventListener("open-observation-modal", handleOpenObservationModal);
+  window.addEventListener(OBSERVATION_OPEN_EVENT, handleOpenObservationModal);
+  window.addEventListener(PORTAL_OPEN_EVENT, handleOpenPortalModal);
 });
 
 onUnmounted(() => {
   window.removeEventListener("open-observation-modal", handleOpenObservationModal);
+  window.removeEventListener(OBSERVATION_OPEN_EVENT, handleOpenObservationModal);
+  window.removeEventListener(PORTAL_OPEN_EVENT, handleOpenPortalModal);
   loadingResizeObserver?.disconnect();
   clearTimeout(clickTimer);
   backtopResizeObserver?.disconnect();
@@ -487,17 +491,6 @@ const currentYear = new Date(
   background-color: var(--el-menu-bg-color);
   width: 100%;
   max-width: 1200px;
-}
-
-.header-portal {
-  position: absolute;
-  right: 16px;
-  top: 14px;
-}
-
-.portal-btn {
-  font-weight: 500;
-  border-radius: 16px;
 }
 
 .logo-title {
