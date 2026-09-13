@@ -6,10 +6,9 @@
         <p>在来源网站完成登录，再选择采集范围。登录态留在 Chrome，采集结果保存在本机。</p>
       </div>
       <div class="header-actions">
-        <button type="button" :disabled="connecting" @click="connect">
-          {{ connecting ? '正在检查连接…' : connected ? `扩展已连接 · ${version}${extensionBuildTag ? ' (' + extensionBuildTag.slice(-8) + ')' : ''}` : '检查扩展连接' }}
+        <button type="button" :disabled="connecting" :title="connected ? `扩展版本: ${version}${extensionBuildTag ? ' (' + extensionBuildTag + ')' : ''}` : '检查扩展连接'" @click="connect">
+          {{ connecting ? '正在检查连接…' : connected ? `扩展已连接 · ${version}` : '检查扩展连接' }}
         </button>
-        <span class="web-build-badge" :title="'网页构建标识: ' + webBuildTag">Web: {{ webBuildTag.slice(-8) }}</span>
       </div>
     </header>
 
