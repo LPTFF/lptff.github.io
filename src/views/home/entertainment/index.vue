@@ -54,18 +54,26 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted, onUnmounted } from "vue";
 import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
 import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
 import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { isPC } from "../../../utils/utils";
 import movieData from "../../../data/movie.json";
 import douyinSnapshot from "../../../data/tiktok.json";
-import { mergeAuthorizedItems } from "../../../utils/authorizedContent";
-const douyinData = mergeAuthorizedItems("douyin", douyinSnapshot);
+import { mergeAuthorizedItems, onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
+const douyinData = ref(mergeAuthorizedItems("douyin", douyinSnapshot));
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
-const bilibiliData = bilibiliItemsFor("entertainment");
+const bilibiliData = ref(bilibiliItemsFor("entertainment"));
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
+
+onMounted(() => {
+  const cleanup = onAuthorizedContentUpdated(() => {
+    douyinData.value = mergeAuthorizedItems("douyin", douyinSnapshot);
+    bilibiliData.value = bilibiliItemsFor("entertainment");
+  });
+  onUnmounted(cleanup);
+});
 
 type PlatformFilter = "all" | EntertainmentPlatform;
 
@@ -107,7 +115,7 @@ const movieItems: EntertainmentItem[] = movieData
   }))
   .slice(0, 50);
 
-const douyinItems: EntertainmentItem[] = douyinData
+const douyinItems = computed<EntertainmentItem[]>(() => douyinData.value
   .map((video, index) => {
     const likeCount = toNumber("likeCount" in video ? video.likeCount : 0);
     const authorName = "authorName" in video ? String(video.authorName || "") : "关注作者";
@@ -121,15 +129,15 @@ const douyinItems: EntertainmentItem[] = douyinData
       actionLabel: detailUrl ? "查看更新" : "前往作者主页",
       primaryMetric: authorName,
       secondaryMetric: likeCount ? `${formatCompactNumber(likeCount)} 喜欢` : "作者更新",
-      qualityScore: douyinData.length - index,
+      qualityScore: douyinData.value.length - index,
       publishedAt: timestampOf(video.timestamp),
       footerLabel: "作者主页更新",
     };
   })
   .sort((left, right) => right.publishedAt - left.publishedAt)
-  .slice(0, 24);
+  .slice(0, 24));
 
-const bilibiliItems: EntertainmentItem[] = (bilibiliData as Array<Record<string, unknown>>)
+const bilibiliItems = computed<EntertainmentItem[]>(() => (bilibiliData.value as Array<Record<string, unknown>>)
   .map((video, index) => {
     const likeCount = toNumber(video.likeCount);
     const authorName = String(video.authorName || "UP主");
@@ -144,36 +152,36 @@ const bilibiliItems: EntertainmentItem[] = (bilibiliData as Array<Record<string,
       actionLabel: "查看视频",
       primaryMetric: authorName,
       secondaryMetric: playCount ? `${playCount} 播放${likeCount ? ` · ${formatCompactNumber(likeCount)} 点赞` : ""}` : "UP主更新",
-      qualityScore: bilibiliData.length - index,
+      qualityScore: bilibiliData.value.length - index,
       publishedAt: timestampOf(video.timestamp),
       footerLabel: "UP主动态更新",
     };
   })
   .sort((left, right) => right.publishedAt - left.publishedAt)
-  .slice(0, 30);
+  .slice(0, 30));
 
-const itemsByPlatform: Record<EntertainmentPlatform, EntertainmentItem[]> = {
+const itemsByPlatform = computed<Record<EntertainmentPlatform, EntertainmentItem[]>>(() => ({
   movie: movieItems,
-  douyin: douyinItems,
-  bilibili: bilibiliItems,
-};
+  douyin: douyinItems.value,
+  bilibili: bilibiliItems.value,
+}));
 
-const featuredItems = [...douyinItems, ...bilibiliItems, ...movieItems]
-  .sort((left, right) => right.publishedAt - left.publishedAt);
-const contentCount = movieItems.length + douyinItems.length + bilibiliItems.length;
-const platformCount = Object.values(itemsByPlatform).filter((items) => items.length).length;
+const featuredItems = computed(() => [...douyinItems.value, ...bilibiliItems.value, ...movieItems]
+  .sort((left, right) => right.publishedAt - left.publishedAt));
+const contentCount = computed(() => movieItems.length + douyinItems.value.length + bilibiliItems.value.length);
+const platformCount = computed(() => Object.values(itemsByPlatform.value).filter((items) => items.length).length);
 
 const platformTabs = computed(() => [
-  { key: "all" as const, label: "全部", count: contentCount },
+  { key: "all" as const, label: "全部", count: contentCount.value },
   { key: "movie" as const, label: "豆瓣动画", count: movieItems.length },
-  { key: "douyin" as const, label: "抖音", count: douyinItems.length },
-  { key: "bilibili" as const, label: "哔哩视频", count: bilibiliItems.length },
+  { key: "douyin" as const, label: "抖音", count: douyinItems.value.length },
+  { key: "bilibili" as const, label: "哔哩视频", count: bilibiliItems.value.length },
 ]);
 
 const filteredItems = computed(() => {
   return activePlatform.value === "all"
-    ? featuredItems
-    : itemsByPlatform[activePlatform.value];
+    ? featuredItems.value
+    : itemsByPlatform.value[activePlatform.value];
 });
 
 const visibleItems = computed(() => {

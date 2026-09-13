@@ -51,8 +51,13 @@ async function load(platform: string) {
   try {
     const result = await authorizedRequest("RESULT", { platform });
     if (disposed) return;
-    if (saveAuthorizedItems(platform, result.items, result)) window.location.reload();
-    else message.value = "没有可载入的结果，已保留原内容";
+    const count = saveAuthorizedItems(platform, result.items, result);
+    if (count > 0) {
+      message.value = `已载入 ${count} 条最新采集结果`;
+      void check();
+    } else {
+      message.value = "没有可载入的结果，已保留原内容";
+    }
   } catch (error) { message.value = (error as Error).message; }
 }
 async function refresh(platform: string) {
@@ -76,8 +81,20 @@ async function refresh(platform: string) {
   } finally { refreshing.value = ""; }
 }
 const storageChanged = (event: StorageEvent) => { if (event.key === "lptff-authorized-content-v1") void check(); };
-onMounted(() => { void check(); window.addEventListener("storage", storageChanged); window.addEventListener("focus", check); });
-onUnmounted(() => { disposed = true; clearTimeout(timer); window.removeEventListener("storage", storageChanged); window.removeEventListener("focus", check); });
+const contentUpdated = () => void check();
+onMounted(() => {
+  void check();
+  window.addEventListener("storage", storageChanged);
+  window.addEventListener("focus", check);
+  window.addEventListener("lptff-authorized-content-updated", contentUpdated);
+});
+onUnmounted(() => {
+  disposed = true;
+  clearTimeout(timer);
+  window.removeEventListener("storage", storageChanged);
+  window.removeEventListener("focus", check);
+  window.removeEventListener("lptff-authorized-content-updated", contentUpdated);
+});
 </script>
 <style scoped>
 .collection-freshness { margin: 12px 0; font-size: 12px; color: #626c68; }

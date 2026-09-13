@@ -233,7 +233,7 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, reactive } from "vue";
+import { ref, computed, reactive, onMounted, onUnmounted } from "vue";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import ContentAnalysis from "../../../components/ContentAnalysis.vue";
 import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
@@ -244,6 +244,7 @@ import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis"
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../data/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
+import { onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
 import tuanSource from "../../../data/welfare/0818tuan.json";
 import tuanTopSource from "../../../data/welfare/0818tuanTop.json";
 import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
@@ -326,6 +327,29 @@ export default {
       }
     };
     const logoUrl = logoImageUrl;
+
+    const reloadBilibili = () => {
+      const latestBili = bilibiliItemsFor("welfare");
+      for (let i = welfareSource.length - 1; i >= 0; i--) {
+        if (welfareSource[i].website === "bilibili") {
+          welfareSource.splice(i, 1);
+        }
+      }
+      for (const item of latestBili) {
+        const link = item.link || item.url;
+        welfareSource.push({
+          ...item,
+          link,
+          ecosystem: analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
+        });
+      }
+      welfareSource.sort((a, b) => b.timestamp - a.timestamp);
+    };
+
+    onMounted(() => {
+      const cleanup = onAuthorizedContentUpdated(reloadBilibili);
+      onUnmounted(cleanup);
+    });
 
     const welfareSourceCount = computed(() => welfareSource.length);
     const directSourceCount = computed(

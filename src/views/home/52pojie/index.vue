@@ -252,11 +252,12 @@
 </template>
 
 <script lang="ts">
-import { ref, nextTick, watch, computed } from "vue";
+import { ref, nextTick, watch, computed, onMounted, onUnmounted } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
+import { onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
 import SourceIcon from "./SourceIcon.vue";
 import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
@@ -321,6 +322,30 @@ export default {
     const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems]
       .map(item => ({ ...item, ecosystem: analysisFor("pojie", item.url, item.title || "") || item.ecosystem }))
       .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
+
+    const reloadBilibili = () => {
+      const latestBili = bilibiliItemsFor("pojie");
+      for (let i = newsGuide.length - 1; i >= 0; i--) {
+        if (newsGuide[i].website === "bilibili") {
+          newsGuide.splice(i, 1);
+        }
+      }
+      for (const item of latestBili) {
+        const url = item.url || item.link;
+        newsGuide.push({
+          ...item,
+          url,
+          ecosystem: analysisFor("pojie", url, item.title || "") || ecosystemByUrl.get(url),
+        });
+      }
+      newsGuide.sort((a: any, b: any) => b.timestamp - a.timestamp || a.url.localeCompare(b.url));
+    };
+
+    onMounted(() => {
+      const cleanup = onAuthorizedContentUpdated(reloadBilibili);
+      onUnmounted(cleanup);
+    });
+
     const applyAnalysis = (results: any[]) => {
       for (const result of results) for (const item of newsGuide) {
         if (item.url === result.url) item.ecosystem = result.analysis;

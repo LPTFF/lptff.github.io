@@ -118,9 +118,9 @@
   window.addEventListener("message", (event) => {
     if (event.source !== window || event.origin !== location.origin) return;
     if (event.data?.type === "LPTFF_AUTHORIZED_CONTENT_REQUEST") {
-      const actions = ["STATUS", "START", "STOP", "LOGIN", "RESULT", "OPEN_ASSISTANT", "AI_CONFIG", "AI_REVEAL", "AI_CLEAR", "AI_TEST", "AI_CACHED", "AI_SAVE", "AI_ANALYZE"];
+      const actions = ["STATUS", "START", "START_ALL", "RESUME", "STOP", "LOGIN", "RESULT", "OPEN_ASSISTANT", "AI_CONFIG", "AI_REVEAL", "AI_CLEAR", "AI_TEST", "AI_CACHED", "AI_SAVE", "AI_ANALYZE"];
       if (!actions.includes(event.data.action)) return;
-      forward({ type: `AUTHORIZED_CONTENT_${event.data.action}`, platform: event.data.platform,
+      forward({ type: `AUTHORIZED_CONTENT_${event.data.action}`, platform: event.data.platform, resume: event.data.resume,
         mode: event.data.mode, config: event.data.config, domain: event.data.domain, items: event.data.items, requestId: event.data.requestId }, "LPTFF_AUTHORIZED_CONTENT_RESPONSE");
     }
     if (event.data?.type === "LPTFF_INVESTMENT_GET_STAGING") {
@@ -219,6 +219,14 @@
   });
 
   chrome.runtime.onMessage.addListener((message) => {
+    if (message?.type === "AUTHORIZED_CONTENT_PROGRESS") {
+      window.postMessage({
+        source: "lptff-investment-assistant",
+        type: "LPTFF_AUTHORIZED_CONTENT_PROGRESS",
+        snapshot: message.snapshot,
+      }, location.origin);
+      return;
+    }
     if (message?.type === "OBSERVATION_PROGRESS" && message.platform === "binance") {
       window.postMessage({ source: "lptff-investment-assistant", type: "LPTFF_BINANCE_COLLECTION_PROGRESS", progress: message }, location.origin);
       return;
