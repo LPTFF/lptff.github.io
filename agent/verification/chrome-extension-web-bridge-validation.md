@@ -2,6 +2,8 @@
 
 本项目求职工作台（`/career`）及投资页面通过 `window.postMessage` 与 Chrome 扩展（`project-support/extension/lptff-investment-assistant`）的 `content/web-bridge.js` 和 `background.js` 进行双向 RPC 通信。本手册总结本次真实 Chrome 实测中沉淀的核心经验与排障模式，供后续 Agent 以极低成本、零副作用快速复用。
 
+> 2026-09-13 验收补充：下文刷新流程和 UI Automation 示例用于历史排障，不是“免刷新恢复”的通过证据。当前验收以[真实环境验收原则](../standards/trusted-verification.md)为准。必须先核对准确扩展 ID、实际加载路径及运行构建标识；示例中的固定 PID、耗时和“首个重载按钮”不得直接用于真实操作。对单次工具失败不作 Chrome 平台普遍限制的推断。
+
 ---
 
 ## 1. 核心问题与根因分析（避坑指南）
@@ -131,8 +133,8 @@ Add-Type -ReferencedAssemblies "UIAutomationClient", "UIAutomationTypes", "Syste
 [ChromeExtensionReloader]::Reload(2372)
 ```
 
-### 第二步：刷新业务目标页面
-扩展热重载后，原页面中的旧 content script 已断开，必须通过 DevTools MCP 在目标页面执行刷新：
+### 第二步：区分恢复验收与刷新排障
+若本次目标是免刷新恢复，重载前保存业务文档标识和导航计数，重载后观察同一页面自动握手与界面恢复，不执行刷新或测试主动握手。只有普通排障允许通过 DevTools MCP 刷新；执行后结论仅限“刷新后恢复”，不能计为免刷新验收：
 ```javascript
 // MCP evaluate_script on target pageId
 location.reload();
