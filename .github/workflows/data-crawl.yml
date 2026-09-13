@@ -112,7 +112,7 @@ jobs:
 
       - name: 发布有效爬虫数据快照至 python-crawl
         # 仅在采集有效完成时推送 python-crawl 分支，使用受控白名单，防止敏感文件漏入
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         run: |
           cd ./src/data/
           git config --global user.email "lptffhh@gmail.com"
@@ -127,7 +127,7 @@ jobs:
           git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN || secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:python-crawl || true
 
       - name: 微信通知采集完成状态
-        if: github.event_name != 'schedule' || github.event.schedule == '17 22 * * *'
+        if: ${{ github.event_name != 'schedule' || github.event.schedule == '17 22 * * *' }}
         continue-on-error: true
         run: python -B ./project-support/crawl/sendNotify.py
         env:
