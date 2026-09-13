@@ -1062,8 +1062,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, toRaw } from "vue";
+import { ref, computed, watch, onMounted, toRaw } from "vue";
 import { ElMessage, ElMessageBox } from "element-plus";
+import { recordFeatureView, startTask, recordOutboundOpen } from "../../utils/observation";
 import type {
   CareerProfile,
   CareerDirection,
@@ -1556,11 +1557,23 @@ const startProcessFile = async (file: File) => {
     processStep.value = 3;
     processMessage.value = "正在对照公开招聘需求快照匹配搜索方向并校验原文引用...";
 
-    const matchedDirections = await matchCareerDirections(
-      toRaw(extractedProfile) || extractedProfile,
-      toRaw(publicJobs.value),
-      toRaw(preferences.value)
-    );
+    const dirTask = startTask("career", "generate_directions");
+    let matchedDirections: CareerDirection[] = [];
+    try {
+      matchedDirections = await matchCareerDirections(
+        toRaw(extractedProfile) || extractedProfile,
+        toRaw(publicJobs.value),
+        toRaw(preferences.value)
+      );
+      if (matchedDirections && matchedDirections.length > 0) {
+        dirTask.finish("success");
+      } else {
+        dirTask.finish("empty");
+      }
+    } catch (e) {
+      dirTask.finish("failure", "runtime_error");
+      throw e;
+    }
     directions.value = matchedDirections;
 
     processStep.value = 4;
@@ -1586,15 +1599,23 @@ const handlePreferencesChange = async () => {
   if (!profile.value || !bridgeStatus.value.connected) return;
   isProcessing.value = true;
   processMessage.value = "偏好已调整，正在重新计算推荐方向...";
+  const dirTask = startTask("career", "generate_directions");
   try {
-    directions.value = await matchCareerDirections(
+    const res = await matchCareerDirections(
       toRaw(profile.value) || profile.value,
       toRaw(publicJobs.value),
       toRaw(preferences.value)
     );
+    directions.value = res;
+    if (res && res.length > 0) {
+      dirTask.finish("success");
+    } else {
+      dirTask.finish("empty");
+    }
     processMessage.value = "推荐方向已重新计算";
     ElMessage.success("推荐方向已根据新偏好更新");
   } catch (error) {
+    dirTask.finish("failure", "runtime_error");
     processError.value = error instanceof Error ? error.message : String(error);
   } finally {
     isProcessing.value = false;
@@ -1602,6 +1623,7 @@ const handlePreferencesChange = async () => {
 };
 
 const handleJumpToBoss = (keyword: string) => {
+  void recordOutboundOpen("career", "open_platform", "job_platform");
   const cleanKeyword = encodeURIComponent(keyword.trim());
   let targetUrl = `https://www.zhipin.com/web/geek/job?query=${cleanKeyword}`;
   window.open(targetUrl, "_blank", "noopener,noreferrer");
@@ -1679,7 +1701,22 @@ const scrollToStep = (stepId: string) => {
 };
 
 onMounted(() => {
+  void recordFeatureView("career");
   refreshBridgeStatus();
+});
+
+let hasInitSnapshotFilterWatch = false;
+watch([snapshotSelectedCity, snapshotSelectedSkill, snapshotSearchQuery], () => {
+  if (!hasInitSnapshotFilterWatch) {
+    hasInitSnapshotFilterWatch = true;
+    return;
+  }
+  const task = startTask("career", "filter_jobs");
+  if (filteredPublicJobs.value.length > 0) {
+    task.finish("success");
+  } else {
+    task.finish("empty");
+  }
 });
 </script>
 

@@ -1,6 +1,6 @@
 <template>
   <article class="entertainment-card">
-    <a class="cover-link" :href="item.url" target="_blank" rel="noopener noreferrer">
+    <a class="cover-link" :href="item.url" target="_blank" rel="noopener noreferrer" @click="handleCardClick">
       <img
         :src="resolvedCover"
         :alt="`${platformLabel}：${item.title}`"
@@ -14,7 +14,7 @@
     </a>
 
     <div class="card-content">
-      <a class="item-title" :title="item.title" :href="item.url" target="_blank" rel="noopener noreferrer">
+      <a class="item-title" :title="item.title" :href="item.url" target="_blank" rel="noopener noreferrer" @click="handleCardClick">
         {{ item.title }}
       </a>
       <div class="metrics">
@@ -24,7 +24,7 @@
       <div class="card-footer">
         <time v-if="item.publishedAt" :datetime="isoDate">{{ displayDate }}</time>
         <span v-else>{{ item.footerLabel || "内容更新" }}</span>
-        <a :href="item.url" target="_blank" rel="noopener noreferrer">{{ item.actionLabel }} →</a>
+        <a :href="item.url" target="_blank" rel="noopener noreferrer" @click="handleCardClick">{{ item.actionLabel }} →</a>
       </div>
     </div>
   </article>
@@ -33,6 +33,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import fallbackImage from "../../../../assets/bg.jpg";
+import { recordOutboundOpen } from "../../../../utils/observation";
+
+function handleCardClick() {
+  void recordOutboundOpen("entertainment", "open_media", "other");
+}
 
 export type EntertainmentPlatform = "movie" | "douyin" | "bilibili";
 

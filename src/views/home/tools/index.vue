@@ -25,6 +25,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import { gotoOutPage } from "../../../utils/utils";
+import { recordOutboundOpen } from "../../../utils/observation";
 import websiteGroups from "./websiteGroups.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import { ElRow, ElCol, ElCard, ElLink, ElAvatar, ElTag } from "element-plus";
@@ -66,6 +67,13 @@ export default defineComponent({
           clickData[key].count += 1;
         }
         localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
+
+        if (website.url === "/observation") {
+          window.dispatchEvent(new CustomEvent("open-observation-modal"));
+          return;
+        }
+
+        recordOutboundOpen("navigation", "open_site", "general_link");
         gotoOutPage(website.url);
       }
     };

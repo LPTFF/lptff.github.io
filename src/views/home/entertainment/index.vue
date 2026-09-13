@@ -54,7 +54,8 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted } from "vue";
+import { recordFeatureView, startTask } from "../../../utils/observation";
 import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
 import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
 import CollectionFreshness from "../../../components/CollectionFreshness.vue";
@@ -68,6 +69,7 @@ const bilibiliData = ref(bilibiliItemsFor("entertainment"));
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
 
 onMounted(() => {
+  void recordFeatureView("entertainment");
   const cleanup = onAuthorizedContentUpdated(() => {
     douyinData.value = mergeAuthorizedItems("douyin", douyinSnapshot);
     bilibiliData.value = bilibiliItemsFor("entertainment");
@@ -83,6 +85,16 @@ const props = defineProps<{
 
 const { collectionStatuses, collectionDetails, revealCollection } = useCollectionIndicators();
 const activePlatform = ref<PlatformFilter>("all");
+
+let hasInitPlatformWatch = false;
+watch(activePlatform, () => {
+  if (!hasInitPlatformWatch) {
+    hasInitPlatformWatch = true;
+    return;
+  }
+  const task = startTask("entertainment", "filter_platform");
+  task.finish("success");
+});
 
 const toNumber = (value: unknown) => {
   const text = String(value ?? "").trim();

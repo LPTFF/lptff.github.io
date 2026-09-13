@@ -2,6 +2,7 @@
 import { computed, nextTick, onMounted, onUnmounted, ref } from "vue";
 import { ElMessage } from "element-plus";
 import QRCode from "qrcode";
+import { recordFeatureView, startTask } from "../../../utils/observation";
 
 /** 每张二维码的目标字节数（用户期望容量）。数值越小码点越稀疏，手机越易扫准；代价是分片更多。
  *  实际每张装多少由内容动态决定：纯 ASCII 可装满目标字节，含中文/多字节字符则按字符边界
@@ -74,6 +75,7 @@ async function generate(): Promise<void> {
     ElMessage.warning("请先粘贴文本或上传 txt / md 文件");
     return;
   }
+  const task = startTask("devtools", "generate_qr");
   generating.value = true;
   genProgress.value = 5;
   genStatusText.value = "正在拆分文本…";
@@ -82,26 +84,33 @@ async function generate(): Promise<void> {
   await nextTick();
   await new Promise((r) => setTimeout(r, 0));
 
-  // 1. 拆分（已优化为一次性编码，大文件也很快）
-  const parts = splitByBytes(text, chunkSize.value);
-  chunks.value = parts;
-  scanStatus.value = parts.map(() => "pending" as const);
-  currentIndex.value = 0;
-  genProgress.value = 30;
-  genStatusText.value = `已拆分为 ${parts.length} 张，正在生成二维码…`;
-  await nextTick();
+  try {
+    // 1. 拆分（已优化为一次性编码，大文件也很快）
+    const parts = splitByBytes(text, chunkSize.value);
+    chunks.value = parts;
+    scanStatus.value = parts.map(() => "pending" as const);
+    currentIndex.value = 0;
+    genProgress.value = 30;
+    genStatusText.value = `已拆分为 ${parts.length} 张，正在生成二维码…`;
+    await nextTick();
 
-  // 2. 渲染当前张（分页模式下只渲染当前一张，瞬间完成）
-  await renderCurrent();
-  genProgress.value = 100;
-  genStatusText.value = "";
+    // 2. 渲染当前张（分页模式下只渲染当前一张，瞬间完成）
+    await renderCurrent();
+    genProgress.value = 100;
+    genStatusText.value = "";
 
-  generating.value = false;
-  ElMessage.success(
-    parts.length === 1
-      ? "已生成 1 张二维码"
-      : `内容较长，已分页为 ${parts.length} 张，从第 1 张开始扫码`,
-  );
+    generating.value = false;
+    task.finish("success");
+    ElMessage.success(
+      parts.length === 1
+        ? "已生成 1 张二维码"
+        : `内容较长，已分页为 ${parts.length} 张，从第 1 张开始扫码`,
+    );
+  } catch (err) {
+    generating.value = false;
+    task.finish("failure", "runtime_error");
+    ElMessage.error("生成二维码失败");
+  }
   // 稍后归零，避免进度条闪退
   setTimeout(() => {
     if (!generating.value) genProgress.value = 0;
@@ -234,7 +243,10 @@ function onKeydown(e: KeyboardEvent): void {
   }
 }
 
-onMounted(() => window.addEventListener("keydown", onKeydown));
+onMounted(() => {
+  void recordFeatureView("devtools");
+  window.addEventListener("keydown", onKeydown);
+});
 onUnmounted(() => window.removeEventListener("keydown", onKeydown));
 
 function clearAll(): void {

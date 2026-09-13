@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, ref, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import { recordFeatureView, startTask } from "../../../utils/observation";
 import {
   ALGOS,
   ENCODINGS,
@@ -48,21 +49,32 @@ async function doCompress(): Promise<void> {
     ElMessage.warning("请先输入要压缩的内容");
     return;
   }
+  const task = startTask("devtools", "compress_text");
   compressing.value = true;
   compressError.value = null;
   compressOutput.value = "";
   try {
     const res = await compress(text, algo.value, encoding.value);
     compressOutput.value = res.output;
-    if (!res.output) ElMessage.warning("压缩结果为空");
-    else ElMessage.success("压缩完成");
+    if (!res.output) {
+      task.finish("empty");
+      ElMessage.warning("压缩结果为空");
+    } else {
+      task.finish("success");
+      ElMessage.success("压缩完成");
+    }
   } catch (err) {
+    task.finish("failure", "runtime_error");
     compressError.value = err instanceof Error ? err.message : String(err);
     ElMessage.error("压缩失败");
   } finally {
     compressing.value = false;
   }
 }
+
+onMounted(() => {
+  void recordFeatureView("devtools");
+});
 
 async function copyCompressed(): Promise<void> {
   if (!compressOutput.value) {

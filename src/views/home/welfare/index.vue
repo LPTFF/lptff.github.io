@@ -233,7 +233,8 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, reactive, onMounted, onUnmounted } from "vue";
+import { ref, computed, reactive, watch, onMounted, onUnmounted } from "vue";
+import { recordFeatureView, startTask, recordOutboundOpen, type TargetCategory } from "../../../utils/observation";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import ContentAnalysis from "../../../components/ContentAnalysis.vue";
 import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
@@ -527,8 +528,22 @@ export default {
       return year < currentYear ? "#e96a43" : "";
     };
 
+    const resolveFixedTargetCategory = (item: any): TargetCategory => {
+      const cat = String(item.category || "").toLowerCase();
+      const title = String(item.title || "").toLowerCase();
+      const text = `${cat} ${title}`;
+      if (text.includes("卡") || text.includes("银行") || text.includes("card") || text.includes("visa")) return "card";
+      if (text.includes("ai") || text.includes("gpt") || text.includes("模型") || text.includes("gemini") || text.includes("claude")) return "ai";
+      if (text.includes("vps") || text.includes("服务器") || text.includes("主机")) return "vps";
+      if (text.includes("域名") || text.includes("domain")) return "domain";
+      if (text.includes("托管") || text.includes("hosting") || text.includes("cloudflare") || text.includes("vercel")) return "hosting";
+      return "other";
+    };
+
     const gotoWelfareWebsite = (item: any) => {
       if (item.link) {
+        const cat = resolveFixedTargetCategory(item);
+        void recordOutboundOpen("welfare", "open_resource", cat);
         gotoOutPage(item.link);
       }
     };
@@ -663,9 +678,29 @@ export default {
     const gotoMainWebsite = (item: any) => {
       let websiteInfo = getWebsiteInfo(item);
       if (websiteInfo.mainWebsite) {
+        void recordOutboundOpen("welfare", "open_resource", "other");
         gotoOutPage(websiteInfo.mainWebsite);
       }
     };
+
+    onMounted(() => {
+      void recordFeatureView("welfare");
+    });
+
+    let hasInitFilterWatch = false;
+    watch([selectedCategory, selectedFocus, selectedSource], () => {
+      if (!hasInitFilterWatch) {
+        hasInitFilterWatch = true;
+        return;
+      }
+      const task = startTask("welfare", "filter_welfare");
+      const count = filteredWelfare.value.length;
+      if (count > 0) {
+        task.finish("success");
+      } else {
+        task.finish("empty");
+      }
+    });
 
     return {
       applyAnalysis,

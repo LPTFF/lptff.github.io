@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { ElMessage } from "element-plus";
+import { recordFeatureView, startTask } from "../../../utils/observation";
 
 const SAMPLE_JSON = `{
   "name": "dev-tools",
@@ -52,14 +53,21 @@ function run(action: "format" | "compress"): void {
     ElMessage.warning("请先输入 JSON 内容");
     return;
   }
+  const task = startTask("devtools", "format_json");
   const result = tryParse(text);
   if (!result.ok) {
+    task.finish("failure", "parse_error");
     ElMessage.error("JSON 语法错误，请根据下方提示修正");
     return;
   }
+  task.finish("success");
   output.value = action === "format" ? JSON.stringify(result.value, null, indent.value) : JSON.stringify(result.value);
   ElMessage.success(action === "format" ? "格式化完成" : "压缩完成");
 }
+
+onMounted(() => {
+  void recordFeatureView("devtools");
+});
 
 async function copyOutput(): Promise<void> {
   if (!output.value) {

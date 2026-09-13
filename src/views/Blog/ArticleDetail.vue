@@ -15,6 +15,7 @@
         <div ref="contentRef" class="markdown-body">
           <component :is="article.component" />
         </div>
+        <ValueFeedbackWidget feature-id="blog" />
         <footer class="article-footer">
           <RouterLink v-if="previous" :to="`/blog/articles/${previous.slug}`">← {{ previous.title }}</RouterLink>
           <RouterLink to="/blog">返回文章列表</RouterLink>
@@ -36,6 +37,8 @@ import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, r
 import { useRoute } from "vue-router";
 import { articles, getArticle } from "./data/articles";
 import type { TocItem } from "./data/types";
+import ValueFeedbackWidget from "../../components/ValueFeedbackWidget.vue";
+import { recordFeatureView } from "../../utils/observation";
 
 const route = useRoute();
 const article = computed(() => {
@@ -65,6 +68,7 @@ async function enhance() {
   contentRef.value.querySelectorAll("a").forEach((link) => { if (link.hostname && link.hostname !== window.location.hostname) { link.target = "_blank"; link.rel = "noopener noreferrer"; } });
   if (route.hash) setTimeout(() => document.querySelector(route.hash)?.scrollIntoView({ behavior: "smooth" }), 0);
   document.title = `${article.value?.title || "博客"} · tangff`;
+  void recordFeatureView("blog");
 }
 watch(() => article.value?.slug, enhance, { immediate: true });
 onMounted(enhance);

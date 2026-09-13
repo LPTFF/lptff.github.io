@@ -31,6 +31,9 @@
             <el-button class="portal-btn" size="small" type="primary" plain @click="showPortalModal = true">
               我的空间
             </el-button>
+            <el-button class="observation-btn" size="small" type="info" plain @click="showObservationModal = true">
+              功能使用观察
+            </el-button>
           </div>
         </el-header>
         <el-main class="main-content">
@@ -86,6 +89,7 @@
           aria-label="回到顶部"
         />
         <PrivatePortalModal v-model="showPortalModal" />
+        <FeatureObservationModal v-model="showObservationModal" />
       </div>
     </div>
   </div>
@@ -97,6 +101,7 @@ import {
   shallowRef,
   onMounted,
   onUnmounted,
+  watch,
   computed,
   defineAsyncComponent,
   nextTick,
@@ -107,6 +112,8 @@ import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
 import TabLoadError from "./TabLoadError.vue";
 import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
+import FeatureObservationModal from "../../components/FeatureObservationModal.vue";
+import { recordFeatureView, initSessionManager } from "../../utils/observation";
 import {
   ElMenu,
   ElMenuItem,
@@ -186,6 +193,7 @@ const menuConfig = [
 ];
 
 const showPortalModal = ref(false);
+const showObservationModal = ref(false);
 const previousRoute = ref("");
 const isPCRes = ref(isPC());
 const windowHeight = ref(typeof window !== "undefined" ? window.innerHeight : 900);
@@ -223,6 +231,19 @@ const updateBacktopPosition = () => {
 };
 const route = useRoute();
 const router = useRouter();
+
+const handleOpenObservationModal = () => {
+  showObservationModal.value = true;
+};
+
+watch(
+  () => route.query.observation,
+  (val) => {
+    if (val === "1") {
+      showObservationModal.value = true;
+    }
+  }
+);
 const requestedTab = route.query.tab ? String(route.query.tab) : "";
 const queryTab = requestedTab === "douban" ? "entertainment" : requestedTab;
 const defaultTab = menuConfig.some((item) => item.key === queryTab)
@@ -251,6 +272,15 @@ const handleTabPending = () => {
 const handleTabResolved = () => {
   window.requestAnimationFrame(() => {
     isTabSwitching.value = false;
+    const tabFeatureMap: Record<string, "navigation" | "welfare" | "entertainment"> = {
+      tools: "navigation",
+      welfare: "welfare",
+      entertainment: "entertainment",
+    };
+    const mapped = tabFeatureMap[selectIndex.value];
+    if (mapped) {
+      void recordFeatureView(mapped);
+    }
   });
 };
 
@@ -320,6 +350,10 @@ const gotoIssue = () => {
 };
 
 onMounted(() => {
+  initSessionManager();
+  if (route.query.observation === "1" || route.query.tab === "observation") {
+    showObservationModal.value = true;
+  }
   loadingResizeObserver = new ResizeObserver(([entry]) => {
     if (!entry || !isTabSwitching.value) return;
     const rowHeight = window.matchMedia("(max-width: 768px)").matches ? 92 : 106;
@@ -344,9 +378,11 @@ onMounted(() => {
     }
     window.addEventListener("resize", updateWindowDimensions);
   });
+  window.addEventListener("open-observation-modal", handleOpenObservationModal);
 });
 
 onUnmounted(() => {
+  window.removeEventListener("open-observation-modal", handleOpenObservationModal);
   loadingResizeObserver?.disconnect();
   clearTimeout(clickTimer);
   backtopResizeObserver?.disconnect();
