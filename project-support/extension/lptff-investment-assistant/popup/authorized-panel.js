@@ -70,7 +70,7 @@
     model.value = config.model;
     key.placeholder = "请输入 Gemini API Key";
     document.querySelector("#shared-ai-saved").textContent = config.hasKey ? "已保存" : "未配置";
-    state.textContent = config.hasKey ? "已保存 · 与 BOSS 助手及资讯分析共用" : "尚未配置 Gemini Key。";
+    state.textContent = config.hasKey ? "已保存在本机 · 与 BOSS 助手及资讯分析共用" : "尚未配置 Gemini Key。";
   }
   key.addEventListener("input", () => { keyDirty = true; state.textContent = "修改未保存"; });
   model.addEventListener("change", () => { state.textContent = "修改未保存"; });
@@ -106,7 +106,7 @@
     busy(true);
     try {
       display(await call("AI_CLEAR")); key.value = ""; keyDirty = false; hideKey();
-      state.textContent = "Key 已清除 · 全站与 BOSS 助手同步生效";
+      state.textContent = "Key 已清除 · 与 BOSS 助手及资讯分析同步生效";
     } catch (error) { state.textContent = `清除失败：${error.message}`; }
     finally { busy(false); }
   });

@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "LPTFF Investment Assistant",
+  "name": "LPTFF 本地助手",
   "version": "3.24.0",
-  "description": "本机授权采集：抖音与B站固定作者、基金、币安合约历史、BOSS职位、快手、抖音兴趣视频、红果。登录态留在来源页面，结果仅保存在本机。",
+  "description": "本机授权采集：支持基金与币安合约来源采集、BOSS 求职助手、指定内容来源采集和共享 Gemini 配置。登录态留在来源页面，结果仅保存在本机。",
   "permissions": [
     "activeTab",
     "alarms",
@@ -21,9 +21,7 @@
     "https://*.binance.com/*",
     "https://*.zhipin.com/*",
     "https://zhipin.com/*",
-    "https://www.kuaishou.com/*",
     "https://www.douyin.com/*",
-    "https://hongguoduanju.com/*",
     "http://*/*",
     "https://*/*"
   ],
@@ -42,17 +40,10 @@
     ]
   },
   "action": {
-    "default_title": "LPTFF 多领域本地助手",
+    "default_title": "LPTFF 本地助手",
     "default_popup": "popup/shell.html"
   },
-  "commands": {
-    "generate-douyin-dataset": {
-      "suggested_key": {
-        "default": "Alt+Shift+D"
-      },
-      "description": "生成抖音感兴趣视频数据集"
-    }
-  },
+
   "background": {
     "service_worker": "background.js"
   },
@@ -165,66 +156,6 @@
       "matches": [
         "https://*.zhipin.com/*",
         "https://zhipin.com/*"
-      ],
-      "js": [
-        "content/observation-collector.js"
-      ],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://www.kuaishou.com/*"
-      ],
-      "js": [
-        "content/source-extractor.js",
-        "content/observation-bridge.js"
-      ],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://www.kuaishou.com/*"
-      ],
-      "js": [
-        "content/observation-collector.js"
-      ],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://www.douyin.com/*"
-      ],
-      "js": [
-        "content/source-extractor.js",
-        "content/observation-bridge.js"
-      ],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://www.douyin.com/*"
-      ],
-      "js": [
-        "content/observation-collector.js"
-      ],
-      "run_at": "document_idle"
-    },
-    {
-      "matches": [
-        "https://hongguoduanju.com/*"
-      ],
-      "js": [
-        "content/source-extractor.js",
-        "content/observation-bridge.js"
-      ],
-      "run_at": "document_start",
-      "world": "MAIN"
-    },
-    {
-      "matches": [
-        "https://hongguoduanju.com/*"
       ],
       "js": [
         "content/observation-collector.js"

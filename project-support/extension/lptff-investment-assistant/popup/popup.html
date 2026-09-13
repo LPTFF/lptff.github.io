@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>平台授权与 AI</title>
+    <title>LPTFF 本地助手</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
     <main class="popup">
-      <h1>LPTFF 平台授权与 AI</h1>
-      <p>按平台登录并授权所需范围；Gemini 配置供全站资讯分析与各助手共用。</p>
+      <h1>LPTFF 本地助手</h1>
+      <p>支持基金与币安合约来源采集、BOSS 求职助手、指定内容来源采集；共享 Gemini 配置仅保存在本机并按需调用。</p>
       <div class="mode-tabs" role="tablist">
         <button id="mode-finance" class="mode-tab active" type="button" role="tab" aria-selected="true">基金 / 币安</button>
         <button id="mode-market" class="mode-tab" type="button" role="tab" aria-selected="false">BOSS 直聘</button>
@@ -58,7 +58,6 @@
             <p class="action-hint">分页认证信息只在币安来源页内存中临时复用，不写入来源包或本地存储。正式来源包是产品输入；REST/WS 观察报告仅用于维护端点契约。</p>
           </details>
         </article>
-        <div id="obs-group-finance" class="observation-group"></div>
       </section>
 
       <section id="market-mode" hidden>
@@ -81,13 +80,11 @@
       <section id="entertainment-mode" hidden>
         <p>先在来源平台登录，再授权采集作品或动态。登录凭据不会导出，结果仅保存在本机。</p>
         <div id="authorized-platforms"></div>
-        <h2>其他平台与采集范围</h2>
-        <div id="obs-group-entertainment" class="observation-group"></div>
       </section>
 
       <details class="advanced">
-        <summary>全站 Gemini 配置</summary>
-        <p>安全社区、薅羊毛与已有助手共用本机密钥；资讯分析仅发送公开标题与链接。</p>
+        <summary>共享 Gemini 配置</summary>
+        <p>密钥保存在本机，仅与 BOSS 助手及薅羊毛、安全社区资讯分析共用；资讯分析请求发送公开标题与链接至 Gemini。</p>
         <label>模型 <select id="shared-ai-model"><option>gemini-3.5-flash-lite</option><option>gemini-3.6-flash</option><option>gemini-3.7-flash</option></select></label>
         <label>Gemini API Key <input id="shared-ai-key" type="password" autocomplete="off" placeholder="请输入 Gemini API Key" /></label>
         <button id="shared-ai-reveal" type="button" aria-label="显示 Gemini Key">显示</button>

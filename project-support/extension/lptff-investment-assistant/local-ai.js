@@ -1,4 +1,7 @@
-// Shared local AI settings. Keep the legacy storage key for existing assistants.
+// 本地共享 Gemini 配置与资讯分析接口。
+// 1. 配置存储：Gemini API Key 与模型配置仅保存在本机 chrome.storage.local（与 BOSS 求职助手共用底层键 lptffBossAutopilot）。
+// 2. 外部调用边界：仅在用户明确发起资讯分析时，才向 Google Gemini 发送分析请求，且请求中仅包含待分析内容的公开标题与公开 URL。
+// 3. 适用范围：当前分析领域仅允许 welfare（薅羊毛）与 pojie（安全社区/吾爱破解），单批仅支持 1–6 条资讯；分析结果缓存在本地。
 async function loadLocalGeminiConfig() {
   const raw = (await chrome.storage.local.get("lptffBossAutopilot")).lptffBossAutopilot || {};
   return { geminiKey: String(raw.geminiKey || ""), model: raw.model || "gemini-3.5-flash-lite" };

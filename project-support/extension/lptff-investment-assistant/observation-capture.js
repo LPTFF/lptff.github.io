@@ -71,54 +71,6 @@
         return warnings;
       },
     },
-    kuaishou: {
-      label: "快手",
-      datasets: [
-        { dataset: "recommendVideoFeed", hint: "/rest/v/feed/hot（2026-08-24 真实 Chrome 已确认的推荐视频流）", test: (snap) => /^\/rest\/v\/feed\/hot/i.test(String(snap.path || "")) },
-        { dataset: "restVideoFeeds", hint: "其他 /rest/v/feed/* 视频流", test: (snap) => /^\/rest\/v\/feed\//i.test(String(snap.path || "")) },
-        { dataset: "profileVideoQueries", hint: "graphql visionProfilePhotoList（主页视频列表：photo/封面/点赞/播放数）", test: (snap) => /profilephoto|photolist/i.test(String(snap.operationName || "")) },
-        { dataset: "videoFeedQueries", hint: "其他视频/推荐流 graphql 查询（operationName 含 feed/video/vision/rank）", test: (snap) => /feed|video|vision|rank/i.test(String(snap.operationName || "")) },
-        { dataset: "graphQlOthers", hint: "其他 /graphql 查询", test: () => true },
-        { dataset: "websockets", hint: "页面 WebSocket 流", wsKind: "websocket" },
-        { dataset: "workerScripts", hint: "页面使用的 Worker 脚本", kind: "workers" },
-      ],
-      buildWarnings(counts) {
-        const warnings = [];
-        if (!counts.recommendVideoFeed && !counts.restVideoFeeds && !counts.profileVideoQueries && !counts.videoFeedQueries) {
-          warnings.push("未观察到视频流接口：可能未登录，或观察窗口内没有触发加载。请登录后打开目标主页或推荐页并滚动几屏，再执行一次观察采集");
-        }
-        return warnings;
-      },
-    },
-    douyin: {
-      label: "抖音",
-      datasets: [
-        { dataset: "favoriteVideoFeed", hint: "/aweme/v1/web/aweme/favorite/（收藏视频兴趣种子）", test: (snap) => /\/aweme\/v1\/web\/aweme\/favorite\/?$/i.test(String(snap.path || "")) },
-        { dataset: "interestSearchFeed", hint: "/aweme/v1/web/*/search/*（按收藏标签自动搜索的候选视频）", test: (snap) => /\/aweme\/v1\/web\/(?:general\/search|search)\//i.test(String(snap.path || "")) },
-        { dataset: "videoFeedEndpoints", hint: "/aweme/v1/web/*（视频列表/详情：候选视频补充字段）", test: (snap) => /\/aweme\/v1\/web\/(?:aweme\/detail|aweme\/(?:post|feed|list)|[^/]*(?:feed|video|favorite))/i.test(String(snap.path || "")) },
-        { dataset: "commentEndpoints", hint: "/aweme/v1/web/comment/*（评论接口）", test: (snap) => /\/comment/i.test(String(snap.path || "")) },
-        { dataset: "awemeOthers", hint: "其他 /aweme/v1/web/* 接口", test: (snap) => String(snap.path || "").startsWith("/aweme/") },
-        { dataset: "websockets", hint: "页面 WebSocket 流", wsKind: "websocket" },
-        { dataset: "workerScripts", hint: "页面使用的 Worker 脚本", kind: "workers" },
-      ],
-      buildWarnings(counts) {
-        const warnings = [];
-        if (!counts.favoriteVideoFeed) {
-          warnings.push("未观察到收藏视频端点：请登录抖音并打开“我 → 收藏 → 视频合集”，滚动几屏后重试");
-        }
-        if (!counts.interestSearchFeed) warnings.push("未观察到标签搜索结果端点，最终感兴趣视频数据集可能为空");
-        return warnings;
-      },
-    },
-    hongguo: {
-      label: "红果短剧",
-      datasets: [
-        { dataset: "domCatalog", hint: "官网 Elements 中的公开短剧卡片与详情", kind: "dom" },
-      ],
-      buildWarnings(counts) {
-        return counts.domCatalog ? [] : ["未读取到官网短剧卡片；请打开首页、分类页或由 APP 分享的短剧详情页后重试"];
-      },
-    },
   };
 
   // 核心数据实体定义（对齐 agent/product/source/multi-domain-data-requirements.md）：
@@ -185,82 +137,6 @@
         required: "must",
         trigger: "搜索请求的 query 参数与翻页参数",
         fields: [["query", /query|keyword|search_?key/i], ["city", /city/i], ["page", /page/i]],
-      },
-    ],
-    kuaishou: [
-      {
-        entity: "Video",
-        label: "视频（清单主体）",
-        required: "must",
-        trigger: "打开主页/推荐页并滚动几屏",
-        fields: [["caption", /caption|desc/i], ["coverUrl", /cover_?url|cover/i], ["photoUrl", /photo_?url|video_?url|play_?url|play_?addr/i], ["likeCount", /like_?count|digg_?count/i], ["viewCount", /view_?count|play_?count/i], ["timestamp", /timestamp|create_?time/i], ["duration", /duration/i]],
-      },
-      {
-        entity: "Author",
-        label: "作者（按兴趣筛选锚点，降级链路缺失）",
-        required: "must",
-        trigger: "观察视频列表响应（通常内嵌）或点开作者主页",
-        fields: [["userName", /user_?name|nickname|author_?name/i], ["userId", /user_?id/i]],
-      },
-      {
-        entity: "FeedContext",
-        label: "流上下文（翻页拉全量）",
-        required: "must",
-        trigger: "滚动触发下一页加载",
-        fields: [["pcursor", /pcursor|cursor/i]],
-      },
-    ],
-    douyin: [
-      {
-        entity: "Video",
-        label: "收藏视频（兴趣种子与清单主体）",
-        required: "must",
-        trigger: "打开“我 → 收藏 → 视频合集”并滚动几屏",
-        fields: [["desc", /desc|caption/i], ["tags", /text_?extra|hashtag|tag/i], ["coverUrl", /cover_?url|cover/i], ["playAddr", /play_?addr|video_?url|play_?url/i], ["diggCount", /digg_?count|like_?count/i], ["playCount", /play_?count|view_?count/i], ["createTime", /create_?time|timestamp/i], ["duration", /duration/i]],
-      },
-      {
-        entity: "Author",
-        label: "作者（按兴趣筛选锚点，降级链路缺失）",
-        required: "must",
-        trigger: "观察视频列表响应（通常内嵌）或点开作者主页",
-        fields: [["nickname", /nickname|user_?name|author_?name/i], ["secUserId", /sec_?user_?id|user_?id/i]],
-      },
-      {
-        entity: "FeedContext",
-        label: "流上下文（翻页拉全量）",
-        required: "must",
-        trigger: "滚动触发下一页加载",
-        fields: [["cursor", /cursor|pcursor/i], ["hasMore", /has_?more/i]],
-      },
-      {
-        entity: "InterestProfile",
-        label: "收藏标签搜索画像",
-        required: "must",
-        trigger: "收藏视频文案或 text_extra 中的 #标签",
-        fields: [["tags", /text_?extra|hashtag|tag/i], ["favorite", /favorite/i]],
-      },
-      {
-        entity: "InterestVideo",
-        label: "感兴趣视频（最终候选数据集）",
-        required: "must",
-        trigger: "插件按收藏标签自动打开抖音视频搜索并翻页",
-        fields: [["search", /search/i], ["video", /aweme|video/i], ["playAddr", /play_?addr|video_?url|play_?url/i]],
-      },
-    ],
-    hongguo: [
-      {
-        entity: "Series",
-        label: "短剧（筛选基座主体）",
-        required: "must",
-        trigger: "打开官网片库或 APP 分享的详情链接",
-        fields: [["title", /title/i], ["coverUrl", /cover_?url/i], ["episodeCount", /episode_?count/i], ["tags", /tags?/i], ["detailUrl", /detail_?url/i], ["playUrl", /play_?url/i]],
-      },
-      {
-        entity: "CatalogContext",
-        label: "片库上下文",
-        required: "must",
-        trigger: "打开首页、分类页或详情页",
-        fields: [["pageType", /page_?type/i], ["pageUrl", /page_?url/i]],
       },
     ],
   };

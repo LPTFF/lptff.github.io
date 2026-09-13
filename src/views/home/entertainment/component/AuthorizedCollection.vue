@@ -38,7 +38,7 @@
       <summary>其他已有采集功能</summary>
       <p>在现有助手中选择具体范围并启动；这里只打开入口，不自动读取账户或发起操作。</p>
       <div class="collection-actions">
-        <button type="button" :disabled="!connected" @click="action('OPEN_ASSISTANT', { mode: 'entertainment' })">快手 / 抖音兴趣视频 / 红果</button>
+        <button type="button" :disabled="!connected" @click="action('OPEN_ASSISTANT', { mode: 'entertainment' })">内容平台授权助手</button>
         <button type="button" :disabled="!connected" @click="action('OPEN_ASSISTANT', { mode: 'finance' })">基金 / 币安采集助手</button>
         <button type="button" :disabled="!connected" @click="action('OPEN_ASSISTANT', { mode: 'market' })">BOSS 助手入口</button>
       </div>
