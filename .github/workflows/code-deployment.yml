@@ -1,0 +1,109 @@
+name: 前端代码构建与发布
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: "npm"
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 安装 Node 依赖
+        run: npm ci
+
+      - name: 前端类型检查
+        run: npm run typecheck
+
+      - name: 恢复已发布的数据快照
+        # 优先从 python-crawl 分支拉取已验证的最新有效数据快照
+        run: |
+          git fetch --depth=1 origin python-crawl || true
+          if git rev-parse --verify FETCH_HEAD >/dev/null 2>&1; then
+            git archive --format=tar FETCH_HEAD | tar -xf - -C src/data || true
+          fi
+
+      - name: 验证前后端接口契约一致性
+        run: node project-support/scripts/verify-backend-contract.cjs
+
+      - name: 生成研究书签快照
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: >-
+          python -B project-support/scripts/build_research_bookmarks.py
+          --repo "$GITHUB_REPOSITORY"
+
+      - name: 构建静态站点
+        run: npm run build
+
+      - name: 审查构建产物安全白名单
+        run: node project-support/scripts/verify-public-whitelist.cjs dist
+
+      - name: 打包投资助手浏览器扩展
+        run: |
+          node project-support/scripts/extension/build-zip.js
+          test -s dist-extension/lptff-investment-assistant.zip
+
+      - name: 发布投资助手扩展 Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          release_tag="extension-latest"
+          release_title="LPTFF Investment Assistant (latest)"
+          release_notes="自动发布于 commit $GITHUB_SHA，GitHub Actions run $GITHUB_RUN_ID。"
+          if gh release view "$release_tag" >/dev/null 2>&1; then
+            gh release upload "$release_tag" dist-extension/lptff-investment-assistant.zip --clobber
+            gh release edit "$release_tag" --title "$release_title" --notes "$release_notes" --latest
+          else
+            gh release create "$release_tag" dist-extension/lptff-investment-assistant.zip \
+              --title "$release_title" \
+              --notes "$release_notes" \
+              --latest
+          fi
+
+      - name: 配置静态单页路由与 CNAME
+        run: |
+          cp dist/index.html dist/404.html
+          echo "lptff.github.io" > dist/CNAME
+          touch dist/.nojekyll
+
+      - name: 配置 GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: 上传 Pages 产物
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: 部署至 GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
