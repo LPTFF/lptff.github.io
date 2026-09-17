@@ -111,20 +111,47 @@ jobs:
         run: python -B project-support/crawl/welfare/keyword_search.py --sanitize-only
 
       - name: 发布有效爬虫数据快照至 python-crawl
-        # 仅在采集有效完成时推送 python-crawl 分支，使用受控白名单，防止敏感文件漏入
+        # 基于最新 python-crawl 分支提交，避免 GHA 强推覆盖青龙刚写入的登录态数据。
         if: ${{ !cancelled() }}
         run: |
-          cd ./src/data/
+          set -euo pipefail
+          PUBLISH_TOKEN="${{ secrets.ACCESS_TOKEN || secrets.GITHUB_TOKEN }}"
+          if [ -z "$PUBLISH_TOKEN" ]; then
+            echo "发布凭据未配置，停止更新 python-crawl。"
+            exit 1
+          fi
           git config --global user.email "lptffhh@gmail.com"
           git config --global user.name "LPTFF"
-          git config --global init.defaultBranch master
-          git init
-          git add *.json
-          if [ -d "career" ]; then git add career/*.json; fi
-          if [ -d "techForum" ]; then git add techForum/*.json; fi
-          if [ -d "welfare" ]; then git add welfare/*.json; fi
-          git commit -m "$(date +%F日%H时%M分%S秒)" || echo "No changes to commit"
-          git push -f "https://LPTFF:${{ secrets.ACCESS_TOKEN || secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git" HEAD:python-crawl || true
+          success=0
+          for attempt in 1 2 3; do
+            workdir="$(mktemp -d)"
+            trap 'rm -rf "$workdir"' EXIT
+            git clone --depth=1 --branch python-crawl \
+              "https://x-access-token:${PUBLISH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$workdir"
+            while IFS= read -r -d '' file; do
+              relative="${file#src/data/}"
+              case "$relative" in
+                kuaishouData.json|bilibili.json|tiktok.json|douyinHot.json) continue ;;
+              esac
+              mkdir -p "$workdir/$(dirname "$relative")"
+              cp "$file" "$workdir/$relative"
+            done < <(find src/data -type f -name '*.json' -print0)
+            git -C "$workdir" add -A -- '*.json'
+            git -C "$workdir" commit -m "$(date +%F日%H时%M分%S秒)" || true
+            if git -C "$workdir" push origin HEAD:python-crawl; then
+              success=1
+              rm -rf "$workdir"
+              trap - EXIT
+              break
+            fi
+            rm -rf "$workdir"
+            trap - EXIT
+            if [ "$attempt" -lt 3 ]; then sleep 2; fi
+          done
+          if [ "$success" -ne 1 ]; then
+            echo "python-crawl 更新在有限重试后仍失败。"
+            exit 1
+          fi
 
       - name: 微信通知采集完成状态
         if: ${{ github.event_name != 'schedule' || github.event.schedule == '17 22 * * *' }}

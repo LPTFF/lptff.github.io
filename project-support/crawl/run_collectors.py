@@ -38,7 +38,7 @@ COLLECTORS = (
     CollectorSpec("infzm", "infzm.py", "infzm.json", "article", 3),
     CollectorSpec("juejin", "juejin.py", "juejin.json", "article", 3, group="archived"),
     CollectorSpec("weibo", "weibo.py", "weibo.json", "article", 5),
-    CollectorSpec("douyinHot", "douyinHot.py", "douyinHot.json", "article", 5, 90, True),
+    CollectorSpec("douyinHot", "douyinHot.py", "douyinHot.json", "article", 5, 90, True, group="qinglong"),  # 已迁移至青龙面板
     CollectorSpec("kuaishouHot", "kuaishouHot.py", "kuaishouHot.json", "article", 5, optional=True),
     CollectorSpec("xiaohongshu", "xiaohongshu.py", "xiaohongshu.json", "article", optional=True),
     CollectorSpec("githubTrending", "githubTrending.py", "githubTrending.json", "article", 3, group="archived"),
@@ -59,16 +59,17 @@ COLLECTORS = (
     CollectorSpec("douban", "douban.py", "movie.json", "movie", 10, 180, group="full"),
     CollectorSpec("leetCode", "leetCode.py", "leetCode", "leetcode", 1, 960, group="archived"),
     CollectorSpec("zhipin", "zhipin.py", "zhipin.json", "job", 3, 180, optional=True, group="full"),
-    CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True, group="archived"),
-    CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "authorized"),
-    CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 360, True, "full"),
+    CollectorSpec("kuaishou", "kuaishou.py", "kuaishouData.json", "video", 1, 120, True, group="qinglong"),  # 已迁移至青龙面板
+    CollectorSpec("tiktok", "tiktokData.py", "tiktok.json", "video", 1, 180, True, "qinglong"),              # 已迁移至青龙面板
+    CollectorSpec("bilibili", "bilibiliData.py", "bilibili.json", "video", 1, 360, True, "qinglong"),        # 已迁移至青龙面板
 )
 
 # Welfare and entertainment share one hourly selection and one workflow trigger.
 HOURLY_COLLECTORS = {
     "welfare", "0818tuan", "0818tuanTop", "zhuanyes", "zhuanyesTop",
     "daydayzhuan", "daydayzhuanTop", "zhujiceping", "hamibot", "xianyu", "keywordSearch",
-    "infzm", "weibo", "douyinHot", "xiaohongshu", "douban", "bilibili",
+    "infzm", "weibo", "xiaohongshu", "douban",
+    # bilibili 已迁移至青龙面板，不在 GHA hourly 中运行
 }
 
 
