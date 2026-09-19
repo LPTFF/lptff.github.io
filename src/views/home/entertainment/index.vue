@@ -26,7 +26,7 @@
             >
               {{ tab.label }}
               <span>{{ tab.count }}</span>
-              <CollectionStatusBadge :status="collectionStatuses[tab.key]" />
+              <CollectionStatusBadge v-if="tab.key !== 'bilibili'" :status="collectionStatuses[tab.key]" />
             </button>
           </div>
           <span class="filter-result" role="status" aria-live="polite" aria-atomic="true">
@@ -38,8 +38,8 @@
       <details ref="collectionDetails" class="source-details">
         <summary>更新范围与来源说明</summary>
         <p>追踪豆瓣动画、抖音作者作品与哔哩视频更新。</p>
-        <CollectionFreshness tab="entertainment" @change="collectionStatuses = $event" />
-        <p>豆瓣与 B 站公开内容和薅羊毛共用每小时采集任务；抖音作者改为插件授权采集。来源不可用时保留上次内容，授权结果仅在本机显示。</p>
+        <CollectionFreshness tab="entertainment" :excluded-platforms="['bilibili']" @change="collectionStatuses = $event" />
+        <p>B 站作者动态由青龙统一采集并发布快照；抖音作者仍由浏览器扩展授权采集。来源不可用时保留上次成功结果，抖音授权结果仅在本机显示。</p>
       </details>
     </section>
 
@@ -72,7 +72,6 @@ onMounted(() => {
   void recordFeatureView("entertainment");
   const cleanup = onAuthorizedContentUpdated(() => {
     douyinData.value = mergeAuthorizedItems("douyin", douyinSnapshot);
-    bilibiliData.value = bilibiliItemsFor("entertainment");
   });
   onUnmounted(cleanup);
 });

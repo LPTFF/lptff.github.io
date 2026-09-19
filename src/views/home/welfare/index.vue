@@ -61,10 +61,9 @@
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
             title="固定来源直采"
-            @click="selectedSource = source.id; revealCollection(source.id)"
+            @click="selectedSource = source.id"
           >
             {{ source.label }} <small>{{ source.count }}</small>
-            <CollectionStatusBadge :status="collectionStatuses[source.id.replace(/^direct:/, '')]" />
           </button>
         </div>
 
@@ -79,7 +78,7 @@
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
             :title="`Google RSS · site:${source.domain}`"
-            @click="selectedSource = source.id; revealCollection(source.id)"
+            @click="selectedSource = source.id"
           >
             {{ source.label }} <small>{{ source.count }}</small>
           </button>
@@ -91,14 +90,13 @@
         <summary>采集范围与更新规则</summary>
         <p>顶部统计为去重后的全部资讯；来源按钮数量按当前标签和观察视角统计，当前结果再叠加所选来源。固定来源与 Google 定向发现分别计数，同一平台的两种采集方式独立筛选。</p>
         <p>保留全部多路采集源资讯，由 Gemini 智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。</p>
-        <CollectionFreshness tab="welfare" @change="collectionStatuses = $event" />
         <ContentAnalysis domain="welfare" :items="welfareSource" @analyzed="applyAnalysis" />
-        <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新。这里指采集记录的新鲜度，不代表福利活动或登录状态的有效期；失败保留原内容。</p>
+        <p>固定来源由青龙按任务计划采集并发布快照；页面展示的是最近一次成功发布的数据，不代表福利活动或登录状态的有效期。</p>
         <div class="collector-detail-grid">
           <div>
             <strong>固定来源</strong>
             <p>
-              线报站筛选银行优惠与各类高优福利，主机站筛选年费不超过 20 美元的 VPS；闲鱼仅关注 115 网盘会员、迅雷会员和 QQ 阅读充值优惠；Hamibot 关注脚本市场畅销榜并接入 Gemini 生态标签。目前固定来源中仅 bilibili 需由本地用户手动执行采集，其余固定源均由自动化管线拉取并统一由 Gemini 标注生态属性。
+              线报站筛选银行优惠与各类高优福利，主机站筛选年费不超过 20 美元的 VPS；闲鱼仅关注 115 网盘会员、迅雷会员和 QQ 阅读充值优惠；Hamibot 关注脚本市场畅销榜。固定来源由青龙面板统一采集并完成基础生态标注，页面只负责展示已发布快照。
             </p>
             <div class="detail-sources">
               <span v-for="source in directCollectorSources" :key="source.id">{{ source.label }}</span>
@@ -161,7 +159,21 @@
               <div class="welfare-icon-hour">
                 <el-icon><Timer /></el-icon>
               </div>
-              <div>{{ handleHour(item) }}</div>
+              <div>
+                {{ handleHour(item) }}
+                <small
+                  v-if="item.timestampMeaning === 'source-discovered-at'"
+                  class="date-meaning"
+                  title="来源未提供发布时间，此处为本站首次发现时间"
+                  style="display: block; font-size: 11px; line-height: 1.5"
+                >首次发现</small>
+                <small
+                  v-else-if="item.website === 'hamibot' && !item.timestampMeaning"
+                  class="date-meaning"
+                  title="历史快照没有可靠的日期来源，等待自动采集更新"
+                  style="display: block; font-size: 11px; line-height: 1.5"
+                >日期待核实</small>
+              </div>
             </div>
             <div class="welfare-content-body">
               <a
@@ -233,19 +245,15 @@
 </template>
 
 <script lang="ts">
-import { ref, computed, reactive, watch, onMounted, onUnmounted } from "vue";
+import { ref, computed, reactive, watch, onMounted } from "vue";
 import { recordFeatureView, startTask, recordOutboundOpen, type TargetCategory } from "../../../utils/observation";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import ContentAnalysis from "../../../components/ContentAnalysis.vue";
-import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
-import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
-import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
 import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../data/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
-import { onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
 import tuanSource from "../../../data/welfare/0818tuan.json";
 import tuanTopSource from "../../../data/welfare/0818tuanTop.json";
 import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
@@ -314,7 +322,7 @@ for (const item of [...rawTopSource, ...rawInitSource]) {
   uniqueWelfare.push({
     ...item,
     link,
-    ecosystem: analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
+    ecosystem: (item as any).ecosystem || analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
   });
 }
 const welfareSource = reactive(uniqueWelfare.sort((a, b) => b.timestamp - a.timestamp));
@@ -324,36 +332,12 @@ export default {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
-    const indicators = useCollectionIndicators();
     const applyAnalysis = (results: any[]) => {
       for (const result of results) for (const item of welfareSource) {
         if (item.link === result.url) item.ecosystem = result.analysis;
       }
     };
     const logoUrl = logoImageUrl;
-
-    const reloadBilibili = () => {
-      const latestBili = bilibiliItemsFor("welfare");
-      for (let i = welfareSource.length - 1; i >= 0; i--) {
-        if (welfareSource[i].website === "bilibili") {
-          welfareSource.splice(i, 1);
-        }
-      }
-      for (const item of latestBili) {
-        const link = item.link || item.url;
-        welfareSource.push({
-          ...item,
-          link,
-          ecosystem: analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
-        });
-      }
-      welfareSource.sort((a, b) => b.timestamp - a.timestamp);
-    };
-
-    onMounted(() => {
-      const cleanup = onAuthorizedContentUpdated(reloadBilibili);
-      onUnmounted(cleanup);
-    });
 
     const welfareSourceCount = computed(() => welfareSource.length);
     const directSourceCount = computed(
@@ -725,7 +709,6 @@ export default {
       selectedCategory,
       logoUrl,
       selectedSource,
-      ...indicators,
       welfareSource,
       welfareSourceCount,
       directSourceCount,
@@ -751,8 +734,6 @@ export default {
     };
   },
   components: {
-    CollectionFreshness,
-    CollectionStatusBadge,
     ContentAnalysis,
     TagCategoryPicker,
     ElRow,

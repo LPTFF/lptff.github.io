@@ -21,7 +21,7 @@
           :disabled="!connected || isRunning || isAiAnalyzing"
           @click="startAll"
         >
-          一键采集刷新（全平台作者）
+          一键采集刷新（抖音作者）
         </button>
         <button
           type="button"
@@ -56,7 +56,7 @@
         >
           继续未完成作者
         </button>
-        <label class="auto-ai-toggle" title="全平台作者采集完成后，自动触发对待标注内容的 Gemini 分析">
+        <label class="auto-ai-toggle" title="抖音作者采集完成后，自动触发对待标注内容的 Gemini 分析">
           <input type="checkbox" v-model="autoAiAnalyze" @change="saveAutoAiOption" />
           <span>采集完成后自动执行 AI 分析</span>
         </label>
@@ -117,8 +117,8 @@
     </div>
 
     <p class="catalog-hint">
-      抖音作品进入“娱乐专区”；百科老王与国外主机测评进入薅羊毛“固定来源”，小迪老师进入安全社区“观察源”，杨博士说AI进入“娱乐专区”。
-      点击上方“一键 AI 分析待标注内容”可自动为全平台作者动态及全站待标注资讯批量生成 Gemini 生态标签与价值评级。
+      抖音作品进入“娱乐专区”；B 站由青龙统一采集，其中百科老王与国外主机测评进入薅羊毛“固定来源”，小迪老师进入安全社区“观察源”，杨博士说AI进入“娱乐专区”。
+      点击上方“一键 AI 分析待标注内容”可为本机待标注资讯批量生成 Gemini 生态标签与价值评级。
     </p>
 
     <!-- 全站 Gemini 配置 -->
@@ -202,7 +202,6 @@ const lastImportedVersion = ref(getSavedResultVersion());
 
 const platforms = [
   { id: "douyin", name: "抖音 · 作者作品", description: "李子栗、独孤十一。默认目标最近 50 条有效作品。" },
-  { id: "bilibili", name: "哔哩哔哩 · 作者动态", description: "百科老王、国外主机测评、小迪老师、杨博士说AI。默认目标最近 50 条有效动态。" },
 ];
 
 let timer: ReturnType<typeof setTimeout> | undefined;
@@ -289,7 +288,7 @@ async function checkAndAutoImport(newVersion: number, force = false) {
   if (newVersion > lastImportedVersion.value && (!isRunning.value || force)) {
     try {
       let importedCount = 0;
-      for (const p of ["douyin", "bilibili"]) {
+      for (const p of ["douyin"]) {
         const res = await authorizedRequest("RESULT", { platform: p });
         if (res.items) {
           const count = saveAuthorizedItems(p, res.items, res);
@@ -349,8 +348,8 @@ async function connect() {
 
 async function startAll() {
   try {
-    message.value = "正在一键调度全平台作者采集…";
-    await authorizedRequest("START_ALL");
+    message.value = "正在一键调度抖音作者采集…";
+    await authorizedRequest("START", { platform: "douyin" });
     await connect();
   } catch (error) {
     message.value = (error as Error).message;
@@ -359,8 +358,8 @@ async function startAll() {
 
 async function resumeTask() {
   try {
-    message.value = "正在继续采集未完成的作者…";
-    await authorizedRequest("RESUME");
+    message.value = "正在继续采集未完成的抖音作者…";
+    await authorizedRequest("RESUME", { platform: "douyin" });
     await connect();
   } catch (error) {
     message.value = (error as Error).message;
@@ -369,7 +368,7 @@ async function resumeTask() {
 
 async function start(platform: string) {
   try {
-    message.value = `正在采集 ${platform === "douyin" ? "抖音" : "B 站"} 作者作品…`;
+    message.value = "正在采集抖音作者作品…";
     await authorizedRequest("START", { platform });
     await connect();
   } catch (error) {
