@@ -14,10 +14,7 @@
 
 - `project-support/extension/lptff-investment-assistant/`
 - `project-support/scripts/`
-- `project-support/crawl/`
 - `project-support/public/`
-- `project-support/requirements-crawl.txt`
-- `project-support/build.sh`
 - `project-support/deploy/`
 
 ### `agent/` 维护工作台
@@ -38,12 +35,12 @@ project-support/ → 构建、CI、扩展发布和静态资源
 
 - `project-support/extension/lptff-investment-assistant/**`
 - `project-support/scripts/extension/build-zip.js`
-- `project-support/scripts/collectors/**`
-- `project-support/crawl/**`、`project-support/build.sh`
 - `project-support/public/**`
 - `src/data/**`、`src/assets/**`
 - `src/views/Blog/articles/**`、`src/data/career/**`、`src/data/findJobMarkDown/**`
-- `vite.config.ts`、`package.json`、`.github/workflows/ci.yml`
+- `vite.config.ts`、`package.json`、`.github/workflows/code-deployment.yml`
+
+公开采集代码已迁入私有 `qinglongBackup/src/site_crawlers/`；旧实现归档于该仓库的 `research/legacy-site-collectors/`。本仓库只消费 `python-crawl` 分支数据，页面关键词配置位于 `src/config/welfare-keywords.json`。
 
 这些路径被页面、Vite、package scripts 或 CI 调用。变更前先做调用图检查，不按目录名称判断能否迁移。
 

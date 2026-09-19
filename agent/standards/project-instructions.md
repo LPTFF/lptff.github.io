@@ -8,7 +8,7 @@
 - `npm run preview`：预览生产构建。
 - `npm run typecheck`：运行 Vue/TypeScript 类型检查。
 - `npm run build`：只执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由原 CI 步骤生成。
-- Python 采集按需直接运行 `project-support/crawl/run_collectors.py` 或 `project-support/build.sh`，不再通过 package scripts 转发。
+- 公开来源采集只在 qinglongBackup/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。
 
 命令是给维护者选择的工具，不是每次改动都必须执行的仪式。根据改动影响选择最能证明结果的检查。
 
@@ -30,7 +30,7 @@
 - `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试知识树与项目串联稿只保留 `src/views/Blog/articles/2026/` 下的博客源文件，投资脱敏快照只保留 `project-support/data-snapshots/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。
-- 除非任务确实涉及爬虫或部署，不运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
+- 除非任务确实涉及部署，不运行 `project-support/deploy/uploadQL.js`。历史采集脚本已归档到 qinglongBackup/research/legacy-site-collectors，不再从本站执行。
 
 ## 验证与交付
 

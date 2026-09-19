@@ -5,6 +5,14 @@ on:
     branches:
       - master
   workflow_dispatch:
+    inputs:
+      data_ref:
+        description: "拉取数据快照的目标分支"
+        required: false
+        default: "python-crawl"
+  repository_dispatch:
+    types:
+      - qinglong-data-updated
 
 permissions:
   contents: write
@@ -12,7 +20,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-deploy-${{ github.ref }}
+  group: pages-deploy
   cancel-in-progress: false
 
 jobs:
@@ -25,6 +33,7 @@ jobs:
       - name: 检出源码
         uses: actions/checkout@v7
         with:
+          ref: master
           fetch-depth: 0
 
       - name: 设置 Node.js
@@ -41,16 +50,21 @@ jobs:
       - name: 安装 Node 依赖
         run: npm ci
 
+      - name: 恢复已发布的数据快照
+        # 优先从指定分支（默认 python-crawl）拉取已验证的最新有效数据快照
+        env:
+          DATA_REF: ${{ github.event.inputs.data_ref || github.event.client_payload.data_ref || 'python-crawl' }}
+        run: |
+          set -euo pipefail
+          if [[ "$DATA_REF" != "python-crawl" && ! "$DATA_REF" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "Unsupported data reference"; exit 1
+          fi
+          git fetch --depth=1 origin "$DATA_REF"
+          git rev-parse FETCH_HEAD
+          git archive --format=tar FETCH_HEAD | tar -xf - -C src/data
+
       - name: 前端类型检查
         run: npm run typecheck
-
-      - name: 恢复已发布的数据快照
-        # 优先从 python-crawl 分支拉取已验证的最新有效数据快照
-        run: |
-          git fetch --depth=1 origin python-crawl || true
-          if git rev-parse --verify FETCH_HEAD >/dev/null 2>&1; then
-            git archive --format=tar FETCH_HEAD | tar -xf - -C src/data || true
-          fi
 
       - name: 验证前后端接口契约一致性
         run: node project-support/scripts/verify-backend-contract.cjs

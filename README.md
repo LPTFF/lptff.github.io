@@ -64,7 +64,7 @@ npm run build
 
 ## 公共数据采集与验收
 
-资讯文章页面已经归档，RSS 不再进入 Pages 的自动采集与发布链。历史采集器保留在 `project-support/scripts/collectors/rss/`，只在明确研究任务中手动运行；采集结果不再作为产品页面或构建依赖。归档理由与后续信息获取方式见博客文章《从搜索入口和资讯聚合到 AI 按需获取》。
+公开来源采集、AI 分类与数据发布由私有 qinglongBackup 仓库的青龙任务维护；本站只消费 python-crawl 分支的公开 JSON。旧 Python/RSS 采集源码已迁入该仓库 research/legacy-site-collectors，本站不再保留定时采集工作流。浏览器授权采集扩展继续保留。研究书签是站主通过 GitHub Issues 维护的公开内容同步，不执行外部站点爬取。
 
 ## 拼写检查
 
@@ -88,8 +88,7 @@ npm run build
 - `project-support/public/`：Vite 静态发布资源
 - `src/data/`：页面打包的数据快照
 - `src/data/career/`、`src/data/findJobMarkDown/`：不由一级页面直接消费的职业结构化资料与面试原文资产
-- `project-support/scripts/`：产品摘要同步、数据采集和构建辅助脚本
-- `project-support/crawl/`：Python 数据采集和 CI 发布链路
+- `project-support/scripts/`：产品摘要同步和构建辅助脚本
 - `project-support/extension/`：Chrome 多领域本地助手运行功能，包含 BOSS 真实市场现场能力
 - `project-support/deploy/`：手工部署工具
 - `agent/`：维护者的项目工作台，记录业务规划、产品设计、项目事实、研究材料和有长期价值的验收经验
@@ -100,7 +99,7 @@ npm run build
 
 GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；该文件是发布配置，不是页面业务源码。
 
-仓库还保留一个位于 `project-support/deploy/uploadQL.js` 的 SFTP 手动部署路径。除非明确进行部署工作，否则不要运行 `project-support/build.sh` 或 `project-support/deploy/uploadQL.js`。
+仓库还保留一个位于 `project-support/deploy/uploadQL.js` 的 SFTP 手动部署路径；仅在明确部署任务中使用。公开数据更新由青龙定期触发 master 上的 Pages 工作流。
 
 ## 依赖安全
 

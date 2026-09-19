@@ -263,7 +263,7 @@ import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
 import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
 import hamibotSource from "../../../data/welfare/hamibot.json";
 import keywordSearchSource from "../../../data/welfare/keyword-search.json";
-import keywordSearchConfig from "../../../../project-support/crawl/welfare/keyword_search_config.json";
+import keywordSearchConfig from "../../../config/welfare-keywords.json";
 import welfareRadar from "../../../data/welfare-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import { Calendar, Timer } from "@element-plus/icons-vue";
