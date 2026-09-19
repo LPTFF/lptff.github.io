@@ -22,11 +22,10 @@
               :class="{ active: activePlatform === tab.key }"
               type="button"
               :aria-pressed="activePlatform === tab.key"
-              @click="activePlatform = tab.key; revealCollection(tab.key)"
+              @click="activePlatform = tab.key"
             >
               {{ tab.label }}
               <span>{{ tab.count }}</span>
-              <CollectionStatusBadge v-if="tab.key !== 'bilibili'" :status="collectionStatuses[tab.key]" />
             </button>
           </div>
           <span class="filter-result" role="status" aria-live="polite" aria-atomic="true">
@@ -35,11 +34,10 @@
         </div>
       </section>
 
-      <details ref="collectionDetails" class="source-details">
+      <details class="source-details">
         <summary>更新范围与来源说明</summary>
         <p>追踪豆瓣动画、抖音作者作品与哔哩视频更新。</p>
-        <CollectionFreshness tab="entertainment" :excluded-platforms="['bilibili']" @change="collectionStatuses = $event" />
-        <p>B 站作者动态由青龙统一采集并发布快照；抖音作者仍由浏览器扩展授权采集。来源不可用时保留上次成功结果，抖音授权结果仅在本机显示。</p>
+        <p>页面仅展示服务器已发布快照，不读取本机采集缓存。抖音支持局域网插件桥接，以及配置完成后的服务器定时采集；桥接接收不等于已发布，启用情况以服务器任务状态为准。采集失败保留旧内容，快照不代表平台登录态或实时作品可用性。</p>
       </details>
     </section>
 
@@ -54,26 +52,19 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onUnmounted } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { recordFeatureView, startTask } from "../../../utils/observation";
-import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
-import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
-import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { isPC } from "../../../utils/utils";
 import movieData from "../../../data/movie.json";
 import douyinSnapshot from "../../../data/tiktok.json";
-import { mergeAuthorizedItems, onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
-const douyinData = ref(mergeAuthorizedItems("douyin", douyinSnapshot));
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
-const bilibiliData = ref(bilibiliItemsFor("entertainment"));
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
+
+const douyinData = ref(douyinSnapshot || []);
+const bilibiliData = ref(bilibiliItemsFor("entertainment"));
 
 onMounted(() => {
   void recordFeatureView("entertainment");
-  const cleanup = onAuthorizedContentUpdated(() => {
-    douyinData.value = mergeAuthorizedItems("douyin", douyinSnapshot);
-  });
-  onUnmounted(cleanup);
 });
 
 type PlatformFilter = "all" | EntertainmentPlatform;
@@ -82,7 +73,6 @@ const props = defineProps<{
   entertainmentLocation?: string | number;
 }>();
 
-const { collectionStatuses, collectionDetails, revealCollection } = useCollectionIndicators();
 const activePlatform = ref<PlatformFilter>("all");
 
 let hasInitPlatformWatch = false;
@@ -108,25 +98,24 @@ const timestampOf = (value: unknown) => {
 
 const movieBaseTime = 1788574763000; // 2026-09-05 10:19:23
 
-const movieItems: EntertainmentItem[] = movieData
+const movieItems: EntertainmentItem[] = (movieData as Array<Record<string, unknown>>)
   .map((movie, index) => ({
     key: `movie-${movie.id}`,
     id: String(movie.id),
     platform: "movie" as const,
-    title: movie.title,
-    coverUrl: movie.cover,
-    url: movie.url,
+    title: String(movie.title || ""),
+    coverUrl: String(movie.cover || ""),
+    url: String(movie.url || ""),
     actionLabel: "查看动画",
     primaryMetric: toNumber(movie.rate) ? `豆瓣 ${movie.rate}` : "暂无评分",
-    secondaryMetric: movie.episodes_info || (movie.is_new ? "新上榜" : "动画热度"),
+    secondaryMetric: (movie.episodes_info as string) || (movie.is_new ? "新上榜" : "动画热度"),
     qualityScore: toNumber(movie.rate),
     publishedAt: movieBaseTime - index * 1000,
     footerLabel: "豆瓣动画更新",
-    isNew: movie.is_new,
-  }))
-  .slice(0, 50);
+    isNew: Boolean(movie.is_new),
+  }));
 
-const douyinItems = computed<EntertainmentItem[]>(() => douyinData.value
+const douyinItems = computed<EntertainmentItem[]>(() => (douyinData.value as Array<Record<string, unknown>>)
   .map((video, index) => {
     const likeCount = toNumber("likeCount" in video ? video.likeCount : 0);
     const authorName = "authorName" in video ? String(video.authorName || "") : "关注作者";
@@ -134,8 +123,8 @@ const douyinItems = computed<EntertainmentItem[]>(() => douyinData.value
     return {
       key: `douyin-${video.timestamp}-${index}`,
       platform: "douyin" as const,
-      title: video.desc || "抖音作者更新",
-      coverUrl: video.captionUrl,
+      title: (video.desc as string) || "抖音作者更新",
+      coverUrl: (video.captionUrl as string) || "",
       url: detailUrl || ("authorPage" in video ? String(video.authorPage || "") : "https://www.douyin.com/"),
       actionLabel: detailUrl ? "查看更新" : "前往作者主页",
       primaryMetric: authorName,
@@ -145,8 +134,7 @@ const douyinItems = computed<EntertainmentItem[]>(() => douyinData.value
       footerLabel: "作者主页更新",
     };
   })
-  .sort((left, right) => right.publishedAt - left.publishedAt)
-  .slice(0, 24));
+  .sort((left, right) => right.publishedAt - left.publishedAt));
 
 const bilibiliItems = computed<EntertainmentItem[]>(() => (bilibiliData.value as Array<Record<string, unknown>>)
   .map((video, index) => {
@@ -168,8 +156,7 @@ const bilibiliItems = computed<EntertainmentItem[]>(() => (bilibiliData.value as
       footerLabel: "UP主动态更新",
     };
   })
-  .sort((left, right) => right.publishedAt - left.publishedAt)
-  .slice(0, 30));
+  .sort((left, right) => right.publishedAt - left.publishedAt));
 
 const itemsByPlatform = computed<Record<EntertainmentPlatform, EntertainmentItem[]>>(() => ({
   movie: movieItems,

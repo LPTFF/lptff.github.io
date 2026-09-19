@@ -7,7 +7,7 @@
         </div>
         <div class="radar-stats">
           <span>{{ newsGuide.length }} 条资讯</span>
-          <span>{{ analyzedCount }} 条 Gemini 已分析</span>
+          <span>{{ analyzedCount }} 条服务器已标注</span>
           <span>{{ categoryCount }} 个生态主题</span>
           <span title="统计全部资讯的细分标签，本机和定时采集共同计入">{{ tagCounts.size }} 个细分标签</span>
         </div>
@@ -37,25 +37,20 @@
             class="filter-tag"
             :class="{ active: selectedSource === source.id }"
             :aria-pressed="selectedSource === source.id"
-            @click="selectedSource = source.id; revealCollection(source.id)"
+            @click="selectedSource = source.id"
           >
             {{ source.label }} {{ source.count }}
-            <CollectionStatusBadge :status="collectionStatuses[source.id.replace(/^direct:/, '')]" />
           </button>
           <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
         </div>
       </div>
-      <details ref="collectionDetails" class="collector-details">
+      <details class="collector-details">
         <summary>Gemini 标签逻辑与更新规则</summary>
-        <CollectionFreshness tab="pojie" @change="collectionStatuses = $event" />
-        <ContentAnalysis domain="pojie" :items="newsGuide" @analyzed="applyAnalysis" />
-        <p>插件采集按每位作者上次成功检查的时间提醒：45 分钟后即将过期，1 小时后建议手动刷新；不以帖子发布时间判断，失败保留原内容。采集记录的新鲜度不代表登录状态的有效期。</p>
-        <p>吾爱破解与看雪采集后统一交由 Gemini 智能分析。模型根据帖子标题、来源和时间含义，从预设主题中选择分类，并生成摘要、评分、用途判断和相近主题分组；不读取帖子全文。</p>
+        <p>吾爱破解、看雪和 B 站小迪老师均由青龙统一采集。Gemini 在服务器侧统一分析并生成生态评分、技术深度与趋势评分，页面展示最近一次成功发布快照。来源失败时保留上一份有效快照。</p>
         <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
-        <p>观察视角按 Gemini 结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
-        <p>两个来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。看雪发帖时间来自公开帖子接口的原始创建时间，不使用采集时间、最后回复时间或“几天前”推算。</p>
-        <p>每日更新，来源异常时保留上次快照；日期与时分按原有样式展示。</p>
-        <p>分析结果经条目完整性、主题与评分校验后发布。Gemini 不可用时保留上次分析，尚无结果的帖子标为“生态信号待分析”，仍可在全部主题、全部视角中查看；这些标签是模型判断，不代表人工核实。</p>
+        <p>观察视角按服务器分析结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
+        <p>全部来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。发帖时间来自公开接口原始创建时间，不使用采集时间或推算。</p>
+        <p>每日定时更新，来源异常时保留上次有效快照。分析结果经条目完整性、主题与评分校验后发布。Gemini 不可用时保留上次分析或采用确定性规则降级，无分析结果条目标为“生态信号待分析”，仍可在全部主题和视角中查看；标签为自动化分析判断，不代表人工核实。</p>
       </details>
     </section>
     <div class="filter-empty" v-if="filteredNews.length === 0">
@@ -252,22 +247,16 @@
 </template>
 
 <script lang="ts">
-import { ref, nextTick, watch, computed, onMounted, onUnmounted } from "vue";
+import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
-import { onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
 import SourceIcon from "./SourceIcon.vue";
 import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
-import ContentAnalysis from "../../../components/ContentAnalysis.vue";
-import CollectionStatusBadge from "../../../components/CollectionStatusBadge.vue";
-import { useCollectionIndicators } from "../../../utils/useCollectionIndicators";
-import CollectionFreshness from "../../../components/CollectionFreshness.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
-import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis";
 import { reactive } from "vue";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
@@ -285,9 +274,6 @@ export default {
     pojieLocation: [String, Number],
   },
   components: {
-    CollectionFreshness,
-    CollectionStatusBadge,
-    ContentAnalysis,
     TagCategoryPicker,
     SourceIcon,
     ElCol,
@@ -302,14 +288,13 @@ export default {
     Timer,
   },
   setup(props: any) {
-    const indicators = useCollectionIndicators();
     const logoUrl = logoImageUrl;
     let dialogGuideVisible = ref(false);
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
     const ecosystemByUrl = new Map(
-      ecosystemRadar.items.map((item: any) => [item.url, item])
+      (ecosystemRadar.items || []).map((item: any) => [item.url, item])
     );
     const pojieItems = [...pojieNews]
       .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
@@ -320,40 +305,11 @@ export default {
     const bilibiliItems = bilibiliItemsFor("pojie")
       .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }));
     const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems]
-      .map(item => ({ ...item, ecosystem: analysisFor("pojie", item.url, item.title || "") || item.ecosystem }))
       .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
 
-    const reloadBilibili = () => {
-      const latestBili = bilibiliItemsFor("pojie");
-      for (let i = newsGuide.length - 1; i >= 0; i--) {
-        if (newsGuide[i].website === "bilibili") {
-          newsGuide.splice(i, 1);
-        }
-      }
-      for (const item of latestBili) {
-        const url = item.url || item.link;
-        newsGuide.push({
-          ...item,
-          url,
-          ecosystem: analysisFor("pojie", url, item.title || "") || ecosystemByUrl.get(url),
-        });
-      }
-      newsGuide.sort((a: any, b: any) => b.timestamp - a.timestamp || a.url.localeCompare(b.url));
-    };
-
-    onMounted(() => {
-      const cleanup = onAuthorizedContentUpdated(reloadBilibili);
-      onUnmounted(cleanup);
-    });
-
-    const applyAnalysis = (results: any[]) => {
-      for (const result of results) for (const item of newsGuide) {
-        if (item.url === result.url) item.ecosystem = result.analysis;
-      }
-    };
     const tagCounts = computed(() => countContentTags(newsGuide));
     const analyzedCount = computed(
-      () => newsGuide.filter((item: any) => hasContentAnalysis("pojie", item.ecosystem)).length
+      () => newsGuide.filter((item: any) => Boolean(item.ecosystem?.category)).length
     );
     const categoryCount = computed(
       () => new Set(newsGuide.map((item: any) => item.ecosystem?.category).filter(Boolean)).size
@@ -574,14 +530,12 @@ export default {
       return guideTmpAll;
     });
     return {
-      applyAnalysis,
       contentTags,
       tagCounts,
       sourceOptions,
       focusOptions,
       categoryOptions,
       selectedSource,
-      ...indicators,
       selectedFocus,
       selectedCategory,
       handleDay,

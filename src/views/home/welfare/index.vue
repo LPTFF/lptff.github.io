@@ -9,8 +9,8 @@
           <span><strong>{{ welfareSourceCount }}</strong> 条线报资讯</span>
           <span><strong>{{ directSourceCount }}</strong> 条固定来源</span>
           <span><strong>{{ directedSourceCount }}</strong> 条定向发现</span>
-          <span :title="'统计全部资讯的细分标签，本机和定时采集共同计入'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
-        </div>
+          <span :title="'统计全部资讯的细分标签，已由青龙统一完成分类标注'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
+      </div>
       </div>
 
       <div class="radar-filters">
@@ -89,9 +89,7 @@
       <details ref="collectionDetails" class="collector-details">
         <summary>采集范围与更新规则</summary>
         <p>顶部统计为去重后的全部资讯；来源按钮数量按当前标签和观察视角统计，当前结果再叠加所选来源。固定来源与 Google 定向发现分别计数，同一平台的两种采集方式独立筛选。</p>
-        <p>保留全部多路采集源资讯，由 Gemini 智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。</p>
-        <ContentAnalysis domain="welfare" :items="welfareSource" @analyzed="applyAnalysis" />
-        <p>固定来源由青龙按任务计划采集并发布快照；页面展示的是最近一次成功发布的数据，不代表福利活动或登录状态的有效期。</p>
+        <p>保留全部多路采集源资讯，由服务器端统一智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。页面展示的是最近一次成功发布的快照，不代表福利活动或登录状态的有效期。</p>
         <div class="collector-detail-grid">
           <div>
             <strong>固定来源</strong>
@@ -115,7 +113,7 @@
           </div>
         </div>
         <p class="collector-note">
-          保留全部采集源资讯并由 Gemini 智能标注；来源暂不可用时保留已有快照。参与条件与有效期请以原文为准。
+          保留全部采集源资讯并由服务端智能标注；来源暂不可用时保留已有快照。参与条件与有效期请以原文为准。
         </p>
       </details>
     </section>
@@ -195,7 +193,7 @@
                   size="small"
                   type="info"
                   v-for="sig in contentTags(item)"
-                  :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签（含本机分析）`"
+                  :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签`"
                   :key="sig"
                 >
                   {{ sig }} · {{ tagCounts.get(sig) || 0 }} 条
@@ -248,9 +246,7 @@
 import { ref, computed, reactive, watch, onMounted } from "vue";
 import { recordFeatureView, startTask, recordOutboundOpen, type TargetCategory } from "../../../utils/observation";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
-import ContentAnalysis from "../../../components/ContentAnalysis.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
-import { analysisFor, hasContentAnalysis } from "../../../utils/contentAnalysis";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import oldSource from "../../../data/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
@@ -322,7 +318,7 @@ for (const item of [...rawTopSource, ...rawInitSource]) {
   uniqueWelfare.push({
     ...item,
     link,
-    ecosystem: (item as any).ecosystem || analysisFor("welfare", link, item.title || "") || ecosystemByLink.get(link),
+    ecosystem: ecosystemByLink.get(link) || (item as any).ecosystem,
   });
 }
 const welfareSource = reactive(uniqueWelfare.sort((a, b) => b.timestamp - a.timestamp));
@@ -332,11 +328,6 @@ export default {
     welfareLocation: [String, Number],
   },
   setup(props: any) {
-    const applyAnalysis = (results: any[]) => {
-      for (const result of results) for (const item of welfareSource) {
-        if (item.link === result.url) item.ecosystem = result.analysis;
-      }
-    };
     const logoUrl = logoImageUrl;
 
     const welfareSourceCount = computed(() => welfareSource.length);
@@ -348,9 +339,6 @@ export default {
     );
 
     const tagCounts = computed(() => countContentTags(welfareSource));
-    const analyzedCount = computed(
-      () => welfareSource.filter((item: any) => hasContentAnalysis("welfare", item.ecosystem)).length
-    );
 
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
@@ -697,7 +685,6 @@ export default {
     });
 
     return {
-      applyAnalysis,
       contentTags,
       tagCounts,
       searchSources,
@@ -713,7 +700,6 @@ export default {
       welfareSourceCount,
       directSourceCount,
       directedSourceCount,
-      analyzedCount,
       selectedFilterLabel,
       directCollectorSources,
       collectorSources,
@@ -734,7 +720,6 @@ export default {
     };
   },
   components: {
-    ContentAnalysis,
     TagCategoryPicker,
     ElRow,
     ElCol,

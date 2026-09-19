@@ -59,6 +59,50 @@
   `;
   host.append(globalHeader);
 
+  const bridgePanel = document.createElement("section");
+  bridgePanel.className = "collection-card";
+  bridgePanel.innerHTML = `
+    <h2>家庭服务器自动同步</h2>
+    <p>采集完成后同步公开快照。凭据同步须单独开启，仅支持受信任证书的局域网 HTTPS。</p>
+    <p><label><input id="bridge-enabled" type="checkbox"> 自动同步公开快照</label></p>
+    <p><label>服务器地址 <input id="bridge-url" type="url" placeholder="https://192.168.1.100:5800"></label></p>
+    <p><label>配对密钥 <input id="bridge-secret" type="password" autocomplete="off" placeholder="保留已有密钥请留空"></label></p>
+    <p><label><input id="bridge-cookie" type="checkbox"> 同步抖音登录凭据（仅 HTTPS）</label></p>
+    <button id="bridge-save" type="button">保存同步设置</button>
+    <p id="bridge-status" role="status"></p>
+  `;
+  host.append(bridgePanel);
+  const bridgeEnabled = bridgePanel.querySelector("#bridge-enabled");
+  const bridgeUrl = bridgePanel.querySelector("#bridge-url");
+  const bridgeSecret = bridgePanel.querySelector("#bridge-secret");
+  const bridgeCookie = bridgePanel.querySelector("#bridge-cookie");
+  const bridgeSave = bridgePanel.querySelector("#bridge-save");
+  const bridgeStatus = bridgePanel.querySelector("#bridge-status");
+  const bridgeLabels = { disabled: "自动同步已关闭", idle: "尚未同步", synced: "快照已同步", "waiting-lan": "等待局域网连接", rejected: "服务器拒绝", "credential-failed": "快照已同步，凭据同步失败" };
+  async function refreshBridge() {
+    const info = await call("BRIDGE_STATUS");
+    bridgeEnabled.checked = info.enabled;
+    bridgeUrl.value = info.baseUrl || "";
+    bridgeCookie.checked = info.syncCookie;
+    bridgeStatus.textContent = `${bridgeLabels[info.status?.state] || "尚未同步"}${info.status?.itemCount ? ` · ${info.status.itemCount} 条` : ""}${info.hasSecret ? " · 已配置密钥" : " · 未配置密钥"}`;
+  }
+  bridgeSave.addEventListener("click", async () => {
+    bridgeSave.disabled = true;
+    try {
+      if (bridgeCookie.checked && !await chrome.permissions.request({ permissions: ["cookies"] })) {
+        throw new Error("未授权抖音 Cookie 读取，设置未保存");
+      }
+      await call("BRIDGE_SAVE", { config: {
+        enabled: bridgeEnabled.checked, baseUrl: bridgeUrl.value,
+        secret: bridgeSecret.value, syncCookie: bridgeCookie.checked,
+      } });
+      bridgeSecret.value = "";
+      await refreshBridge();
+    } catch (error) { bridgeStatus.textContent = error.message; }
+    finally { bridgeSave.disabled = false; }
+  });
+  refreshBridge().catch(() => { bridgeStatus.textContent = "桥接状态不可用"; });
+
   const startAllBtn = globalHeader.querySelector("#auth-start-all");
   const resumeBtn = globalHeader.querySelector("#auth-resume");
   const stopBtn = globalHeader.querySelector("#auth-stop");

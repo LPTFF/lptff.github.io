@@ -1,4 +1,4 @@
-﻿import { defineConfig, type Plugin } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import vue from "@vitejs/plugin-vue";
 import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
@@ -6,6 +6,82 @@ import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { live2dModelAssetsPlugin } from "./project-support/vite/live2d-model-assets";
 import fs from "node:fs";
+import path from "node:path";
+
+function getPublishedDataMeta(overrideDir: string) {
+  const metaPath = path.join(overrideDir, "snapshot-meta.json");
+  if (fs.existsSync(metaPath)) {
+    try {
+      return JSON.parse(fs.readFileSync(metaPath, "utf-8"));
+    } catch {}
+  }
+  return null;
+}
+
+const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin => {
+  const localDataDir = path.resolve(__dirname, "src/data");
+
+  if (isPublished) {
+    if (!fs.existsSync(overrideDir) || !fs.existsSync(path.join(overrideDir, "snapshot-meta.json"))) {
+      throw new Error(
+        "【发布快照模式】本地快照目录 .local/published-data/ 不存在或缺少 snapshot-meta.json！请先运行 npm run dev:published 恢复快照。"
+      );
+    }
+  }
+
+  return {
+    name: "lptff-published-data-resolver",
+    enforce: "pre",
+    resolveId(source, importer) {
+      if (!isPublished || !importer) return null;
+      try {
+        let candidate = "";
+        if (source.startsWith("@/data/")) {
+          candidate = path.resolve(localDataDir, source.slice("@/data/".length));
+        } else if (source.startsWith("./") || source.startsWith("../")) {
+          candidate = path.resolve(path.dirname(importer), source);
+        } else {
+          return null;
+        }
+
+        const normCandidate = candidate.replace(/\\/g, "/");
+        const normLocal = localDataDir.replace(/\\/g, "/");
+        if (normCandidate.startsWith(normLocal + "/")) {
+          const relPath = normCandidate.slice(normLocal.length).replace(/^\//, "");
+          const overrideFile = path.resolve(overrideDir, relPath);
+          if (fs.existsSync(overrideFile)) {
+            return overrideFile;
+          }
+          if (/^(?:52pojie(?:-ecosystem)?|kanxue|bilibili|welfare(?:-ecosystem)?|tiktok|movie)\.json$/.test(relPath) || relPath.startsWith("welfare/")) {
+            throw new Error(`发布快照缺少页面需要的数据：${relPath}`);
+          }
+        }
+      } catch (error) {
+        throw error;
+      }
+      return null;
+    },
+    configureServer(server) {
+      server.middlewares.use((req, res, next) => {
+        if (isPublished && req.url && req.url.startsWith("/data/")) {
+          const cleanUrl = req.url.split("?")[0];
+          const rel = cleanUrl.replace(/^\/data\//, "");
+          const target = path.resolve(overrideDir, rel);
+          if (target.startsWith(overrideDir + path.sep) && target.endsWith(".json") && fs.existsSync(target) && fs.statSync(target).isFile()) {
+            res.setHeader("Content-Type", "application/json; charset=utf-8");
+            fs.createReadStream(target).pipe(res);
+            return;
+          }
+        }
+        next();
+      });
+    },
+    transformIndexHtml() {
+      if (!isPublished) return [];
+      return [{ tag: "script", children: `window.__PUBLISHED_DATA_META__=${JSON.stringify(getPublishedDataMeta(overrideDir)).replace(/</g, "\\u003c")}`, injectTo: "head" }];
+    },
+  };
+};
 
 const extensionDownloadPlugin = (): Plugin => ({
   name: "lptff-extension-download",
@@ -32,25 +108,38 @@ const extensionDownloadPlugin = (): Plugin => ({
   },
 });
 
-export default defineConfig({
-  base: "/",
-  publicDir: "project-support/public",
-  plugins: [
-    live2dModelAssetsPlugin(),
-    extensionDownloadPlugin(),
-    AutoImport({
-      resolvers: [ElementPlusResolver({ importStyle: "css" })],
-    }),
-    Components({
-      resolvers: [ElementPlusResolver({ importStyle: "css" })],
-    }),
-    vue({
-      include: [/\.vue$/, /\.md$/],
-    }),
-    Markdown({
-      exclude: [/前端八股文汇总背诵版/],
-    }),
-  ],
+export default defineConfig(({ mode }) => {
+  const isPublished = mode === "published" || process.env.USE_PUBLISHED_DATA === "true";
+  const overrideDir = path.resolve(__dirname, ".local/published-data");
+
+  return {
+    base: "/",
+    publicDir: "project-support/public",
+    define: {
+      __PUBLISHED_DATA_META__: JSON.stringify(getPublishedDataMeta(overrideDir)),
+    },
+    plugins: [
+      publishedDataPlugin(isPublished, overrideDir),
+      live2dModelAssetsPlugin(),
+      extensionDownloadPlugin(),
+      AutoImport({
+        resolvers: [ElementPlusResolver({ importStyle: "css" })],
+      }),
+      Components({
+        resolvers: [ElementPlusResolver({ importStyle: "css" })],
+      }),
+      vue({
+        include: [/\.vue$/, /\.md$/],
+      }),
+      Markdown({
+        exclude: [/前端八股文汇总背诵版/],
+      }),
+    ],
+    preview: {
+      port: 4173,
+      host: "127.0.0.1",
+    },
+
   server: {
     cors: true,
     open: false,
@@ -112,4 +201,5 @@ export default defineConfig({
     },
     chunkSizeWarningLimit: 200,
   },
+};
 });

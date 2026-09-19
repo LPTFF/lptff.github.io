@@ -26,6 +26,8 @@ const extFiles = [
   path.join(extensionDir, 'manifest.json'),
   path.join(extensionDir, 'background.js'),
   path.join(extensionDir, 'authorized-content.js'),
+  path.join(extensionDir, 'lan-bridge-sync.js'),
+  path.join(extensionDir, 'popup/authorized-panel.js'),
   path.join(extensionDir, 'content/web-bridge.js'),
 ];
 const extDigest = computeDigest(extFiles);
@@ -35,6 +37,10 @@ const extBuildTag = `cand-3.25.0-${extDigest}`;
 const webFiles = [
   path.join(projectRoot, 'src/utils/authorizedContent.ts'),
   path.join(projectRoot, 'src/views/home/entertainment/component/AuthorizedCollection.vue'),
+  path.join(projectRoot, 'src/views/home/52pojie/index.vue'),
+  path.join(projectRoot, 'src/views/home/welfare/index.vue'),
+  path.join(projectRoot, 'src/views/home/entertainment/index.vue'),
+  path.join(projectRoot, 'vite.config.ts'),
 ];
 const webDigest = computeDigest(webFiles);
 const webBuildTag = `cand-web-${webDigest}`;

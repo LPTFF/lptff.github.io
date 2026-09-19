@@ -1,6 +1,7 @@
 importScripts(
   "build-info.js",
   "local-ai.js",
+  "lan-bridge-sync.js",
   "authorized-content.js",
   "boss-playbook.js",
   "source-capture.js",

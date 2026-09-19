@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "LPTFF 本地助手",
   "version": "3.25.0",
-  "description": "本机授权采集：支持基金与币安合约来源采集、BOSS 求职助手、指定内容来源全并行采集和共享 Gemini 配置。登录态留在来源页面，结果仅保存在本机。",
+  "description": "本机授权采集：支持投资来源、BOSS 求职助手、指定内容来源和共享 Gemini 配置。可单独启用抖音内网快照同步；Cookie 同步须另行授权，且仅支持 HTTPS 内网服务。",
   "permissions": [
     "activeTab",
     "alarms",
@@ -14,6 +14,7 @@
     "scripting",
     "declarativeNetRequest"
   ],
+  "optional_permissions": ["cookies"],
   "host_permissions": [
     "https://fund.eastmoney.com/*",
     "https://fundf10.eastmoney.com/*",

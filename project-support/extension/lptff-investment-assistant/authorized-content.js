@@ -1,4 +1,4 @@
-/* Fixed-author collection: source-page session only, no Cookie export or cloud write. */
+/* Fixed-author collection: source-page session with an optional signed LAN bridge. */
 (() => {
   const CONTENT_KEY = "lptffAuthorizedContentV1";
   const TASK_KEY = "lptffAuthorizedContentTaskSnapshot";
@@ -746,6 +746,14 @@
           },
         };
         await chrome.storage.local.set({ [CONTENT_KEY]: nextStored });
+        const freshPages = new Set(authors.filter((a) => a.platform === "douyin" && a.status === "completed" && a.lastSuccessAt >= startTime).map((a) => sourceUrl(a)));
+        const bridgeItems = platformItems.douyin.filter((item) => freshPages.has(item.authorPage));
+        if (platformsToRun.includes("douyin") && bridgeItems.length && globalThis.LPTFFDouyinBridge) {
+          await globalThis.LPTFFDouyinBridge.syncAfterCollection(
+            bridgeItems,
+            nextStored.douyin.sources,
+          );
+        }
         snapshot.resultVersion = nextVersion;
       }
 
@@ -788,6 +796,14 @@
         const mode = ["finance", "market", "entertainment"].includes(message.mode) ? message.mode : "entertainment";
         await chrome.tabs.create({ url: chrome.runtime.getURL(`popup/popup.html?mode=${mode}`) });
         return { ok: true };
+      }
+      if (message.type === "AUTHORIZED_CONTENT_BRIDGE_STATUS") {
+        if (!sender.url?.startsWith(chrome.runtime.getURL("popup/")) || sender.id !== chrome.runtime.id) throw new Error("仅扩展设置可操作桥接");
+        return { ok: true, ...(await globalThis.LPTFFDouyinBridge.status()) };
+      }
+      if (message.type === "AUTHORIZED_CONTENT_BRIDGE_SAVE") {
+        if (!sender.url?.startsWith(chrome.runtime.getURL("popup/")) || sender.id !== chrome.runtime.id) throw new Error("仅扩展设置可操作桥接");
+        return { ok: true, ...(await globalThis.LPTFFDouyinBridge.saveConfig(message.config || {})) };
       }
 
       // 2. 状态查询（包含持久化任务快照与各平台摘要）
