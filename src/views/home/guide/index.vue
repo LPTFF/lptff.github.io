@@ -7,13 +7,8 @@
         </div>
         <div class="radar-stats">
           <span>{{ totalNewsCount }} 条资讯</span>
-          <span>{{ analyzedCount }} 条 Gemini 已分析</span>
+          <span>{{ analyzedCount }} 条服务器已标注</span>
           <span>{{ categoryOptions.length }} 个生态主题</span>
-          <span class="health-meta-badge" v-if="sourceHealth">
-            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
-          </span>
         </div>
       </section>
       <section class="radar-filters" aria-label="热门资讯生态筛选">
@@ -65,12 +60,17 @@
         </div>
       </section>
       <details class="collector-details">
-        <summary>Gemini 标签逻辑与更新规则</summary>
+        <summary>服务端标签逻辑与更新规则</summary>
+        <div class="health-meta-badge details-health-meta" v-if="sourceHealth" aria-label="当前采集与发布状态">
+          <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+        </div>
         <p>汇集抖音热榜、快手热榜、微博热搜、小红书公开发现与南方周末，观察公共注意力、生活趋势和深度议题。</p>
-        <p>这 5 个观察源统一由 Gemini 3.5 智能模型进行语义理解，生成生态主题分类与观察摘要。</p>
+        <p>这 5 个观察源由服务端统一分析，优先使用经实测选定的 Gemini 模型生成生态主题与观察摘要；模型不可用时使用确定性规则降级。</p>
         <p>模型根据各平台新闻标题、事件背景及跨平台热度，归类至政务与时事、社会与民生、科技与产业、文娱与影视、消费与生活、教育与职场、财经与商业、体育与竞技、深度特稿与网络潮流 10 大生态主题，真实反映当下公共注意力分布。</p>
-        <p>观察视角根据 Gemini 分析结果生成：跨来源共振＝同一主题在 2 个及以上来源同时上榜发酵；热榜前列＝各平台 Top 10 核心关注；深度特稿＝南方周末深度调查特稿与事件背景追踪。</p>
-        <p>列表严格按最新发布与采集时间倒序呈现，各来源保留原始榜单名次与热度值；数据随采集流水线由 Gemini 每日自动分析并更新发布。</p>
+        <p>观察视角根据服务端分析结果生成：跨来源共振＝同一主题在 2 个及以上来源同时上榜发酵；热榜前列＝各平台 Top 10 核心关注；深度特稿＝南方周末深度调查特稿与事件背景追踪。</p>
+        <p>列表严格按最新发布与采集时间倒序呈现，各来源保留原始榜单名次与热度值；数据随采集流水线自动分析并更新发布。</p>
       </details>
     </div>
     <div class="filter-empty" v-if="filteredNews.length === 0">
@@ -451,6 +451,7 @@ export default {
         return {
           ...item,
           website: item.website || source.id,
+          analysisMatched: Boolean(eco),
           ecosystem: {
             category,
             isTop,
@@ -475,7 +476,7 @@ export default {
 
     const totalNewsCount = newsGuide.length;
     const analyzedCount = computed(
-      () => newsGuide.filter((item: any) => item.ecosystem).length
+      () => newsGuide.filter((item: any) => item.analysisMatched).length
     );
     const sourceFilters = sourceDefinitions.map((source) => ({
       id: source.id,
@@ -793,7 +794,7 @@ export default {
 
     const sourceHealth = computed(() => getSourceHealth("guide") || getSourceHealth("douyinHot"));
     const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode || "server-https"));
-    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode || "gemini", sourceHealth.value?.model || "gemini-3.5-flash-lite"));
+    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode, sourceHealth.value?.model));
     const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
 
     return {
@@ -894,7 +895,10 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
+  flex-wrap: wrap;
+}
+.details-health-meta {
+  margin: 10px 0 2px;
 }
 .radar-filters {
   min-width: 0;

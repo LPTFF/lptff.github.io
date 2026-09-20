@@ -14,7 +14,7 @@ export interface SnapshotSourceInfo {
   contentLatestAt: string | null;
   itemCount: number;
   state: "fresh" | "unchanged" | "preserved" | "failed" | string;
-  analysisMode: "gemini" | "rule-fallback" | "none" | string | null;
+  analysisMode: "gemini" | "mixed" | "rule-fallback" | "none" | string | null;
   model: string | null;
   reason: string | null;
 }
@@ -67,7 +67,14 @@ export function formatAnalysisMode(
   tagType: "success" | "warning" | "info" | "primary" | "danger";
   isAi: boolean;
 } {
-  if (analysisMode === "gemini" || (model && model.includes("gemini"))) {
+  if (analysisMode === "mixed") {
+    return {
+      label: "Gemini + 规则混合标注",
+      tagType: "warning",
+      isAi: true,
+    };
+  }
+  if (analysisMode === "gemini") {
     const modelShort = model?.replace(/^gemini-/, "") || "3.5-flash-lite";
     return {
       label: `Gemini AI · ${modelShort}`,
@@ -89,6 +96,14 @@ export function formatAnalysisMode(
       isAi: false,
     };
   }
+  if (!analysisMode && model?.includes("gemini")) {
+    const modelShort = model.replace(/^gemini-/, "");
+    return {
+      label: `Gemini AI · ${modelShort}`,
+      tagType: "success",
+      isAi: true,
+    };
+  }
   return {
     label: "未标注",
     tagType: "info",
@@ -96,7 +111,7 @@ export function formatAnalysisMode(
   };
 }
 
-export function formatFreshness(isoString: string | null | undefined): {
+export function formatFreshness(isoString: string | number | null | undefined): {
   label: string;
   isExpired: boolean;
   tagType: "success" | "warning" | "danger" | "info";
@@ -106,6 +121,9 @@ export function formatFreshness(isoString: string | null | undefined): {
   }
 
   const date = new Date(isoString);
+  if (Number.isNaN(date.getTime())) {
+    return { label: "时间未知", isExpired: true, tagType: "info" };
+  }
   const diffMs = Date.now() - date.getTime();
   const diffHours = diffMs / (1000 * 60 * 60);
 

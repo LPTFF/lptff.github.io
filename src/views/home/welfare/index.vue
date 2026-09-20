@@ -9,12 +9,7 @@
           <span><strong>{{ welfareSourceCount }}</strong> 条线报资讯</span>
           <span><strong>{{ directSourceCount }}</strong> 条固定来源</span>
           <span><strong>{{ directedSourceCount }}</strong> 条定向发现</span>
-          <span :title="'统计全部资讯的细分标签，已由家庭服务器与Gemini统一完成分类标注'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
-          <span class="health-meta-badge" v-if="sourceHealth">
-            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
-          </span>
+          <span title="统计服务端已完成标注的细分标签；Gemini 不可用时使用规则引擎降级"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
         </div>
       </div>
 
@@ -93,6 +88,11 @@
       <!-- 采集规则说明展开 -->
       <details ref="collectionDetails" class="collector-details">
         <summary>采集范围与更新规则</summary>
+        <div class="health-meta-badge details-health-meta" v-if="sourceHealth" aria-label="当前采集与发布状态">
+          <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+        </div>
         <p>顶部统计为去重后的全部资讯；来源按钮数量按当前标签和观察视角统计，当前结果再叠加所选来源。固定来源与 Google 定向发现分别计数，同一平台的两种采集方式独立筛选。</p>
         <p>保留全部多路采集源资讯，由服务器端统一智能标注权益类型与福利信号；涵盖固定线报直采与 Google 定向发现。页面展示的是最近一次成功发布的快照，不代表福利活动或登录状态的有效期。</p>
         <div class="collector-detail-grid">
@@ -211,7 +211,7 @@
                 </el-tag>
               </div>
               <div class="ecosystem-tags" v-else>
-                <el-tag size="small" type="info">规则标注中</el-tag>
+                <el-tag size="small" type="info">待服务器标注</el-tag>
               </div>
               <div class="ecosystem-summary" v-if="item.ecosystem && item.ecosystem.summary">
                 {{ item.ecosystem.summary }}
@@ -314,45 +314,6 @@ const ecosystemByLink = new Map(
   ((welfareRadar as any).items || []).map((item: any) => [item.link, item])
 );
 
-function fallbackEcosystem(title: string) {
-  let category = "待分类";
-  const signals: string[] = [];
-  let isBankOffer = false;
-  if (/银行|建行|工行|招行|农行|中行|交行|邮储|平安银行|浦发|中信|光大|民生|广发|华夏/.test(title)) {
-    category = "银行优惠";
-    signals.push("银行活动");
-    isBankOffer = true;
-  } else if (/话费|充值|流量|网费/.test(title)) {
-    category = "话费流量";
-    signals.push("话费立减");
-  } else if (/抽奖|签到|红包|转盘|盲盒/.test(title)) {
-    category = "抽奖签到";
-    signals.push("抽奖红包");
-  } else if (/立减|立减金|云闪付|微信支付|支付宝|返现/.test(title)) {
-    category = "支付立减";
-    signals.push("支付立减");
-  } else if (/生鲜|大米|水果|零食|牛奶|鸡蛋|食品|粮油|饼干|肉/.test(title)) {
-    category = "食品生鲜";
-    signals.push("食品特惠");
-  } else if (/会员|网盘|腾讯视频|爱奇艺|优酷|哔哩哔哩|115|迅雷/.test(title)) {
-    category = "影音会员";
-    signals.push("会员折扣");
-  } else if (/vps|服务器|云服务|域名|主机/i.test(title)) {
-    category = "数码科技";
-    signals.push("云服务器特惠");
-  }
-
-  return {
-    category,
-    welfareValue: 30,
-    difficulty: 30,
-    signals,
-    isBankOffer,
-    analysisMode: "rule-fallback",
-    modelUsed: "rule-fallback",
-  };
-}
-
 const rawInitSource = [
   ...bilibiliItemsFor("welfare"),
   ...oldSource,
@@ -384,8 +345,7 @@ for (const item of [...rawTopSource, ...rawInitSource]) {
   const matchedEco =
     (stableId && ecosystemByStableId.get(stableId)) ||
     ecosystemByLink.get(link) ||
-    (item as any).ecosystem ||
-    fallbackEcosystem((item as any).title || "");
+    (item as any).ecosystem;
 
   uniqueWelfare.push({
     ...item,
@@ -418,7 +378,7 @@ export default {
     const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
 
     function formatAnalysisBadge(eco: any) {
-      if (!eco) return "规则引擎";
+      if (!eco) return "待服务器标注";
       if (eco.modelUsed?.includes("gemini") || eco.analysisMode === "gemini" || eco.model?.includes("gemini")) {
         const m = eco.modelUsed || eco.model || "3.5-flash-lite";
         return `AI · ${m.replace(/^gemini-/, "")}`;
@@ -870,7 +830,10 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
+  flex-wrap: wrap;
+}
+.details-health-meta {
+  margin: 10px 0 2px;
 }
 .radar-stats strong {
   color: #3471c9;

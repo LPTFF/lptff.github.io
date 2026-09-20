@@ -8,10 +8,6 @@
         <div class="overview-stats" aria-label="内容来源概览">
           <span><strong>{{ contentCount }}</strong> 条内容</span>
           <span><strong>{{ platformCount }}</strong> 个来源</span>
-          <span class="health-meta-badge" v-if="activePlatformHealth">
-            <span class="health-chip" :class="activePlatformHealth.mode.tagType">{{ activePlatformHealth.mode.label }}</span>
-            <span class="health-chip" :class="activePlatformHealth.freshness.tagType">{{ activePlatformHealth.freshness.label }}</span>
-          </span>
         </div>
       </header>
 
@@ -40,8 +36,13 @@
 
       <details class="source-details">
         <summary>更新范围与来源说明</summary>
+        <div class="health-meta-badge details-health-meta" v-if="activePlatformHealth" aria-label="当前采集与发布状态">
+          <span class="health-chip" :class="activePlatformHealth.mode.tagType">{{ activePlatformHealth.mode.label }}</span>
+          <span class="health-chip" :class="activePlatformHealth.freshness.tagType">{{ activePlatformHealth.freshness.label }}</span>
+        </div>
         <p>追踪豆瓣动画、抖音作者作品与哔哩视频更新。</p>
-        <p>页面仅展示服务器已发布快照，不读取本机采集缓存。抖音支持局域网插件桥接，以及配置完成后的服务器定时采集；桥接接收不等于已发布，启用情况以服务器任务状态为准。采集失败保留旧内容，快照不代表平台登录态或实时作品可用性。</p>
+        <p>豆瓣动画与哔哩视频展示服务器发布快照；抖音在服务器快照基础上合并当前浏览器最近一次插件采集结果。已配置家庭服务器桥接时，插件结果还会同步等待统一校验与发布；本机已更新不等于服务器已经发布。采集失败时保留上一份有效内容。</p>
+        <AuthorizedCollection />
       </details>
     </section>
 
@@ -56,21 +57,29 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted } from "vue";
+import { computed, ref, watch, onMounted, onUnmounted } from "vue";
 import { recordFeatureView, startTask } from "../../../utils/observation";
 import { isPC } from "../../../utils/utils";
 import { getSourceHealth, formatCollectionMode, formatFreshness } from "../../../utils/sourceHealth";
 import movieData from "../../../data/movie.json";
 import douyinSnapshot from "../../../data/tiktok.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
+import { authorizedCollectionMeta, mergeAuthorizedItems, onAuthorizedContentUpdated } from "../../../utils/authorizedContent";
 import EntertainmentCard, { type EntertainmentItem, type EntertainmentPlatform } from "./component/EntertainmentCard.vue";
+import AuthorizedCollection from "./component/AuthorizedCollection.vue";
 
-const douyinData = ref(douyinSnapshot || []);
+const douyinData = ref(mergeAuthorizedItems("douyin", douyinSnapshot || []));
 const bilibiliData = ref(bilibiliItemsFor("entertainment"));
+let stopAuthorizedContentListener: (() => void) | undefined;
 
 onMounted(() => {
   void recordFeatureView("entertainment");
+  stopAuthorizedContentListener = onAuthorizedContentUpdated(() => {
+    douyinData.value = mergeAuthorizedItems("douyin", douyinSnapshot || []);
+  });
 });
+
+onUnmounted(() => stopAuthorizedContentListener?.());
 
 type PlatformFilter = "all" | EntertainmentPlatform;
 
@@ -79,6 +88,7 @@ const props = defineProps<{
 }>();
 
 const activePlatform = ref<PlatformFilter>("all");
+const doubanHealth = getSourceHealth("douban");
 
 let hasInitPlatformWatch = false;
 watch(activePlatform, () => {
@@ -102,14 +112,14 @@ const timestampOf = (value: unknown) => {
 };
 
 const movieItems: EntertainmentItem[] = (movieData as Array<Record<string, unknown>>)
-  .map((movie, index) => {
+  .map((movie) => {
     let pubTime = 0;
     if (movie.collectedAt) {
       pubTime = new Date(String(movie.collectedAt)).getTime();
     } else if (movie.timestamp) {
       pubTime = timestampOf(movie.timestamp);
-    } else {
-      pubTime = Date.now() - index * 1000;
+    } else if (doubanHealth?.collectedAt) {
+      pubTime = new Date(doubanHealth.collectedAt).getTime();
     }
     return {
       key: `movie-${movie.id}`,
@@ -123,7 +133,7 @@ const movieItems: EntertainmentItem[] = (movieData as Array<Record<string, unkno
       secondaryMetric: (movie.episodes_info as string) || (movie.is_new ? "新上榜" : "动画热度"),
       qualityScore: toNumber(movie.rate),
       publishedAt: pubTime,
-      footerLabel: "豆瓣近期热门动画",
+      footerLabel: pubTime ? "豆瓣近期热门动画" : "采集时间未知",
       isNew: Boolean(movie.is_new),
     };
   });
@@ -185,9 +195,14 @@ const platformCount = computed(() => Object.values(itemsByPlatform.value).filter
 const activePlatformHealth = computed(() => {
   if (activePlatform.value === "douyin") {
     const h = getSourceHealth("tiktok");
+    const local = authorizedCollectionMeta("douyin");
     return {
       mode: formatCollectionMode("plugin-bridge"),
-      freshness: formatFreshness(h?.collectedAt || (douyinSnapshot?.[0] as any)?.timestamp),
+      freshness: formatFreshness(Math.max(
+        Date.parse(h?.collectedAt || "") || 0,
+        Number(local.updatedAt) || 0,
+        Number((douyinSnapshot?.[0] as any)?.timestamp) || 0,
+      )),
     };
   }
   if (activePlatform.value === "bilibili") {
@@ -320,7 +335,11 @@ function interleave(...groups: EntertainmentItem[][]) {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
+  flex-wrap: wrap;
+}
+
+.details-health-meta {
+  margin: 10px 0 2px;
 }
 
 .health-chip {

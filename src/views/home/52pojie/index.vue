@@ -10,11 +10,6 @@
           <span>{{ analyzedCount }} 条服务器已标注</span>
           <span>{{ categoryCount }} 个生态主题</span>
           <span title="统计全部资讯的细分标签，本机和定时采集共同计入">{{ tagCounts.size }} 个细分标签</span>
-          <span class="health-meta-badge" v-if="sourceHealth">
-            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
-            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
-          </span>
         </div>
       </div>
       <div class="radar-filters">
@@ -50,8 +45,13 @@
         </div>
       </div>
       <details class="collector-details">
-        <summary>Gemini 标签逻辑与更新规则</summary>
-        <p>吾爱破解、看雪和 B 站小迪老师均由青龙统一采集。Gemini 在服务器侧统一分析并生成生态评分、技术深度与趋势评分，页面展示最近一次成功发布快照。来源失败时保留上一份有效快照。</p>
+        <summary>服务端标签逻辑与更新规则</summary>
+        <div class="health-meta-badge details-health-meta" v-if="sourceHealth" aria-label="当前采集与发布状态">
+          <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+          <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+        </div>
+        <p>吾爱破解、看雪和 B 站小迪老师均由青龙统一采集。服务端优先使用 Gemini 生成生态评分、技术深度与趋势评分，页面展示最近一次成功发布快照。来源失败时保留上一份有效快照。</p>
         <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
         <p>观察视角按服务器分析结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
         <p>全部来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。发帖时间来自公开接口原始创建时间，不使用采集时间或推算。</p>
@@ -555,9 +555,9 @@ export default {
       return guideTmpAll;
     });
 
-    const sourceHealth = computed(() => getSourceHealth("52pojie") || getSourceHealth("kanxue"));
+    const sourceHealth = computed(() => getSourceHealth("52pojie-ecosystem") || getSourceHealth("52pojie") || getSourceHealth("kanxue"));
     const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode || "server-https"));
-    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode || "gemini", sourceHealth.value?.model || "gemini-3.5-flash-lite"));
+    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode, sourceHealth.value?.model));
     const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
 
     return {
@@ -656,7 +656,10 @@ export default {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin-left: 6px;
+  flex-wrap: wrap;
+}
+.details-health-meta {
+  margin: 10px 0 2px;
 }
 .radar-filters {
   margin-top: 12px;

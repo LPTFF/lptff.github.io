@@ -165,12 +165,13 @@ export function mergeAuthorizedItems(platform: string, snapshot: Item[]): Item[]
 
 export function onAuthorizedContentUpdated(callback: () => void): () => void {
   const handler = () => callback();
+  const storageHandler = (event: StorageEvent) => {
+    if (event.key === KEY) callback();
+  };
   window.addEventListener("lptff-authorized-content-updated", handler);
-  window.addEventListener("storage", (e) => {
-    if (e.key === KEY) callback();
-  });
+  window.addEventListener("storage", storageHandler);
   return () => {
     window.removeEventListener("lptff-authorized-content-updated", handler);
-    window.removeEventListener("storage", handler);
+    window.removeEventListener("storage", storageHandler);
   };
 }
