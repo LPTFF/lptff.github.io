@@ -24,6 +24,7 @@
 | 页面、数据或部署验收 | [真实环境验收原则](standards/trusted-verification.md) |
 | 页面交互、滚动条与动态加载验收 | [浏览器 UI 验收指南](verification/browser-ui-validation.md) |
 | 外部资讯源、AI 筛选或定时采集接入 | [外部资讯源接入手册](verification/external-content-source-integration.md) |
+| 青龙采集迁移、旧定时器关闭或快照发布验收 | [青龙迁移与快照消费指南](verification/qinglong-snapshot-migration.md)（迁移后的采集责任边界优先看此文） |
 | BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |
 | Web 与扩展桥接验收 | [Web 与扩展桥接验收指南](verification/chrome-extension-web-bridge-validation.md) |
 | 代码或产品组织 | [代码组织](standards/code-organization.md)、[产品设计](standards/product-design.md) |
