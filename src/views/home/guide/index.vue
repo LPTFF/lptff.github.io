@@ -9,6 +9,11 @@
           <span>{{ totalNewsCount }} 条资讯</span>
           <span>{{ analyzedCount }} 条 Gemini 已分析</span>
           <span>{{ categoryOptions.length }} 个生态主题</span>
+          <span class="health-meta-badge" v-if="sourceHealth">
+            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+          </span>
         </div>
       </section>
       <section class="radar-filters" aria-label="热门资讯生态筛选">
@@ -248,6 +253,12 @@ import {
   ElTag,
 } from "element-plus";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
+import {
+  getSourceHealth,
+  formatCollectionMode,
+  formatAnalysisMode,
+  formatFreshness,
+} from "../../../utils/sourceHealth";
 export default {
   props: {
     guideLocation: [String, Number],
@@ -303,6 +314,11 @@ export default {
         items: infzmNews as any[],
       },
     ];
+    const ecosystemByStableId = new Map<string, any>(
+      ((guideEcosystem as any).items || [])
+        .filter((item: any) => item.stableId)
+        .map((item: any) => [item.stableId, item])
+    );
     const ecosystemByUrl = new Map<string, any>(
       ((guideEcosystem as any).items || []).map((item: any) => [item.url, item])
     );
@@ -407,7 +423,7 @@ export default {
     const sourceDefinitions = rawSourceDefinitions.map((source) => ({
       ...source,
       items: source.items.map((item) => {
-        const eco = ecosystemByUrl.get(item.url) as any;
+        const eco = (((item as any).stableId && ecosystemByStableId.get((item as any).stableId)) || ecosystemByUrl.get(item.url)) as any;
         const category = eco?.category || classifyTopic(item);
         const isTop = eco
           ? eco.isTop
@@ -774,6 +790,12 @@ export default {
       );
       return guideTmpAll;
     });
+
+    const sourceHealth = computed(() => getSourceHealth("guide") || getSourceHealth("douyinHot"));
+    const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode || "server-https"));
+    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode || "gemini", sourceHealth.value?.model || "gemini-3.5-flash-lite"));
+    const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
+
     return {
       xiaohongshuNewsCount,
       kuaishouNewsCount,
@@ -808,6 +830,10 @@ export default {
       categoryOptions,
       focusOptions,
       filteredNews,
+      sourceHealth,
+      collectionModeInfo,
+      analysisModeInfo,
+      freshnessInfo,
     };
   },
 };
@@ -856,11 +882,19 @@ export default {
 }
 .radar-stats {
   display: flex;
+  align-items: center;
   flex-shrink: 0;
   gap: 14px;
   color: #4a74ad;
   font-size: 13px;
   font-weight: 600;
+  flex-wrap: wrap;
+}
+.health-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
 }
 .radar-filters {
   min-width: 0;

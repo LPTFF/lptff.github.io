@@ -9,8 +9,13 @@
           <span><strong>{{ welfareSourceCount }}</strong> 条线报资讯</span>
           <span><strong>{{ directSourceCount }}</strong> 条固定来源</span>
           <span><strong>{{ directedSourceCount }}</strong> 条定向发现</span>
-          <span :title="'统计全部资讯的细分标签，已由青龙统一完成分类标注'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
-      </div>
+          <span :title="'统计全部资讯的细分标签，已由家庭服务器与Gemini统一完成分类标注'"><strong>{{ tagCounts.size }}</strong> 个细分标签</span>
+          <span class="health-meta-badge" v-if="sourceHealth">
+            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+          </span>
+        </div>
       </div>
 
       <div class="radar-filters">
@@ -191,6 +196,12 @@
                 </el-tag>
                 <el-tag
                   size="small"
+                  :type="item.ecosystem.modelUsed?.includes('gemini') || item.ecosystem.analysisMode === 'gemini' ? 'success' : 'info'"
+                >
+                  {{ formatAnalysisBadge(item.ecosystem) }}
+                </el-tag>
+                <el-tag
+                  size="small"
                   type="info"
                   v-for="sig in contentTags(item)"
                   :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签`"
@@ -200,7 +211,7 @@
                 </el-tag>
               </div>
               <div class="ecosystem-tags" v-else>
-                <el-tag size="small" type="info">福利待标注</el-tag>
+                <el-tag size="small" type="info">规则标注中</el-tag>
               </div>
               <div class="ecosystem-summary" v-if="item.ecosystem && item.ecosystem.summary">
                 {{ item.ecosystem.summary }}
@@ -248,6 +259,12 @@ import { recordFeatureView, startTask, recordOutboundOpen, type TargetCategory }
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
 import { gotoOutPage, isPC } from "../../../utils/utils";
+import {
+  getSourceHealth,
+  formatCollectionMode,
+  formatAnalysisMode,
+  formatFreshness,
+} from "../../../utils/sourceHealth";
 import oldSource from "../../../data/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import tuanSource from "../../../data/welfare/0818tuan.json";
@@ -288,9 +305,53 @@ const directCollectorSources = [
   { id: "hamibot", label: "Hamibot" },
 ];
 
+const ecosystemByStableId = new Map(
+  ((welfareRadar as any).items || [])
+    .filter((it: any) => it.stableId)
+    .map((it: any) => [it.stableId, it])
+);
 const ecosystemByLink = new Map(
   ((welfareRadar as any).items || []).map((item: any) => [item.link, item])
 );
+
+function fallbackEcosystem(title: string) {
+  let category = "待分类";
+  const signals: string[] = [];
+  let isBankOffer = false;
+  if (/银行|建行|工行|招行|农行|中行|交行|邮储|平安银行|浦发|中信|光大|民生|广发|华夏/.test(title)) {
+    category = "银行优惠";
+    signals.push("银行活动");
+    isBankOffer = true;
+  } else if (/话费|充值|流量|网费/.test(title)) {
+    category = "话费流量";
+    signals.push("话费立减");
+  } else if (/抽奖|签到|红包|转盘|盲盒/.test(title)) {
+    category = "抽奖签到";
+    signals.push("抽奖红包");
+  } else if (/立减|立减金|云闪付|微信支付|支付宝|返现/.test(title)) {
+    category = "支付立减";
+    signals.push("支付立减");
+  } else if (/生鲜|大米|水果|零食|牛奶|鸡蛋|食品|粮油|饼干|肉/.test(title)) {
+    category = "食品生鲜";
+    signals.push("食品特惠");
+  } else if (/会员|网盘|腾讯视频|爱奇艺|优酷|哔哩哔哩|115|迅雷/.test(title)) {
+    category = "影音会员";
+    signals.push("会员折扣");
+  } else if (/vps|服务器|云服务|域名|主机/i.test(title)) {
+    category = "数码科技";
+    signals.push("云服务器特惠");
+  }
+
+  return {
+    category,
+    welfareValue: 30,
+    difficulty: 30,
+    signals,
+    isBankOffer,
+    analysisMode: "rule-fallback",
+    modelUsed: "rule-fallback",
+  };
+}
 
 const rawInitSource = [
   ...bilibiliItemsFor("welfare"),
@@ -310,15 +371,26 @@ const rawTopSource = [
 
 // 去重合并并注入生态标注数据
 const seenLinks = new Set<string>();
+const seenIds = new Set<string>();
 const uniqueWelfare: any[] = [];
 for (const item of [...rawTopSource, ...rawInitSource]) {
   const link = (item as any).link || (item as any).url;
+  const stableId = (item as any).stableId;
   if (!link || seenLinks.has(link)) continue;
+  if (stableId && seenIds.has(stableId)) continue;
   seenLinks.add(link);
+  if (stableId) seenIds.add(stableId);
+
+  const matchedEco =
+    (stableId && ecosystemByStableId.get(stableId)) ||
+    ecosystemByLink.get(link) ||
+    (item as any).ecosystem ||
+    fallbackEcosystem((item as any).title || "");
+
   uniqueWelfare.push({
     ...item,
     link,
-    ecosystem: ecosystemByLink.get(link) || (item as any).ecosystem,
+    ecosystem: matchedEco,
   });
 }
 const welfareSource = reactive(uniqueWelfare.sort((a, b) => b.timestamp - a.timestamp));
@@ -339,6 +411,20 @@ export default {
     );
 
     const tagCounts = computed(() => countContentTags(welfareSource));
+
+    const sourceHealth = computed(() => getSourceHealth("welfare"));
+    const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode));
+    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode, sourceHealth.value?.model));
+    const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
+
+    function formatAnalysisBadge(eco: any) {
+      if (!eco) return "规则引擎";
+      if (eco.modelUsed?.includes("gemini") || eco.analysisMode === "gemini" || eco.model?.includes("gemini")) {
+        const m = eco.modelUsed || eco.model || "3.5-flash-lite";
+        return `AI · ${m.replace(/^gemini-/, "")}`;
+      }
+      return "规则引擎";
+    }
 
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
@@ -717,6 +803,11 @@ export default {
       fallbackChar,
       fallbackColor,
       gotoMainWebsite,
+      sourceHealth,
+      collectionModeInfo,
+      analysisModeInfo,
+      freshnessInfo,
+      formatAnalysisBadge,
     };
   },
   components: {
@@ -773,6 +864,13 @@ export default {
   color: #4a74ad;
   font-size: 13px;
   font-weight: 600;
+  flex-wrap: wrap;
+}
+.health-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
 }
 .radar-stats strong {
   color: #3471c9;

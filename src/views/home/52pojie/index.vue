@@ -10,6 +10,11 @@
           <span>{{ analyzedCount }} 条服务器已标注</span>
           <span>{{ categoryCount }} 个生态主题</span>
           <span title="统计全部资讯的细分标签，本机和定时采集共同计入">{{ tagCounts.size }} 个细分标签</span>
+          <span class="health-meta-badge" v-if="sourceHealth">
+            <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
+            <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
+          </span>
         </div>
       </div>
       <div class="radar-filters">
@@ -257,6 +262,12 @@ import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
+import {
+  getSourceHealth,
+  formatCollectionMode,
+  formatAnalysisMode,
+  formatFreshness,
+} from "../../../utils/sourceHealth";
 import { reactive } from "vue";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
@@ -293,17 +304,31 @@ export default {
     let dialogTitle = ref("");
     let dialogContent = ref("");
     let dialogParam = ref("");
+    const ecosystemByStableId = new Map(
+      ((ecosystemRadar as any).items || [])
+        .filter((item: any) => item.stableId)
+        .map((item: any) => [item.stableId, item])
+    );
     const ecosystemByUrl = new Map(
       (ecosystemRadar.items || []).map((item: any) => [item.url, item])
     );
     const pojieItems = [...pojieNews]
-      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
+      .map((item: any) => ({
+        ...item,
+        ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
+      }))
       .sort((a: any, b: any) => b.timestamp - a.timestamp);
     const kanxueItems = [...kanxueNews]
-      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }))
+      .map((item: any) => ({
+        ...item,
+        ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
+      }))
       .sort((a, b) => a.rank - b.rank);
     const bilibiliItems = bilibiliItemsFor("pojie")
-      .map((item: any) => ({ ...item, ecosystem: ecosystemByUrl.get(item.url) }));
+      .map((item: any) => ({
+        ...item,
+        ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
+      }));
     const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems]
       .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
 
@@ -529,6 +554,12 @@ export default {
       );
       return guideTmpAll;
     });
+
+    const sourceHealth = computed(() => getSourceHealth("52pojie") || getSourceHealth("kanxue"));
+    const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode || "server-https"));
+    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode || "gemini", sourceHealth.value?.model || "gemini-3.5-flash-lite"));
+    const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
+
     return {
       contentTags,
       tagCounts,
@@ -565,6 +596,10 @@ export default {
       analyzedCount,
       categoryCount,
       filteredNews,
+      sourceHealth,
+      collectionModeInfo,
+      analysisModeInfo,
+      freshnessInfo,
     };
   },
 };
@@ -609,11 +644,19 @@ export default {
 }
 .radar-stats {
   display: flex;
+  align-items: center;
   flex-shrink: 0;
   gap: 14px;
   color: #4a74ad;
   font-size: 13px;
   font-weight: 600;
+  flex-wrap: wrap;
+}
+.health-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
 }
 .radar-filters {
   margin-top: 12px;

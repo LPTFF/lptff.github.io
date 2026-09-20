@@ -3,7 +3,7 @@
     <header>
       <div>
         <h2>平台登录与授权采集</h2>
-        <p>在来源网站完成登录，再选择采集范围。登录态留在 Chrome，采集结果保存在本机。</p>
+        <p>在来源网站完成登录，再选择采集范围。登录态留在 Chrome，采集结果自动上传家庭服务器统一校验、分析和发布。</p>
       </div>
       <div class="header-actions">
         <button type="button" :disabled="connecting" :title="connected ? `扩展版本: ${version}${extensionBuildTag ? ' (' + extensionBuildTag + ')' : ''}` : '检查扩展连接'" @click="connect">
@@ -98,7 +98,7 @@
         <div class="collection-actions">
           <button type="button" :disabled="!connected || isRunning" @click="start(platform.id)">手动采集刷新</button>
           <button type="button" :disabled="!connected" @click="action('LOGIN', { platform: platform.id })">打开来源 / 登录</button>
-          <button type="button" :disabled="!connected || !states[platform.id]?.count" @click="loadResult(platform.id)">载入本机结果</button>
+          <button type="button" :disabled="!connected || !states[platform.id]?.count" @click="loadResult(platform.id)">同步上传至服务器</button>
         </div>
 
         <!-- 作者具体分支（参考币安分支进度） -->
@@ -118,14 +118,14 @@
 
     <p class="catalog-hint">
       抖音作品进入“娱乐专区”；B 站由青龙统一采集，其中百科老王与国外主机测评进入薅羊毛“固定来源”，小迪老师进入安全社区“观察源”，杨博士说AI进入“娱乐专区”。
-      点击上方“一键 AI 分析待标注内容”可为本机待标注资讯批量生成 Gemini 生态标签与价值评级。
+      点击上方“一键 AI 分析待标注内容”可触发服务器统一生成 Gemini 生态标签与价值评级。
     </p>
 
     <!-- 全站 Gemini 配置 -->
     <section aria-label="全站 Gemini 配置" class="gemini-config-section">
       <h3>本机 Gemini · 全站共用</h3>
       <p>{{ !aiLoaded ? '读取本机配置后，可查看和修改共享密钥。' : ai.hasKey ? '已配置密钥，可用于资讯分析与现有助手。' : '尚未配置密钥。保存一次后，资讯分析与现有助手共用。' }}</p>
-      <p>资讯页点击“分析待标注内容”，仅将待分析的公开标题与链接发送给 Gemini，结果缓存在本机。</p>
+      <p>资讯页点击“分析待标注内容”，仅将待分析的公开标题与链接发送给家庭服务器统一分析与发布。</p>
       <label>模型 <select v-model="ai.model" :disabled="aiBusy || !aiLoaded" @change="aiStatus = '修改未保存'"><option>gemini-3.5-flash-lite</option><option>gemini-3.6-flash</option><option>gemini-3.7-flash</option></select></label>
       <label for="global-ai-key">Gemini API Key</label>
       <div class="key-field">
@@ -390,7 +390,7 @@ async function loadResult(platform: string) {
   try {
     const result = await authorizedRequest("RESULT", { platform });
     const count = saveAuthorizedItems(platform, result.items, result);
-    message.value = count ? `已保存 ${count} 条到本机，页面已更新。` : "没有可载入的新结果，保留已有内容。";
+    message.value = count ? `已上传 ${count} 条到家庭服务器，等待统一校验与发布。` : "没有可上传的新结果，保留已有内容。";
     updatePendingCounts();
   } catch (error) {
     message.value = (error as Error).message;

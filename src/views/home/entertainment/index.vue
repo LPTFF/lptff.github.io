@@ -8,6 +8,10 @@
         <div class="overview-stats" aria-label="内容来源概览">
           <span><strong>{{ contentCount }}</strong> 条内容</span>
           <span><strong>{{ platformCount }}</strong> 个来源</span>
+          <span class="health-meta-badge" v-if="activePlatformHealth">
+            <span class="health-chip" :class="activePlatformHealth.mode.tagType">{{ activePlatformHealth.mode.label }}</span>
+            <span class="health-chip" :class="activePlatformHealth.freshness.tagType">{{ activePlatformHealth.freshness.label }}</span>
+          </span>
         </div>
       </header>
 
@@ -55,6 +59,7 @@
 import { computed, ref, watch, onMounted } from "vue";
 import { recordFeatureView, startTask } from "../../../utils/observation";
 import { isPC } from "../../../utils/utils";
+import { getSourceHealth, formatCollectionMode, formatFreshness } from "../../../utils/sourceHealth";
 import movieData from "../../../data/movie.json";
 import douyinSnapshot from "../../../data/tiktok.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
@@ -96,24 +101,32 @@ const timestampOf = (value: unknown) => {
   return timestamp > 10_000_000_000 ? timestamp : timestamp * 1000;
 };
 
-const movieBaseTime = 1788574763000; // 2026-09-05 10:19:23
-
 const movieItems: EntertainmentItem[] = (movieData as Array<Record<string, unknown>>)
-  .map((movie, index) => ({
-    key: `movie-${movie.id}`,
-    id: String(movie.id),
-    platform: "movie" as const,
-    title: String(movie.title || ""),
-    coverUrl: String(movie.cover || ""),
-    url: String(movie.url || ""),
-    actionLabel: "查看动画",
-    primaryMetric: toNumber(movie.rate) ? `豆瓣 ${movie.rate}` : "暂无评分",
-    secondaryMetric: (movie.episodes_info as string) || (movie.is_new ? "新上榜" : "动画热度"),
-    qualityScore: toNumber(movie.rate),
-    publishedAt: movieBaseTime - index * 1000,
-    footerLabel: "豆瓣动画更新",
-    isNew: Boolean(movie.is_new),
-  }));
+  .map((movie, index) => {
+    let pubTime = 0;
+    if (movie.collectedAt) {
+      pubTime = new Date(String(movie.collectedAt)).getTime();
+    } else if (movie.timestamp) {
+      pubTime = timestampOf(movie.timestamp);
+    } else {
+      pubTime = Date.now() - index * 1000;
+    }
+    return {
+      key: `movie-${movie.id}`,
+      id: String(movie.id),
+      platform: "movie" as const,
+      title: String(movie.title || ""),
+      coverUrl: String(movie.cover || ""),
+      url: String(movie.url || ""),
+      actionLabel: "查看动画",
+      primaryMetric: toNumber(movie.rate) ? `豆瓣 ${movie.rate}` : "暂无评分",
+      secondaryMetric: (movie.episodes_info as string) || (movie.is_new ? "新上榜" : "动画热度"),
+      qualityScore: toNumber(movie.rate),
+      publishedAt: pubTime,
+      footerLabel: "豆瓣近期热门动画",
+      isNew: Boolean(movie.is_new),
+    };
+  });
 
 const douyinItems = computed<EntertainmentItem[]>(() => (douyinData.value as Array<Record<string, unknown>>)
   .map((video, index) => {
@@ -131,7 +144,7 @@ const douyinItems = computed<EntertainmentItem[]>(() => (douyinData.value as Arr
       secondaryMetric: likeCount ? `${formatCompactNumber(likeCount)} 喜欢` : "作者更新",
       qualityScore: douyinData.value.length - index,
       publishedAt: timestampOf(video.timestamp),
-      footerLabel: "作者主页更新",
+      footerLabel: "浏览器插件桥接采集",
     };
   })
   .sort((left, right) => right.publishedAt - left.publishedAt));
@@ -153,7 +166,7 @@ const bilibiliItems = computed<EntertainmentItem[]>(() => (bilibiliData.value as
       secondaryMetric: playCount ? `${playCount} 播放${likeCount ? ` · ${formatCompactNumber(likeCount)} 点赞` : ""}` : "UP主更新",
       qualityScore: bilibiliData.value.length - index,
       publishedAt: timestampOf(video.timestamp),
-      footerLabel: "UP主动态更新",
+      footerLabel: "服务器 HTTPS 采集",
     };
   })
   .sort((left, right) => right.publishedAt - left.publishedAt));
@@ -168,6 +181,35 @@ const featuredItems = computed(() => [...douyinItems.value, ...bilibiliItems.val
   .sort((left, right) => right.publishedAt - left.publishedAt));
 const contentCount = computed(() => movieItems.length + douyinItems.value.length + bilibiliItems.value.length);
 const platformCount = computed(() => Object.values(itemsByPlatform.value).filter((items) => items.length).length);
+
+const activePlatformHealth = computed(() => {
+  if (activePlatform.value === "douyin") {
+    const h = getSourceHealth("tiktok");
+    return {
+      mode: formatCollectionMode("plugin-bridge"),
+      freshness: formatFreshness(h?.collectedAt || (douyinSnapshot?.[0] as any)?.timestamp),
+    };
+  }
+  if (activePlatform.value === "bilibili") {
+    const h = getSourceHealth("bilibili");
+    return {
+      mode: formatCollectionMode("server-https"),
+      freshness: formatFreshness(h?.collectedAt),
+    };
+  }
+  if (activePlatform.value === "movie") {
+    const h = getSourceHealth("douban");
+    return {
+      mode: formatCollectionMode("server-https"),
+      freshness: formatFreshness(h?.collectedAt),
+    };
+  }
+  const h = getSourceHealth("tiktok") || getSourceHealth("welfare");
+  return {
+    mode: { label: "多源融合调度", tagType: "info" as const },
+    freshness: formatFreshness(h?.collectedAt),
+  };
+});
 
 const platformTabs = computed(() => [
   { key: "all" as const, label: "全部", count: contentCount.value },
@@ -272,6 +314,39 @@ function interleave(...groups: EntertainmentItem[][]) {
 .overview-stats strong {
   color: #3471c9;
   font-size: 16px;
+}
+
+.health-meta-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 6px;
+}
+
+.health-chip {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.health-chip.success {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+}
+
+.health-chip.warning {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.health-chip.info {
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
 }
 
 .entertainment-filters {
