@@ -1,26 +1,27 @@
 {
   "version": 1,
-  "generatedAt": "2026-09-20T10:10:46.411815+00:00",
+  "generatedAt": "2026-09-20T16:11:07.305742+00:00",
   "model": "gemini-3.5-flash-lite",
-  "snapshotId": "52pojie-ecosystem-20260920T101046Z-23017dc2",
+  "snapshotId": "52pojie-ecosystem-20260920T161107Z-120ce21b",
   "analysisMode": "gemini",
   "items": [
     {
       "category": "抓包与协议分析",
-      "ecosystemValue": 60,
-      "technicalDepth": 35,
+      "ecosystemValue": 55,
+      "technicalDepth": 30,
       "trendNovelty": 20,
       "signals": [
-        "移动App抓包",
-        "通用代理配置问题"
+        "针对某问APP的抓包分析",
+        "移动端网络通信与代理调试"
       ],
       "tools": [
-        "Burp Suite"
+        "Burp Suite",
+        "Charles"
       ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "常规抓包求助与实践。",
-      "summary": "体现了开发者和研究人员在针对特定移动App进行流量抓包时的基础需求。",
+      "riskType": "gray_abuse",
+      "duplicateGroup": "app_capture_group",
+      "evolutionNote": "常规APP抓包与网络请求分析方法探讨。",
+      "summary": "记录了对特定问答类移动应用的网络抓包和协议分析流程。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2128021-1-1.html",
       "title": "某问抓包",
@@ -30,21 +31,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 40,
       "signals": [
-        "Cocos2d-Lua手游逆向",
-        "资源解密与打包"
+        "Cocos2d-Lua 手游逆向",
+        "资源解密与 APK 打包破解"
       ],
       "tools": [
-        "Cocos2d-Lua"
+        "Cocos2d-Lua",
+        "Apktool",
+        "IDA Pro"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "针对主流手游引擎的结构性逆向教学。",
-      "summary": "展示了Cocos2d-Lua游戏引擎资源的解密流程和打包修改实战。",
-      "confidence": 0.95,
+      "duplicateGroup": "game_mod_group",
+      "evolutionNote": "对基于 Cocos2d-Lua 引擎的游戏资源解密和重新打包技术的深入探讨。",
+      "summary": "分享了 Cocos2d-Lua 手游逆向全流程，涵盖资源解密、逻辑修改和二次打包。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2127702-1-1.html",
       "title": "【逆向实战】Cocos2d-Lua 手游从资源解密到打包破解 (下)",
       "stableId": "52pojie:2127702",
@@ -52,22 +55,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 80,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 90,
       "signals": [
-        "AI辅助逆向签名链",
-        "海外社交软件分析"
+        "海外社交应用签名链分析",
+        "AI辅助逆向工程全流程"
       ],
       "tools": [
-        "AI Assistant"
+        "LLM",
+        "IDA Pro",
+        "Jadx"
       ],
       "riskType": "dual_use",
-      "duplicateGroup": "social_sign_chain_ai",
-      "evolutionNote": "跨社区重复主题，结合AI逆向展示签名链分析流程。",
-      "summary": "利用AI技术对海外社交软件的复杂签名链进行全流程逆向分析。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reversing_group",
+      "evolutionNote": "利用 AI 技术对复杂海外 App 的签名链进行自动化或辅助逆向。",
+      "summary": "探讨了结合大模型对某知名海外社交软件 Android 签名链进行AI逆向分析的完整步骤。",
+      "confidence": 0.99,
       "url": "https://www.52pojie.cn/thread-2127692-1-1.html",
       "title": "某知名海外社交 Android 签名链AI逆向分析全流程",
       "stableId": "52pojie:2127692",
@@ -75,19 +80,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 60,
+      "category": "会员与授权绕过",
+      "ecosystemValue": 65,
       "technicalDepth": 40,
-      "trendNovelty": 25,
+      "trendNovelty": 20,
       "signals": [
-        "小说App逆向",
-        "阅读软件修改"
+        "小说阅读软件逆向",
+        "去广告或限制解除"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "常见的小说类客户端逆向。",
-      "summary": "针对某小说软件的功能和代码逆向探索。",
+      "duplicateGroup": "novel_app_reverse",
+      "evolutionNote": "针对典型阅读类 APP 的会员及广告逻辑逆向。",
+      "summary": "记录了某小说软件的逆向过程，涉及功能限制与授权逻辑分析。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2127578-1-1.html",
       "title": "某小说软件逆向",
@@ -97,21 +105,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 70,
+      "ecosystemValue": 92,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
-        "虚拟机保护分析",
-        "VMP壳还原"
+        "七神 VMP 分析",
+        "虚拟机保护还原"
       ],
       "tools": [
-        "VMP"
+        "IDA Pro",
+        "Frida"
       ],
       "riskType": "dual_use",
-      "duplicateGroup": "qishen_vmp_analysis",
-      "evolutionNote": "针对七神VMP保护机制的深入分析与还原。",
-      "summary": "对高难度虚拟机加固（VMP）进行逆向分析。",
-      "confidence": 0.95,
+      "duplicateGroup": "vmp_analysis_group",
+      "evolutionNote": "针对七神 VMP 保护机制的深入逆向与还原探讨。",
+      "summary": "分析了七神虚拟机的架构特征与去混淆还原思路。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2127122-1-1.html",
       "title": "七神VMP分析",
       "stableId": "52pojie:2127122",
@@ -119,21 +128,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "广告与功能限制",
-      "ecosystemValue": 55,
-      "technicalDepth": 30,
-      "trendNovelty": 20,
+      "category": "工具链与入门",
+      "ecosystemValue": 45,
+      "technicalDepth": 25,
+      "trendNovelty": 10,
       "signals": [
-        "去除APK安装检查",
-        "初学者实战"
+        "新手入门逆向",
+        "APK安装检查去除"
       ],
       "tools": [
+        "Apktool",
         "MT管理器"
       ],
-      "riskType": "gray_abuse",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "新人入门级别的APK校验移除。",
-      "summary": "展示了新手如何通过简单 patch 绕过Android APK安装检查。",
+      "evolutionNote": "面向初学者的基础 smali 修改与校验绕过教学。",
+      "summary": "新人首发帖，记录了暴力去除 APK 安装校验的基础操作。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2126875-1-1.html",
       "title": "新人发帖第一贴之暴力去除apk安装检查",
@@ -142,23 +152,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 90,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 95,
+      "technicalDepth": 90,
+      "trendNovelty": 95,
       "signals": [
-        "大模型无限制驱动Frida Stalker",
-        "绕过银行App检测"
+        "大模型无道德无限制驱动",
+        "Frida Stalker 绕过银行某梆检测"
       ],
       "tools": [
         "GLM-5.3",
-        "Frida Stalker"
+        "Frida",
+        "Stalker"
       ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "结合大模型与Frida高级特性的对抗实战。",
-      "summary": "利用大模型绕过高强度金融安全检测的Frida高级对抗方案。",
-      "confidence": 0.95,
+      "riskType": "dual_use",
+      "duplicateGroup": "ai_advanced_bypass",
+      "evolutionNote": "利用最新大模型驱动 Frida Stalker 动态跟踪技术对抗高级梆梆加固。",
+      "summary": "展示了通过大模型无限制驱动 Frida Stalker 绕过金融类 App 梆梆检测的对抗案例。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2126497-1-1.html",
       "title": "最强逆向大模型GLM-5.3无道德无限制驱动Frida Stalker绕过银行某梆检测",
       "stableId": "52pojie:2126497",
@@ -167,22 +178,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 80,
-      "trendNovelty": 75,
+      "ecosystemValue": 85,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
       "signals": [
-        "Hermes引擎自动化",
-        "刷写与提权自动化验证"
+        "Hermes 引擎逆向",
+        "设备刷写与 Frida 魔改自动化"
       ],
       "tools": [
         "Hermes",
-        "Frida"
+        "Frida",
+        "ADB"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "面向复现的底层自动化逆向验证。",
-      "summary": "探讨了Hermes引擎在系统级刷写、提权与自动化逆向中的应用。",
-      "confidence": 0.95,
+      "evolutionNote": "聚焦于 Meta Hermes JS 引擎在 Android 设备上的自动化逆向与调试实践。",
+      "summary": "探讨了 Hermes 在设备刷写、提权以及 Frida 魔改环境下的自动化能力验证。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2126444-1-1.html",
       "title": "面向复现的逆向工程实践：Hermes 在设备刷写、提权与 Frida 魔改中的自动化能力验证",
       "stableId": "52pojie:2126444",
@@ -190,41 +202,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 70,
-      "technicalDepth": 50,
-      "trendNovelty": 30,
-      "signals": [
-        "APK逆向经验分享",
-        "可回滚验证"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "工程化的移动逆向经验交流。",
-      "summary": "分享了匿名APK逆向过程中的问题定位与版本迭代验证经验。",
-      "confidence": 0.95,
-      "url": "https://www.52pojie.cn/thread-2126299-1-1.html",
-      "title": "匿名 APK 逆向经验分享：从问题定位到可回滚验证",
-      "stableId": "52pojie:2126299",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "隐私后门与恶意行为",
-      "ecosystemValue": 85,
-      "technicalDepth": 70,
+      "ecosystemValue": 88,
+      "technicalDepth": 75,
       "trendNovelty": 60,
       "signals": [
-        "高危后门分析",
-        "位置伪装软件风险"
+        "Fake Location 高危后门分析",
+        "第三方模块安全审计"
       ],
-      "tools": [],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "fakelocation_backdoor",
-      "evolutionNote": "针对知名工具软件内置风险或后门的持续追踪。",
-      "summary": "分析了Fake Location 1.5.2版本中存在的安全后门。",
-      "confidence": 0.95,
+      "tools": [
+        "Jadx",
+        "IDA Pro"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": "fake_location_audit",
+      "evolutionNote": "对 Fake Location 1.5.2 版本中引入的后门或风险代码进行深入分析。",
+      "summary": "详细分析了 Fake Location 1.5.2 版本中的高危后门及隐蔽行为。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2126060-1-1.html",
       "title": "Fake Location 1.5.2 高危后门分析",
       "stableId": "52pojie:2126060",
@@ -233,21 +227,22 @@
     },
     {
       "category": "抓包与协议分析",
-      "ecosystemValue": 75,
-      "technicalDepth": 45,
+      "ecosystemValue": 70,
+      "technicalDepth": 50,
       "trendNovelty": 30,
       "signals": [
-        "代理检测绕过",
-        "Burp Suite抓包问题"
+        "代理设置导致 Burp 抓包失效",
+        "网络调试问题排查"
       ],
       "tools": [
-        "Burp Suite"
+        "Burp Suite",
+        "Charles"
       ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "经典网络代理检测与抓包失败的排查。",
-      "summary": "分析了App设置自定义代理导致Burp Suite无法正常抓包的原因及解决方法。",
-      "confidence": 0.95,
+      "riskType": "normal",
+      "duplicateGroup": "app_capture_group",
+      "evolutionNote": "针对移动端由于应用层代理配置导致的抓包失败问题的通用解决方案。",
+      "summary": "分析了 App 设置代理导致 Burp Suite 无法抓包的原因并给出了解决方法。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2125847-1-1.html",
       "title": "app设置了代理而导致bp无法抓包问题分析以及解决方法",
       "stableId": "52pojie:2125847",
@@ -255,20 +250,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 65,
-      "technicalDepth": 40,
-      "trendNovelty": 20,
+      "category": "工具链与入门",
+      "ecosystemValue": 60,
+      "technicalDepth": 30,
+      "trendNovelty": 10,
       "signals": [
-        "安卓APK逆向经验",
-        "通用技巧"
+        "安卓 APK 逆向经验分享",
+        "新手基础总结"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "Smali"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "基础逆向经验总结。",
-      "summary": "常规的安卓APK逆向基础知识与经验分享。",
-      "confidence": 0.95,
+      "evolutionNote": "系统性的 Android 逆向基础知识及经验串讲。",
+      "summary": "分享了作者在 Android APK 逆向过程中的实用经验与常备技巧。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2125546-1-1.html",
       "title": "安卓 APK 逆向经验分享",
       "stableId": "52pojie:2125546",
@@ -276,23 +274,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "会员与授权绕过",
-      "ecosystemValue": 70,
-      "technicalDepth": 55,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 70,
+      "trendNovelty": 85,
       "signals": [
-        "AI反汇编",
-        "修改Unity游戏内购货币"
+        "AI直接反汇编修改",
+        "Unity3D il2cpp 游戏内购修改"
       ],
       "tools": [
-        "AI",
-        "IL2CPP"
+        "LLM",
+        "Il2CppDumper",
+        "IDA Pro"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "利用AI直接处理游戏内购。",
-      "summary": "新手通过AI辅助反汇编并修改Unity3D il2cpp游戏内购货币的实践。",
-      "confidence": 0.95,
+      "duplicateGroup": "unity_ai_mod",
+      "evolutionNote": "利用 AI 直接辅助分析修改 Unity3D il2cpp 游戏内购逻辑。",
+      "summary": "新手利用 AI 直接反汇编并成功修改某 Unity3D il2cpp 游戏内的货币内购数据。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2123859-1-1.html",
       "title": "【新手报到】记录一次AI直接反汇编修改某Unity3D il2cpp游戏内购货币",
       "stableId": "52pojie:2123859",
@@ -301,19 +300,22 @@
     },
     {
       "category": "会员与授权绕过",
-      "ecosystemValue": 70,
-      "technicalDepth": 45,
+      "ecosystemValue": 75,
+      "technicalDepth": 55,
       "trendNovelty": 30,
       "signals": [
         "加速器会员解锁",
-        "逆向分析与破解"
+        "授权逻辑逆向"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "accelerator_vip_unlock",
-      "evolutionNote": "针对网络加速器服务的会员逻辑分析。",
-      "summary": "某加速器软件的会员权限验证机制逆向与破解。",
-      "confidence": 0.95,
+      "duplicateGroup": "accelerator_vip_group",
+      "evolutionNote": "针对某网络加速器软件的会员验证机制破解。",
+      "summary": "对某网络加速器应用实施了会员解锁的逆向分析与破解实践。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2123778-1-1.html",
       "title": "[Android逆向] 某加速器会员解锁的逆向分析与破解",
       "stableId": "52pojie:2123778",
@@ -322,22 +324,24 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
       "trendNovelty": 60,
       "signals": [
-        "Unity脱壳",
-        "热更DLL逆向",
-        "签名校验绕过"
+        "加固 Unity 儿童教育 APP",
+        "脱壳与签名校验绕过",
+        "热更 DLL 分析"
       ],
       "tools": [
-        "Unity"
+        "Il2CppDumper",
+        "Frida",
+        "IDA Pro"
       ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "针对特定儿童教育类App的复合加固对抗。",
-      "summary": "对加固Unity儿童教育App进行了脱壳、签名校验三连绕过及热更DLL分析。",
-      "confidence": 0.95,
+      "riskType": "dual_use",
+      "duplicateGroup": "unity_hardening_group",
+      "evolutionNote": "综合应用脱壳、绕过签名校验及热更新 DLL 硬刚的 Unity 加固破解案例。",
+      "summary": "针对加固的 Unity 儿童教育类 App 进行了脱壳、签名校验三连绕过及热更 DLL 逆向。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2123294-1-1.html",
       "title": "加固的 Unity 儿童教育（**巴士学汉字） APP：脱壳、签名校验三连、热更 DLL 硬刚",
       "stableId": "52pojie:2123294",
@@ -346,19 +350,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 80,
-      "trendNovelty": 70,
+      "ecosystemValue": 94,
+      "technicalDepth": 92,
+      "trendNovelty": 80,
       "signals": [
-        "VMP分析与还原",
-        "短视频App加固"
+        "快手 VMP 分析与还原",
+        "虚拟机指令重构"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Frida"
+      ],
       "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "主流大厂App虚拟机保护分析。",
-      "summary": "对短视频平台使用的VMP虚拟机保护进行深入分析与指令还原。",
-      "confidence": 0.95,
+      "duplicateGroup": "vmp_analysis_group",
+      "evolutionNote": "对短视频头部大厂快手的定制 VMP 保护开展分析与指令还原。",
+      "summary": "深入探讨了快手客户端的 VMP 保护机制及其反混淆还原过程。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2123217-1-1.html",
       "title": "快手 VMP 分析与还原",
       "stableId": "52pojie:2123217",
@@ -369,19 +376,21 @@
       "category": "工具链与入门",
       "ecosystemValue": 70,
       "technicalDepth": 50,
-      "trendNovelty": 25,
+      "trendNovelty": 20,
       "signals": [
-        "移动安全靶场",
-        "全解教程"
+        "Allsafe靶场全解",
+        "移动安全靶场学习"
       ],
       "tools": [
-        "Allsafe"
+        "Allsafe",
+        "Burp Suite",
+        "Jadx"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "面向初学者的靶场通关指南。",
-      "summary": "移动安全靶场 Allsafe 的全面通关解析与学习资料。",
-      "confidence": 0.95,
+      "evolutionNote": "针对经典移动安全漏洞靶场的完整通关解析。",
+      "summary": "对移动安全靶场 Allsafe 的各项漏洞与测试点给出了全面解析。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2122890-1-1.html",
       "title": "Allsafe靶场全解",
       "stableId": "52pojie:2122890",
@@ -390,21 +399,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 80,
+      "ecosystemValue": 90,
+      "technicalDepth": 88,
+      "trendNovelty": 85,
       "signals": [
-        "自动逆向分析工具",
-        "CTF实战解析"
+        "r0re 自动逆向分析工具",
+        "看雪 Android CTF 通关"
       ],
       "tools": [
-        "r0re"
+        "r0re",
+        "IDA Pro",
+        "Python"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "自动化逆向工具在实际CTF比赛中的应用验证。",
-      "summary": "使用 r0re 自动逆向分析工具通关看雪 Android CTF 的实战记录。",
-      "confidence": 0.95,
+      "evolutionNote": "自动化逆向分析工具在 CTF 赛事及实际逆向中的应用与源码解析。",
+      "summary": "展示了使用 r0re 自动化逆向工具全通看雪 Android CTF 的实战记录及源码解析。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2122552-1-1.html",
       "title": "r0re 自动逆向分析工具实战记录：全通看雪 Android CTF，完整使用指南和源码解析",
       "stableId": "52pojie:2122552",
@@ -412,20 +423,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "抓包与协议分析",
-      "ecosystemValue": 70,
-      "technicalDepth": 50,
-      "trendNovelty": 35,
+      "category": "游戏与作弊生态",
+      "ecosystemValue": 75,
+      "technicalDepth": 60,
+      "trendNovelty": 40,
       "signals": [
-        "跳绳App抓包",
-        "刷作业脚本研究"
+        "天天跳绳逆向抓包",
+        "刷作业自动化研究"
       ],
-      "tools": [],
+      "tools": [
+        "Burp Suite",
+        "Charles",
+        "Frida"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "校园体育打卡类App的业务协议分析。",
-      "summary": "针对特定运动打卡App的抓包及“刷作业”行为研究。",
-      "confidence": 0.95,
+      "evolutionNote": "针对校园运动类打卡/刷作业 App 的数据包协议逆向分析。",
+      "summary": "研究了天天跳绳APP的抓包协议，并探讨了自动化刷作业的可行性。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2122540-1-1.html",
       "title": "针对天天跳绳逆向抓包，刷作业的研究",
       "stableId": "52pojie:2122540",
@@ -433,20 +448,48 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "抓包与协议分析",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
+      "category": "会员与授权绕过",
+      "ecosystemValue": 68,
+      "technicalDepth": 45,
+      "trendNovelty": 25,
       "signals": [
-        "Discord Android协议逆向",
-        "DLL逆向分析"
+        "某刺猬小说逆向分析",
+        "阅读软件限制去除"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": "novel_app_reverse",
+      "evolutionNote": "对另一款小说阅读软件的去广告及VIP章节阅读逆向。",
+      "summary": "记录了某刺猬小说客户端的逆向分析过程与相关逻辑破解。",
+      "confidence": 0.96,
+      "url": "https://www.52pojie.cn/thread-2122438-1-1.html",
+      "title": "某刺猬小说逆向分析",
+      "stableId": "52pojie:2122438",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "抓包与协议分析",
+      "ecosystemValue": 85,
+      "technicalDepth": 80,
+      "trendNovelty": 60,
+      "signals": [
+        "Discord Android 协议逆向",
+        "APK 反编译到 Windows 协议 DLL"
+      ],
+      "tools": [
+        "Jadx",
+        "IDA Pro",
+        "Ghidra"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "跨平台即时通讯软件的客户端协议分析。",
-      "summary": "Discord Android端协议逆向，从APK反编译到Windows协议动态分析。",
-      "confidence": 0.95,
+      "evolutionNote": "跨平台即时通讯软件底层私有通信协议的逆向移植研究。",
+      "summary": "详述了 Discord Android 客户端从 APK 反编译到提取并生成 Windows 协议 DLL 的完整协议逆向实战。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2119947-1-1.html",
       "title": "Discord Android 协议逆向实战 —— 从 APK 反编译到 Windows 协议 DLL 全流程",
       "stableId": "52pojie:2119947",
@@ -454,23 +497,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 75,
-      "technicalDepth": 60,
-      "trendNovelty": 45,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 82,
+      "technicalDepth": 75,
+      "trendNovelty": 60,
       "signals": [
-        "手机端编译Xposed模块",
-        "LSPosed环境搭建"
+        "aarch64 手机端独立编译 Xposed 模块",
+        "LSPosed 生态"
       ],
       "tools": [
         "LSPosed",
-        "Magisk"
+        "Android SDK",
+        "Termux"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "脱离PC的移动端模块开发与环境搭建。",
-      "summary": "在arm64安卓手机上脱离PC直接编译Xposed/LSPosed模块的实践。",
-      "confidence": 0.95,
+      "evolutionNote": "摆脱 PC 依赖，直接在移动端完成底座框架与模块构建的编译实践。",
+      "summary": "记录了在 aarch64 Android 手机上脱离 PC 环境，直接完整编译 Xposed/LSPosed 模块的过程。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2119578-1-1.html",
       "title": "成了 ，在 aarch64 Android 手机上，不借助 PC，完整编译一个 Xposed 模块（LSPose...",
       "stableId": "52pojie:2119578",
@@ -478,23 +522,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "会员与授权绕过",
-      "ecosystemValue": 75,
-      "technicalDepth": 50,
-      "trendNovelty": 65,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 88,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
       "signals": [
-        "MT管理器联动DeepSeek",
-        "会员解锁"
+        "MT管理器结合 DeepSeek AI",
+        "录屏软件会员解锁新玩法"
       ],
       "tools": [
         "MT管理器",
-        "DeepSeek"
+        "DeepSeek",
+        "Jadx"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "大模型工具链与传统逆向工具的结合。",
-      "summary": "结合MT管理器与DeepSeek大模型实现某录屏软件会员解锁的新玩法。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reversing_group",
+      "evolutionNote": "利用国产大模型与主流移动端逆向工具箱结合实现高效破解。",
+      "summary": "展示了利用 MT管理器 联合 DeepSeek AI 快速逆向并解锁某录屏软件会员的新玩法。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2119351-1-1.html",
       "title": "MT管理器 + DeepSeek AI = 安卓逆向+破解新玩法？某录屏软件会员解锁！",
       "stableId": "52pojie:2119351",
@@ -503,19 +548,22 @@
     },
     {
       "category": "隐私后门与恶意行为",
-      "ecosystemValue": 85,
-      "technicalDepth": 70,
-      "trendNovelty": 50,
+      "ecosystemValue": 88,
+      "technicalDepth": 75,
+      "trendNovelty": 40,
       "signals": [
-        "FakeLocation后门分析",
-        "历史版本追踪"
+        "FakeLocation 后门分析",
+        "版本持续追踪"
       ],
-      "tools": [],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "fakelocation_backdoor",
-      "evolutionNote": "针对同一软件不同版本的后门持续分析（演化自1.5.0）。",
-      "summary": "对 FakeLocation 1.5.0 版本中包含的后门进行逆向排查。",
-      "confidence": 0.95,
+      "tools": [
+        "Jadx",
+        "JEB"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": "fake_location_audit",
+      "evolutionNote": "对 Fake Location 早期版本（1.5.0）后门漏洞的早期复现与安全分析。",
+      "summary": "针对 Fake Location 1.5.0 版本中的潜在后门和敏感行为开展了安全分析。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2117178-1-1.html",
       "title": "FakeLocation 1.5.0 后门分析",
       "stableId": "52pojie:2117178",
@@ -523,23 +571,47 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 40,
-      "trendNovelty": 20,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 70,
+      "technicalDepth": 65,
+      "trendNovelty": 35,
       "signals": [
-        "模拟器Root环境",
-        "Magisk安装教程"
+        "WXLiquidGlass 动态玻璃插件逆向",
+        "UI 效果插件分析"
       ],
       "tools": [
-        "Magisk",
-        "雷电模拟器"
+        "Jadx",
+        "IDA Pro"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "常规模拟器Root环境配置。",
-      "summary": "雷电模拟器安装面具 Magisk 的更新配置教程。",
+      "evolutionNote": "针对特定动态视觉UI插件的逆向分析与实现机制探究。",
+      "summary": "记录了对 WXLiquidGlass 动态玻璃插件的逆向过程与实现原理。",
       "confidence": 0.95,
+      "url": "https://www.52pojie.cn/thread-2116853-1-1.html",
+      "title": "WXLiquidGlass 动态玻璃插件逆向记录",
+      "stableId": "52pojie:2116853",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "工具链与入门",
+      "ecosystemValue": 55,
+      "technicalDepth": 40,
+      "trendNovelty": 15,
+      "signals": [
+        "雷电模拟器安装 Magisk",
+        "模拟器 Root 环境搭建更新"
+      ],
+      "tools": [
+        "雷电模拟器",
+        "Magisk"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "emulator_root_group",
+      "evolutionNote": "针对雷电模拟器环境配置 Magisk 刷入的更新教程。",
+      "summary": "分享了在雷电模拟器中安装 Magisk Root 环境的更新方法与步骤。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2113682-1-1.html",
       "title": "【已更新】雷电模拟器14安装面具magisk",
       "stableId": "52pojie:2113682",
@@ -549,18 +621,21 @@
     {
       "category": "会员与授权绕过",
       "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 30,
+      "technicalDepth": 50,
+      "trendNovelty": 20,
       "signals": [
-        "注册机手搓教程",
-        "周易软件破解"
+        "玄奥周易软件注册机手搓",
+        "传统注册算法逆向"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "x64dbg"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "register_generator",
-      "evolutionNote": "传统算法注册机编写教学。",
-      "summary": "针对特定周易预测类App的算法注册机手动编写教程。",
-      "confidence": 0.95,
+      "duplicateGroup": null,
+      "evolutionNote": "针对传统桌面端易经算命类软件的注册码算法逆向与生成器编写。",
+      "summary": "提供了一份针对《玄奥周易》软件手搓注册机的完整逆向教程。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2112941-1-1.html",
       "title": "【玄奥周易】安卓版注册机手搓教程",
       "stableId": "52pojie:2112941",
@@ -570,22 +645,22 @@
     {
       "category": "抓包与协议分析",
       "ecosystemValue": 75,
-      "technicalDepth": 55,
-      "trendNovelty": 30,
+      "technicalDepth": 60,
+      "trendNovelty": 35,
       "signals": [
-        "雷电模拟器抓包",
-        "Burp与Frida联合调试"
+        "雷电9 Android 9 抓包环境",
+        "Burp Suite 与 Frida 联合配置"
       ],
       "tools": [
+        "雷电模拟器",
         "Burp Suite",
-        "Frida",
-        "雷电模拟器"
+        "Frida"
       ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "标准安卓动态抓包环境搭建。",
-      "summary": "雷电9模拟器配合 Burp Suite 与 Frida 进行 HTTPS 抓包实操。",
-      "confidence": 0.95,
+      "riskType": "normal",
+      "duplicateGroup": "app_capture_group",
+      "evolutionNote": "针对高版本 Android 9 模拟器的全套 HTTPS 抓包及 SSL Pinning 绕过实操。",
+      "summary": "梳理了雷电9模拟器配合 Android 9 系统进行 Burp 与 Frida 联合抓包的实操流程。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2111305-1-1.html",
       "title": "雷电9 Android9 + Burp + Frida 抓包实操",
       "stableId": "52pojie:2111305",
@@ -594,42 +669,22 @@
     },
     {
       "category": "会员与授权绕过",
-      "ecosystemValue": 70,
-      "technicalDepth": 50,
-      "trendNovelty": 45,
-      "signals": [
-        "AI生成注册机",
-        "八字App破解"
-      ],
-      "tools": [
-        "AI"
-      ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "register_generator",
-      "evolutionNote": "利用AI辅助生成注册验证算法。",
-      "summary": "利用AI辅助生成特定八字App注册机的实践分享。",
-      "confidence": 0.95,
-      "url": "https://www.52pojie.cn/thread-2109773-1-1.html",
-      "title": "我也来蹭个热度，玄奥八字APP的 注册机AI生成",
-      "stableId": "52pojie:2109773",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "会员与授权绕过",
       "ecosystemValue": 60,
       "technicalDepth": 40,
-      "trendNovelty": 20,
+      "trendNovelty": 15,
       "signals": [
-        "吉他调音器会员破解",
-        "内购修改"
+        "吉他调音器APP永久会员破解",
+        "内购验证绕过"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "小众工具App的内购解锁。",
-      "summary": "付费购买并逆向破解某吉他调音器APP永久会员权益。",
-      "confidence": 0.95,
+      "evolutionNote": "对日常工具类应用内购逻辑的分析与会员权限绕过。",
+      "summary": "记录了付费破解某吉他调音器 App 永久会员的过程，并附带倡导支持正版的声明。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2108552-1-1.html",
       "title": "付费破解一款 吉他调音器APP的永久会员，大家还是要支持正版！",
       "stableId": "52pojie:2108552",
@@ -637,22 +692,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 60,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 82,
+      "trendNovelty": 70,
       "signals": [
-        "Magisk Zygisk模块开发",
-        "Vibe Coding实践"
+        "Vibe Coding 源码阅读与模块开发",
+        "Magisk Zygisk 移植实现"
       ],
       "tools": [
-        "Magisk Zygisk"
+        "Magisk",
+        "Zygisk",
+        "Android Studio"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "基于最新系统底层框架的模块开发。",
-      "summary": "基于最新版 Magisk Zygisk 移植并实现自定义系统模块的源码开发。",
-      "confidence": 0.95,
+      "evolutionNote": "基于最新版 Magisk Zygisk 框架的底层 Hook 模块开发与移植实践。",
+      "summary": "基于最新版 Magisk Zygisk 实现了自定义功能模块的底层移植与开发。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2107426-1-1.html",
       "title": "Vibe Coding 从源码阅读到模块开发：基于最新版 Magisk Zygisk，移植实现一个带 We...",
       "stableId": "52pojie:2107426",
@@ -660,20 +717,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "广告与功能限制",
-      "ecosystemValue": 60,
-      "technicalDepth": 35,
+      "category": "会员与授权绕过",
+      "ecosystemValue": 65,
+      "technicalDepth": 40,
       "trendNovelty": 20,
       "signals": [
-        "相机App水印去除",
-        "功能限制修改"
+        "水印相机APP破解",
+        "高级功能限制解除"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "常规相机工具水印限制解除。",
-      "summary": "对某带有时间、地点、经纬度水印的相机App进行去限制逆向。",
-      "confidence": 0.95,
+      "evolutionNote": "对常规摄影工具类应用水印特权及限制的逆向去除。",
+      "summary": "分享了对某款显示时间、地点及经纬度水印的相机 App 的破解过程。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2105276-1-1.html",
       "title": "闲来无事，破解一款显示时间、地点、经纬度水印的相机APP",
       "stableId": "52pojie:2105276",
@@ -682,19 +742,23 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 40,
+      "ecosystemValue": 82,
+      "technicalDepth": 78,
+      "trendNovelty": 50,
       "signals": [
-        "百度加固脱壳",
-        "户外助手会员分析"
+        "两路户外助手会员分析",
+        "新百度加固去除"
       ],
-      "tools": [],
-      "riskType": "gray_abuse",
+      "tools": [
+        "百度加固脱壳工具",
+        "Jadx",
+        "IDA Pro"
+      ],
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对特定加固厂商（百度加固）的脱壳方法。",
-      "summary": "两步路户外助手会员分析及新版百度加固去除实践。",
-      "confidence": 0.95,
+      "evolutionNote": "针对百度加固新版本的脱壳方法及户外地图类 APP 会员逻辑分析。",
+      "summary": "分析了两步路户外助手会员权益，并重点探讨了新版本百度加固的去除方法。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2104201-1-1.html",
       "title": "两步路户外助手会员分析和新百度加固去除",
       "stableId": "52pojie:2104201",
@@ -703,20 +767,23 @@
     },
     {
       "category": "抓包与协议分析",
-      "ecosystemValue": 75,
-      "technicalDepth": 60,
-      "trendNovelty": 35,
+      "ecosystemValue": 78,
+      "technicalDepth": 68,
+      "trendNovelty": 40,
       "signals": [
-        "小说App逆向",
-        "hostnameVerify绕过",
-        "sign签名逆向"
+        "八猫付费小说逆向",
+        "hostnameVerify 与 sign 校验分析"
       ],
-      "tools": [],
+      "tools": [
+        "Frida",
+        "Burp Suite",
+        "Jadx"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "针对小说类App的HTTPS证书校验与请求签名分析。",
-      "summary": "八猫付费小说App的hostnameVerify与sign签名机制逆向。",
-      "confidence": 0.95,
+      "duplicateGroup": "novel_app_reverse",
+      "evolutionNote": "针对特定小说平台的 HTTPS 证书校验和 API 签名机制的逆向解析。",
+      "summary": "对八猫付费小说的网络请求进行逆向，重点分析了 hostnameVerify 绕过和请求签名算法。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2102001-1-1.html",
       "title": "八猫付费小说逆向-hostnameVerify&sign",
       "stableId": "52pojie:2102001",
@@ -725,19 +792,22 @@
     },
     {
       "category": "广告与功能限制",
-      "ecosystemValue": 65,
-      "technicalDepth": 35,
-      "trendNovelty": 25,
+      "ecosystemValue": 70,
+      "technicalDepth": 45,
+      "trendNovelty": 20,
       "signals": [
         "影视VIP破解",
-        "去广告"
+        "去广告处理"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "入门级影视App去广告与VIP解锁。",
-      "summary": "新手对某影视App进行VIP权限解锁与去广告的记录。",
-      "confidence": 0.95,
+      "evolutionNote": "新手针对影视类客户端的开屏广告去除及VIP特权解锁尝试。",
+      "summary": "记录了一次初学者针对某影视 App 的 VIP 权限破解与去广告实操。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2101167-1-1.html",
       "title": "记录本菜鸡第一次破解某影视VIP和去广告",
       "stableId": "52pojie:2101167",
@@ -746,21 +816,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 65,
+      "ecosystemValue": 86,
+      "technicalDepth": 75,
+      "trendNovelty": 70,
       "signals": [
-        "AI辅助APK重打包",
-        "改包名与Native校验绕过"
+        "全流程 AI 完成 APK 重打包",
+        "改包名、Native 校验绕过与签名重建"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "Apktool",
+        "Jarsigner"
       ],
-      "riskType": "gray_abuse",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "全流程AI驱动的APK重打包与对抗。",
-      "summary": "全流程利用AI完成APK重打包、改包名、绕过Native校验及去除奖励限制。",
-      "confidence": 0.95,
+      "evolutionNote": "利用大模型全流程串联 APK 重打包、改包名、绕过底层校验及重建签名的自动化实践。",
+      "summary": "展示了通过 AI 全流程辅助完成 APK 重打包、改包名、绕过 Native 校验及重建签名的完整链条。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2100927-1-1.html",
       "title": "全流程使用AI，完成一次APK重打包。改包名、绕过 Native 校验、重建签名并去掉奖励...",
       "stableId": "52pojie:2100927",
@@ -768,19 +840,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "广告与功能限制",
-      "ecosystemValue": 55,
-      "technicalDepth": 30,
+      "category": "会员与授权绕过",
+      "ecosystemValue": 65,
+      "technicalDepth": 35,
       "trendNovelty": 20,
       "signals": [
-        "网盘画质解锁教程",
-        "夸克网盘"
+        "夸克网盘 VIP 画质教程",
+        "客户端画质限制解除"
       ],
-      "tools": [],
+      "tools": [
+        "MT管理器",
+        "Jadx"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "网盘客户端画质限制调整。",
-      "summary": "夸克网盘VIP画质限制绕过相关教程。",
+      "evolutionNote": "针对主流网盘客户端的画质播放限制解除教程。",
+      "summary": "分享了关于夸克网盘 VIP 画质特权的破解或解锁配置教程。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2089079-1-1.html",
       "title": "夸克网盘VIP画质教程",
@@ -794,14 +869,18 @@
       "technicalDepth": 40,
       "trendNovelty": 20,
       "signals": [
-        "记账App会员分析"
+        "记账App永久会员分析",
+        "本地验证逻辑逆向"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "常规生活工具App会员逻辑分析。",
-      "summary": "某记账App永久会员功能及本地授权验证机制分析。",
-      "confidence": 0.95,
+      "evolutionNote": "对轻量级记账应用本地授权校验逻辑的逆向分析。",
+      "summary": "对某记账 App 的永久会员功能及授权逻辑进行了逆向分析。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2088595-1-1.html",
       "title": "某记账App永久会员功能分析",
       "stableId": "52pojie:2088595",
@@ -809,20 +888,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 80,
-      "trendNovelty": 40,
+      "category": "加固脱壳与反调试",
+      "ecosystemValue": 85,
+      "technicalDepth": 88,
+      "trendNovelty": 50,
       "signals": [
-        "SO加载全景图",
-        "底层动态库加载分析"
+        "Android so 加载全景图",
+        "底层库动态加载与链接机制"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Linker"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "Android底层so动态加载机制研究。",
-      "summary": "探讨Android系统so动态加载机制的全景技术实现。",
-      "confidence": 0.95,
+      "evolutionNote": "深入探讨 Android 操作系统底层 Linker 加载和解析 so 库的全景机制。",
+      "summary": "详细剖析了 Android 系统中 native so 库加载的底层全景流程与机制。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2083097-1-1.html",
       "title": "地表最强 Android so加载全景图",
       "stableId": "52pojie:2083097",
@@ -831,21 +913,21 @@
     },
     {
       "category": "工具链与入门",
-      "ecosystemValue": 60,
-      "technicalDepth": 25,
+      "ecosystemValue": 40,
+      "technicalDepth": 20,
       "trendNovelty": 10,
       "signals": [
-        "Android Studio安装配置",
-        "开发工具入门"
+        "Android Studio 安装配置",
+        "开发工具环境搭建"
       ],
       "tools": [
         "Android Studio"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开发环境配置指南。",
-      "summary": "Android Studio开发工具的安装与环境配通指南。",
-      "confidence": 0.95,
+      "evolutionNote": "面向初学者的 IDE 安装与环境避坑指南。",
+      "summary": "分享了顺畅安装配置 Android Studio 开发工具的实用指南。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2064573-1-1.html",
       "title": "无痛畅通安装android-studio开发工具",
       "stableId": "52pojie:2064573",
@@ -854,19 +936,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
+      "ecosystemValue": 80,
+      "technicalDepth": 82,
       "trendNovelty": 50,
       "signals": [
-        "mmap模块化保护",
-        "内存映射保护分析"
+        "日游 mmap 模块化保护分析",
+        "内存映射加固机制"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Frida"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "基于mmap的内存保护与模块化加固分析。",
-      "summary": "某日游mmap模块化代码保护机制的简要逆向分析。",
-      "confidence": 0.95,
+      "evolutionNote": "针对基于 mmap 内存映射的模块化代码保护机制的逆向分析。",
+      "summary": "简单分析了某日游应用中采用的 mmap 模块化代码保护与对抗技术。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-2029498-1-1.html",
       "title": "某日遊mmap模塊化保護簡單分析",
       "stableId": "52pojie:2029498",
@@ -875,23 +960,23 @@
     },
     {
       "category": "工具链与入门",
-      "ecosystemValue": 65,
+      "ecosystemValue": 55,
       "technicalDepth": 35,
-      "trendNovelty": 10,
+      "trendNovelty": 15,
       "signals": [
-        "雷电模拟器配置",
-        "Magisk与LSPosed"
+        "模拟器安装 Magisk 和 LSPosed",
+        "新手调试环境配置"
       ],
       "tools": [
+        "雷电模拟器",
         "Magisk",
-        "LSPosed",
-        "雷电模拟器"
+        "LSPosed"
       ],
       "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "早期模拟器越狱环境搭建教程。",
-      "summary": "安卓新手在雷电模拟器中安装Magisk和LSPosed的基础教程。",
-      "confidence": 0.95,
+      "duplicateGroup": "emulator_root_group",
+      "evolutionNote": "Android 逆向必备调试环境（模拟器+Root+框架）的基础搭建教程。",
+      "summary": "面向安卓新手的雷电模拟器安装 Magisk 和 LSPosed 框架的图文教程。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2024885-1-1.html",
       "title": "【安卓新手】雷电模拟器安装magisk和Lsposed",
       "stableId": "52pojie:2024885",
@@ -900,19 +985,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 30,
+      "ecosystemValue": 90,
+      "technicalDepth": 88,
+      "trendNovelty": 60,
       "signals": [
-        "腾讯游戏安全竞赛",
-        "安卓初赛分析"
+        "腾讯游戏安全技术竞赛",
+        "安卓初赛逆向分析"
       ],
-      "tools": [],
-      "riskType": "normal",
+      "tools": [
+        "IDA Pro",
+        "Frida",
+        "Ghidra"
+      ],
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "官方游戏安全竞赛题目解析。",
-      "summary": "2025腾讯游戏安全技术竞赛安卓初赛赛题解析。",
-      "confidence": 0.95,
+      "evolutionNote": "大厂安全竞赛真题解析，体现当前游戏安全对抗方向。",
+      "summary": "回顾与解析了 2025 腾讯游戏安全技术竞赛安卓初赛的技术考点与逆向思路。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-2024227-1-1.html",
       "title": "2025腾讯游戏安全技术竞赛 安卓初赛",
       "stableId": "52pojie:2024227",
@@ -921,19 +1010,22 @@
     },
     {
       "category": "会员与授权绕过",
-      "ecosystemValue": 65,
-      "technicalDepth": 45,
+      "ecosystemValue": 70,
+      "technicalDepth": 50,
       "trendNovelty": 25,
       "signals": [
-        "利用软件逻辑失误",
-        "Poweramp破解"
+        "Poweramp 及均衡器破解",
+        "利用软件逻辑失误绕过"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "利用官方授权逻辑漏洞进行激活。",
-      "summary": "利用音频软件Poweramp及均衡器的设计失误进行会员激活。",
-      "confidence": 0.95,
+      "evolutionNote": "利用知名音频播放器本身存在的逻辑漏洞实现高级版解锁。",
+      "summary": "分享了利用软件自身的配置疏漏或逻辑失误来破解 Poweramp 播放器及均衡器限制的方法。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2021655-1-1.html",
       "title": "利用软件失误破解Poweramp、均衡器",
       "stableId": "52pojie:2021655",
@@ -942,22 +1034,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 40,
+      "ecosystemValue": 84,
+      "technicalDepth": 78,
+      "trendNovelty": 55,
       "signals": [
-        "Flutter逆向",
-        "blutter工具应用"
+        "Flutter 逆向",
+        "blutter 工具应用"
       ],
       "tools": [
-        "Flutter",
-        "blutter"
+        "blutter",
+        "IDA Pro",
+        "Flutter"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对Flutter跨平台框架的专项逆向分析。",
-      "summary": "使用blutter工具对某直播App的Flutter架构进行逆向解析。",
-      "confidence": 0.95,
+      "evolutionNote": "针对 Flutter 跨平台编译应用的专门逆向工具 blutter 的实战应用。",
+      "summary": "记录了使用 blutter 工具对某直播 App 的 Flutter 引擎代码进行逆向分析的过程。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-2007204-1-1.html",
       "title": "某糖/某彩直播APP flutter逆向 -blutter",
       "stableId": "52pojie:2007204",
@@ -966,19 +1059,22 @@
     },
     {
       "category": "会员与授权绕过",
-      "ecosystemValue": 65,
-      "technicalDepth": 40,
-      "trendNovelty": 25,
+      "ecosystemValue": 70,
+      "technicalDepth": 45,
+      "trendNovelty": 20,
       "signals": [
-        "音乐软件会员解锁",
-        "本地修改"
+        "蓝色音乐软件会员歌曲永久免费听",
+        "音频流解密与权限绕过"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "Burp Suite"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "常见音乐播放器无损音源/会员限制绕过。",
-      "summary": "某蓝色音乐软件会员音乐永久免费听的本地逻辑修改。",
-      "confidence": 0.95,
+      "evolutionNote": "针对主流音乐客户端付费专区音频获取的逆向修改。",
+      "summary": "分享了对某音乐软件进行会员歌曲永久免费听功能的逆向修改方法。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-1996002-1-1.html",
       "title": "某蓝色音乐软件——会员音乐永久免费听",
       "stableId": "52pojie:1996002",
@@ -987,19 +1083,23 @@
     },
     {
       "category": "工具链与入门",
-      "ecosystemValue": 70,
-      "technicalDepth": 35,
-      "trendNovelty": 15,
+      "ecosystemValue": 65,
+      "technicalDepth": 30,
+      "trendNovelty": 10,
       "signals": [
         "Android逆向学习路线",
-        "新手指南"
+        "体系化知识梳理"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "IDA Pro",
+        "Frida"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "长期适用的逆向学习大纲。",
-      "summary": "系统性的Android逆向工程学习路线与知识点规划。",
-      "confidence": 0.95,
+      "evolutionNote": "面向初学者的 Android 逆向工程进阶与学习路径规划。",
+      "summary": "提供了一份较为完整的 Android 逆向工程技术栈学习路线指南。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-1975239-1-1.html",
       "title": "Android逆向学习路线",
       "stableId": "52pojie:1975239",
@@ -1009,18 +1109,21 @@
     {
       "category": "会员与授权绕过",
       "ecosystemValue": 65,
-      "technicalDepth": 35,
-      "trendNovelty": 20,
+      "technicalDepth": 40,
+      "trendNovelty": 15,
       "signals": [
-        "麻雀记App",
-        "高级会员解锁"
+        "麻雀记高级会员解锁",
+        "版本号定位与 Smali 修改"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "特定版本笔记软件授权解锁。",
-      "summary": "麻雀记4.9.6版本高级会员解锁方法。",
-      "confidence": 0.95,
+      "evolutionNote": "针对特定版本（4.9.6）记事本软件的高级特权解锁。",
+      "summary": "记录了对麻雀记 4.9.6 版本高级会员权限解锁的逆向修改细节。",
+      "confidence": 0.96,
       "url": "https://www.52pojie.cn/thread-1966697-1-1.html",
       "title": "麻雀记4.9.6 解锁高级会员",
       "stableId": "52pojie:1966697",
@@ -1029,23 +1132,23 @@
     },
     {
       "category": "车机与嵌入式系统",
-      "ecosystemValue": 75,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 40,
       "signals": [
-        "电视盒子破解",
-        "ADB与telnet",
-        "保留IPTV"
+        "电视盒子 ZXV10 B860AV2.1-T 破解",
+        "ADB telnet 与 IPTV 保留"
       ],
       "tools": [
         "ADB",
-        "telnet"
+        "telnet",
+        "Fastboot"
       ],
-      "riskType": "dual_use",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "智能电视盒子固件改造与限制解除。",
-      "summary": "四川中兴电视盒子开启ADB和telnet并去除第三方App限制的改造教程。",
-      "confidence": 0.95,
+      "evolutionNote": "针对运营商 IPTV 电视机顶盒开启 ADB、解锁第三方应用限制并保留关键服务的折腾教程。",
+      "summary": "分享了四川中兴电视盒子开 ADB、telnet、解除第三方应用限制同时保留 IPTV 的完整折腾记录。",
+      "confidence": 0.98,
       "url": "https://www.52pojie.cn/thread-1920698-1-1.html",
       "title": "四川中兴电视盒子ZXV10 B860AV2.1-T 开二维码 ADB telnet 解第三方app限制 保留IPTV",
       "stableId": "52pojie:1920698",
@@ -1054,19 +1157,22 @@
     },
     {
       "category": "广告与功能限制",
-      "ecosystemValue": 65,
-      "technicalDepth": 45,
+      "ecosystemValue": 70,
+      "technicalDepth": 50,
       "trendNovelty": 25,
       "signals": [
         "电视投屏软件去广告",
-        "应用瘦身"
+        "投屏客户端净化"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "投屏类大屏应用去广告实践。",
-      "summary": "从零开始对电视投屏软件进行去广告修改。",
-      "confidence": 0.95,
+      "evolutionNote": "针对大屏电视投屏应用的开屏及内置广告去除实践。",
+      "summary": "从零开始对某电视投屏软件进行了去广告和净化处理。",
+      "confidence": 0.97,
       "url": "https://www.52pojie.cn/thread-1892773-1-1.html",
       "title": "从零开始对某电视投屏软件去广告",
       "stableId": "52pojie:1892773",
@@ -1075,19 +1181,23 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
+      "ecosystemValue": 92,
+      "technicalDepth": 92,
+      "trendNovelty": 85,
       "signals": [
-        "DexVMP恢复工作流",
-        "虚拟机还原"
+        "Android DexVMP 恢复工作流框架",
+        "虚拟化指令还原为可执行程序"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Frida",
+        "Python"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "看雪社区专业脱壳与VMP还原框架分享。",
-      "summary": "Android某零免费版 DexVMP 恢复工作流框架，将虚拟化代码还原为可运行程序。",
-      "confidence": 0.95,
+      "evolutionNote": "针对某6零免费版 DexVMP 的自动化恢复工作流，将虚拟字节码还原为常规可运行程序。",
+      "summary": "原创发布了针对 Android 某安全厂商免费版 DexVMP 的恢复工作流框架，实现指令还原。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292951.htm",
       "title": "[原创]Android 某6零免费版 DexVMP 恢复工作流框架：还原成可运行的正常程序,仅供学习研究",
       "stableId": "kanxue:292951",
@@ -1096,19 +1206,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 80,
+      "ecosystemValue": 94,
+      "technicalDepth": 94,
+      "trendNovelty": 85,
       "signals": [
-        "七神VMP分析",
-        "指令还原"
+        "七神 VMP 分析与还原",
+        "虚拟机架构逆向"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Ghidra"
+      ],
       "riskType": "dual_use",
-      "duplicateGroup": "qishen_vmp_analysis",
-      "evolutionNote": "跨社区（看雪与吾爱破解）同步讨论的高难度加固还原。",
-      "summary": "看雪社区对七神VMP加固的深入分析与完全还原。",
-      "confidence": 0.95,
+      "duplicateGroup": "vmp_analysis_group",
+      "evolutionNote": "看雪社区内对七神 VMP 保护深层次分析与还原的技术进阶探讨。",
+      "summary": "深度剖析了七神 VMP 的内部实现逻辑，并给出了完整的逆向分析与还原方案。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292925.htm",
       "title": "[原创] 七神VMP真正的分析与还原",
       "stableId": "kanxue:292925",
@@ -1117,21 +1230,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 70,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
       "signals": [
-        "APatch Root方案",
-        "nofault回退检测绕过"
+        "APatch Root 方案 compat 的 nofault 回退检测",
+        "内核 Root 方案对抗"
       ],
       "tools": [
-        "APatch"
+        "APatch",
+        "KernelSU",
+        "ADB"
       ],
       "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "新型Root方案（APatch）的底层缺陷与对抗分析。",
-      "summary": "分析了APatch Root方案中compat的nofault回退机制导致被应用检测到的原因。",
-      "confidence": 0.95,
+      "duplicateGroup": "kernel_root_detect",
+      "evolutionNote": "探讨现代内核级 Root 方案（APatch）在处理 compat 异常回退时被应用层安全检测识别的成因与绕过。",
+      "summary": "分析了 Android APatch Root 方案中 compat 的 nofault 回退导致被安全策略检测的机制。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292954.htm",
       "title": "[原创]安卓APatch Root方案compat的nofault回退导致被检测",
       "stableId": "kanxue:292954",
@@ -1139,22 +1254,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "category": "游戏与作弊生态",
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 75,
       "signals": [
-        "Unreal Engine 4逆向",
-        "游戏安全竞赛案例"
+        "Unreal Engine 4 引擎基础",
+        "游戏安全竞赛安卓客户端安全分析"
       ],
       "tools": [
-        "Unreal Engine 4"
+        "IDA Pro",
+        "UE4",
+        "Frida"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "游戏安全竞赛中UE4客户端安全案例剖析。",
-      "summary": "以第九届游戏安全竞赛初赛安卓客户端为例，解析Unreal Engine 4引擎基础及逆向要点。",
-      "confidence": 0.95,
+      "evolutionNote": "以第九届游戏安全竞赛初赛安卓客户端为例，剖析 UE4 引擎加固与逆向要点。",
+      "summary": "详细解析了 Unreal Engine 4 引擎基础结构，并结合游戏安全竞赛安卓客户端初赛样本进行安全分析。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292934.htm",
       "title": "[原创]Unreal Engine 4引擎基础及其2024第九届游戏安全竞赛-初赛-安卓客户端安全为例",
       "stableId": "kanxue:292934",
@@ -1162,22 +1279,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "抓包与协议分析",
-      "ecosystemValue": 90,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 92,
       "technicalDepth": 85,
-      "trendNovelty": 85,
+      "trendNovelty": 90,
       "signals": [
-        "AI全自动分析网络请求",
-        "加密算法逆向"
+        "中某某动 APP 算法 AI 分析",
+        "一句话全自动分析网络请求与加密算法"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "Frida",
+        "Burp Suite"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "大模型在网络协议及加密算法自动化分析中的深度应用。",
-      "summary": "利用AI实现对某移动客户端网络请求及加密算法的一句话全自动分析。",
-      "confidence": 0.95,
+      "evolutionNote": "利用大模型实现对大型企业级 App 网络请求和加解密算法的端到端自动化分析。",
+      "summary": "分享了利用 AI 实现对某移动应用网络请求及复杂加密算法的全自动分析实战。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292939.htm",
       "title": "中某某动APP算法AI分析-一句话全自动分析网络请求和加密算法",
       "stableId": "kanxue:292939",
@@ -1185,43 +1304,47 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "加固脱壳与反调试",
-      "ecosystemValue": 85,
-      "technicalDepth": 85,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 90,
+      "technicalDepth": 82,
       "trendNovelty": 70,
       "signals": [
-        "The Enigma Protector",
-        "VM还原插件"
+        "端侧风险检测到策略闭环",
+        "企业安全风控体系"
       ],
       "tools": [
-        "The Enigma Protector"
+        "RASP",
+        "EDR"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "针对PC/通用加固壳的虚拟机还原插件开发。",
-      "summary": "实现了针对 The Enigma Protector 加壳程序的虚拟机指令还原插件。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292906.htm",
-      "title": "[原创]The Enigma Protector vm还原插件",
-      "stableId": "kanxue:292906",
+      "evolutionNote": "从防御方视角探讨端侧风险感知、安全SDK检测到后端策略联动的完整闭环建设。",
+      "summary": "探讨了从移动端侧风险检测出发，如何构建端到端风控与对抗的策略闭环体系。",
+      "confidence": 0.97,
+      "url": "https://bbs.kanxue.com/thread-292994.htm",
+      "title": "从端侧风险检测到策略闭环",
+      "stableId": "kanxue:292994",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "category": "游戏与作弊生态",
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 50,
       "signals": [
-        "棋牌类逆向",
-        "Java层与Native层联合分析"
+        "jcc 记牌器分析",
+        "Java 层与 Native 层协同逆向"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "IDA Pro"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "棋牌记牌器类的双层逻辑逆向。",
-      "summary": "针对jcc记牌器的Java层与Native层业务逻辑进行了详细逆向分析。",
-      "confidence": 0.95,
+      "evolutionNote": "针对棋牌类辅助记牌器工具的 Java 层逻辑及底层 Native 实现的联合分析。",
+      "summary": "对某记牌器工具开展了 Java 层与 Native 层的逆向解析与逻辑拆解。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292938.htm",
       "title": "[原创]jcc记牌器java层和native层分析",
       "stableId": "kanxue:292938",
@@ -1234,18 +1357,44 @@
       "technicalDepth": 90,
       "trendNovelty": 80,
       "signals": [
-        "P-code中间语言",
-        "VMP还原",
-        "IR入门"
+        "The Enigma Protector vm 还原插件",
+        "主流商用加壳去混淆"
       ],
       "tools": [
-        "Ghidra"
+        "IDA Pro",
+        "x64dbg",
+        "Python"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "利用编译器中间语言（P-code）做通用虚拟机还原的实战方法。",
-      "summary": "探讨了如何使用 P-code 中间语言进行 VMP 虚拟机的还原与中间表示（IR）入门。",
-      "confidence": 0.95,
+      "evolutionNote": "针对桌面端主流加壳工具 The Enigma Protector 的虚拟机还原插件开发。",
+      "summary": "原创开发并分享了针对 The Enigma Protector 虚拟机的还原与去混淆插件。",
+      "confidence": 0.98,
+      "url": "https://bbs.kanxue.com/thread-292906.htm",
+      "title": "[原创]The Enigma Protector vm还原插件",
+      "stableId": "kanxue:292906",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "加固脱壳与反调试",
+      "ecosystemValue": 92,
+      "technicalDepth": 92,
+      "trendNovelty": 85,
+      "signals": [
+        "P-code 做 VMP 还原",
+        "中间语言（IR）入门实践"
+      ],
+      "tools": [
+        "Ghidra",
+        "P-code",
+        "IDA Pro"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "利用 Ghidra 的 P-code 中间语言进行通用虚拟机保护（VMP）还原的实战入门教程。",
+      "summary": "分享了使用 P-code 架构进行 VMP 虚拟机还原的实战型中间语言（IR）入门解析。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292911.htm",
       "title": "[原创] 用 P-code 做 VMP 还原：一份实战向的 IR 入门",
       "stableId": "kanxue:292911",
@@ -1253,22 +1402,47 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 70,
-      "technicalDepth": 50,
-      "trendNovelty": 40,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 88,
+      "technicalDepth": 88,
+      "trendNovelty": 80,
       "signals": [
-        "IDA Pro新版本发布",
-        "macOS Intel支持"
+        "MCP 协议的 x32dbg 自动化调试平台",
+        "调试器二次开发"
       ],
       "tools": [
-        "IDA Pro"
+        "x32dbg",
+        "MCP协议",
+        "Python"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "结合现代通信/控制协议实现 x32dbg 调试平台的自动化设计与落地。",
+      "summary": "设计并实现了基于 MCP 协议的 x32dbg 自动化调试平台，提升二进制调试效率。",
+      "confidence": 0.97,
+      "url": "https://bbs.kanxue.com/thread-292993.htm",
+      "title": "[原创]基于MCP协议的x32dbg自动化调试平台设计与实现",
+      "stableId": "kanxue:292993",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "工具链与入门",
+      "ecosystemValue": 60,
+      "technicalDepth": 30,
+      "trendNovelty": 40,
+      "signals": [
+        "IDA 9.4 (macOS Intel)",
+        "逆向工具版本更新"
+      ],
+      "tools": [
+        "IDA Pro 9.4"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "主流逆向工具版本更新动态。",
-      "summary": "介绍了 IDA 9.4 (macOS Intel版) 的发布与更新内容。",
-      "confidence": 0.95,
+      "evolutionNote": "业内主流逆向分析工具 IDA Pro 最新版本的分享与同步。",
+      "summary": "分享了 IDA Pro 9.4 (macOS Intel) 版本的获取与生态工具链更新。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292930.htm",
       "title": "[原创] IDA 9.4  (macOS Intel)",
       "stableId": "kanxue:292930",
@@ -1276,23 +1450,25 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "车机与嵌入式系统",
-      "ecosystemValue": 95,
-      "technicalDepth": 95,
-      "trendNovelty": 85,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 96,
+      "technicalDepth": 96,
+      "trendNovelty": 90,
       "signals": [
-        "Win11内核异常处理",
-        "无痕Hook",
-        "进程保护与反调试"
+        "Win11 26H1 内核异常体系分析",
+        "无痕 Hook、进程保护与反调试",
+        "PoC 验证"
       ],
       "tools": [
-        "x64dbg"
+        "Visual Studio",
+        "WinDbg",
+        "KD"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "Windows内核安全与底层异常处理前沿实验。",
-      "summary": "Windows 11内核异常体系分析与实验，提前接管异常实现无痕Hook、进程保护与反调试。",
-      "confidence": 0.95,
+      "evolutionNote": "深度探索 Windows 11 最新内核体系中的异常接管机制，实现高级对抗技术。",
+      "summary": "实验并分析了 Win11 26H1 内核异常体系，提前接管用户态/内核态异常实现了无痕 Hook、进程保护和反调试及 PoC。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292876.htm",
       "title": "[原创]Win11 26H1内核异常体系分析与实验：提前接管用户态、内核态异常，实现无痕Hook、进程保护、反调试，附PoC",
       "stableId": "kanxue:292876",
@@ -1301,42 +1477,22 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 50,
-      "signals": [
-        "端侧风险检测",
-        "安全策略闭环"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "企业级移动端安全风控体系建设。",
-      "summary": "探讨了从端侧风险检测到整体安全策略闭环的建设思路。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292994.htm",
-      "title": "从端侧风险检测到策略闭环",
-      "stableId": "kanxue:292994",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "移动安全与逆向",
       "ecosystemValue": 85,
       "technicalDepth": 80,
-      "trendNovelty": 55,
+      "trendNovelty": 50,
       "signals": [
-        "Frida底层原理",
-        "Java.perform与运行时机"
+        "Frida 脚本运行时机",
+        "Java.perform 原理剖析"
       ],
       "tools": [
-        "Frida"
+        "Frida",
+        "JavaScript"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "动态插桩工具Frida的核心机制剖析。",
-      "summary": "深入解析了 Frida 脚本运行时机与 Java.perform API 的底层执行原理。",
-      "confidence": 0.95,
+      "evolutionNote": "深入底层探讨 Frida 注入时机选择及 Java.perform 钩子调度原理。",
+      "summary": "解析了 Frida 脚本的具体运行时机以及 Java.perform 底层执行的内部原理。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292880.htm",
       "title": "[原创]Frida 脚本运行时机与Java.perform的原理",
       "stableId": "kanxue:292880",
@@ -1344,43 +1500,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 75,
-      "signals": [
-        "非标准VM识别与分析",
-        "虚拟机保护变种"
-      ],
-      "tools": [],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "针对新型非标虚拟化保护的识别方法。",
-      "summary": "总结了一种“非标准VM”加固的识别特征与逆向分析方法。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292904.htm",
-      "title": "[原创]一种“非标准VM“的识别与分析",
-      "stableId": "kanxue:292904",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "AI辅助逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 70,
+      "ecosystemValue": 88,
+      "technicalDepth": 80,
+      "trendNovelty": 85,
       "signals": [
-        "AI检索海量日志",
-        "自动化分析辅助"
+        "AI 高效检索上百 GB 日志",
+        "海量日志分析自动化"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "Python",
+        "Log Analysis"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "大模型在安全日志分析中的工程化应用。",
-      "summary": "探讨了如何利用AI高效检索和分析上百GB的安全调试日志。",
-      "confidence": 0.95,
+      "evolutionNote": "利用大语言模型解决安全分析或逆向过程中超大规模日志的高效检索与归纳痛点。",
+      "summary": "探讨了如何借助 AI 技术实现对上百 GB 级别安全与调试日志的高效检索和分析。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292988.htm",
       "title": "[原创]让AI也能高效检索上百GB日志",
       "stableId": "kanxue:292988",
@@ -1388,20 +1525,48 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
+      "category": "加固脱壳与反调试",
       "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 70,
+      "technicalDepth": 88,
+      "trendNovelty": 80,
       "signals": [
-        "安卓Root对抗",
-        "内核级对抗"
+        "非标准 VM 识别与分析",
+        "自定义虚拟机保护对抗"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Frida"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "移动端Root检测与对抗逐渐向内核层演进。",
-      "summary": "探讨了安卓环境下的Root对抗对抗技术，重点在于内核层的攻防。",
-      "confidence": 0.95,
+      "evolutionNote": "针对市面上非标准化、定制化虚拟机保护壳的特征识别与逆向拆解。",
+      "summary": "研究并探讨了一种“非标准VM”保护机制的特征识别方法与深度分析流程。",
+      "confidence": 0.97,
+      "url": "https://bbs.kanxue.com/thread-292904.htm",
+      "title": "[原创]一种“非标准VM“的识别与分析",
+      "stableId": "kanxue:292904",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "移动安全与逆向",
+      "ecosystemValue": 92,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
+      "signals": [
+        "安卓 root 对抗",
+        "内核级防御与财富定位"
+      ],
+      "tools": [
+        "KernelSU",
+        "APatch",
+        "Magisk"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": "kernel_root_detect",
+      "evolutionNote": "聚焦于 Android 底层 Root 检测与对抗的内核空间攻防技术。",
+      "summary": "探讨了安卓平台 root 对抗的核心逻辑与内核层面的攻防技术要点。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292966.htm",
       "title": "[原创][原创]安卓root对抗，财富都在内核里",
       "stableId": "kanxue:292966",
@@ -1409,45 +1574,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 70,
-      "technicalDepth": 40,
-      "trendNovelty": 20,
+      "category": "隐私后门与恶意行为",
+      "ecosystemValue": 94,
+      "technicalDepth": 92,
+      "trendNovelty": 90,
       "signals": [
-        "IDA Pro基础教程",
-        "动态调试入门"
+        "仿冒 CCleaner 投递 GhostDesk 木马",
+        "无文件加载、用户态 Rootkit 隐身与 Chrome 恶意扩展"
       ],
       "tools": [
-        "IDA Pro"
+        "Process Hacker",
+        "IDA Pro",
+        "Procmon"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "经典的IDA Pro入门与动态调试指南。",
-      "summary": "IDA Pro 基础教程：涵盖目录结构到动态调试的完整入门指南。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292932.htm",
-      "title": "[分享]IDA Pro 基础教程：从目录结构到动态调试的入门指南",
-      "stableId": "kanxue:292932",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "隐私后门与恶意行为",
-      "ecosystemValue": 95,
-      "technicalDepth": 90,
-      "trendNovelty": 85,
-      "signals": [
-        "仿冒CCleaner木马",
-        "无文件加载",
-        "用户态Rootkit",
-        "Chrome恶意扩展"
-      ],
-      "tools": [],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "复杂的组合型钓鱼与窃密木马分析。",
-      "summary": "分析了仿冒 CCleaner 投递 GhostDesk 木马的无文件加载、用户态 Rootkit 隐身及恶意扩展等技术。",
-      "confidence": 0.95,
+      "evolutionNote": "深度解析针对桌面端供应链投递的高级木马变种，涉及无文件落地和浏览器扩展劫持。",
+      "summary": "分析了仿冒 CCleaner 投递 GhostDesk 木马的样本，涵盖无文件加载、用户态 Rootkit 隐身及 Chrome 恶意扩展。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292989.htm",
       "title": "[病毒分析]仿冒 CCleaner 投递 GhostDesk 木马：无文件加载、用户态 Rootkit 隐身与 Chrome 恶意扩展",
       "stableId": "kanxue:292989",
@@ -1455,22 +1599,47 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 75,
+      "category": "工具链与入门",
+      "ecosystemValue": 65,
+      "technicalDepth": 35,
+      "trendNovelty": 15,
       "signals": [
-        "OLLVM混淆去除",
-        "ollvm去混淆"
+        "IDA Pro 基础教程",
+        "动态调试入门"
       ],
       "tools": [
-        "OLLVM"
+        "IDA Pro"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "面向新手的 IDA Pro 目录结构与动态调试基础全景指南。",
+      "summary": "提供了一份 IDA Pro 基础使用教程，从目录结构到动态调试的入门解析。",
+      "confidence": 0.98,
+      "url": "https://bbs.kanxue.com/thread-292932.htm",
+      "title": "[分享]IDA Pro 基础教程：从目录结构到动态调试的入门指南",
+      "stableId": "kanxue:292932",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "加固脱壳与反调试",
+      "ecosystemValue": 92,
+      "technicalDepth": 90,
+      "trendNovelty": 80,
+      "signals": [
+        "26 企鹅 ollvm 混淆去除",
+        "大厂ollvm变种去混淆"
+      ],
+      "tools": [
+        "IDA Pro",
+        "LLVM",
+        "Python"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对现代混淆技术的去混淆实践。",
-      "summary": "分享了对特定版本OLLVM控制流平坦化等混淆的去除与还原方法。",
-      "confidence": 0.95,
+      "evolutionNote": "针对腾讯系最新 ollvm 变种混淆代码的去混淆与控制流平坦化还原。",
+      "summary": "分享了针对腾讯定制版 ollvm 混淆代码的去除与控制流恢复实战。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292886.htm",
       "title": "[原创]26企鹅ollvm混淆去除",
       "stableId": "kanxue:292886",
@@ -1478,23 +1647,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "加固脱壳与反调试",
-      "ecosystemValue": 95,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 94,
       "technicalDepth": 95,
-      "trendNovelty": 85,
+      "trendNovelty": 88,
       "signals": [
-        "Unicorn检测方案",
-        "Unidbg环境补全对抗"
+        "Unicorn 有效检测方案与魔改对抗",
+        "Unidbg 环境补全失效原因分析"
       ],
       "tools": [
         "Unicorn",
-        "Unidbg"
+        "Unidbg",
+        "Frida"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "模拟执行引擎（Unicorn/Unidbg）的攻防对抗前沿。",
-      "summary": "深入探讨了Unicorn模拟执行的有效检测方案及其魔改对抗方案，解释了Unidbg补全环境后仍失效的原因。",
-      "confidence": 0.95,
+      "evolutionNote": "深入探讨模拟执行（Unicorn/Unidbg）在现代安全校验中的检测难点及魔改对抗方法。",
+      "summary": "剖析了 Unicorn 引擎的有效检测方案以及为何补全环境后 Unidbg 依然被识别的底层原因与魔改对抗策略。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292882.htm",
       "title": "[原创]unicorn有效的检测方案，以及魔改的对抗方案(unidbg为什么补好了环境却还是不能用)",
       "stableId": "kanxue:292882",
@@ -1502,20 +1672,46 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "抓包与协议分析",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 50,
+      "category": "工具链与入门",
+      "ecosystemValue": 60,
+      "technicalDepth": 30,
+      "trendNovelty": 30,
       "signals": [
-        "VPN检测",
-        "网络虚拟化检测"
+        "BackPRO 软件分享",
+        "辅助逆向工具"
       ],
-      "tools": [],
+      "tools": [
+        "BackPRO"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "逆向社区实用辅助工具 BackPRO 的分享与推荐。",
+      "summary": "分享了一款名为 BackPRO 的辅助工具或相关资源。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-292996.htm",
+      "title": "[分享]BackPRO",
+      "stableId": "kanxue:292996",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "移动安全与逆向",
+      "ecosystemValue": 82,
+      "technicalDepth": 75,
+      "trendNovelty": 60,
+      "signals": [
+        "VPN 检测机制分析",
+        "网络代理与虚拟网卡识别"
+      ],
+      "tools": [
+        "Frida",
+        "Jadx"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "App侧对VPN及代理环境的进阶检测方法。",
-      "summary": "探讨并分享了一种高效的移动App端VPN检测与识别方案。",
-      "confidence": 0.95,
+      "evolutionNote": "探讨移动端如何精准识别 VPN 及虚拟网卡流量的检测与绕过技术。",
+      "summary": "探讨并分享了当前主流应用中较为高效的 VPN 检测及对抗实现方案。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292928.htm",
       "title": "[原创]最好用过VPN检测",
       "stableId": "kanxue:292928",
@@ -1524,21 +1720,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
+      "ecosystemValue": 95,
+      "technicalDepth": 96,
+      "trendNovelty": 85,
       "signals": [
-        "64位VMP3.5壳分析",
-        "堆栈分析与handle识别"
+        "64位 VMP 3.5 壳逆向实战（下）",
+        "堆栈分析与 Handle 识别"
       ],
       "tools": [
-        "VMP"
+        "x64dbg",
+        "IDA Pro"
       ],
       "riskType": "dual_use",
       "duplicateGroup": "vmp_35_analysis",
-      "evolutionNote": "针对商业加固VMP 3.5的系列化逆向分析（阶段Ⅱ）。",
-      "summary": "从0开始手撕64位VMP 3.5壳系列教程第二部分：深入堆栈分析与handle识别。",
-      "confidence": 0.95,
+      "evolutionNote": "高难度 64 位 VMP 3.5 壳逆向的第二部分：深入堆栈与 Handle 分发识别。",
+      "summary": "从0开始手撕 64 位 VMP 3.5 壳系列之二：详细记录了堆栈分析与指令 Handle 识别过程。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292920.htm",
       "title": "[原创]从0开始手撕64位vmp3.5壳(能撕但只能撕一点点)-Ⅱ堆栈分析与handle识别",
       "stableId": "kanxue:292920",
@@ -1548,18 +1745,21 @@
     {
       "category": "工具链与入门",
       "ecosystemValue": 65,
-      "technicalDepth": 50,
-      "trendNovelty": 25,
+      "technicalDepth": 40,
+      "trendNovelty": 20,
       "signals": [
-        "驱动加载工具",
-        "Windows内核工具"
+        "驱动加载工具分享",
+        "内核调试辅助"
       ],
-      "tools": [],
+      "tools": [
+        "KDMapper",
+        "Driver Loader"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "Windows内核驱动辅助加载工具分享。",
-      "summary": "分享了一款实用的Windows内核驱动加载工具。",
-      "confidence": 0.95,
+      "evolutionNote": "Windows 内核驱动开发与逆向调试常用的辅助加载工具。",
+      "summary": "分享了一款实用的 Windows 驱动加载与测试辅助工具。",
+      "confidence": 0.96,
       "url": "https://bbs.kanxue.com/thread-292964.htm",
       "title": "[分享]驱动加载工具",
       "stableId": "kanxue:292964",
@@ -1568,21 +1768,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
+      "ecosystemValue": 94,
+      "technicalDepth": 95,
+      "trendNovelty": 85,
       "signals": [
-        "64位VMP3.5壳分析",
-        "去混淆"
+        "64位 VMP 3.5 壳逆向实战（上）",
+        "工具介绍及去混淆"
       ],
       "tools": [
-        "VMP"
+        "x64dbg",
+        "IDA Pro"
       ],
       "riskType": "dual_use",
       "duplicateGroup": "vmp_35_analysis",
-      "evolutionNote": "针对商业加固VMP 3.5的系列化逆向分析（阶段Ⅰ）。",
-      "summary": "从0开始手撕64位VMP 3.5壳系列教程第一部分：工具介绍与前置去混淆。",
-      "confidence": 0.95,
+      "evolutionNote": "高难度 64 位 VMP 3.5 壳逆向的第一部分：环境准备、工具介绍及基础去混淆。",
+      "summary": "从0开始手撕 64 位 VMP 3.5 壳系列之一：介绍了分析工具链及前置去混淆处理方法。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292890.htm",
       "title": "[原创]从0开始手撕64位vmp3.5壳(能撕但只能撕一点点)-Ⅰ工具介绍及去混淆",
       "stableId": "kanxue:292890",
@@ -1590,20 +1791,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "车机与嵌入式系统",
-      "ecosystemValue": 85,
-      "technicalDepth": 90,
-      "trendNovelty": 60,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 88,
+      "technicalDepth": 92,
+      "trendNovelty": 70,
       "signals": [
-        "CTF内核漏洞",
-        "oob越界访问"
+        "starctf oob 漏洞利用",
+        "内核/二进制越界读写漏洞"
       ],
-      "tools": [],
+      "tools": [
+        "GDB",
+        "IDA Pro"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "二进制安全CTF中的经典内核漏洞利用研究。",
-      "summary": "分析并复现了 starctf 中的内核越界访问（oob）漏洞。",
-      "confidence": 0.95,
+      "evolutionNote": "CTF 赛题中的经典内存越界（OOB）漏洞利用复现与原理分析。",
+      "summary": "分享了 starctf 比赛中 oob（越界读写）漏洞的分析与利用过程。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292975.htm",
       "title": "[原创]starctf oob",
       "stableId": "kanxue:292975",
@@ -1612,21 +1816,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 75,
+      "ecosystemValue": 90,
+      "technicalDepth": 88,
+      "trendNovelty": 80,
       "signals": [
-        "商业RASP",
-        "环境检测分析"
+        "paytm 商业 RASP",
+        "Bugsmirror Defender 环境检测分析"
       ],
       "tools": [
-        "Bugsmirror Defender"
+        "Frida",
+        "Jadx",
+        "IDA Pro"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "移动端应用保护框架（RASP）的安全性与检测机制分析。",
-      "summary": "对paytm商业RASP（Bugsmirror Defender）的环境检测机制进行了逆向分析。",
-      "confidence": 0.95,
+      "evolutionNote": "对知名移动支付应用集成的高级商业 RASP 及运行环境检测框架进行剖析。",
+      "summary": "分析了 paytm 商业级 RASP 产品 Bugsmirror Defender 的各项环境检测机制与应对策略。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292873.htm",
       "title": "[原创]paytm  商业 RASP Bugsmirror Defender 环境检测分析",
       "stableId": "kanxue:292873",
@@ -1634,23 +1840,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "AI辅助逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 80,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
       "signals": [
-        "AI Agent",
-        "EDR功能需求设计"
+        "CC-Monitor",
+        "AI Agent 的 EDR 功能需求设计"
       ],
       "tools": [
-        "AI Agent",
-        "CC-Monitor"
+        "LLM",
+        "EDR",
+        "Python"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "AI Agent在终端安全检测（EDR）中的设计与应用探讨。",
-      "summary": "从CC-Monitor的设计开发实践出发，探讨了AI Agent在EDR安全监测中的功能需求。",
-      "confidence": 0.95,
+      "evolutionNote": "结合 AI Agent 架构探讨新一代终端检测与响应（EDR）系统的设计需求与架构。",
+      "summary": "从 CC-Monitor 的设计开发实践出发，探讨了面向未来的 AI Agent 在 EDR 系统中的功能需求。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292963.htm",
       "title": "[原创]从CC-Monitor的设计开发看AI Agent的EDR功能需求",
       "stableId": "kanxue:292963",
@@ -1659,21 +1866,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 85,
+      "ecosystemValue": 92,
+      "technicalDepth": 90,
+      "trendNovelty": 92,
       "signals": [
-        "ReArk工具发布",
-        "Android APK/AAB逆向"
+        "ReArk v1.0.0 全新发布",
+        "Android APK/AAB 逆向新工具"
       ],
       "tools": [
-        "ReArk"
+        "ReArk",
+        "Java",
+        "Python"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "新型移动应用逆向分析工具的发布。",
-      "summary": "全新Android APK/AAB逆向分析工具 ReArk v1.0.0 的发布与特性介绍。",
-      "confidence": 0.95,
+      "evolutionNote": "原创发布针对 Android APK 和 AAB 格式的全新自动化逆向分析工具。",
+      "summary": "发布了 ReArk v1.0.0 逆向工具，全面支持 Android APK 及 AAB 格式的自动化逆向分析。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292931.htm",
       "title": "[原创]ReArk v1.0.0 全新发布！Android APK/AAB 逆向支持",
       "stableId": "kanxue:292931",
@@ -1681,43 +1890,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "车机与嵌入式系统",
+      "category": "AI辅助逆向",
       "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 70,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
       "signals": [
-        "ptehook特性",
-        "调试通道重建"
-      ],
-      "tools": [],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "Windows内核级PTE Hook与底层调试技术研究。",
-      "summary": "巧妙利用ptehook机制重建系统调试通道的高级技术实现。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292869.htm",
-      "title": "[原创] 巧妙利用ptehook的特性重建创建调试的调试通道",
-      "stableId": "kanxue:292869",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
-      "signals": [
-        "海外社交软件逆向",
-        "签名链AI分析"
+        "海外社交 App 签名链 AI 逆向",
+        "看雪与吾爱跨社区技术印证"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "IDA Pro",
+        "Jadx"
       ],
       "riskType": "dual_use",
-      "duplicateGroup": "social_sign_chain_ai",
-      "evolutionNote": "跨社区重复主题：海外社交软件签名链AI逆向（看雪同步收录）。",
-      "summary": "某知名海外社交App签名链的AI逆向分析全流程记录。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reversing_group",
+      "evolutionNote": "看雪社区同步发布的利用 AI 分析海外社交软件签名链的实战案例（与id=2呼应）。",
+      "summary": "详细记录了某知名海外社交软件 Android 签名链的 AI 逆向分析全流程。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292935.htm",
       "title": "[原创]某知名海外社交 Android 签名链AI逆向分析全流程",
       "stableId": "kanxue:292935",
@@ -1726,19 +1916,23 @@
     },
     {
       "category": "抓包与协议分析",
-      "ecosystemValue": 75,
-      "technicalDepth": 55,
-      "trendNovelty": 30,
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 40,
       "signals": [
-        "App抓包全流程",
-        "HTTPS抓包指南"
+        "某 App 抓包全流程技术文档",
+        "综合抓包与加固对抗"
       ],
-      "tools": [],
+      "tools": [
+        "Burp Suite",
+        "Frida",
+        "Charles"
+      ],
       "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "移动App通用抓包流程总结。",
-      "summary": "分享了某移动App抓包的完整技术文档与实操流程。",
-      "confidence": 0.95,
+      "duplicateGroup": "app_capture_group",
+      "evolutionNote": "系统化的移动应用 HTTPS 抓包与证书校验绕过全套技术文档。",
+      "summary": "分享了一份面向实战的某 App 抓包全流程技术文档，涵盖证书配置与对抗。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292883.htm",
       "title": "[原创]某App 抓包全流程技术文档",
       "stableId": "kanxue:292883",
@@ -1746,23 +1940,70 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 70,
+      "category": "会员与授权绕过",
+      "ecosystemValue": 70,
+      "technicalDepth": 65,
+      "trendNovelty": 30,
       "signals": [
-        "金融App登录逆向",
-        "梆梆加固反Frida自毁",
-        "Go语言业务层抓包"
+        "Flexlm 11.16.1 许可证破解求助",
+        "企业级许可管理系统逆向"
       ],
       "tools": [
-        "Frida"
+        "IDA Pro",
+        "x64dbg"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": null,
+      "evolutionNote": "针对 EDA/CAD 行业常用的 Flexlm 许可管理系统的高版本逆向探讨。",
+      "summary": "发布了关于 Flexlm 11.16.1 许可证管理系统的逆向求助与技术讨论。",
+      "confidence": 0.96,
+      "url": "https://bbs.kanxue.com/thread-292985.htm",
+      "title": "[求助]Flexlm 11.16.1 求助",
+      "stableId": "kanxue:292985",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "移动安全与逆向",
+      "ecosystemValue": 75,
+      "technicalDepth": 40,
+      "trendNovelty": 50,
+      "signals": [
+        "逆向死没死",
+        "行业现状讨论"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "社区针对大模型时代下逆向工程行业前景与生存状态的热烈讨论。",
+      "summary": "引发了社区成员对“逆向工程行业是否已死”的深入讨论与生态思考。",
+      "confidence": 0.97,
+      "url": "https://bbs.kanxue.com/thread-292997.htm",
+      "title": "[讨论]逆向死没死",
+      "stableId": "kanxue:292997",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "抓包与协议分析",
+      "ecosystemValue": 92,
+      "technicalDepth": 90,
+      "trendNovelty": 80,
+      "signals": [
+        "某金融 App 登录请求逆向",
+        "梆梆加固反 Frida 自毁",
+        "Go 业务层明文抓包"
+      ],
+      "tools": [
+        "Frida",
+        "IDA Pro",
+        "Burp Suite"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "金融级App加固对抗与Go语言后端逻辑逆向。",
-      "summary": "某金融App登录请求逆向实战：克服梆梆加固反Frida自毁，实现Go业务层明文抓包。",
-      "confidence": 0.95,
+      "evolutionNote": "针对金融类 App 梆梆加固带来的反 Frida 自毁机制绕过及 Go 语言编写的业务层明文抓包。",
+      "summary": "实战某金融 App 登录请求逆向：成功绕过梆梆加固反 Frida 自毁并实现 Go 业务层明文数据抓包。",
+      "confidence": 0.99,
       "url": "https://bbs.kanxue.com/thread-292885.htm",
       "title": "[原创]某金融App 登录请求逆向实战：从梆梆加固反 Frida 自毁到 Go 业务层明文抓包",
       "stableId": "kanxue:292885",
@@ -1770,46 +2011,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 80,
-      "signals": [
-        "MCP协议",
-        "x32dbg自动化调试平台"
-      ],
-      "tools": [
-        "x32dbg",
-        "MCP"
-      ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "大模型控制协议（MCP）在底层调试工具自动化中的应用。",
-      "summary": "基于MCP协议设计并实现了x32dbg自动化调试平台。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292993.htm",
-      "title": "[原创]基于MCP协议的x32dbg自动化调试平台设计与实现",
-      "stableId": "kanxue:292993",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 75,
       "signals": [
-        "Visual层反截屏",
-        "DWM侧检测"
+        "Visual 层反截屏原理",
+        "DWM 侧检测技术"
       ],
       "tools": [
-        "DWM"
+        "Visual Studio",
+        "WinDbg"
       ],
       "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "Windows图形子系统层面的反截屏与隐私保护原理。",
-      "summary": "探讨了应用程序Visual层反截屏的底层原理及其在DWM（桌面窗口管理器）侧的检测机制。",
-      "confidence": 0.95,
+      "duplicateGroup": "dwm_anti_screenshot",
+      "evolutionNote": "深入 Windows 桌面管理（DWM）底层探讨应用层反截屏保护的底层机制。",
+      "summary": "分析了 Windows Visual 层反截屏的底层原理以及在 DWM 侧的检测方法。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292902.htm",
       "title": "[原创]Visual 层反截屏原理与 DWM 侧检测",
       "stableId": "kanxue:292902",
@@ -1817,24 +2035,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 70,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
       "signals": [
-        "DeepSeek分析聊天App",
-        "Qimei生成",
-        "OLLVM理解"
+        "使用 DeepSeek 分析聊天 App qimei 生成",
+        "ollvm 理解与逆向记录"
       ],
       "tools": [
         "DeepSeek",
-        "OLLVM"
+        "IDA Pro",
+        "Frida"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "利用大模型解析聊天App设备指纹与控制流混淆。",
-      "summary": "使用DeepSeek分析某聊天App的qimei生成机制及OLLVM混淆代码的记录。",
-      "confidence": 0.95,
+      "evolutionNote": "结合 DeepSeek 大模型对聊天软件设备指纹（qimei）生成逻辑及 ollvm 混淆代码进行分析。",
+      "summary": "记录了使用 DeepSeek 分析某聊天 App qimei 生成机制及 ollvm 混淆代码的实战过程。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292900.htm",
       "title": "[原创]使用deepseek 分析某聊天app的qimei生成、与ollvm理解--分析路上记录",
       "stableId": "kanxue:292900",
@@ -1843,40 +2061,21 @@
     },
     {
       "category": "车机与嵌入式系统",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 40,
-      "signals": [
-        "硬件工作站修复",
-        "多卡连接配置"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "高端硬件工作站（Lenovo ThinkStation）维护与配置。",
-      "summary": "联想工作站PGX硬件故障修复与多GPU卡连接配置实战。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292936.htm",
-      "title": "[原创]lenovo thinkstation PGX修复与多卡连接",
-      "stableId": "kanxue:292936",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "车机与嵌入式系统",
       "ecosystemValue": 75,
-      "technicalDepth": 65,
+      "technicalDepth": 70,
       "trendNovelty": 30,
       "signals": [
-        "AMD64编程手册翻译",
-        "安全虚拟机"
+        "AMD64 编程手册 Vol.2 第15章",
+        "安全虚拟机中文翻译"
       ],
-      "tools": [],
+      "tools": [
+        "AMD64 Manual"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "处理器架构与硬件虚拟化技术文档翻译。",
-      "summary": "AMD64 编程手册 Vol.2 第 15 章关于“安全虚拟机”的中文全译文。",
-      "confidence": 0.95,
+      "evolutionNote": "官方底层架构技术文档的精翻与安全虚拟机原理普及。",
+      "summary": "提供了 AMD64 编程手册第二卷第 15 章《安全虚拟机》的全文中文翻译与技术分享。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292992.htm",
       "title": "[翻译]AMD64 编程手册 Vol.2 第 15 章「安全虚拟机」全文中文翻译",
       "stableId": "kanxue:292992",
@@ -1884,20 +2083,46 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "category": "工具链与入门",
+      "ecosystemValue": 70,
+      "technicalDepth": 65,
+      "trendNovelty": 40,
       "signals": [
-        "SetWindowDisplayAffinity",
-        "DWM反截屏检测"
+        "lenovo thinkstation PGX 修复",
+        "多卡连接与硬件调试"
       ],
-      "tools": [],
-      "riskType": "dual_use",
+      "tools": [
+        "Hardware Debug"
+      ],
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "API级别的防截屏原理与对抗检测。",
-      "summary": "深入解析了 SetWindowDisplayAffinity API 的防截屏原理及其在 DWM 层的检测方式。",
-      "confidence": 0.95,
+      "evolutionNote": "针对高性能工作站硬件底层修复与多显卡/设备互联的调试记录。",
+      "summary": "分享了联想 ThinkStation 工作站 PGX 故障修复与多卡连接的技术处理过程。",
+      "confidence": 0.96,
+      "url": "https://bbs.kanxue.com/thread-292936.htm",
+      "title": "[原创]lenovo thinkstation PGX修复与多卡连接",
+      "stableId": "kanxue:292936",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "移动安全与逆向",
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 75,
+      "signals": [
+        "SetWindowDisplayAffinity 原理与检测",
+        "DWM 篇反截屏防护"
+      ],
+      "tools": [
+        "Win32 API",
+        "DWM"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": "dwm_anti_screenshot",
+      "evolutionNote": "探讨 Win32 API 中 SetWindowDisplayAffinity 实现窗口反捕获的底层原理及安全检测。",
+      "summary": "深入探讨了 SetWindowDisplayAffinity 在 DWM 侧的底层原理及其安全检测对抗方案。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292893.htm",
       "title": "[原创]SetWindowDisplayAffinity：原理与检测（DWM篇）",
       "stableId": "kanxue:292893",
@@ -1906,19 +2131,22 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 60,
       "signals": [
-        "VMP Runtime",
+        "vmp runtime 源码/样本分享",
         "虚拟机运行时分析"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "x64dbg"
+      ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "虚拟机保护运行时的代码分享与讨论。",
-      "summary": "分享了关于 VMP 运行时（Runtime）的底层结构与运行逻辑。",
-      "confidence": 0.95,
+      "evolutionNote": "关于虚拟机保护运行时刻（Runtime）核心逻辑的样本或源码分享。",
+      "summary": "分享了 VMP 虚拟机保护运行时刻（runtime）的相关研究资料与技术样本。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292937.htm",
       "title": "[分享]vmp runtime",
       "stableId": "kanxue:292937",
@@ -1927,19 +2155,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 75,
       "signals": [
-        "BitBlt超级截屏",
-        "DWM篇反截屏对抗"
+        "BitBlt 超级截屏方案",
+        "DWM 篇底层图形接口"
       ],
-      "tools": [],
+      "tools": [
+        "GDI",
+        "BitBlt",
+        "DWM"
+      ],
       "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "绕过窗口防截屏限制的高级截屏方案探讨。",
-      "summary": "探讨了基于 BitBlt 的“超级截屏”技术方案及其在 DWM 侧的应用与对抗。",
-      "confidence": 0.95,
+      "duplicateGroup": "dwm_anti_screenshot",
+      "evolutionNote": "研究 Windows 底层图形接口 BitBlt 在截屏及对抗场景中的高级应用。",
+      "summary": "介绍了基于 BitBlt 实现的“超级截屏”方案及其在 DWM 场景下的技术细节。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292919.htm",
       "title": "[原创] BitBlt「超级截屏」方案（DWM篇）",
       "stableId": "kanxue:292919",
@@ -1949,46 +2181,25 @@
     {
       "category": "加固脱壳与反调试",
       "ecosystemValue": 90,
-      "technicalDepth": 85,
+      "technicalDepth": 88,
       "trendNovelty": 75,
       "signals": [
-        "DexProtector新版环境检测",
-        "加固对抗"
+        "新版 dexprotector 环境检测分析",
+        "高级加壳防护绕过"
       ],
       "tools": [
-        "DexProtector"
+        "DexProtector",
+        "Frida",
+        "IDA Pro"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "知名商用加固DexProtector最新版的安全检测手段分析。",
-      "summary": "针对新版 DexProtector 加固方案的环境检测机制进行了逆向分析。",
-      "confidence": 0.95,
+      "evolutionNote": "针对国际知名加固产品 DexProtector 最新版本的各项运行环境检测进行逆向分析。",
+      "summary": "详细分析了新版 dexprotector 加壳工具实施的各项运行环境检测机制与应对方案。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292874.htm",
       "title": "[原创]新版dexprotector环境检测分析",
       "stableId": "kanxue:292874",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "会员与授权绕过",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 20,
-      "signals": [
-        "Flexlm许可协议逆向",
-        "商业软件授权求助"
-      ],
-      "tools": [
-        "Flexlm"
-      ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "传统EDA/工业软件Flexlm许可证授权求助。",
-      "summary": "关于 Flexlm 11.16.1 授权许可机制的求助与逆向探讨。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292985.htm",
-      "title": "[求助]Flexlm 11.16.1 求助",
-      "stableId": "kanxue:292985",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1998,17 +2209,17 @@
       "technicalDepth": 60,
       "trendNovelty": 50,
       "signals": [
-        "大模型能力讨论",
-        "AI代码理解"
+        "模型的理解",
+        "AI安全领域观点讨论"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "社区对当前AI大模型在代码和安全领域理解能力的讨论。",
-      "summary": "社区成员关于大模型在安全与代码理解方面能力的讨论与思考。",
-      "confidence": 0.95,
+      "evolutionNote": "看雪社区内关于当前大语言模型对安全、逆向理解深度的理性探讨。",
+      "summary": "探讨了社区成员对当前 AI 模型在安全与代码理解层面的能力边界与认知。",
+      "confidence": 0.96,
       "url": "https://bbs.kanxue.com/thread-292903.htm",
       "title": "[讨论]模型的理解",
       "stableId": "kanxue:292903",
@@ -2018,20 +2229,20 @@
     {
       "category": "工具链与入门",
       "ecosystemValue": 65,
-      "technicalDepth": 35,
-      "trendNovelty": 10,
+      "technicalDepth": 30,
+      "trendNovelty": 20,
       "signals": [
-        "WinHex工具分享",
-        "取证与编辑工具"
+        "X-Ways WinHex 21.8 SR-6 Pro",
+        "取证与十六进制编辑工具"
       ],
       "tools": [
         "WinHex"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "经典二进制编辑与取证工具版本分享。",
-      "summary": "分享了 X-Ways WinHex 21.8 SR-6 Pro 专业版。",
-      "confidence": 0.95,
+      "evolutionNote": "经典二进制取证与十六进制编辑工具的更新版本分享。",
+      "summary": "分享了取证与二进制编辑工具 X-Ways WinHex 21.8 SR-6 Pro 资源。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292940.htm",
       "title": "[转帖]X-Ways WinHex 21.8 SR-6 Pro",
       "stableId": "kanxue:292940",
@@ -2042,17 +2253,20 @@
       "category": "会员与授权绕过",
       "ecosystemValue": 70,
       "technicalDepth": 45,
-      "trendNovelty": 30,
+      "trendNovelty": 20,
       "signals": [
-        "加速器VIP解锁",
-        "新手逆向实战"
+        "新手学逆向：加速器 VIP 解锁",
+        "基础授权验证绕过"
       ],
-      "tools": [],
+      "tools": [
+        "Jadx",
+        "MT管理器"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "accelerator_vip_unlock",
-      "evolutionNote": "针对网络加速器工具的会员逻辑破解（新手向）。",
-      "summary": "新手记录的某加速器软件VIP会员权限解锁过程。",
-      "confidence": 0.95,
+      "duplicateGroup": "accelerator_vip_group",
+      "evolutionNote": "新手针对加速器软件VIP特权解锁的实战记录（与id=12相关归类）。",
+      "summary": "新手逆向实战记录：通过分析与修改实现了某加速器 App 的 VIP 会员解锁。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292929.htm",
       "title": "[原创]新手学逆向之某加速vip解锁",
       "stableId": "kanxue:292929",
@@ -2060,43 +2274,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "广告与功能限制",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 55,
+      "category": "移动安全与逆向",
+      "ecosystemValue": 92,
+      "technicalDepth": 95,
+      "trendNovelty": 85,
       "signals": [
-        "电子教室软件重写",
-        "极域客户端对抗"
-      ],
-      "tools": [],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "对老旧教学管理软件（极域）的重写与逆向对抗。",
-      "summary": "重写并翻新了停更五年的电子教室反控软件（Dzjs Trainer v1.0.0）。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-292871.htm",
-      "title": "[原创]我翻新了JiYu Trainer!!!部分重写一个停更五年的反电子教室软件 —— Dzjs Trainer v1.0.0",
-      "stableId": "kanxue:292871",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "隐私后门与恶意行为",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
-      "signals": [
-        "curl真实漏洞发现",
-        "漏洞挖掘分享"
+        "curl 真实漏洞发现",
+        "开源软件漏洞挖掘与竞争"
       ],
       "tools": [
-        "curl"
+        "curl",
+        "AddressSanitizer"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "知名开源网络库(curl)的漏洞挖掘与复盘。",
-      "summary": "分享了在 curl 网络库中发现真实漏洞的经历及漏洞抢先披露的情况。",
-      "confidence": 0.95,
+      "evolutionNote": "安全研究员在知名开源网络库 curl 中发现真实漏洞但遭遇撞洞的复盘与经验总结。",
+      "summary": "分享了在 curl 库中发现真实漏洞却被他人抢先一步披露的漏洞挖掘复盘经历。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292983.htm",
       "title": "[原创] 在 curl 里发现了一个真实漏洞，但有人比我更早一步",
       "stableId": "kanxue:292983",
@@ -2106,20 +2300,20 @@
     {
       "category": "抓包与协议分析",
       "ecosystemValue": 65,
-      "technicalDepth": 35,
-      "trendNovelty": 10,
+      "technicalDepth": 30,
+      "trendNovelty": 20,
       "signals": [
-        "HTTP Debugger Pro",
-        "抓包工具分享"
+        "HTTP Debugger Pro 10.10",
+        "抓包调试工具分享"
       ],
       "tools": [
         "HTTP Debugger"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "常用HTTP调试抓包工具更新分享。",
-      "summary": "分享了 HTTP Debugger Pro 10.10 版本工具。",
-      "confidence": 0.95,
+      "evolutionNote": "主流 HTTP 抓包与流量调试软件的版本分享。",
+      "summary": "分享了 HTTP Debugger Pro 10.10 版本调试工具。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292976.htm",
       "title": "[转帖]HTTP Debugger Pro 10.10",
       "stableId": "kanxue:292976",
@@ -2128,21 +2322,23 @@
     },
     {
       "category": "加固脱壳与反调试",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 60,
+      "ecosystemValue": 88,
+      "technicalDepth": 85,
+      "trendNovelty": 65,
       "signals": [
-        "R8 DEX Guard保护",
-        "安卓代码混淆"
+        "R8 DEX Guard 保护",
+        "Android 代码混淆与保护机制"
       ],
       "tools": [
-        "R8 DEX Guard"
+        "R8",
+        "DexGuard",
+        "Jadx"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对Google官方R8编译器及DEX Guard保护的分析。",
-      "summary": "分享并探讨了 R8 DEX Guard 代码保护与混淆机制。",
-      "confidence": 0.95,
+      "evolutionNote": "探讨 Android 官方 R8 混淆及企业级 DEX Guard 保护机制的特点与应对。",
+      "summary": "分析了 Android 平台上 R8 编译器与 DEX Guard 带来的代码保护及对抗要点。",
+      "confidence": 0.97,
       "url": "https://bbs.kanxue.com/thread-292915.htm",
       "title": "[分享][原创]R8 DEX Guard保护",
       "stableId": "kanxue:292915",
@@ -2151,19 +2347,23 @@
     },
     {
       "category": "隐私后门与恶意行为",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 75,
+      "ecosystemValue": 94,
+      "technicalDepth": 90,
+      "trendNovelty": 85,
       "signals": [
-        "多层伪装木马",
-        "分层式窃密木马解析"
+        "多层伪装躲避防护检测",
+        "分层式模块化窃密木马解析"
       ],
-      "tools": [],
-      "riskType": "gray_abuse",
+      "tools": [
+        "IDA Pro",
+        "Process Hacker",
+        "Procmon"
+      ],
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "采用多层混淆与伪装的高级窃密木马解析。",
-      "summary": "解析了一种多层伪装躲避防护检测的分层式模块化窃密木马。",
-      "confidence": 0.95,
+      "evolutionNote": "深度解析采用多层伪装和模块化架构设计的高级窃密木马变种。",
+      "summary": "解析了一种采用多层伪装躲避防护检测的复杂分层式模块化窃密木马样本。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292972.htm",
       "title": "[原创]多层伪装躲避防护检测!分层式模块化窃密木马解析",
       "stableId": "kanxue:292972",
@@ -2172,19 +2372,23 @@
     },
     {
       "category": "移动安全与逆向",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 50,
+      "ecosystemValue": 90,
+      "technicalDepth": 88,
+      "trendNovelty": 75,
       "signals": [
-        "KCTF赛题分析",
-        "AliCrackme逆向"
+        "KCTF 第一题",
+        "AliCrackme_1 逆向分析过程"
       ],
-      "tools": [],
+      "tools": [
+        "IDA Pro",
+        "Frida",
+        "Jadx"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "看雪KCTF竞赛官方题目的解题思路沉淀。",
-      "summary": "看雪 KCTF 第一题（AliCrackme_1）的完整逆向分析与通关过程。",
-      "confidence": 0.95,
+      "evolutionNote": "看雪 KCTF 竞赛第一题（基于阿里安全 Crackme 样本）的完整通关解析。",
+      "summary": "详述了看雪 KCTF 第一题（AliCrackme_1）的完整逆向分析与解题通关过程。",
+      "confidence": 0.98,
       "url": "https://bbs.kanxue.com/thread-292960.htm",
       "title": "[原创]KCTF 第一题（AliCrackme_1 逆向分析过程）",
       "stableId": "kanxue:292960",
@@ -2192,22 +2396,72 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
       "signals": [
-        "AI逆向教学",
-        "零基础接单培训"
+        "AI 逆向破解网络验证卡密",
+        "封包技术与 AI 结合商业宣传"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "x64dbg",
+        "Burp Suite"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "面向商业化培训与接单宣传的AI逆向课程广告。",
-      "summary": "推广“AI逆向工程师”培训课程，宣传零基础全自动软件逆向与接单能力。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reverse_course_group",
+      "evolutionNote": "利用 AI 自动化处理网络验证卡密及封包逆向的实战演示与课程推广。",
+      "summary": "实战演示了利用 AI 逆向破解网络验证卡密及封包技术，探讨了AI在二进制安全中的应用。",
+      "confidence": 0.96,
+      "url": "https://www.bilibili.com/video/BV1aXei6GE5j",
+      "title": "AI逆向破解工程师：实战网络验证卡密逆向，实测结果！AI真能行！【二进制安全逆向，游戏安全，软件安全，网络安全，CTF比赛必备基础，封包技术】",
+      "stableId": "bilibili:BV1aXei6GE5j",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI辅助逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
+      "signals": [
+        "AI 逆向破解某 APK 实例",
+        "自动化 APK 破解演示"
+      ],
+      "tools": [
+        "LLM",
+        "Jadx",
+        "MT管理器"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": "ai_reverse_course_group",
+      "evolutionNote": "通过具体 APK 实例展示 AI 辅助移动端逆向破解的实测效果。",
+      "summary": "通过某 APK 实例实测展示了 AI 辅助移动端逆向破解的效果与可行性。",
+      "confidence": 0.96,
+      "url": "https://www.bilibili.com/video/BV1JGev6DEBE",
+      "title": "AI逆向破解工程师：某APK实例逆向，实测结果！AI真能行！【二进制安全逆向，游戏安全，软件安全，网络安全，CTF比赛必备基础，封包技术】",
+      "stableId": "bilibili:BV1JGev6DEBE",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
+      "signals": [
+        "AI逆向工程师课程更新",
+        "教学加接单全自动软件逆向推广"
+      ],
+      "tools": [
+        "LLM"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "面向商业培训生态的“AI逆向工程师”全自动逆向教学与接单宣传。",
+      "summary": "发布了《AI逆向工程师》课程重磅更新，主打教学加接单及全自动软件逆向。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1249984084725202962",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1249984084725202962",
@@ -2215,22 +2469,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
       "signals": [
-        "AI破甲与逆向培训",
-        "一机一码破解"
+        "AI 无限制逆向破解",
+        "一机一码与卡密破解实战"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "x64dbg"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "强调AI无限制破解的商业培训宣传。",
-      "summary": "宣传利用AI无限制进行二进制安全逆向、一机一码及卡密破解的课程。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reverse_course_group",
+      "evolutionNote": "探讨如何打破道德边界，利用 AI 实现一机一码及卡密保护的无限制破解。",
+      "summary": "实战展示了让 AI 无限制进行逆向破解、一机一码及卡密验证绕过的全过程。",
+      "confidence": 0.96,
       "url": "https://www.bilibili.com/video/BV1jeeC6BExm",
       "title": "AI逆向破甲无道德？实战让AI无限制做逆向破解、一机一码破解、卡密破解逆向【二进制安全逆向，游戏安全，软件安全，网络安全，CTF比赛必备基础，封包技术】",
       "stableId": "bilibili:BV1jeeC6BExm",
@@ -2238,22 +2493,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 85,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
       "signals": [
-        "AI逆向破解宣传",
-        "二进制安全培训"
+        "AI 逆向破甲：一机一码与卡密破解",
+        "大模型安全攻防演练"
       ],
       "tools": [
-        "AI"
+        "LLM",
+        "IDA Pro"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "同类AI逆向培训课程宣传内容。",
-      "summary": "关于AI逆向破甲、一机一码和卡密破解的二进制安全教学宣传。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_reverse_course_group",
+      "evolutionNote": "同主题 AI 逆向破甲及卡密破解实战演练内容的重复发布。",
+      "summary": "演示了利用 AI 无限制执行逆向破解、一机一码限制解除及卡密验证绕过的技术手段。",
+      "confidence": 0.96,
       "url": "https://www.bilibili.com/video/BV15Yer6hEft",
       "title": "AI逆向破甲：让AI无限制做逆向破解、一机一码破解、卡密破解逆向【二进制安全逆向，游戏安全，软件安全，网络安全，CTF比赛必备基础，封包技术】",
       "stableId": "bilibili:BV15Yer6hEft",
@@ -2261,22 +2517,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
       "signals": [
-        "AI逆向教学广告",
-        "自动化逆向服务"
+        "AI逆向工程师课程更新",
+        "教学与接单业务宣传"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》课程更新通知，涵盖教学与接单全自动软件逆向。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "《AI逆向工程师》课程及接单服务的重复推广动态。",
+      "summary": "同步更新了《AI逆向工程师》课程内容，推广全自动软件逆向教学与接单服务。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1248870369662599173",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1248870369662599173",
@@ -2284,22 +2540,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
       "signals": [
-        "AI逆向培训",
-        "零基础包学会"
+        "AI逆向工程师课程更新",
+        "零基础包学会宣传"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》课程招生与全自动逆向教学宣传。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "商业化 AI 逆向培训课程的日常宣发动态。",
+      "summary": "发布了《AI逆向工程师》教学与接单服务的更新动态，主打零基础自动化逆向培训。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1248519758602567680",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1248519758602567680",
@@ -2307,22 +2563,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
       "signals": [
-        "AI逆向教学",
-        "软件限制解锁培训"
+        "AI逆向工程师课程更新",
+        "商业培训推广"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》课程更新，主打全自动软件逆向与零基础教学。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "《AI逆向工程师》课程更新与接单变现宣传。",
+      "summary": "推送了《AI逆向工程师》重磅更新信息，面向社区推广全自动软件逆向教学与接单。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1248260733410476104",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1248260733410476104",
@@ -2332,18 +2588,18 @@
     {
       "category": "其他安全生态",
       "ecosystemValue": 20,
-      "technicalDepth": 0,
+      "technicalDepth": 10,
       "trendNovelty": 10,
       "signals": [
-        "动态转发",
-        "非技术内容"
+        "转发动态",
+        "平台常规转发"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "社交平台常规转发行为。",
-      "summary": "哔哩哔哩平台上的动态转发内容。",
-      "confidence": 0.95,
+      "evolutionNote": "B站平台的常规动态转发，无实质技术内容。",
+      "summary": "用户在社区平台执行的常规转发动态。",
+      "confidence": 0.99,
       "url": "https://t.bilibili.com/1247917990748356609",
       "title": "转发动态",
       "stableId": "bilibili:1247917990748356609",
@@ -2351,22 +2607,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
       "signals": [
-        "AI逆向培训",
-        "接单服务宣传"
+        "AI逆向工程师课程更新",
+        "自动化逆向教学宣传"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》课程更新及接单服务宣传。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "《AI逆向工程师》课程更新的持续同步。",
+      "summary": "继续发布《AI逆向工程师》课程更新通知，推广教学加接单与全自动逆向。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1247917921987985415",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1247917921987985415",
@@ -2374,71 +2630,25 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
+      "category": "AI辅助逆向",
+      "ecosystemValue": 80,
+      "technicalDepth": 40,
+      "trendNovelty": 80,
       "signals": [
-        "AI逆向教学",
-        "零基础逆向"
+        "AI逆向工程师课程更新",
+        "零基础逆向培训"
       ],
       "tools": [
-        "AI"
+        "LLM"
       ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》重磅更新与零基础软件逆向教学宣传。",
-      "confidence": 0.95,
+      "duplicateGroup": "ai_engineer_promo_group",
+      "evolutionNote": "《AI逆向工程师》课程更新的早期批次宣传。",
+      "summary": "发布《AI逆向工程师》课程更新及全自动软件逆向零基础教学宣传。",
+      "confidence": 0.97,
       "url": "https://t.bilibili.com/1247688136934293505",
       "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
       "stableId": "bilibili:1247688136934293505",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "工具链与入门",
-      "ecosystemValue": 65,
-      "technicalDepth": 20,
-      "trendNovelty": 60,
-      "signals": [
-        "AI逆向教学",
-        "自动化软件逆向"
-      ],
-      "tools": [
-        "AI"
-      ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "ai_reverse_training",
-      "evolutionNote": "培训广告的例行重复发布。",
-      "summary": "《AI逆向工程师》课程更新，宣称通过AI实现全自动软件逆向。",
-      "confidence": 0.95,
-      "url": "https://t.bilibili.com/1247491152578347015",
-      "title": "《AI逆向工程师》重磅更新！\n教学➕接单\n🔥全自动软件逆向\n零基础包学会软件逆向\n告别软件限制，解锁无限可能！\n零基础，有基础均可报名",
-      "stableId": "bilibili:1247491152578347015",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "移动安全与逆向",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 80,
-      "signals": [
-        "AI快速开发外挂",
-        "游戏外挂对抗警示"
-      ],
-      "tools": [
-        "AI"
-      ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "探讨AI辅助快速编写游戏外挂对游戏安全带来的严峻挑战。",
-      "summary": "探讨AI在极短时间内（3h）开发出游戏外挂的现象，呼吁游戏厂商加强端侧检测。",
-      "confidence": 0.95,
-      "url": "https://www.bilibili.com/video/BV1eqYv66EWR",
-      "title": "AI逆向的春天，游戏的寒冬！AI竟然3h 开发出游戏外挂！强烈建议游戏加强检测！【二进制安全逆向，游戏安全，软件安全，网络安全，CTF比赛必备基础，封包技术】",
-      "stableId": "bilibili:BV1eqYv66EWR",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     }
