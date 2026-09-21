@@ -59,6 +59,12 @@ const routes = [
     redirect: () => ({ path: "/", query: { tab: "entertainment" } }),
   },
   {
+    path: "/sundown-showdown",
+    beforeEnter() {
+      window.location.replace("/sundown-showdown/index.html");
+    },
+  },
+  {
     path: "/observation",
     redirect: () => ({ path: "/", query: { observation: "1" } }),
   },
