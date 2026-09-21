@@ -29407,8 +29407,8 @@ void main() {
 				float param = packed - tier;
 				bool persp = shadowRadius < 0.0;
 
-				int nSearch = 8 + int( tier ) * 4;
-				int nFilter = 10 + int( tier ) * 8;
+				int nSearch = 4 + int( tier ) * 2;
+				int nFilter = 6 + int( tier ) * 3;
 				float fSearch = float( nSearch );
 				float fFilter = float( nFilter );
 
@@ -29428,7 +29428,7 @@ void main() {
 				float blockerSum = 0.0;
 				float blockers = 0.0;
 
-				for ( int i = 0; i < 20; i ++ ) {
+				for ( int i = 0; i < 10; i ++ ) {
 
 					if ( i >= nSearch ) break;
 					float d = textureLod( shadowMap, shadowCoord.xy + pcssDisk( i, fSearch, phi ) * maxRadius, 0.0 ).r;
@@ -29465,7 +29465,7 @@ void main() {
 
 					float lit = 0.0;
 
-					for ( int i = 0; i < 34; i ++ ) {
+					for ( int i = 0; i < 16; i ++ ) {
 
 						if ( i >= nFilter ) break;
 						lit += step( zR, textureLod( shadowMap, shadowCoord.xy + pcssDisk( i, fFilter, phi + 1.7 ) * radius, 0.0 ).r );
@@ -29643,6 +29643,10 @@ void main() {
               i =
                 this.superSample ||
                 Math.min(window.devicePixelRatio || 1, e.dpr);
+            let maxPixelBudget = 1920 * 1080;
+            if (n * i * r * i > maxPixelBudget) {
+              i = Math.max(0.75, Math.sqrt(maxPixelBudget / (n * r)));
+            }
             (t.setPixelRatio(i),
               t.setSize(n, r, !1),
               (this.width = n),
@@ -29670,7 +29674,7 @@ void main() {
                   distanceExponent: 1.4,
                   thickness: 1.2,
                   scale: 1.15,
-                  samples: 16,
+                  samples: 8,
                   distanceFallOff: 1,
                   screenSpaceRadius: !1,
                 }),
@@ -29678,10 +29682,10 @@ void main() {
                   lumaPhi: 10,
                   depthPhi: 2,
                   normalPhi: 3,
-                  radius: 7,
+                  radius: 6,
                   radiusExponent: 1.2,
-                  rings: 2,
-                  samples: 14,
+                  rings: 1,
+                  samples: 6,
                 }));
               let t = e._overrideVisibility.bind(e);
               ((e._overrideVisibility = function () {
@@ -29695,7 +29699,7 @@ void main() {
                 o.addPass(e),
                 (this.gtao = e));
             }
-            ((this.bloom = new Mc(new V(a.x, a.y), 0.5, 0.72, 1.2)),
+            ((this.bloom = new Mc(new V(Math.floor(a.x * 0.5), Math.floor(a.y * 0.5)), 0.5, 0.72, 1.2)),
               (this.bloom.enabled = e.bloom && this.toggles.bloom),
               o.addPass(this.bloom),
               (this.grade = new gc(Xc)),
@@ -29736,7 +29740,13 @@ void main() {
           );
         };
       }
-      var $c = (e, t, n) => Math.max(t, Math.min(n, e)),
+      var _cleanArr = (e, t) => {
+          let n = 0;
+          for (let r = 0; r < e.length; r++) t(e[r]) && (e[n++] = e[r]);
+          e.length = n;
+          return e;
+        },
+        $c = (e, t, n) => Math.max(t, Math.min(n, e)),
         el = (e, t, n) => e + (t - e) * n,
         tl = (e, t, n) => {
           let r = $c((n - e) / (t - e), 0, 1);
@@ -29887,6 +29897,15 @@ void main() {
         El = new _n(new H(0, 1, 0), 0),
         Dl = new H(),
         Ol = new H(),
+        _shPts = Array.from({ length: 6 }, () => new H()),
+        _shUVs = [
+          [-1, -1],
+          [1, -1],
+          [1, 1],
+          [-1, 1],
+          [0, -1],
+          [0, 1],
+        ],
         kl = class {
           constructor(e, t) {
             ((this.scene = e),
@@ -30013,6 +30032,7 @@ void main() {
           applyQuality(e) {
             ((this.tier = e.tier),
               (this.pcss = this.pipeline.usingPCSS),
+              (this.lampShadowSlots = e.tier >= 3 ? 4 : (e.tier >= 2 ? 2 : (e.tier >= 1 ? 1 : 0))),
               this.mapSize !== e.shadowMap &&
                 ((this.mapSize = e.shadowMap),
                 this.key.shadow.mapSize.set(e.shadowMap, e.shadowMap),
@@ -30230,30 +30250,17 @@ void main() {
             }
           }
           fitShadow(e) {
-            let t = [
-                [-1, -1],
-                [1, -1],
-                [1, 1],
-                [-1, 1],
-                [0, -1],
-                [0, 1],
-              ],
-              n = [];
-            for (let [r, i] of t) {
+            for (let k = 0; k < 6; k++) {
+              let r = _shUVs[k][0], i = _shUVs[k][1];
               (Tl.set(r, i), wl.setFromCamera(Tl, e));
               let t = wl.ray.intersectPlane(El, Dl);
               t && wl.ray.origin.distanceTo(t) < 90
-                ? n.push(t.clone())
-                : n.push(
-                    wl.ray.origin
-                      .clone()
-                      .addScaledVector(wl.ray.direction, 90)
-                      .setY(0),
-                  );
+                ? _shPts[k].copy(t)
+                : _shPts[k].copy(wl.ray.origin).addScaledVector(wl.ray.direction, 90).setY(0);
             }
-            Ol.copy(n[4]).add(n[5]).multiplyScalar(0.5);
+            Ol.copy(_shPts[4]).add(_shPts[5]).multiplyScalar(0.5);
             let r = 0;
-            for (let e = 0; e < 4; e++) r = Math.max(r, Ol.distanceTo(n[e]));
+            for (let e = 0; e < 4; e++) r = Math.max(r, Ol.distanceTo(_shPts[e]));
             let i = $c(Math.ceil(r + 3.5), 12, 46);
             ((i > this.shadowRadius || i < this.shadowRadius - 3) &&
               ((this.shadowRadius = i), this.updateShadowParams()),
@@ -32965,7 +32972,7 @@ varying vec3 vBladeWorld;`,
                     s.radius * (s.melee ? 2.2 : 1.6),
                   )));
             }
-            ((this.bullets = this.bullets.filter((e) => e.alive)),
+            (_cleanArr(this.bullets, (e) => e.alive),
               (this.bulletMesh.count = o),
               (this.bulletMesh.instanceMatrix.needsUpdate = !0),
               this.bulletMesh.instanceColor &&
@@ -33002,7 +33009,7 @@ varying vec3 vBladeWorld;`,
                   (a.ring.visible = !1),
                   this.explode(n.tx, n.tz, o, n.owner, n.isSuper)));
             }
-            this.bombs = this.bombs.filter((e) => !e.done);
+            _cleanArr(this.bombs, (e) => !e.done);
             for (let n of this.boxes) {
               if (!n.alive) continue;
               n.shake = Math.max(0, n.shake - e * 5);
@@ -33051,7 +33058,7 @@ varying vec3 vBladeWorld;`,
                   }
               }
             }
-            this.cubes = this.cubes.filter((e) => e.alive);
+            _cleanArr(this.cubes, (e) => e.alive);
           }
           clear() {
             let e = this.game.scene;
@@ -33807,7 +33814,7 @@ varying vec3 vBladeWorld;`,
                 t.distance,
               );
             }
-            this.flashes = this.flashes.filter((e) => e.t < e.T);
+            _cleanArr(this.flashes, (e) => e.t < e.T);
             let i = !1;
             for (let t = 0; t < this.debrisCap; t++) {
               let n = this.debrisData[t];
@@ -34769,7 +34776,7 @@ varying vec3 vBladeWorld;`,
           }
           update(e) {
             let t = this.game,
-              n = {};
+              n = this._proj || (this._proj = { x: 0, y: 0, on: !1 });
             for (let e of t.brawlers) {
               let t = this.overheads.get(e.id);
               if (!t) continue;
