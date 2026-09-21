@@ -372,10 +372,20 @@ export default {
 
     const tagCounts = computed(() => countContentTags(welfareSource));
 
-    const sourceHealth = computed(() => getSourceHealth("welfare"));
-    const collectionModeInfo = computed(() => formatCollectionMode(sourceHealth.value?.collectionMode));
-    const analysisModeInfo = computed(() => formatAnalysisMode(sourceHealth.value?.analysisMode, sourceHealth.value?.model));
-    const freshnessInfo = computed(() => formatFreshness(sourceHealth.value?.collectedAt || sourceHealth.value?.analyzedAt));
+    const collectionHealth = computed(() => getSourceHealth("welfare"));
+    const analysisHealth = computed(
+      () => getSourceHealth("welfare-analysis") || collectionHealth.value
+    );
+    const sourceHealth = computed(() => collectionHealth.value || analysisHealth.value);
+    const collectionModeInfo = computed(() =>
+      formatCollectionMode(collectionHealth.value?.collectionMode)
+    );
+    const analysisModeInfo = computed(() =>
+      formatAnalysisMode(analysisHealth.value?.analysisMode, analysisHealth.value?.model)
+    );
+    const freshnessInfo = computed(() =>
+      formatFreshness(collectionHealth.value?.collectedAt || analysisHealth.value?.analyzedAt)
+    );
 
     function formatAnalysisBadge(eco: any) {
       if (!eco) return "待服务器标注";
