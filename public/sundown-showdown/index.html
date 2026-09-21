@@ -1128,6 +1128,8 @@
     <div id="loading">正在点亮街灯&hellip;</div>
 
     <script>
+Math.hypot = (a, b, c) => c !== undefined ? Math.sqrt(a*a + b*b + c*c) : Math.sqrt(a*a + b*b);
+
       var e = 1e3,
         t = 1001,
         n = 1002,
@@ -29606,7 +29608,7 @@ void main() {
               canvas: e,
               antialias: !1,
               powerPreference: `high-performance`,
-              stencil: !1,
+              stencil: !1, desynchronized: !0,
             });
             ((this.renderer = r),
               (r.outputColorSpace = k),
@@ -29655,7 +29657,7 @@ void main() {
                 (this.composer.passes.forEach((e) => e.dispose && e.dispose()),
                 this.composer.renderTarget1.dispose(),
                 this.composer.renderTarget2.dispose()));
-            let a = t.getDrawingBufferSize(new V()),
+            let a = t.getDrawingBufferSize(rd),
               o = new yc(t, new Fe(a.x, a.y, { type: u, samples: e.msaa }));
             if (
               (o.setPixelRatio(i),
@@ -30245,11 +30247,19 @@ void main() {
                 (r.intensity = hl * t * a * o),
                 r.castShadow &&
                   ((r.shadow.intensity = 1 - tl(10.5, 14.5, i.d)),
-                  (r.shadow.autoUpdate =
-                    r.intensity > 0.01 && r.shadow.intensity > 0.005)));
+                  (r.shadow.autoUpdate = !1)));
+            }
+            if (this.lampSlots.length > 0) {
+               let activeShadowLamps = this.lampSlots.filter(r => r.intensity > 0.01 && r.shadow.intensity > 0.005);
+               if (activeShadowLamps.length > 0) {
+                  this.lampUpdateIdx = (this.lampUpdateIdx || 0) + 1;
+                  if (this.lampUpdateIdx >= activeShadowLamps.length) this.lampUpdateIdx = 0;
+                  activeShadowLamps[this.lampUpdateIdx].shadow.needsUpdate = !0;
+               }
             }
           }
           fitShadow(e) {
+this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.key.shadow.needsUpdate=!1;return;} this.sunShadowSkip=0; this.key.shadow.needsUpdate=!0;
             for (let k = 0; k < 6; k++) {
               let r = _shUVs[k][0], i = _shUVs[k][1];
               (Tl.set(r, i), wl.setFromCamera(Tl, e));
@@ -31138,6 +31148,7 @@ void main() {
           }
           addInstanced(e, t, n, r, i = !0) {
             let a = new Yn(t, n, Math.max(1, r));
+(a.frustumCulled = !1); (a.matrixAutoUpdate = !1); a.updateMatrix();
             return (
               (a.count = r),
               (a.castShadow = i),
@@ -33791,7 +33802,7 @@ varying vec3 vBladeWorld;`,
             let t = this.game,
               n = t.lighting,
               r =
-                t.pipeline.renderer.getDrawingBufferSize(new V()).y /
+                t.pipeline.renderer.getDrawingBufferSize(rd).y /
                 (2 * Math.tan((t.camera.fov * Math.PI) / 360));
             ((this.glow.material.uniforms.uScale.value = r),
               (this.smoke.material.uniforms.uScale.value = r),
