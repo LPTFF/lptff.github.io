@@ -1,4 +1,4 @@
-import sources from "../../project-support/extension/lptff-investment-assistant/content-sources.json";
+import sources from "../../extension/content-sources.json";
 import data from "../data/bilibili.json";
 
 export const bilibiliItemsFor = (tab: string) => {

@@ -57,6 +57,7 @@ npm run preview
 ## 构建
 
 ```bash
+npm run repo:check
 npm run build
 ```
 
@@ -79,27 +80,25 @@ npm run build
 
 ## 目录说明
 
-- `src/views/`：页面组件
-- `src/views/Blog/articles/`：博客文章 Markdown 内容
-- `src/views/Blog/articles/2026/`：职业方向、面试知识树、项目证据与旧功能归档
-- `src/views/investment/`：投资页面及其运行时协议文档
-- `src/utils/`：共享工具，包括 Excel 导出适配器
-- `src/assets/`：页面打包图片等应用资源
-- `project-support/public/`：Vite 静态发布资源
-- `src/data/`：页面打包的数据快照
-- `src/data/career/`、`src/data/findJobMarkDown/`：不由一级页面直接消费的职业结构化资料与面试原文资产
-- `project-support/scripts/`：产品摘要同步和构建辅助脚本
-- `project-support/extension/`：Chrome 多领域本地助手运行功能，包含 BOSS 真实市场现场能力
-- `project-support/deploy/`：手工部署工具
-- `agent/`：维护者的项目工作台，记录业务规划、产品设计、项目事实、研究材料和有长期价值的验收经验
-- `agent/product/prd/`：Investment OS PRD 原文归档、拆解和需求追踪
-- `agent/docs/`：没有运行时消费者的维护文档
+根目录只保留七类正式内容：
+
+- `src/`：Vue 网站源码，页面、组件、领域逻辑和站内数据都在这里。
+- `extension/`：Chrome 本地助手源码；生成的 ZIP 不进入 Git。
+- `public/`：会原样发布的公开静态资源。
+- `data/snapshots/`：产品需要的脱敏、可复现输入。
+- `scripts/`：构建、检查、打包和手工部署脚本。
+- `config/`、`contracts/`：构建配置与跨仓库接口契约。
+- `docs/`：产品说明、项目事实、标准和长期验收记录。
+
+依赖、构建结果、截图、报告、参考仓库和临时采集结果都属于本机内容，统一忽略或收进 `.local/`，不作为远程仓库产物。
+
+完整的目录职责、生成物例外和禁止提交范围见 [仓库结构与交付边界](docs/standards/repository-structure.md)。`npm run repo:check` 会检查 Git 索引中的未登记顶层入口、缓存、日志、数据库、真实环境文件、截图/报告和构建包；首次使用可运行 `npm run hooks:install` 启用本地提交门禁。
 
 ## 部署
 
 GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；该文件是发布配置，不是页面业务源码。
 
-仓库还保留一个位于 `project-support/deploy/uploadQL.js` 的 SFTP 手动部署路径；仅在明确部署任务中使用。公开数据更新由青龙定期触发 master 上的 Pages 工作流。
+仓库还保留一个位于 `scripts/deploy/uploadQL.js` 的 SFTP 手动部署路径；仅在明确部署任务中使用。公开数据更新由青龙定期触发 master 上的 Pages 工作流。
 
 ## 依赖安全
 
@@ -113,6 +112,6 @@ npm audit --registry=https://registry.npmjs.org
 
 ## Agent 资产
 
-项目功能代码与维护者资料分开维护。`agent/` 是帮助人理解项目、做产品取舍和复盘结果的工作台，不要求固定阅读顺序或治理命令，入口见 [agent/README.md](agent/README.md)。
+项目功能代码与维护者资料分开维护。`docs/` 是帮助人理解项目、做产品取舍和复盘结果的工作台，不要求固定阅读顺序或治理命令，入口见 [docs/README.md](docs/README.md)。
 
 根 [AGENTS.md](AGENTS.md) 与 [CLAUDE.md](CLAUDE.md) 只用于宿主发现，项目资料不在根文件重复维护。

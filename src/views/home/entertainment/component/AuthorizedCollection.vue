@@ -55,7 +55,7 @@
 import { computed, onMounted, onUnmounted, ref } from "vue";
 import { authorizedRequest, getSavedResultVersion, saveAuthorizedItems } from "../../../../utils/authorizedContent";
 import { collectionFreshness } from "../../../../utils/collectionFreshness";
-import catalog from "../../../../../project-support/extension/lptff-investment-assistant/content-sources.json";
+import catalog from "../../../../../extension/content-sources.json";
 import { usePluginGuide } from "../../../../investment/composables/use-plugin-guide";
 import { WEB_BUILD_TAG, EXPECTED_EXTENSION_BUILD_TAG } from "../../../../build-info";
 

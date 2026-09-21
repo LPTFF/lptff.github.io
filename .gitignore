@@ -23,26 +23,42 @@ _metadata/
 lptff-investment-source-capture.json
 __pycache__/
 *.py[cod]
-/project-support/crawl/**/__pycache__/
+/.local/generated/crawl/**/__pycache__/
 
 # 旧版图标本地化缓存仅为本机生成物；当前运行时不读取该目录
-/project-support/public/icons/
+/public/icons/
 # 旧掘金海报缓存已无页面消费者，避免历史采集产物重新进入仓库
 /src/data/juejinImg/
-# Local research repositories and generated collector/verification artifacts
-/agent/product/research/qinglongBackup/
-# dev-tools 参考项目仓库（复刻来源，仅本地保留，不进入代码变更）
-/agent/product/research/dev-tools/
-# boss-helper-upstream 参考项目仓库（复刻来源，仅本地保留，不进入代码变更）
-/agent/references/
-/agent/verification/reports/
-# Compatibility guard for verification tools used before the agent/ migration.
-/docs/verification-reports/
+# Local research repositories and generated collector/verification artifacts live under .local/.
+/docs/verification/reports/
 /.artifacts/
-/project-support/public/data/recommendArticleData.json
+/public/data/recommendArticleData.json
 # Local verification artifacts (screenshots etc.) stay local
 /artifacts/
 verification-report.html
+
+# Repository hygiene: local task output is never a source deliverable.
+/.tmp-*/
+/tmp/
+/coverage/
+/playwright-report/
+/test-results/
+/screenshots/
+walkthrough.*
+*.tmp
+*.temp
+*.bak
+*.orig
+*.rej
+*.sqlite
+*.sqlite3
+*.sqlite-wal
+*.sqlite-shm
+*.db-wal
+*.db-shm
+*.zip
+*.tgz
+*.tar.gz
 
 # Editor directories and files
 /.claude/

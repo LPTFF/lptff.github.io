@@ -1,4 +1,4 @@
-import policy from "../../project-support/extension/lptff-investment-assistant/content-freshness.json";
+import policy from "../../extension/content-freshness.json";
 
 export function collectionFreshness(meta: any, uids: string[], now = Date.now()) {
   const states = uids.map((uid) => meta?.sources?.find((item: any) => item.uid === uid));

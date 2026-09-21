@@ -60,7 +60,7 @@ import {
 import { buildBehaviorActions } from "../engines/behavior";
 import { assertDecisionImmutable } from "../engines/review/operation-compliance";
 import { calculateReductionQuantity } from "../engines/review/reduction";
-import bundledSnapshotUrl from "../../../project-support/data-snapshots/investment/eastmoney-source-desensitized.json?url";
+import bundledSnapshotUrl from "../../../data/snapshots/investment/eastmoney-source-desensitized.json?url";
 
 export interface InvestmentOsState {
   loaded: boolean;

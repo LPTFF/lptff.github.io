@@ -1,5 +1,5 @@
 /**
- * 规则依据映射：把每类规则关联到 agent/theories/investment-performance-and-decision-review.md
+ * 规则依据映射：把每类规则关联到 docs/theories/investment-performance-and-decision-review.md
  * 领域内的理论概念，并诚实标注阈值数值的依据。
  *
  * 边界（investment-review.md 第 10 节 + 理论 README）：

@@ -50,6 +50,12 @@ jobs:
       - name: 安装 Node 依赖
         run: npm ci
 
+      - name: 检查仓库结构与非项目产物
+        run: npm run repo:check
+
+      - name: 依赖高危漏洞门禁
+        run: npm audit --registry=https://registry.npmjs.org --audit-level=high
+
       - name: 恢复已发布的数据快照
         # 优先从指定分支（默认 python-crawl）拉取已验证的最新有效数据快照
         env:
@@ -67,24 +73,27 @@ jobs:
         run: npm run typecheck
 
       - name: 验证前后端接口契约一致性
-        run: node project-support/scripts/verify-backend-contract.cjs
+        run: npm run contract:verify
 
       - name: 生成研究书签快照
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: >-
-          python -B project-support/scripts/build_research_bookmarks.py
+          python -B scripts/build_research_bookmarks.py
           --repo "$GITHUB_REPOSITORY"
 
       - name: 构建静态站点
         run: npm run build
 
+      - name: 验证网页与扩展构建标识
+        run: npm run build-tags:verify
+
       - name: 审查构建产物安全白名单
-        run: node project-support/scripts/verify-public-whitelist.cjs dist
+        run: node scripts/verify-public-whitelist.cjs dist
 
       - name: 打包投资助手浏览器扩展
         run: |
-          node project-support/scripts/extension/build-zip.js
+          node scripts/extension/build-zip.js
           test -s dist-extension/lptff-investment-assistant.zip
 
       - name: 发布投资助手扩展 Release

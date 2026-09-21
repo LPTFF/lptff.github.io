@@ -33,6 +33,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import fallbackImage from "../../../../assets/bg.jpg";
+import { getDoubanPoster } from "../../../../utils/douban-posters";
 import { recordOutboundOpen } from "../../../../utils/observation";
 
 function handleCardClick() {
@@ -78,8 +79,7 @@ const isoDate = computed(() => props.item.publishedAt ? date.value.toISOString()
 onMounted(async () => {
   if (props.item.platform !== "movie" || !props.item.id) return;
   try {
-    const posterModule = await import("../../../../data/doubanPosters.json");
-    const poster = (posterModule.default as Record<string, string>)[props.item.id];
+    const poster = await getDoubanPoster(props.item.id);
     if (/^data:image\/(?:jpeg|png|webp|gif);base64,/i.test(poster || "")) {
       resolvedCover.value = poster;
     }

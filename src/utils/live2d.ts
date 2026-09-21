@@ -1,6 +1,6 @@
 // live2d 看板娘管理：模型与运行方式复刻自 hexo-backup 分支的 live2dw（hijiki），
 // 并扩展 live2d-widget 官方免费示例模型支持多选切换；
-// 模型清单由 project-support/scripts/fetch-live2d-assets.js 拉取时生成的
+// 模型清单由 scripts/fetch-live2d-assets.js 拉取时生成的
 // /live2dw/models/manifest.json 提供，内置列表仅作 manifest 不可用时的兜底。
 // 运行方式：L2Dwidget（2018 年黑盒老库）整体隔离在 srcdoc iframe 中执行——
 // 销毁重建 iframe 即获得全新库状态，切换模型无需刷新页面；

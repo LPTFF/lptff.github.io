@@ -10,7 +10,7 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, watchEffect, onMounted, onUnmounted } from "vue";
-import catalog from "../../project-support/extension/lptff-investment-assistant/content-sources.json";
+import catalog from "../../extension/content-sources.json";
 import { authorizedRequest, authorizedCollectionMeta, saveAuthorizedItems } from "../utils/authorizedContent";
 import { collectionFreshness } from "../utils/collectionFreshness";
 const props = defineProps<{ tab: string; excludedPlatforms?: string[] }>();

@@ -1,4 +1,4 @@
-import sources from "../../project-support/extension/lptff-investment-assistant/content-sources.json";
+import sources from "../../extension/content-sources.json";
 
 const KEY = "lptff-authorized-content-v1";
 const PER_AUTHOR_LIMIT = 60;
@@ -37,7 +37,13 @@ export function authorizedRequest(action: string, payload: Record<string, unknow
 
   if (isQuery) {
     inFlightQueries.set(action, p);
-    p.finally(() => inFlightQueries.delete(action));
+    // `finally()` creates a second promise. If STATUS times out, leaving that
+    // derived promise unobserved surfaces a misleading unhandled rejection even
+    // when the caller correctly handles the original request.
+    p.then(
+      () => inFlightQueries.delete(action),
+      () => inFlightQueries.delete(action),
+    );
   }
 
   return p;

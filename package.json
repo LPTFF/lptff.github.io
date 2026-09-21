@@ -5,13 +5,17 @@
   "type": "module",
   "scripts": {
     "serve": "vite",
-    "dev:published": "node project-support/scripts/restore-published-snapshot.mjs && vite --mode published",
-    "restore-snapshot": "node project-support/scripts/restore-published-snapshot.mjs",
+    "dev:published": "node scripts/restore-published-snapshot.mjs && vite --mode published",
+    "restore-snapshot": "node scripts/restore-published-snapshot.mjs",
     "preview": "vite preview",
     "preview:published": "npm run build:published && vite preview --port 4173",
+    "contract:verify": "node scripts/verify-backend-contract.cjs",
+    "build-tags:verify": "node scripts/verify-build-tags.mjs",
+    "repo:check": "node scripts/verify-repository-hygiene.cjs",
+    "hooks:install": "git config core.hooksPath .githooks",
     "typecheck": "vue-tsc --noEmit -p tsconfig.json",
-    "build": "node project-support/scripts/generate-build-tags.mjs && vite build",
-    "build:published": "node project-support/scripts/restore-published-snapshot.mjs && node project-support/scripts/generate-build-tags.mjs && vite build --mode published"
+    "build": "node scripts/generate-build-tags.mjs && vite build",
+    "build:published": "node scripts/restore-published-snapshot.mjs && node scripts/generate-build-tags.mjs && vite build --mode published"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",

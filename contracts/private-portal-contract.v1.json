@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "contractVersion": "1.0.0",
+  "service": "private-portal",
+  "description": "公开入口与健康检查的冻结跨仓契约；业务私有接口不在本契约范围内。",
+  "endpoints": [
+    {
+      "path": "/app/",
+      "method": "GET",
+      "authentication": "none",
+      "frontendUsage": "navigation",
+      "responses": {
+        "200": {
+          "contentType": "text/html"
+        }
+      }
+    },
+    {
+      "path": "/api/ping",
+      "method": "GET",
+      "authentication": "none",
+      "frontendUsage": "fallback-probe",
+      "responses": {
+        "200": {
+          "contentType": "application/json",
+          "required": ["ok", "app"]
+        }
+      }
+    },
+    {
+      "path": "/api/health",
+      "method": "GET",
+      "authentication": "none",
+      "frontendUsage": "primary-probe",
+      "responses": {
+        "200": {
+          "contentType": "application/json",
+          "required": ["ok", "app"]
+        }
+      }
+    },
+    {
+      "path": "/api/platform/health",
+      "method": "GET",
+      "authentication": "optional-management-session",
+      "frontendUsage": "none",
+      "responses": {
+        "200": {
+          "contentType": "application/json",
+          "required": ["status", "app_alive"]
+        },
+        "403": {
+          "contentType": "application/json",
+          "required": ["ok", "error"]
+        }
+      }
+    }
+  ]
+}

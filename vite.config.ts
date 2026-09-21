@@ -4,7 +4,7 @@ import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import { live2dModelAssetsPlugin } from "./project-support/vite/live2d-model-assets";
+import { live2dModelAssetsPlugin } from "./config/live2d-model-assets";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -93,7 +93,7 @@ const extensionDownloadPlugin = (): Plugin => ({
       }
 
       try {
-        const { buildExtensionZip } = await import("./project-support/scripts/extension/build-zip.js");
+        const { buildExtensionZip } = await import("./scripts/extension/build-zip.js");
         const outputFile = await buildExtensionZip();
         response.statusCode = 200;
         response.setHeader("Content-Type", "application/zip");
@@ -114,7 +114,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     base: "/",
-    publicDir: "project-support/public",
+    publicDir: "public",
     define: {
       __PUBLISHED_DATA_META__: JSON.stringify(getPublishedDataMeta(overrideDir)),
     },

@@ -102,7 +102,7 @@
     <el-collapse v-model="rationaleActive">
       <el-collapse-item title="规则与理论依据" name="rationale">
         <LazyPanel :active="rationaleActive.includes('rationale')">
-        <p class="tool-disclaimer">理论提供原则、不给具体阈值；默认阈值为风控惯例示例值，须你按自身风险承受确认。理论全文见 agent/theories/investment-performance-and-decision-review.md。</p>
+        <p class="tool-disclaimer">理论提供原则、不给具体阈值；默认阈值为风控惯例示例值，须你按自身风险承受确认。理论全文见 docs/theories/investment-performance-and-decision-review.md。</p>
         <div class="rationale-list">
           <div v-for="[kind, r] in rationaleEntries" :key="kind" class="rationale-item">
             <el-tag size="small" effect="plain" class="rationale-tag">{{ RULE_LABEL[kind] ?? kind }}</el-tag>

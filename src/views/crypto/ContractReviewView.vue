@@ -1116,7 +1116,7 @@ import {
 import PerformanceTable from "./components/PerformanceTable.vue";
 import PortfolioAnalytics from "./components/PortfolioAnalytics.vue";
 import EquityTimeCurveChart from "./components/EquityTimeCurveChart.vue";
-import bundledSnapshotUrl from "../../../project-support/data-snapshots/crypto/binance-source-desensitized.json?url";
+import bundledSnapshotUrl from "../../../data/snapshots/crypto/binance-source-desensitized.json?url";
 
 interface Branch {
   label: string;

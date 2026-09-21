@@ -270,7 +270,7 @@
                 description="简历深度解析、原文证据提取及市场机会匹配需复用扩展的 Gemini 本地能力。未连接扩展时仅可浏览右侧的公开招聘市场快照，不会伪造分析进度。"
               />
               <div class="guide-actions">
-                <a href="https://github.com/LPTFF/lptff.github.io/tree/master/project-support/extension/lptff-investment-assistant" target="_blank" class="guide-link">
+                <a href="https://github.com/LPTFF/lptff.github.io/tree/master/extension" target="_blank" class="guide-link">
                   查看扩展加载说明 →
                 </a>
               </div>

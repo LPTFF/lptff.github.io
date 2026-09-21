@@ -6,14 +6,14 @@
 2. **主动完成闭环**：在授权范围内自动完成可逆的分析、实现、排错和验证；失败就依据真实差异继续修复，不把机械工作退还给人。涉及 Web 页面与用户交互的任务，交付必须提供以下闭环证据：
    - **变更文件**：精确的文件修改清单与变更要点；
    - **Chrome 浏览器真实页面**：启动本地服务或连接目标环境，通过 Chrome DevTools MCP 在真实 Chrome 页面完成操作、交互与视觉验证，且交付前保留供用户审查的现场服务与页面；
-   - **对话内验收说明**：在回复中简要说明验证结果、运行状态和未验证范围，必要时直接展示真实页面截图。默认不额外生成 walkthrough.md 或独立报告；用户明确要求图文或 HTML 报告时，交付一份由实际验收结果生成、内嵌脱敏截图的报告，遵循[真实环境验收原则](agent/standards/trusted-verification.md)。报告不能代替实际验证，临时材料在审查结束后清理，不纳入源码或功能包。
+   - **对话内验收说明**：在回复中简要说明验证结果、运行状态和未验证范围，必要时直接展示真实页面截图。默认不额外生成 walkthrough.md 或独立报告；用户明确要求图文或 HTML 报告时，交付一份由实际验收结果生成、内嵌脱敏截图的报告，遵循[真实环境验收原则](docs/standards/trusted-verification.md)。报告不能代替实际验证，临时材料在审查结束后清理，不纳入源码或功能包。
 3. **证据匹配结果**：自动测试可证明覆盖的规则和运行行为；用户路径、真实来源和部署结论须在对应消费者与环境中验证，不用构建、模拟或局部通过代替，并注明没有证明的范围。
 4. **权限和副作用最小化**：私人数据只在明确授权的环境和字段范围内观察；默认只输出脱敏状态与聚合结果。对外、不可逆、交易、凭据和用户可见高风险动作必须单独获批。
 5. **让人容易审查**：提交、推送前展示确定版本、重要差异、真实证据和剩余未知并取得明确批准；证据交付前不清理仍需人查看的页面或服务。
 
-项目事实和按任务路由见 [agent/README.md](agent/README.md)。不要遍历整套资料，也不要为简单任务套治理模板。发生长时间无进展、工具反复失败或取消后续接时，执行[阻塞诊断与续接](agent/standards/project-instructions.md#阻塞诊断与续接)，按已完成的真实状态继续。
+项目事实和按任务路由见 [docs/README.md](docs/README.md)。不要遍历整套资料，也不要为简单任务套治理模板。发生长时间无进展、工具反复失败或取消后续接时，执行[阻塞诊断与续接](docs/standards/project-instructions.md#阻塞诊断与续接)，按已完成的真实状态继续。
 
 ## 浏览器特例
 
-- **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](agent/product/investment-review.md) 与 [真实环境验收原则](agent/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
-- **BOSS 直聘扩展**：必须先读并执行 [BOSS 真实验收手册](agent/verification/boss-extension-real-validation.md) 中的默认执行约定、自闭环验收和交付要求。默认使用普通 Chrome 与 OS 级操作；已加载本项目防关闭逻辑并完成页面刷新后，允许按 [DevTools 调试指南](agent/verification/boss-devtools-debugging.md) 使用 Chrome DevTools MCP 受控调试。浏览器调试授权不包含发送、投递或其他对外动作。
+- **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](docs/product/investment-review.md) 与 [真实环境验收原则](docs/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
+- **BOSS 直聘扩展**：必须先读并执行 [BOSS 真实验收手册](docs/verification/boss-extension-real-validation.md) 中的默认执行约定、自闭环验收和交付要求。默认使用普通 Chrome 与 OS 级操作；已加载本项目防关闭逻辑并完成页面刷新后，允许按 [DevTools 调试指南](docs/verification/boss-devtools-debugging.md) 使用 Chrome DevTools MCP 受控调试。浏览器调试授权不包含发送、投递或其他对外动作。

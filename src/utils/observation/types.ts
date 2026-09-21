@@ -1,6 +1,6 @@
 /**
  * 需求验证与埋点监控 - 类型定义与白名单
- * 遵循 agent/product/README.md 隐私边界与事件语义约束
+ * 遵循 docs/product/README.md 隐私边界与事件语义约束
  */
 
 export type FeatureId =
