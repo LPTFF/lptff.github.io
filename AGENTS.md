@@ -13,6 +13,12 @@
 
 项目事实和按任务路由见 [docs/README.md](docs/README.md)。不要遍历整套资料，也不要为简单任务套治理模板。发生长时间无进展、工具反复失败或取消后续接时，执行[阻塞诊断与续接](docs/standards/project-instructions.md#阻塞诊断与续接)，按已完成的真实状态继续。
 
+## 公开福利数据特例
+
+页面大量出现“待服务器标注”时，先确认 `src/views/home/welfare/index.vue` 的真实触发条件：它表示合并后的记录缺少 `ecosystem`，不自动等于前端样式错误或 Gemini 故障。必须使用 Chrome DevTools MCP 检查真实页面和控制台，并按页面合并规则统计 `python-crawl` 分支全部当前来源的待标注数；禁止只改提示文案、隐藏卡片、过滤未分类记录或手工修改快照来制造通过。
+
+采集、分类、青龙调度和数据发布的事实源及完整处置清单位于同级后端仓库 `qinglongBackup/docs/guides/site-crawler-migration-review.md` 的“福利待标注故障处置清单”。只有证据指向前端合并或健康状态展示时才修改本仓库；生产验收必须同时覆盖数据分支、准确 Pages 提交和 Chrome 真实线上页面。无法访问同级后端仓库时，明确报告边界，不猜测远程任务状态。
+
 ## 浏览器特例
 
 - **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](docs/product/investment-review.md) 与 [真实环境验收原则](docs/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
