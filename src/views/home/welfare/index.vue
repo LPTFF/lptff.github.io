@@ -223,7 +223,7 @@
                   class="welfare-img-link"
                   @error="handleImageError"
                 />
-                <span v-if="item.website === 'keyword-search'" class="discovery-badge">
+                <span v-if="isDirectedItem(item)" class="discovery-badge">
                   Google RSS · site:{{ item.searchSourceDomain }}
                 </span>
                 <span v-else class="discovery-badge direct-badge">{{ handleWebsiteName(item) }}</span>
@@ -292,6 +292,8 @@ import {
 
 // 定向发现来源配置
 const collectorSources = keywordSearchConfig.searchSources;
+const directedWebsiteIds = new Set(["keyword-search", "keywordSearch"]);
+const isDirectedItem = (item: any) => directedWebsiteIds.has(item?.website);
 
 // 固定直采来源配置
 const directCollectorSources = [
@@ -364,10 +366,10 @@ export default {
 
     const welfareSourceCount = computed(() => welfareSource.length);
     const directSourceCount = computed(
-      () => welfareSource.filter((item) => item.website !== "keyword-search").length
+      () => welfareSource.filter((item) => !isDirectedItem(item)).length
     );
     const directedSourceCount = computed(
-      () => welfareSource.filter((item) => item.website === "keyword-search").length
+      () => welfareSource.filter(isDirectedItem).length
     );
 
     const tagCounts = computed(() => countContentTags(welfareSource));
@@ -414,8 +416,8 @@ export default {
 
     const collectionModes = computed(() => [
       { id: "all", label: "全部", count: matchingWelfare.value.length },
-      { id: "direct", label: "固定来源", count: matchingWelfare.value.filter((item) => item.website !== "keyword-search").length },
-      { id: "directed", label: "定向发现", count: matchingWelfare.value.filter((item) => item.website === "keyword-search").length },
+      { id: "direct", label: "固定来源", count: matchingWelfare.value.filter((item) => !isDirectedItem(item)).length },
+      { id: "directed", label: "定向发现", count: matchingWelfare.value.filter(isDirectedItem).length },
     ]);
 
     const directSources = computed(() =>
@@ -433,7 +435,7 @@ export default {
         id: `directed:${source.id}`,
         kind: "search",
         count: matchingWelfare.value.filter(
-          (item) => item.website === "keyword-search" && item.searchSourceId === source.id
+          (item) => isDirectedItem(item) && item.searchSourceId === source.id
         ).length,
       }))
     );
@@ -495,7 +497,7 @@ export default {
 
     const filteredWelfare = computed(() => matchingWelfare.value.filter((item: any) => {
       const source = selectedSource.value;
-      const directed = item.website === "keyword-search";
+      const directed = isDirectedItem(item);
       if (source === "all") return true;
       if (source === "direct") return !directed;
       if (source === "directed") return directed;
@@ -514,10 +516,10 @@ export default {
       // 当处于全局/大类模式时，将主机测评与定向发现等稀缺源条目置前，避免被普通海量资讯挤出首屏
       if (["all", "direct", "directed"].includes(selectedSource.value)) {
         const specialOffers = visibleItems.filter((item: any) =>
-          ["zhujiceping", "keyword-search"].includes(item.website)
+          item.website === "zhujiceping" || isDirectedItem(item)
         );
         const regularOffers = visibleItems.filter(
-          (item: any) => !["zhujiceping", "keyword-search"].includes(item.website)
+          (item: any) => item.website !== "zhujiceping" && !isDirectedItem(item)
         );
         visibleItems = [...specialOffers, ...regularOffers].sort(
           (a: any, b: any) => b.timestamp - a.timestamp
@@ -659,6 +661,7 @@ export default {
             websiteImg: "https://img.alicdn.com/tfs/TB19WObTNv1gK0jSZFFXXb0sXXa-144-144.png",
           };
           break;
+        case "keywordSearch":
         case "keyword-search": {
           const sourceIcons: Record<string, string> = {
             github: "https://github.com/favicon.ico",
@@ -742,6 +745,7 @@ export default {
 
     return {
       contentTags,
+      isDirectedItem,
       tagCounts,
       searchSources,
       directSources,
