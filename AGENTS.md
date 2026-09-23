@@ -19,6 +19,14 @@
 
 采集、分类、青龙调度和数据发布的事实源及完整处置清单位于同级后端仓库 `qinglongBackup/docs/guides/site-crawler-migration-review.md` 的“福利待标注故障处置清单”。只有证据指向前端合并或健康状态展示时才修改本仓库；生产验收必须同时覆盖数据分支、准确 Pages 提交和 Chrome 真实线上页面。无法访问同级后端仓库时，明确报告边界，不猜测远程任务状态。
 
+福利来源总数或 GitHub、Telegram、Bilibili、闲鱼、实时线报任一来源突然为 0 时，低推理模型按以下规则执行：
+
+1. 先在 `python-crawl` 分支直接统计每个 JSON 的 `website`、`searchSourceId` 等真实字段，再与页面合并规则比较；不要先改 CSS、文案、默认筛选或隐藏 0 值。
+2. 定向发现公开数据的规范 `website` 值是 `keyword-search`；前端可兼容历史 `keywordSearch`，但生产者必须输出规范值。汇总、筛选、排序、徽标和来源按钮必须共用同一个来源判定函数，禁止各写一套字符串比较。
+3. 页面显示 0 而数据分支非 0 时，核对准确 Pages run 是否晚于数据提交，并用 Chrome DevTools MCP 忽略缓存刷新 `https://lptff.github.io/?tab=welfare`；同时检查 Console。未完成“数据提交 → Pages 成功 → 线上计数”闭环，不得宣布修复。
+4. 页面非 0 不代表来源实时健康。后端若标记 `degraded` 或保留旧快照，交付必须明确“当前展示为最后有效快照”，不得描述成最新实时抓取；恢复与推送逻辑只在同级 `qinglongBackup` 修改。
+5. GitHub Actions 的 Node.js 或 runner 迁移告警要在产生告警的仓库修复；检查最新运行的完整 Annotations，不要因为升级了最先列出的三个 Action 就停止。项目治理产生的人工审批 warning 与平台弃用 warning 分开判断。
+
 ## 浏览器特例
 
 - **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](docs/product/investment-review.md) 与 [真实环境验收原则](docs/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
