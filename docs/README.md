@@ -18,6 +18,7 @@
 | 当前问题 | 读取 |
 | --- | --- |
 | 项目现状或文件归属 | [项目上下文](context/project-context.md)、[文件边界](context/project-file-boundaries.md) |
+| 历史仓库与公开待办 P01、P02、P04、P05 | [历史仓库收敛核对](context/legacy-repository-convergence.md) |
 | 产品价值或范围 | [产品入口](product/README.md) 与对应产品正文 |
 | Investment Review | [产品正文](product/investment-review.md)；实现细节才读[工程附录](product/reference/investment-review-engineering.md) |
 | 本地运行或构建 | [项目工作说明](standards/project-instructions.md) |

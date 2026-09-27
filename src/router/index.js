@@ -114,6 +114,18 @@ const routes = [
     ],
   },
   {
+    path: "/todo",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "项目待办", product: "公开待办" },
+    children: [
+      {
+        path: "",
+        name: "project-todo",
+        component: () => import("../views/todo/index.vue"),
+      },
+    ],
+  },
+  {
     path: "/live2d",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
     meta: { title: "看板娘" },
