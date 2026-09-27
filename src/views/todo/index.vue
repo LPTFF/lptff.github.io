@@ -80,6 +80,7 @@
                 <span class="criteria-label">完成条件：</span>
                 <span class="criteria-text">{{ task.criteria }}</span>
               </div>
+              <a v-if="task.sourceUrl" :href="task.sourceUrl" target="_blank" rel="noopener noreferrer">参考来源（内容待核实）</a>
             </div>
           </article>
 
@@ -125,6 +126,7 @@
                         <span class="criteria-label">完成条件：</span>
                         <span class="criteria-text">{{ task.criteria }}</span>
                       </div>
+                      <a v-if="task.sourceUrl" :href="task.sourceUrl" target="_blank" rel="noopener noreferrer">参考来源（内容待核实）</a>
                     </div>
                   </article>
                 </div>
@@ -150,6 +152,7 @@ export interface TodoTask {
   status: "待处理" | "待现场处理" | "进行中" | "已完成";
   order: number;
   criteria: string;
+  sourceUrl?: string;
 }
 
 const allTasks: TodoTask[] = (rawTasks as TodoTask[]).slice().sort((a, b) => a.order - b.order);
