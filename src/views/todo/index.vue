@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        本页面列出当前个人项目与各仓库功能收敛的公开待办事项。保留定位任务所需的账号、项目和地点信息，不展示密码、令牌等内部凭据。
+        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖长沙家庭服务器。未完成事项统一记录在这里，等回长沙后继续核对和处理；待决定事项先确认用途再实施，已完成记录保留。公开页不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">
@@ -164,13 +164,13 @@ const groupConfigs = [
   {
     key: "待现场处理" as const,
     title: "待现场处理",
-    desc: "需在本地服务器实际运行环境核实版本、调度、数据备份与维护源的事项",
+    desc: "回长沙后先核对服务器运行与备份，再处理数据、隐私、访问和资源能力；每项按完成条件验收",
     tagType: "warning" as const,
   },
   {
     key: "待决定" as const,
     title: "待决定",
-    desc: "需依据真实使用场景、维护成本与数据边界综合评估取舍的事项",
+    desc: "回长沙后结合真实使用情况决定范围；记录待办不代表自动恢复旧模块、注册账户或付费投放",
     tagType: "primary" as const,
   },
 ];
