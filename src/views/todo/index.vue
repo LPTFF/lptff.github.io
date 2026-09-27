@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        本页面列出当前个人项目与各仓库功能收敛的公开待办事项。展示内容均已脱敏，仅记录公开任务范围、状态与完成条件，不展示私有仓库地址、服务器位置、内部凭据或私人数据。
+        本页面列出当前个人项目与各仓库功能收敛的公开待办事项。保留定位任务所需的账号、项目和地点信息，不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">

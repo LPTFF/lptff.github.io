@@ -79,5 +79,41 @@
     "status": "待现场处理",
     "order": 9,
     "criteria": "逐项核对旧脚本，保留唯一受控版本。"
+  },
+  {
+    "id": "P10",
+    "title": "验证 Cloudflare Workers 发布链路",
+    "group": "现在可做",
+    "domain": "云端部署",
+    "status": "已完成",
+    "order": 10,
+    "criteria": "Cloudflare 账号 lpt***001@gmail.com 已验证，密码保存在保险库；示例 Worker nameless-wind-2d67（workers.dev）已部署并可访问，Workers 发布链路已验证。Zero Trust 绑卡流程已停止，未产生扣费。"
+  },
+  {
+    "id": "P11",
+    "title": "回长沙后在 qinglongBackup 配置家庭服务器 Cloudflare Tunnel",
+    "group": "待现场处理",
+    "domain": "服务端运维",
+    "status": "待现场处理",
+    "order": 11,
+    "criteria": "在 C:\\Users\\Administrator\\Desktop\\开发\\qinglongBackup 核对长沙家庭服务器现状，按网络安全边界评审此前确定的 cloudflared 命令行方案、身份认证、访问范围和回滚方式，再配置并验证；无需绑卡。小应用、API 和定时任务可按需使用 Workers，文件备份可评估 R2；使用前复核免费额度。"
+  },
+  {
+    "id": "P12",
+    "title": "记录 AWS 东京 VPS 可用状态",
+    "group": "现在可做",
+    "domain": "云端部署",
+    "status": "已完成",
+    "order": 12,
+    "criteria": "AWS 账号 5989-****-4593（lpt***001@gmail.com，Free Plan）；东京 t4g.micro 实例 i-0331…a286，固定 Elastic IP 18.177.***.99，SSH 直连已通，HAProxy、Xray、Nginx 与朋友的 Clash 服务正常。Bedrock 当前不可用；$100 抵扣金记录至 2027-09-27，控制台免费权限记录至 2027-03-27，使用前复核。"
+  },
+  {
+    "id": "P13",
+    "title": "回长沙后评审 AWS VPS 与家庭服务器的 FRP 接入",
+    "group": "待现场处理",
+    "domain": "服务端运维",
+    "status": "待现场处理",
+    "order": 13,
+    "criteria": "在 qinglongBackup 核对长沙家庭服务器与东京 VPS 现状，比较 FRP 与 P11 的 Cloudflare Tunnel 方案；明确用途、身份认证、最小开放范围和回滚方式，先按项目网络安全边界评审并取得本次授权，再决定是否做公网映射。当前 VPS 安全组有多端口对公网开放，配置前一并核查收敛。"
   }
 ]
