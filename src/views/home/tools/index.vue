@@ -10,8 +10,10 @@
             shadow="hover">
             <el-link :href="item.url" target="_blank" class="website-link" underline="never"
               @click.prevent="gotoNewsWebsite(item)">
-              <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)">
-                <span class="icon-fallback" :style="{ backgroundColor: fallbackColor(item.name) }">{{ fallbackChar(item.name) }}</span>
+              <el-avatar :size="50" class="log-website" :src="item.url === noReferrerIconUrl ? '' : resolveIcon(item.icon)">
+                <img v-if="item.url === noReferrerIconUrl && !failedNoReferrerIcon" class="direct-icon"
+                  :src="resolveIcon(item.icon)" referrerpolicy="no-referrer" @error="failedNoReferrerIcon = true" />
+                <span v-else class="icon-fallback" :style="{ backgroundColor: fallbackColor(item.name) }">{{ fallbackChar(item.name) }}</span>
               </el-avatar>
               {{ item.name }}
             </el-link>
@@ -40,8 +42,36 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
+    const noReferrerIconUrl = "https://www.zhujiceping.com/";
+    const failedNoReferrerIcon = ref(false);
     const loadFrequentWebsites = () => {
       const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
+      let clickDataChanged = false;
+      const oldXiaohongshuUrl = "https://www.xiaohongshu.com/explore";
+      const newXiaohongshuUrl = "https://www.xiaohongshu.com/ai_chat";
+      if (clickData[oldXiaohongshuUrl]) {
+        const oldEntry = clickData[oldXiaohongshuUrl];
+        const newEntry = clickData[newXiaohongshuUrl];
+        clickData[newXiaohongshuUrl] = {
+          ...oldEntry,
+          ...newEntry,
+          url: newXiaohongshuUrl,
+          count: (oldEntry.count || 0) + (newEntry?.count || 0),
+        };
+        delete clickData[oldXiaohongshuUrl];
+        clickDataChanged = true;
+      }
+      for (const group of websiteGroups) {
+        for (const website of group.list) {
+          if (clickData[website.url] && clickData[website.url].icon !== website.icon) {
+            clickData[website.url].icon = website.icon;
+            clickDataChanged = true;
+          }
+        }
+      }
+      if (clickDataChanged) {
+        localStorage.setItem("frequentWebsites", JSON.stringify(clickData));
+      }
       const list = Object.values(clickData)
         .sort((a: any, b: any) => b.count - a.count) // 按点击次数降序排序
         .slice(0, 12); // 最多显示12个常用网站
@@ -119,7 +149,9 @@ export default defineComponent({
       getBackgroundColor,
       resolveIcon,
       fallbackChar,
-      fallbackColor
+      fallbackColor,
+      noReferrerIconUrl,
+      failedNoReferrerIcon
     };
   },
   components: {
@@ -156,5 +188,11 @@ export default defineComponent({
   color: #fff;
   font-size: 18px;
   font-weight: 600;
+}
+
+.direct-icon {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 </style>
