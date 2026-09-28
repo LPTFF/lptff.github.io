@@ -127,7 +127,7 @@ export default defineComponent({
       ];
       return colors[parentIndex % 5]; // 每5次循环一次
     };
-    // 图标地址在 websiteGroups.json 中显式指向目标站点的官方 favicon 或官方 CDN；
+    // 图标地址在 websiteGroups.json 中显式配置；Grok 经 favicon 服务读取官网图标。
     // 官方资源失败时由 el-avatar 默认 slot 显示首字符色块
     const resolveIcon = (icon: string) => {
       if (icon === "InternalWebsite") {

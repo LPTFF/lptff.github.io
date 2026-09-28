@@ -40,7 +40,7 @@ Excel 导出使用浏览器端 `write-excel-file`，仅在用户执行导出时�
 npm install
 ```
 
-Live2D 模型包已纳入 devDependencies 和锁文件。开发服务器由 Vite 直接从已安装的 `node_modules` 提供模型，生产构建由同一 Vite 插件写入 `dist/live2dw/models/`；不维护 `public` 缓存，也没有安装后或启动前脚本。导航图标直接使用目标站点的官方 favicon 或官方 CDN，加载失败时显示首字符色块，不参与资源准备。
+Live2D 模型包已纳入 devDependencies 和锁文件。开发服务器由 Vite 直接从已安装的 `node_modules` 提供模型，生产构建由同一 Vite 插件写入 `dist/live2dw/models/`；不维护 `public` 缓存，也没有安装后或启动前脚本。导航图标通常直接使用目标站点的官方 favicon 或官方 CDN；Grok 通过 favicon 服务获取官网图标。加载失败时显示首字符色块，不参与资源准备。
 
 启动开发服务器（端口 8090）：
 
