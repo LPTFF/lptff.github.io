@@ -10,10 +10,8 @@
             shadow="hover">
             <el-link :href="item.url" target="_blank" class="website-link" underline="never"
               @click.prevent="gotoNewsWebsite(item)">
-              <el-avatar :size="50" class="log-website" :src="item.url === noReferrerIconUrl ? '' : resolveIcon(item.icon)">
-                <img v-if="item.url === noReferrerIconUrl && !failedNoReferrerIcon" class="direct-icon"
-                  :src="resolveIcon(item.icon)" referrerpolicy="no-referrer" @error="failedNoReferrerIcon = true" />
-                <span v-else class="icon-fallback" :style="{ backgroundColor: fallbackColor(item.name) }">{{ fallbackChar(item.name) }}</span>
+              <el-avatar :size="50" class="log-website" :src="resolveIcon(item.icon)">
+                <span class="icon-fallback" :style="{ backgroundColor: fallbackColor(item.name) }">{{ fallbackChar(item.name) }}</span>
               </el-avatar>
               {{ item.name }}
             </el-link>
@@ -42,11 +40,13 @@ enum WebsiteType {
 export default defineComponent({
   name: "App",
   setup() {
-    const noReferrerIconUrl = "https://www.zhujiceping.com/";
-    const failedNoReferrerIcon = ref(false);
     const loadFrequentWebsites = () => {
       const clickData = JSON.parse(localStorage.getItem("frequentWebsites") || "{}");
       let clickDataChanged = false;
+      if (clickData["https://www.zhujiceping.com/"]) {
+        delete clickData["https://www.zhujiceping.com/"];
+        clickDataChanged = true;
+      }
       const oldXiaohongshuUrl = "https://www.xiaohongshu.com/explore";
       const newXiaohongshuUrl = "https://www.xiaohongshu.com/ai_chat";
       if (clickData[oldXiaohongshuUrl]) {
@@ -77,7 +77,7 @@ export default defineComponent({
         .slice(0, 12); // 最多显示12个常用网站
       if (list.length > 0) {
         return [{
-          category: "常用",
+          category: "Frequently Used",
           list,
         }];
       }
@@ -149,9 +149,7 @@ export default defineComponent({
       getBackgroundColor,
       resolveIcon,
       fallbackChar,
-      fallbackColor,
-      noReferrerIconUrl,
-      failedNoReferrerIcon
+      fallbackColor
     };
   },
   components: {
@@ -190,9 +188,4 @@ export default defineComponent({
   font-weight: 600;
 }
 
-.direct-icon {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
 </style>
