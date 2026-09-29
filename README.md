@@ -61,8 +61,6 @@ npm run repo:check
 npm run build
 ```
 
-本地 `build` 只执行 Vite 生产构建；面试 Markdown、投资脱敏快照和 Live2D 模型均由 Vite 从唯一来源生成构建资源，不做启动前复制。GitHub Pages 的 `404.html` 继续由原有 CI 步骤生成。
-
 ## 公共数据采集与验收
 
 公开来源采集、AI 分类与数据发布由私有 qinglongBackup 仓库的青龙任务维护；本站只消费 python-crawl 分支的公开 JSON。旧 Python/RSS 采集源码已迁入该仓库 research/legacy-site-collectors，本站不再保留定时采集工作流。浏览器授权采集扩展继续保留。研究书签是站主通过 GitHub Issues 维护的公开内容同步，不执行外部站点爬取。

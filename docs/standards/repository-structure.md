@@ -30,7 +30,7 @@ docs/ ──只描述和约束，不参与浏览器运行
 - `public/` 中的内容会原样发布；凭据、私有采集包和未脱敏数据不得放入其中。
 - 页面需要的大型映射数据优先放在 `public/data/` 并按功能按需请求，避免进入首屏 JS。
 - `data/snapshots/` 只接收有产品消费者的脱敏快照；测试替身留在 `.local/verification/`。
-- 长期验收事实维护在 `docs/verification/real-validation-state.md`；可生成 HTML、截图和原始运行结果留在 `.local/verification/`。
+- 本次验收结论与对应提交或 PR 关联；可生成 HTML、截图和原始运行结果留在 `.local/verification/`，不作为长期源码文件追加。
 - 新增顶层入口必须同步更新本文件和仓库治理脚本。
 
 ## 提交门禁

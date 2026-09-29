@@ -50,15 +50,7 @@
 
 ## 1. 保存状态并确定范围
 
-先查看 `git status --short`、`git diff`、`git diff --stat`，然后在 `docs/verification/real-validation-state.md` 维护：
-
-- Changed files
-- Impacted behaviors
-- Pending real scenarios
-- Infrastructure issue/attempts
-- Current executor
-- Issues found
-- Next action
+先查看 `git status --short`、`git diff`、`git diff --stat`。本次验收在交付回复中记录变更、实际环境、覆盖场景、结果和未知；适合长期追溯的脱敏结论写入对应提交正文或 PR。历史验收记录仍可通过 `git log -- docs/verification/real-validation-state.md` 查阅，不再维护追加式状态文档。
 
 为每个文件建立 `Changed File → Changed Behavior → Real Scenario` 映射：P0 测直接变化，P1 测调用链和生命周期，P2 测最可能受影响的相邻功能。P3 只有发现连带影响时才扩展。
 
@@ -153,7 +145,7 @@ Runner 至少支持：`screenshot`、`list_windows`、`focus_window`、`maximize
 → 重新加载当前扩展
 → 在同一真实页面重测原失败路径
 → 补测成功、失败、刷新/恢复三个分支
-→ 更新 `docs/verification/real-validation-state.md`
+→ 更新本次验收结论与剩余未知
 ```
 
 不要通过删除整项功能、放宽断言、隐藏错误文案或把模拟结果写成 PASS 来“收敛”。如果 UI 描述比实现更强，优先补齐实现；只有产品明确改变承诺时才同步修改 UI。
