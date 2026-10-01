@@ -106,7 +106,7 @@ GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；�
 npm audit --registry=https://registry.npmjs.org
 ```
 
-当前完整依赖树和生产依赖审计均为 0 个漏洞。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS。不要直接运行 `npm audit fix --force`。
+部署流水线会在每次构建时检查高危依赖漏洞；Dependabot 每日检查 npm 版本更新。开发服务器当前监听 `0.0.0.0:8090` 并启用 CORS。不要直接运行 `npm audit fix --force`。
 
 ## Agent 资产
 
