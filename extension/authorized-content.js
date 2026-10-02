@@ -451,7 +451,7 @@
   function getExtensionBuildTag() {
     return (typeof self !== "undefined" && self.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
       || (typeof window !== "undefined" && window.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
-      || "cand-3.25.0-unknown";
+      || "cand-3.26.3-unknown";
   }
   let snapshotSequence = 0;
   let persistQueue = Promise.resolve();

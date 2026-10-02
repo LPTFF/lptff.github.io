@@ -42,7 +42,7 @@
 
     <details v-if="!connected" class="install-details">
       <summary>未检测到扩展？</summary>
-      <p>请确认已加载 3.25.0 或更新版本并刷新本页。</p>
+      <p>请确认已加载 3.25.1 或更新版本并刷新本页。</p>
       <button type="button" @click="downloadPlugin">下载采集扩展</button>
       <p v-if="pluginHint">{{ pluginHint.title }}：{{ pluginHint.desc }}</p>
     </details>

@@ -31,6 +31,11 @@ export function computeBuildTags(projectRoot) {
     path.join(extensionDir, 'lan-bridge-sync.js'),
     path.join(extensionDir, 'popup/authorized-panel.js'),
     path.join(extensionDir, 'content/web-bridge.js'),
+    path.join(extensionDir, 'private-bookmarks.js'),
+    path.join(extensionDir, 'content/private-bookmarks-github.js'),
+    path.join(extensionDir, 'popup/private-bookmarks-settings.js'),
+    path.join(extensionDir, 'popup/private-bookmarks-settings.html'),
+    path.join(extensionDir, 'popup/private-bookmarks-settings.css'),
   ]);
 
   const webDigest = computeDigest([
@@ -40,6 +45,7 @@ export function computeBuildTags(projectRoot) {
     path.join(projectRoot, 'src/views/home/welfare/index.vue'),
     path.join(projectRoot, 'src/views/home/entertainment/index.vue'),
     path.join(projectRoot, 'vite.config.ts'),
+    path.join(projectRoot, 'src/views/home/devtools/PrivateBookmarks.vue'),
   ]);
 
   return {
