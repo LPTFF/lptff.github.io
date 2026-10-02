@@ -1,23 +1,18 @@
 <template>
   <div class="devtools-page">
-    <nav class="devtools-nav">
-      <RouterLink
-        v-for="tool in tools"
-        :key="tool.path"
-        :to="tool.path"
-        class="devtools-nav-link"
-        :class="{ active: route.path === tool.path }"
-      >
-        <span class="devtools-nav-name">{{ tool.name }}</span>
-        <span class="devtools-nav-desc">{{ tool.description }}</span>
-      </RouterLink>
+    <nav class="devtools-nav" aria-label="开发工具">
+      <el-tabs :model-value="route.path" class="devtools-tabs" @tab-change="navigateToTool">
+        <el-tab-pane v-for="tool in tools" :key="tool.path" :name="tool.path" :label="tool.name" />
+      </el-tabs>
+      <p class="devtools-current-desc">{{ currentTool?.description }}</p>
     </nav>
     <RouterView />
   </div>
 </template>
 
 <script setup lang="ts">
-import { RouterLink, RouterView, useRoute } from "vue-router";
+import { computed } from "vue";
+import { RouterView, useRoute, useRouter } from "vue-router";
 
 /** 工具注册表：新增工具时在此追加一条，并在 router/index.js 注册对应子路由 */
 const tools = [
@@ -41,9 +36,20 @@ const tools = [
     name: "研究资料",
     description: "导入浏览器书签，复制格式后到 Issue 补充",
   },
+  {
+    path: "/devtools/private-bookmarks",
+    name: "私密书签",
+    description: "通过插件查看、整理并手动备份到 GitHub 私人仓库",
+  },
 ];
 
 const route = useRoute();
+const router = useRouter();
+const currentTool = computed(() => tools.find((tool) => tool.path === route.path));
+
+function navigateToTool(path: string | number): void {
+  if (path !== route.path) void router.push(String(path));
+}
 </script>
 
 <style scoped>
@@ -53,45 +59,22 @@ const route = useRoute();
 }
 
 .devtools-nav {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 20px;
+  min-width: 0;
+  margin-bottom: 16px;
 }
 
-.devtools-nav-link {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 10px 16px;
-  border: 1px solid #ebeef5;
-  border-radius: 8px;
-  background: #fafbfc;
-  color: #606266;
-  text-decoration: none;
-  transition: all 0.2s;
+.devtools-tabs :deep(.el-tabs__header) {
+  margin-bottom: 0;
 }
 
-.devtools-nav-link:hover {
-  border-color: #409eff;
+.devtools-tabs :deep(.el-tabs__content) {
+  display: none;
 }
 
-.devtools-nav-link.active {
-  border-color: #409eff;
-  background: #ecf5ff;
-}
-
-.devtools-nav-name {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.devtools-nav-link.active .devtools-nav-name {
-  color: #409eff;
-}
-
-.devtools-nav-desc {
+.devtools-current-desc {
+  margin: 6px 0 0;
   font-size: 12px;
-  color: #909399;
+  line-height: 1.5;
+  color: var(--el-text-color-secondary);
 }
 </style>

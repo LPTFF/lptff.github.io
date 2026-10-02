@@ -171,6 +171,12 @@ const routes = [
             component: () => import("../views/home/devtools/ResearchBookmarks.vue"),
             meta: { title: "研究资料", product: "开发工具" },
           },
+          {
+            path: "private-bookmarks",
+            name: "devtools-private-bookmarks",
+            component: () => import("../views/home/devtools/PrivateBookmarks.vue"),
+            meta: { title: "私密书签", product: "开发工具" },
+          },
         ],
       },
     ],

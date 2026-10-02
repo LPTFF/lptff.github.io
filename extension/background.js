@@ -7,6 +7,7 @@ importScripts(
   "source-capture.js",
   "collection-policy.js",
   "observation-capture.js",
+  "private-bookmarks.js",
   "content/source-extractor.js",
   "boss-helper-upstream-background.js",
 );
@@ -1527,6 +1528,46 @@ chrome.runtime.onConnect.addListener((port) => {
 chrome.tabs.onRemoved.addListener((tabId) => preservedLoginTabIds.delete(tabId));
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (String(message?.type || "").startsWith("PRIVATE_BOOKMARKS_")) {
+    const senderUrl = String(sender?.url || sender?.tab?.url || "");
+    let fromOptions = false;
+    try {
+      const senderPage = new URL(senderUrl);
+      const optionsPage = new URL(chrome.runtime.getURL("popup/private-bookmarks-settings.html"));
+      fromOptions = sender?.id === chrome.runtime.id && senderPage.origin === optionsPage.origin && senderPage.pathname === optionsPage.pathname;
+    } catch {}
+    let fromToolPage = false;
+    try {
+      const url = new URL(senderUrl);
+      fromToolPage = url.pathname === "/devtools/private-bookmarks"
+        && (url.origin === "https://lptff.github.io" || ((url.hostname === "127.0.0.1" || url.hostname === "localhost") && url.port === "8091"));
+    } catch {}
+    if (!fromOptions && !fromToolPage) {
+      sendResponse({ ok: false, error: "无权访问私密书签功能" });
+      return false;
+    }
+    const actions = {
+      PRIVATE_BOOKMARKS_STATUS: async () => globalThis.LPTFFPrivateBookmarks.status(sender?.tab?.id),
+      PRIVATE_BOOKMARKS_READ: async () => globalThis.LPTFFPrivateBookmarks.startRead(sender.tab),
+      PRIVATE_BOOKMARKS_CANCEL: async () => globalThis.LPTFFPrivateBookmarks.cancel(sender?.tab?.id),
+      PRIVATE_BOOKMARKS_OPEN_SETTINGS: async () => {
+        await chrome.runtime.openOptionsPage();
+        return { opened: true };
+      },
+      PRIVATE_BOOKMARKS_GET: async () => globalThis.LPTFFPrivateBookmarks.getFile(sender?.tab?.id),
+      PRIVATE_BOOKMARKS_SYNC: async () => globalThis.LPTFFPrivateBookmarks.syncFile(message, sender.tab),
+      PRIVATE_BOOKMARKS_FOLDERS: async () => globalThis.LPTFFPrivateBookmarks.folders(),
+      PRIVATE_BOOKMARKS_IMPORT_SELECTED: async () => globalThis.LPTFFPrivateBookmarks.readSelected(message.bookmarkIds),
+      PRIVATE_BOOKMARKS_DISCONNECT: async () => globalThis.LPTFFPrivateBookmarks.clearConfig(sender?.tab?.id),
+    };
+    const action = actions[message.type];
+    if (!action) {
+      sendResponse({ ok: false, error: "未知的私密书签操作" });
+      return false;
+    }
+    action().then((result) => sendResponse({ ok: true, ...(Array.isArray(result) ? { items: result } : result && typeof result === "object" ? result : result === undefined ? {} : { value: result }) })).catch((error) => sendResponse({ ok: false, error: error instanceof Error ? error.message : "私密书签操作失败" }));
+    return true;
+  }
   if (message?.type === "BOSS_FEATURE_BOOTSTRAP") {
     const senderUrl = String(sender?.url || sender?.tab?.url || "");
     const tabId = sender?.tab?.id;

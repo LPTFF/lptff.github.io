@@ -58,6 +58,7 @@ declare module 'vue' {
     ElTabs: typeof import('element-plus/es')['ElTabs']
     ElTag: typeof import('element-plus/es')['ElTag']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    ElTree: typeof import('element-plus/es')['ElTree']
     FeatureObservationModal: typeof import('./src/components/FeatureObservationModal.vue')['default']
     FloatingAuthorization: typeof import('./src/components/FloatingAuthorization.vue')['default']
     PrivatePortalModal: typeof import('./src/components/PrivatePortalModal.vue')['default']

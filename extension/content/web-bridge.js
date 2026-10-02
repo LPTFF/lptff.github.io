@@ -144,6 +144,23 @@
       window.removeEventListener("message", onWindowMessage);
       return;
     }
+    if (event.data?.type === "LPTFF_PRIVATE_BOOKMARKS_REQUEST" && location.pathname === "/devtools/private-bookmarks") {
+      const allowed = new Set(["STATUS", "READ", "CANCEL", "OPEN_SETTINGS", "GET", "SYNC", "FOLDERS", "IMPORT_SELECTED", "DISCONNECT"]);
+      const action = String(event.data.action || "");
+      if (!allowed.has(action)) return;
+      const payload = {
+        type: `PRIVATE_BOOKMARKS_${action}`,
+        requestId: String(event.data.requestId || "").slice(0, 100),
+      };
+      if (action === "SYNC") {
+        payload.data = event.data.data;
+        payload.baseSha = event.data.baseSha;
+        payload.connectionId = event.data.connectionId;
+      }
+      if (action === "IMPORT_SELECTED") payload.bookmarkIds = Array.isArray(event.data.bookmarkIds) ? event.data.bookmarkIds.slice(0, 1001) : [];
+      forward(payload, "LPTFF_PRIVATE_BOOKMARKS_RESPONSE");
+      return;
+    }
     if (event.data?.type === "LPTFF_AUTHORIZED_CONTENT_REQUEST") {
       const actions = ["STATUS", "START", "START_ALL", "RESUME", "STOP", "LOGIN", "RESULT", "OPEN_ASSISTANT", "AI_CONFIG", "AI_REVEAL", "AI_CLEAR", "AI_TEST", "AI_CACHED", "AI_SAVE", "AI_ANALYZE"];
       if (!actions.includes(event.data.action)) return;
@@ -262,6 +279,10 @@
       window.postMessage({ source: "lptff-investment-assistant", type: "LPTFF_BINANCE_COLLECTION_PROGRESS", progress: message }, location.origin);
       return;
     }
+    if (message?.type === "LPTFF_PRIVATE_BOOKMARKS_RESPONSE") {
+      window.postMessage({ source: "lptff-investment-assistant", ...message }, location.origin);
+      return;
+    }
     if (message?.type !== "COLLECTION_PROGRESS") return;
     window.postMessage({
       source: "lptff-investment-assistant",
@@ -285,10 +306,10 @@
   // 广播就绪事件，通知页面扩展已在线，实现免刷新秒连
   try {
     const manifest = (typeof chrome !== "undefined" && chrome.runtime?.getManifest) ? chrome.runtime.getManifest() : {};
-    const version = manifest?.version || "3.25.0";
+    const version = manifest?.version || "3.26.3";
     const buildTag = (typeof window !== "undefined" && window.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
       || (typeof self !== "undefined" && self.__LPTFF_EXTENSION_BUILD_INFO__?.buildTag)
-      || "cand-3.25.0-bridge";
+      || "cand-3.26.3-bridge";
     const detail = {
       source: "lptff-investment-assistant",
       type: "LPTFF_EXTENSION_READY",
