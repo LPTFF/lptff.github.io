@@ -29625,6 +29625,8 @@ void main() {
               (this.composer = null),
               (this.width = 1),
               (this.height = 1));
+            r.domElement.addEventListener('webglcontextlost', () => this.releaseLostContext());
+            r.domElement.addEventListener('webglcontextrestored', () => this.build());
           }
           get usingPCSS() {
             return this.pcssAvailable && this.quality.pcss;
@@ -29636,6 +29638,45 @@ void main() {
             (this.renderer.shadowMap.type !== t &&
               (this.renderer.shadowMap.type = t),
               this.build());
+          }
+          disposeComposer() {
+            if (!this.composer) return;
+            this.composer.passes.forEach((pass) => pass.dispose?.());
+            this.gtao?.gtaoMaterial.dispose();
+            this.composer.dispose();
+            this.composer = null;
+          }
+          releaseLostContext() {
+            // Dispose GPU caches before restoration replaces the renderer's cache
+            // owners. Geometry arrays, textures' images and gameplay remain intact.
+            const geometries = new Set(), materials = new Set(), textures = new Set();
+            this.scene.traverse((object) => {
+              if (object.geometry) geometries.add(object.geometry);
+              if (object.material) {
+                const list = Array.isArray(object.material) ? object.material : [object.material];
+                for (const material of list) materials.add(material);
+              }
+              if (object.isInstancedMesh) object.dispose();
+              const shadow = object.shadow;
+              if (shadow) {
+                shadow.map?.dispose();
+                shadow.mapPass?.dispose();
+                shadow.map = shadow.mapPass = null;
+                shadow.needsUpdate = true;
+              }
+            });
+            for (const material of materials) {
+              for (const value of Object.values(material)) if (value?.isTexture) textures.add(value);
+              for (const uniform of Object.values(material.uniforms || {})) {
+                if (uniform.value?.isTexture) textures.add(uniform.value);
+              }
+              material.dispose();
+            }
+            for (const geometry of geometries) geometry.dispose();
+            for (const texture of textures) texture.dispose();
+            this.disposeComposer();
+            this.groundUploader?.dispose();
+            this.groundUploader = null;
           }
           build() {
             let e = this.quality,
@@ -29653,10 +29694,7 @@ void main() {
               t.setSize(n, r, !1),
               (this.width = n),
               (this.height = r),
-              this.composer &&
-                (this.composer.passes.forEach((e) => e.dispose && e.dispose()),
-                this.composer.renderTarget1.dispose(),
-                this.composer.renderTarget2.dispose()));
+              this.disposeComposer());
             let a = t.getDrawingBufferSize(rd),
               o = new yc(t, new Fe(a.x, a.y, { type: u, samples: e.msaa }));
             if (
@@ -29689,12 +29727,15 @@ void main() {
                   rings: 1,
                   samples: 6,
                 }));
-              let t = e._overrideVisibility.bind(e);
+              // Combine GTAO's point/line exclusions with game-specific ones
+              // in one traversal; restoration still uses the same visibility cache.
               ((e._overrideVisibility = function () {
-                t();
-                let e = this._visibilityCache;
-                this.scene.traverse((t) => {
-                  t.userData.noAO && t.visible && ((t.visible = !1), e.push(t));
+                const cache = this._visibilityCache;
+                this.scene.traverse((object) => {
+                  if (object.visible && (object.isPoints || object.isLine || object.isLine2 || object.userData.noAO)) {
+                    object.visible = false;
+                    cache.push(object);
+                  }
                 });
               }),
                 (e.enabled = this.toggles.ao),
@@ -29722,13 +29763,40 @@ void main() {
               ((this.width = e),
               (this.height = t),
               this.renderer.setSize(e, t, !1),
-              this.composer.setSize(e, t),
+              this.composer?.setSize(e, t),
               (this.camera.aspect = e / t),
               this.camera.updateProjectionMatrix());
           }
+          updateGroundMap(world) {
+            if (!world.groundMapDirty || this.renderer.getContext().isContextLost()) return;
+            if (!this.groundUploadDisabled) {
+              try {
+                this.groundUploader ||= new GroundMapUploader(this.renderer);
+                this.groundUploader.upload(world.groundMap, world.groundCanvas);
+              } catch (error) {
+                // Preserve the original rendering path if a driver rejects the fast path.
+                this.groundUploader?.dispose();
+                this.groundUploader = null;
+                this.groundUploadDisabled = true;
+                world.groundMap.needsUpdate = true;
+                console.warn('Ground texture upload fallback:', error);
+              }
+            } else world.groundMap.needsUpdate = true;
+            world.groundMapDirty = false;
+          }
           render(e) {
-            ((this.renderer.shadowMap.needsUpdate = !0),
-              this.composer.render(e));
+            if (this.renderer.getContext().isContextLost() || !this.composer) return;
+            // Scene and GTAO consume the same pose. Update transforms once,
+            // rather than traversing/recomposing the full scene for each pass.
+            this.scene.updateMatrixWorld();
+            const autoUpdate = this.scene.matrixWorldAutoUpdate;
+            this.scene.matrixWorldAutoUpdate = false;
+            try {
+              this.renderer.shadowMap.needsUpdate = true;
+              this.composer.render(e);
+            } finally {
+              this.scene.matrixWorldAutoUpdate = autoUpdate;
+            }
           }
         };
       function Qc(e) {
@@ -29765,6 +29833,114 @@ void main() {
         );
       }
       var il = (e, t, n, r) => e + rl(e, t) * (1 - Math.exp(-n * r));
+      // Upload canvas bytes through RGBA8, then render into the original sRGB
+      // texture. Direct canvas -> SRGB8_ALPHA8 uploads stall some ANGLE drivers.
+      // texelFetch + sRGB decode preserves encoded texels and native mip filtering.
+      class GroundMapUploader {
+        constructor(renderer) {
+          this.renderer = renderer;
+          this.gl = renderer.getContext();
+          this.staging = new cr();
+          this.staging.generateMipmaps = false;
+          this.staging.minFilter = this.staging.magFilter;
+        }
+        createProgram() {
+          const gl = this.gl;
+          const shaders = [];
+          const program = gl.createProgram();
+          try {
+            for (const [type, source] of [
+              [gl.VERTEX_SHADER, `#version 300 es
+void main() {
+  vec2 p = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2));
+  gl_Position = vec4(p * 2.0 - 1.0, 0.0, 1.0);
+}`],
+              [gl.FRAGMENT_SHADER, `#version 300 es
+precision highp float;
+uniform sampler2D sourceMap;
+out vec4 color;
+void main() {
+  vec4 c = texelFetch(sourceMap, ivec2(gl_FragCoord.xy), 0);
+  vec3 linear = mix(c.rgb / 12.92,
+    pow((c.rgb + 0.055) / 1.055, vec3(2.4)), step(vec3(0.04045), c.rgb));
+  color = vec4(linear, c.a);
+}`],
+            ]) {
+              const shader = gl.createShader(type);
+              shaders.push(shader);
+              gl.shaderSource(shader, source);
+              gl.compileShader(shader);
+              if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS))
+                throw new Error(gl.getShaderInfoLog(shader));
+              gl.attachShader(program, shader);
+            }
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS))
+              throw new Error(gl.getProgramInfoLog(program));
+            this.program = program;
+            this.sourceLocation = gl.getUniformLocation(program, 'sourceMap');
+            this.framebuffer = gl.createFramebuffer();
+          } catch (error) {
+            gl.deleteProgram(program);
+            throw error;
+          } finally {
+            for (const shader of shaders) gl.deleteShader(shader);
+          }
+        }
+        upload(texture, canvas) {
+          const renderer = this.renderer, gl = this.gl;
+          const destination = renderer.properties.get(texture).__webglTexture;
+          // Allocate normally on first use (also after WebGL context restoration).
+          if (!destination) {
+            texture.needsUpdate = true;
+            renderer.initTexture(texture);
+            return;
+          }
+          if (!this.program || !gl.isProgram(this.program)) this.createProgram();
+          const target = renderer.getRenderTarget();
+          const face = renderer.getActiveCubeFace(), mip = renderer.getActiveMipmapLevel();
+          const dither = gl.isEnabled(gl.DITHER);
+          try {
+            this.staging.image = canvas;
+            this.staging.needsUpdate = true;
+            renderer.initTexture(this.staging);
+            renderer.resetState();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0,
+              gl.TEXTURE_2D, destination, 0);
+            if (gl.checkFramebufferStatus(gl.FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE)
+              throw new Error('Ground texture framebuffer is incomplete');
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.disable(gl.SCISSOR_TEST);
+            gl.disable(gl.DEPTH_TEST);
+            gl.disable(gl.STENCIL_TEST);
+            gl.disable(gl.BLEND);
+            gl.disable(gl.CULL_FACE);
+            gl.disable(gl.DITHER);
+            gl.colorMask(true, true, true, true);
+            gl.useProgram(this.program);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_2D, renderer.properties.get(this.staging).__webglTexture);
+            gl.uniform1i(this.sourceLocation, 0);
+            gl.bindVertexArray(null);
+            gl.drawArrays(gl.TRIANGLES, 0, 3);
+            gl.bindTexture(gl.TEXTURE_2D, destination);
+            if (texture.generateMipmaps) gl.generateMipmap(gl.TEXTURE_2D);
+          } finally {
+            // Detach the world texture so retiring a map cannot retain its storage.
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer);
+            gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, null, 0);
+            renderer.resetState();
+            renderer.setRenderTarget(target, face, mip);
+            if (dither) gl.enable(gl.DITHER); else gl.disable(gl.DITHER);
+          }
+        }
+        dispose() {
+          this.staging.dispose();
+          if (this.program) this.gl.deleteProgram(this.program);
+          if (this.framebuffer) this.gl.deleteFramebuffer(this.framebuffer);
+        }
+      }
       function al(e, t) {
         let n = document.createElement(`canvas`);
         return ((n.width = e), (n.height = t), n);
@@ -30098,9 +30274,11 @@ void main() {
                 phase: Math.random() * 10,
               }))),
               (this.lampGlass = t));
-            let n = Rc.height - 0.12,
-              r = new gr(Math.tan(Rc.angle * 0.8) * n, n, 40, 1, !0);
-            r.translate(0, n / 2, 0);
+            let n = Rc.height - 0.12;
+            // Lamp cone geometry is identical across maps and owned by lighting.
+            const r = this.coneGeometry ||= new gr(
+              Math.tan(Rc.angle * 0.8) * n, n, 40, 1, !0,
+            ).translate(0, n / 2, 0);
             for (let e of this.lamps) {
               let t = new Ln(r, this.coneMaterial);
               (t.position.set(e.x, 0, e.z),
@@ -30735,6 +30913,11 @@ this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.ke
               this.buildWater(),
               this.buildLamps(),
               this.buildOutskirts());
+            // World transforms are static; grass/water animation uses uniforms.
+            this.group.traverse((object) => {
+              object.updateMatrix();
+              object.matrixAutoUpdate = false;
+            });
           }
           toTile(e) {
             return Math.floor(e + 22);
@@ -30980,7 +31163,7 @@ this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.ke
           }
           paintAO() {
             let e = 44 * zl,
-              t = al(e, e),
+              t = (this.aoMaskCanvas ||= al(e, e)),
               n = t.getContext(`2d`);
             ((n.fillStyle = `#fff`), n.fillRect(0, 0, e, e));
             for (let e = 0; e < 44; e++)
@@ -31143,7 +31326,7 @@ this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.ke
           rebakeGround() {
             (this.paintAO(),
               this.composeGround(),
-              (this.groundMap.needsUpdate = !0),
+              (this.groundMapDirty = true),
               (this.groundAO.needsUpdate = !0));
           }
           addInstanced(e, t, n, r, i = !0) {
@@ -31220,6 +31403,7 @@ this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.ke
               let r = ql(new fr(0.94, 0.94, 0.94), 0.7),
                 i = new Nr({ map: Jl(), roughness: 0.82, vertexColors: !0 }),
                 a = this.addInstanced(`crate`, r, i, t[Fc.CRATE].length);
+              this.disposables.push(i.map);
               t[Fc.CRATE].forEach(([t, r], i) => {
                 let o = 0.97 + e() * 0.06;
                 (Gl.setHSL(0.08, 0.1, 0.86 + e() * 0.14),
@@ -31243,6 +31427,7 @@ this.sunShadowSkip = (this.sunShadowSkip||0)+1; if(this.sunShadowSkip<2){this.ke
               let r = ql(new hr(0.41, 0.37, 1.04, 16), 0.68),
                 i = new Nr({ map: Yl(), roughness: 0.7, vertexColors: !0 }),
                 a = this.addInstanced(`barrel`, r, i, t[Fc.BARREL].length);
+              this.disposables.push(i.map);
               t[Fc.BARREL].forEach(([t, r], i) => {
                 (Gl.setHSL(0.07, 0.1, 0.85 + e() * 0.15),
                   n(
@@ -31718,18 +31903,30 @@ varying vec3 vBladeWorld;`,
           }
           findPath(e, t, n, r, i) {
             if (!Il(e, t) || !Il(n, r)) return null;
+            // Reuse search nodes across bot queries without changing heap tie order.
+            const entries = this._pathEntries ||= [];
+            const heap = this._pathHeap ||= [];
+            heap.length = 0;
+            let used = 0;
             let a = ++this._tick,
               { _g: o, _from: s, _stamp: c, _closed: l } = this,
               u = Fl(e, t),
               d = Fl(n, r),
-              f = [],
+              f = heap,
               p = (e, t) => {
-                f.push([t, e]);
+                const entry = entries[used] || (entries[used] = [0, 0]);
+                used++;
+                entry[0] = t;
+                entry[1] = e;
+                f.push(entry);
                 let n = f.length - 1;
                 for (; n > 0;) {
                   let e = (n - 1) >> 1;
                   if (f[e][0] <= f[n][0]) break;
-                  (([f[e], f[n]] = [f[n], f[e]]), (n = e));
+                  const swap = f[e];
+                  f[e] = f[n];
+                  f[n] = swap;
+                  n = e;
                 }
               },
               m = () => {
@@ -31748,7 +31945,10 @@ varying vec3 vBladeWorld;`,
                       r === e)
                     )
                       break;
-                    (([f[r], f[e]] = [f[e], f[r]]), (e = r));
+                    const swap = f[r];
+                    f[r] = f[e];
+                    f[e] = swap;
+                    e = r;
                   }
                 }
                 return e[1];
@@ -32054,6 +32254,38 @@ varying vec3 vBladeWorld;`,
         }
         m.forEach((e, t) => {
           ((e.rotation.x = _.armBase[t][0]), (e.rotation.z = _.armBase[t][1]));
+        });
+        // Merge only rigid siblings sharing the exact same material. Animated
+        // head/arm/leg/weapon groups remain separate, with all vertices intact.
+        const rigidGroups = [];
+        a.traverse((node) => { if (node.isGroup) rigidGroups.push(node); });
+        rigidGroups.forEach((parent, groupIndex) => {
+          const batches = new Map();
+          for (const mesh of parent.children) {
+            if (!mesh.isMesh || mesh.children.length) continue;
+            mesh.updateMatrix();
+            mesh.matrixAutoUpdate = false;
+            const key = `${mesh.material.uuid}/${mesh.castShadow}/${mesh.receiveShadow}`;
+            if (!batches.has(key)) batches.set(key, []);
+            batches.get(key).push(mesh);
+          }
+          let batchIndex = 0;
+          for (const meshes of batches.values()) {
+            const key = `hero-rigid/${e.id}/${groupIndex}/${batchIndex++}`;
+            if (meshes.length < 2) continue;
+            const geometry = $l(key, () => {
+              const parts = meshes.map((mesh) => mesh.geometry.clone().applyMatrix4(mesh.matrix));
+              const merged = Nl(parts);
+              for (const part of parts) part.dispose();
+              return merged;
+            });
+            const merged = new Ln(geometry, meshes[0].material);
+            merged.castShadow = meshes[0].castShadow;
+            merged.receiveShadow = meshes[0].receiveShadow;
+            merged.matrixAutoUpdate = false;
+            for (const mesh of meshes) parent.remove(mesh);
+            parent.add(merged);
+          }
         });
         let v = Object.values(r);
         return {
@@ -32613,6 +32845,7 @@ varying vec3 vBladeWorld;`,
               (this.bullets = []),
               (this.bombs = []),
               (this.boxes = []),
+              (this.boxGrid = new Array(44 * 44).fill(null)),
               (this.cubes = []));
             let t = new xr(1, 10, 8);
             ((this.bulletMesh = new Yn(t, new Tn({ color: 16777215 }), bu)),
@@ -32709,12 +32942,20 @@ varying vec3 vBladeWorld;`,
               alive: !0,
               isBox: !0,
             };
-            return (this.boxes.push(a), a);
+            return (this.boxes.push(a), (this.boxGrid[Fl(e, t)] = a), a);
+          }
+          uploadBullets(count) {
+            for (const attribute of [this.bulletMesh.instanceMatrix, this.bulletMesh.instanceColor]) {
+              if (!attribute) continue;
+              attribute.clearUpdateRanges();
+              attribute.addUpdateRange(0, count * attribute.itemSize);
+              attribute.needsUpdate = true;
+            }
           }
           boxAt(e, t) {
-            for (let n of this.boxes)
-              if (n.alive && n.tx === e && n.ty === t) return n;
-            return null;
+            if (!Il(e, t)) return null;
+            const box = this.boxGrid[Fl(e, t)];
+            return box && box.alive ? box : null;
           }
           damageBox(e, t, n) {
             e.alive &&
@@ -32985,9 +33226,7 @@ varying vec3 vBladeWorld;`,
             }
             (_cleanArr(this.bullets, (e) => e.alive),
               (this.bulletMesh.count = o),
-              (this.bulletMesh.instanceMatrix.needsUpdate = !0),
-              this.bulletMesh.instanceColor &&
-                (this.bulletMesh.instanceColor.needsUpdate = !0));
+              o > 0 && this.uploadBullets(o));
             for (let n of this.bombs) {
               let a = n.slot,
                 o = n.a;
@@ -33082,6 +33321,7 @@ varying vec3 vBladeWorld;`,
             for (let t of this.boxes)
               (t.alive && e.remove(t.mesh), t.mat.dispose());
             this.boxes.length = 0;
+            this.boxGrid.fill(null);
             for (let t of this.cubes) e.remove(t.mesh);
             this.cubes.length = 0;
           }
@@ -33115,6 +33355,8 @@ varying vec3 vBladeWorld;`,
         ju = class {
           constructor(e, t, n) {
             ((this.cap = t), (this.cursor = 0), (this.additive = n));
+            this.activeWords = new Uint32Array(Math.ceil(t / 32));
+            this.drawIndices = new Uint16Array(t);
             let r = t;
             ((this.pos = new Float32Array(r * 3)),
               (this.col = new Float32Array(r * 4)),
@@ -33128,7 +33370,9 @@ varying vec3 vBladeWorld;`,
               (this.drag = new Float32Array(r)),
               (this.grav = new Float32Array(r)));
             let i = new pn();
-            (i.setAttribute(`position`, new Zt(this.pos, 3).setUsage(N)),
+            (i.setIndex(new Zt(this.drawIndices, 1).setUsage(N)),
+              i.setDrawRange(0, 0),
+              i.setAttribute(`position`, new Zt(this.pos, 3).setUsage(N)),
               i.setAttribute(`aColor`, new Zt(this.col, 4).setUsage(N)),
               i.setAttribute(`aSize`, new Zt(this.size, 1).setUsage(N)),
               (this.material = new jr({
@@ -33143,9 +33387,11 @@ varying vec3 vBladeWorld;`,
               (this.points.frustumCulled = !1),
               (this.points.renderOrder = n ? 8 : 7),
               e.add(this.points));
+            this.uploadAttributes = Object.values(i.attributes);
           }
           emit(e, t, n, r, i, a, o, s, c, l, u, d, f = 1, p = 1.5, m = 0) {
             let h = this.cursor;
+            this.activeWords[h >>> 5] |= 1 << (h & 31);
             ((this.cursor = (h + 1) % this.cap),
               (this.pos[h * 3] = e),
               (this.pos[h * 3 + 1] = t),
@@ -33178,30 +33424,52 @@ varying vec3 vBladeWorld;`,
               drag: u,
               grav: d,
             } = this;
-            for (let f = 0; f < this.cap; f++) {
-              if (r[f] <= 0) {
-                a[f] = 0;
-                continue;
+            let count = 0, first = this.cap, last = -1;
+            // Iterate occupied slots in their original order. Alpha-blended smoke
+            // must retain its order; compacting particle storage would change it.
+            for (let word = 0; word < this.activeWords.length; word++) {
+              let bits = this.activeWords[word];
+              while (bits) {
+                const bit = bits & -bits;
+                const f = word * 32 + 31 - Math.clz32(bit);
+                bits = (bits & (bits - 1)) >>> 0;
+                if (r[f] <= 0) {
+                  a[f] = 0;
+                  this.activeWords[word] &= ~bit;
+                  continue;
+                }
+                r[f] -= e;
+                let p = 1 - Math.max(0, r[f]) / i[f],
+                  m = Math.exp(-u[f] * e);
+                ((n[f * 3] *= m),
+                  (n[f * 3 + 1] = n[f * 3 + 1] * m - d[f] * e),
+                  (n[f * 3 + 2] *= m),
+                  (t[f * 3] += n[f * 3] * e),
+                  (t[f * 3 + 1] += n[f * 3 + 1] * e),
+                  (t[f * 3 + 2] += n[f * 3 + 2] * e),
+                  t[f * 3 + 1] < 0.03 &&
+                    d[f] > 0 &&
+                    ((t[f * 3 + 1] = 0.03), (n[f * 3 + 1] *= -0.35)),
+                  (a[f] = r[f] <= 0 ? 0 : o[f] + (s[f] - o[f]) * p),
+                  (c[f * 4 + 3] = l[f] * (1 - p * p)));
+                if (r[f] > 0) {
+                  this.drawIndices[count++] = f;
+                  first = Math.min(first, f);
+                  last = f;
+                } else this.activeWords[word] &= ~bit;
               }
-              r[f] -= e;
-              let p = 1 - Math.max(0, r[f]) / i[f],
-                m = Math.exp(-u[f] * e);
-              ((n[f * 3] *= m),
-                (n[f * 3 + 1] = n[f * 3 + 1] * m - d[f] * e),
-                (n[f * 3 + 2] *= m),
-                (t[f * 3] += n[f * 3] * e),
-                (t[f * 3 + 1] += n[f * 3 + 1] * e),
-                (t[f * 3 + 2] += n[f * 3 + 2] * e),
-                t[f * 3 + 1] < 0.03 &&
-                  d[f] > 0 &&
-                  ((t[f * 3 + 1] = 0.03), (n[f * 3 + 1] *= -0.35)),
-                (a[f] = r[f] <= 0 ? 0 : o[f] + (s[f] - o[f]) * p),
-                (c[f * 4 + 3] = l[f] * (1 - p * p)));
             }
-            let f = this.points.geometry;
-            ((f.attributes.position.needsUpdate = !0),
-              (f.attributes.aColor.needsUpdate = !0),
-              (f.attributes.aSize.needsUpdate = !0));
+            const geometry = this.points.geometry;
+            geometry.setDrawRange(0, count);
+            if (!count) return;
+            geometry.index.clearUpdateRanges();
+            geometry.index.addUpdateRange(0, count);
+            geometry.index.needsUpdate = true;
+            for (const attribute of this.uploadAttributes) {
+              attribute.clearUpdateRanges();
+              attribute.addUpdateRange(first * attribute.itemSize, (last - first + 1) * attribute.itemSize);
+              attribute.needsUpdate = true;
+            }
           }
         };
       function Mu() {
@@ -34902,16 +35170,25 @@ varying vec3 vBladeWorld;`,
               ($(`hurt`).style.opacity = this.hurt.toFixed(2)));
             let s =
               a && a.alive && t.gas.active && t.gas.depthAt(a.x, a.z) > 0.35;
-            if (
-              (($(`gas-warn`).style.opacity = s ? `1` : `0`),
-              this.frames++,
-              (this.statsT += e),
-              this.statsT >= 0.5 &&
-                ((this.fps = Math.round(this.frames / this.statsT)),
-                (this.frames = 0),
-                (this.statsT = 0),
-                $(`settings`).classList.contains(`open`)))
-            ) {
+            $(`gas-warn`).style.opacity = s ? `1` : `0`;
+          }
+          updateFrameStats(delta) {
+            // Measure presented frame intervals, not clamped simulation time.
+            // Pausing and multiple simulation steps must not inflate the FPS.
+            if (document.hidden || !Number.isFinite(delta) || delta <= 0) {
+              this.frames = this.statsT = this.slowFrames = this.worstFrame = 0;
+              return;
+            }
+            const t = this.game;
+            this.frames++;
+            this.statsT += delta;
+            this.slowFrames = (this.slowFrames || 0) + Number(delta > 1 / 30 + 0.001);
+            this.worstFrame = Math.max(this.worstFrame || 0, delta * 1000);
+            if (this.statsT < 1) return;
+            this.fps = Math.round(this.frames / this.statsT);
+            const timing = `最长帧 ${this.worstFrame.toFixed(1)}ms · 超过30帧预算 ${this.slowFrames}/${this.frames}`;
+            this.frames = this.statsT = this.slowFrames = this.worstFrame = 0;
+            if ($(`settings`).classList.contains(`open`)) {
               let e = { render: t.frameStats },
                 n = t.lighting,
                 r = n.lampSlots.filter((e) => e.intensity > 0.01).length,
@@ -34919,10 +35196,10 @@ varying vec3 vBladeWorld;`,
                   (e) => e.castShadow && e.shadow.autoUpdate,
                 ).length;
               $(`stats`).textContent =
-                `${this.fps} fps   ${e.render.calls} draws   ${(e.render.triangles / 1e3).toFixed(0)}k tris\nsun shadow ${n.mapSize}px over ${(n.shadowRadius * 2).toFixed(0)}m  (${t.pipeline.usingPCSS ? `PCSS` : `PCF`})\nlamps lit ${r}  casting ${i}   pool lights ${n.pool.filter((e) => e.intensity > 0).length}/${n.pool.length}\n` +
+                `${this.fps} fps · ${timing}\n${e.render.calls} draws   ${(e.render.triangles / 1e3).toFixed(0)}k tris\nsun shadow ${n.mapSize}px over ${(n.shadowRadius * 2).toFixed(0)}m  (${t.pipeline.usingPCSS ? `PCSS` : `PCF`})\nlamps lit ${r}  casting ${i}   pool lights ${n.pool.filter((e) => e.intensity > 0).length}/${n.pool.length}\n` +
                 (t.userPickedQuality
                   ? `quality: your choice`
-                  : `quality: auto  (night frame ${t.perf.benchMs ? t.perf.benchMs.toFixed(1) : `?`} ms at startup)`);
+                  : `quality: high (fixed; no automatic downgrade)`);
             }
           }
         },
@@ -35131,6 +35408,8 @@ varying vec3 vBladeWorld;`,
           }
           ((this.saved = t),
             (this.scene = new vt()),
+            // The root is static; moving descendants still update normally.
+            (this.scene.matrixAutoUpdate = false),
             (this.camera = new hi(
               Zu,
               window.innerWidth / window.innerHeight,
@@ -35148,29 +35427,8 @@ varying vec3 vBladeWorld;`,
           let n = !!(
             window.matchMedia && window.matchMedia(`(pointer: coarse)`).matches
           );
-          let _gpuTier = (() => {
-            if (n) return `low`;
-            try {
-              let gl = this.pipeline.renderer.getContext();
-              let dbg = gl.getExtension(`WEBGL_debug_renderer_info`);
-              let ren = dbg ? gl.getParameter(dbg.UNMASKED_RENDERER_WEBGL) : "";
-              if (
-                /RTX|GTX|GeForce|Radeon RX|Radeon Pro|Quadro|Tesla/i.test(
-                  ren,
-                ) &&
-                !/Intel|HD Graphics|UHD|Iris/i.test(ren)
-              )
-                return `high`;
-              if (
-                /Intel|Iris|HD Graphics|UHD|Mali|Adreno|PowerVR|Apple M/i.test(
-                  ren,
-                )
-              )
-                return `low`;
-            } catch (e) {}
-            return `low`;
-          })();
-          let r = this.params.get(`q`) || t.quality || _gpuTier;
+          // Keep the full effects preset on every device; quality is user-controlled.
+          let r = this.params.get(`q`) || t.quality || `high`;
           ((this.userPickedQuality = !!(this.params.get(`q`) || t.quality)),
             (this.pipeline.superSample = $c(
               parseFloat(this.params.get(`ss`)) || 0,
@@ -35193,6 +35451,7 @@ varying vec3 vBladeWorld;`,
             (this.elapsed = 0),
             (this.matchTime = 0),
             (this.state = `menu`),
+            (this.retiredResources = []),
             (this.brawlers = []),
             (this.brains = []),
             (this.player = null),
@@ -35216,7 +35475,6 @@ varying vec3 vBladeWorld;`,
             )),
             (this.timePreset = 0),
             (this.autoTime = t.autoTime !== !1),
-            (this.perf = { t: 0, frames: 0, done: !1 }),
             (this.frameStats = { calls: 0, triangles: 0 }));
           let a = parseInt(this.params.get(`seed`), 10);
           ((this.nextSeed = Number.isFinite(a) ? a : (Math.random() * 1e9) | 0),
@@ -35312,7 +35570,12 @@ varying vec3 vBladeWorld;`,
               ));
         }
         clearEntities() {
-          for (let e of this.brawlers) e.dispose();
+          // Keep old GPU programs alive until their replacements have rendered.
+          // Immediate disposal forces the same shaders to compile on every match.
+          for (const brawler of this.brawlers) {
+            this.scene.remove(brawler.root);
+            this.retiredResources.push(brawler);
+          }
           ((this.brawlers = []),
             (this.brains = []),
             (this.player = null),
@@ -35322,7 +35585,8 @@ varying vec3 vBladeWorld;`,
             this.hud.reset());
         }
         newWorld() {
-          (this.world.dispose(),
+          (this.scene.remove(this.world.group),
+            this.retiredResources.push(this.world),
             (this.nextSeed =
               this.fixedSeed === null
                 ? (Math.random() * 1e9) | 0
@@ -35873,32 +36137,6 @@ varying vec3 vBladeWorld;`,
           }
           this.hud.update(e);
         }
-        benchmarkQuality() {
-          if (this.userPickedQuality) return;
-          this.perf.benchMs = 16;
-        }
-        adaptQuality(e) {
-          let t = this.perf;
-          if (
-            this.userPickedQuality ||
-            this.state !== `playing` ||
-            this.paused ||
-            document.hidden ||
-            e > 0.1 ||
-            ((t.t += e), t.frames++, t.t < 3)
-          )
-            return;
-          let n = t.frames / t.t;
-          ((t.t = 0), (t.frames = 0));
-          let r = [`ultra`, `high`, `medium`, `low`],
-            i = r.indexOf(this.pipeline.qualityName);
-          n < 45 &&
-            i < r.length - 1 &&
-            (this.setQuality(r[i + 1]),
-            this.hud.toast(
-              `当前帧率 ${Math.round(n)} fps - 自动切换至 ${Uc[r[i + 1]].label} 画质`,
-            ));
-        }
         frame(e) {
           let t = (e - this.last) / 1e3,
             n = Math.min(0.05, Math.max(1e-4, t));
@@ -35908,13 +36146,15 @@ varying vec3 vBladeWorld;`,
             (this.frameStats.triangles = r.render.triangles),
             r.reset());
           for (let e = 0; e < this.simSteps; e++) this.update(n);
-          (this.pipeline.render(n),
+          this.pipeline.updateGroundMap(this.world);
+          this.pipeline.render(n);
+          for (const resource of this.retiredResources) resource.dispose();
+          this.retiredResources.length = 0;
+          (this.hud.updateFrameStats(t),
             this.warmup > 0 &&
               --this.warmup === 0 &&
-              (this.benchmarkQuality(),
-              (this.last = performance.now()),
+              ((this.last = performance.now()),
               document.getElementById(`loading`).classList.add(`done`)),
-            this.adaptQuality(t),
             requestAnimationFrame(this.frame));
         }
       };
