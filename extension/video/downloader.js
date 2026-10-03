@@ -240,17 +240,27 @@
   }
 
   function adaptiveConnections() {
-    const memory = Number(navigator.deviceMemory) || 8;
-    let maximum = memory <= 2 ? 6 : memory <= 4 ? 12 : memory <= 8 ? 20 : 24;
-    let limit = Math.min(4, maximum);
+    let averageSize = 0;
+    // Use the browser's current heap headroom when available. The fallback is
+    // deliberately only a safety estimate; it is not a fixed connection cap.
+    const memoryLimit = () => {
+      const heap = performance.memory;
+      const available = heap?.jsHeapSizeLimit > heap?.usedJSHeapSize
+        ? heap.jsHeapSizeLimit - heap.usedJSHeapSize
+        : (Number(navigator.deviceMemory) || 4) * 1024 ** 3;
+      return Math.max(1, Math.floor((available - 64 * 1024 ** 2) / (2 * Math.max(averageSize, 1024 * 1024))));
+    };
+    let limit = Math.min(4, memoryLimit());
     let peak = limit;
     let windowStart = performance.now();
     let windowBytes = 0;
     let windowCount = 0;
-    let previousRate = 0;
+    let bestRate = 0;
+    let previousLimit = limit;
+    let windowsSinceProbe = 0;
+    let probing = false;
     let speed = 0;
-    let averageSize = 0;
-    const render = () => { threadsStatus.textContent = `自动并发：${limit} / ${maximum} 路 · ${speed.toFixed(1)} MB/s`; };
+    const render = () => { threadsStatus.textContent = `自动调度：${limit} 路 · ${speed.toFixed(1)} MB/s`; };
     render();
     return {
       get limit() { return limit; },
@@ -258,20 +268,31 @@
       get speed() { return speed; },
       success(bytes) {
         averageSize = averageSize ? averageSize * 0.8 + bytes * 0.2 : bytes;
-        const memoryCeiling = averageSize > 16 * 1024 * 1024 ? 4 : averageSize > 4 * 1024 * 1024 ? 8 : 24;
-        maximum = Math.min(maximum, memoryCeiling);
+        const maximum = memoryLimit();
         limit = Math.min(limit, maximum);
         windowBytes += bytes;
         windowCount += 1;
         const now = performance.now();
         const elapsed = Math.max((now - windowStart) / 1000, 0.001);
-        if (windowCount >= Math.max(4, Math.ceil(limit * 1.5)) || elapsed >= 2 && windowCount >= 2) {
+        if (windowCount >= Math.max(4, limit) || elapsed >= 1 && windowCount >= 2) {
           const rate = windowBytes / elapsed / 1024 / 1024;
           speed = speed ? speed * 0.35 + rate * 0.65 : rate;
-          if (!previousRate || rate >= previousRate * 1.08) limit = Math.min(maximum, limit + 2);
-          else if (rate < previousRate * 0.78) limit = Math.max(1, limit - Math.max(1, Math.ceil(limit / 4)));
-          else if (rate >= previousRate * 0.94) limit = Math.min(maximum, limit + 1);
-          previousRate = rate;
+          if (!bestRate || rate > bestRate * 1.08) {
+            bestRate = rate;
+            previousLimit = limit;
+            limit = Math.min(maximum, limit + Math.max(2, Math.ceil(limit / 2)));
+            probing = limit > previousLimit;
+            windowsSinceProbe = 0;
+          } else if (probing) {
+            limit = Math.max(1, Math.min(previousLimit, maximum));
+            probing = false;
+            windowsSinceProbe = 0;
+          } else if (++windowsSinceProbe >= 3) {
+            previousLimit = limit;
+            limit = Math.min(maximum, limit + Math.max(1, Math.ceil(limit / 4)));
+            probing = limit > previousLimit;
+            windowsSinceProbe = 0;
+          }
           peak = Math.max(peak, limit);
           windowStart = now;
           windowBytes = 0;
@@ -281,13 +302,15 @@
       },
       pressure() {
         limit = Math.max(1, Math.ceil(limit / 2));
+        previousLimit = limit;
+        probing = false;
         windowStart = performance.now();
         windowBytes = 0;
         windowCount = 0;
-        previousRate = 0;
+        bestRate = 0;
         render();
       },
-      finish() { threadsStatus.textContent = `自动并发：已完成 · 峰值 ${peak} 路`; },
+      finish() { threadsStatus.textContent = `自动调度：已完成 · 调度峰值 ${peak} 路`; },
     };
   }
 
@@ -466,6 +489,10 @@
       const startedAt = performance.now();
       const connections = adaptiveConnections();
       const plannedSegments = playlist.segments.length + (audioPlaylist?.segments.length || 0);
+      let cachedSegments = 0;
+      let activeRequests = 0;
+      const pendingRequests = [];
+      let requestFailure = null;
       const fetchSegment = async (segment) => {
         for (let attempt = 0; attempt < 3; attempt += 1) {
           if (fetchController.signal.aborted) throw new Error('下载已中断');
@@ -482,36 +509,45 @@
         if (!batch.length) return;
         if (playlist.live) updateStage('caching', sourceOffset ? '直播音轨本轮缓存' : '直播视频本轮缓存', 0, `0 / ${batch.length}`, true);
         const baseIndex = destination.segments.length;
-        let next = 0;
-        let active = 0;
         let completed = 0;
-        let failure = null;
-        await new Promise((resolve, reject) => {
-          const pump = () => {
-            if (failure) { if (active === 0) reject(failure); return; }
-            if (completed === batch.length) { resolve(); return; }
-            while (active < connections.limit && next < batch.length) {
-              const index = next++;
-              active += 1;
-              void (async () => {
-                if (restartVariant) throw new Error('SWITCH_VARIANT');
-                const bytes = await fetchSegment(batch[index]);
-                await cachePut('source', { jobId, index: sourceOffset + baseIndex + index, bytes });
-                totalBytes += bytes.byteLength;
-                connections.success(bytes.byteLength);
-                const count = output.segments.length + (audioOutput?.segments.length || 0) + completed + 1;
-                const speed = connections.speed || totalBytes / Math.max((performance.now() - startedAt) / 1000, 0.001) / 1024 / 1024;
-                show(playlist.live ? `直播已缓存 ${count} 个片段 · ${(totalBytes / 1024 / 1024).toFixed(1)} MB · ${speed.toFixed(1)} MB/s` : `已缓存 ${count} / ${plannedSegments} 个片段 · ${speed.toFixed(1)} MB/s`);
-                updateStage('caching', playlist.live ? (sourceOffset ? '直播音轨本轮缓存' : '直播视频本轮缓存') : '缓存媒体片段', playlist.live ? (completed + 1) / batch.length * 100 : count / plannedSegments * 100, playlist.live ? `${completed + 1} / ${batch.length}` : `${count} / ${plannedSegments}`);
-              })().then(() => { completed += 1; }).catch((error) => {
-                if (!failure) { failure = error; fetchController.abort(); }
-              }).finally(() => { active -= 1; pump(); });
-            }
-          };
-          pump();
-        });
+        const tasks = batch.map((segment, index) => scheduleRequest(async () => {
+          if (restartVariant) throw new Error('SWITCH_VARIANT');
+          const bytes = await fetchSegment(segment);
+          await cachePut('source', { jobId, index: sourceOffset + baseIndex + index, bytes });
+          totalBytes += bytes.byteLength;
+          cachedSegments += 1;
+          completed += 1;
+          connections.success(bytes.byteLength);
+          const speed = connections.speed || totalBytes / Math.max((performance.now() - startedAt) / 1000, 0.001) / 1024 / 1024;
+          show(playlist.live ? `直播已缓存 ${cachedSegments} 个片段 · ${(totalBytes / 1024 / 1024).toFixed(1)} MB · ${speed.toFixed(1)} MB/s` : `已缓存 ${cachedSegments} / ${plannedSegments} 个片段 · ${speed.toFixed(1)} MB/s`);
+          updateStage('caching', playlist.live ? (sourceOffset ? '直播音轨本轮缓存' : '直播视频本轮缓存') : '缓存媒体片段', playlist.live ? completed / batch.length * 100 : cachedSegments / plannedSegments * 100, playlist.live ? `${completed} / ${batch.length}` : `${cachedSegments} / ${plannedSegments}`);
+        }));
+        const results = await Promise.allSettled(tasks);
+        const failed = results.find((result) => result.status === 'rejected');
+        if (failed) throw failed.reason;
         for (const segment of batch) destination.segments.push(segment);
       };
+      function pumpRequests() {
+        while (!requestFailure && activeRequests < connections.limit && pendingRequests.length) {
+          const task = pendingRequests.shift();
+          activeRequests += 1;
+          Promise.resolve().then(task.run).then(task.resolve, (error) => {
+            if (!requestFailure) {
+              requestFailure = error;
+              fetchController.abort();
+              for (const pending of pendingRequests.splice(0)) pending.reject(error);
+            }
+            task.reject(error);
+          }).finally(() => { activeRequests -= 1; pumpRequests(); });
+        }
+      }
+      function scheduleRequest(run) {
+        return new Promise((resolve, reject) => {
+          if (requestFailure) { reject(requestFailure); return; }
+          pendingRequests.push({ run, resolve, reject });
+          pumpRequests();
+        });
+      }
       const addSnapshot = async (snapshot) => {
         const mapIndexes = [];
         for (const map of snapshot.maps) {
@@ -556,8 +592,9 @@
       let audioSnapshot = audioPlaylist;
       for (;;) {
         if (restartVariant) throw new Error('SWITCH_VARIANT');
-        await addSnapshot(snapshot);
-        await addAudioSnapshot(audioSnapshot);
+        const downloads = await Promise.allSettled([addSnapshot(snapshot), addAudioSnapshot(audioSnapshot)]);
+        const failed = downloads.find((result) => result.status === 'rejected');
+        if (failed) throw failed.reason;
         if (!snapshot.live || stopRequested) break;
         await new Promise((resolve) => {
           const timer = setTimeout(resolve, Math.max(1000, Math.min(10000, snapshot.targetDuration * 500)));
