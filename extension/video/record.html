@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>网页视频录制</title>
+  <style>
+    body { margin: 0; background: #f5f7fa; color: #303133; font: 14px/1.6 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 48px auto; padding: 28px; background: white; border: 1px solid #dcdfe6; border-radius: 12px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { color: #606266; }
+    label { display: block; margin: 18px 0 6px; font-weight: 600; }
+    input { box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #cdd0d6; border-radius: 6px; font: inherit; }
+    button { margin: 20px 8px 0 0; padding: 10px 18px; color: white; background: #409eff; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
+    button:disabled { background: #a0cfff; }
+    #status { margin-top: 16px; white-space: pre-wrap; }
+    #status.error { color: #f56c6c; }
+    progress { width: 100%; margin-top: 12px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>网页视频录制</h1>
+    <p>保持来源视频播放。停止后，录制数据会在浏览器内合成 MP4，然后由你选择保存位置。</p>
+    <label for="filename">文件名</label>
+    <input id="filename" value="网页视频录制.mp4" maxlength="180" />
+    <button id="stop">停止录制并合成</button>
+    <button id="retry" hidden>重新合成</button>
+    <button id="save" hidden>保存文件</button>
+    <button id="clear" hidden>清除缓存</button>
+    <progress id="progress" hidden></progress>
+    <div id="status" role="status">正在读取录制状态…</div>
+    <p>录制从你点击开始的时刻起算；受保护或禁止捕获的播放器可能无法录制。</p>
+  </main>
+  <script src="../vendor/ffmpeg.js"></script>
+  <script src="record.js"></script>
+</body>
+</html>

@@ -154,6 +154,12 @@ const routes = [
             meta: { title: "文本压缩", product: "开发工具" },
           },
           {
+            path: "video-download",
+            name: "devtools-video-download",
+            component: () => import("../views/home/devtools/VideoDownload.vue"),
+            meta: { title: "视频下载", product: "开发工具" },
+          },
+          {
             path: "qr-code-gen",
             name: "devtools-qr-code-gen",
             component: () => import("../views/home/devtools/QrCodeGen.vue"),

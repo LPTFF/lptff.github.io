@@ -8,6 +8,7 @@ importScripts(
   "collection-policy.js",
   "observation-capture.js",
   "private-bookmarks.js",
+  "video-capture.js",
   "content/source-extractor.js",
   "boss-helper-upstream-background.js",
 );

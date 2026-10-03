@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HLS 视频下载</title>
+  <style>
+    body { margin: 0; background: #f5f7fa; color: #303133; font: 14px/1.6 system-ui, sans-serif; }
+    main { max-width: 760px; margin: 48px auto; padding: 28px; background: white; border: 1px solid #dcdfe6; border-radius: 12px; }
+    h1 { margin: 0 0 8px; font-size: 24px; }
+    p { color: #606266; }
+    label { display: block; margin: 18px 0 6px; font-weight: 600; }
+    select, input { box-sizing: border-box; width: 100%; padding: 10px; border: 1px solid #cdd0d6; border-radius: 6px; font: inherit; }
+    button { margin-top: 20px; padding: 10px 18px; color: white; background: #409eff; border: 0; border-radius: 6px; cursor: pointer; font: inherit; }
+    button:disabled { background: #a0cfff; cursor: wait; }
+    #status { margin-top: 16px; white-space: pre-wrap; }
+    #status.error { color: #f56c6c; }
+    #auto-threads { margin-top: 12px; color: #606266; }
+    #stage { margin-top: 16px; font-weight: 600; }
+    progress { width: 100%; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>HLS 视频下载</h1>
+    <p>选择清晰度后，先在本机缓存并合成可播放的 MP4；完成后点击“保存文件”选择位置。处理期间请保持本页打开。</p>
+    <label for="variant">清晰度</label>
+    <select id="variant" disabled><option>正在读取播放列表…</option></select>
+    <label for="filename">文件名</label>
+    <input id="filename" type="text" value="video.mp4" maxlength="180" />
+    <div id="auto-threads" role="status">自动并发：等待开始</div>
+    <button id="download" disabled>开始缓存</button>
+    <button id="stop" type="button" hidden>停止直播并合成</button>
+    <button id="save" type="button" hidden>保存文件</button>
+    <button id="clear" type="button" hidden>清除缓存</button>
+    <div id="stage" role="status">分析播放列表 · 0%</div>
+    <progress id="progress" max="100" value="0"></progress>
+    <div id="status" role="status">正在读取播放列表…</div>
+    <p>支持未加密 HLS 点播与直播、字节范围和媒体时间轴切换。处理大文件需要足够的浏览器内存及磁盘空间。</p>
+  </main>
+  <script src="../vendor/ffmpeg.js"></script>
+  <script src="downloader.js"></script>
+</body>
+</html>

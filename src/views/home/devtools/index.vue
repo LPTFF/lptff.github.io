@@ -22,6 +22,11 @@ const tools = [
     description: "三算法无损压缩，三种编码输出，可反向解压",
   },
   {
+    path: "/devtools/video-download",
+    name: "视频下载",
+    description: "与本地 Chrome 扩展配合，发现并保存网页媒体",
+  },
+  {
     path: "/devtools/qr-code-gen",
     name: "文本转二维码",
     description: "文本 / git diff 生成二维码，超长自动分片",

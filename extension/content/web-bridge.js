@@ -144,6 +144,18 @@
       window.removeEventListener("message", onWindowMessage);
       return;
     }
+    if (event.data?.type === "LPTFF_VIDEO_CAPTURE_REQUEST" && location.pathname === "/devtools/video-download") {
+        const actions = new Set(["STATUS", "START_PAGE", "STOP", "DOWNLOAD", "PREVIEW", "RECORD_START", "RECORD_STOP"]);
+      const action = String(event.data.action || "");
+      if (!actions.has(action)) return;
+      forward({
+        type: `VIDEO_CAPTURE_${action}`,
+        requestId: String(event.data.requestId || "").slice(0, 100),
+        pageUrl: event.data.pageUrl,
+        id: event.data.id,
+      }, "LPTFF_VIDEO_CAPTURE_RESPONSE");
+      return;
+    }
     if (event.data?.type === "LPTFF_PRIVATE_BOOKMARKS_REQUEST" && location.pathname === "/devtools/private-bookmarks") {
       const allowed = new Set(["STATUS", "READ", "CANCEL", "OPEN_SETTINGS", "GET", "SYNC", "FOLDERS", "IMPORT_SELECTED", "DISCONNECT"]);
       const action = String(event.data.action || "");

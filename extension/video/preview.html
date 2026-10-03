@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>媒体预览</title>
+  <style>
+    body { margin: 0; background: #15191f; color: #f4f6f8; font: 14px/1.6 system-ui, sans-serif; }
+    main { max-width: 1100px; margin: 28px auto; padding: 0 18px; }
+    h1 { font-size: 22px; margin: 0 0 8px; }
+    p { color: #b8c2cc; }
+    video { display: block; width: 100%; max-height: 75vh; margin-top: 18px; background: #000; }
+    #status.error { color: #ff8d8d; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">媒体预览</h1>
+    <p id="status" role="status">正在读取媒体…</p>
+    <video id="player" controls playsinline></video>
+    <p>预览直接读取来源媒体，不会保存文件。若源站拒绝跨站播放，可返回原网页确认目标。</p>
+  </main>
+  <script src="../vendor/hls.min.js"></script>
+  <script src="preview.js"></script>
+</body>
+</html>

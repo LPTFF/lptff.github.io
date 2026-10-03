@@ -27,6 +27,19 @@ export function computeBuildTags(projectRoot) {
   const extensionDigest = computeDigest([
     manifestPath,
     path.join(extensionDir, 'background.js'),
+    path.join(extensionDir, 'video-capture.js'),
+    path.join(extensionDir, 'video/downloader.html'),
+    path.join(extensionDir, 'video/downloader.js'),
+    path.join(extensionDir, 'video/preview.html'),
+    path.join(extensionDir, 'video/preview.js'),
+    path.join(extensionDir, 'video/record.html'),
+    path.join(extensionDir, 'video/record.js'),
+    path.join(extensionDir, 'content/video-recorder.js'),
+    path.join(extensionDir, 'vendor/hls.min.js'),
+    path.join(extensionDir, 'vendor/ffmpeg.js'),
+    path.join(extensionDir, 'vendor/814.ffmpeg.js'),
+    path.join(extensionDir, 'vendor/ffmpeg-core.js'),
+    path.join(extensionDir, 'vendor/ffmpeg-core.wasm'),
     path.join(extensionDir, 'authorized-content.js'),
     path.join(extensionDir, 'lan-bridge-sync.js'),
     path.join(extensionDir, 'popup/authorized-panel.js'),
@@ -46,6 +59,9 @@ export function computeBuildTags(projectRoot) {
     path.join(projectRoot, 'src/views/home/entertainment/index.vue'),
     path.join(projectRoot, 'vite.config.ts'),
     path.join(projectRoot, 'src/views/home/devtools/PrivateBookmarks.vue'),
+    path.join(projectRoot, 'src/views/home/devtools/VideoDownload.vue'),
+    path.join(projectRoot, 'src/views/home/devtools/index.vue'),
+    path.join(projectRoot, 'src/router/index.js'),
   ]);
 
   return {
