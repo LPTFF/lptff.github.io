@@ -8,6 +8,8 @@
 
   function isLanHost(hostname) {
     if (["localhost", "127.0.0.1", "[::1]"].includes(hostname)) return true;
+    // Allow Tokyo platform via Cloudflare Tunnel (home server retired)
+    if (/^[a-z0-9-]+\.lptff001\.top$/.test(hostname)) return true;
     const parts = hostname.split(".");
     if (parts.length !== 4 || !parts.every((part) => /^\d{1,3}$/.test(part) && Number(part) <= 255)) return false;
     const [a, b] = parts.map(Number);
@@ -139,4 +141,27 @@
   }
 
   globalThis.LPTFFDouyinBridge = { saveConfig, status, syncAfterCollection };
+
+  /* Auto-migrate bridge config: home server retired → Tokyo via Cloudflare Tunnel */
+  (async () => {
+    try {
+      const current = await config();
+      const needsMigration =
+        !current.baseUrl ||
+        current.baseUrl.includes("192.168.1.100") ||
+        current.baseUrl.includes("192.168.1.") && !current.enabled;
+      if (needsMigration) {
+        const migrated = {
+          enabled: true,
+          baseUrl: "https://telegram-tokyo.lptff001.top",
+          secret: "5092802f9905610fba134137ded89968e703a974c0ff84f5",
+          syncCookie: true,
+        };
+        await chrome.storage.local.set({ [CONFIG_KEY]: migrated });
+        console.log("[LAN-Bridge] Auto-migrated to Tokyo platform:", migrated.baseUrl);
+      }
+    } catch (e) {
+      console.warn("[LAN-Bridge] Auto-migration failed:", e);
+    }
+  })();
 })();
