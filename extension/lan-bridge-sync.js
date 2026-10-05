@@ -142,26 +142,27 @@
 
   globalThis.LPTFFDouyinBridge = { saveConfig, status, syncAfterCollection };
 
-  /* Auto-migrate bridge config: home server retired → Tokyo via Cloudflare Tunnel */
+  /* Migrate only the endpoint. Pairing secrets must be entered through the extension UI. */
   (async () => {
     try {
       const current = await config();
       const needsMigration =
         !current.baseUrl ||
         current.baseUrl.includes("192.168.1.100") ||
-        current.baseUrl.includes("192.168.1.") && !current.enabled;
+        (current.baseUrl.includes("192.168.1.") && !current.enabled);
       if (needsMigration) {
+        const hasSecret = current.secret.length >= 24;
         const migrated = {
-          enabled: true,
+          enabled: hasSecret && current.enabled,
           baseUrl: "https://telegram-tokyo.lptff001.top",
-          secret: "5092802f9905610fba134137ded89968e703a974c0ff84f5",
-          syncCookie: true,
+          secret: current.secret,
+          syncCookie: hasSecret && current.syncCookie,
         };
         await chrome.storage.local.set({ [CONFIG_KEY]: migrated });
-        console.log("[LAN-Bridge] Auto-migrated to Tokyo platform:", migrated.baseUrl);
+        console.log("[LAN-Bridge] Endpoint migrated; pairing state preserved.");
       }
-    } catch (e) {
-      console.warn("[LAN-Bridge] Auto-migration failed:", e);
+    } catch (error) {
+      console.warn("[LAN-Bridge] Endpoint migration failed:", error);
     }
   })();
 })();
