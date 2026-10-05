@@ -69,6 +69,9 @@ jobs:
           git rev-parse FETCH_HEAD
           git archive --format=tar FETCH_HEAD | tar -xf - -C src/data
 
+      - name: 审查公开数据字段白名单
+        run: node scripts/verify-public-whitelist.cjs src/data
+
       - name: 前端类型检查
         run: npm run typecheck
 

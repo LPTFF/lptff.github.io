@@ -15,14 +15,36 @@ const PROHIBITED_KEYS = new Set([
   'strict_private',
   'aaguid',
   'credential_id',
-  'publicKeyPem',
-  'actionDigest',
-  'approvalId',
+  'publickeypem',
+  'actiondigest',
+  'approvalid',
   'tombstones',
   'idempotency',
   'private_key',
   'cookie',
-  'accessToken',
+  'token',
+  'access_token',
+  'accesstoken',
+  'refresh_token',
+  'authorization',
+  'password',
+  'password_hash',
+  'csrf',
+  'session',
+  'session_id',
+  'api_id',
+  'api_hash',
+  'phone',
+  'phone_number',
+  'account_id',
+  'group_id',
+  'chat_id',
+  'message_id',
+  'sender_id',
+  'reply_to_id',
+  'raw_text',
+  'raw_text_snippet',
+  'payload_json',
   'restore_runtime',
   'encryption_key',
   'device_store',
@@ -74,7 +96,7 @@ function scanObjectForProhibitedKeys(obj, prefix = '') {
   } else {
     for (const [k, v] of Object.entries(obj)) {
       const currentPath = prefix ? `${prefix}.${k}` : k;
-      if (PROHIBITED_KEYS.has(k)) {
+      if (PROHIBITED_KEYS.has(k.toLowerCase())) {
         violations.push(currentPath);
       }
       violations.push(...scanObjectForProhibitedKeys(v, currentPath));
