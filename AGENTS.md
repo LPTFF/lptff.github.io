@@ -1,33 +1,85 @@
 # Agent 入口
 
-本项目只保留五条通用原则：
+## 项目定位
 
-1. **为人的结果负责**：先确认要改善的用户结果，再选择实现手段；维护所需的人力、注意力和运行成本应远低于项目收益，收益包括信息价值与使用体验；事实、推测和价值取舍分开表达。
-2. **主动完成闭环**：在授权范围内自动完成可逆的分析、实现、排错和验证；失败就依据真实差异继续修复，不把机械工作退还给人。涉及 Web 页面与用户交互的任务，交付必须提供以下闭环证据：
-   - **变更文件**：精确的文件修改清单与变更要点；
-   - **Chrome 浏览器真实页面**：启动本地服务或连接目标环境，通过 Chrome DevTools MCP 在真实 Chrome 页面完成操作、交互与视觉验证，且交付前保留供用户审查的现场服务与页面；
-   - **对话内验收说明**：在回复中简要说明验证结果、运行状态和未验证范围，必要时直接展示真实页面截图。默认不额外生成 walkthrough.md 或独立报告；用户明确要求图文或 HTML 报告时，交付一份由实际验收结果生成、内嵌脱敏截图的报告，遵循[真实环境验收原则](docs/standards/trusted-verification.md)。报告不能代替实际验证，临时材料在审查结束后清理，不纳入源码或功能包。
-3. **证据匹配结果**：自动测试可证明覆盖的规则和运行行为；用户路径、真实来源和部署结论须在对应消费者与环境中验证，不用构建、模拟或局部通过代替，并注明没有证明的范围。
-4. **权限和副作用最小化**：私人数据只在明确授权的环境和字段范围内观察；默认只输出脱敏状态与聚合结果。对外、不可逆、交易、凭据和用户可见高风险动作必须单独获批。
-5. **让人容易审查**：提交、推送前展示确定版本、重要差异、真实证据和剩余未知并取得明确批准；提交前核对暂存差异，并按[Git 提交信息规范](docs/standards/project-instructions.md#git-提交信息规范)检查标题，使用 `<type>(<scope>): <中文摘要>`（scope 可省略）；证据交付前不清理仍需人查看的页面或服务。
+`lptff.github.io` 是部署在 GitHub Pages 的**公开产品与公开数据消费者仓库**，负责：
 
-项目事实和按任务路由见 [docs/README.md](docs/README.md)。不要遍历整套资料，也不要为简单任务套治理模板。发生长时间无进展、工具反复失败或取消后续接时，执行[阻塞诊断与续接](docs/standards/project-instructions.md#阻塞诊断与续接)，按已完成的真实状态继续。
+- Vue 公开站点的页面、路由、交互、可访问性和静态资源；
+- `python-crawl` 分支中公开数据的读取、兼容、汇总和状态展示；
+- GitHub Pages 构建、公开数据契约验证和真实浏览器验收；
+- 明确属于浏览器本地的功能，例如 Investment Review 的本地脱敏数据和 BOSS 扩展。
 
-## 公开福利数据特例
+本仓库不负责服务器采集、青龙调度、家庭服务器应用、发布中心、FRP、HAProxy、Cloudflare Tunnel 或私有运行凭据。这些内容属于同级 [`../qinglongBackup`](../qinglongBackup/AGENTS.md)。公开页面不能依赖家庭服务器、RackNerd 或任何私有接口才能正常打开。
 
-页面大量出现“待服务器标注”时，先确认 `src/views/home/welfare/index.vue` 的真实触发条件：它表示合并后的记录缺少 `ecosystem`，不自动等于前端样式错误或 Gemini 故障。必须使用 Chrome DevTools MCP 检查真实页面和控制台，并按页面合并规则统计 `python-crawl` 分支全部当前来源的待标注数；禁止只改提示文案、隐藏卡片、过滤未分类记录或手工修改快照来制造通过。
+## 系统边界
 
-采集、分类、青龙调度和数据发布的事实源及完整处置清单位于同级后端仓库 `qinglongBackup/docs/guides/site-crawler-migration-review.md` 的“福利待标注故障处置清单”。只有证据指向前端合并或健康状态展示时才修改本仓库；生产验收必须同时覆盖数据分支、准确 Pages 提交和 Chrome 真实线上页面。无法访问同级后端仓库时，明确报告边界，不猜测远程任务状态。
+```text
+qinglongBackup 的公开采集器
+        │ 校验并发布
+        ▼
+本仓库 python-crawl 分支（公开数据契约）
+        │ 读取
+        ▼
+本仓库应用源码 ──GitHub Actions──> GitHub Pages
 
-福利来源总数或 GitHub、Telegram、Bilibili、闲鱼、实时线报任一来源突然为 0 时，低推理模型按以下规则执行：
+家庭服务器私有平台、青龙、发布中心与运维入口
+        └─ 不属于公开站点运行依赖
+```
 
-1. 先在 `python-crawl` 分支直接统计每个 JSON 的 `website`、`searchSourceId` 等真实字段，再与页面合并规则比较；不要先改 CSS、文案、默认筛选或隐藏 0 值。
-2. 定向发现公开数据的规范 `website` 值是 `keyword-search`；前端可兼容历史 `keywordSearch`，但生产者必须输出规范值。汇总、筛选、排序、徽标和来源按钮必须共用同一个来源判定函数，禁止各写一套字符串比较。
-3. 页面显示 0 而数据分支非 0 时，核对准确 Pages run 是否晚于数据提交，并用 Chrome DevTools MCP 忽略缓存刷新 `https://lptff.github.io/?tab=welfare`；同时检查 Console。未完成“数据提交 → Pages 成功 → 线上计数”闭环，不得宣布修复。
-4. 页面非 0 不代表来源实时健康。后端若标记 `degraded` 或保留旧快照，交付必须明确“当前展示为最后有效快照”，不得描述成最新实时抓取；恢复与推送逻辑只在同级 `qinglongBackup` 修改。
-5. GitHub Actions 的 Node.js 或 runner 迁移告警要在产生告警的仓库修复；检查最新运行的完整 Annotations，不要因为升级了最先列出的三个 Action 就停止。项目治理产生的人工审批 warning 与平台弃用 warning 分开判断。
+| 问题 | 应修改的位置 |
+| --- | --- |
+| 来源抓不到、分类失败、快照保护或青龙任务异常 | `qinglongBackup` |
+| JSON 字段、版本或公开数据契约变化 | 先改生产者，再在本仓库做兼容 |
+| 页面合并、计数、筛选、路由、样式或交互错误 | 本仓库 |
+| Pages 构建、公开资源或 Actions 异常 | 本仓库 |
+| 私有账号、Cookie、API Key、服务器部署与远程入口 | `qinglongBackup` 的受保护运行环境 |
 
-## 浏览器特例
+- `python-crawl` 是公开数据发布面，不是人工修数位置。禁止直接改快照来制造正常计数。
+- 公共契约应只包含可以公开的数据。发现密码、Cookie、Token、会话、私有地址或个人原始数据时，停止发布并在生产端修复脱敏与字段白名单。
+- 页面可兼容生产者迁移期间的新旧字段，但不得长期复制采集器、分类器或青龙任务到前端仓库。
+- Investment Review 与浏览器扩展的个人数据默认保存在本地浏览器；除非用户明确授权，不上传、提交或写入公开数据分支。
 
-- **Investment Review**：修改或验收投资页面前，必须读取 [Investment Review 当前产品边界](docs/product/investment-review.md) 与 [真实环境验收原则](docs/standards/trusted-verification.md)。完成结论必须来自 Chrome DevTools MCP 接管用户实际 Chrome 后的目标页面操作；未部署只能声明本地结果。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
-- **BOSS 直聘扩展**：必须先读并执行 [BOSS 真实验收手册](docs/verification/boss-extension-real-validation.md) 中的默认执行约定、自闭环验收和交付要求。默认使用普通 Chrome 与 OS 级操作；已加载本项目防关闭逻辑并完成页面刷新后，允许按 [DevTools 调试指南](docs/verification/boss-devtools-debugging.md) 使用 Chrome DevTools MCP 受控调试。浏览器调试授权不包含发送、投递或其他对外动作。
+## Agent 默认流程
+
+1. 先确认要改善的用户路径及对应消费者，再判断问题属于生产者、契约还是页面。
+2. 阅读 [项目工作说明](docs/standards/project-instructions.md) 和当前任务对应的专项文档；不要遍历整套资料。
+3. 检查 `git status`，只修改当前任务文件，不覆盖或顺带提交其他改动。
+4. 使用最小实现完成真实用户结果。生成文件优先由源文件重新生成，不直接维护 `dist/` 等派生产物。
+5. 根据影响执行类型检查、契约验证、构建和真实浏览器验收；每项证据只证明它实际覆盖的范围。
+6. 交付时说明变更文件、用户结果、验证环境、仍未验证的范围和当前 Git 状态。
+
+## 通用原则
+
+1. **为人的结果负责**：先确认用户需要看到或完成什么，再选择实现；事实、推测和取舍分开表达。
+2. **主动完成闭环**：在授权范围内继续排错和验证，不把可自动完成的机械步骤退还给用户。
+3. **证据匹配结论**：构建成功只证明构建；接口成功只证明接口；公开页面结论必须在准确部署与真实页面中验证。
+4. **权限和副作用最小化**：只观察完成任务需要的数据；对外发送、投递、交易、发布、凭据操作和其他不可逆行为需要对应授权。
+5. **让人容易审查**：差异小而集中，提交说明准确，临时服务和审查页面在用户审查前保持可用。
+
+## 公开数据故障
+
+页面出现“待服务器标注”、来源计数为 0 或数据过旧时，不要先改提示、筛选或样式：
+
+1. 核对页面真实合并规则及 `python-crawl` 当前文件中的规范字段和数量。
+2. 数据分支正确而页面错误时，在本仓库修复读取、归一化、汇总或展示。
+3. 数据分支本身错误时，转到 `qinglongBackup`，按“真实来源 → 青龙日志 → 运行快照 → 发布提交”修复生产链路。
+4. 数据正确后，确认准确 Pages 工作流成功，再用 Chrome DevTools MCP 忽略缓存验证线上页面、Console 和来源计数。
+5. 后端状态为 `degraded` 或沿用最后有效快照时，页面和交付说明必须准确表达数据新鲜度，不把旧快照描述为实时成功。
+
+定向发现公开数据的规范 `website` 值是 `keyword-search`。前端可以兼容历史 `keywordSearch`，但汇总、筛选、排序、徽标和来源按钮必须共用同一个归一化结果。采集、分类、快照保护和 GitHub 数据推送的事实源是 [`../qinglongBackup/docs/guides/site-crawler-migration-review.md`](../qinglongBackup/docs/guides/site-crawler-migration-review.md)。
+
+## UI 与浏览器验收
+
+- 涉及页面和交互时，遵循 [真实环境验收原则](docs/standards/trusted-verification.md)，使用 Chrome DevTools MCP 验证用户指定的 Chrome 或目标环境。至少检查目标路径、关键交互、Console、关键请求及受影响视口。
+- 本地结果、预览环境与线上结果必须明确区分。HTTP 200、截图或无头测试不能单独代替用户路径验收。
+- 交付默认在对话中给出精确文件和结果，不额外生成 walkthrough 或报告；用户明确要求时再生成，并对截图和数据脱敏。
+- 用户已明确禁止某种浏览器工具时，不得调用该工具作为替代。
+
+### 专项入口
+
+- **Investment Review**：先读 [Investment Review 当前产品边界](docs/product/investment-review.md) 和 [真实环境验收原则](docs/standards/trusted-verification.md)。只输出脱敏状态和聚合计数，不展示基金名称、金额、收益、账户或原始网络内容。
+- **BOSS 直聘扩展**：先读 [BOSS 真实验收手册](docs/verification/boss-extension-real-validation.md)。浏览器调试授权不包含发送消息、投递或其他对外动作；需要 DevTools 调试时再读 [DevTools 调试指南](docs/verification/boss-devtools-debugging.md)。
+
+## Git 边界
+
+提交格式遵守 [Git 提交信息规范](docs/standards/project-instructions.md#git-提交信息规范)，使用 `<type>(<scope>): <中文摘要>`。只暂存当前任务文件；提交、推送和部署是不同动作。执行前向维护者展示准确差异、验证结果和目标，并取得当前范围的明确授权。
