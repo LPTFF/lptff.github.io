@@ -165,7 +165,7 @@ const menuConfig = [
   },
   {
     key: "pojie",
-    label: "安全社区",
+    label: "论坛社区",
     component: createAsyncTab("pojie"),
     propName: "pojieLocation",
   },

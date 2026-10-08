@@ -52,7 +52,7 @@ const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin 
           if (fs.existsSync(overrideFile)) {
             return overrideFile;
           }
-          if (/^(?:52pojie(?:-ecosystem)?|kanxue|bilibili|welfare(?:-ecosystem)?|tiktok|movie)\.json$/.test(relPath) || relPath.startsWith("welfare/")) {
+          if (/^(?:52pojie(?:-ecosystem)?|kanxue|bilibili|nodeseek|linuxdo|welfare(?:-ecosystem)?|tiktok|movie)\.json$/.test(relPath) || relPath.startsWith("welfare/")) {
             throw new Error(`发布快照缺少页面需要的数据：${relPath}`);
           }
         }

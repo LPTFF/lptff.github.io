@@ -1,6 +1,6 @@
 <template>
   <span class="source-avatar">
-    <img v-if="!failed" :src="src" :alt="alt" referrerpolicy="no-referrer" @error="failed = true" />
+    <img v-if="src && !failed" :src="src" :alt="alt" referrerpolicy="no-referrer" @error="failed = true" />
     <slot v-else />
   </span>
 </template>

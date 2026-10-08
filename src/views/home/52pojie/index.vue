@@ -3,7 +3,7 @@
     <section class="ecosystem-panel">
       <div class="ecosystem-radar">
         <div>
-          <div class="radar-title">安全社区生态雷达</div>
+          <div class="radar-title">论坛社区生态雷达</div>
         </div>
         <div class="radar-stats">
           <span>{{ newsGuide.length }} 条资讯</span>
@@ -51,7 +51,7 @@
           <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
           <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
         </div>
-        <p>吾爱破解、看雪和 B 站小迪老师均由青龙统一采集。服务端优先使用 Gemini 生成生态评分、技术深度与趋势评分，页面展示最近一次成功发布快照。来源失败时保留上一份有效快照。</p>
+        <p>吾爱破解、看雪、B 站小迪老师、NodeSeek 和 LINUX DO 均由青龙统一采集。服务端优先使用 Gemini 生成生态评分、技术深度与趋势评分；两个公开论坛 RSS 观察源当前保留原始版块，不采集正文、评论或账号信息。页面展示最近一次成功发布快照，来源失败时保留上一份有效快照。</p>
         <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
         <p>观察视角按服务器分析结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
         <p>全部来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。发帖时间来自公开接口原始创建时间，不使用采集时间或推算。</p>
@@ -256,6 +256,8 @@ import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
+import nodeseekNews from "../../../data/nodeseek.json";
+import linuxdoNews from "../../../data/linuxdo.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import SourceIcon from "./SourceIcon.vue";
 import kanxueNews from "../../../data/kanxue.json";
@@ -329,7 +331,13 @@ export default {
         ...item,
         ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
       }));
-    const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems]
+    const communityItems = [...nodeseekNews, ...linuxdoNews]
+      .map((item: any) => ({
+        ...item,
+        url: item.url || item.link,
+      }))
+      .filter((item: any) => item.url && item.title && Number.isFinite(Number(item.timestamp)));
+    const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems, ...communityItems]
       .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
 
     const tagCounts = computed(() => countContentTags(newsGuide));
@@ -347,6 +355,8 @@ export default {
       { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
       { id: "kanxue", label: "看雪本周热榜", count: kanxueItems.length },
       { id: "bilibili", label: "bilibili · 小迪老师", count: bilibiliItems.length },
+      { id: "nodeseek", label: "NodeSeek", count: communityItems.filter((item: any) => item.website === "nodeseek").length },
+      { id: "linuxdo", label: "LINUX DO", count: communityItems.filter((item: any) => item.website === "linuxdo").length },
     ];
     const categoryOptions = computed(() => [...countContentTags(newsGuide, true).entries()]
       .map(([name, count]) => ({ name, count }))
@@ -429,6 +439,8 @@ export default {
         case "52pojie":
         case "kanxue":
         case "bilibili":
+        case "nodeseek":
+        case "linuxdo":
           websiteUrl = item.url;
           break;
       }
@@ -442,6 +454,8 @@ export default {
     };
     const handleWebsiteName = (item: any) => {
       if (item.website === "bilibili") return `bilibili · ${item.authorName || "UP主"}`;
+      if (item.website === "nodeseek") return "NodeSeek";
+      if (item.website === "linuxdo") return "LINUX DO";
       let websiteName = "";
       switch (String(item.website)) {
         case "52pojie":
@@ -457,6 +471,7 @@ export default {
     };
     const handleWebsiteImg = (item: any) => {
       if (item.website === "bilibili") return "https://www.bilibili.com/favicon.ico";
+      if (item.website === "nodeseek" || item.website === "linuxdo") return "";
       // The post page declares this snowflake favicon; version avoids stale cached artwork.
       if (item.website === "kanxue") return "https://bbs.kanxue.com/view/img/favicon.ico?v=20260908-noreferrer";
       let websiteImg = "";

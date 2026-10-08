@@ -115,7 +115,7 @@ export function getPojiePendingCandidates(): PendingCandidate[] {
         domain: "pojie",
         url,
         title,
-        source: (item as any).authorName || (item as any).website || "安全社区",
+        source: (item as any).authorName || (item as any).website || "论坛社区",
       });
     }
   }
