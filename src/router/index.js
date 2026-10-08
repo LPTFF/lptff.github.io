@@ -126,6 +126,18 @@ const routes = [
     ],
   },
   {
+    path: "/community",
+    component: () => import("../views/home/StandaloneFeatureLayout.vue"),
+    meta: { title: "社区观察", product: "公开社区观察" },
+    children: [
+      {
+        path: "",
+        name: "community-observation",
+        component: () => import("../views/community/index.vue"),
+      },
+    ],
+  },
+  {
     path: "/live2d",
     component: () => import("../views/home/StandaloneFeatureLayout.vue"),
     meta: { title: "看板娘" },

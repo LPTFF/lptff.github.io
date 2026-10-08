@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖长沙家庭服务器。这里只保留尚未完成的事项，等回长沙后继续核对和处理；待决定事项先确认用途再实施。公开页不展示密码、令牌等内部凭据。
+        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖家庭服务器。这里只保留尚未完成的事项；已经恢复异地运维条件，可远程推进的任务已移至“现在可做”，涉及个人账户、付款或家庭路由器的事项仍等待本人确认或现场核对。公开页不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">
@@ -114,19 +114,19 @@ const groupConfigs = [
   {
     key: "现在可做" as const,
     title: "现在可做",
-    desc: "当前开发环境已具备核对与整理条件，可直接推进的功能收敛事项",
+    desc: "当前开发环境和异地运维入口已具备条件，可直接推进的事项",
     tagType: "success" as const,
   },
   {
     key: "待现场处理" as const,
     title: "待现场处理",
-    desc: "回长沙后先核对服务器运行与备份，再处理数据、隐私、访问和资源能力；每项按完成条件验收",
+    desc: "仍需要家庭路由器、个人设备、账户控制权或其他现场条件的事项",
     tagType: "warning" as const,
   },
   {
     key: "待决定" as const,
     title: "待决定",
-    desc: "回长沙后结合真实使用情况决定范围；记录待办不代表自动恢复旧模块、注册账户或付费投放",
+    desc: "结合真实使用情况决定范围；记录待办不代表自动恢复旧模块、注册账户或付费投放",
     tagType: "primary" as const,
   },
 ];

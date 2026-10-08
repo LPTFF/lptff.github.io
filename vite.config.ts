@@ -113,12 +113,12 @@ const staticRouteEntriesPlugin = (): Plugin => ({
   closeBundle() {
     const distDir = path.resolve(__dirname, "dist");
     const indexFile = path.join(distDir, "index.html");
-    const todoDir = path.join(distDir, "todo");
-
     if (!fs.existsSync(indexFile)) return;
-
-    fs.mkdirSync(todoDir, { recursive: true });
-    fs.copyFileSync(indexFile, path.join(todoDir, "index.html"));
+    for (const route of ["todo", "community"]) {
+      const routeDir = path.join(distDir, route);
+      fs.mkdirSync(routeDir, { recursive: true });
+      fs.copyFileSync(indexFile, path.join(routeDir, "index.html"));
+    }
   },
 });
 
