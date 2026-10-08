@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖家庭服务器。这里只保留尚未完成的事项；已经恢复异地运维条件，可远程推进的任务已移至“现在可做”，涉及个人账户、付款或家庭路由器的事项仍等待本人确认或现场核对。公开页不展示密码、令牌等内部凭据。
+        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖家庭服务器。这里只展示尚未完成且已经确认需要推进的事项；已结案内容及长期取舍不重复作为公开待办。公开页不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">
@@ -25,7 +25,12 @@
       </div>
     </header>
 
-    <div class="todo-groups">
+    <div v-if="allTasks.length === 0" class="all-clear" role="status">
+      <div class="all-clear-title">当前没有未完成事项</div>
+      <p>现有待办已经完成或作出明确取舍；后续只有出现经过确认的新需求时才会重新加入。</p>
+    </div>
+
+    <div v-else class="todo-groups">
       <section
         v-for="grp in groupConfigs"
         :key="grp.key"
@@ -235,6 +240,28 @@ function getStatusTagType(status: TodoTask["status"]): "info" | "warning" | "suc
   display: flex;
   flex-direction: column;
   gap: 32px;
+}
+
+.all-clear {
+  padding: 32px 24px;
+  text-align: center;
+  color: #606266;
+  background: var(--el-color-success-light-9, #f0f9eb);
+  border: 1px solid var(--el-color-success-light-7, #c2e7b0);
+  border-radius: 10px;
+}
+
+.all-clear-title {
+  margin-bottom: 8px;
+  color: var(--el-color-success-dark-2, #529b2e);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.all-clear p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.7;
 }
 
 .group-section {
