@@ -2,8 +2,8 @@
 (function (root) {
   var info = {
     version: "3.26.9",
-    buildTag: "cand-3.26.9-4686c698c0",
-    builtAt: "2026-10-03T06:37:20.914Z"
+    buildTag: "cand-3.26.9-7c86e79c65",
+    builtAt: "2026-10-08T02:26:19.193Z"
   };
   if (typeof self !== "undefined") {
     self.__LPTFF_EXTENSION_BUILD_INFO__ = info;
