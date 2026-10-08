@@ -2,4 +2,4 @@
 export const WEB_BUILD_TAG = "cand-web-f4bedb0711";
 export const EXPECTED_EXTENSION_BUILD_TAG = "cand-3.26.9-7c86e79c65";
 export const EXTENSION_VERSION = "3.26.9";
-export const BUILT_AT = "2026-10-08T08:43:34.665Z";
+export const BUILT_AT = "2026-10-08T10:08:24.201Z";
