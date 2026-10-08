@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖长沙家庭服务器。未完成事项统一记录在这里，等回长沙后继续核对和处理；待决定事项先确认用途再实施，已完成记录保留。公开页不展示密码、令牌等内部凭据。
+        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖长沙家庭服务器。这里只保留尚未完成的事项，等回长沙后继续核对和处理；待决定事项先确认用途再实施。公开页不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">
@@ -21,10 +21,6 @@
         <div class="stat-pill primary">
           <span class="stat-label">待决定</span>
           <span class="stat-value">{{ countByGroup("待决定") }}</span>
-        </div>
-        <div class="stat-pill info">
-          <span class="stat-label">已完成</span>
-          <span class="stat-value">{{ completedCount }}</span>
         </div>
       </div>
     </header>
@@ -51,7 +47,7 @@
 
         <div class="task-list">
           <article
-            v-for="task in getActiveTasks(grp.key)"
+            v-for="task in getTasks(grp.key)"
             :key="task.id"
             class="task-card"
             :aria-label="`${task.id} ${task.title}`"
@@ -85,54 +81,12 @@
           </article>
 
           <div
-            v-if="getActiveTasks(grp.key).length === 0 && getCompletedTasks(grp.key).length === 0"
+            v-if="getTasks(grp.key).length === 0"
             class="empty-tip"
           >
             该分组暂无任务
           </div>
 
-          <div
-            v-if="getCompletedTasks(grp.key).length > 0"
-            class="completed-collapse-wrapper"
-          >
-            <el-collapse class="completed-collapse">
-              <el-collapse-item
-                :title="`查看此分组已完成事项 (${getCompletedTasks(grp.key).length})`"
-                :name="`completed-${grp.key}`"
-              >
-                <div class="task-list inner-completed">
-                  <article
-                    v-for="task in getCompletedTasks(grp.key)"
-                    :key="task.id"
-                    class="task-card is-completed"
-                    :aria-label="`已完成任务 ${task.id} ${task.title}`"
-                  >
-                    <div class="task-head">
-                      <div class="task-primary-info">
-                        <span class="task-id-badge completed-badge">{{ task.id }}</span>
-                        <h3 class="task-title line-through">{{ task.title }}</h3>
-                      </div>
-                      <div class="task-tags">
-                        <el-tag size="small" effect="plain" type="info" class="domain-tag">
-                          {{ task.domain }}
-                        </el-tag>
-                        <el-tag size="small" type="success" effect="light" class="status-tag">
-                          已完成
-                        </el-tag>
-                      </div>
-                    </div>
-                    <div class="task-body">
-                      <div class="criteria-row">
-                        <span class="criteria-label">完成条件：</span>
-                        <span class="criteria-text">{{ task.criteria }}</span>
-                      </div>
-                      <a v-if="task.sourceUrl" :href="task.sourceUrl" target="_blank" rel="noopener noreferrer">参考来源（内容待核实）</a>
-                    </div>
-                  </article>
-                </div>
-              </el-collapse-item>
-            </el-collapse>
-          </div>
         </div>
       </section>
     </div>
@@ -140,8 +94,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from "vue";
-import { ElTag, ElCollapse, ElCollapseItem } from "element-plus";
+import { ElTag } from "element-plus";
 import rawTasks from "../../data/todoTasks.json";
 
 export interface TodoTask {
@@ -149,7 +102,7 @@ export interface TodoTask {
   title: string;
   group: "现在可做" | "待现场处理" | "待决定";
   domain: string;
-  status: "待处理" | "待现场处理" | "进行中" | "已完成";
+  status: "待处理" | "待现场处理" | "进行中";
   order: number;
   criteria: string;
   sourceUrl?: string;
@@ -178,20 +131,12 @@ const groupConfigs = [
   },
 ];
 
-const completedCount = computed(() => {
-  return allTasks.filter((t) => t.status === "已完成").length;
-});
-
 function countByGroup(groupKey: "现在可做" | "待现场处理" | "待决定") {
-  return allTasks.filter((t) => t.group === groupKey && t.status !== "已完成").length;
+  return allTasks.filter((t) => t.group === groupKey).length;
 }
 
-function getActiveTasks(groupKey: "现在可做" | "待现场处理" | "待决定") {
-  return allTasks.filter((t) => t.group === groupKey && t.status !== "已完成");
-}
-
-function getCompletedTasks(groupKey: "现在可做" | "待现场处理" | "待决定") {
-  return allTasks.filter((t) => t.group === groupKey && t.status === "已完成");
+function getTasks(groupKey: "现在可做" | "待现场处理" | "待决定") {
+  return allTasks.filter((t) => t.group === groupKey);
 }
 
 function getStatusTagType(status: TodoTask["status"]): "info" | "warning" | "success" | "primary" | "danger" {
@@ -202,8 +147,6 @@ function getStatusTagType(status: TodoTask["status"]): "info" | "warning" | "suc
       return "warning";
     case "进行中":
       return "primary";
-    case "已完成":
-      return "success";
     default:
       return "info";
   }
@@ -425,42 +368,6 @@ function getStatusTagType(status: TodoTask["status"]): "info" | "warning" | "suc
 
 .criteria-text {
   color: #484b51;
-}
-
-.is-completed {
-  opacity: 0.75;
-  background-color: #fafbfc;
-}
-
-.completed-badge {
-  background-color: #e1f3d8;
-  color: #67c23a;
-}
-
-.line-through {
-  text-decoration: line-through;
-  color: #909399;
-}
-
-.completed-collapse-wrapper {
-  margin-top: 8px;
-}
-
-.completed-collapse {
-  border: 1px solid var(--el-border-color-lighter, #ebeef5);
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.completed-collapse :deep(.el-collapse-item__header) {
-  padding: 0 14px;
-  font-size: 13px;
-  color: #909399;
-  background-color: #fdfdfd;
-}
-
-.completed-collapse :deep(.el-collapse-item__content) {
-  padding: 12px;
 }
 
 .empty-tip {

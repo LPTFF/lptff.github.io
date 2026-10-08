@@ -108,6 +108,20 @@ const extensionDownloadPlugin = (): Plugin => ({
   },
 });
 
+const staticRouteEntriesPlugin = (): Plugin => ({
+  name: "lptff-static-route-entries",
+  closeBundle() {
+    const distDir = path.resolve(__dirname, "dist");
+    const indexFile = path.join(distDir, "index.html");
+    const todoDir = path.join(distDir, "todo");
+
+    if (!fs.existsSync(indexFile)) return;
+
+    fs.mkdirSync(todoDir, { recursive: true });
+    fs.copyFileSync(indexFile, path.join(todoDir, "index.html"));
+  },
+});
+
 export default defineConfig(({ mode }) => {
   const isPublished = mode === "published" || process.env.USE_PUBLISHED_DATA === "true";
   const overrideDir = path.resolve(__dirname, ".local/published-data");
@@ -122,6 +136,7 @@ export default defineConfig(({ mode }) => {
       publishedDataPlugin(isPublished, overrideDir),
       live2dModelAssetsPlugin(),
       extensionDownloadPlugin(),
+      staticRouteEntriesPlugin(),
       AutoImport({
         resolvers: [ElementPlusResolver({ importStyle: "css" })],
       }),
