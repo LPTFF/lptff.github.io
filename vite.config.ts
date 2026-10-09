@@ -24,7 +24,7 @@ const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin 
   if (isPublished) {
     if (!fs.existsSync(overrideDir) || !fs.existsSync(path.join(overrideDir, "snapshot-meta.json"))) {
       throw new Error(
-        "【发布快照模式】本地快照目录 .local/published-data/ 不存在或缺少 snapshot-meta.json！请先运行 npm run dev:published 恢复快照。"
+        "【发布快照模式】本地快照目录 .local/published-data/ 不存在或缺少 snapshot-meta.json！请先运行 npm run serve 恢复快照。"
       );
     }
   }

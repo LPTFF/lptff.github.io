@@ -15,7 +15,7 @@
 - `extension/`
 - `scripts/`
 - `public/`
-- `config/`、`contracts/`、`data/snapshots/`
+- `config/`、`data/snapshots/`
 
 ### `docs/` 维护工作台
 

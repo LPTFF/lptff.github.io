@@ -4,16 +4,12 @@
 
 ## 常用命令
 
-- `npm run serve`：优先在 8090 启动 Vite；占用时自动选择后续空闲端口，以启动输出中的实际 URL 为准，不执行同步或联网准备。可用 `npm run serve -- --port <端口>` 指定其他首选端口。
-- `npm run preview`：预览生产构建。
-- `npm run typecheck`：运行 Vue/TypeScript 类型检查。
-- `npm run build`：先执行 `scripts/generate-build-tags.mjs` 生成可追溯构建标识，再执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由 CI 步骤生成。
-- `npm run contract:verify`：以版本化冻结契约核对前端调用；相邻后端源码存在时再核对真实路由实现，独立前端 CI 必须明确标注后端未验证。
-- `npm run repo:check`：检查 Git 索引中的目录边界与非项目产物；详细规则见 [仓库结构与交付边界](repository-structure.md)。
+- `npm run serve`：先从 `origin/python-crawl` 安全恢复最新线上公开数据到忽略目录 `.local/published-data/`，再以发布快照模式启动 Vite；优先使用 8090，端口占用时自动选择后续空闲端口，以启动输出中的实际 URL 为准。
+- `npm run build`：恢复最新线上公开数据，运行 Vue/TypeScript 类型检查，生成可追溯构建标识，再以发布快照模式执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由 CI 步骤生成。
 - `npm audit --registry=https://registry.npmjs.org --audit-level=high`：按执行时的官方 Registry 事实阻断高危依赖，不在文档中长期声称固定的“0 漏洞”。
 - 公开来源采集只在 homeops/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。
 
-命令是给维护者选择的工具，不是每次改动都必须执行的仪式。根据改动影响选择最能证明结果的检查。
+本地只保留开发与构建两个入口；仓库结构、公开数据白名单和构建标识等门禁由 CI 直接调用对应脚本。
 
 ## 阻塞诊断与续接
 

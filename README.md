@@ -44,24 +44,19 @@ npm install
 
 Live2D 模型包已纳入 devDependencies 和锁文件。开发服务器由 Vite 直接从已安装的 `node_modules` 提供模型，生产构建由同一 Vite 插件写入 `dist/live2dw/models/`；不维护 `public` 缓存，也没有安装后或启动前脚本。导航图标通常直接使用目标站点的官方 favicon 或官方 CDN；Grok 通过 favicon 服务获取官网图标。加载失败时显示首字符色块，不参与资源准备。
 
-启动开发服务器（端口 8090）：
+启动开发服务器（端口 8090）。默认先从 `origin/python-crawl` 获取最新线上公开数据快照，再启动页面：
 
 ```bash
 npm run serve
 ```
 
-预览构建结果：
-
-```bash
-npm run preview
-```
-
 ## 构建
 
 ```bash
-npm run repo:check
 npm run build
 ```
+
+构建命令会恢复最新线上公开数据、完成类型检查并生成生产包。项目只保留 `serve` 和 `build` 两个 npm 命令，其他检查由 CI 直接执行对应脚本，避免本地运维入口分叉。
 
 ## 公共数据采集与验收
 
@@ -89,12 +84,12 @@ npm run build
 - `public/`：会原样发布的公开静态资源。
 - `data/snapshots/`：产品需要的脱敏、可复现输入。
 - `scripts/`：构建、检查、打包和手工部署脚本。
-- `config/`、`contracts/`：构建配置与跨仓库接口契约。
+- `config/`：构建工具使用的配置。
 - `docs/`：产品说明、项目事实、标准和长期验收记录。
 
 依赖、构建结果、截图、报告、参考仓库和临时采集结果都属于本机内容，统一忽略或收进 `.local/`，不作为远程仓库产物。
 
-完整的目录职责、生成物例外和禁止提交范围见 [仓库结构与交付边界](docs/standards/repository-structure.md)。`npm run repo:check` 会检查 Git 索引中的未登记顶层入口、缓存、日志、数据库、真实环境文件、截图/报告和构建包；首次使用可运行 `npm run hooks:install` 启用本地提交门禁。
+完整的目录职责、生成物例外和禁止提交范围见 [仓库结构与交付边界](docs/standards/repository-structure.md)。仓库结构检查由 CI 和 Git hooks 直接运行治理脚本，不再额外暴露 npm 命令。
 
 ## 部署
 

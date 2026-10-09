@@ -80,7 +80,6 @@
           :bottom="88"
           aria-label="回到顶部"
         />
-        <PrivatePortalModal v-model="showPortalModal" />
         <FeatureObservationModal v-model="showObservationModal" />
       </div>
     </div>
@@ -103,13 +102,8 @@ import { isPC, gotoOutPage, initEruda } from "../../utils/utils";
 import { useRoute, useRouter } from "vue-router";
 import logoUrl from "../../assets/logo.jpg";
 import TabLoadError from "./TabLoadError.vue";
-import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
 import FeatureObservationModal from "../../components/FeatureObservationModal.vue";
 import { recordFeatureView, initSessionManager } from "../../utils/observation";
-import {
-  PORTAL_OPEN_EVENT,
-  OBSERVATION_OPEN_EVENT,
-} from "../../utils/devTools";
 import {
   ElMenu,
   ElMenuItem,
@@ -188,8 +182,8 @@ const menuConfig = [
   },
 ];
 
-const showPortalModal = ref(false);
 const showObservationModal = ref(false);
+const OBSERVATION_OPEN_EVENT = "lptff-open-observation";
 const previousRoute = ref("");
 const isPCRes = ref(isPC());
 const windowHeight = ref(typeof window !== "undefined" ? window.innerHeight : 900);
@@ -230,10 +224,6 @@ const router = useRouter();
 
 const handleOpenObservationModal = () => {
   showObservationModal.value = true;
-};
-
-const handleOpenPortalModal = () => {
-  showPortalModal.value = true;
 };
 
 watch(
@@ -380,13 +370,11 @@ onMounted(() => {
   });
   window.addEventListener("open-observation-modal", handleOpenObservationModal);
   window.addEventListener(OBSERVATION_OPEN_EVENT, handleOpenObservationModal);
-  window.addEventListener(PORTAL_OPEN_EVENT, handleOpenPortalModal);
 });
 
 onUnmounted(() => {
   window.removeEventListener("open-observation-modal", handleOpenObservationModal);
   window.removeEventListener(OBSERVATION_OPEN_EVENT, handleOpenObservationModal);
-  window.removeEventListener(PORTAL_OPEN_EVENT, handleOpenPortalModal);
   loadingResizeObserver?.disconnect();
   clearTimeout(clickTimer);
   backtopResizeObserver?.disconnect();

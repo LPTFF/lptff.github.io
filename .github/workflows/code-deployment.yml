@@ -51,32 +51,10 @@ jobs:
         run: npm ci
 
       - name: 检查仓库结构与非项目产物
-        run: npm run repo:check
+        run: node scripts/verify-repository-hygiene.cjs
 
       - name: 依赖高危漏洞门禁
         run: npm audit --registry=https://registry.npmjs.org --audit-level=high
-
-      - name: 恢复已发布的数据快照
-        # 优先从指定分支（默认 python-crawl）拉取已验证的最新有效数据快照
-        env:
-          DATA_REF: ${{ github.event.inputs.data_ref || github.event.client_payload.data_ref || 'python-crawl' }}
-        run: |
-          set -euo pipefail
-          if [[ "$DATA_REF" != "python-crawl" && ! "$DATA_REF" =~ ^[0-9a-f]{40}$ ]]; then
-            echo "Unsupported data reference"; exit 1
-          fi
-          git fetch --depth=1 origin "$DATA_REF"
-          git rev-parse FETCH_HEAD
-          git archive --format=tar FETCH_HEAD | tar -xf - -C src/data
-
-      - name: 审查公开数据字段白名单
-        run: node scripts/verify-public-whitelist.cjs src/data
-
-      - name: 前端类型检查
-        run: npm run typecheck
-
-      - name: 验证前后端接口契约一致性
-        run: npm run contract:verify
 
       - name: 生成研究书签快照
         env:
@@ -86,10 +64,15 @@ jobs:
           --repo "$GITHUB_REPOSITORY"
 
       - name: 构建静态站点
+        env:
+          DATA_REF: ${{ github.event.inputs.data_ref || github.event.client_payload.data_ref || 'python-crawl' }}
         run: npm run build
 
       - name: 验证网页与扩展构建标识
-        run: npm run build-tags:verify
+        run: node scripts/verify-build-tags.mjs
+
+      - name: 审查公开数据字段白名单
+        run: node scripts/verify-public-whitelist.cjs .local/published-data
 
       - name: 审查构建产物安全白名单
         run: node scripts/verify-public-whitelist.cjs dist

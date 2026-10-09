@@ -28,36 +28,20 @@
       <RouterView />
     </main>
     <footer class="blog-footer">记录学习，分享思考 · tangff</footer>
-    <PrivatePortalModal v-model="showPortalModal" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from "vue";
+import { ref } from "vue";
 import { useRouter } from "vue-router";
 import { Menu, Search } from "@element-plus/icons-vue";
-import PrivatePortalModal from "../../components/PrivatePortalModal.vue";
-import { PORTAL_OPEN_EVENT } from "../../utils/devTools";
 
 const router = useRouter();
 const query = ref("");
 const menuOpen = ref(false);
-const showPortalModal = ref(false);
 const search = () => {
   router.push({ path: "/blog/search", query: query.value.trim() ? { q: query.value.trim() } : undefined });
 };
-
-const handlePortalEvent = () => {
-  showPortalModal.value = true;
-};
-
-onMounted(() => {
-  window.addEventListener(PORTAL_OPEN_EVENT, handlePortalEvent);
-});
-
-onUnmounted(() => {
-  window.removeEventListener(PORTAL_OPEN_EVENT, handlePortalEvent);
-});
 </script>
 
 <style>

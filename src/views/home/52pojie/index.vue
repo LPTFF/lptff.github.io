@@ -1,61 +1,70 @@
 <template>
   <div>
+    <ForumTagCloud :items="filteredNews" />
     <section class="ecosystem-panel">
       <div class="ecosystem-radar">
         <div>
           <div class="radar-title">论坛社区生态雷达</div>
         </div>
         <div class="radar-stats">
-          <span>{{ newsGuide.length }} 条资讯</span>
+          <span>{{ newsGuide.length }} 条公开主题</span>
           <span>{{ analyzedCount }} 条服务器已标注</span>
           <span>{{ categoryCount }} 个生态主题</span>
           <span title="统计全部资讯的细分标签，本机和定时采集共同计入">{{ tagCounts.size }} 个细分标签</span>
         </div>
       </div>
-      <div class="radar-filters">
-        <TagCategoryPicker domain="pojie" :options="categoryOptions" :total="newsGuide.length" v-model="selectedCategory" />
-        <div class="filter-row" v-if="analyzedCount">
-          <span class="filter-label">观察视角</span>
-          <button
-            v-for="focus in focusOptions"
-            :key="focus.key"
-            type="button"
-            class="filter-tag focus-tag"
-            :class="{ active: selectedFocus === focus.key }"
-            :aria-pressed="selectedFocus === focus.key"
-            @click="selectedFocus = focus.key"
-          >
-            {{ focus.label }}
-          </button>
+      <details class="radar-filter-details">
+        <summary>
+          <span>筛选条件</span>
+          <span class="filter-summary-count">{{ filteredNews.length }} 条当前结果</span>
+        </summary>
+        <div class="radar-filters">
+          <TagCategoryPicker domain="pojie" :options="categoryOptions" :total="newsGuide.length" v-model="selectedCategory" />
+          <div class="filter-row" v-if="analyzedCount">
+            <span class="filter-label">观察视角</span>
+            <button
+              v-for="focus in focusOptions"
+              :key="focus.key"
+              type="button"
+              class="filter-tag focus-tag"
+              :class="{ active: selectedFocus === focus.key }"
+              :aria-pressed="selectedFocus === focus.key"
+              @click="selectedFocus = focus.key"
+            >
+              {{ focus.label }}
+            </button>
+          </div>
+          <div class="filter-row" role="group" aria-label="按观察源筛选">
+            <span class="filter-label">观察源</span>
+            <button
+              v-for="source in sourceOptions"
+              :key="source.id"
+              type="button"
+              class="filter-tag"
+              :class="{ active: selectedSource === source.id }"
+              :aria-pressed="selectedSource === source.id"
+              :disabled="source.id !== 'all' && source.count === 0"
+              :title="source.id !== 'all' && source.count === 0 ? '当前没有可用的公开快照' : undefined"
+              @click="selectedSource = source.id"
+            >
+              {{ source.label }} {{ source.count }}
+            </button>
+            <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+          </div>
         </div>
-        <div class="filter-row" role="group" aria-label="按观察源筛选">
-          <span class="filter-label">观察源</span>
-          <button
-            v-for="source in sourceOptions"
-            :key="source.id"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedSource === source.id }"
-            :aria-pressed="selectedSource === source.id"
-            @click="selectedSource = source.id"
-          >
-            {{ source.label }} {{ source.count }}
-          </button>
-          <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
-        </div>
-      </div>
+      </details>
       <details class="collector-details">
-        <summary>服务端标签逻辑与更新规则</summary>
+        <summary>数据来源、分析逻辑与更新规则</summary>
         <div class="health-meta-badge details-health-meta" v-if="sourceHealth" aria-label="当前采集与发布状态">
           <el-tag size="small" :type="collectionModeInfo.tagType">{{ collectionModeInfo.label }}</el-tag>
           <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
           <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
         </div>
-        <p>吾爱破解、看雪、B 站小迪老师、NodeSeek 和 LINUX DO 均由青龙统一采集。服务端优先使用 Gemini 生成生态评分、技术深度与趋势评分；两个公开论坛 RSS 观察源当前保留原始版块，不采集正文、评论或账号信息。页面展示最近一次成功发布快照，来源失败时保留上一份有效快照。</p>
-        <p>生态评分衡量社区需求与攻防热点的观察价值，技术评分衡量技术深度，趋势评分衡量本批次的新对象、新工具或新变化，均为 0–100 分。</p>
-        <p>观察视角按服务器分析结果筛选：高生态信号＝生态评分 ≥85；技术深入＝技术评分 ≥75；新趋势＝趋势评分 ≥75；主题演化＝存在相近主题分组；灰色用途＝模型判为灰色滥用；入门生态＝技术评分 ≤50。主题、视角和观察源可组合筛选，标签不用于删帖。</p>
-        <p>全部来源统一按发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。发帖时间来自公开接口原始创建时间，不使用采集时间或推算。</p>
-        <p>每日定时更新，来源异常时保留上次有效快照。分析结果经条目完整性、主题与评分校验后发布。Gemini 不可用时保留上次分析或采用确定性规则降级，无分析结果条目标为“生态信号待分析”，仍可在全部主题和视角中查看；标签为自动化分析判断，不代表人工核实。</p>
+        <p>青龙统一汇总吾爱破解、看雪、小迪老师、NodeSeek、LINUX DO 和 V2EX 的公开主题。优先使用官方公开 API 或 RSS，全程只保留标题、原帖链接、版块和来源发布时间，不采集 Cookie、正文、评论或账号资料。无法在青龙中稳定无人值守更新的来源不纳入页面。</p>
+        <p>社区价值衡量话题对理解真实需求、技术采用、商业供需、平台变化、群体情绪或风险动向的观察价值；内容深度与趋势新颖度独立评分，均为 0–100。安全攻防只是其中一个主题，不再作为整页默认分类口径。</p>
+        <p>观察视角按服务端结果筛选：高社区信号＝社区价值 ≥85；内容深入＝内容深度 ≥75；新趋势＝趋势新颖度 ≥75；主题演化＝存在相近主题分组；风险生态＝模型判为灰色滥用；轻量讨论＝内容深度 ≤50。主题、视角和观察源可组合筛选，风险与标签仅用于观察，不用于删帖或事实定性。</p>
+        <p>全部来源按原始发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。来源异常时保留上一份有效快照，并且不会把挑战页或登录页当作数据。</p>
+        <p>服务端优先使用 Gemini 分批分析并校验条目完整性、主题、评分与来源 URL。Gemini 不可用时保留已有分析或采用确定性规则降级；无分析结果的条目标为“社区信号待分析”。自动标签表达模型判断，不代表人工核实或站点立场。</p>
       </details>
     </section>
     <div class="filter-empty" v-if="filteredNews.length === 0">
@@ -110,10 +119,10 @@
               <div class="ecosystem-tags" v-if="item.ecosystem">
                 <el-tag size="small">{{ item.ecosystem.category }}</el-tag>
                 <el-tag size="small" type="success">
-                  生态 {{ item.ecosystem.ecosystemValue }}
+                  社区价值 {{ item.ecosystem.ecosystemValue }}
                 </el-tag>
                 <el-tag size="small" type="info">
-                  技术 {{ item.ecosystem.technicalDepth }}
+                  深度 {{ item.ecosystem.technicalDepth }}
                 </el-tag>
                 <el-tag size="small" type="primary">
                   趋势 {{ item.ecosystem.trendNovelty }}
@@ -124,7 +133,7 @@
                 <el-tag v-for="sig in contentTags(item)" :key="sig" size="small" type="info" :title="`全部资讯中有 ${tagCounts.get(sig) || 0} 条包含此标签（含本机分析）`">{{ sig }} · {{ tagCounts.get(sig) || 0 }} 条</el-tag>
               </div>
               <div class="ecosystem-tags" v-else>
-                <el-tag size="small" type="info">生态信号待分析</el-tag>
+                <el-tag size="small" type="info">社区信号待分析</el-tag>
               </div>
               <div class="ecosystem-summary" v-if="item.ecosystem">
                 {{ item.ecosystem.summary }}
@@ -173,8 +182,8 @@
                 </div>
                 <div class="mobile-ecosystem-signal">
                   <span v-if="item.website === 'kanxue'">本周 #{{ item.rank }} · 热度 {{ item.heat }}</span>
-                  <span>{{ item.ecosystem?.category || "生态信号待分析" }}</span>
-                  <span v-if="item.ecosystem">生态 {{ item.ecosystem.ecosystemValue }}</span>
+                  <span>{{ item.ecosystem?.category || "社区信号待分析" }}</span>
+                  <span v-if="item.ecosystem">社区价值 {{ item.ecosystem.ecosystemValue }}</span>
                 </div>
               </div>
               <div
@@ -258,8 +267,10 @@ import { Calendar, Timer } from "@element-plus/icons-vue";
 import pojieNews from "../../../data/52pojie.json";
 import nodeseekNews from "../../../data/nodeseek.json";
 import linuxdoNews from "../../../data/linuxdo.json";
+import v2exNews from "../../../data/v2ex.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import SourceIcon from "./SourceIcon.vue";
+import ForumTagCloud from "./ForumTagCloud.vue";
 import kanxueNews from "../../../data/kanxue.json";
 import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
@@ -288,6 +299,7 @@ export default {
   },
   components: {
     TagCategoryPicker,
+    ForumTagCloud,
     SourceIcon,
     ElCol,
     ElRow,
@@ -331,10 +343,15 @@ export default {
         ...item,
         ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
       }));
-    const communityItems = [...nodeseekNews, ...linuxdoNews]
+    const communityItems = [
+      ...nodeseekNews,
+      ...linuxdoNews,
+      ...v2exNews,
+    ]
       .map((item: any) => ({
         ...item,
         url: item.url || item.link,
+        ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url || item.link),
       }))
       .filter((item: any) => item.url && item.title && Number.isFinite(Number(item.timestamp)));
     const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems, ...communityItems]
@@ -355,21 +372,26 @@ export default {
       { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
       { id: "kanxue", label: "看雪本周热榜", count: kanxueItems.length },
       { id: "bilibili", label: "bilibili · 小迪老师", count: bilibiliItems.length },
-      { id: "nodeseek", label: "NodeSeek", count: communityItems.filter((item: any) => item.website === "nodeseek").length },
-      { id: "linuxdo", label: "LINUX DO", count: communityItems.filter((item: any) => item.website === "linuxdo").length },
+      ...[
+        ["nodeseek", "NodeSeek"],
+        ["linuxdo", "LINUX DO"],
+        ["v2ex", "V2EX"],
+      ].map(([id, label]) => ({ id, label, count: communityItems.filter((item: any) => item.website === id).length })),
     ];
+    const placeholderTags = new Set(["其他社区话题", "社区讨论", "其他", "未分类"]);
     const categoryOptions = computed(() => [...countContentTags(newsGuide, true).entries()]
+      .filter(([name]) => !placeholderTags.has(name))
       .map(([name, count]) => ({ name, count }))
       .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name, "zh-CN")));
 
     const focusOptions = [
       { key: "all", label: "全部视角" },
-      { key: "high", label: "高生态信号" },
-      { key: "technical", label: "技术深入" },
+      { key: "high", label: "高社区信号" },
+      { key: "technical", label: "内容深入" },
       { key: "trend", label: "新趋势" },
       { key: "evolution", label: "主题演化" },
-      { key: "gray", label: "灰色用途" },
-      { key: "beginner", label: "入门生态" },
+      { key: "gray", label: "风险生态" },
+      { key: "beginner", label: "轻量讨论" },
     ];
     const filteredNews = computed(() =>
       newsGuide.filter((item: any) => {
@@ -441,6 +463,7 @@ export default {
         case "bilibili":
         case "nodeseek":
         case "linuxdo":
+        case "v2ex":
           websiteUrl = item.url;
           break;
       }
@@ -456,6 +479,7 @@ export default {
       if (item.website === "bilibili") return `bilibili · ${item.authorName || "UP主"}`;
       if (item.website === "nodeseek") return "NodeSeek";
       if (item.website === "linuxdo") return "LINUX DO";
+      if (item.website === "v2ex") return "V2EX";
       let websiteName = "";
       switch (String(item.website)) {
         case "52pojie":
@@ -471,7 +495,9 @@ export default {
     };
     const handleWebsiteImg = (item: any) => {
       if (item.website === "bilibili") return "https://www.bilibili.com/favicon.ico";
-      if (item.website === "nodeseek" || item.website === "linuxdo") return "";
+      if (item.website === "v2ex") return "https://www.v2ex.com/static/icon-192.png";
+      if (item.website === "linuxdo") return "https://cdn3.ldstatic.com/optimized/4X/6/a/6/6a6affc7b1ce8140279e959d32671304db06d5ab_2_180x180.png";
+      if (item.website === "nodeseek") return "https://icons.duckduckgo.com/ip3/nodeseek.com.ico";
       // The post page declares this snowflake favicon; version avoids stale cached artwork.
       if (item.website === "kanxue") return "https://bbs.kanxue.com/view/img/favicon.ico?v=20260908-noreferrer";
       let websiteImg = "";
@@ -676,12 +702,40 @@ export default {
 .details-health-meta {
   margin: 10px 0 2px;
 }
-.radar-filters {
+.radar-filter-details {
   margin-top: 12px;
-  padding: 9px 12px;
   border: 1px solid #dce6f2;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.78);
+  color: #4a74ad;
+}
+.radar-filter-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  list-style-position: inside;
+}
+.filter-tag:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+.radar-filter-details > summary::marker {
+  color: #409eff;
+}
+.filter-summary-count {
+  margin-left: auto;
+  color: #65738a;
+  font-size: 12px;
+  font-weight: 600;
+}
+.radar-filters {
+  padding: 4px 12px 12px;
+  border-top: 1px solid #e6edf6;
 }
 .filter-row {
   display: flex;
@@ -914,9 +968,15 @@ export default {
     flex-wrap: wrap;
     gap: 8px 14px;
   }
-  .radar-filters {
+  .radar-filter-details {
     margin-top: 10px;
-    padding: 10px;
+  }
+  .radar-filter-details > summary {
+    min-height: 42px;
+    padding: 0 10px;
+  }
+  .radar-filters {
+    padding: 9px 10px 10px;
   }
   .radar-filters .filter-row {
     flex-wrap: nowrap;

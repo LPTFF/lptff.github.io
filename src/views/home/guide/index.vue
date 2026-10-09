@@ -1,5 +1,6 @@
 <template>
   <div>
+    <GuideTagCloud :items="filteredNews" />
     <div class="ecosystem-panel">
       <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
         <div>
@@ -11,54 +12,60 @@
           <span>{{ categoryOptions.length }} 个生态主题</span>
         </div>
       </section>
-      <section class="radar-filters" aria-label="热门资讯生态筛选">
-        <TagCategoryPicker
-          v-model="selectedCategory"
-          domain="guide"
-          label="生态主题"
-          search-placeholder="输入主题名称，如 科技、生活"
-          :options="categoryOptions"
-          :total="totalNewsCount"
-        />
-        <div class="filter-row">
-          <span class="filter-label">观察视角</span>
-          <button
-            v-for="focus in focusOptions"
-            :key="focus.key"
-            type="button"
-            class="filter-tag focus-tag"
-            :class="{ active: selectedFocus === focus.key }"
-            :aria-pressed="selectedFocus === focus.key"
-            @click="selectedFocus = focus.key"
-          >
-            {{ focus.label }}
-          </button>
-        </div>
-        <div class="filter-row" role="group" aria-label="按资讯来源筛选">
-          <span class="filter-label">观察源</span>
-          <button
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedSource === 'all' }"
-            :aria-pressed="selectedSource === 'all'"
-            @click="selectedSource = 'all'"
-          >
-            全部 {{ totalNewsCount }}
-          </button>
-          <button
-            v-for="source in sourceFilters"
-            :key="source.id"
-            type="button"
-            class="filter-tag"
-            :class="{ active: selectedSource === source.id }"
-            :aria-pressed="selectedSource === source.id"
-            @click="selectedSource = source.id"
-          >
-            {{ source.label }} {{ source.count }}
-          </button>
-          <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
-        </div>
-      </section>
+      <details class="radar-filter-details">
+        <summary>
+          <span>筛选条件</span>
+          <span class="filter-summary-count">{{ filteredNews.length }} 条当前结果</span>
+        </summary>
+        <section class="radar-filters" aria-label="热门资讯生态筛选">
+          <TagCategoryPicker
+            v-model="selectedCategory"
+            domain="guide"
+            label="生态主题"
+            search-placeholder="输入主题名称，如 科技、生活"
+            :options="categoryOptions"
+            :total="totalNewsCount"
+          />
+          <div class="filter-row">
+            <span class="filter-label">观察视角</span>
+            <button
+              v-for="focus in focusOptions"
+              :key="focus.key"
+              type="button"
+              class="filter-tag focus-tag"
+              :class="{ active: selectedFocus === focus.key }"
+              :aria-pressed="selectedFocus === focus.key"
+              @click="selectedFocus = focus.key"
+            >
+              {{ focus.label }}
+            </button>
+          </div>
+          <div class="filter-row" role="group" aria-label="按资讯来源筛选">
+            <span class="filter-label">观察源</span>
+            <button
+              type="button"
+              class="filter-tag"
+              :class="{ active: selectedSource === 'all' }"
+              :aria-pressed="selectedSource === 'all'"
+              @click="selectedSource = 'all'"
+            >
+              全部 {{ totalNewsCount }}
+            </button>
+            <button
+              v-for="source in sourceFilters"
+              :key="source.id"
+              type="button"
+              class="filter-tag"
+              :class="{ active: selectedSource === source.id }"
+              :aria-pressed="selectedSource === source.id"
+              @click="selectedSource = source.id"
+            >
+              {{ source.label }} {{ source.count }}
+            </button>
+            <span class="filter-result">{{ filteredNews.length }} 条当前结果</span>
+          </div>
+        </section>
+      </details>
       <details class="collector-details">
         <summary>服务端标签逻辑与更新规则</summary>
         <div class="health-meta-badge details-health-meta" v-if="sourceHealth" aria-label="当前采集与发布状态">
@@ -253,6 +260,7 @@ import {
   ElTag,
 } from "element-plus";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
+import GuideTagCloud from "./GuideTagCloud.vue";
 import {
   getSourceHealth,
   formatCollectionMode,
@@ -265,6 +273,7 @@ export default {
   },
   components: {
     TagCategoryPicker,
+    GuideTagCloud,
     ElCol,
     ElRow,
     ElDialog,
@@ -900,13 +909,37 @@ export default {
 .details-health-meta {
   margin: 10px 0 2px;
 }
-.radar-filters {
-  min-width: 0;
+.radar-filter-details {
   margin-top: 12px;
-  padding: 9px 12px;
   border: 1px solid #dce6f2;
   border-radius: 9px;
   background: rgba(255, 255, 255, 0.78);
+  color: #4a74ad;
+}
+.radar-filter-details > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 0 12px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  list-style-position: inside;
+}
+.radar-filter-details > summary::marker {
+  color: #409eff;
+}
+.filter-summary-count {
+  margin-left: auto;
+  color: #65738a;
+  font-size: 12px;
+  font-weight: 600;
+}
+.radar-filters {
+  min-width: 0;
+  padding: 4px 12px 12px;
+  border-top: 1px solid #e6edf6;
 }
 .filter-row {
   display: flex;
@@ -1119,8 +1152,17 @@ export default {
     font-size: 11px;
   }
 
+  .radar-filter-details {
+    margin-top: 10px;
+  }
+
+  .radar-filter-details > summary {
+    min-height: 42px;
+    padding: 0 10px;
+  }
+
   .radar-filters {
-    padding: 8px 9px;
+    padding: 9px 10px 10px;
   }
 
   .radar-filters .filter-row {
