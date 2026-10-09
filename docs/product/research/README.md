@@ -6,7 +6,7 @@
 
 ## 参考项目索引
 
-- [qinglongBackup 数据能力评估](qinglong-backup-assessment.md)：区分可安全提炼的公共数据采集思路、验证后候选和禁止迁移的账户/部署能力。原始仓库仅保留在本地并由外层 `.gitignore` 排除。
+- [homeops 数据能力评估](homeops-assessment.md)：区分可安全提炼的公共数据采集思路、验证后候选和禁止迁移的账户/部署能力。原始仓库仅保留在本地并由外层 `.gitignore` 排除。
 - [采集脚本浏览器插件配合评估](crawl-extension-assessment.md)：区分哪些采集器保持纯 HTTP、哪些需要登录态而适合浏览器插件配合（参照 src/investment 模式），含判定标准与插件化候选。
 - dev-tools 提效工具箱：JSON 格式化 / 文本转二维码 / 文本压缩三个工具已复刻到 `src/views/home/devtools/`（入口：导航专区 InternalWebsite → 开发工具），参考仓库仅保留在本地并由外层 `.gitignore` 排除。
 - 导航图标官方源直连（2026-08-23）：52 个入口优先使用目标站点的官方 favicon；已有明确官方 CDN 资源的入口继续使用官方 CDN，其余使用目标域名根路径 `/favicon.ico`。官方图片加载失败时由 el-avatar slot 直接显示首字符色块，不再依赖 Cravatar、DuckDuckGo 或本地 map。图标不参与本地安装、开发启动或生产构建；Live2D 模型作为锁定依赖由 Vite 在开发与构建阶段直接提供。修复附带问题：L2Dwidget 老库初始化与首页首屏异步组件（导航专区为 PC 默认 tab）竞争导致其渲染空白，live2d 已改为页面 load 后延迟启动。

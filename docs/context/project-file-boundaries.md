@@ -40,7 +40,7 @@ scripts/、config/、extension/、public/ → 构建、CI、扩展发布和静�
 - `src/views/Blog/articles/**`、`src/data/career/**`、`src/data/findJobMarkDown/**`
 - `vite.config.ts`、`package.json`、`.github/workflows/code-deployment.yml`
 
-公开采集代码已迁入私有 `qinglongBackup/src/site_crawlers/`；旧实现归档于该仓库的 `research/legacy-site-collectors/`。本仓库只消费 `python-crawl` 分支数据，页面关键词配置位于 `src/config/welfare-keywords.json`。
+公开采集代码已迁入私有 `homeops/src/site_crawlers/`；旧实现归档于该仓库的 `research/legacy-site-collectors/`。本仓库只消费 `python-crawl` 分支数据，页面关键词配置位于 `src/config/welfare-keywords.json`。
 
 这些路径被页面、Vite、package scripts 或 CI 调用。变更前先做调用图检查，不按目录名称判断能否迁移。
 

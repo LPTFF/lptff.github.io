@@ -5,7 +5,7 @@
 ## 当前责任边界
 
 - 2026-09-20 维护者明确：服务器采集只使用 HTTPS 接口请求，接口做不到就暂时搁置；不安装或启用服务器 Chromium / Playwright 采集。用户本机扩展授权采集及内网 HTTPS 同步是独立辅助路径，不算服务器独立自动采集。
-- 私有 `qinglongBackup/src/site_crawlers/manifest.json` 管理服务器采集，青龙产生数据后推送本仓库 `python-crawl` 分支。
+- 私有 `homeops/src/site_crawlers/manifest.json` 管理服务器采集，青龙产生数据后推送本仓库 `python-crawl` 分支。
 - 本仓库 `master` 只负责页面与构建；`.github/workflows/code-deployment.yml` 恢复公开快照并发布 Pages，不重新采集来源。
 - 旧 Python/RSS 实现归档私有仓库 `research/legacy-site-collectors/`；不要恢复 `.local/generated/crawl/`、`scripts/collectors/` 或 `data-crawl.yml`。
 - 页面关键词配置在 `src/config/welfare-keywords.json`。浏览器授权扩展、站主 Issue 研究书签同步有独立用途，不随服务器采集一起删除。

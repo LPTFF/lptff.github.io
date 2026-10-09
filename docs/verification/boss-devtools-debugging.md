@@ -4,7 +4,7 @@
 
 ## 来源与实现范围
 
-参考来源是本机 `qinglongBackup/research/zhipin/`：`extension/inject.js`、`manifest.json`、`rules.json` 和 `anti-debug-analysis.md`。该文档描述 BOSS 的 `BZLFE` UA 白名单、`nd_result_13912_number_1.result === "QM&Lb"` 免检分支，以及关闭、回退、清空 DOM、重载和内存消耗路径。参考目录未包含被分析的原始站点包，不把文档描述当作当前线上版本已验证的事实。
+参考来源是本机 `homeops/research/zhipin/`：`extension/inject.js`、`manifest.json`、`rules.json` 和 `anti-debug-analysis.md`。该文档描述 BOSS 的 `BZLFE` UA 白名单、`nd_result_13912_number_1.result === "QM&Lb"` 免检分支，以及关闭、回退、清空 DOM、重载和内存消耗路径。参考目录未包含被分析的原始站点包，不把文档描述当作当前线上版本已验证的事实。
 
 本项目入口：
 

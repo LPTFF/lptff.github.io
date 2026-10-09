@@ -7,7 +7,7 @@
 - 跨页面纯逻辑：`src/utils/<domain>/`。
 - 用户内容：直接放在唯一消费者的页面目录，例如 `src/views/Blog/articles/` 和 `src/views/investment/`；没有一级页面消费者的职业原始资料放在 `src/data/career/` 或 `src/data/findJobMarkDown/`。
 - 用户内容和应用资源：页面内容直接随消费者组织，应用数据在 `src/data/`，应用资源在 `src/assets/`。
-- 交付支持区：`public/`、`scripts/`、`extension/`、`config/`、`contracts/`。公开采集实现属于 qinglongBackup，不进入本站源码。
+- 交付支持区：`public/`、`scripts/`、`extension/`、`config/`、`contracts/`。公开采集实现属于 homeops，不进入本站源码。
 - 运行时可读的产品文档：明确由页面导入的文档仍属于项目功能，例如 `src/views/Blog/articles/**/*.md` 由 `import.meta.glob` 以 `?raw` 编译。
 - 项目事实、产品判断、研究资料和有长期价值的复盘：`docs/`。
 - 维护文档且没有运行时消费者：`docs/docs/`。

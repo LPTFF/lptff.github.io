@@ -67,7 +67,7 @@ await check('Save success requires reading back the actual submitted content', a
   const h = harness(); const r = await h.read();
   await h.api.syncFile({ data: r.data, baseSha: r.sha, connectionId: r.connectionId }, sourceTab); await h.phase('reviewing');
   h.state.raw = h.state.prepared[0] + '\n';
-  await h.chrome.tabs.update([...h.tabs.keys()].at(-1), { url: 'https://github.com/LPTFF/qinglongBackup/blob/master/private-bookmarks/v1.json' });
+  await h.chrome.tabs.update([...h.tabs.keys()].at(-1), { url: 'https://github.com/LPTFF/homeops/blob/master/private-bookmarks/v1.json' });
   assert.equal((await h.phase('ready')).completedWrite, true);
 });
 await check('Existing file uses edit route and detects remote changes before filling', async () => {
@@ -115,7 +115,7 @@ await check('Wrong-session saves and concurrent operations are rejected', async 
 await check('Login completion resumes the original read task', async () => {
   const h = harness(); h.state.error = '请先登录'; await h.api.startRead(sourceTab); await h.phase('error');
   h.state.error = null;
-  await h.chrome.tabs.update([...h.tabs.keys()].at(-1), { url: 'https://github.com/LPTFF/qinglongBackup' });
+  await h.chrome.tabs.update([...h.tabs.keys()].at(-1), { url: 'https://github.com/LPTFF/homeops' });
   await h.phase('ready'); assert.equal((await h.api.getFile(1)).data.bookmarks.length, 0);
 });
 await check('Canceling a failed refresh retains the previous baseline', async () => {

@@ -1,4 +1,4 @@
-// Adapted from qinglongBackup/research/zhipin/extension/inject.js (v3.1).
+// Adapted from homeops/research/zhipin/extension/inject.js (v3.1).
 // Site-specific compatibility shim; see docs/verification/boss-devtools-debugging.md.
 // Must run synchronously in MAIN at document_start, before the site's bundles.
 (() => {

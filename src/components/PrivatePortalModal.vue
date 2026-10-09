@@ -111,7 +111,7 @@
               本机模式用于个人电脑上的本地功能调试与人工接管，<strong>属于按需手动启动</strong>。请在电脑上双击 <code>全栈项目/启动我的空间.bat</code>，或在终端执行：
             </div>
             <div class="command-row">
-              <code class="command-code">python qinglongBackup/tools/private-platform/platform-cli.py serve</code>
+              <code class="command-code">python homeops/tools/private-platform/platform-cli.py serve</code>
               <el-button size="small" type="primary" link @click="copyCommand">
                 {{ copied ? "已复制！" : "复制命令" }}
               </el-button>
@@ -274,7 +274,7 @@ const promptLanIp = () => {
 
 const copyCommand = async () => {
   try {
-    await navigator.clipboard.writeText("python qinglongBackup/tools/private-platform/platform-cli.py serve");
+    await navigator.clipboard.writeText("python homeops/tools/private-platform/platform-cli.py serve");
     copied.value = true;
     setTimeout(() => {
       copied.value = false;

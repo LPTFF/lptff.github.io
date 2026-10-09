@@ -51,7 +51,7 @@
   }
 
 
-  const REPO_URL = "https://github.com/LPTFF/qinglongBackup";
+  const REPO_URL = "https://github.com/LPTFF/homeops";
   const FILE_PATH = "private-bookmarks/v1.json";
   const BRANCH = "master";
   const KEY = "lptffPrivateBookmarksGitHub:";
@@ -115,10 +115,10 @@
       try { tab = await chrome.tabs.get(task.githubTabId); }
       catch { throw new Error('GitHub 页面已关闭，本页修改仍保留。'); }
       const u = new URL(tab.url || 'about:blank');
-      if (u.origin !== 'https://github.com' || !(u.pathname === '/LPTFF/qinglongBackup' || u.pathname.startsWith('/LPTFF/qinglongBackup/')) || tab.status !== 'complete') return;
-      if (task.phase === 'reviewing' && u.pathname !== `/LPTFF/qinglongBackup/blob/${BRANCH}/${FILE_PATH}`) return;
+      if (u.origin !== 'https://github.com' || !(u.pathname === '/LPTFF/homeops' || u.pathname.startsWith('/LPTFF/homeops/')) || tab.status !== 'complete') return;
+      if (task.phase === 'reviewing' && u.pathname !== `/LPTFF/homeops/blob/${BRANCH}/${FILE_PATH}`) return;
       if (task.phase === 'preparing') {
-        const target = task.initialized ? `/LPTFF/qinglongBackup/edit/${BRANCH}/${FILE_PATH}` : `/LPTFF/qinglongBackup/new/${BRANCH}`;
+        const target = task.initialized ? `/LPTFF/homeops/edit/${BRANCH}/${FILE_PATH}` : `/LPTFF/homeops/new/${BRANCH}`;
         if (u.pathname !== target) return;
         const remote = await readRemote(task.githubTabId);
         if ((await taskFor(sourceId))?.operationId !== operationId) return;

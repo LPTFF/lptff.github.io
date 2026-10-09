@@ -45,7 +45,7 @@ function readContract(filePath) {
 function findBackendContract() {
   const candidates = [
     process.env.BACKEND_CONTRACT_PATH,
-    path.resolve(repoRoot, '../qinglongBackup/contracts/portal/v1/private-portal-contract.json')
+    path.resolve(repoRoot, '../homeops/contracts/portal/v1/private-portal-contract.json')
   ].filter(Boolean);
   return candidates.find(candidate => fs.existsSync(candidate)) || null;
 }
@@ -53,7 +53,7 @@ function findBackendContract() {
 function findBackendSource() {
   const candidates = [
     process.env.BACKEND_WEB_APP_PATH,
-    path.resolve(repoRoot, '../qinglongBackup/src/resource_collector/web_app.py')
+    path.resolve(repoRoot, '../homeops/src/resource_collector/web_app.py')
   ].filter(Boolean);
   return candidates.find(candidate => fs.existsSync(candidate)) || null;
 }

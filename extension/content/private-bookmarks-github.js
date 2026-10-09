@@ -1,6 +1,6 @@
 // Runs only in the explicitly opened GitHub tab; no cookies, tokens or login fields are read.
 (() => {
-  const REPO = '/LPTFF/qinglongBackup';
+  const REPO = '/LPTFF/homeops';
   const FILE = 'private-bookmarks/v1.json';
   const BRANCH = 'master';
   const blobPath = `${REPO}/blob/${BRANCH}/${FILE}`;

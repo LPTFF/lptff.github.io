@@ -3,7 +3,7 @@
     <header class="todo-intro-header">
       <div class="intro-badge">公开待办</div>
       <p class="intro-desc">
-        lptff.github.io 与 qinglongBackup 共同承载个人网站，业务数据与运行逻辑依赖家庭服务器。这里只展示尚未完成且已经确认需要推进的事项；已结案内容及长期取舍不重复作为公开待办。公开页不展示密码、令牌等内部凭据。
+        lptff.github.io 与 homeops 共同承载个人网站，业务数据与运行逻辑依赖家庭服务器。这里只展示尚未完成且已经确认需要推进的事项；已结案内容及长期取舍不重复作为公开待办。公开页不展示密码、令牌等内部凭据。
       </p>
       <div class="stats-bar" role="region" aria-label="待办概览统计">
         <div class="stat-pill">

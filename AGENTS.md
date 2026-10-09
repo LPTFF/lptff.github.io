@@ -9,12 +9,12 @@
 - GitHub Pages 构建、公开数据契约验证和真实浏览器验收；
 - 明确属于浏览器本地的功能，例如 Investment Review 的本地脱敏数据和 BOSS 扩展。
 
-本仓库不负责服务器采集、青龙调度、家庭服务器应用、发布中心、FRP、HAProxy、Cloudflare Tunnel 或私有运行凭据。这些内容属于同级 [`../qinglongBackup`](../qinglongBackup/AGENTS.md)。公开页面不能依赖家庭服务器、RackNerd 或任何私有接口才能正常打开。
+本仓库不负责服务器采集、青龙调度、家庭服务器应用、发布中心、FRP、HAProxy、Cloudflare Tunnel 或私有运行凭据。这些内容属于同级 [`../homeops`](../homeops/AGENTS.md)。公开页面不能依赖家庭服务器、RackNerd 或任何私有接口才能正常打开。
 
 ## 系统边界
 
 ```text
-qinglongBackup 的公开采集器
+homeops 的公开采集器
         │ 校验并发布
         ▼
 本仓库 python-crawl 分支（公开数据契约）
@@ -28,11 +28,11 @@ qinglongBackup 的公开采集器
 
 | 问题 | 应修改的位置 |
 | --- | --- |
-| 来源抓不到、分类失败、快照保护或青龙任务异常 | `qinglongBackup` |
+| 来源抓不到、分类失败、快照保护或青龙任务异常 | `homeops` |
 | JSON 字段、版本或公开数据契约变化 | 先改生产者，再在本仓库做兼容 |
 | 页面合并、计数、筛选、路由、样式或交互错误 | 本仓库 |
 | Pages 构建、公开资源或 Actions 异常 | 本仓库 |
-| 私有账号、Cookie、API Key、服务器部署与远程入口 | `qinglongBackup` 的受保护运行环境 |
+| 私有账号、Cookie、API Key、服务器部署与远程入口 | `homeops` 的受保护运行环境 |
 
 - `python-crawl` 是公开数据发布面，不是人工修数位置。禁止直接改快照来制造正常计数。
 - 公共契约应只包含可以公开的数据。发现密码、Cookie、Token、会话、私有地址或个人原始数据时，停止发布并在生产端修复脱敏与字段白名单。
@@ -62,11 +62,11 @@ qinglongBackup 的公开采集器
 
 1. 核对页面真实合并规则及 `python-crawl` 当前文件中的规范字段和数量。
 2. 数据分支正确而页面错误时，在本仓库修复读取、归一化、汇总或展示。
-3. 数据分支本身错误时，转到 `qinglongBackup`，按“真实来源 → 青龙日志 → 运行快照 → 发布提交”修复生产链路。
+3. 数据分支本身错误时，转到 `homeops`，按“真实来源 → 青龙日志 → 运行快照 → 发布提交”修复生产链路。
 4. 数据正确后，确认准确 Pages 工作流成功，再用 Chrome DevTools MCP 忽略缓存验证线上页面、Console 和来源计数。
 5. 后端状态为 `degraded` 或沿用最后有效快照时，页面和交付说明必须准确表达数据新鲜度，不把旧快照描述为实时成功。
 
-定向发现公开数据的规范 `website` 值是 `keyword-search`。前端可以兼容历史 `keywordSearch`，但汇总、筛选、排序、徽标和来源按钮必须共用同一个归一化结果。采集、分类、快照保护和 GitHub 数据推送的事实源是 [`../qinglongBackup/docs/guides/site-crawler-migration-review.md`](../qinglongBackup/docs/guides/site-crawler-migration-review.md)。
+定向发现公开数据的规范 `website` 值是 `keyword-search`。前端可以兼容历史 `keywordSearch`，但汇总、筛选、排序、徽标和来源按钮必须共用同一个归一化结果。采集、分类、快照保护和 GitHub 数据推送的事实源是 [`../homeops/docs/guides/site-crawler-migration-review.md`](../homeops/docs/guides/site-crawler-migration-review.md)。
 
 ## UI 与浏览器验收
 

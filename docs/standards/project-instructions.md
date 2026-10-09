@@ -11,7 +11,7 @@
 - `npm run contract:verify`：以版本化冻结契约核对前端调用；相邻后端源码存在时再核对真实路由实现，独立前端 CI 必须明确标注后端未验证。
 - `npm run repo:check`：检查 Git 索引中的目录边界与非项目产物；详细规则见 [仓库结构与交付边界](repository-structure.md)。
 - `npm audit --registry=https://registry.npmjs.org --audit-level=high`：按执行时的官方 Registry 事实阻断高危依赖，不在文档中长期声称固定的“0 漏洞”。
-- 公开来源采集只在 qinglongBackup/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。
+- 公开来源采集只在 homeops/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。
 
 命令是给维护者选择的工具，不是每次改动都必须执行的仪式。根据改动影响选择最能证明结果的检查。
 
@@ -33,7 +33,7 @@
 - `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试知识树与项目串联稿只保留 `src/views/Blog/articles/2026/` 下的博客源文件，投资脱敏快照只保留 `data/snapshots/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。
 - 个人数据默认本地优先。云同步、远程埋点、第三方上传、凭据和账号态行为需要单独判断授权、隐私和退出方式。
-- 除非任务确实涉及部署，不运行 `scripts/deploy/uploadQL.js`。历史采集脚本已归档到 qinglongBackup/research/legacy-site-collectors，不再从本站执行。
+- 除非任务确实涉及部署，不运行 `scripts/deploy/uploadQL.js`。历史采集脚本已归档到 homeops/research/legacy-site-collectors，不再从本站执行。
 
 ## 验证与交付
 

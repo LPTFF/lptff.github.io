@@ -1,11 +1,11 @@
-# qinglongBackup 数据能力评估
+# homeops 数据能力评估
 
 ## 基本信息
 
 - **状态**：已分析，安全采集基准实施中
 - **项目类型**：青龙任务、公共数据采集、账户自动化和部署脚本的混合备份仓库
-- **源码地址**：<https://github.com/LPTFF/qinglongBackup>
-- **本地参考目录**：`docs/product/research/qinglongBackup/`（嵌套独立 Git 仓库，外层项目不跟踪）
+- **源码地址**：<https://github.com/LPTFF/homeops>
+- **本地参考目录**：`docs/product/research/homeops/`（嵌套独立 Git 仓库，外层项目不跟踪）
 - **许可证**：未确认
 - **评估日期**：2026-07-31
 
