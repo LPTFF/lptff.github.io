@@ -242,12 +242,12 @@
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
-import infzmNews from "../../../data/infzm.json";
-import weiboNews from "../../../data/weibo.json";
-import douyinHotNews from "../../../data/douyinHot.json";
-import xiaohongshuNews from "../../../data/xiaohongshu.json";
-import kuaishouHotNews from "../../../data/kuaishouHot.json";
-import guideEcosystem from "../../../data/guide-ecosystem.json";
+import infzmNews from "@published/infzm.json";
+import weiboNews from "@published/weibo.json";
+import douyinHotNews from "@published/douyinHot.json";
+import xiaohongshuNews from "@published/xiaohongshu.json";
+import kuaishouHotNews from "@published/kuaishouHot.json";
+import guideEcosystem from "@published/guide-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import {
   ElCol,

@@ -264,15 +264,15 @@
 import { ref, nextTick, watch, computed } from "vue";
 import { gotoOutPage, isPC } from "../../../utils/utils";
 import { Calendar, Timer } from "@element-plus/icons-vue";
-import pojieNews from "../../../data/52pojie.json";
-import nodeseekNews from "../../../data/nodeseek.json";
-import linuxdoNews from "../../../data/linuxdo.json";
-import v2exNews from "../../../data/v2ex.json";
+import pojieNews from "@published/52pojie.json";
+import nodeseekNews from "@published/nodeseek.json";
+import linuxdoNews from "@published/linuxdo.json";
+import v2exNews from "@published/v2ex.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import SourceIcon from "./SourceIcon.vue";
 import ForumTagCloud from "./ForumTagCloud.vue";
-import kanxueNews from "../../../data/kanxue.json";
-import ecosystemRadar from "../../../data/52pojie-ecosystem.json";
+import kanxueNews from "@published/kanxue.json";
+import ecosystemRadar from "@published/52pojie-ecosystem.json";
 import TagCategoryPicker from "../../../components/TagCategoryPicker.vue";
 import { contentTags, countContentTags, allContentCategories } from "../../../utils/contentTagCounts";
 import {

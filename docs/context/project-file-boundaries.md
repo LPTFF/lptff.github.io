@@ -15,7 +15,7 @@
 - `extension/`
 - `scripts/`
 - `public/`
-- `config/`、`data/snapshots/`
+- `data/snapshots/`
 
 ### `docs/` 维护工作台
 
@@ -25,7 +25,7 @@
 
 ```text
 src/ 页面与应用 → src/ 内容与数据、根目录交付支持区
-scripts/、config/、extension/、public/ → 构建、CI、扩展发布和静态资源
+scripts/、extension/、public/ → 构建、CI、扩展发布和静态资源
 维护者 → docs/ 工作台
 ```
 
@@ -37,10 +37,10 @@ scripts/、config/、extension/、public/ → 构建、CI、扩展发布和静�
 - `scripts/extension/build-zip.js`
 - `public/**`
 - `src/data/**`、`src/assets/**`
-- `src/views/Blog/articles/**`、`src/data/career/**`、`src/data/findJobMarkDown/**`
+- `src/views/Blog/articles/**`、`src/data/findJobMarkDown/**`
 - `vite.config.ts`、`package.json`、`.github/workflows/code-deployment.yml`
 
-公开采集代码已迁入私有 `homeops/src/site_crawlers/`；旧实现归档于该仓库的 `research/legacy-site-collectors/`。本仓库只消费 `python-crawl` 分支数据，页面关键词配置位于 `src/config/welfare-keywords.json`。
+公开采集代码已迁入私有 `homeops/src/site_crawlers/`；旧实现归档于该仓库的 `research/legacy-site-collectors/`。本仓库主分支不再复制动态 JSON，只通过 `@published/*` 消费构建前恢复的 `python-crawl` 分支快照；页面关键词配置位于 `src/config/welfare-keywords.json`。
 
 这些路径被页面、Vite、package scripts 或 CI 调用。变更前先做调用图检查，不按目录名称判断能否迁移。
 

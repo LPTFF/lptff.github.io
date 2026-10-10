@@ -4,7 +4,7 @@ import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
-import { live2dModelAssetsPlugin } from "./config/live2d-model-assets";
+import { live2dModelAssetsPlugin } from "./scripts/vite/live2d-model-assets";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -19,8 +19,6 @@ function getPublishedDataMeta(overrideDir: string) {
 }
 
 const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin => {
-  const localDataDir = path.resolve(__dirname, "src/data");
-
   if (isPublished) {
     if (!fs.existsSync(overrideDir) || !fs.existsSync(path.join(overrideDir, "snapshot-meta.json"))) {
       throw new Error(
@@ -30,37 +28,8 @@ const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin 
   }
 
   return {
-    name: "lptff-published-data-resolver",
+    name: "lptff-published-data",
     enforce: "pre",
-    resolveId(source, importer) {
-      if (!isPublished || !importer) return null;
-      try {
-        let candidate = "";
-        if (source.startsWith("@/data/")) {
-          candidate = path.resolve(localDataDir, source.slice("@/data/".length));
-        } else if (source.startsWith("./") || source.startsWith("../")) {
-          candidate = path.resolve(path.dirname(importer), source);
-        } else {
-          return null;
-        }
-
-        const normCandidate = candidate.replace(/\\/g, "/");
-        const normLocal = localDataDir.replace(/\\/g, "/");
-        if (normCandidate.startsWith(normLocal + "/")) {
-          const relPath = normCandidate.slice(normLocal.length).replace(/^\//, "");
-          const overrideFile = path.resolve(overrideDir, relPath);
-          if (fs.existsSync(overrideFile)) {
-            return overrideFile;
-          }
-          if (/^(?:52pojie(?:-ecosystem)?|kanxue|bilibili|nodeseek|linuxdo|welfare(?:-ecosystem)?|tiktok|movie)\.json$/.test(relPath) || relPath.startsWith("welfare/")) {
-            throw new Error(`发布快照缺少页面需要的数据：${relPath}`);
-          }
-        }
-      } catch (error) {
-        throw error;
-      }
-      return null;
-    },
     configureServer(server) {
       server.middlewares.use((req, res, next) => {
         if (isPublished && req.url && req.url.startsWith("/data/")) {
@@ -129,6 +98,11 @@ export default defineConfig(({ mode }) => {
   return {
     base: "/",
     publicDir: "public",
+    resolve: {
+      alias: {
+        "@published": overrideDir,
+      },
+    },
     define: {
       __PUBLISHED_DATA_META__: JSON.stringify(getPublishedDataMeta(overrideDir)),
     },
@@ -161,26 +135,6 @@ export default defineConfig(({ mode }) => {
     host: '0.0.0.0',
     port: 8090,
     strictPort: false,
-    proxy: {
-      "/Run": {
-        target: "https://www.runoob.com",
-        secure: true,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/Run/, ""),
-      },
-      "/Jue": {
-        target: "https://api.juejin.cn",
-        secure: true,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/Jue/, ""),
-      },
-      "/douban": {
-        target: "https://movie.douban.com",
-        secure: true,
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/douban/, ""),
-      }
-    },
   },
   build: {
     target: "es2015",

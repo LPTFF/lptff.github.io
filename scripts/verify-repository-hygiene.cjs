@@ -8,7 +8,7 @@ const allowedTopLevel = new Set([
   '.cspell.json', '.env.development', '.env.example', '.githooks', '.github', '.gitignore',
   '.nojekyll', '.vscode', 'AGENTS.md', 'CLAUDE.md', 'CNAME', 'README.md',
   'auto-imports.d.ts', 'components.d.ts', 'index.html',
-  'package.json', 'package-lock.json', 'config', 'contracts', 'data', 'docs',
+  'package.json', 'package-lock.json', 'data', 'docs',
   'extension', 'public', 'scripts', 'src',
   'tsconfig.json', 'tsconfig.node.json', 'vite.config.ts',
 ]);

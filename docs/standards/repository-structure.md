@@ -10,8 +10,7 @@
 | `public/` | 浏览器按 URL 读取、无需打包进 JS 的公开静态资源 | 是，必须确认可公开 |
 | `data/snapshots/` | 产品功能需要的脱敏、可复现输入，不是测试夹具 | 是 |
 | `extension/` | 浏览器扩展源码；构建出的 ZIP 不进入 Git | 是源码，不含构建包 |
-| `scripts/` | 构建、校验、扩展打包与手工部署脚本 | 是 |
-| `config/` | 构建工具使用的配置模块 | 是 |
+| `scripts/` | 构建、校验、发布快照恢复与扩展打包脚本 | 是 |
 | `docs/` | 项目标准、长期事实和维护说明 | 是 |
 | `.local/`、`.artifacts/`、`artifacts/` | 临时截图、报告、浏览器证据和本地验证材料 | 否 |
 | `dist/`、`dist-extension/`、缓存与临时工作树 | CI 或本机可重建产物 | 否 |
@@ -19,13 +18,14 @@
 ## 依赖与数据方向
 
 ```text
-data/snapshots/ ──构建输入──> src/ ──Vite──> dist/
+homeops ──python-crawl 分支──> .local/published-data/ ──只读输入──> src/
+data/snapshots/ ────────────────────────────────────────> src/ ──Vite──> dist/
 public/ ─────────────────────────浏览器 URL───────────┘
 extension/ ──scripts/extension/build-zip.js──> dist-extension/
 docs/ ──只描述和约束，不参与浏览器运行
 ```
 
-- `src/` 不得读取 `.local/`、报告目录、开发机绝对路径或临时工作树。
+- `src/` 只允许通过 `@published/*` 读取构建前恢复的 `.local/published-data/`；不得读取其他本地目录、报告、开发机绝对路径或临时工作树。
 - `public/` 中的内容会原样发布；凭据、私有采集包和未脱敏数据不得放入其中。
 - 页面需要的大型映射数据优先放在 `public/data/` 并按功能按需请求，避免进入首屏 JS。
 - `data/snapshots/` 只接收有产品消费者的脱敏快照；测试替身留在 `.local/verification/`。

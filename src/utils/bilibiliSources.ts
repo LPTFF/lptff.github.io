@@ -1,5 +1,5 @@
 import sources from "../../extension/content-sources.json";
-import data from "../data/bilibili.json";
+import data from "@published/bilibili.json";
 
 export const bilibiliItemsFor = (tab: string) => {
   const uids = new Set(sources.filter((source) => source.platform === "bilibili" && source.tab === tab).map((source) => source.uid));

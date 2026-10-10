@@ -265,19 +265,19 @@ import {
   formatAnalysisMode,
   formatFreshness,
 } from "../../../utils/sourceHealth";
-import oldSource from "../../../data/welfare.json";
+import oldSource from "@published/welfare.json";
 import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
-import tuanSource from "../../../data/welfare/0818tuan.json";
-import tuanTopSource from "../../../data/welfare/0818tuanTop.json";
-import zhuanyesSource from "../../../data/welfare/zhuanyes.json";
-import zhuanyesTopSource from "../../../data/welfare/zhuanyesTop.json";
-import daydayzhuanSource from "../../../data/welfare/daydayzhuan.json";
-import daydayzhuanTopSource from "../../../data/welfare/daydayzhuanTop.json";
-import zhujicepingSource from "../../../data/welfare/zhujiceping.json";
-import hamibotSource from "../../../data/welfare/hamibot.json";
-import keywordSearchSource from "../../../data/welfare/keyword-search.json";
+import tuanSource from "@published/welfare/0818tuan.json";
+import tuanTopSource from "@published/welfare/0818tuanTop.json";
+import zhuanyesSource from "@published/welfare/zhuanyes.json";
+import zhuanyesTopSource from "@published/welfare/zhuanyesTop.json";
+import daydayzhuanSource from "@published/welfare/daydayzhuan.json";
+import daydayzhuanTopSource from "@published/welfare/daydayzhuanTop.json";
+import zhujicepingSource from "@published/welfare/zhujiceping.json";
+import hamibotSource from "@published/welfare/hamibot.json";
+import keywordSearchSource from "@published/welfare/keyword-search.json";
 import keywordSearchConfig from "../../../config/welfare-keywords.json";
-import welfareRadar from "../../../data/welfare-ecosystem.json";
+import welfareRadar from "@published/welfare-ecosystem.json";
 import logoImageUrl from "../../../assets/logo.jpg";
 import { Calendar, Timer } from "@element-plus/icons-vue";
 import {

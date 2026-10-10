@@ -9,6 +9,24 @@ const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
 const targetDir = path.resolve(repoRoot, ".local/published-data");
 
+function removeGeneratedDirectory(directory) {
+  try {
+    fs.rmSync(directory, { recursive: true, force: true });
+  } catch (error) {
+    console.warn(`[restore-published-snapshot] 无法清理旧的临时目录 ${path.basename(directory)}: ${error.message}`);
+  }
+}
+
+function pruneGeneratedDirectories(localDir, keep = new Set()) {
+  if (!fs.existsSync(localDir)) return;
+  for (const entry of fs.readdirSync(localDir, { withFileTypes: true })) {
+    if (!entry.isDirectory() || keep.has(entry.name)) continue;
+    if (/^published-(?:backup-\d+|staging-[A-Za-z0-9_-]+)$/.test(entry.name)) {
+      removeGeneratedDirectory(path.join(localDir, entry.name));
+    }
+  }
+}
+
 function parseArgs() {
   const args = process.argv.slice(2);
   let ref = process.env.DATA_REF || "origin/python-crawl";
@@ -103,6 +121,7 @@ async function main() {
   }
   const localDir = path.dirname(targetDir);
   fs.mkdirSync(localDir, { recursive: true });
+  pruneGeneratedDirectories(localDir, new Set([path.basename(targetDir)]));
   if (fs.lstatSync(localDir).isSymbolicLink() || (fs.existsSync(targetDir) && fs.lstatSync(targetDir).isSymbolicLink())) throw new Error("拒绝链接快照目录");
   const stagingDir = fs.mkdtempSync(path.join(localDir, "published-staging-"));
 
@@ -174,7 +193,8 @@ async function main() {
   if (hasPrevious) await rename(targetDir, backup);
   try { await rename(stagingDir, targetDir); }
   catch (error) { if (hasPrevious) await rename(backup, targetDir); throw error; }
-  // Generated backup is retained for recovery; never delete the user's data files.
+  if (hasPrevious) removeGeneratedDirectory(backup);
+  pruneGeneratedDirectories(localDir, new Set([path.basename(targetDir)]));
 
   console.log(`[restore-published-snapshot] ✅ 快照已成功恢复至 .local/published-data/ (SHA: ${sha})`);
 }

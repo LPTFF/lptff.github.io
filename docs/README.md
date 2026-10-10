@@ -36,7 +36,7 @@
 | 本地运行或构建 | [项目工作说明](standards/project-instructions.md) |
 | 页面、数据或部署验收 | [真实环境验收原则](standards/trusted-verification.md) |
 | 页面交互、滚动条与动态加载验收 | [浏览器 UI 验收指南](verification/browser-ui-validation.md) |
-| 外部资讯源、AI 筛选或定时采集接入 | [外部资讯源接入手册](verification/external-content-source-integration.md) |
+| 外部资讯源、AI 筛选或定时采集接入 | 在同级 `homeops` 的采集器与运维文档中处理；本站只验证快照契约和页面消费 |
 | 青龙采集迁移、旧定时器关闭或快照发布验收 | [青龙迁移与快照消费指南](verification/qinglong-snapshot-migration.md)（迁移后的采集责任边界优先看此文） |
 | BOSS 扩展验收 | [BOSS 专用手册](verification/boss-extension-real-validation.md) |
 | Web 与扩展桥接验收 | [Web 与扩展桥接验收指南](verification/chrome-extension-web-bridge-validation.md) |
@@ -67,6 +67,6 @@
 
 ## 目录边界
 
-- `src/`、`extension/`、`public/`、`data/`、`scripts/` 和 `config/` 保存产品代码与交付链；`docs/` 保存仍有长期价值的事实、产品判断和参考资料。
+- `src/`、`extension/`、`public/`、`data/` 和 `scripts/` 保存产品代码与交付链；`docs/` 保存仍有长期价值的事实、产品判断和参考资料。
 - 不把可重新安装的依赖、凭据、登录态、真实私人数据、原始网络日志、临时测试产物或截图提交到仓库。
 - 好的交接只说明目标、已证实结果、失败或未知、变更、证据和下一步；没有长期价值的过程材料应删除。

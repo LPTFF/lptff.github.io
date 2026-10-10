@@ -2,7 +2,7 @@
 
 - 日期：2026-08-24
 - 定位：回答"浏览器插件第一版必须采到哪些核心数据，才能保证各领域产品能力成立"。观察采集（`<platform>-observation-capture/0.9`）是确认这些数据可得性的手段——本文档是观察采集的**方向定义**：每个平台的观察操作都围绕下表实体触发，观察报告自动对照核心字段清单（插件 v3.4.0 起内置 coreFields 核对），登录调试时直接看到"产品数据诉求覆盖度"而非只有"端点覆盖度"。
-- 上游输入：[多领域观察采集插件任务记录](../../records/multi-domain-observation-extension-20260824.md)（产品逻辑口述）、[加密货币复盘助手产品分析](crypto-review-product-analysis.md)（合约对象模型 3.1 节）、现有降级链路消费 schema（`src/data/zhipin.json`/`kuaishouData.json`/`tiktok.json`）与[BOSS 字段验证报告](../../docs/verification-reports/current/2026-08-05-boss-zhipin-fields.md)的降级教训。
+- 上游输入：[多领域观察采集插件任务记录](../../records/multi-domain-observation-extension-20260824.md)（产品逻辑口述）、[加密货币复盘助手产品分析](crypto-review-product-analysis.md)（合约对象模型 3.1 节）、`python-crawl` 发布快照中的 `zhipin.json`/`kuaishouData.json`/`tiktok.json` 契约与 BOSS 字段验证的降级教训。
 - 方法：每个领域先声明第一版产品能力 → 推导产品赖以成立的核心数据实体 → 给每个实体参考字段描述（字段名候选来自现有消费 schema 与平台接口惯例，最终以登录观察报告确认的契约为准）。降级链路已经缺的字段是优先确认对象。
 
 ## 1. 金融：币安合约（复盘防重大错误）

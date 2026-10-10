@@ -48,7 +48,7 @@
 ## 已知决策与风险
 
 - Excel 导出使用 `write-excel-file`，通过 `src/utils/exportExcel.ts` 保持页面调用一致并延迟加载。
-- `vite-plugin-compression`、`rollup-plugin-visualizer` 和手动 `scripts/deploy/uploadQL.js` 路径是否长期保留，仍是待决定事项。
+- 动态公开数据只由 HomeOps 生产并发布到 `python-crawl`，主分支不保留副本；本站部署只走 GitHub Pages。
 - 研究目录中的第三方项目只提供待验证思路；采用前要确认许可证、隐私、安全、成本和退出方式。
 
 ## 如何维护

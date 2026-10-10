@@ -77,14 +77,13 @@ npm run build
 
 ## 目录说明
 
-根目录只保留七类正式内容：
+根目录只保留六类正式内容：
 
-- `src/`：Vue 网站源码，页面、组件、领域逻辑和站内数据都在这里。
+- `src/`：Vue 网站源码，页面、组件、领域逻辑和站内静态内容都在这里；采集数据不入主分支。
 - `extension/`：Chrome 本地助手源码；生成的 ZIP 不进入 Git。
 - `public/`：会原样发布的公开静态资源。
 - `data/snapshots/`：产品需要的脱敏、可复现输入。
-- `scripts/`：构建、检查、打包和手工部署脚本。
-- `config/`：构建工具使用的配置。
+- `scripts/`：构建、检查、发布快照恢复和扩展打包脚本。
 - `docs/`：产品说明、项目事实、标准和长期验收记录。
 
 依赖、构建结果、截图、报告、参考仓库和临时采集结果都属于本机内容，统一忽略或收进 `.local/`，不作为远程仓库产物。
@@ -95,7 +94,7 @@ npm run build
 
 GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；该文件是发布配置，不是页面业务源码。
 
-仓库还保留一个位于 `scripts/deploy/uploadQL.js` 的 SFTP 手动部署路径；仅在明确部署任务中使用。公开数据更新由青龙定期触发 master 上的 Pages 工作流。
+代码发布只走 GitHub Pages 工作流。公开数据由 HomeOps 采集并发布到 `python-crawl` 分支，构建时恢复到 `.local/published-data/`；本站不再保存采集器或服务器手工部署脚本。
 
 ## 依赖安全
 

@@ -1,21 +1,21 @@
 import { analysisFor, hasContentAnalysis } from "./contentAnalysis";
 import { bilibiliItemsFor } from "./bilibiliSources";
 
-import oldWelfareSource from "../data/welfare.json";
-import tuanSource from "../data/welfare/0818tuan.json";
-import tuanTopSource from "../data/welfare/0818tuanTop.json";
-import zhuanyesSource from "../data/welfare/zhuanyes.json";
-import zhuanyesTopSource from "../data/welfare/zhuanyesTop.json";
-import daydayzhuanSource from "../data/welfare/daydayzhuan.json";
-import daydayzhuanTopSource from "../data/welfare/daydayzhuanTop.json";
-import zhujicepingSource from "../data/welfare/zhujiceping.json";
-import hamibotSource from "../data/welfare/hamibot.json";
-import keywordSearchSource from "../data/welfare/keyword-search.json";
-import welfareRadar from "../data/welfare-ecosystem.json";
+import oldWelfareSource from "@published/welfare.json";
+import tuanSource from "@published/welfare/0818tuan.json";
+import tuanTopSource from "@published/welfare/0818tuanTop.json";
+import zhuanyesSource from "@published/welfare/zhuanyes.json";
+import zhuanyesTopSource from "@published/welfare/zhuanyesTop.json";
+import daydayzhuanSource from "@published/welfare/daydayzhuan.json";
+import daydayzhuanTopSource from "@published/welfare/daydayzhuanTop.json";
+import zhujicepingSource from "@published/welfare/zhujiceping.json";
+import hamibotSource from "@published/welfare/hamibot.json";
+import keywordSearchSource from "@published/welfare/keyword-search.json";
+import welfareRadar from "@published/welfare-ecosystem.json";
 
-import pojieNews from "../data/52pojie.json";
-import kanxueNews from "../data/kanxue.json";
-import pojieEcosystemRadar from "../data/52pojie-ecosystem.json";
+import pojieNews from "@published/52pojie.json";
+import kanxueNews from "@published/kanxue.json";
+import pojieEcosystemRadar from "@published/52pojie-ecosystem.json";
 
 export interface PendingCandidate {
   domain: "welfare" | "pojie";

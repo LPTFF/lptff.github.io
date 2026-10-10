@@ -2,7 +2,7 @@
  * src/utils/sourceHealth.ts
  * 统一快照与采集健康状态管理工具库
  */
-import rawHealthData from "../data/health-status.json";
+import rawHealthData from "@published/health-status.json";
 
 export interface SnapshotSourceInfo {
   snapshotId: string;

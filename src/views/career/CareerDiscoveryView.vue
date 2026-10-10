@@ -1087,7 +1087,7 @@ import {
   clearCareerGeminiKey,
 } from "../../career/sync/career-bridge";
 import { parseResumeFile } from "../../career/parser";
-import publicJobsRaw from "../../data/zhipin.json";
+import publicJobsRaw from "@published/zhipin.json";
 
 const publicJobs = ref<MarketJobItem[]>(publicJobsRaw as MarketJobItem[]);
 
