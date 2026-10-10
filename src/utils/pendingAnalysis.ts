@@ -88,7 +88,6 @@ export function getWelfarePendingCandidates(): PendingCandidate[] {
 
 export function getPojiePendingCandidates(): PendingCandidate[] {
   const allPojieRaw = [
-    ...bilibiliItemsFor("pojie"),
     ...pojieNews,
     ...kanxueNews,
   ];

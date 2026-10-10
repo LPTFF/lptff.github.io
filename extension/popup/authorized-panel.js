@@ -142,7 +142,7 @@
   // 2. 平台卡片与作者分支
   for (const [platform, title, scope] of [
     ["douyin", "抖音 · 作者作品", "李子栗、独孤十一；默认目标最近 50 条作品。"],
-    ["bilibili", "哔哩哔哩 · 作者动态", "百科老王、国外主机测评、小迪老师、杨博士说AI；默认目标最近 50 条动态。"],
+    ["bilibili", "哔哩哔哩 · 作者动态", "百科老王、国外主机测评、杨博士说AI；默认目标最近 50 条动态。"],
   ]) {
     const article = document.createElement("article");
     article.className = "collection-card";

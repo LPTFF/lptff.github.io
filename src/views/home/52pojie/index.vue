@@ -60,7 +60,7 @@
           <el-tag size="small" :type="analysisModeInfo.tagType">{{ analysisModeInfo.label }}</el-tag>
           <el-tag size="small" :type="freshnessInfo.tagType">{{ freshnessInfo.label }}</el-tag>
         </div>
-        <p>青龙统一汇总吾爱破解、看雪、小迪老师、NodeSeek、LINUX DO 和 V2EX 的公开主题。优先使用官方公开 API 或 RSS，全程只保留标题、原帖链接、版块和来源发布时间，不采集 Cookie、正文、评论或账号资料。无法在青龙中稳定无人值守更新的来源不纳入页面。</p>
+        <p>青龙统一汇总吾爱破解、看雪、NodeSeek、LINUX DO 和 V2EX 的公开主题。优先使用官方公开 API 或 RSS，全程只保留标题、原帖链接、版块和来源发布时间，不采集 Cookie、正文、评论或账号资料。无法在青龙中稳定无人值守更新的来源不纳入页面。</p>
         <p>社区价值衡量话题对理解真实需求、技术采用、商业供需、平台变化、群体情绪或风险动向的观察价值；内容深度与趋势新颖度独立评分，均为 0–100。安全攻防只是其中一个主题，不再作为整页默认分类口径。</p>
         <p>观察视角按服务端结果筛选：高社区信号＝社区价值 ≥85；内容深入＝内容深度 ≥75；新趋势＝趋势新颖度 ≥75；主题演化＝存在相近主题分组；风险生态＝模型判为灰色滥用；轻量讨论＝内容深度 ≤50。主题、视角和观察源可组合筛选，风险与标签仅用于观察，不用于删帖或事实定性。</p>
         <p>全部来源按原始发帖时间从新到旧展示，看雪另保留本周热榜名次与热度。来源异常时保留上一份有效快照，并且不会把挑战页或登录页当作数据。</p>
@@ -268,7 +268,6 @@ import pojieNews from "@published/52pojie.json";
 import nodeseekNews from "@published/nodeseek.json";
 import linuxdoNews from "@published/linuxdo.json";
 import v2exNews from "@published/v2ex.json";
-import { bilibiliItemsFor } from "../../../utils/bilibiliSources";
 import SourceIcon from "./SourceIcon.vue";
 import ForumTagCloud from "./ForumTagCloud.vue";
 import kanxueNews from "@published/kanxue.json";
@@ -338,11 +337,6 @@ export default {
         ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
       }))
       .sort((a, b) => a.rank - b.rank);
-    const bilibiliItems = bilibiliItemsFor("pojie")
-      .map((item: any) => ({
-        ...item,
-        ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url),
-      }));
     const communityItems = [
       ...nodeseekNews,
       ...linuxdoNews,
@@ -354,7 +348,7 @@ export default {
         ecosystem: (item.stableId && ecosystemByStableId.get(item.stableId)) || ecosystemByUrl.get(item.url || item.link),
       }))
       .filter((item: any) => item.url && item.title && Number.isFinite(Number(item.timestamp)));
-    const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...bilibiliItems, ...communityItems]
+    const newsGuide: any[] = reactive([...pojieItems, ...kanxueItems, ...communityItems]
       .sort((a, b) => b.timestamp - a.timestamp || a.url.localeCompare(b.url)));
 
     const tagCounts = computed(() => countContentTags(newsGuide));
@@ -372,7 +366,6 @@ export default {
       { id: "all", label: "全部", count: newsGuide.length },
       { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
       { id: "kanxue", label: "看雪本周热榜", count: kanxueItems.length },
-      { id: "bilibili", label: "bilibili · 小迪老师", count: bilibiliItems.length },
       ...[
         ["nodeseek", "NodeSeek"],
         ["linuxdo", "LINUX DO"],
