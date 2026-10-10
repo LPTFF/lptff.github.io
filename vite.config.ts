@@ -1,10 +1,10 @@
 import { defineConfig, type Plugin } from "vite";
 import vue from "@vitejs/plugin-vue";
-import Markdown from "unplugin-vue-markdown/vite";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { live2dModelAssetsPlugin } from "./scripts/vite/live2d-model-assets";
+import { markdownComponentsPlugin } from "./scripts/vite/markdown-components";
 import fs from "node:fs";
 import path from "node:path";
 
@@ -109,6 +109,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       publishedDataPlugin(isPublished, overrideDir),
       live2dModelAssetsPlugin(),
+      markdownComponentsPlugin(),
       extensionDownloadPlugin(),
       staticRouteEntriesPlugin(),
       AutoImport({
@@ -119,9 +120,6 @@ export default defineConfig(({ mode }) => {
       }),
       vue({
         include: [/\.vue$/, /\.md$/],
-      }),
-      Markdown({
-        exclude: [/前端八股文汇总背诵版/],
       }),
     ],
     preview: {
