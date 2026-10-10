@@ -1,6 +1,6 @@
 <template>
   <div>
-    <GuideTagCloud :items="filteredNews" />
+    <GuideTagCloud v-model="selectedCloudTag" :items="radarFilteredNews" />
     <div class="ecosystem-panel">
       <section class="ecosystem-radar" aria-labelledby="guide-radar-title">
         <div>
@@ -294,6 +294,7 @@ export default {
     const selectedSource = ref("all");
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
+    const selectedCloudTag = ref<any>(null);
     const xiaohongshuNewsCount = xiaohongshuNews.length;
     const kuaishouNewsCount = kuaishouHotNews.length;
     const rawSourceDefinitions = [
@@ -508,7 +509,7 @@ export default {
       { key: "top", label: "热榜前列" },
       { key: "deep", label: "深度特稿" },
     ];
-    const filteredNews = computed(() =>
+    const radarFilteredNews = computed(() =>
       newsGuide.filter((item) => {
         if (selectedSource.value !== "all" && item.website !== selectedSource.value) {
           return false;
@@ -531,6 +532,18 @@ export default {
         }
       })
     );
+    const filteredNews = computed(() => {
+      if (!selectedCloudTag.value) return radarFilteredNews.value;
+      const matchingKeys = new Set(
+        (selectedCloudTag.value.items || []).map((item: any) => String(item.stableId || item.url || ""))
+      );
+      return radarFilteredNews.value.filter((item: any) =>
+        matchingKeys.has(String(item.stableId || item.url || ""))
+      );
+    });
+    watch([selectedCategory, selectedFocus, selectedSource], () => {
+      selectedCloudTag.value = null;
+    });
     const handleRankLabel = (item: any) => {
       const rankVal = item.rank;
       if (rankVal === undefined || rankVal === null || rankVal === "") return "";
@@ -835,11 +848,13 @@ export default {
       selectedSource,
       selectedCategory,
       selectedFocus,
+      selectedCloudTag,
       sourceFilters,
       totalNewsCount,
       categoryOptions,
       focusOptions,
       filteredNews,
+      radarFilteredNews,
       sourceHealth,
       collectionModeInfo,
       analysisModeInfo,

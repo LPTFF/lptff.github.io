@@ -1,6 +1,6 @@
 <template>
   <div>
-    <ForumTagCloud :items="filteredNews" />
+    <ForumTagCloud v-model="selectedCloudTag" :items="radarFilteredNews" />
     <section class="ecosystem-panel">
       <div class="ecosystem-radar">
         <div>
@@ -367,6 +367,7 @@ export default {
     const selectedCategory = ref("all");
     const selectedFocus = ref("all");
     const selectedSource = ref("all");
+    const selectedCloudTag = ref<any>(null);
     const sourceOptions = [
       { id: "all", label: "全部", count: newsGuide.length },
       { id: "52pojie", label: "吾爱破解", count: pojieItems.length },
@@ -393,7 +394,7 @@ export default {
       { key: "gray", label: "风险生态" },
       { key: "beginner", label: "轻量讨论" },
     ];
-    const filteredNews = computed(() =>
+    const radarFilteredNews = computed(() =>
       newsGuide.filter((item: any) => {
         if (selectedSource.value !== "all" && item.website !== selectedSource.value) return false;
         const ecosystem = item.ecosystem;
@@ -422,6 +423,18 @@ export default {
         }
       })
     );
+    const filteredNews = computed(() => {
+      if (!selectedCloudTag.value) return radarFilteredNews.value;
+      const matchingKeys = new Set(
+        (selectedCloudTag.value.items || []).map((item: any) => String(item.stableId || item.url || item.link || ""))
+      );
+      return radarFilteredNews.value.filter((item: any) =>
+        matchingKeys.has(String(item.stableId || item.url || item.link || ""))
+      );
+    });
+    watch([selectedCategory, selectedFocus, selectedSource], () => {
+      selectedCloudTag.value = null;
+    });
     const handleDay = (item: any) => {
       const date = new Date(item.timestamp);
       const day = date.getDate();
@@ -610,6 +623,7 @@ export default {
       selectedSource,
       selectedFocus,
       selectedCategory,
+      selectedCloudTag,
       handleDay,
       handleHour,
       gotoWelfareWebsite,
@@ -637,6 +651,7 @@ export default {
       analyzedCount,
       categoryCount,
       filteredNews,
+      radarFilteredNews,
       sourceHealth,
       collectionModeInfo,
       analysisModeInfo,
