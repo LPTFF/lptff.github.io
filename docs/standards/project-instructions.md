@@ -4,7 +4,7 @@
 
 ## 常用命令
 
-- `npm run serve`：先从 `origin/python-crawl` 安全恢复最新线上公开数据到忽略目录 `.local/published-data/`，再以发布快照模式启动 Vite；优先使用 8090，端口占用时自动选择后续空闲端口，以启动输出中的实际 URL 为准。
+- `npm run serve`：先从 `origin/python-crawl` 安全恢复最新线上公开数据到 `node_modules/.cache/lptff/published-data/`，再以发布快照模式启动 Vite；优先使用 8090，端口占用时自动选择后续空闲端口，以启动输出中的实际 URL 为准。
 - `npm run build`：恢复最新线上公开数据，运行 Vue/TypeScript 类型检查，生成可追溯构建标识，再以发布快照模式执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由 CI 步骤生成。
 - `npm audit --registry=https://registry.npmjs.org --audit-level=high`：按执行时的官方 Registry 事实阻断高危依赖，不在文档中长期声称固定的“0 漏洞”。
 - 公开来源采集只在 homeops/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。

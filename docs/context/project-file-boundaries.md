@@ -29,7 +29,7 @@ scripts/、extension/、public/ → 构建、CI、扩展发布和静态资源
 维护者 → docs/ 工作台
 ```
 
-禁止 `src/`、Vite 配置、npm scripts、扩展打包器或 CI import、执行或发布 `docs/` 内容。参考源码只用于阅读和重新生成经校验的项目产物；不要在其中保留 `node_modules`、`dist`、`.output` 等可重建内容。
+禁止 `src/`、Vite 配置、npm scripts、扩展打包器或 CI import、执行或发布 `docs/` 内容。外部参考仓库和一次性验证产物不在本仓库内长期保存；需要长期保留的结论进入正式文档，原始材料验收后删除。
 
 ## 迁移后的路径
 

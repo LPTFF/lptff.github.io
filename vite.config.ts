@@ -22,7 +22,7 @@ const publishedDataPlugin = (isPublished: boolean, overrideDir: string): Plugin 
   if (isPublished) {
     if (!fs.existsSync(overrideDir) || !fs.existsSync(path.join(overrideDir, "snapshot-meta.json"))) {
       throw new Error(
-        "【发布快照模式】本地快照目录 .local/published-data/ 不存在或缺少 snapshot-meta.json！请先运行 npm run serve 恢复快照。"
+        "【发布快照模式】本地发布快照缓存不存在或缺少 snapshot-meta.json！请先运行 npm run serve 恢复快照。"
       );
     }
   }
@@ -93,7 +93,7 @@ const staticRouteEntriesPlugin = (): Plugin => ({
 
 export default defineConfig(({ mode }) => {
   const isPublished = mode === "published" || process.env.USE_PUBLISHED_DATA === "true";
-  const overrideDir = path.resolve(__dirname, ".local/published-data");
+  const overrideDir = path.resolve(__dirname, "node_modules/.cache/lptff/published-data");
 
   return {
     base: "/",

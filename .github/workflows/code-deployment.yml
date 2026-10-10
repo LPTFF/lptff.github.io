@@ -72,7 +72,7 @@ jobs:
         run: node scripts/verify-build-tags.mjs
 
       - name: 审查公开数据字段白名单
-        run: node scripts/verify-public-whitelist.cjs .local/published-data
+        run: node scripts/verify-public-whitelist.cjs node_modules/.cache/lptff/published-data
 
       - name: 审查构建产物安全白名单
         run: node scripts/verify-public-whitelist.cjs dist

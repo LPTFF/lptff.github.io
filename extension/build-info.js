@@ -3,7 +3,7 @@
   var info = {
     version: "3.26.9",
     buildTag: "cand-3.26.9-4c278d4563",
-    builtAt: "2026-10-10T00:22:38.018Z"
+    builtAt: "2026-10-10T00:34:33.229Z"
   };
   if (typeof self !== "undefined") {
     self.__LPTFF_EXTENSION_BUILD_INFO__ = info;

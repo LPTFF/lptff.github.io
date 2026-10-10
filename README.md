@@ -94,7 +94,7 @@ npm run build
 
 GitHub Pages 使用根目录 `CNAME` 声明自定义域名 `lptff.github.io`；该文件是发布配置，不是页面业务源码。
 
-代码发布只走 GitHub Pages 工作流。公开数据由 HomeOps 采集并发布到 `python-crawl` 分支，构建时恢复到 `.local/published-data/`；本站不再保存采集器或服务器手工部署脚本。
+代码发布只走 GitHub Pages 工作流。公开数据由 HomeOps 采集并发布到 `python-crawl` 分支，构建时恢复到 `node_modules/.cache/lptff/published-data/`；本站不再保存采集器或服务器手工部署脚本。
 
 ## 依赖安全
 

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const repoRoot = path.resolve(__dirname, "..");
-const targetDir = path.resolve(repoRoot, ".local/published-data");
+const targetDir = path.resolve(repoRoot, "node_modules/.cache/lptff/published-data");
 
 function removeGeneratedDirectory(directory) {
   try {
@@ -125,7 +125,7 @@ async function main() {
   if (fs.lstatSync(localDir).isSymbolicLink() || (fs.existsSync(targetDir) && fs.lstatSync(targetDir).isSymbolicLink())) throw new Error("拒绝链接快照目录");
   const stagingDir = fs.mkdtempSync(path.join(localDir, "published-staging-"));
 
-  // 使用 git archive 管道解压至 .local/published-data
+  // 使用 git archive 管道解压至依赖目录下的可重建缓存
   await new Promise((resolve, reject) => {
     const gitProc = spawn("git", ["archive", "--format=tar", sha], {
       cwd: repoRoot,
@@ -196,7 +196,7 @@ async function main() {
   if (hasPrevious) removeGeneratedDirectory(backup);
   pruneGeneratedDirectories(localDir, new Set([path.basename(targetDir)]));
 
-  console.log(`[restore-published-snapshot] ✅ 快照已成功恢复至 .local/published-data/ (SHA: ${sha})`);
+  console.log(`[restore-published-snapshot] ✅ 快照已成功恢复至 node_modules/.cache/lptff/published-data/ (SHA: ${sha})`);
 }
 
 main().catch((err) => {
