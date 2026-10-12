@@ -1,9 +1,9 @@
 {
   "version": 1,
   "taxonomyVersion": 3,
-  "generatedAt": "2026-10-12T08:32:07.692709+00:00",
+  "generatedAt": "2026-10-12T08:38:13.835825+00:00",
   "model": "rule-fallback",
-  "snapshotId": "52pojie-ecosystem-20261012T083207Z-f0462522",
+  "snapshotId": "52pojie-ecosystem-20261012T083813Z-121fdad8",
   "analysisMode": "rule-fallback",
   "items": [
     {
@@ -1207,6 +1207,31 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "软件工程与开源",
+      "ecosystemValue": 90,
+      "technicalDepth": 95,
+      "trendNovelty": 75,
+      "signals": [
+        "C++虚表解剖",
+        "内存布局",
+        "glibc IO攻击链路"
+      ],
+      "tools": [
+        "C++",
+        "glibc"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "底层C++面向对象内存布局及高阶二进制漏洞利用链路的学术/技术研究。",
+      "summary": "C++虚表全解剖：从对象内存布局到glibc IO攻击链路的底层原理分析。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293186.htm",
+      "title": "[原创]C++ 虚表全解剖：从对象内存布局到 glibc IO 攻击链路",
+      "stableId": "kanxue:293186",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "网络安全与隐私",
       "ecosystemValue": 90,
       "technicalDepth": 92,
@@ -1227,32 +1252,6 @@
       "url": "https://bbs.kanxue.com/thread-293138.htm",
       "title": "[原创]基于 VMProtect授权锁架构的RSA算法另类Bypass思路",
       "stableId": "kanxue:293138",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 95,
-      "technicalDepth": 95,
-      "trendNovelty": 90,
-      "signals": [
-        "安卓16脱壳移植",
-        "syscall-trace",
-        "KPM隐藏Frida",
-        "内核级对抗"
-      ],
-      "tools": [
-        "Android 16",
-        "Frida"
-      ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "前沿安卓系统（Android 16）脱壳与内核级隐藏Frida的最新技术突破。",
-      "summary": "实现安卓16脱壳移植、syscall-trace及KPM隐藏Frida的技术分享。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293142.htm",
-      "title": "[原创]安卓16脱壳移植 syscall-trace  KPM隐藏frida",
-      "stableId": "kanxue:293142",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1284,27 +1283,28 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
-      "ecosystemValue": 90,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 95,
       "technicalDepth": 95,
-      "trendNovelty": 75,
+      "trendNovelty": 90,
       "signals": [
-        "C++虚表解剖",
-        "内存布局",
-        "glibc IO攻击链路"
+        "安卓16脱壳移植",
+        "syscall-trace",
+        "KPM隐藏Frida",
+        "内核级对抗"
       ],
       "tools": [
-        "C++",
-        "glibc"
+        "Android 16",
+        "Frida"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "底层C++面向对象内存布局及高阶二进制漏洞利用链路的学术/技术研究。",
-      "summary": "C++虚表全解剖：从对象内存布局到glibc IO攻击链路的底层原理分析。",
+      "evolutionNote": "前沿安卓系统（Android 16）脱壳与内核级隐藏Frida的最新技术突破。",
+      "summary": "实现安卓16脱壳移植、syscall-trace及KPM隐藏Frida的技术分享。",
       "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293186.htm",
-      "title": "[原创]C++ 虚表全解剖：从对象内存布局到 glibc IO 攻击链路",
-      "stableId": "kanxue:293186",
+      "url": "https://bbs.kanxue.com/thread-293142.htm",
+      "title": "[原创]安卓16脱壳移植 syscall-trace  KPM隐藏frida",
+      "stableId": "kanxue:293142",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1468,30 +1468,6 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 80,
-      "trendNovelty": 50,
-      "signals": [
-        "010 Editor",
-        "注册算法",
-        "注册机实现"
-      ],
-      "tools": [
-        "010 Editor"
-      ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "经典文本与十六进制编辑器注册机制逆向",
-      "summary": "详细剖析 010 Editor 的注册算法并实现注册机。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293074.htm",
-      "title": "[原创]010 Editor 注册算法分析与注册机实现",
-      "stableId": "kanxue:293074",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 70,
@@ -1512,6 +1488,30 @@
       "url": "https://bbs.kanxue.com/thread-293192.htm",
       "title": "[讨论]现在还有啥能挡住ai逆向么？",
       "stableId": "kanxue:293192",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 75,
+      "technicalDepth": 80,
+      "trendNovelty": 50,
+      "signals": [
+        "010 Editor",
+        "注册算法",
+        "注册机实现"
+      ],
+      "tools": [
+        "010 Editor"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "经典文本与十六进制编辑器注册机制逆向",
+      "summary": "详细剖析 010 Editor 的注册算法并实现注册机。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293074.htm",
+      "title": "[原创]010 Editor 注册算法分析与注册机实现",
+      "stableId": "kanxue:293074",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1562,6 +1562,28 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 70,
+      "technicalDepth": 75,
+      "trendNovelty": 50,
+      "signals": [
+        "逆向还原",
+        "七神分析",
+        "逆向工程"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "安全圈特定系列逆向分析文章的还原篇",
+      "summary": "发布某安全逆向分析系列的还原篇技术内容。",
+      "confidence": 0.88,
+      "url": "https://bbs.kanxue.com/thread-293130.htm",
+      "title": "[原创]七神分析之还原篇",
+      "stableId": "kanxue:293130",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 75,
@@ -1582,28 +1604,6 @@
       "url": "https://bbs.kanxue.com/thread-293109.htm",
       "title": "逆向已死：GPT-6-Astra 通杀传统CTF",
       "stableId": "kanxue:293109",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
-      "signals": [
-        "逆向还原",
-        "七神分析",
-        "逆向工程"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "安全圈特定系列逆向分析文章的还原篇",
-      "summary": "发布某安全逆向分析系列的还原篇技术内容。",
-      "confidence": 0.88,
-      "url": "https://bbs.kanxue.com/thread-293130.htm",
-      "title": "[原创]七神分析之还原篇",
-      "stableId": "kanxue:293130",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1747,6 +1747,30 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 80,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
+      "signals": [
+        "OIOIC",
+        "原生编译",
+        "代码保护方案"
+      ],
+      "tools": [
+        "OIOIC"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "新一代原生编译代码保护方案的技术解析",
+      "summary": "深度解析 OIOIC 原生编译代码保护方案的架构与安全机制。",
+      "confidence": 0.93,
+      "url": "https://bbs.kanxue.com/thread-293195.htm",
+      "title": "# OIOIC 原生编译新一代代码保护方案深度解析",
+      "stableId": "kanxue:293195",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "软件工程与开源",
       "ecosystemValue": 85,
       "technicalDepth": 85,
@@ -1821,30 +1845,6 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 80,
-      "technicalDepth": 85,
-      "trendNovelty": 80,
-      "signals": [
-        "OIOIC",
-        "原生编译",
-        "代码保护方案"
-      ],
-      "tools": [
-        "OIOIC"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "新一代原生编译代码保护方案的技术解析",
-      "summary": "深度解析 OIOIC 原生编译代码保护方案的架构与安全机制。",
-      "confidence": 0.93,
-      "url": "https://bbs.kanxue.com/thread-293195.htm",
-      "title": "# OIOIC 原生编译新一代代码保护方案深度解析",
-      "stableId": "kanxue:293195",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
       "ecosystemValue": 75,
       "technicalDepth": 80,
       "trendNovelty": 65,
@@ -1911,6 +1911,31 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 80,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
+      "signals": [
+        "ARM64",
+        "自定义VM",
+        "代码虚拟化",
+        "逆向还原"
+      ],
+      "tools": [
+        "ARM64"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "针对ARM64架构下自定义虚拟机保护的逆向分析与还原",
+      "summary": "分析并还原 ARM64 架构下的自定义虚拟保护（VM）机制。",
+      "confidence": 0.96,
+      "url": "https://bbs.kanxue.com/thread-293114.htm",
+      "title": "[原创]一个 ARM64 自定义 VM 的分析与还原",
+      "stableId": "kanxue:293114",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 80,
@@ -1933,6 +1958,31 @@
       "url": "https://bbs.kanxue.com/thread-293076.htm",
       "title": "[原创]酷狗音乐AI逆向-10分钟通杀所有IOS加密算法MCP",
       "stableId": "kanxue:293076",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 80,
+      "technicalDepth": 85,
+      "trendNovelty": 75,
+      "signals": [
+        "M-S签名逆向",
+        "Ascon",
+        "ChaCha20",
+        "补环境复现"
+      ],
+      "tools": [
+        "Node"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "从混淆烟雾弹到核心密码算法识别及Node补环境还原",
+      "summary": "记录某约稿平台 M-S 签名逆向过程，识别 ChaCha20 算法并进行 Node 黑盒补环境复现。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293164.htm",
+      "title": "[原创]某约稿平台 M-S 签名逆向：从 \"Ascon\" 烟雾弹到 ChaCha20 铁证，再到 Node 黑盒补环境复现",
+      "stableId": "kanxue:293164",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1964,51 +2014,23 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 80,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
+      "ecosystemValue": 75,
+      "technicalDepth": 80,
+      "trendNovelty": 65,
       "signals": [
-        "ARM64",
-        "自定义VM",
-        "代码虚拟化",
-        "逆向还原"
+        "代理程序逆向",
+        "流量分析",
+        "逆向工程"
       ],
-      "tools": [
-        "ARM64"
-      ],
+      "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对ARM64架构下自定义虚拟机保护的逆向分析与还原",
-      "summary": "分析并还原 ARM64 架构下的自定义虚拟保护（VM）机制。",
-      "confidence": 0.96,
-      "url": "https://bbs.kanxue.com/thread-293114.htm",
-      "title": "[原创]一个 ARM64 自定义 VM 的分析与还原",
-      "stableId": "kanxue:293114",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 80,
-      "technicalDepth": 85,
-      "trendNovelty": 75,
-      "signals": [
-        "M-S签名逆向",
-        "Ascon",
-        "ChaCha20",
-        "补环境复现"
-      ],
-      "tools": [
-        "Node"
-      ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "从混淆烟雾弹到核心密码算法识别及Node补环境还原",
-      "summary": "记录某约稿平台 M-S 签名逆向过程，识别 ChaCha20 算法并进行 Node 黑盒补环境复现。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293164.htm",
-      "title": "[原创]某约稿平台 M-S 签名逆向：从 \"Ascon\" 烟雾弹到 ChaCha20 铁证，再到 Node 黑盒补环境复现",
-      "stableId": "kanxue:293164",
+      "evolutionNote": "对特定网络代理工具的逆向与行为分析",
+      "summary": "对某代理程序进行逆向分析，探究其底层实现与通信逻辑。",
+      "confidence": 0.93,
+      "url": "https://bbs.kanxue.com/thread-293189.htm",
+      "title": "[原创]某代理程序的逆向分析",
+      "stableId": "kanxue:293189",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -2124,28 +2146,6 @@
       "url": "https://bbs.kanxue.com/thread-293156.htm",
       "title": "[原创] 安全和开发场景下大模型使用经验随笔",
       "stableId": "kanxue:293156",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
-      "signals": [
-        "代理程序逆向",
-        "流量分析",
-        "逆向工程"
-      ],
-      "tools": [],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "对特定网络代理工具的逆向与行为分析",
-      "summary": "对某代理程序进行逆向分析，探究其底层实现与通信逻辑。",
-      "confidence": 0.93,
-      "url": "https://bbs.kanxue.com/thread-293189.htm",
-      "title": "[原创]某代理程序的逆向分析",
-      "stableId": "kanxue:293189",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
