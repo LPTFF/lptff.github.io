@@ -1,9 +1,9 @@
 {
   "version": 1,
   "taxonomyVersion": 3,
-  "generatedAt": "2026-10-12T04:32:08.671521+00:00",
+  "generatedAt": "2026-10-12T04:38:11.954574+00:00",
   "model": "rule-fallback",
-  "snapshotId": "52pojie-ecosystem-20261012T043208Z-232fd6a2",
+  "snapshotId": "52pojie-ecosystem-20261012T043811Z-33efb1a2",
   "analysisMode": "rule-fallback",
   "items": [
     {
@@ -1239,6 +1239,55 @@
     },
     {
       "category": "网络安全与隐私",
+      "ecosystemValue": 95,
+      "technicalDepth": 95,
+      "trendNovelty": 90,
+      "signals": [
+        "Android PIN解锁",
+        "Gatekeeper",
+        "TEE",
+        "KeyMint"
+      ],
+      "tools": [
+        "Gatekeeper",
+        "TEE",
+        "KeyMint"
+      ],
+      "riskType": "dual_use",
+      "duplicateGroup": null,
+      "evolutionNote": "深入安卓操作系统底层可信执行环境与凭据加密解封机制的高级安全研究。",
+      "summary": "Android PIN解锁全链路解析：Gatekeeper、TEE、KeyMint与FBE密钥解封。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293176.htm",
+      "title": "[原创] Android PIN 解锁全链路：Gatekeeper · TEE · KeyMint 与 FBE 密钥解封",
+      "stableId": "kanxue:293176",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "软件工程与开源",
+      "ecosystemValue": 80,
+      "technicalDepth": 95,
+      "trendNovelty": 50,
+      "signals": [
+        "C++虚表",
+        "内存布局",
+        "glibc IO攻击"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "底层C++面向对象机制与高级二进制漏洞利用攻击链路的连贯梳理。",
+      "summary": "全面剖析C++虚表，从对象底层内存布局一直延伸至glibc IO攻击链路。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293186.htm",
+      "title": "[原创]C++ 虚表全解剖：从对象内存布局到 glibc IO 攻击链路",
+      "stableId": "kanxue:293186",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
       "ecosystemValue": 75,
       "technicalDepth": 80,
       "trendNovelty": 50,
@@ -1277,33 +1326,6 @@
       "url": "https://bbs.kanxue.com/thread-293116.htm",
       "title": "[原创][原创]银狐木马深度剖析：手工拆解三层自解密壳与 48KB 最终载荷",
       "stableId": "kanxue:293116",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 95,
-      "technicalDepth": 95,
-      "trendNovelty": 90,
-      "signals": [
-        "Android PIN解锁",
-        "Gatekeeper",
-        "TEE",
-        "KeyMint"
-      ],
-      "tools": [
-        "Gatekeeper",
-        "TEE",
-        "KeyMint"
-      ],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "深入安卓操作系统底层可信执行环境与凭据加密解封机制的高级安全研究。",
-      "summary": "Android PIN解锁全链路解析：Gatekeeper、TEE、KeyMint与FBE密钥解封。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293176.htm",
-      "title": "[原创] Android PIN 解锁全链路：Gatekeeper · TEE · KeyMint 与 FBE 密钥解封",
-      "stableId": "kanxue:293176",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1397,6 +1419,28 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "AI与开发工具",
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
+      "signals": [
+        "AI时代逆向",
+        "动态分析框架",
+        "大模型辅助逆向"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": "ai_reverse_engineering",
+      "evolutionNote": "探讨AI大模型赋能下动态分析框架的变革。",
+      "summary": "探讨在AI时代背景下，逆向工程中动态分析框架的设计与演进。",
+      "confidence": 0.9,
+      "url": "https://bbs.kanxue.com/thread-293115.htm",
+      "title": "[原创]AI时代逆向分析：动态分析框架",
+      "stableId": "kanxue:293115",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
       "technicalDepth": 85,
@@ -1422,23 +1466,23 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
+      "ecosystemValue": 85,
+      "technicalDepth": 65,
       "trendNovelty": 85,
       "signals": [
-        "AI时代逆向",
-        "动态分析框架",
-        "大模型辅助逆向"
+        "AI逆向",
+        "安全防御失效",
+        "社区情绪探讨"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": "ai_reverse_engineering",
-      "evolutionNote": "探讨AI大模型赋能下动态分析框架的变革。",
-      "summary": "探讨在AI时代背景下，逆向工程中动态分析框架的设计与演进。",
+      "evolutionNote": "社区针对AI对传统安全防御边界冲击的讨论。",
+      "summary": "探讨当前传统安全保护机制在强大的AI逆向能力面前是否还能保持防御效果。",
       "confidence": 0.9,
-      "url": "https://bbs.kanxue.com/thread-293115.htm",
-      "title": "[原创]AI时代逆向分析：动态分析框架",
-      "stableId": "kanxue:293115",
+      "url": "https://bbs.kanxue.com/thread-293192.htm",
+      "title": "[讨论]现在还有啥能挡住ai逆向么？",
+      "stableId": "kanxue:293192",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1491,28 +1535,6 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
-      "technicalDepth": 65,
-      "trendNovelty": 85,
-      "signals": [
-        "AI逆向",
-        "安全防御失效",
-        "社区情绪探讨"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": "ai_reverse_engineering",
-      "evolutionNote": "社区针对AI对传统安全防御边界冲击的讨论。",
-      "summary": "探讨当前传统安全保护机制在强大的AI逆向能力面前是否还能保持防御效果。",
-      "confidence": 0.9,
-      "url": "https://bbs.kanxue.com/thread-293192.htm",
-      "title": "[讨论]现在还有啥能挡住ai逆向么？",
-      "stableId": "kanxue:293192",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "AI与开发工具",
-      "ecosystemValue": 85,
       "technicalDepth": 75,
       "trendNovelty": 90,
       "signals": [
@@ -1553,6 +1575,28 @@
       "url": "https://bbs.kanxue.com/thread-293130.htm",
       "title": "[原创]七神分析之还原篇",
       "stableId": "kanxue:293130",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "职业成长与独立开发",
+      "ecosystemValue": 75,
+      "technicalDepth": 70,
+      "trendNovelty": 60,
+      "signals": [
+        "安卓逆向",
+        "正向开发",
+        "MuzicBox项目"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "从正向开发角度剖析逆向原理的系列教程第一篇。",
+      "summary": "通过MuzicBox项目规划与创建，开始安卓逆向负基础的正向开发实践系列。",
+      "confidence": 0.9,
+      "url": "https://bbs.kanxue.com/thread-293182.htm",
+      "title": "[原创]《安卓逆向负基础之正向开发实践》01：MuzicBox 项目规划与工程创建",
+      "stableId": "kanxue:293182",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1623,28 +1667,6 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 75,
-      "trendNovelty": 20,
-      "signals": [
-        "CVE-2010-2883",
-        "漏洞分析",
-        "历史漏洞"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "经典历史漏洞的复现与原理剖析报告。",
-      "summary": "发布针对CVE-2010-2883漏洞的详细分析报告。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293150.htm",
-      "title": "[原创]CVE-2010-2883漏洞分析报告",
-      "stableId": "kanxue:293150",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 80,
@@ -1669,24 +1691,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "职业成长与独立开发",
-      "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 60,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 70,
+      "technicalDepth": 75,
+      "trendNovelty": 20,
       "signals": [
-        "安卓逆向",
-        "正向开发",
-        "MuzicBox项目"
+        "CVE-2010-2883",
+        "漏洞分析",
+        "历史漏洞"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "从正向开发角度剖析逆向原理的系列教程第一篇。",
-      "summary": "通过MuzicBox项目规划与创建，开始安卓逆向负基础的正向开发实践系列。",
-      "confidence": 0.9,
-      "url": "https://bbs.kanxue.com/thread-293182.htm",
-      "title": "[原创]《安卓逆向负基础之正向开发实践》01：MuzicBox 项目规划与工程创建",
-      "stableId": "kanxue:293182",
+      "evolutionNote": "经典历史漏洞的复现与原理剖析报告。",
+      "summary": "发布针对CVE-2010-2883漏洞的详细分析报告。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293150.htm",
+      "title": "[原创]CVE-2010-2883漏洞分析报告",
+      "stableId": "kanxue:293150",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1716,6 +1738,30 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "AI与开发工具",
+      "ecosystemValue": 85,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
+      "signals": [
+        "OpenSecurity 2.0",
+        "无人值守",
+        "CTF Web挑战"
+      ],
+      "tools": [
+        "OpenSecurity 2.0"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "全自动智能Agent在解决网络安全Web竞赛挑战方面的进展。",
+      "summary": "介绍OpenSecurity 2.0系统实现无人值守完成所有CTF Web挑战的能力。",
+      "confidence": 0.9,
+      "url": "https://bbs.kanxue.com/thread-293120.htm",
+      "title": "[原创] OpenSecurity 2.0 无人值守完成 CTF 所有 Web 挑战",
+      "stableId": "kanxue:293120",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "软件工程与开源",
       "ecosystemValue": 80,
       "technicalDepth": 85,
@@ -1741,6 +1787,30 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
+      "category": "软件工程与开源",
+      "ecosystemValue": 85,
+      "technicalDepth": 90,
+      "trendNovelty": 85,
+      "signals": [
+        "OIOIC",
+        "原生编译",
+        "代码保护方案"
+      ],
+      "tools": [
+        "OIOIC"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "介绍新一代基于原生编译的代码保护与防反编译技术。",
+      "summary": "深度解析OIOIC原生编译新一代代码保护方案的技术原理与架构。",
+      "confidence": 0.9,
+      "url": "https://bbs.kanxue.com/thread-293195.htm",
+      "title": "# OIOIC 原生编译新一代代码保护方案深度解析",
+      "stableId": "kanxue:293195",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
       "category": "网络安全与隐私",
       "ecosystemValue": 80,
       "technicalDepth": 85,
@@ -1759,30 +1829,6 @@
       "url": "https://bbs.kanxue.com/thread-293121.htm",
       "title": "[原创]hook libpairipcore.so",
       "stableId": "kanxue:293121",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "AI与开发工具",
-      "ecosystemValue": 85,
-      "technicalDepth": 85,
-      "trendNovelty": 85,
-      "signals": [
-        "OpenSecurity 2.0",
-        "无人值守",
-        "CTF Web挑战"
-      ],
-      "tools": [
-        "OpenSecurity 2.0"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "全自动智能Agent在解决网络安全Web竞赛挑战方面的进展。",
-      "summary": "介绍OpenSecurity 2.0系统实现无人值守完成所有CTF Web挑战的能力。",
-      "confidence": 0.9,
-      "url": "https://bbs.kanxue.com/thread-293120.htm",
-      "title": "[原创] OpenSecurity 2.0 无人值守完成 CTF 所有 Web 挑战",
-      "stableId": "kanxue:293120",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -1832,30 +1878,6 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
-      "ecosystemValue": 85,
-      "technicalDepth": 90,
-      "trendNovelty": 85,
-      "signals": [
-        "OIOIC",
-        "原生编译",
-        "代码保护方案"
-      ],
-      "tools": [
-        "OIOIC"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "介绍新一代基于原生编译的代码保护与防反编译技术。",
-      "summary": "深度解析OIOIC原生编译新一代代码保护方案的技术原理与架构。",
-      "confidence": 0.9,
-      "url": "https://bbs.kanxue.com/thread-293195.htm",
-      "title": "# OIOIC 原生编译新一代代码保护方案深度解析",
-      "stableId": "kanxue:293195",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 85,
@@ -1877,28 +1899,6 @@
       "url": "https://bbs.kanxue.com/thread-293076.htm",
       "title": "[原创]酷狗音乐AI逆向-10分钟通杀所有IOS加密算法MCP",
       "stableId": "kanxue:293076",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "软件工程与开源",
-      "ecosystemValue": 80,
-      "technicalDepth": 95,
-      "trendNovelty": 50,
-      "signals": [
-        "C++虚表",
-        "内存布局",
-        "glibc IO攻击"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "底层C++面向对象机制与高级二进制漏洞利用攻击链路的连贯梳理。",
-      "summary": "全面剖析C++虚表，从对象底层内存布局一直延伸至glibc IO攻击链路。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293186.htm",
-      "title": "[原创]C++ 虚表全解剖：从对象内存布局到 glibc IO 攻击链路",
-      "stableId": "kanxue:293186",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
@@ -2001,28 +2001,6 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 80,
-      "technicalDepth": 85,
-      "trendNovelty": 50,
-      "signals": [
-        "恶意代码分析",
-        "进程镂空",
-        "XOR解密"
-      ],
-      "tools": [],
-      "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "对经典恶意软件行为（进程镂空与xor解密）的样本技术剖析。",
-      "summary": "分析恶意代码中的进程镂空技术以及XOR解密实现细节。",
-      "confidence": 0.95,
-      "url": "https://bbs.kanxue.com/thread-293159.htm",
-      "title": "[原创]恶意代码分析-进程镂空 xor解密",
-      "stableId": "kanxue:293159",
-      "analysisMode": "gemini",
-      "modelUsed": "gemini-3.5-flash-lite"
-    },
-    {
-      "category": "网络安全与隐私",
       "ecosystemValue": 85,
       "technicalDepth": 85,
       "trendNovelty": 75,
@@ -2041,6 +2019,28 @@
       "url": "https://bbs.kanxue.com/thread-293131.htm",
       "title": "[原创] 某网站瑞数6反爬逆向：从 412 拦截到借道浏览器会话，一次性翻完全部页列表",
       "stableId": "kanxue:293131",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 80,
+      "technicalDepth": 85,
+      "trendNovelty": 50,
+      "signals": [
+        "恶意代码分析",
+        "进程镂空",
+        "XOR解密"
+      ],
+      "tools": [],
+      "riskType": "gray_abuse",
+      "duplicateGroup": null,
+      "evolutionNote": "对经典恶意软件行为（进程镂空与xor解密）的样本技术剖析。",
+      "summary": "分析恶意代码中的进程镂空技术以及XOR解密实现细节。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293159.htm",
+      "title": "[原创]恶意代码分析-进程镂空 xor解密",
+      "stableId": "kanxue:293159",
       "analysisMode": "gemini",
       "modelUsed": "gemini-3.5-flash-lite"
     },
