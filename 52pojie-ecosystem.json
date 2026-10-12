@@ -1,28 +1,28 @@
 {
   "version": 1,
   "taxonomyVersion": 3,
-  "generatedAt": "2026-10-12T22:38:10.203343+00:00",
-  "model": "rule-fallback",
-  "snapshotId": "52pojie-ecosystem-20261012T223810Z-53e39032",
-  "analysisMode": "rule-fallback",
+  "generatedAt": "2026-10-12T22:43:25.310047+00:00",
+  "model": "gemini-3.5-flash-lite",
+  "snapshotId": "52pojie-ecosystem-20261012T224325Z-53e39032",
+  "analysisMode": "gemini",
   "items": [
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 40,
+      "technicalDepth": 75,
+      "trendNovelty": 65,
       "signals": [
-        "TLS校验缺失",
-        "Android安全分析",
+        "TLS证书校验缺失",
+        "Android逆向分析",
         "云管控客户端"
       ],
       "tools": [
-        "Android"
+        "博喻云管控"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "分析云管控类App证书校验机制的常见缺陷",
-      "summary": "研究移动端应用在传输层安全性上的常见配置疏漏",
+      "evolutionNote": "分析客户端安全机制与传输层校验漏洞。",
+      "summary": "讨论博喻云管控 Android 客户端在 TLS 证书与主机名校验上的缺失问题。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2131998-1-1.html",
       "title": "【原创】博喻云管控 Android 客户端 TLS 证书与主机名校验缺失分析",
@@ -31,19 +31,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "数字服务与订阅",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 40,
-      "technicalDepth": 10,
+      "technicalDepth": 20,
       "trendNovelty": 20,
       "signals": [
         "永久会员",
-        "自习室APP"
+        "应用授权绕过",
+        "清单自习室"
       ],
-      "tools": [],
+      "tools": [
+        "清单自习室"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "涉及效率工具的会员激活或解锁状态讨论",
-      "summary": "围绕特定自习室应用订阅权益展开的用户分享",
+      "evolutionNote": "常见消费级应用的激活授权讨论。",
+      "summary": "涉及清单自习室永久会员相关的激活与授权分享。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2131131-1-1.html",
       "title": "清单自习室永久会员",
@@ -57,16 +60,17 @@
       "technicalDepth": 80,
       "trendNovelty": 85,
       "signals": [
-        "AI自动化安全环境",
-        "逆向工程集成"
+        "AI自动化研究",
+        "安全研究环境",
+        "r0env2026"
       ],
       "tools": [
         "r0env2026"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探索将大模型与安全逆向环境结合的自动化方案",
-      "summary": "构建结合人工智能的自动化安全研究与逆向运行环境",
+      "evolutionNote": "反映AI赋能安全逆向环境的集成与自动化趋势。",
+      "summary": "介绍r0env2026：面向AI自动化的安全研究环境搭建。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2130961-1-1.html",
       "title": "r0env2026：AI 自动化安全研究环境",
@@ -76,20 +80,21 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "ecosystemValue": 70,
+      "technicalDepth": 70,
+      "trendNovelty": 50,
       "signals": [
         "Android逆向",
-        "应用分析"
+        "应用逆向分析",
+        "清浊"
       ],
       "tools": [
         "清浊"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "对国内工具类App进行常规逆向与内部结构分析",
-      "summary": "探讨某清理工具App的技术实现与逆向流程",
+      "evolutionNote": "针对具体Android工具软件的代码结构分析。",
+      "summary": "对Android应用清浊 2.1.9 版本进行逆向分析。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2130835-1-1.html",
       "title": "【Android】清浊 2.1.9 逆向分析",
@@ -98,20 +103,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 55,
+      "technicalDepth": 65,
+      "trendNovelty": 40,
       "signals": [
-        "VIP破解",
+        "VIP功能解锁",
         "签名绕过",
         "记账APP"
       ],
       "tools": [],
       "riskType": "gray_abuse",
-      "duplicateGroup": null,
-      "evolutionNote": "针对常见移动应用内购及签名的基础破解研究",
-      "summary": "分析记账应用中VIP权益验证机制及签名校验绕过方法",
+      "duplicateGroup": "vip_bypass_group",
+      "evolutionNote": "移动应用内购与VIP验证绕过的常规技术实践。",
+      "summary": "探讨某记账APP的永久VIP功能和签名绕过实现。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2130752-1-1.html",
       "title": "某记账APP的永久VIP功能和签名绕过等",
@@ -122,18 +127,19 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "technicalDepth": 75,
+      "trendNovelty": 50,
       "signals": [
-        "逆向还原",
-        "加固分析"
+        "逆向分析",
+        "还原篇",
+        "七神分析"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "属于作者系列安全逆向分析文章之一",
-      "summary": "分享特定加固与混淆样本的还原技巧",
-      "confidence": 0.9,
+      "evolutionNote": "安全圈内的特定样本还原与逆向复盘。",
+      "summary": "分享关于七神分析之还原篇的技术复盘。",
+      "confidence": 0.85,
       "url": "https://www.52pojie.cn/thread-2130745-1-1.html",
       "title": "七神分析之还原篇",
       "stableId": "52pojie:2130745",
@@ -141,19 +147,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "游戏与数字娱乐",
-      "ecosystemValue": 65,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 70,
+      "technicalDepth": 70,
+      "trendNovelty": 50,
       "signals": [
         "买断制游戏",
-        "游戏逆向"
+        "通杀分析",
+        "授权机制"
       ],
       "tools": [],
-      "riskType": "gray_abuse",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "探讨买断制游戏的通用逆向与保护机制突破思路",
-      "summary": "对单机买断制游戏的授权验证进行通杀分析",
+      "evolutionNote": "探讨数字游戏买断制与本地验证通用的绕过思路。",
+      "summary": "探讨买断制游戏的通杀分析与授权机制研究。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2130620-1-1.html",
       "title": "买断制游戏通杀分析",
@@ -163,20 +170,20 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 40,
+      "ecosystemValue": 75,
+      "technicalDepth": 65,
+      "trendNovelty": 60,
       "signals": [
         "摇一摇广告",
-        "广告触发分析",
+        "触发流程分析",
         "地图APP"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "分析App通过重力感应或陀螺仪主动触发广告的对抗技术",
-      "summary": "拆解某地图应用中利用摇一摇拉起广告的业务逻辑与触发流程",
-      "confidence": 0.95,
+      "evolutionNote": "分析移动应用中常见陀螺仪/加速度计广告触发机制。",
+      "summary": "分析某地图 APP 摇一摇广告的触发流程及逻辑。",
+      "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2130000-1-1.html",
       "title": "某地图 APP 摇一摇广告触发流程分析",
       "stableId": "52pojie:2130000",
@@ -186,21 +193,21 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 75,
+      "technicalDepth": 75,
+      "trendNovelty": 80,
       "signals": [
         "AI辅助逆向",
-        "登录接口逆向",
-        "运动健康APP"
+        "接口逆向",
+        "咕咚"
       ],
       "tools": [
-        "DeepSeek",
-        "AI"
+        "AI",
+        "咕咚"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "体现AI辅助协议逆向和抓包分析的实际应用",
-      "summary": "利用AI大模型辅助逆向分析运动软件的登录与数据上传协议",
+      "evolutionNote": "展示大模型在移动应用接口逆向与协议解析中的辅助作用。",
+      "summary": "借助AI实现运动软件咕咚的登录及上传接口逆向。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2129895-1-1.html",
       "title": "借助ai实现咕咚的登录以及上传接口的逆向",
@@ -211,20 +218,20 @@
     {
       "category": "云服务与基础设施",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 40,
+      "technicalDepth": 80,
+      "trendNovelty": 60,
       "signals": [
+        "自动化测试",
         "自研ROM",
-        "安卓模拟器",
-        "自动化测试踩坑"
+        "安卓模拟器"
       ],
       "tools": [
-        "Android"
+        "ROM"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "总结安卓自动化测试中构建定制ROM与模拟器的工程经验",
-      "summary": "分享企业或开发者在自研安卓模拟器及测试ROM过程中的踩坑经验",
+      "evolutionNote": "移动端自动化测试基础设施的深度建设经验分享。",
+      "summary": "分享安卓自动化测试中自研ROM和模拟器的踩坑经验。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2129424-1-1.html",
       "title": "安卓自动化测试自研rom和安卓模拟器-踩坑分享",
@@ -233,21 +240,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 60,
+      "technicalDepth": 65,
+      "trendNovelty": 45,
       "signals": [
         "车机助手",
-        "激活绕过",
+        "激活验证绕过",
         "逆向破解"
       ],
-      "tools": [],
+      "tools": [
+        "星愿车机助手"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "针对特定车载系统应用授权验证的分析",
-      "summary": "星愿车机助手激活验证绕过的完整逆向教程",
-      "confidence": 0.9,
+      "evolutionNote": "针对车载智能软件激活机制的破解教程。",
+      "summary": "星愿车机助手3.4.6激活验证绕过完整教程。",
+      "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2127435-1-1.html",
       "title": "【逆向破解】星愿车机助手3.4.6 激活验证绕过完整教程",
       "stableId": "52pojie:2127435",
@@ -255,24 +264,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "AI与开发工具",
       "ecosystemValue": 90,
-      "technicalDepth": 85,
+      "technicalDepth": 90,
       "trendNovelty": 90,
       "signals": [
-        "AI逆向大模型",
+        "大模型逆向",
         "Frida Stalker",
-        "梆梆加固绕过"
+        "银行App检测绕过"
       ],
       "tools": [
         "GLM-5.3",
-        "Frida"
+        "Frida Stalker"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "展示新一代逆向大模型结合底层指令跟踪绕过金融级加固的极高强度对抗",
-      "summary": "利用大模型驱动Frida Stalker实现银行应用加固对抗的技术探索",
-      "confidence": 0.95,
+      "evolutionNote": "利用高能力AI突破金融级移动应用加固与安全检测。",
+      "summary": "探讨利用逆向大模型驱动Frida Stalker绕过银行App检测。",
+      "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2126497-1-1.html",
       "title": "最强逆向大模型GLM-5.3无道德无限制驱动Frida Stalker绕过银行某梆检测",
       "stableId": "52pojie:2126497",
@@ -281,21 +290,21 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
+      "ecosystemValue": 80,
+      "technicalDepth": 80,
+      "trendNovelty": 75,
       "signals": [
-        "虚拟定位",
-        "高危后门分析",
-        "恶意行为审计"
+        "后门分析",
+        "高危漏洞",
+        "Fake Location"
       ],
       "tools": [
         "Fake Location"
       ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "fake_location_analysis",
-      "evolutionNote": "针对知名虚拟定位工具后门风险的安全审计",
-      "summary": "对Fake Location 1.5.2版本中存在的安全后门进行深度剖析",
+      "riskType": "normal",
+      "duplicateGroup": "fake_location_backdoor",
+      "evolutionNote": "对热门虚拟定位工具供应链安全与后门的深度排查。",
+      "summary": "对 Fake Location 1.5.2 版本中存在的高危后门进行分析。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2126060-1-1.html",
       "title": "Fake Location 1.5.2 高危后门分析",
@@ -306,18 +315,18 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "technicalDepth": 70,
+      "trendNovelty": 50,
       "signals": [
-        "应用商店接口",
-        "小米主题商店",
-        "API逆向"
+        "主题商店",
+        "接口逆向",
+        "某米主题商店"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "对厂商官方应用市场接口与数据格式的逆向分析",
-      "summary": "分析某米主题商店的后端接口调用方式及数据结构",
+      "evolutionNote": "主流手机厂商应用商店后端API的逆向研究。",
+      "summary": "某米主题商店接口逆向分析与协议调研。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2125273-1-1.html",
       "title": "某米主题商店接口逆向分析",
@@ -328,20 +337,20 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 45,
+      "technicalDepth": 85,
+      "trendNovelty": 70,
       "signals": [
-        "Unity脱壳",
-        "签名校验",
-        "热更新DLL逆向"
+        "Unity加固",
+        "脱壳",
+        "热更DLL"
       ],
       "tools": [
         "Unity"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "综合运用脱壳、重签名及热更代码逆向的Unity游戏分析",
-      "summary": "针对加固Unity儿童教育App的脱壳、签名校验移除与热更新DLL逆向全记录",
+      "evolutionNote": "针对Unity引擎儿童教育类App的深度加固对抗分析。",
+      "summary": "加固的 Unity 儿童教育APP：脱壳、签名校验三连及热更DLL逆向。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2123294-1-1.html",
       "title": "加固的 Unity 儿童教育（**巴士学汉字） APP：脱壳、签名校验三连、热更 DLL 硬刚",
@@ -352,18 +361,20 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 50,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
         "VMP分析",
-        "快手逆向",
-        "虚拟机保护"
+        "代码还原",
+        "快手"
       ],
-      "tools": [],
-      "riskType": "normal",
+      "tools": [
+        "快手"
+      ],
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "探讨短视频大厂App采用的虚拟机保护(VMP)技术还原",
-      "summary": "对短视频应用快手的VMP保护机制进行分析与还原",
+      "evolutionNote": "针对短视频巨头应用自定义虚拟机保护（VMP）的逆向挑战。",
+      "summary": "快手虚拟机保护（VMP）分析与指令还原。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2123217-1-1.html",
       "title": "快手 VMP 分析与还原",
@@ -373,21 +384,21 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 20,
+      "ecosystemValue": 75,
+      "technicalDepth": 75,
+      "trendNovelty": 40,
       "signals": [
         "安全靶场",
-        "漏洞复现",
-        "CTF"
+        "漏洞全解",
+        "Allsafe"
       ],
       "tools": [
         "Allsafe"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "针对移动端安全学习靶场的全通关解析",
-      "summary": "Allsafe移动安全靶场的全套解题思路分享",
+      "evolutionNote": "移动端应用安全靶场的通关演练与教学。",
+      "summary": "Allsafe靶场全解及相关移动安全漏洞复现。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2122890-1-1.html",
       "title": "Allsafe靶场全解",
@@ -398,20 +409,20 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
+      "technicalDepth": 85,
       "trendNovelty": 80,
       "signals": [
         "自动逆向工具",
-        "看雪CTF",
-        "源码解析"
+        "CTF实战",
+        "r0re"
       ],
       "tools": [
         "r0re"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "自动化逆向工具在实际CTF比赛中的应用与源码剖析",
-      "summary": "使用r0re自动逆向分析工具通关看雪Android CTF的实战记录",
+      "evolutionNote": "展示自动化逆向分析工具在安全竞赛中的实战落地。",
+      "summary": "r0re 自动逆向分析工具实战记录：全通看雪 Android CTF。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2122552-1-1.html",
       "title": "r0re 自动逆向分析工具实战记录：全通看雪 Android CTF，完整使用指南和源码解析",
@@ -420,20 +431,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 65,
+      "technicalDepth": 70,
+      "trendNovelty": 55,
       "signals": [
-        "抓包分析",
-        "体育作业APP",
-        "协议逆向"
+        "抓包研究",
+        "刷作业",
+        "天天跳绳"
       ],
-      "tools": [],
+      "tools": [
+        "天天跳绳"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "针对运动打卡类App的通信协议抓包与自动化研究",
-      "summary": "研究天天跳绳App的抓包方法与作业数据提交逻辑",
+      "evolutionNote": "针对运动打卡类教育软件的协议逆向与数据模拟。",
+      "summary": "针对天天跳绳逆向抓包，刷作业机制的研究。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2122540-1-1.html",
       "title": "针对天天跳绳逆向抓包，刷作业的研究",
@@ -443,11 +456,10 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 75,
+      "ecosystemValue": 85,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
       "signals": [
-        "AI辅助逆向",
         "MT管理器",
         "DeepSeek",
         "会员解锁"
@@ -458,8 +470,8 @@
       ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "展示通用移动端文件管理器配合大模型进行低门槛逆向的范例",
-      "summary": "结合MT管理器与DeepSeek实现录屏软件会员权益解锁的新玩法",
+      "evolutionNote": "典型国产AI大模型与老牌安卓逆向神器的生态结合案例。",
+      "summary": "MT管理器结合DeepSeek AI实现录屏软件会员解锁新玩法。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2119351-1-1.html",
       "title": "MT管理器 + DeepSeek AI = 安卓逆向+破解新玩法？某录屏软件会员解锁！",
@@ -468,23 +480,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 20,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 55,
+      "technicalDepth": 60,
+      "trendNovelty": 40,
       "signals": [
         "签名校验去除",
         "MX播放器",
-        "Android逆向"
+        "破解教程"
       ],
       "tools": [
-        "MX Player"
+        "MX播放器"
       ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "经典的Android应用签名校验去除教程",
-      "summary": "介绍MX播放器去除应用签名校验的具体操作步骤",
-      "confidence": 0.9,
+      "evolutionNote": "经典视频播放器去签名校验的通用修改教学。",
+      "summary": "mx播放器去除签名校验教程。",
+      "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2118952-1-1.html",
       "title": "mx播放器 去除签名校验教程",
       "stableId": "52pojie:2118952",
@@ -494,8 +506,8 @@
     {
       "category": "软件工程与开源",
       "ecosystemValue": 80,
-      "technicalDepth": 85,
-      "trendNovelty": 60,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
         "unidbg",
         "多线程架构",
@@ -506,8 +518,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "针对安卓模拟执行框架unidbg底层的并发调度优化",
-      "summary": "unidbg从时间片轮转到调用级并发的单后端多线程架构重构",
+      "evolutionNote": "Android模拟执行框架底层并发模型的重大架构演进。",
+      "summary": "从时间片轮转到调用级并发：unidbg单后端多线程架构重构。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2117230-1-1.html",
       "title": "从时间片轮转到调用级并发：unidbg 单后端多线程架构重构",
@@ -517,21 +529,20 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 30,
+      "ecosystemValue": 80,
+      "technicalDepth": 80,
+      "trendNovelty": 70,
       "signals": [
-        "FakeLocation",
         "后门分析",
-        "位置伪装工具"
+        "FakeLocation"
       ],
       "tools": [
-        "Fake Location"
+        "FakeLocation"
       ],
-      "riskType": "gray_abuse",
-      "duplicateGroup": "fake_location_analysis",
-      "evolutionNote": "早期版本(1.5.0)的同类安全审计报告",
-      "summary": "FakeLocation 1.5.0版本的后门及风险代码分析",
+      "riskType": "normal",
+      "duplicateGroup": "fake_location_backdoor",
+      "evolutionNote": "早期版本后门事件的分析前置记录。",
+      "summary": "FakeLocation 1.5.0 版本后门分析。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2117178-1-1.html",
       "title": "FakeLocation 1.5.0 后门分析",
@@ -542,18 +553,20 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 50,
+      "technicalDepth": 75,
+      "trendNovelty": 65,
       "signals": [
         "AI辅助",
         "iOS证书签名",
-        "p12证书逆向"
+        "逆向分析"
       ],
-      "tools": [],
-      "riskType": "normal",
+      "tools": [
+        "iOS"
+      ],
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "结合AI进行iOS证书工具的逆向与获取流程解析",
-      "summary": "AI辅助下的iOS p12证书签名软件逆向分析与证书获取方法",
+      "evolutionNote": "结合AI进行iOS签名工具及p12证书获取流程的逆向解析。",
+      "summary": "AI辅助下的iOS p12证书签名软件逆向分析与证书获取。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2115938-1-1.html",
       "title": "【AI辅助】iOS p12证书签名软件的逆向分析 + 证书获取（新）",
@@ -564,20 +577,20 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 90,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
       "signals": [
         "DeviceCheck",
-        "苹果设备身份",
-        "灰黑产对抗"
+        "设备身份链",
+        "黑灰产对抗"
       ],
       "tools": [
         "DeviceCheck"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "深入探讨苹果设备身份认证体系与黑灰产对抗的技术细节",
-      "summary": "解析Apple DeviceCheck在设备身份链及反欺诈对抗中的攻防博弈",
+      "evolutionNote": "探讨苹果设备身份认证机制及其与黑灰产对抗的攻防演进。",
+      "summary": "解析iOS DeviceCheck：苹果设备身份链与黑灰产对抗的攻防博弈。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2114213-1-1.html",
       "title": "iOS DeviceCheck：苹果设备身份链与黑灰产对抗的攻防博弈",
@@ -586,20 +599,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 85,
-      "technicalDepth": 85,
-      "trendNovelty": 40,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
-        "黑灰产软件",
+        "黑产软件",
         "全链路逆向",
         "多栈实战"
       ],
       "tools": [],
       "riskType": "gray_abuse",
-      "duplicateGroup": "black_industry_re",
-      "evolutionNote": "黑灰产软件逆向实录下篇，深入核心逻辑",
-      "summary": "某黑产软件全链路逆向实录下篇，完成深层对抗分析",
+      "duplicateGroup": "black_industry_reversing",
+      "evolutionNote": "黑产团伙作案工具的全链路逆向解剖下篇。",
+      "summary": "某黑产软件全链路逆向实录（下篇）。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2113640-1-1.html",
       "title": "【多栈实战】某黑产软件全链路逆向实录 (下)",
@@ -608,20 +621,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 85,
-      "technicalDepth": 85,
-      "trendNovelty": 40,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
-        "黑灰产软件",
+        "黑产软件",
         "全链路逆向",
         "多栈实战"
       ],
       "tools": [],
       "riskType": "gray_abuse",
-      "duplicateGroup": "black_industry_re",
-      "evolutionNote": "黑灰产软件逆向实录中篇",
-      "summary": "某黑产软件全链路逆向实录中篇，剖析关键对抗环节",
+      "duplicateGroup": "black_industry_reversing",
+      "evolutionNote": "黑产团伙作案工具的全链路逆向解剖中篇。",
+      "summary": "某黑产软件全链路逆向实录（中篇）。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2111428-1-1.html",
       "title": "【多栈实战】某黑产软件全链路逆向实录 (中)",
@@ -632,23 +645,22 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 60,
-      "trendNovelty": 20,
+      "technicalDepth": 70,
+      "trendNovelty": 45,
       "signals": [
         "雷电模拟器",
-        "BurpSuite",
-        "Frida",
-        "HTTPS抓包"
+        "Burp Suite",
+        "Frida抓包"
       ],
       "tools": [
-        "雷电模拟器",
-        "Burp Suite",
+        "雷电9",
+        "Burp",
         "Frida"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "面向初学者的标准安卓抓包环境搭建指南",
-      "summary": "雷电9模拟器结合Burp与Frida的常规抓包与调试实操",
+      "evolutionNote": "标准安卓抓包环境搭建的组合拳指南。",
+      "summary": "雷电9 Android9 + Burp + Frida 抓包实操指南。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2111305-1-1.html",
       "title": "雷电9 Android9 + Burp + Frida 抓包实操",
@@ -659,18 +671,18 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 20,
+      "technicalDepth": 65,
+      "trendNovelty": 30,
       "signals": [
         "APK脱壳",
         "反编译",
-        "安卓新手教程"
+        "新手记录"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "面向入门者的APK脱壳与基础静态分析记录",
-      "summary": "新手首次进行安卓APK脱壳与反编译的步骤记录",
+      "evolutionNote": "新手向的APK脱壳与反编译基础入门流程。",
+      "summary": "记录首次对安卓APK进行脱壳反编译的步骤。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2110136-1-1.html",
       "title": "记录首次对安卓APK进行脱壳反编译的步骤",
@@ -679,23 +691,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 20,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 60,
+      "technicalDepth": 65,
+      "trendNovelty": 40,
       "signals": [
-        "视频播放器",
-        "App破解",
-        "XPlayer"
+        "XPlayer",
+        "arc Player",
+        "破解教程"
       ],
       "tools": [
-        "XPlayer"
+        "XPlayer",
+        "arc Player"
       ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "常见多媒体播放类应用的修改教程",
-      "summary": "XPlayer与arc Player播放器的修改与破解教程",
-      "confidence": 0.9,
+      "evolutionNote": "针对视频类移动应用的本地验证破解。",
+      "summary": "XPlayer 万能视频播放器和arc Player 破解教程。",
+      "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2110049-1-1.html",
       "title": "XPlayer 万能视频播放器和arc Player 破解教程",
       "stableId": "52pojie:2110049",
@@ -705,13 +718,12 @@
     {
       "category": "软件工程与开源",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 75,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
       "signals": [
         "Vibe Coding",
         "Magisk Zygisk",
-        "模块开发",
-        "源码阅读"
+        "模块开发"
       ],
       "tools": [
         "Magisk",
@@ -719,9 +731,9 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨基于最新Root框架进行底层系统模块开发的实践",
-      "summary": "从源码阅读到模块开发：基于Magisk Zygisk实现系统级扩展功能",
-      "confidence": 0.95,
+      "evolutionNote": "结合最新Root框架进行系统级功能模块移植开发。",
+      "summary": "基于最新版 Magisk Zygisk 移植实现自定义功能模块开发。",
+      "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2107426-1-1.html",
       "title": "Vibe Coding 从源码阅读到模块开发：基于最新版 Magisk Zygisk，移植实现一个带 We...",
       "stableId": "52pojie:2107426",
@@ -729,20 +741,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 20,
+      "technicalDepth": 65,
+      "trendNovelty": 45,
       "signals": [
         "王者营地",
         "userId抓包",
         "token获取"
       ],
-      "tools": [],
-      "riskType": "normal",
+      "tools": [
+        "王者营地"
+      ],
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "针对腾讯游戏社区App的常规账号凭证抓包方法",
-      "summary": "王者营地用户ID与Token凭证的抓包获取教程",
+      "evolutionNote": "主流游戏社区客户端的敏感凭证抓包方法。",
+      "summary": "王者营地userId和token抓包获取教程。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2106378-1-1.html",
       "title": "王者营地userId和token抓包获取",
@@ -751,20 +765,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 55,
-      "trendNovelty": 25,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 60,
+      "technicalDepth": 65,
+      "trendNovelty": 45,
       "signals": [
-        "水印相机APP",
-        "逆向修改",
-        "本地验证"
+        "水印相机",
+        "经纬度修改",
+        "APP破解"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "对特定工具类App本地验证逻辑的轻量级修改",
-      "summary": "相机水印App的本地验证逻辑逆向与功能修改实战",
+      "evolutionNote": "针对防篡改水印相机应用定位及时间验证的逆向。",
+      "summary": "破解一款显示时间、地点、经纬度水印的相机APP。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2105276-1-1.html",
       "title": "闲来无事，破解一款显示时间、地点、经纬度水印的相机APP",
@@ -773,22 +787,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "technicalDepth": 65,
+      "trendNovelty": 45,
       "signals": [
-        "哔哩哔哩客户端",
-        "去广告",
+        "哔哩哔哩",
+        "去开屏广告",
         "去震动"
       ],
       "tools": [
         "哔哩哔哩"
       ],
-      "riskType": "normal",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "针对主流视频客户端的常规去广告与UI精简教程",
-      "summary": "哔哩哔哩客户端去震动与开屏广告的修改教程",
+      "evolutionNote": "针对主流视频客户端去广告与去振动反馈的定制修改。",
+      "summary": "哔哩哔哩客户端去震动和开屏广告教程。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2104894-1-1.html",
       "title": "哔哩哔哩客户端 去震动和开屏广告教程",
@@ -797,20 +811,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 40,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 70,
+      "technicalDepth": 75,
+      "trendNovelty": 60,
       "signals": [
         "两步路户外助手",
-        "会员分析",
-        "百度加固逆向"
+        "百度加固",
+        "会员分析"
       ],
-      "tools": [],
+      "tools": [
+        "两步路户外助手"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "涉及百度最新加固壳的脱壳与特定户外软件会员逻辑分析",
-      "summary": "两步路户外助手会员机制分析及新百度加固去除方法",
+      "evolutionNote": "分析户外工具软件的会员验证机制及新版百度加固脱壳。",
+      "summary": "两步路户外助手会员分析和新百度加固去除。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2104201-1-1.html",
       "title": "两步路户外助手会员分析和新百度加固去除",
@@ -820,19 +836,19 @@
     },
     {
       "category": "游戏与数字娱乐",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 40,
+      "ecosystemValue": 75,
+      "technicalDepth": 80,
+      "trendNovelty": 65,
       "signals": [
-        "手游加密数据",
-        "协议破解",
-        "游戏逆向"
+        "手游加密",
+        "数据破解",
+        "协议分析"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "探讨特定手游传输加密数据的逆向破解方法",
-      "summary": "某手游加密数据破解教程及核心算法分析",
+      "evolutionNote": "针对特定时期手游加密通信与数据包的逆向方法。",
+      "summary": "某手游加密数据破解教程。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2102536-1-1.html",
       "title": "某手游加密数据破解教程（截止2026/4/12）",
@@ -841,20 +857,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 50,
-      "trendNovelty": 20,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 60,
+      "technicalDepth": 60,
+      "trendNovelty": 40,
       "signals": [
-        "影视VIP破解",
+        "影视VIP",
         "去广告",
-        "新手逆向"
+        "新手破解"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "新手针对影视流媒体软件的去广告与VIP验证绕过记录",
-      "summary": "新手对某影视App进行VIP解除与去广告的尝试记录",
+      "evolutionNote": "新手向影视类App会员与广告去除经验。",
+      "summary": "记录新手破解某影视VIP和去广告过程。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2101167-1-1.html",
       "title": "记录本菜鸡第一次破解某影视VIP和去广告",
@@ -865,18 +881,18 @@
     {
       "category": "软件工程与开源",
       "ecosystemValue": 80,
-      "technicalDepth": 80,
-      "trendNovelty": 50,
+      "technicalDepth": 85,
+      "trendNovelty": 70,
       "signals": [
         "注入工具",
-        "注入器开发",
-        "底层HOOK"
+        "注入器",
+        "从零构建"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "深入进程注入工具核心架构与编写原理的系列文章",
-      "summary": "从0到1构建进程注入工具之注入器篇第二部分技术解析",
+      "evolutionNote": "系统底层动态链接库注入与进程注入器开发系列教程。",
+      "summary": "从0到1构建一个注入工具之注入器篇（二）。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2097864-1-1.html",
       "title": "从0到1构建一个注入工具之注入器篇（二）",
@@ -885,19 +901,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 60,
-      "technicalDepth": 50,
-      "trendNovelty": 20,
+      "technicalDepth": 55,
+      "trendNovelty": 35,
       "signals": [
-        "安卓定位修改",
-        "Hook定位"
+        "安卓定位",
+        "虚拟定位",
+        "浅修改"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "基础的安卓位置伪装与修改探讨",
-      "summary": "轻量修改安卓系统定位的简易方法分享",
+      "evolutionNote": "基础安卓地理位置Hook与修改的轻量级教程。",
+      "summary": "浅修改一下安卓定位。",
       "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2090140-1-1.html",
       "title": "浅修改一下安卓定位",
@@ -908,20 +925,20 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 35,
+      "technicalDepth": 75,
+      "trendNovelty": 50,
       "signals": [
         "VR播放器",
-        "4XVR",
-        "本地验证逆向"
+        "本地验证",
+        "逆向实战"
       ],
       "tools": [
         "4XVR Player"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对VR类多媒体应用的本地授权验证逆向实战",
-      "summary": "针对VR播放器4XVR Player的本地验证逻辑分析与逆向实战",
+      "evolutionNote": "针对VR硬件端专业播放软件本地授权逻辑的逆向解剖。",
+      "summary": "记一次对VR播放器 4XVR Player 的本地验证逻辑分析与逆向实战。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2082996-1-1.html",
       "title": "[Android] 记一次对VR播放器 4XVR Player 的本地验证逻辑分析与逆向实战",
@@ -931,19 +948,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 35,
+      "ecosystemValue": 70,
+      "technicalDepth": 80,
+      "trendNovelty": 55,
       "signals": [
-        "星球App算法",
-        "签名算法逆向"
+        "算法分析",
+        "逆向工程"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对特定知识社群类App的底层加密算法逆向分析",
-      "summary": "某星球类社交软件的底层加密算法分析记录",
-      "confidence": 0.9,
+      "evolutionNote": "针对特定社群/平台加密算法的逆向还原记录。",
+      "summary": "某知识星球类应用算法分析。",
+      "confidence": 0.8,
       "url": "https://www.52pojie.cn/thread-2074694-1-1.html",
       "title": "他x星qiu算法分析",
       "stableId": "52pojie:2074694",
@@ -953,8 +970,8 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 60,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
         "DexProtector",
         "加固对抗",
@@ -964,10 +981,10 @@
         "DexProtector",
         "Frida"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对高级商业加固DexProtector的Frida检测绕过技术",
-      "summary": "从零开始绕过DexProtector加固保护下的Frida检测机制",
+      "evolutionNote": "针对高端加固壳DexProtector的Frida检测对抗技术。",
+      "summary": "从零开始绕过 DexProtector 加固的 Frida 检测。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2074484-1-1.html",
       "title": "从零开始绕过 DexProtector 加固的 Frida 检测",
@@ -978,19 +995,19 @@
     {
       "category": "游戏与数字娱乐",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 35,
+      "technicalDepth": 80,
+      "trendNovelty": 55,
       "signals": [
         "修仙肉鸽游戏",
         "协议逆向",
-        "数据修改"
+        "修正版"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "修正版游戏网络协议逆向与数据交互分析",
-      "summary": "某修仙肉鸽游戏协议逆向分析折腾记录修正版",
-      "confidence": 0.9,
+      "evolutionNote": "手游协议逆向折腾记录的修正与深化。",
+      "summary": "某修仙肉鸽游戏协议逆向分析折腾记录（修正版）。",
+      "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2057659-1-1.html",
       "title": "[修正版]某修仙肉鸽游戏协议逆向分析折腾记录",
       "stableId": "52pojie:2057659",
@@ -1000,21 +1017,21 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 50,
+      "technicalDepth": 85,
+      "trendNovelty": 70,
       "signals": [
-        "谷歌服务校验",
-        "授权逆向",
-        "GMS绕过"
+        "谷歌服务",
+        "服务校验",
+        "手撕"
       ],
       "tools": [
-        "Google Mobile Services"
+        "Google Services"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "深入底层分析并绕过Google服务框架校验机制",
-      "summary": "全网首发的手撕谷歌服务校验及授权逆向实录",
-      "confidence": 0.95,
+      "evolutionNote": "全网首发性质的Google Mobile Services服务校验机制绕过研究。",
+      "summary": "手撕谷歌服务校验。",
+      "confidence": 0.9,
       "url": "https://www.52pojie.cn/thread-2050389-1-1.html",
       "title": "【全网首发】手撕谷歌服务校验",
       "stableId": "52pojie:2050389",
@@ -1022,21 +1039,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 30,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 65,
+      "technicalDepth": 65,
+      "trendNovelty": 50,
       "signals": [
         "一木记账",
-        "APK内置数据",
-        "免登录离线使用"
+        "免登录",
+        "离线使用"
       ],
-      "tools": [],
+      "tools": [
+        "一木记账"
+      ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "通过修改APK内置数据实现特定记账软件离线免登录",
-      "summary": "一木记账APP通过内置数据实现免登录离线使用与账号切换",
-      "confidence": 0.9,
+      "evolutionNote": "通过内置数据包实现记账软件免登录离线修改。",
+      "summary": "一木记账APK内置数据实现免登录可离线使用。",
+      "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2028436-1-1.html",
       "title": "一木记账_APK内置数据-真正意义的免登录可离线使用可在线切换账号",
       "stableId": "52pojie:2028436",
@@ -1045,24 +1064,23 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 65,
+      "ecosystemValue": 60,
       "technicalDepth": 55,
       "trendNovelty": 20,
       "signals": [
-        "雷电模拟器",
+        "模拟器Root",
         "Magisk",
-        "LSPosed",
-        "环境搭建"
+        "Lsposed"
       ],
       "tools": [
         "雷电模拟器",
         "Magisk",
-        "LSPosed"
+        "Lsposed"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "安卓新手搭建逆向与Hook环境的标准教程",
-      "summary": "安卓新手在雷电模拟器中安装Magisk和LSPosed框架的指南",
+      "evolutionNote": "面向安卓逆向新手的标准模拟器Xposed环境搭建。",
+      "summary": "雷电模拟器安装magisk和Lsposed新手指南。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2024885-1-1.html",
       "title": "【安卓新手】雷电模拟器安装magisk和Lsposed",
@@ -1073,20 +1091,20 @@
     {
       "category": "游戏与数字娱乐",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 35,
+      "technicalDepth": 80,
+      "trendNovelty": 60,
       "signals": [
-        "cocos2djs",
+        "Cocos2d-js",
         "手游逆向",
         "分析思路"
       ],
       "tools": [
         "Cocos2d-js"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "分享基于Cocos2d-js引擎开发的手游逆向分析方法论",
-      "summary": "某Cocos2d-js引擎手游的逆向分析思路与切入方法分享",
+      "evolutionNote": "针对Cocos2d-js引擎手游的通用逆向思路与切入方法。",
+      "summary": "某手游cocos2d-js逆向分享之分析思路及切入方法。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-2007094-1-1.html",
       "title": "某手游cocos2djs逆向分享之分析思路及切入方法",
@@ -1096,19 +1114,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
+      "ecosystemValue": 70,
       "technicalDepth": 65,
-      "trendNovelty": 25,
+      "trendNovelty": 20,
       "signals": [
-        "安卓逆向教程",
-        "抓包基础",
-        "安全警示"
+        "抓包教程",
+        "安卓逆向",
+        "系列连载"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "连载性质的安卓逆向与抓包教程科普",
-      "summary": "《安卓逆向这档事》系列关于抓包基础知识与安全合规探讨",
+      "evolutionNote": "经典安卓抓包系列教程的教学分享。",
+      "summary": "《安卓逆向这档事》系列：抓包学得好。",
       "confidence": 0.95,
       "url": "https://www.52pojie.cn/thread-1945285-1-1.html",
       "title": "《安卓逆向这档事》二十、抓包学得好，牢饭吃得饱(上)",
@@ -1119,10 +1137,10 @@
     {
       "category": "云服务与基础设施",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 75,
+      "technicalDepth": 85,
+      "trendNovelty": 85,
       "signals": [
-        "云手机开源",
+        "开源云手机",
         "xenoid",
         "虚拟化方案"
       ],
@@ -1131,8 +1149,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开源自用云手机解决方案的技术分享",
-      "summary": "看雪社区开源自用云手机方案xenoid的架构与实现",
+      "evolutionNote": "开源自用云手机解决方案的发布，具有极高基础设施参考价值。",
+      "summary": "看雪论坛原创开源一个自用的云手机方案 xenoid。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293175.htm",
       "title": "[原创]开源一个自用的云手机方案 xenoid",
@@ -1142,19 +1160,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 85,
-      "technicalDepth": 85,
-      "trendNovelty": 70,
+      "ecosystemValue": 80,
+      "technicalDepth": 90,
+      "trendNovelty": 80,
       "signals": [
-        "漏驱防护",
+        "漏洞驱动",
         "驱动加载拦截",
-        "内核安全"
+        "内核对抗"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "探讨操作系统内核层对抗漏洞驱动加载的方法",
-      "summary": "针对预启动阶段漏洞驱动加载方式的拦截机制研究",
+      "evolutionNote": "Windows内核级预启动阶段对恶意/漏洞驱动加载的拦截研究。",
+      "summary": "某预启动对漏洞驱动加载方式的拦截技术分析。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293169.htm",
       "title": "[原创]某预启动对漏驱驱动加载方式的拦截",
@@ -1164,11 +1182,11 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 65,
+      "ecosystemValue": 85,
+      "technicalDepth": 95,
+      "trendNovelty": 75,
       "signals": [
-        "C++虚表解剖",
+        "C++虚表",
         "内存布局",
         "glibc IO攻击"
       ],
@@ -1178,8 +1196,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "底层C++语言特性与内存漏洞利用结合的深度技术剖析",
-      "summary": "C++虚表全解剖：从对象内存布局到glibc IO攻击链路分析",
+      "evolutionNote": "深入底层C++面向对象内存布局与高阶二进制漏洞利用链路。",
+      "summary": "C++虚表全解剖：从对象内存布局到glibc IO攻击链路。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293186.htm",
       "title": "[原创]C++ 虚表全解剖：从对象内存布局到 glibc IO 攻击链路",
@@ -1188,22 +1206,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
+      "category": "灰黑产与风险生态",
       "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 60,
+      "technicalDepth": 85,
+      "trendNovelty": 80,
       "signals": [
-        "Python纯协议",
-        "直播弹幕采集",
-        "短视频API"
+        "纯协议采集",
+        "短视频直播间",
+        "弹幕采集"
       ],
       "tools": [
         "Python"
       ],
-      "riskType": "dual_use",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "探讨亿级日活短视频平台直播间弹幕的纯协议逆向采集",
-      "summary": "使用Python纯协议实现亿级短视频APP直播间弹幕高效采集",
+      "evolutionNote": "利用Python纯协议逆向实现亿级流量平台直播间弹幕高并发采集。",
+      "summary": "Python纯协议实现亿级短视频App直播间弹幕采集。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293161.htm",
       "title": "[原创]python纯协议实现亿级短视频app的直播间弹幕采集",
@@ -1213,13 +1231,13 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 95,
+      "ecosystemValue": 90,
       "technicalDepth": 90,
       "trendNovelty": 95,
       "signals": [
         "IDA Pro 9.5",
         "MCP集成",
-        "逆向工程工具"
+        "逆向工具发布"
       ],
       "tools": [
         "IDA Pro",
@@ -1227,8 +1245,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "专业逆向分析工具IDA Pro集成大模型上下文协议(MCP)的版本发布",
-      "summary": "IDA Pro 9.5注册版发布并正式引入MCP(模型上下文协议)支持",
+      "evolutionNote": "顶级逆向反编译工具IDA Pro新版本带MCP特性的发布与生态更新。",
+      "summary": "带MCP特性的 IDA Pro 9.5 b1 注册版与MCP雷霆大发布。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293139.htm",
       "title": "[分享]【带MCP】IDA Pro 9.5 b1注册版+MCP 雷霆大发布！",
@@ -1238,12 +1256,12 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 80,
+      "ecosystemValue": 85,
+      "technicalDepth": 90,
+      "trendNovelty": 85,
       "signals": [
         "VMProtect",
-        "授权锁架构",
+        "授权锁",
         "RSA算法Bypass"
       ],
       "tools": [
@@ -1251,8 +1269,8 @@
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对高端加壳软件VMProtect授权锁及RSA校验的非典型绕过研究",
-      "summary": "基于VMProtect授权锁架构的RSA算法另类Bypass思路探讨",
+      "evolutionNote": "针对主流商业加壳保护软件VMProtect授权锁架构的创新旁路绕过。",
+      "summary": "基于 VMProtect 授权锁架构的 RSA 算法另类 Bypass 思路。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293138.htm",
       "title": "[原创]基于 VMProtect授权锁架构的RSA算法另类Bypass思路",
@@ -1263,23 +1281,22 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 70,
+      "technicalDepth": 90,
+      "trendNovelty": 85,
       "signals": [
         "Android PIN解锁",
+        "Gatekeeper",
+        "TEE KeyMint FBE"
+      ],
+      "tools": [
         "Gatekeeper",
         "TEE",
         "KeyMint"
       ],
-      "tools": [
-        "Android",
-        "TEE",
-        "KeyMint"
-      ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "深度剖析安卓系统从锁屏PIN码到硬件安全模块的全链路机制",
-      "summary": "Android PIN解锁全链路解析：Gatekeeper、TEE、KeyMint与FBE密钥解封",
+      "evolutionNote": "深度剖析Android现代全盘加密、TEE及认证架构的底层安全机制。",
+      "summary": "Android PIN解锁全链路：Gatekeeper · TEE · KeyMint 与 FBE 密钥解封。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293176.htm",
       "title": "[原创] Android PIN 解锁全链路：Gatekeeper · TEE · KeyMint 与 FBE 密钥解封",
@@ -1290,21 +1307,22 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 90,
-      "technicalDepth": 90,
-      "trendNovelty": 85,
+      "technicalDepth": 95,
+      "trendNovelty": 90,
       "signals": [
-        "安卓16脱壳",
-        "syscall-trace",
-        "KPM隐藏Frida"
+        "安卓16",
+        "内核脱壳",
+        "Frida隐藏",
+        "KPM"
       ],
       "tools": [
-        "Android 16",
-        "Frida"
+        "Frida",
+        "KPM"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "面向最新安卓16系统的脱壳移植、系统调用追踪与内核态隐藏Frida研究",
-      "summary": "安卓16脱壳移植、syscall-trace及KPM隐藏Frida技术实战",
+      "evolutionNote": "紧跟Android最新系统版本的底层内核脱壳与反检测对抗技术演进。",
+      "summary": "安卓16脱壳移植 syscall-trace 与 KPM 隐藏 Frida 技术实现。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293142.htm",
       "title": "[原创]安卓16脱壳移植 syscall-trace  KPM隐藏frida",
@@ -1315,18 +1333,18 @@
     {
       "category": "游戏与数字娱乐",
       "ecosystemValue": 75,
-      "technicalDepth": 70,
-      "trendNovelty": 40,
+      "technicalDepth": 80,
+      "trendNovelty": 60,
       "signals": [
-        "传奇协议分析",
-        "网游逆向",
-        "MMORPG"
+        "传奇协议",
+        "网游协议分析",
+        "逆向心得"
       ],
       "tools": [],
-      "riskType": "normal",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "经典网络游戏传奇底层通信协议的分析心得总结",
-      "summary": "经典传奇游戏协议分析心得与网络通信机制探讨",
+      "evolutionNote": "经典MMORPG网络游戏私服/客户端通信协议逆向与解析心得。",
+      "summary": "传奇协议分析心得与底层数据交互梳理。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293162.htm",
       "title": "[原创]传奇协议分析心得",
@@ -1336,19 +1354,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 85,
+      "ecosystemValue": 80,
       "technicalDepth": 85,
-      "trendNovelty": 45,
+      "trendNovelty": 40,
       "signals": [
         "CVE-2020-6507",
-        "漏洞利用链",
-        "浏览器安全"
+        "浏览器漏洞",
+        "利用链"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "对经典浏览器及组件漏洞利用链的回顾与技术拆解",
-      "summary": "CVE-2020-6507漏洞利用链的原理分析与复现研究",
+      "evolutionNote": "经典浏览器内核漏洞利用链的技术回顾与研究。",
+      "summary": "CVE-2020-6507 漏洞利用链深度复盘。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293153.htm",
       "title": "[原创]CVE-2020-6507利用链",
@@ -1359,18 +1377,18 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 95,
-      "technicalDepth": 90,
-      "trendNovelty": 75,
+      "technicalDepth": 95,
+      "trendNovelty": 85,
       "signals": [
         "银狐木马",
-        "自解密壳",
+        "三层自解密壳",
         "恶意软件剖析"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "对当前活跃的高级APT/商业木马进行深入的样本拆解与威胁情报分析",
-      "summary": "银狐木马深度剖析：手工拆解三层自解密壳与48KB最终载荷",
+      "evolutionNote": "针对当前活跃的高级威胁/黑产木马样本的硬核手工逆向解剖。",
+      "summary": "银狐木马深度剖析：手工拆解三层自解密壳与 48KB 最终载荷。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293116.htm",
       "title": "[原创][原创]银狐木马深度剖析：手工拆解三层自解密壳与 48KB 最终载荷",
@@ -1381,18 +1399,18 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 60,
+      "technicalDepth": 85,
+      "trendNovelty": 70,
       "signals": [
         "基础环境检测",
         "安全对抗",
-        "沙箱识别"
+        "反虚拟机"
       ],
       "tools": [],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "系统级和虚拟机环境检测与反检测对抗技术的通用总结",
-      "summary": "基础环境检测与攻防对抗技术总结",
+      "evolutionNote": "系统和应用层基础环境检测与各类反调试、反虚拟化对抗技术总结。",
+      "summary": "基础环境检测与攻防对抗技术总结。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293118.htm",
       "title": "[原创]基础环境检测与对抗",
@@ -1402,20 +1420,21 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 88,
+      "ecosystemValue": 90,
       "technicalDepth": 85,
-      "trendNovelty": 90,
+      "trendNovelty": 92,
       "signals": [
-        "REA Agent",
-        "逆向智能体深度剖析"
+        "AI Agent逆向分析",
+        "REA工具评估"
       ],
       "tools": [
-        "REA"
+        "REA",
+        "Reverse Engineer Anything"
       ],
       "riskType": "normal",
-      "duplicateGroup": "rea_agent_group",
-      "evolutionNote": "对热门逆向AI Agent（REA）架构的深度逆向与剖析",
-      "summary": "对近期大火的逆向工程AI Agent（REA）进行底层架构与实现机制的深度技术剖析。",
+      "duplicateGroup": "group_rea",
+      "evolutionNote": "深入探讨REA Agent在逆向工程中的应用与效能",
+      "summary": "社区对大热的REA逆向Agent展开深度技术分析，探讨其在自动化逆向中的表现。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293202.htm",
       "title": "[原创]对rea这个爆火agent的深度分析",
@@ -1426,19 +1445,19 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 40,
+      "technicalDepth": 60,
+      "trendNovelty": 70,
       "signals": [
-        "软件更新",
-        "逆向工程工具"
+        "IDA Pro新版本",
+        "逆向工具更新"
       ],
       "tools": [
-        "IDA"
+        "IDA Pro"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "IDA 9.5 Beta 1 版本发布讨论",
-      "summary": "讨论主流逆向分析工具 IDA 的新版本 Beta 特性与更新内容。",
+      "evolutionNote": "IDA Pro 9.5 Beta 1 发布更新分享",
+      "summary": "分享IDA Pro 9.5 Beta 1版本的更新动态，备受逆向从业者关注。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293136.htm",
       "title": "[转帖]IDA 9.5 Beta 1",
@@ -1447,19 +1466,19 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "AI与开发工具",
+      "category": "网络安全与隐私",
       "ecosystemValue": 85,
       "technicalDepth": 80,
-      "trendNovelty": 75,
+      "trendNovelty": 85,
       "signals": [
-        "AI逆向分析",
-        "动态分析框架"
+        "AI时代动态逆向",
+        "逆向分析框架"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨AI大模型赋能下的动态逆向分析新框架",
-      "summary": "探讨在AI时代如何构建针对软件逆向的动态分析框架，提升自动化分析效率。",
+      "evolutionNote": "探讨AI大模型赋能下的动态逆向分析框架设计",
+      "summary": "探讨人工智能时代背景下，逆向工程动态分析框架的新设计与方法论。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293115.htm",
       "title": "[原创]AI时代逆向分析：动态分析框架",
@@ -1469,18 +1488,18 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 70,
+      "ecosystemValue": 80,
       "technicalDepth": 85,
-      "trendNovelty": 50,
+      "trendNovelty": 60,
       "signals": [
-        "密钥逆向",
+        "应用密钥逆向",
         "算法还原"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "外卖软件加密算法分析案例分享",
-      "summary": "分析外卖软件内部密钥生成算法的逆向还原过程。",
+      "evolutionNote": "针对某外卖App密钥生成算法的逆向还原实战",
+      "summary": "详细记录某外卖软件密钥生成算法的逆向破解与分析过程。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293179.htm",
       "title": "[原创] 某外卖软件密钥生成算法分析",
@@ -1489,19 +1508,19 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "AI与开发工具",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 85,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 88,
+      "technicalDepth": 75,
+      "trendNovelty": 90,
       "signals": [
         "AI逆向极限",
-        "代码混淆对抗"
+        "代码保护挑战"
       ],
       "tools": [],
       "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "讨论大模型对传统逆向门槛的冲击",
-      "summary": "社区探讨当前代码保护技术是否还能有效阻挡基于AI的自动化逆向分析。",
+      "duplicateGroup": "group_ai_reverse",
+      "evolutionNote": "探讨传统加固方案在AI驱动逆向面前的有效性边界",
+      "summary": "社区讨论在AI逆向能力大幅提升的当下，现有加固保护技术是否还有效抵御。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293192.htm",
       "title": "[讨论]现在还有啥能挡住ai逆向么？",
@@ -1511,21 +1530,20 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 88,
-      "technicalDepth": 82,
-      "trendNovelty": 90,
+      "ecosystemValue": 85,
+      "technicalDepth": 70,
+      "trendNovelty": 88,
       "signals": [
-        "逆向AI Agent",
-        "REA工具"
+        "REA工具发布",
+        "逆向自动化"
       ],
       "tools": [
-        "REA",
-        "Reverse Engineer Anything"
+        "REA"
       ],
       "riskType": "normal",
-      "duplicateGroup": "rea_agent_group",
-      "evolutionNote": "转帖介绍爆火的逆向AI Agent工具 REA",
-      "summary": "介绍旨在实现“Reverse Engineer Anything”的新兴AI逆向代理工具。",
+      "duplicateGroup": "group_rea",
+      "evolutionNote": "转帖介绍Reverse Engineer Anything (REA)项目",
+      "summary": "介绍Reverse Engineer Anything (REA)这一面向逆向工程的AI工具。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293188.htm",
       "title": "[转帖]REA: Reverse Engineer Anything",
@@ -1535,18 +1553,18 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 65,
-      "technicalDepth": 85,
-      "trendNovelty": 40,
+      "ecosystemValue": 82,
+      "technicalDepth": 88,
+      "trendNovelty": 65,
       "signals": [
-        "代码还原",
-        "加壳还原"
+        "七神分析法",
+        "代码还原"
       ],
       "tools": [],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "安全研究员分享加壳与还原技术细节",
-      "summary": "分享关于特定加壳保护机制的代码还原分析实战文章。",
+      "evolutionNote": "系列逆向文章还原篇",
+      "summary": "分享逆向工程系列文章中的还原篇，展示深厚的技术还原功底。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293130.htm",
       "title": "[原创]七神分析之还原篇",
@@ -1556,20 +1574,20 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 85,
+      "ecosystemValue": 90,
       "technicalDepth": 75,
-      "trendNovelty": 90,
+      "trendNovelty": 95,
       "signals": [
-        "CTF自动化",
-        "大模型通杀传统挑战"
+        "大模型通杀CTF",
+        "AI安全冲击"
       ],
       "tools": [
         "GPT-6-Astra"
       ],
       "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "探讨高阶大模型对传统CTF逆向题的降维打击",
-      "summary": "讨论大模型在解决传统网络安全CTF比赛中的逆向和解题能力突破。",
+      "duplicateGroup": "group_ai_reverse",
+      "evolutionNote": "探讨虚构或前沿的大模型对传统CTF竞赛和逆向领域的颠覆",
+      "summary": "讨论前沿大模型对传统CTF安全挑战带来的颠覆性冲击与社区反思。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293109.htm",
       "title": "逆向已死：GPT-6-Astra 通杀传统CTF",
@@ -1579,22 +1597,21 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 82,
+      "ecosystemValue": 85,
       "technicalDepth": 90,
-      "trendNovelty": 85,
+      "trendNovelty": 88,
       "signals": [
-        "新一代代码保护",
-        "原生编译加固",
-        "OIOIC"
+        "原生编译代码保护",
+        "OIOIC加固"
       ],
       "tools": [
         "OIOIC"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "深度解析名为 OIOIC 的原生编译代码保护方案",
-      "summary": "对面向抗AI逆向的新一代代码保护方案 OIOIC 进行底层架构深度解析。",
-      "confidence": 0.92,
+      "evolutionNote": "解析新一代原生编译代码保护方案",
+      "summary": "深度解析OIOIC原生编译方案的代码保护机制与安全特性。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293195.htm",
       "title": "# OIOIC 原生编译新一代代码保护方案深度解析",
       "stableId": "kanxue:293195",
@@ -1603,11 +1620,11 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 60,
-      "technicalDepth": 65,
-      "trendNovelty": 50,
+      "ecosystemValue": 70,
+      "technicalDepth": 75,
+      "trendNovelty": 60,
       "signals": [
-        "安卓逆向正向结合",
+        "安卓正向开发",
         "MuzicBox项目"
       ],
       "tools": [
@@ -1615,8 +1632,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "通过正向开发实践理解逆向基础的系列教程第一篇",
-      "summary": "通过规划并从零开发一个名为 MuzicBox 的安卓应用，反向夯实安卓逆向基础。",
+      "evolutionNote": "安卓逆向负基础之正向开发实践连载",
+      "summary": "通过正向开发实践项目MuzicBox，反哺安卓逆向基础能力构建。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293182.htm",
       "title": "[原创]《安卓逆向负基础之正向开发实践》01：MuzicBox 项目规划与工程创建",
@@ -1626,19 +1643,21 @@
     },
     {
       "category": "灰黑产与风险生态",
-      "ecosystemValue": 90,
+      "ecosystemValue": 92,
       "technicalDepth": 88,
-      "trendNovelty": 85,
+      "trendNovelty": 80,
       "signals": [
-        "银狐远控木马",
-        "恶意软件伪装",
-        "AI破甲工具欺诈"
+        "银狐木马",
+        "AI破甲工具伪装",
+        "恶意软件分析"
       ],
-      "tools": [],
+      "tools": [
+        "银狐"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "silver_fox_trojan",
-      "evolutionNote": "分析银狐木马利用伪装成AI破甲工具进行传播的最新手法",
-      "summary": "深度分析银狐远控木马样本，揭露其伪装成热门AI辅助工具进行恶意传播的技术细节。",
+      "duplicateGroup": "group_silver_fox",
+      "evolutionNote": "银狐木马利用伪装成AI破甲工具进行传播的威胁分析",
+      "summary": "深度分析银狐远控木马伪装成AI辅助破甲工具的新型攻击手段。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293117.htm",
       "title": "[原创]银狐远控木马深度分析：伪装AI破甲工具",
@@ -1648,18 +1667,18 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 78,
-      "technicalDepth": 82,
-      "trendNovelty": 60,
+      "ecosystemValue": 82,
+      "technicalDepth": 85,
+      "trendNovelty": 70,
       "signals": [
-        "iOS风控检测",
-        "安全对抗"
+        "iOS风控对抗",
+        "移动安全"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "iOS端风控机制与逆向对抗的经验总结",
-      "summary": "探讨iOS移动端应用的风控检测机制及相关安全对抗技术。",
+      "evolutionNote": "探讨iOS系统层面的风控检测机制与对抗技术",
+      "summary": "浅析iOS平台的风控检测机制及相关安全对抗技术。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293154.htm",
       "title": "[原创] 浅谈ios的风控检测与对抗",
@@ -1668,20 +1687,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
-      "ecosystemValue": 75,
-      "technicalDepth": 88,
-      "trendNovelty": 70,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 85,
+      "technicalDepth": 92,
+      "trendNovelty": 80,
       "signals": [
-        "用户态杀软",
-        "自主实现安全软件"
+        "用户态杀软开发",
+        "安全软件"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开发者分享自主编写用户态防病毒/杀毒软件的实践",
-      "summary": "开发者分享从零实现一个用户态轻量级安全防护软件的设计思路与挑战。",
-      "confidence": 0.9,
+      "evolutionNote": "个人开发者实现用户态杀毒软件的实践分享",
+      "summary": "分享作者自行编写用户态杀毒软件的底层架构设计与实现经历。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293155.htm",
       "title": "[原创]我写了半个用户态杀软!!?",
       "stableId": "kanxue:293155",
@@ -1690,22 +1709,21 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
+      "ecosystemValue": 86,
+      "technicalDepth": 78,
       "trendNovelty": 88,
       "signals": [
         "MCP server",
-        "上下文成本优化",
-        "工具链集成"
+        "上下文成本优化"
       ],
       "tools": [
         "MCP"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨大规模工具挂载下的大模型上下文开销优化方案",
-      "summary": "探讨如何在接入数百个 MCP 工具服务器的同时，将大模型的初始上下文 Token 消耗控制在极低水平。",
-      "confidence": 0.92,
+      "evolutionNote": "探讨在大量工具场景下使用MCP server控制Token消耗的经验",
+      "summary": "讨论如何在接入数百个工具的MCP server时，有效控制大模型上下文Token成本。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293191.htm",
       "title": "[分享]735 个工具的 MCP server，开场只花 3K token：聊聊 AI 工具链的上下文成本",
       "stableId": "kanxue:293191",
@@ -1714,18 +1732,18 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 55,
-      "technicalDepth": 75,
-      "trendNovelty": 30,
+      "ecosystemValue": 60,
+      "technicalDepth": 70,
+      "trendNovelty": 20,
       "signals": [
-        "历史漏洞复现",
-        "CVE漏洞分析"
+        "CVE漏洞分析",
+        "经典漏洞复现"
       ],
       "tools": [],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "经典老漏洞的复现与原理剖析",
-      "summary": "对经典安全漏洞 CVE-2010-2883 的技术成因与利用原理进行分析报告撰写。",
+      "evolutionNote": "历史经典漏洞CVE-2010-2883的复盘分析",
+      "summary": "对经典漏洞CVE-2010-2883进行原理剖析与分析报告分享。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293150.htm",
       "title": "[原创]CVE-2010-2883漏洞分析报告",
@@ -1735,22 +1753,22 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 80,
-      "technicalDepth": 85,
-      "trendNovelty": 75,
+      "ecosystemValue": 88,
+      "technicalDepth": 92,
+      "trendNovelty": 82,
       "signals": [
-        "开源项目",
-        "Minifilter驱动",
-        "透明加解密"
+        "文件透明加解密",
+        "minifilter驱动",
+        "开源项目"
       ],
       "tools": [
         "Hawkeye TFE"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开源双缓冲 minifilter 文件透明加解密驱动",
-      "summary": "开源基于 GPL-3.0 协议的双缓冲 minifilter 文件透明加解密驱动项目 Hawkeye TFE。",
-      "confidence": 0.92,
+      "evolutionNote": "开源基于minifilter双缓冲的透明加解密驱动",
+      "summary": "开源基于GPL-3.0协议的双缓冲minifilter文件透明加解密驱动项目。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293158.htm",
       "title": "[原创]【开源】Hawkeye TFE：双缓冲 minifilter 文件透明加解密（GPL-3.0）",
       "stableId": "kanxue:293158",
@@ -1759,20 +1777,20 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 82,
+      "ecosystemValue": 85,
       "technicalDepth": 80,
-      "trendNovelty": 85,
+      "trendNovelty": 90,
       "signals": [
         "无人值守CTF",
         "Web安全自动化"
       ],
       "tools": [
-        "OpenSecurity 2.0"
+        "OpenSecurity"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "自动化安全测试工具版本升级展示",
-      "summary": "介绍 OpenSecurity 2.0 实现完全无人值守自动攻克所有 Web CTF 挑战的能力。",
+      "evolutionNote": "OpenSecurity 2.0 实现全自动Web CTF挑战",
+      "summary": "介绍OpenSecurity 2.0系统全自动、无人值守完成所有Web CTF挑战的成果。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293120.htm",
       "title": "[原创] OpenSecurity 2.0 无人值守完成 CTF 所有 Web 挑战",
@@ -1782,20 +1800,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 78,
-      "technicalDepth": 92,
-      "trendNovelty": 65,
+      "ecosystemValue": 84,
+      "technicalDepth": 95,
+      "trendNovelty": 75,
       "signals": [
-        "ARM64架构",
-        "自定义虚拟机保护",
+        "ARM64虚拟机加固",
         "VM还原"
       ],
       "tools": [],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "针对ARM64平台自定义VM保护的逆向分析与还原",
-      "summary": "分享针对 ARM64 架构下自定义虚拟机（VM）保护机制的逆向分析与代码还原经验。",
-      "confidence": 0.92,
+      "evolutionNote": "针对ARM64平台自定义虚拟机保护机制的逆向还原",
+      "summary": "深度分析并还原基于ARM64架构的自定义虚拟机（VM）保护机制。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293114.htm",
       "title": "[原创]一个 ARM64 自定义 VM 的分析与还原",
       "stableId": "kanxue:293114",
@@ -1803,22 +1820,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动设备与应用",
-      "ecosystemValue": 72,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 78,
       "technicalDepth": 85,
-      "trendNovelty": 60,
+      "trendNovelty": 65,
       "signals": [
-        "移动安全",
         "Hook技术",
-        "so加固对抗"
+        "安卓加固对抗"
       ],
       "tools": [
         "libpairipcore.so"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对特定移动端加固库的函数Hook技术分享",
-      "summary": "分享对安卓/移动端底层加固库 libpairipcore.so 进行 Hook 拦截的技术方法。",
+      "evolutionNote": "针对特定SO库的Hook技术应用",
+      "summary": "分享对特定移动应用安全库 libpairipcore.so 的 Hook 实践与经验。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293121.htm",
       "title": "[原创]hook libpairipcore.so",
@@ -1828,19 +1844,21 @@
     },
     {
       "category": "灰黑产与风险生态",
-      "ecosystemValue": 90,
+      "ecosystemValue": 92,
       "technicalDepth": 90,
-      "trendNovelty": 85,
+      "trendNovelty": 82,
       "signals": [
         "银狐木马",
         "C2通信追踪",
         "杀软对抗"
       ],
-      "tools": [],
+      "tools": [
+        "银狐"
+      ],
       "riskType": "gray_abuse",
-      "duplicateGroup": "silver_fox_trojan",
-      "evolutionNote": "银狐木马深度剖析系列第二篇：C2通信与免杀对抗",
-      "summary": "深入追踪银狐木马的 C2 命令与控制通信链路，详细拆解其绕过和对抗现代安全软件的四种核心技术手段。",
+      "duplicateGroup": "group_silver_fox",
+      "evolutionNote": "银狐木马深度剖析第二篇：追踪C2通信及反杀软对抗手段",
+      "summary": "深入追踪银狐木马的C2通信链路，详细拆解其对抗安全软件的四种核心技术手段。",
       "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293151.htm",
       "title": "[原创]银狐木马深度剖析（二）：动调追踪 C2 通信链，拆解杀软对抗的“四种命”",
@@ -1850,18 +1868,18 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 82,
+      "ecosystemValue": 85,
+      "technicalDepth": 80,
+      "trendNovelty": 88,
       "signals": [
-        "验证码对抗",
-        "后AI时代风控"
+        "后AI时代验证码",
+        "安全验证对抗"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "探讨大模型普及后传统与新型验证码的演变趋势",
-      "summary": "探讨在人工智能普及的背景下，验证码技术在攻防对抗中的现状与未来演变方向。",
+      "evolutionNote": "探讨生成式AI普及后的验证码技术演进与对抗变化",
+      "summary": "探讨大模型及视觉AI普及后，验证码技术面临的挑战及未来演进方向。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293157.htm",
       "title": "[原创] 后AI时代的验证码",
@@ -1871,24 +1889,22 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 78,
+      "ecosystemValue": 84,
       "technicalDepth": 88,
-      "trendNovelty": 75,
+      "trendNovelty": 78,
       "signals": [
-        "加解密算法识别",
-        "ChaCha20",
-        "Node环境补环境"
+        "签名逆向",
+        "ChaCha20算法",
+        "补环境复现"
       ],
       "tools": [
-        "Ascon",
-        "ChaCha20",
         "Node"
       ],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "记一次复杂的云端签名接口逆向与环境补齐复现",
-      "summary": "分享对某约稿平台签名算法的逆向过程，揭开误导性的烟雾弹算法并最终定位 ChaCha20 加密，在 Node.js 中完成黑盒补环境复现。",
-      "confidence": 0.92,
+      "evolutionNote": "某约稿平台签名算法逆向全过程，涉及烟雾弹与实际ChaCha20识别",
+      "summary": "分享某约稿平台API签名的逆向过程，排除干扰算法并完成Node黑盒补环境复现。",
+      "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293164.htm",
       "title": "[原创]某约稿平台 M-S 签名逆向：从 \"Ascon\" 烟雾弹到 ChaCha20 铁证，再到 Node 黑盒补环境复现",
       "stableId": "kanxue:293164",
@@ -1897,23 +1913,23 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 78,
-      "technicalDepth": 88,
-      "trendNovelty": 80,
+      "ecosystemValue": 86,
+      "technicalDepth": 92,
+      "trendNovelty": 85,
       "signals": [
-        "函数Hook",
+        "SigilHook",
         "AngelScript",
-        "运行时注入"
+        "函数Hook注入"
       ],
       "tools": [
         "SigilHook",
         "AngelScript"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开源基于 AngelScript 的 x86/x64 动态 Hook 注入工具",
-      "summary": "介绍自研的 SigilHook 运行环境，支持使用 AngelScript 脚本语言实现 x86/x64 函数的 Hook 注入与控制。",
-      "confidence": 0.92,
+      "evolutionNote": "开源使用AngelScript实现x86/x64函数Hook的运行时工具",
+      "summary": "介绍并开源SigilHook项目，利用AngelScript脚本语言实现灵活的x86/x64函数Hook。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293112.htm",
       "title": "[原创]SigilHook：用 AngelScript 做 x86/x64 函数 Hook 的注入式运行时",
       "stableId": "kanxue:293112",
@@ -1922,19 +1938,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 70,
+      "ecosystemValue": 75,
       "technicalDepth": 80,
-      "trendNovelty": 50,
+      "trendNovelty": 60,
       "signals": [
         "代理程序逆向",
-        "流量与协议分析"
+        "流量安全"
       ],
       "tools": [],
       "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "对某款未知代理工具的逆向分析记录",
-      "summary": "针对某款特定代理软件进行的逆向工程与内部通信协议分析。",
-      "confidence": 0.88,
+      "evolutionNote": "对某未知代理软件的逆向分析与内部逻辑探究",
+      "summary": "对某款特定代理程序进行逆向分析，解构其通信及连接机制。",
+      "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293189.htm",
       "title": "[原创]某代理程序的逆向分析",
       "stableId": "kanxue:293189",
@@ -1943,20 +1959,19 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 85,
-      "trendNovelty": 65,
+      "ecosystemValue": 85,
+      "technicalDepth": 86,
+      "trendNovelty": 75,
       "signals": [
         "瑞数6反爬",
-        "浏览器会话借道",
-        "412拦截对抗"
+        "浏览器会话复用"
       ],
       "tools": [],
-      "riskType": "gray_abuse",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "针对瑞数6代反爬虫机制的突破实践",
-      "summary": "分析瑞数6代反爬机制，通过绕过 412 拦截并借道浏览器会话实现全量数据采集的技术路线。",
-      "confidence": 0.9,
+      "evolutionNote": "突破瑞数6代反爬虫防护的逆向实战分析",
+      "summary": "记录破解某网站瑞数6代反爬机制的过程，利用浏览器会话绕过412拦截获取数据。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293131.htm",
       "title": "[原创] 某网站瑞数6反爬逆向：从 412 拦截到借道浏览器会话，一次性翻完全部页列表",
       "stableId": "kanxue:293131",
@@ -1965,21 +1980,21 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 80,
+      "ecosystemValue": 82,
       "technicalDepth": 75,
-      "trendNovelty": 82,
+      "trendNovelty": 85,
       "signals": [
-        "Qwen3.8",
-        "本地大模型部署评估"
+        "Qwen3.8本地部署",
+        "大模型评测"
       ],
       "tools": [
         "Qwen3.8"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开发者针对 Qwen3.8 本地化部署的深度测评与选型建议",
-      "summary": "分享 Qwen3.8 本地部署的真实体验与性能评估，指出其局限性并给出选型建议。",
-      "confidence": 0.92,
+      "evolutionNote": "分享Qwen3.8本地化部署的实际体验与性价比评估",
+      "summary": "分享Qwen3.8模型本地部署的评测与避坑建议，评估其是否为当前优选。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293123.htm",
       "title": "[原创] Qwen3.8 本地部署：并非优选方案，看完再决定",
       "stableId": "kanxue:293123",
@@ -1987,21 +2002,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "网络安全与隐私",
-      "ecosystemValue": 75,
+      "category": "灰黑产与风险生态",
+      "ecosystemValue": 88,
       "technicalDepth": 85,
-      "trendNovelty": 55,
+      "trendNovelty": 70,
       "signals": [
-        "恶意代码分析",
         "进程镂空",
-        "XOR解密"
+        "xor解密",
+        "恶意代码分析"
       ],
       "tools": [],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "恶意软件进程镂空与动态解密技术的特征分析",
-      "summary": "分析恶意代码中常用的进程镂空（Process Hollowing）与 XOR 加密还原技术。",
-      "confidence": 0.9,
+      "evolutionNote": "分析恶意代码中常用的进程镂空与xor解密技术",
+      "summary": "剖析恶意样本中进程镂空（Process Hollowing）与xor解密技术的实现原理。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293159.htm",
       "title": "[原创]恶意代码分析-进程镂空 xor解密",
       "stableId": "kanxue:293159",
@@ -2014,14 +2029,14 @@
       "technicalDepth": 65,
       "trendNovelty": 75,
       "signals": [
-        "大模型安全应用",
-        "开发场景实践"
+        "大模型工程经验",
+        "安全开发辅助"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨大语言模型在软件开发与安全分析中的实际应用经验",
-      "summary": "总结分享大语言模型在软件开发和安全漏洞挖掘场景中的使用心得与最佳实践。",
+      "evolutionNote": "总结安全与软件开发场景下使用大模型的实践心德",
+      "summary": "分享在安全研究和软件开发日常工作中应用大模型的经验与高效使用随笔。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293156.htm",
       "title": "[原创] 安全和开发场景下大模型使用经验随笔",
@@ -2033,7 +2048,7 @@
       "category": "灰黑产与风险生态",
       "ecosystemValue": 85,
       "technicalDepth": 60,
-      "trendNovelty": 70,
+      "trendNovelty": 65,
       "signals": [
         "USDT欺诈工具",
         "Flash USDT"
@@ -2043,9 +2058,9 @@
       ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "曝光虚假USDT转账软件的欺诈黑灰产工具",
-      "summary": "关注和记录网络上流传的“闪兑/虚假USDT发送器”等数字货币诈骗工具及生态线索。",
-      "confidence": 0.92,
+      "evolutionNote": "关注网络上虚假USDT转账软件的黑产工具现象",
+      "summary": "提及并收录网络上常见的Flash USDT（闪兑USDT）欺诈发送软件工具信息。",
+      "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293177.htm",
       "title": "[转帖]Best Flash USDT Sender Software Download – Flash USDT Sender App",
       "stableId": "kanxue:293177",
@@ -2053,21 +2068,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动设备与应用",
-      "ecosystemValue": 72,
-      "technicalDepth": 80,
-      "trendNovelty": 65,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 78,
+      "technicalDepth": 75,
+      "trendNovelty": 70,
       "signals": [
-        "酷安数字联盟",
-        "客户端逆向"
+        "酷安数字联盟逆向",
+        "移动应用分析"
       ],
       "tools": [
         "酷安"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "针对国内主流社区客户端SDK的逆向分析",
-      "summary": "对酷安数字联盟相关SDK及客户端逻辑进行的逆向工程分析。",
+      "evolutionNote": "探讨酷安数字联盟相关机制的逆向工程分析",
+      "summary": "分享对酷安数字联盟相关SDK或逻辑的逆向分析过程。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293149.htm",
       "title": "[原创]酷安数字联盟逆向",
@@ -2076,22 +2091,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "游戏与数字娱乐",
-      "ecosystemValue": 75,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 80,
       "technicalDepth": 82,
-      "trendNovelty": 60,
+      "trendNovelty": 70,
       "signals": [
-        "二游安全检测",
-        "LSPosed",
-        "Hook检测绕过"
+        "lsposed hook检测",
+        "游戏安全对抗"
       ],
       "tools": [
-        "LSPosed"
+        "lsposed"
       ],
-      "riskType": "gray_abuse",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "探讨二次元游戏对框架Hook的检测与对抗技术",
-      "summary": "求助与探讨如何绕过某二次元手游针对 LSPosed 框架及常见 Hook 行为的安全检测机制。",
+      "evolutionNote": "探讨如何绕过二游（二次元游戏）中的lsposed框架检测",
+      "summary": "求助与探讨绕过某二次元游戏针对lsposed Hook检测的技术手段。",
       "confidence": 0.9,
       "url": "https://bbs.kanxue.com/thread-293160.htm",
       "title": "[求助]过某二游lsposed hook检测",
@@ -2101,24 +2115,23 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 82,
+      "ecosystemValue": 85,
       "technicalDepth": 78,
-      "trendNovelty": 85,
+      "trendNovelty": 88,
       "signals": [
-        "IDA Agent",
-        "Hex-Rays",
+        "IDA agent",
+        "hexrays assist",
         "AI辅助逆向"
       ],
       "tools": [
-        "IDA",
-        "Hex-Rays",
-        "IDA Agent"
+        "IDA Pro",
+        "Hex-Rays"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "讨论官方或第三方 IDA AI 助手（Hex-Rays Assist）的使用体验",
-      "summary": "社区围绕 IDA 内置或外挂的 AI Agent（Hex-Rays/Assist）功能展开技术讨论与体验交流。",
-      "confidence": 0.92,
+      "evolutionNote": "讨论IDA Pro官方或生态中的AI助手插件功能",
+      "summary": "讨论IDA Pro自带的AI助手（Hex-Rays assist / IDA agent）在逆向工程中的集成应用。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293198.htm",
       "title": "[讨论] ida agent （hexrays/assist）",
       "stableId": "kanxue:293198",
@@ -2127,21 +2140,21 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 60,
-      "technicalDepth": 65,
-      "trendNovelty": 30,
+      "ecosystemValue": 65,
+      "technicalDepth": 55,
+      "trendNovelty": 40,
       "signals": [
-        "EXE查看工具",
-        "PE结构分析"
+        "EXE文件浏览器",
+        "PE结构查看"
       ],
       "tools": [
         "MiTeC EXE Explorer"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "分享轻量级 PE 文件查看与逆向辅助工具更新",
-      "summary": "分享实用的小型 PE 结构查看与分析工具 MiTeC EXE Explorer 新版本。",
-      "confidence": 0.9,
+      "evolutionNote": "MiTeC EXE Explorer 工具更新分享",
+      "summary": "分享PE文件查看和逆向辅助工具 MiTeC EXE Explorer 3.7.5 版本。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293197.htm",
       "title": "[转帖]MiTeC EXE Explorer 3.7.5",
       "stableId": "kanxue:293197",
@@ -2149,42 +2162,46 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://bbs.kanxue.com/thread-293205.htm",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 88,
+      "technicalDepth": 90,
+      "trendNovelty": 75,
       "signals": [
-        "经验分享"
+        "WinAFL实战",
+        "模糊测试",
+        "Crash分析"
       ],
-      "tools": [],
+      "tools": [
+        "WinAFL"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「[原创]WinAFL 实战：从 0 到 crash」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "WinAFL Fuzzing从零到触发Crash的完整实战教程",
+      "summary": "详细记录使用WinAFL进行二进制模糊测试（Fuzzing）并成功触发Crash的全过程。",
+      "confidence": 0.95,
+      "url": "https://bbs.kanxue.com/thread-293205.htm",
       "title": "[原创]WinAFL 实战：从 0 到 crash",
       "stableId": "kanxue:293205",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "移动设备与应用",
+      "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 75,
-      "trendNovelty": 45,
+      "technicalDepth": 65,
+      "trendNovelty": 50,
       "signals": [
         "JEB Decompiler",
-        "安卓逆向反编译工具"
+        "安卓逆向工具"
       ],
       "tools": [
         "JEB Decompiler"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "JEB 反编译工具版本更新与分享",
-      "summary": "分享安卓逆向反编译主力工具 JEB Decompiler 的最新修改版及更新动态。",
-      "confidence": 0.92,
+      "evolutionNote": "JEB Decompiler 5.48 修改版更新分享",
+      "summary": "分享安卓反编译工具 JEB Decompiler 5.48.0 版本的相关修改版资源。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293181.htm",
       "title": "[转帖]JEB Decompiler 5.48.0.202610071539 mod by CXV",
       "stableId": "kanxue:293181",
@@ -2193,20 +2210,20 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 90,
-      "trendNovelty": 80,
+      "ecosystemValue": 86,
+      "technicalDepth": 92,
+      "trendNovelty": 85,
       "signals": [
         "后量子密码",
-        "PQC",
-        "学术论文投稿"
+        "PQC算法",
+        "学术论文"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "研究后量子密码算法现状并向 IEEE 投稿",
-      "summary": "探讨后量子密码（PQC）算法的当前技术演进、安全现状及关键建议，相关论文已向 IEEE 投稿。",
-      "confidence": 0.92,
+      "evolutionNote": "后量子密码算法现状与建议论文已被IEEE投稿接收",
+      "summary": "分享关于后量子密码（PQC）算法发展现状与关键建议的学术研究成果。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293145.htm",
       "title": "[原创]后量子密码（PQC）算法现状与关键建议论文 已投稿IEEE",
       "stableId": "kanxue:293145",
@@ -2214,10 +2231,10 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "云服务与基础设施",
-      "ecosystemValue": 70,
-      "technicalDepth": 85,
-      "trendNovelty": 40,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 82,
+      "technicalDepth": 88,
+      "trendNovelty": 60,
       "signals": [
         "Windows会话隔离",
         "Session 0",
@@ -2228,9 +2245,9 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "深度解析 Windows 系统的底层会话与权限隔离机制",
-      "summary": "技术解析 Windows 会话机制、Session 0 隔离以及进程 Token 身份验证的底层逻辑。",
-      "confidence": 0.92,
+      "evolutionNote": "底层探讨Windows系统Session 0隔离与进程身份Token机制",
+      "summary": "深度解析Windows操作系统的会话管理、Session 0隔离机制及进程Token身份隔离原理。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293089.htm",
       "title": "[原创]Windows 会话、Session 0 与进程 Token 隔离身份",
       "stableId": "kanxue:293089",
@@ -2239,22 +2256,22 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
+      "ecosystemValue": 80,
       "technicalDepth": 75,
-      "trendNovelty": 60,
+      "trendNovelty": 65,
       "signals": [
-        "IoT安全排查",
-        "ARP欺骗",
-        "Wireshark流量分析"
+        "IoT设备安全",
+        "家庭内网排查",
+        "Wireshark分析"
       ],
       "tools": [
         "Wireshark"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "面向家庭用户的内网物联网设备安全审计指南",
-      "summary": "推荐家庭内网 IoT 设备安全自查方法，涵盖 ARP 欺骗排查与 Wireshark 流量抓包分析实践。",
-      "confidence": 0.9,
+      "evolutionNote": "家庭物联网设备安全排查指南，涵盖ARP欺骗与流量分析",
+      "summary": "推荐家庭内网IoT设备安全排查方法，从ARP欺骗检测到Wireshark流量分析实战。",
+      "confidence": 0.95,
       "url": "https://bbs.kanxue.com/thread-293119.htm",
       "title": "[推荐]家庭内网IoT设备安全排查：从ARP欺骗断网到Wireshark流量分析",
       "stableId": "kanxue:293119",
@@ -2262,1173 +2279,1269 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979678-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "数字生活与消费",
+      "ecosystemValue": 40,
+      "technicalDepth": 10,
+      "trendNovelty": 30,
       "signals": [
-        "经验分享",
-        "daily"
+        "褪黑素效果",
+        "日常闲聊"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「褪黑素片没什么效果」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "NodeSeek日常版块生活健康闲聊",
+      "summary": "社区用户分享关于服用褪黑素片效果不佳的日常健康生活吐槽。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979678-1",
       "title": "褪黑素片没什么效果",
       "stableId": "nodeseek:979678",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979677-1",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "数字服务与订阅",
+      "ecosystemValue": 78,
+      "technicalDepth": 30,
+      "trendNovelty": 70,
       "signals": [
-        "AI应用",
-        "工具采用"
+        "Claude账号",
+        "AI服务订阅"
       ],
       "tools": [
-        "claude"
+        "Claude"
       ],
       "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「哪有claude可用啊，1X左右的max，求推荐」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
+      "duplicateGroup": "group_claude_ai",
+      "evolutionNote": "用户寻求Claude订阅渠道与高性价比方案",
+      "summary": "社区用户发帖求购或询问高性价比Claude账号及订阅途径。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979677-1",
       "title": "哪有claude可用啊，1X左右的max，求推荐",
       "stableId": "nodeseek:979677",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979676-1",
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
+      "category": "云服务与基础设施",
+      "ecosystemValue": 82,
+      "technicalDepth": 50,
       "trendNovelty": 60,
       "signals": [
-        "安全研究",
-        "攻防观察"
+        "Racknerd促销",
+        "便宜VPS"
       ],
       "tools": [
-        "ida",
-        "frida"
+        "Racknerd"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「【NodeQuality】Racknerd/RN Black Friday 2020 FLASH SALE - 4GB 」反映了当前社区中的安全研究议题。",
-      "confidence": 0.65,
+      "evolutionNote": "主机圈经典促销活动回顾或年费套餐分享",
+      "summary": "分享Racknerd/RN的经典黑五高性价比年付VPS套餐促销信息。",
+      "confidence": 0.9,
+      "url": "https://www.nodeseek.com/post-979676-1",
       "title": "【NodeQuality】Racknerd/RN Black Friday 2020 FLASH SALE - 4GB DC03 LAX $23.33/年",
       "stableId": "nodeseek:979676",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979675-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "数字服务与订阅",
+      "ecosystemValue": 85,
+      "technicalDepth": 40,
+      "trendNovelty": 82,
       "signals": [
-        "经验分享",
-        "daily"
+        "Saily实体卡",
+        "海外手机卡注册"
       ],
-      "tools": [],
+      "tools": [
+        "Saily"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「saily现在可以注册实体卡了，刚弄了一个查了显示cell Phone」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "Saily推出支持注册的实体卡及资费体验",
+      "summary": "讨论Saily新推出的可用于注册且识别为Cell Phone的实体卡服务。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979675-1",
       "title": "saily现在可以注册实体卡了，刚弄了一个查了显示cell Phone",
       "stableId": "nodeseek:979675",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979674-1",
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "软件工程与开源",
+      "ecosystemValue": 80,
+      "technicalDepth": 70,
+      "trendNovelty": 82,
       "signals": [
-        "安全研究",
-        "攻防观察"
+        "Emby漏洞",
+        "自研闭源核心"
       ],
-      "tools": [],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「emby 出什么大漏洞都跟我没关系了，自研闭源核心了」反映了当前社区中的安全研究议题。",
-      "confidence": 0.65,
+      "tools": [
+        "Emby"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "group_emby_vulnerability",
+      "evolutionNote": "开发者因Emby爆出大漏洞而转向自研闭源核心方案",
+      "summary": "针对近期Emby爆出的重大安全漏洞，开发者选择自研闭源核心以规避风险。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979674-1",
       "title": "emby 出什么大漏洞都跟我没关系了，自研闭源核心了",
       "stableId": "nodeseek:979674",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979673-1",
       "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "ecosystemValue": 78,
+      "technicalDepth": 40,
+      "trendNovelty": 75,
       "signals": [
-        "AI应用",
-        "工具采用"
+        "Gemini服务体验",
+        "白天与夜晚性能差异"
       ],
       "tools": [
-        "gemini"
+        "Gemini"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「白天的gemini和晚上的gemini完全不是同一个产品….」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
+      "evolutionNote": "用户反馈Gemini在不同时段服务响应与质量的差异",
+      "summary": "讨论Gemini大模型在白天和晚上的服务体验、稳定性或性能差异现象。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979673-1",
       "title": "白天的gemini和晚上的gemini完全不是同一个产品….",
       "stableId": "nodeseek:979673",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979672-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
+      "category": "数字服务与订阅",
+      "ecosystemValue": 75,
+      "technicalDepth": 30,
       "trendNovelty": 60,
       "signals": [
-        "经验分享",
-        "daily"
+        "谷歌账号注册失败",
+        "注册风控"
       ],
-      "tools": [],
+      "tools": [
+        "Google"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「拍断大腿, 注册谷歌大失败」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "用户分享注册Google账号遭遇风控拦截的经验教训",
+      "summary": "用户交流注册谷歌账号失败的风控经验与避坑心得。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979672-1",
       "title": "拍断大腿, 注册谷歌大失败",
       "stableId": "nodeseek:979672",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979671-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 72,
+      "technicalDepth": 20,
+      "trendNovelty": 50,
       "signals": [
-        "经验分享",
-        "trade"
+        "VPS求购",
+        "ppflight"
       ],
-      "tools": [],
+      "tools": [
+        "ppflight"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「【收】ppflight US.LAX02 LITE S 3.3刀」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "NodeSeek交易版块的云服务转让需求",
+      "summary": "社区用户发帖求购ppflight US.LAX02 LITE云服务实例。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979671-1",
       "title": "【收】ppflight US.LAX02 LITE S 3.3刀",
       "stableId": "nodeseek:979671",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979670-1",
       "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "ecosystemValue": 82,
+      "technicalDepth": 45,
+      "trendNovelty": 80,
       "signals": [
-        "AI应用",
-        "工具采用"
+        "AI中转站",
+        "API聚合服务"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「AI中转站求推荐」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
+      "evolutionNote": "用户寻求可靠的大模型API中转服务推荐",
+      "summary": "社区发帖交流并征集稳定好用的大模型API中转服务商推荐。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979670-1",
       "title": "AI中转站求推荐",
       "stableId": "nodeseek:979670",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979669-1",
-      "category": "数字服务与订阅",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "AI与开发工具",
+      "ecosystemValue": 75,
+      "technicalDepth": 35,
+      "trendNovelty": 78,
       "signals": [
-        "数字服务",
-        "订阅需求"
+        "日区即梦账号",
+        "AI绘画工具"
       ],
-      "tools": [],
+      "tools": [
+        "即梦"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「NS有做日区即梦账号的玩家吗？」反映了当前社区中的数字服务议题。",
-      "confidence": 0.65,
+      "evolutionNote": "探讨日区即梦（Jimeng）等AI生图工具的账号玩法",
+      "summary": "询问社区中是否有玩家涉足并了解日区即梦（Jimeng）AI账号的注册与使用。",
+      "confidence": 0.9,
+      "url": "https://www.nodeseek.com/post-979669-1",
       "title": "NS有做日区即梦账号的玩家吗？",
       "stableId": "nodeseek:979669",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979668-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
+      "category": "云服务与基础设施",
+      "ecosystemValue": 80,
+      "technicalDepth": 50,
       "trendNovelty": 60,
       "signals": [
-        "经验分享",
-        "review"
+        "HostDZire促销",
+        "便宜大流量VPS"
       ],
-      "tools": [],
+      "tools": [
+        "HostDZire"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「【NQ】HostDZire SFO 4C6G €21.50/年 sfo03」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "主机测评与特价VPS分享",
+      "summary": "分享HostDZire在SFO机房的4C6G高性价比年付VPS配置方案。",
+      "confidence": 0.9,
+      "url": "https://www.nodeseek.com/post-979668-1",
       "title": "【NQ】HostDZire SFO 4C6G €21.50/年 sfo03",
       "stableId": "nodeseek:979668",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "url": "https://www.nodeseek.com/post-979667-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 75,
+      "technicalDepth": 20,
+      "trendNovelty": 50,
       "signals": [
-        "经验分享",
-        "trade"
+        "VMiss求购",
+        "VPS push"
       ],
-      "tools": [],
+      "tools": [
+        "VMiss"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「+150收 VMiss US.LA.TRI Basic，9折款，月付或年付，要包push」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
+      "evolutionNote": "VMiss洛杉矶线路特价云服务转让交易",
+      "summary": "社区用户加价求购VMiss US.LA.TRI Basic套餐并要求包push过户。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979667-1",
       "title": "+150收 VMiss US.LA.TRI Basic，9折款，月付或年付，要包push",
       "stableId": "nodeseek:979667",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979666-1",
-      "category": "网络安全与隐私",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "安全研究",
-        "攻防观察"
-      ],
-      "tools": [],
-      "riskType": "dual_use",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「最近emby出了个大漏洞」反映了当前社区中的安全研究议题。",
-      "confidence": 0.65,
-      "title": "最近emby出了个大漏洞",
-      "stableId": "nodeseek:979666",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979665-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "trade"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「[出]LAX.AS3.Pro.TINY」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "[出]LAX.AS3.Pro.TINY",
-      "stableId": "nodeseek:979665",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979664-1",
-      "category": "云服务与基础设施",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "基础设施",
-        "服务供需"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「AKCDN 的流量转发4个节点我这边3个不通」反映了当前社区中的基础设施议题。",
-      "confidence": 0.65,
-      "title": "AKCDN 的流量转发4个节点我这边3个不通",
-      "stableId": "nodeseek:979664",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979663-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "carpool"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「美国ATT真实家宽 车找人 39元/月起」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "美国ATT真实家宽 车找人 39元/月起",
-      "stableId": "nodeseek:979663",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979662-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "daily"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「NEXUS PRO 虚拟卡平台谁用过？靠谱吗？为什么monzo的卡头都有」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "NEXUS PRO 虚拟卡平台谁用过？靠谱吗？为什么monzo的卡头都有",
-      "stableId": "nodeseek:979662",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979661-1",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「好爽，最近 codex sol 超长上下文价格减半，我直接开五路 512k 上下文，全程不需要压缩，看着项目各个模块以不」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "好爽，最近 codex sol 超长上下文价格减半，我直接开五路 512k 上下文，全程不需要压缩，看着项目各个模块以不可思议的速度完成，最后 claude 润色收尾",
-      "stableId": "nodeseek:979661",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979660-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "daily"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「我好像有病」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "我好像有病",
-      "stableId": "nodeseek:979660",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.nodeseek.com/post-979659-1",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "trade"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「+100收rfc hk对端」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "+100收rfc hk对端",
-      "stableId": "nodeseek:979659",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015511",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "gemini"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「gemini4要来了 现在反重力已下架3.1pro」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "gemini4要来了 现在反重力已下架3.1pro",
-      "stableId": "linuxdo:3015511",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015510",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「下一个恒大是谁？风向标来了」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "下一个恒大是谁？风向标来了",
-      "stableId": "linuxdo:3015510",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015509",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「佬友们一般用claude是用api还是订阅呢」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "佬友们一般用claude是用api还是订阅呢",
-      "stableId": "linuxdo:3015509",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015506",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「谁家的指数更能反映模型能力？Artificial Analysis 榜 VS Epoch 榜」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "谁家的指数更能反映模型能力？Artificial Analysis 榜 VS Epoch 榜",
-      "stableId": "linuxdo:3015506",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015499",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「Cyber-Tiel-Coder-35B-A3B 鹈鹕测试」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "Cyber-Tiel-Coder-35B-A3B 鹈鹕测试",
-      "stableId": "linuxdo:3015499",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015498",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「佬友们，收一个印度区 grok 老账号」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "佬友们，收一个印度区 grok 老账号",
-      "stableId": "linuxdo:3015498",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015496",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「本人打算开发一个 whatsapp 外贸ai agent平台 有希望吗」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "本人打算开发一个 whatsapp 外贸ai agent平台 有希望吗",
-      "stableId": "linuxdo:3015496",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015493",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「被gpt气晕了，大部分时间不是在开发，全在测试和重试。codexapp问题又多」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "被gpt气晕了，大部分时间不是在开发，全在测试和重试。codexapp问题又多",
-      "stableId": "linuxdo:3015493",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015491",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「我也终于见识到 Codex 的删库跑路了。一丁点小修改恨不得备份全家桶。50+G却手起刀落瞬间消失」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "我也终于见识到 Codex 的删库跑路了。一丁点小修改恨不得备份全家桶。50+G却手起刀落瞬间消失",
-      "stableId": "linuxdo:3015491",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015421",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「我和gpt的过度防御真的是一对笑面虎两头乌角鲨」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "我和gpt的过度防御真的是一对笑面虎两头乌角鲨",
-      "stableId": "linuxdo:3015421",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015413",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「凌晨两点被楼上吵醒」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "凌晨两点被楼上吵醒",
-      "stableId": "linuxdo:3015413",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015411",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「一个月一个pro20 干了10B tokens-不知道对不对？多了还是少了？」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "一个月一个pro20 干了10B tokens-不知道对不对？多了还是少了？",
-      "stableId": "linuxdo:3015411",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015409",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「订阅claude相关问题」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "订阅claude相关问题",
-      "stableId": "linuxdo:3015409",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015408",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "开发调优"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「cline你们会报empty response content吗」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "cline你们会报empty response content吗",
-      "stableId": "linuxdo:3015408",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015405",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「CPA登录Codex的短信验证有无低成本的靠谱方案？」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "CPA登录Codex的短信验证有无低成本的靠谱方案？",
-      "stableId": "linuxdo:3015405",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015397",
-      "category": "移动设备与应用",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "移动生态",
-        "应用体验"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「女朋友看小红书种草，现在刺挠就想要 iphone6s」反映了当前社区中的移动生态议题。",
-      "confidence": 0.65,
-      "title": "女朋友看小红书种草，现在刺挠就想要 iphone6s",
-      "stableId": "linuxdo:3015397",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015393",
-      "category": "软件工程与开源",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "开发实践",
-        "开源生态"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「手里有点token，做点什么开源项目好喵」反映了当前社区中的开发实践议题。",
-      "confidence": 0.65,
-      "title": "手里有点token，做点什么开源项目好喵",
-      "stableId": "linuxdo:3015393",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015389",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "问题求助",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「voxi到底怎么拉wificalling啊啊啊啊😭」反映了当前社区中的问题求助议题。",
-      "confidence": 0.65,
-      "title": "voxi到底怎么拉wificalling啊啊啊啊😭",
-      "stableId": "linuxdo:3015389",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015387",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「我严肃怀疑 codex 是知道 GPT 降智状态的」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "我严肃怀疑 codex 是知道 GPT 降智状态的",
-      "stableId": "linuxdo:3015387",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015384",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「开始爽用 opus5.5！！office 365 使用 Claude opus5.5 鹈鹕测试」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "开始爽用 opus5.5！！office 365 使用 Claude opus5.5 鹈鹕测试",
-      "stableId": "linuxdo:3015384",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015382",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「Google play订阅Claude pro kyc如何退款」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "Google play订阅Claude pro kyc如何退款",
-      "stableId": "linuxdo:3015382",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015378",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「claude kyc中国护照，国家选择投票」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "claude kyc中国护照，国家选择投票",
-      "stableId": "linuxdo:3015378",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015376",
-      "category": "数字服务与订阅",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "数字服务",
-        "订阅需求"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「muce新模型可以在code订阅使用」反映了当前社区中的数字服务议题。",
-      "confidence": 0.65,
-      "title": "muce新模型可以在code订阅使用",
-      "stableId": "linuxdo:3015376",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015373",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「记录一下【学习资料】使用SecretFolder软件隐藏，但是忘记密码了」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "记录一下【学习资料】使用SecretFolder软件隐藏，但是忘记密码了",
-      "stableId": "linuxdo:3015373",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015364",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「Claude直卡怎么退款？」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "Claude直卡怎么退款？",
-      "stableId": "linuxdo:3015364",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015359",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "福利羊毛"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「分享一下，大概能用24小时」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "分享一下，大概能用24小时",
-      "stableId": "linuxdo:3015359",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015358",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「各位推荐一下0.2左右稳定好用的中转」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "各位推荐一下0.2左右稳定好用的中转",
-      "stableId": "linuxdo:3015358",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015356",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [
-        "claude"
-      ],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「claude 网页的sonnet也出现的不同程度的降智和雷霆大思考.这是做的小游戏.叠叠乐」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "claude 网页的sonnet也出现的不同程度的降智和雷霆大思考.这是做的小游戏.叠叠乐",
-      "stableId": "linuxdo:3015356",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015353",
-      "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "AI应用",
-        "工具采用"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「gpt 20x订阅还剩13天 基本不能用 求问如何解决」反映了当前社区中的AI应用议题。",
-      "confidence": 0.65,
-      "title": "gpt 20x订阅还剩13天 基本不能用 求问如何解决",
-      "stableId": "linuxdo:3015353",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://linux.do/t/topic/3015351",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "搞七捻三"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「跨境支付通转账汇丰老是失败？」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "跨境支付通转账汇丰老是失败？",
-      "stableId": "linuxdo:3015351",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.v2ex.com/t/1248251",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "分享发现"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「最近下载了抖音刷了一圈视频，发现 100 个视频有 70 个都在阴阳怪气🤣🤣🤣🤣🤣🤣🤡🤡🤡」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "最近下载了抖音刷了一圈视频，发现 100 个视频有 70 个都在阴阳怪气🤣🤣🤣🤣🤣🤣🤡🤡🤡",
-      "stableId": "v2ex:1248251",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.v2ex.com/t/1248250",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "分享发现"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「facebook 又发布新模型了」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "facebook 又发布新模型了",
-      "stableId": "v2ex:1248250",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.v2ex.com/t/1248249",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "推广"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「做定制订单工具时，选规格和排版为什么分开做」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "做定制订单工具时，选规格和排版为什么分开做",
-      "stableId": "v2ex:1248249",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
-    },
-    {
-      "url": "https://www.v2ex.com/t/1248248",
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 70,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
-      "signals": [
-        "经验分享",
-        "杭州"
-      ],
-      "tools": [],
-      "riskType": "normal",
-      "duplicateGroup": null,
-      "evolutionNote": "",
-      "summary": "「杭州买房求大佬指点」反映了当前社区中的经验分享议题。",
-      "confidence": 0.65,
-      "title": "杭州买房求大佬指点",
-      "stableId": "v2ex:1248248",
-      "analysisMode": "rule-fallback",
-      "modelUsed": "rule-engine"
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
     },
     {
       "category": "软件工程与开源",
       "ecosystemValue": 85,
-      "technicalDepth": 85,
+      "technicalDepth": 65,
+      "trendNovelty": 85,
+      "signals": [
+        "Emby安全漏洞",
+        "流媒体服务器风险"
+      ],
+      "tools": [
+        "Emby"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "group_emby_vulnerability",
+      "evolutionNote": "Emby媒体服务器爆出安全漏洞引发社区广泛讨论",
+      "summary": "讨论近期流媒体服务器软件 Emby 爆发的高危安全漏洞及其影响。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979666-1",
+      "title": "最近emby出了个大漏洞",
+      "stableId": "nodeseek:979666",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 72,
+      "technicalDepth": 20,
+      "trendNovelty": 50,
+      "signals": [
+        "VPS转让",
+        "LAX AS3 Pro"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "节点服务器资源的闲置转让贴",
+      "summary": "用户在交易版块发布出让LAX.AS3.Pro.TINY规格云服务的信息。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979665-1",
+      "title": "[出]LAX.AS3.Pro.TINY",
+      "stableId": "nodeseek:979665",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "云服务与基础设施",
+      "ecosystemValue": 78,
+      "technicalDepth": 60,
+      "trendNovelty": 70,
+      "signals": [
+        "AKCDN故障",
+        "流量转发异常"
+      ],
+      "tools": [
+        "AKCDN"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "反馈AKCDN节点大面积不通的网络质量问题",
+      "summary": "技术版块反馈AKCDN流量转发服务四个节点中有三个出现不通故障。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979664-1",
+      "title": "AKCDN 的流量转发4个节点我这边3个不通",
+      "stableId": "nodeseek:979664",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 85,
+      "technicalDepth": 40,
       "trendNovelty": 80,
       "signals": [
+        "ATT家宽合租",
+        "美国原生家宽"
+      ],
+      "tools": [
+        "ATT"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "美国家宽网络资源拼车合租",
+      "summary": "分享美国ATT真实家宽网络资源的拼车（车找人）服务信息。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979663-1",
+      "title": "美国ATT真实家宽 车找人 39元/月起",
+      "stableId": "nodeseek:979663",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 82,
+      "technicalDepth": 50,
+      "trendNovelty": 85,
+      "signals": [
+        "NEXUS PRO虚拟卡",
+        "Monzo卡头"
+      ],
+      "tools": [
+        "NEXUS PRO",
+        "Monzo"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "评估新兴虚拟信用卡平台NEXUS PRO的可靠性与卡头来源",
+      "summary": "探讨NEXUS PRO虚拟卡平台的安全性及与其关联的Monzo卡头背景。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979662-1",
+      "title": "NEXUS PRO 虚拟卡平台谁用过？靠谱吗？为什么monzo的卡头都有",
+      "stableId": "nodeseek:979662",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 92,
+      "technicalDepth": 85,
+      "trendNovelty": 90,
+      "signals": [
+        "超长上下文降价",
+        "Codex Sol",
+        "AI辅助编程"
+      ],
+      "tools": [
+        "Codex Sol",
+        "Claude"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "开发者分享利用超长上下文AI工具进行全模块并发开发的效能提升",
+      "summary": "分享Codex Sol超长上下文降价后的多路并发编程体验，结合Claude润色实现高效开发。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979661-1",
+      "title": "好爽，最近 codex sol 超长上下文价格减半，我直接开五路 512k 上下文，全程不需要压缩，看着项目各个模块以不可思议的速度完成，最后 claude 润色收尾",
+      "stableId": "nodeseek:979661",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字生活与消费",
+      "ecosystemValue": 35,
+      "technicalDepth": 10,
+      "trendNovelty": 20,
+      "signals": [
+        "生活吐槽",
+        "心理状态"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "社区用户的个人情绪日常表达",
+      "summary": "社区用户发布的带有感叹性质的个人日常情绪与状态记录。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979660-1",
+      "title": "我好像有病",
+      "stableId": "nodeseek:979660",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 72,
+      "technicalDepth": 25,
+      "trendNovelty": 50,
+      "signals": [
+        "rfc hk求购",
+        "网络对端"
+      ],
+      "tools": [
+        "rfc"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "CN2/优化线路云服务交易求购",
+      "summary": "交易版块用户加价求购rfc香港（hk）对端网络资源。",
+      "confidence": 0.95,
+      "url": "https://www.nodeseek.com/post-979659-1",
+      "title": "+100收rfc hk对端",
+      "stableId": "nodeseek:979659",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 88,
+      "technicalDepth": 55,
+      "trendNovelty": 92,
+      "signals": [
+        "Gemini 4前瞻",
+        "反重力下架3.1pro"
+      ],
+      "tools": [
+        "Gemini 4",
+        "Gemini 3.1 Pro"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "LinuxDo前沿快讯讨论Gemini新版本迭代与旧版下架",
+      "summary": "前沿快讯透露Gemini 4即将发布，相关平台已先行下架Gemini 3.1 Pro。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015511",
+      "title": "gemini4要来了 现在反重力已下架3.1pro",
+      "stableId": "linuxdo:3015511",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "职业成长与独立开发",
+      "ecosystemValue": 70,
+      "technicalDepth": 20,
+      "trendNovelty": 60,
+      "signals": [
+        "宏观经济风向",
+        "行业风向标"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "社区探讨宏观经济与实体行业风险指标的交流贴",
+      "summary": "社区讨论宏观经济走向及寻找下一阶段商业与市场风向标的宏观话题。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015510",
+      "title": "下一个恒大是谁？风向标来了",
+      "stableId": "linuxdo:3015510",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 75,
+      "technicalDepth": 40,
+      "trendNovelty": 30,
+      "signals": [
+        "API与订阅对比",
+        "Claude使用偏好",
+        "开发者成本优化"
+      ],
+      "tools": [
+        "Claude"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "claude_usage_and_sub",
+      "evolutionNote": "探讨开发者在面对大模型服务时选择按量API还是包月订阅的常见考量。",
+      "summary": "讨论开发者使用Claude时倾向于选择API调用还是固定订阅制。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015509",
+      "title": "佬友们一般用claude是用api还是订阅呢",
+      "stableId": "linuxdo:3015509",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 80,
+      "technicalDepth": 65,
+      "trendNovelty": 60,
+      "signals": [
+        "大模型能力榜单评比",
+        "Artificial Analysis",
+        "Epoch榜"
+      ],
+      "tools": [
+        "Artificial Analysis",
+        "Epoch"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "llm_benchmark_evaluation",
+      "evolutionNote": "社区对于第三方AI能力评测榜单公信力的持续评估。",
+      "summary": "对比和讨论不同的大模型能力排行榜（如Artificial Analysis与Epoch榜）在反映模型真实能力上的优劣。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015506",
+      "title": "谁家的指数更能反映模型能力？Artificial Analysis 榜 VS Epoch 榜",
+      "stableId": "linuxdo:3015506",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 70,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
+      "signals": [
+        "模型评测",
+        "新模型测试",
+        "开源大模型"
+      ],
+      "tools": [
+        "Cyber-Tiel-Coder-35B-A3B"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "对特定新出现代码模型的评测与反馈。",
+      "summary": "分享关于Cyber-Tiel-Coder-35B-A3B模型的测试体验与表现。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015499",
+      "title": "Cyber-Tiel-Coder-35B-A3B 鹈鹕测试",
+      "stableId": "linuxdo:3015499",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 60,
+      "technicalDepth": 10,
+      "trendNovelty": 40,
+      "signals": [
+        "Grok老账号求购",
+        "印度区账号",
+        "跨国服务账号需求"
+      ],
+      "tools": [
+        "Grok"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": "account_trading_and_sub",
+      "evolutionNote": "反映用户对海外AI产品特定区域老账号的获取需求。",
+      "summary": "社区成员发帖求购印度区Grok老账号。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015498",
+      "title": "佬友们，收一个印度区 grok 老账号",
+      "stableId": "linuxdo:3015498",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 85,
+      "technicalDepth": 70,
+      "trendNovelty": 80,
+      "signals": [
+        "WhatsApp外贸Agent",
+        "AI Agent平台开发",
+        "跨境出海工具"
+      ],
+      "tools": [
+        "WhatsApp"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "ai_agent_application",
+      "evolutionNote": "将大模型AI Agent与特定垂直IM（如WhatsApp）结合的外贸场景探索。",
+      "summary": "探讨基于WhatsApp开发外贸垂直领域AI Agent平台的商业潜力和可行性。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015496",
+      "title": "本人打算开发一个 whatsapp 外贸ai agent平台 有希望吗",
+      "stableId": "linuxdo:3015496",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 85,
+      "technicalDepth": 60,
+      "trendNovelty": 70,
+      "signals": [
+        "AI辅助编程痛点",
+        "CodexApp体验",
+        "高频重试与测试摩擦"
+      ],
+      "tools": [
+        "Codex",
+        "CodexApp"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "ai_coding_pain_points",
+      "evolutionNote": "开发者对当前AI编程助手在实际工程落地中的效率摩擦和高错误率的吐槽。",
+      "summary": "吐槽在使用GPT及Codex进行开发时，测试和重试成本高、工具本身问题多的现状。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015493",
+      "title": "被gpt气晕了，大部分时间不是在开发，全在测试和重试。codexapp问题又多",
+      "stableId": "linuxdo:3015493",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 90,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
+      "signals": [
+        "AI编程失控",
+        "Codex删库风险",
+        "大文件自动修改风险"
+      ],
+      "tools": [
+        "Codex"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "ai_coding_pain_points",
+      "evolutionNote": "反映AI编程代理在执行大范围文件重构时可能引发的代码库意外丢失或损坏风险。",
+      "summary": "分享使用Codex编程时遭遇意外大面积删除或覆盖代码文件的惊险经历。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015491",
+      "title": "我也终于见识到 Codex 的删库跑路了。一丁点小修改恨不得备份全家桶。50+G却手起刀落瞬间消失",
+      "stableId": "linuxdo:3015491",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 65,
+      "technicalDepth": 30,
+      "trendNovelty": 40,
+      "signals": [
+        "GPT过度防御",
+        "大模型交互体验",
+        "安全策略吐槽"
+      ],
+      "tools": [
+        "GPT"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "用户对大模型过度合规或防御性回复的吐槽。",
+      "summary": "吐槽与GPT交互时遇到的过度防御和保守响应问题。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015421",
+      "title": "我和gpt的过度防御真的是一对笑面虎两头乌角鲨",
+      "stableId": "linuxdo:3015421",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字生活与消费",
+      "ecosystemValue": 20,
+      "technicalDepth": 0,
+      "trendNovelty": 10,
+      "signals": [
+        "生活日常",
+        "噪声困扰"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "社区成员日常闲聊内容。",
+      "summary": "深夜被楼上噪音吵醒的生活吐槽。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015413",
+      "title": "凌晨两点被楼上吵醒",
+      "stableId": "linuxdo:3015413",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 70,
+      "technicalDepth": 60,
+      "trendNovelty": 50,
+      "signals": [
+        "Token消耗量统计",
+        "Pro订阅额度评估"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "探讨高强度AI使用者一个周期内的Token消耗基准。",
+      "summary": "记录和咨询一个月内使用20x专业版消耗约10B tokens是否正常的用量讨论。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015411",
+      "title": "一个月一个pro20 干了10B tokens-不知道对不对？多了还是少了？",
+      "stableId": "linuxdo:3015411",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 65,
+      "technicalDepth": 20,
+      "trendNovelty": 30,
+      "signals": [
+        "Claude订阅问题",
+        "账号权益管理"
+      ],
+      "tools": [
+        "Claude"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "claude_usage_and_sub",
+      "evolutionNote": "关于Claude账号订阅和计费常见疑问的集中讨论。",
+      "summary": "交流和解决与Claude订阅相关的各类疑问。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015409",
+      "title": "订阅claude相关问题",
+      "stableId": "linuxdo:3015409",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 70,
+      "signals": [
+        "Cline插件报错",
+        "Empty Response",
+        "编程插件异常"
+      ],
+      "tools": [
+        "Cline"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "针对主流AI辅助编程插件在特定网络或响应状态下报错的求助。",
+      "summary": "询问并排查使用Cline编程插件时遇到空响应内容的常见错误。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015408",
+      "title": "cline你们会报empty response content吗",
+      "stableId": "linuxdo:3015408",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 75,
+      "technicalDepth": 65,
+      "trendNovelty": 60,
+      "signals": [
+        "CPA登录",
+        "Codex短信验证",
+        "接码平台方案"
+      ],
+      "tools": [
+        "Codex"
+      ],
+      "riskType": "gray_abuse",
+      "duplicateGroup": null,
+      "evolutionNote": "探讨批量注册或异地登录海外AI工具时的身份验证成本优化问题。",
+      "summary": "寻求低成本且靠谱的短信验证方案以登录Codex账号。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015405",
+      "title": "CPA登录Codex的短信验证有无低成本的靠谱方案？",
+      "stableId": "linuxdo:3015405",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字生活与消费",
+      "ecosystemValue": 40,
+      "technicalDepth": 10,
+      "trendNovelty": 30,
+      "signals": [
+        "小红书种草",
+        "数码消费",
+        "iPhone 6s"
+      ],
+      "tools": [
+        "iPhone 6s"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "社交媒体种草对老旧数码设备消费需求的逆向拉动。",
+      "summary": "因社交平台种草而产生购买老旧型号iPhone 6s的日常讨论。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015397",
+      "title": "女朋友看小红书种草，现在刺挠就想要 iphone6s",
+      "stableId": "linuxdo:3015397",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "软件工程与开源",
+      "ecosystemValue": 75,
+      "technicalDepth": 70,
+      "trendNovelty": 60,
+      "signals": [
+        "开源项目构思",
+        "Token资源利用",
+        "独立开发创意"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "开发者如何利用手中积攒的大模型API Token资源孵化有趣的开源项目。",
+      "summary": "征集如何利用手里多余的Token来开发有价值的开源项目点子。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015393",
+      "title": "手里有点token，做点什么开源项目好喵",
+      "stableId": "linuxdo:3015393",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "移动设备与应用",
+      "ecosystemValue": 60,
+      "technicalDepth": 50,
+      "trendNovelty": 40,
+      "signals": [
+        "Voxi运营商",
+        "WiFi Calling配置",
+        "虚拟运营商网络"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "海外虚拟运营商Wi-Fi Calling功能配置的求助。",
+      "summary": "咨询海外运营商Voxi如何成功开启Wi-Fi Calling功能。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015389",
+      "title": "voxi到底怎么拉wificalling啊啊啊啊😭",
+      "stableId": "linuxdo:3015389",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 80,
+      "technicalDepth": 65,
+      "trendNovelty": 75,
+      "signals": [
+        "GPT降智状态",
+        "Codex感知能力",
+        "大模型状态监控"
+      ],
+      "tools": [
+        "Codex",
+        "GPT"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "ai_coding_pain_points",
+      "evolutionNote": "开发者通过侧面工具（如Codex）的异常表现来推断底层LLM出现“降智”或服务波动的现象。",
+      "summary": "猜测Codex等辅助工具能够感知到底层GPT模型处于降智或性能波动状态。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015387",
+      "title": "我严肃怀疑 codex 是知道 GPT 降智状态的",
+      "stableId": "linuxdo:3015387",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 85,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
+      "signals": [
+        "Claude Opus 5.5",
+        "Office 365集成",
+        "新模型测试"
+      ],
+      "tools": [
+        "Claude",
+        "Office 365"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "新一代大模型（Claude Opus 5.5）在主流办公软件生态中的集成与测试反馈。",
+      "summary": "分享在Office 365中使用最新Claude Opus 5.5模型的测试体验与评测。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015384",
+      "title": "开始爽用 opus5.5！！office 365 使用 Claude opus5.5 鹈鹕测试",
+      "stableId": "linuxdo:3015384",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 70,
+      "technicalDepth": 40,
+      "trendNovelty": 40,
+      "signals": [
+        "Google Play订阅",
+        "Claude Pro",
+        "KYC退款"
+      ],
+      "tools": [
+        "Claude",
+        "Google Play"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "subscription_refund_issues",
+      "evolutionNote": "应用商店内海外AI服务订阅退款及身份核验相关操作疑问。",
+      "summary": "咨询通过Google Play订阅Claude Pro因KYC等原因如何申请退款。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015382",
+      "title": "Google play订阅Claude pro kyc如何退款",
+      "stableId": "linuxdo:3015382",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 70,
+      "technicalDepth": 30,
+      "trendNovelty": 50,
+      "signals": [
+        "Claude KYC",
+        "中国护照合规",
+        "国家地区选择投票"
+      ],
+      "tools": [
+        "Claude"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "中国用户在访问海外AI服务合规KYC认证时的地域选择探讨。",
+      "summary": "针对Claude服务要求中国护照KYC时的国家选择倾向进行的社区投票与讨论。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015378",
+      "title": "claude kyc中国护照，国家选择投票",
+      "stableId": "linuxdo:3015378",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 75,
+      "technicalDepth": 60,
+      "trendNovelty": 80,
+      "signals": [
+        "新模型适配",
+        "Code订阅",
+        "Muce模型"
+      ],
+      "tools": [
+        "Code"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "新模型上线后在官方或第三方编程订阅渠道中的可用性反馈。",
+      "summary": "分享Muce新模型已可在编程订阅服务中使用的动态。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015376",
+      "title": "muce新模型可以在code订阅使用",
+      "stableId": "linuxdo:3015376",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "网络安全与隐私",
+      "ecosystemValue": 50,
+      "technicalDepth": 40,
+      "trendNovelty": 20,
+      "signals": [
+        "SecretFolder",
+        "密码遗忘",
+        "本地文件隐藏恢复"
+      ],
+      "tools": [
+        "SecretFolder"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "常规本地隐私加密工具的密码找回或解锁求助。",
+      "summary": "记录使用SecretFolder软件隐藏资料却忘记密码后的求助与应对过程。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015373",
+      "title": "记录一下【学习资料】使用SecretFolder软件隐藏，但是忘记密码了",
+      "stableId": "linuxdo:3015373",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 70,
+      "technicalDepth": 30,
+      "trendNovelty": 30,
+      "signals": [
+        "Claude直卡订阅",
+        "信用卡支付",
+        "退款渠道"
+      ],
+      "tools": [
+        "Claude"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "subscription_refund_issues",
+      "evolutionNote": "直接使用信用卡购买海外AI服务的退款途径咨询。",
+      "summary": "询问通过直联信用卡订阅Claude服务的退款操作方法。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015364",
+      "title": "Claude直卡怎么退款？",
+      "stableId": "linuxdo:3015364",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 50,
+      "technicalDepth": 10,
+      "trendNovelty": 30,
+      "signals": [
+        "福利羊毛",
+        "限时资源分享"
+      ],
+      "tools": [],
+      "riskType": "gray_abuse",
+      "duplicateGroup": null,
+      "evolutionNote": "社区内部的限时福利或账号资源分享贴。",
+      "summary": "分享一个预计可用24小时的限时福利资源。",
+      "confidence": 0.85,
+      "url": "https://linux.do/t/topic/3015359",
+      "title": "分享一下，大概能用24小时",
+      "stableId": "linuxdo:3015359",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 80,
+      "technicalDepth": 50,
+      "trendNovelty": 50,
+      "signals": [
+        "AI中转服务",
+        "API分发推荐",
+        "性价比中转站"
+      ],
+      "tools": [],
+      "riskType": "gray_abuse",
+      "duplicateGroup": null,
+      "evolutionNote": "开发者寻找低价稳定的大模型API中转服务商的常见需求。",
+      "summary": "征求和推荐价格稳定在0.2左右的大模型API中转服务商。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015358",
+      "title": "各位推荐一下0.2左右稳定好用的中转",
+      "stableId": "linuxdo:3015358",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 80,
+      "technicalDepth": 65,
+      "trendNovelty": 70,
+      "signals": [
+        "Claude网页端降智",
+        "Sonnet思考异常",
+        "模型表现波动"
+      ],
+      "tools": [
+        "Claude",
+        "Sonnet"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "ai_coding_pain_points",
+      "evolutionNote": "用户反馈Claude网页端Sonnet模型近期出现的响应变慢和逻辑退化现象。",
+      "summary": "反映Claude网页版Sonnet模型近期出现思维变慢和降智现象，并以制作小游戏为例进行测试。",
+      "confidence": 0.95,
+      "url": "https://linux.do/t/topic/3015356",
+      "title": "claude 网页的sonnet也出现的不同程度的降智和雷霆大思考.这是做的小游戏.叠叠乐",
+      "stableId": "linuxdo:3015356",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字服务与订阅",
+      "ecosystemValue": 75,
+      "technicalDepth": 40,
+      "trendNovelty": 40,
+      "signals": [
+        "GPT订阅额度失效",
+        "临期账号处理",
+        "服务异常解决"
+      ],
+      "tools": [
+        "GPT"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": "subscription_refund_issues",
+      "evolutionNote": "应对GPT大额度订阅在临期前出现服务不可用或卡顿的求助。",
+      "summary": "求问GPT 20x订阅即将到期但基本无法正常使用时的解决办法。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015353",
+      "title": "gpt 20x订阅还剩13天 基本不能用 求问如何解决",
+      "stableId": "linuxdo:3015353",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 65,
+      "technicalDepth": 30,
+      "trendNovelty": 30,
+      "signals": [
+        "跨境支付",
+        "汇丰银行转账",
+        "支付通故障"
+      ],
+      "tools": [
+        "汇丰银行"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "跨境金融与海外账户转账失败的常见故障排查。",
+      "summary": "咨询跨境支付通转账至汇丰银行频繁失败的原因及解决方法。",
+      "confidence": 0.9,
+      "url": "https://linux.do/t/topic/3015351",
+      "title": "跨境支付通转账汇丰老是失败？",
+      "stableId": "linuxdo:3015351",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "社区治理与平台规则",
+      "ecosystemValue": 45,
+      "technicalDepth": 0,
+      "trendNovelty": 40,
+      "signals": [
+        "短视频平台舆论",
+        "抖音内容生态",
+        "网民情绪观察"
+      ],
+      "tools": [
+        "抖音"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "观察主流短视频平台上泛娱乐内容的网民情绪与讽刺现象。",
+      "summary": "观察并吐槽近期抖音短视频中大量存在阴阳怪气等讽刺性内容的现象。",
+      "confidence": 0.9,
+      "url": "https://www.v2ex.com/t/1248251",
+      "title": "最近下载了抖音刷了一圈视频，发现 100 个视频有 70 个都在阴阳怪气🤣🤣🤣🤣🤣🤣🤡🤡🤡",
+      "stableId": "v2ex:1248251",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "AI与开发工具",
+      "ecosystemValue": 85,
+      "technicalDepth": 75,
+      "trendNovelty": 90,
+      "signals": [
+        "Meta新模型发布",
+        "Facebook开源AI",
+        "大模型动态"
+      ],
+      "tools": [
+        "Facebook"
+      ],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "持续追踪科技巨头发布开源或闭源最新AI模型的动态。",
+      "summary": "分享Facebook（Meta）再次发布全新AI模型的行业动态。",
+      "confidence": 0.95,
+      "url": "https://www.v2ex.com/t/1248250",
+      "title": "facebook 又发布新模型了",
+      "stableId": "v2ex:1248250",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "软件工程与开源",
+      "ecosystemValue": 65,
+      "technicalDepth": 60,
+      "trendNovelty": 50,
+      "signals": [
+        "定制订单工具",
+        "规格选择与排版解耦",
+        "软件架构设计"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "探讨电商或定制类业务系统中，规格选择与最终排版逻辑分离的设计理念。",
+      "summary": "探讨在开发定制订单工具时，为什么需要将商品规格选择和排版逻辑解耦分离。",
+      "confidence": 0.9,
+      "url": "https://www.v2ex.com/t/1248249",
+      "title": "做定制订单工具时，选规格和排版为什么分开做",
+      "stableId": "v2ex:1248249",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "数字生活与消费",
+      "ecosystemValue": 40,
+      "technicalDepth": 0,
+      "trendNovelty": 20,
+      "signals": [
+        "杭州买房",
+        "置业咨询",
+        "房产市场"
+      ],
+      "tools": [],
+      "riskType": "normal",
+      "duplicateGroup": null,
+      "evolutionNote": "国内一二线城市购房置业的经验咨询。",
+      "summary": "发帖向社区大佬征询在杭州买房置业的建议与指导。",
+      "confidence": 0.95,
+      "url": "https://www.v2ex.com/t/1248248",
+      "title": "杭州买房求大佬指点",
+      "stableId": "v2ex:1248248",
+      "analysisMode": "gemini",
+      "modelUsed": "gemini-3.5-flash-lite"
+    },
+    {
+      "category": "软件工程与开源",
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 95,
+      "signals": [
         "Vaultwarden客户端",
-        "原生macOS应用",
-        "Touch ID与AutoFill集成"
+        "macOS原生应用",
+        "Touch ID集成",
+        "AutoFill支持"
       ],
       "tools": [
         "Vaultwarden",
@@ -3437,9 +3550,9 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开发者用新兴语言或框架重构并开源密码管理器的原生桌面客户端。",
-      "summary": "独立开发者基于MyGo框架制作并开源了一款原生的macOS Vaultwarden客户端，实现零WebView及系统级Touch ID支持。",
-      "confidence": 0.96,
+      "evolutionNote": "密码管理器Vaultwarden的高性能原生macOS客户端开源发布。",
+      "summary": "开源并介绍一款基于MyGo开发的、零WebView且支持Touch ID与系统级AutoFill的原生macOS Vaultwarden客户端。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248247",
       "title": "做了一个原生的 macOS Vaultwarden 客户端：基于 MyGo ，主窗口零 WebView，支持 Touch ID 与系统级 AutoFill",
       "stableId": "v2ex:1248247",
@@ -3448,21 +3561,22 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 85,
-      "technicalDepth": 75,
-      "trendNovelty": 80,
+      "ecosystemValue": 90,
+      "technicalDepth": 80,
+      "trendNovelty": 90,
       "signals": [
-        "AI动效视频工具",
-        "局部重绘修改",
-        "多媒体生成应用"
+        "Claude Opus 5.5应用",
+        "动效视频工具",
+        "局部精准修改",
+        "AI视频生成"
       ],
       "tools": [
-        "Claude Opus"
+        "Claude"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "利用高阶AI大模型开发具备局部精准修改能力的视频动效生产工具。",
-      "summary": "开发者利用Claude Opus制作了一款支持局部微调、免去全量重新生成的动效视频制作工具。",
+      "evolutionNote": "利用最新大模型实现视频生成与局部微调工具的独立开发者成果展示。",
+      "summary": "分享使用Claude Opus 5.5开发的一款支持局部修改而无需整条重新生成的动效视频制作工具。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248246",
       "title": "用 Claude Opus 5.5 做了个动效视频工具，哪里不满意只改哪里，不用整条重新生成",
@@ -3471,21 +3585,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
-      "ecosystemValue": 75,
-      "technicalDepth": 60,
-      "trendNovelty": 65,
+      "category": "移动设备与应用",
+      "ecosystemValue": 80,
+      "technicalDepth": 70,
+      "trendNovelty": 85,
       "signals": [
-        "家庭健康管理App",
-        "就诊记录与药箱",
-        "独立开发者实战"
+        "独立App开发",
+        "家庭医疗记录",
+        "就诊与药箱管理"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "从真实生活痛点出发开发的轻量级垂直领域个人效率应用。",
-      "summary": "开发者因带孩子就医的实际生活痛点，独立开发了一款用于记录就诊历史和家庭药箱管理的App。",
-      "confidence": 0.94,
+      "evolutionNote": "从个人生活真实痛点出发开发的垂直健康管理类App。",
+      "summary": "因带孩子就诊及家庭药品管理的现实需求，独立开发的一款记录就诊历程与家庭药箱的App。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248245",
       "title": "因为带孩子去医院，医生开的药，家里其实有，所以我开发了一个记录就诊和家庭药箱的 App",
       "stableId": "v2ex:1248245",
@@ -3494,13 +3608,14 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 70,
-      "technicalDepth": 50,
-      "trendNovelty": 55,
+      "ecosystemValue": 75,
+      "technicalDepth": 65,
+      "trendNovelty": 75,
       "signals": [
-        "EffectCraft资料站",
+        "EffectCraft",
+        "独立资料站",
         "AE兼容限制",
-        "独立插件资源站"
+        "资源整理"
       ],
       "tools": [
         "EffectCraft",
@@ -3508,9 +3623,9 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "围绕特定创意设计软件生态搭建的独立工具与教程资料网站。",
-      "summary": "推出EffectCraft独立资料站，为用户提供下载、入门教程以及After Effects兼容性限制整理。",
-      "confidence": 0.92,
+      "evolutionNote": "垂直创意软件（如After Effects插件生态）周边独立资料站的建设。",
+      "summary": "介绍新建的EffectCraft独立资料站，提供软件下载、入门教程及AE兼容性限制整理。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248244",
       "title": "做了个 EffectCraft 独立资料站：整理下载、入门教程和 AE 兼容限制",
       "stableId": "v2ex:1248244",
@@ -3518,20 +3633,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "数字生活与消费",
+      "category": "软件工程与开源",
       "ecosystemValue": 80,
-      "technicalDepth": 60,
-      "trendNovelty": 75,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
       "signals": [
         "计算机史互动展览",
-        "线上科普博物馆",
-        "数字文化传播"
+        "线上科普项目",
+        "开源文化展示"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "将计算机发展史转化为可互动Web展览的创意开源或独立项目。",
-      "summary": "开发者将计算机发展历史制作成一座支持在线互动参观的虚拟数字展览馆。",
+      "evolutionNote": "技术社区对计算机发展历史进行可视化、交互式科普的创新尝试。",
+      "summary": "分享将计算机发展历史制作成可交互参观的线上数字展览项目。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248243",
       "title": "[分享创造] 我把计算机史做成了一座可以互动参观的线上展览",
@@ -3545,16 +3660,16 @@
       "technicalDepth": 70,
       "trendNovelty": 75,
       "signals": [
-        "AI代码能力展望",
-        "编程语言收敛",
-        "软件开发范式变革"
+        "AI代码能力讨论",
+        "统一编程语言设想",
+        "软件工程未来趋势"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨极强的人工智能代码生成能力是否会消弭不同技术栈平台间的语言壁垒。",
-      "summary": "探讨AI强大的代码生成与跨语言转换能力，未来是否会促使各大软件平台统一使用单一编程语言。",
-      "confidence": 0.92,
+      "evolutionNote": "探讨AI强大代码生成能力是否会抹平不同平台技术栈差异，促成统一语言的假想。",
+      "summary": "探讨随着AI代码能力的极致提升，未来各平台是否会趋向于使用同一语言进行开发。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248242",
       "title": "AI 强悍的代码能力是否能促使各个平台使用同一语言开发",
       "stableId": "v2ex:1248242",
@@ -3563,22 +3678,22 @@
     },
     {
       "category": "数字生活与消费",
-      "ecosystemValue": 50,
-      "technicalDepth": 10,
-      "trendNovelty": 30,
+      "ecosystemValue": 60,
+      "technicalDepth": 20,
+      "trendNovelty": 40,
       "signals": [
         "华为FreeClip2",
-        "开放式耳机",
-        "数码消费体验"
+        "数码产品体验",
+        "开放式耳机"
       ],
       "tools": [
-        "华为 FreeClip 2"
+        "华为FreeClip2"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "消费者对新款国产开放式耳机硬件设计的正向评价。",
-      "summary": "用户分享华为FreeClip 2开放式耳机的实际佩戴与使用体验，评价其设计领先。",
-      "confidence": 0.92,
+      "evolutionNote": "消费者对国内新款开放式无线耳机的硬件体验评价。",
+      "summary": "分享对华为FreeClip2耳机的正面使用体验与评价。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248241",
       "title": "华为 freeclip2 真是遥遥领先",
       "stableId": "v2ex:1248241",
@@ -3586,23 +3701,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
+      "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 80,
-      "trendNovelty": 80,
+      "trendNovelty": 90,
       "signals": [
-        "纯前端文件查看器",
-        "本地不上传设计",
-        "PSD/XLSX/DXF解析"
+        "纯前端文件解析",
+        "PSD/XLSX/DXF在线查看",
+        "ArtCraft编辑器",
+        "数据隐私保护"
       ],
       "tools": [
         "ArtCraft"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "基于开源编辑器实现的纯前端、隐私安全的多格式文件直接解析网站。",
-      "summary": "开发者推出一款基于ArtCraft开源编辑器的网站，支持在浏览器内直接打开PSD、XLSX、DXF等专业格式且文件不上传云端。",
-      "confidence": 0.96,
+      "evolutionNote": "基于开源编辑器的纯前端本地解析多格式文件工具，强调不上传云端。",
+      "summary": "介绍一款基于ArtCraft开源编辑器、能在浏览器直接打开PSD、XLSX、DXF且文件无需上传的本地化网站工具。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248240",
       "title": "做了个网站：浏览器里直接打开 PSD / XLSX / DXF，基于 ArtCraft 开源编辑器，文件不上传",
       "stableId": "v2ex:1248240",
@@ -3612,19 +3728,19 @@
     {
       "category": "网络安全与隐私",
       "ecosystemValue": 75,
-      "technicalDepth": 40,
-      "trendNovelty": 40,
+      "technicalDepth": 60,
+      "trendNovelty": 50,
       "signals": [
-        "指纹浏览器选购",
-        "多账号防关联",
-        "跨境电商浏览器"
+        "指纹浏览器",
+        "防关联工具",
+        "多账号管理"
       ],
       "tools": [],
-      "riskType": "dual_use",
+      "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "跨平台多账号运营与隐私防追踪浏览器的社区选购咨询。",
-      "summary": "社区发帖询问并征集针对多账号防关联、隐私隔离的指纹浏览器推荐方案。",
-      "confidence": 0.92,
+      "evolutionNote": "跨境电商及多账号运营者对防关联指纹浏览器的选型咨询。",
+      "summary": "征求市场上好用的指纹浏览器品牌推荐。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248239",
       "title": "指纹浏览器推荐哪家",
       "stableId": "v2ex:1248239",
@@ -3633,19 +3749,22 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 80,
-      "technicalDepth": 70,
-      "trendNovelty": 75,
+      "ecosystemValue": 85,
+      "technicalDepth": 80,
+      "trendNovelty": 85,
       "signals": [
-        "Mac状态栏翻译软件",
-        "极小体积开源应用",
+        "Mac状态栏工具",
+        "轻量级翻译软件",
+        "开源小工具",
         "毫秒级翻译"
       ],
-      "tools": [],
+      "tools": [
+        "Mac"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "主打极致轻量与高性能的macOS菜单栏开源翻译工具发布。",
-      "summary": "开源一款体积仅1MB的Mac状态栏翻译小工具，实现毫秒级响应与轻量化集成。",
+      "evolutionNote": "开源轻量级原生桌面效能工具的发布，强调极小体积与极致性能。",
+      "summary": "开源一款体积仅1M、支持毫秒级翻译的Mac状态栏小巧翻译软件。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248238",
       "title": "开源一个 Mac 状态栏翻译软件，小巧（只有 1M），毫秒级翻译，开源。",
@@ -3655,22 +3774,22 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 70,
-      "technicalDepth": 30,
-      "trendNovelty": 45,
+      "ecosystemValue": 80,
+      "technicalDepth": 65,
+      "trendNovelty": 75,
       "signals": [
-        "大模型版本吐槽",
-        "GPT行为抱怨",
-        "开发者情绪宣泄"
+        "GPT版本吐槽",
+        "Sol版本性能",
+        "程序员开发抱怨"
       ],
       "tools": [
-        "ChatGPT"
+        "GPT"
       ],
       "riskType": "normal",
-      "duplicateGroup": "gpt_version_complaint",
-      "evolutionNote": "开发者针对特定版本ChatGPT表现进行集中吐槽。",
-      "summary": "程序员专门发帖表达对当前ChatGPT特定版本（如6.1 sol）表现的不满与抱怨。",
-      "confidence": 0.92,
+      "duplicateGroup": "ai_coding_pain_points",
+      "evolutionNote": "程序员群体对特定版本（如6.1 sol）模型表现不佳的集中情绪宣泄。",
+      "summary": "专门发帖吐槽GPT模型（特别是针对6.1 sol版本）在实际编程中的糟糕表现。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248237",
       "title": "专门开一个帖子骂 gpt，特别针对 6.1 sol",
       "stableId": "v2ex:1248237",
@@ -3678,22 +3797,22 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "AI与开发工具",
-      "ecosystemValue": 65,
-      "technicalDepth": 30,
-      "trendNovelty": 30,
+      "category": "网络安全与隐私",
+      "ecosystemValue": 70,
+      "technicalDepth": 50,
+      "trendNovelty": 40,
       "signals": [
-        "账号切换历史记录",
-        "ChatGPT会话隔离",
-        "平台产品逻辑"
+        "ChatGPT账号切换",
+        "历史记录隔离",
+        "隐私安全风险"
       ],
       "tools": [
         "ChatGPT"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "用户发现多账号切换时对话历史可能出现混淆或可见的奇异现象。",
-      "summary": "咨询在电脑端先后登录不同ChatGPT账号时，历史对话及项目出现交叉可见是否属于正常产品现象。",
+      "evolutionNote": "探讨多账号登录同一终端时，聊天历史和项目数据隔离不彻底的现象。",
+      "summary": "询问在电脑端退出ChatGPT的A账号并登录B账号后，仍能看到A账号对话记录是否正常。",
       "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248236",
       "title": "电脑上退出 chatgpt 的 A 账号，再登录 B 账号，之前 A 账号的对话/项目都能看到，正常么？",
@@ -3705,19 +3824,20 @@
       "category": "AI与开发工具",
       "ecosystemValue": 85,
       "technicalDepth": 75,
-      "trendNovelty": 80,
+      "trendNovelty": 85,
       "signals": [
-        "AI文件重命名",
-        "Mac本地AI应用",
-        "纳寻工具"
+        "AI重命名工具",
+        "文件管理自动化",
+        "纳寻App",
+        "自定义规则"
       ],
       "tools": [
         "纳寻"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "结合本地AI能力实现的智能化文件与图片重命名桌面生产力工具。",
-      "summary": "开发者推出一款名为「纳寻」的Mac本地文件与图片AI重命名工具，支持依据内容和自定义规则智能归类命名。",
+      "evolutionNote": "利用AI内容理解能力实现本地文件与图片智能化命名的效能工具。",
+      "summary": "介绍一款名为「纳寻」的Mac端文件与图片AI重命名工具，支持按内容和自定义规则自动起名。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248233",
       "title": "做了个 Mac 文件和图片的 AI 重命名工具「纳寻」，按内容和自定义规则给文件起名字",
@@ -3728,19 +3848,19 @@
     {
       "category": "职业成长与独立开发",
       "ecosystemValue": 85,
-      "technicalDepth": 80,
+      "technicalDepth": 85,
       "trendNovelty": 50,
       "signals": [
-        "软件架构能力提升",
-        "高级程序员成长",
-        "系统设计方法论"
+        "软件架构能力",
+        "技术成长路径",
+        "程序员进阶"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "经典软件工程职业进阶与架构设计方法论讨论。",
-      "summary": "探讨中高级软件工程师如何突破技术瓶颈、系统性提升软件架构设计与宏观把控能力。",
-      "confidence": 0.94,
+      "evolutionNote": "探讨资深软件工程师如何突破技术瓶颈、提升宏观架构设计能力的常青话题。",
+      "summary": "探讨和交流如何系统性提升软件架构设计能力的有效路径。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248232",
       "title": "如何提升软件架构能力",
       "stableId": "v2ex:1248232",
@@ -3749,22 +3869,22 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 75,
-      "technicalDepth": 40,
-      "trendNovelty": 60,
+      "ecosystemValue": 80,
+      "technicalDepth": 65,
+      "trendNovelty": 80,
       "signals": [
         "多模型AI创作工具",
         "Instinct AI",
-        "聚合AI导航"
+        "AI聚合导航"
       ],
       "tools": [
         "Instinct AI"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "分享聚合多种主流AI大模型能力的综合创作辅助工具。",
-      "summary": "推介一款集成了多种顶尖大模型能力的AI创作与效率辅助工具「Instinct AI」。",
-      "confidence": 0.92,
+      "evolutionNote": "聚合多个主流AI模型的跨界内容创作工具分享。",
+      "summary": "分享一款集成多个主流AI模型的多模态创作工具 Instinct AI。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248231",
       "title": "分享一个多模型 AI 创作工具： Instinct AI",
       "stableId": "v2ex:1248231",
@@ -3772,23 +3892,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
+      "category": "移动设备与应用",
       "ecosystemValue": 75,
-      "technicalDepth": 50,
-      "trendNovelty": 40,
+      "technicalDepth": 60,
+      "trendNovelty": 70,
       "signals": [
-        "独立开发App",
-        "随时记笔记工具",
-        "Lutratally"
+        "Lutratally",
+        "随时记App",
+        "独立开发笔记"
       ],
       "tools": [
         "Lutratally"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "独立开发者持续迭代并推广自己的轻量级笔记应用。",
-      "summary": "独立开发者再次分享并推广自己开发的跨平台快速记录应用“Lutratally-随时记”。",
-      "confidence": 0.92,
+      "evolutionNote": "独立开发者持续迭代与推广轻量级笔记类App的动态。",
+      "summary": "再次宣传和推荐个人开发的轻量级随手记App：Lutratally。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248230",
       "title": "再发一次我的 App， Lutratally-随时记",
       "stableId": "v2ex:1248230",
@@ -3797,22 +3917,22 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 75,
-      "technicalDepth": 55,
-      "trendNovelty": 60,
+      "ecosystemValue": 80,
+      "technicalDepth": 75,
+      "trendNovelty": 85,
       "signals": [
         "Spot Authenticator",
-        "两步验证应用",
-        "开发者社区福利"
+        "2FA验证器应用",
+        "独立开发者回馈社区"
       ],
       "tools": [
         "Spot Authenticator"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "独立开发者向社区用户赠送认证安全应用Pro版兑换码。",
-      "summary": "独立开发者为社区用户提供验证码管理工具Spot Authenticator的Pro版限时兑换福利。",
-      "confidence": 0.93,
+      "evolutionNote": "独立开发的双因素认证（2FA）安全工具向社区派发Pro版兑换码。",
+      "summary": "独立开发者为V2EX社区用户赠送Spot Authenticator验证器App的3个月Pro版兑换码。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248229",
       "title": "[国庆快乐] Spot Authenticator，给 V2EXer 的兄弟们送 3 个月 Pro 兑换码",
       "stableId": "v2ex:1248229",
@@ -3823,19 +3943,19 @@
       "category": "软件工程与开源",
       "ecosystemValue": 70,
       "technicalDepth": 75,
-      "trendNovelty": 45,
+      "trendNovelty": 60,
       "signals": [
-        "PStack指南",
-        "技术文档中文版",
-        "底层调试工具"
+        "PStack",
+        "官方指南中文版",
+        "开发文档本地化"
       ],
       "tools": [
         "PStack"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开源或官方调试工具栈的技术文档汉化与生态传播。",
-      "summary": "分享和推广调试/性能分析工具 PStack 官方指南的中文翻译版本。",
+      "evolutionNote": "开源开发工具或框架官方技术文档的中文本地化发布。",
+      "summary": "发布并分享PStack官方指南的中文翻译版本。",
       "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248228",
       "title": "PStack 官方指南中文版",
@@ -3844,21 +3964,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "软件工程与开源",
-      "ecosystemValue": 70,
+      "category": "AI与开发工具",
+      "ecosystemValue": 75,
       "technicalDepth": 70,
-      "trendNovelty": 65,
+      "trendNovelty": 80,
       "signals": [
-        "杂交形态网页",
+        "混合形态网页",
         "前端创新实验",
-        "Web前端架构"
+        "技术栈探索"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开发者展示非常规混合形态Web应用的探索与实践。",
-      "summary": "开发者分享其采用创新混合形态架构构建的实验性网页项目。",
-      "confidence": 0.88,
+      "evolutionNote": "开发者在网页前端交互设计上的新形态实验与分享。",
+      "summary": "分享使用AI辅助制作的一款杂交形态网页的探索过程。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248227",
       "title": "我用做了一个杂交形态的网页",
       "stableId": "v2ex:1248227",
@@ -3868,20 +3988,20 @@
     {
       "category": "职业成长与独立开发",
       "ecosystemValue": 85,
-      "technicalDepth": 40,
-      "trendNovelty": 70,
+      "technicalDepth": 65,
+      "trendNovelty": 80,
       "signals": [
-        "ChatGPT目录搜索插件",
-        "独立开发者推广困境",
-        "产品冷启动"
+        "独立开发推广",
+        "浏览器插件运营",
+        "ChatGPT目录搜索"
       ],
       "tools": [
         "ChatGPT"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "独立开发者面临已有小规模用户但缺乏高效获客渠道的普遍痛点。",
-      "summary": "独立开发者分享其针对ChatGPT会话目录搜索插件的用户增长现状，向社区征集冷启动与推广经验。",
+      "evolutionNote": "独立开发者在产品初期冷启动和精准获客阶段面临的运营困境咨询。",
+      "summary": "探讨一款拥有400多轮ChatGPT目录搜索功能、用户刚过800的小众浏览器插件接下来应如何推广。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248225",
       "title": "做了个支持 400 多轮 ChatGPT 完整目录搜索的插件，用户才 800 多，接下来该怎么推广？",
@@ -3890,20 +4010,20 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "数字生活与消费",
+      "category": "社区治理与平台规则",
       "ecosystemValue": 40,
-      "technicalDepth": 10,
-      "trendNovelty": 20,
+      "technicalDepth": 0,
+      "trendNovelty": 30,
       "signals": [
-        "视频博主分享",
-        "韩国社保观察",
-        "社会议题讨论"
+        "社保话题",
+        "韩国社会观察",
+        "孙富贵视频"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "社区成员对财经与社会观察类自媒体内容的闲聊。",
-      "summary": "交流观看特定财经博主关于韩国社保制度视频的心得与感悟。",
+      "evolutionNote": "围绕自媒体时政与社会福利话题的跨社区讨论。",
+      "summary": "分享和讨论博主孙富贵关于韩国社保制度的视频内容。",
       "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248224",
       "title": "今天孙富贵的视频好有意思，关于社保，讲的是韩国",
@@ -3912,21 +4032,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "职业成长与独立开发",
-      "ecosystemValue": 50,
-      "technicalDepth": 10,
+      "category": "数字生活与消费",
+      "ecosystemValue": 35,
+      "technicalDepth": 0,
       "trendNovelty": 20,
       "signals": [
-        "生活压力情感",
-        "负债与心理状态",
-        "开发者心理健康"
+        "生活压力",
+        "情感交流",
+        "个人心路历程"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "技术社区成员吐露生活压力与心理焦虑的常态化情绪表达。",
-      "summary": "程序员在社区表达面对生活与财务压力时的情感诉求和心理重压。",
-      "confidence": 0.9,
+      "evolutionNote": "程序员与开发者群体的生活压力与情感诉求表达。",
+      "summary": "表达在大城市生活压力和负债背景下对真挚情感关系的渴望。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248223",
       "title": "虽然生活压力很大，负债也很多，可有时候也想碰到一个能坚定选择我，爱我的",
       "stableId": "v2ex:1248223",
@@ -3935,13 +4055,14 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 80,
-      "technicalDepth": 75,
-      "trendNovelty": 70,
+      "ecosystemValue": 85,
+      "technicalDepth": 80,
+      "trendNovelty": 85,
       "signals": [
         "FreeControl 2",
         "scrcpy GUI",
-        "安卓投屏控制开源"
+        "Android投屏控制",
+        "开源项目"
       ],
       "tools": [
         "FreeControl 2",
@@ -3949,8 +4070,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "经典投屏控制工具scrcpy的全新GUI客户端开源发布。",
-      "summary": "开发者开源了基于知名投屏工具scrcpy的全新图形界面客户端「FreeControl 2」。",
+      "evolutionNote": "主流开源投屏工具scrcpy的全新GUI客户端发布与迭代。",
+      "summary": "开源并介绍一款基于scrcpy的新图形界面控制客户端 FreeControl 2。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248222",
       "title": "[开源]FreeControl 2 - 新的 scrcpy GUI",
@@ -3962,19 +4083,20 @@
       "category": "软件工程与开源",
       "ecosystemValue": 85,
       "technicalDepth": 80,
-      "trendNovelty": 80,
+      "trendNovelty": 85,
       "signals": [
-        "无限画布开源",
         "OpenWorkgraph",
-        "协同白板架构"
+        "无限画布",
+        "通用协作工具",
+        "开源项目"
       ],
       "tools": [
         "OpenWorkgraph"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "开源通用无限画布组件，服务于协同办公与可视化工作流。",
-      "summary": "开发者开源了一款通用版本的无限画布协作与工作流管理系统「OpenWorkgraph」。",
+      "evolutionNote": "开发者发布通用型无限画布协作开源项目。",
+      "summary": "开源并介绍一款通用版本的无限画布协作工具 OpenWorkgraph。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248221",
       "title": "做了一个通用版的无限画布 | OpenWorkgraph",
@@ -3985,19 +4107,22 @@
     {
       "category": "资源交易与商业生态",
       "ecosystemValue": 80,
-      "technicalDepth": 45,
+      "technicalDepth": 50,
       "trendNovelty": 60,
       "signals": [
-        "虚拟信用卡管理",
-        "U卡账单记账",
-        "跨境支付工具集合"
+        "虚拟卡管理",
+        "U卡充值",
+        "海外支付与账单",
+        "OpenAI支付"
       ],
-      "tools": [],
+      "tools": [
+        "OpenAI"
+      ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨在海外消费和AI订阅背景下虚拟信用卡与加密U卡的账单管理方案。",
-      "summary": "探讨和征集用户在使用虚拟信用卡、加密货币U卡等海外支付工具时的账单与财务管理最佳实践。",
-      "confidence": 0.94,
+      "evolutionNote": "国内开发者群体管理海外虚拟信用卡、加密货币U卡以支付订阅服务的通用方法探讨。",
+      "summary": "探讨和交流大家如何使用虚拟卡、U卡来管理海外软件服务的支付与账单。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248220",
       "title": "虚拟卡｜ U 卡｜大家怎么管理支付和账单？",
       "stableId": "v2ex:1248220",
@@ -4005,23 +4130,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "数字生活与消费",
-      "ecosystemValue": 55,
-      "technicalDepth": 40,
-      "trendNovelty": 20,
+      "category": "移动设备与应用",
+      "ecosystemValue": 65,
+      "technicalDepth": 55,
+      "trendNovelty": 40,
       "signals": [
         "微信消息延迟",
-        "推送通知排查",
-        "即时通讯网络诊断"
+        "网络推送故障",
+        "即时通讯排障"
       ],
       "tools": [
         "微信"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "常见即时通讯应用在特定网络或设备下的通知延迟故障排查。",
-      "summary": "讨论智能手机上微信消息出现接收延迟的可能原因与系统通知优化排查方法。",
-      "confidence": 0.92,
+      "evolutionNote": "探讨移动端即时通讯软件偶发消息延迟接收的底层网络原因。",
+      "summary": "咨询和排查手机端微信消息出现延迟接收的原因及解决方法。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248219",
       "title": "微信消息延迟收到是什么原因？",
       "stableId": "v2ex:1248219",
@@ -4031,19 +4156,19 @@
     {
       "category": "软件工程与开源",
       "ecosystemValue": 75,
-      "technicalDepth": 65,
-      "trendNovelty": 60,
+      "technicalDepth": 75,
+      "trendNovelty": 70,
       "signals": [
-        "编程语言演进",
-        "新语言未来预测",
-        "语言设计趋势"
+        "编程语言未来",
+        "新语言演进",
+        "技术哲学讨论"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探讨在AI大模型迅速发展的时代背景下未来是否还会诞生新的主流编程语言。",
-      "summary": "探讨在AI代码生成能力突飞猛进的未来，软件工程领域是否还会孕育出全新的编程语言。",
-      "confidence": 0.92,
+      "evolutionNote": "技术社区对于未来是否会诞生颠覆性新编程语言的长期思辨。",
+      "summary": "探讨未来软件工程领域是否还会出现全新的编程语言。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248218",
       "title": "以后还会出现新的编程语言吗？",
       "stableId": "v2ex:1248218",
@@ -4052,23 +4177,23 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 85,
-      "technicalDepth": 80,
-      "trendNovelty": 85,
+      "ecosystemValue": 90,
+      "technicalDepth": 85,
+      "trendNovelty": 90,
       "signals": [
-        "微信公众号AI解析",
-        "ReadGZH开源",
-        "REST API与MCP"
+        "ReadGZH",
+        "微信公众号解析",
+        "REST API与MCP",
+        "AI阅读工具开源"
       ],
       "tools": [
-        "ReadGZH",
         "MCP"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "利用REST API与MCP协议实现AI直接读取和理解微信公众号文章的开源方案。",
-      "summary": "开源一款名为ReadGZH的项目，结合REST API与Model Context Protocol让AI能够直接解析微信公众号文章。",
-      "confidence": 0.96,
+      "evolutionNote": "利用API与Model Context Protocol让AI直接读取闭环平台内容的开源创新工具。",
+      "summary": "开源一款名为ReadGZH的工具，通过REST API与MCP让AI直接读懂微信公众号文章。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248217",
       "title": "ReadGZH：让 AI 直接读懂微信公众号文章（REST API + MCP，已开源）",
       "stableId": "v2ex:1248217",
@@ -4077,22 +4202,22 @@
     },
     {
       "category": "网络安全与隐私",
-      "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 85,
+      "ecosystemValue": 75,
+      "technicalDepth": 60,
+      "trendNovelty": 70,
       "signals": [
-        "Apple Watch逆向",
-        "穿戴设备安全",
-        "固件解密与漏洞"
+        "硬件逆向",
+        "可穿戴设备安全",
+        "Apple Watch"
       ],
       "tools": [
         "Apple Watch"
       ],
-      "riskType": "normal",
+      "riskType": "dual_use",
       "duplicateGroup": null,
-      "evolutionNote": "智能穿戴设备核心安全防线被攻破的重大安全动向。",
-      "summary": "报道苹果智能手表Apple Watch固件或系统遭到逆向工程破解的安全行业动态。",
-      "confidence": 0.96,
+      "evolutionNote": "反映社区对苹果智能手表硬件与系统安全性被突破的关注",
+      "summary": "讨论 Apple Watch 被逆向工程的技术进展与安全影响。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248216",
       "title": "天塌了 Apple watch 已经被逆向",
       "stableId": "v2ex:1248216",
@@ -4101,20 +4226,20 @@
     },
     {
       "category": "数字生活与消费",
-      "ecosystemValue": 45,
-      "technicalDepth": 20,
+      "ecosystemValue": 40,
+      "technicalDepth": 10,
       "trendNovelty": 20,
       "signals": [
-        "医院验光与眼镜店差异",
-        "视力验光数据对比",
-        "眼科健康消费"
+        "视力验光",
+        "线下消费体验",
+        "医疗差异"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "日常生活中的医疗验光与商业眼镜店验光结果差异讨论。",
-      "summary": "探讨医疗机构专业验光与商业眼镜店验光数据存在较大偏差的现象与原因。",
-      "confidence": 0.92,
+      "evolutionNote": "探讨医院与眼镜店验光数据不一致的日常消费经验",
+      "summary": "用户分享和对比医院验光与眼镜店验光的数据差异与消费困惑。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248215",
       "title": "医院验光和眼镜店验光数据差异好大",
       "stableId": "v2ex:1248215",
@@ -4123,20 +4248,20 @@
     },
     {
       "category": "软件工程与开源",
-      "ecosystemValue": 70,
-      "technicalDepth": 60,
-      "trendNovelty": 40,
+      "ecosystemValue": 50,
+      "technicalDepth": 40,
+      "trendNovelty": 30,
       "signals": [
-        "软件资产转移",
-        "应用授权过户",
-        "数字资产安全交接"
+        "软件迁移",
+        "配置备份",
+        "开发环境"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "咨询在售出或转让自研软件项目时如何进行安全规范的资产与权限交接。",
-      "summary": "向社区咨询在转让或交接一款软件项目时，如何确保代码资产、服务器权限及用户数据安全转移。",
-      "confidence": 0.9,
+      "evolutionNote": "开发者在更换电脑或环境时对数据资产安全转移的常规诉求",
+      "summary": "探讨如何安全地迁移软件配置与应用数据。",
+      "confidence": 0.85,
       "url": "https://www.v2ex.com/t/1248214",
       "title": "如何安全的转移一款软件？",
       "stableId": "v2ex:1248214",
@@ -4145,22 +4270,23 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 75,
-      "technicalDepth": 40,
-      "trendNovelty": 45,
+      "ecosystemValue": 80,
+      "technicalDepth": 30,
+      "trendNovelty": 65,
       "signals": [
-        "ChatGPT Plus额度不足",
-        "API配额告急",
-        "高频使用痛点"
+        "API额度限制",
+        "ChatGPT Plus",
+        "模型调用压力"
       ],
       "tools": [
-        "ChatGPT Plus"
+        "ChatGPT",
+        "Plus"
       ],
       "riskType": "normal",
-      "duplicateGroup": "ai_limit_and_degrade",
-      "evolutionNote": "用户反馈Plus订阅服务配额在重度使用下捉襟见肘的行业现象。",
-      "summary": "调侃并承认当前ChatGPT Plus订阅的调用额度在日常高强度开发与使用中确实存在不足。",
-      "confidence": 0.92,
+      "duplicateGroup": null,
+      "evolutionNote": "反映高强度使用场景下大模型服务配额紧张的群体痛点",
+      "summary": "讨论 ChatGPT Plus 订阅额度在日常高强度开发和使用中出现不足的现象。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248213",
       "title": "闹笑话了，这下承认 plus 额度确实不够用了",
       "stableId": "v2ex:1248213",
@@ -4169,21 +4295,22 @@
     },
     {
       "category": "云服务与基础设施",
-      "ecosystemValue": 55,
-      "technicalDepth": 20,
+      "ecosystemValue": 60,
+      "technicalDepth": 30,
       "trendNovelty": 40,
       "signals": [
-        "远程服务可用性",
-        "工具故障讨论"
+        "远程桌面",
+        "服务可用性",
+        "网络工具"
       ],
       "tools": [
         "UU 远程"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "反映用户对常用远程连接和加速工具服务稳定性的即时反馈。",
-      "summary": "讨论 UU 远程服务突发故障或连接异常的情况。",
-      "confidence": 0.95,
+      "evolutionNote": "监控网络远程服务突发故障的社区反馈",
+      "summary": "关注 UU 远程服务突发中断的技术状态与工单反馈。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248212",
       "title": "UU 远程挂了？",
       "stableId": "v2ex:1248212",
@@ -4193,10 +4320,10 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 75,
-      "technicalDepth": 45,
+      "technicalDepth": 65,
       "trendNovelty": 80,
       "signals": [
-        "AI Token 经济",
+        "AI Token经济",
         "独立游戏开发",
         "Vibe Coding"
       ],
@@ -4205,9 +4332,9 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "展示了将大模型 Token 消耗与游戏内虚拟资源互换的趣味性独立开发尝试。",
-      "summary": "开发者分享了一款用 AI 消耗 Token 置换游戏钻石的农场类小游戏。",
-      "confidence": 0.92,
+      "evolutionNote": "展示了将大模型 Token 消耗量与游戏内通货挂钩的创新独立开发尝试",
+      "summary": "开发者分享利用消耗的 AI Token 置换游戏内资源的个人小游戏项目。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248211",
       "title": "我搞了一个 vibo 农场的游戏，可以用消耗的 AI Token 置换游戏内的钻石资源， coding 顺便放松一下",
       "stableId": "v2ex:1248211",
@@ -4215,20 +4342,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "数字服务与订阅",
-      "ecosystemValue": 60,
-      "technicalDepth": 10,
+      "category": "职业成长与独立开发",
+      "ecosystemValue": 65,
+      "technicalDepth": 20,
       "trendNovelty": 30,
       "signals": [
-        "程序员消费决策",
-        "套餐订阅选择"
+        "程序员套餐",
+        "电信运营商",
+        "流量资费"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "程序员群体关于日常生产力或网络/云服务套餐性价比的日常咨询。",
-      "summary": "探讨当前适合程序员群体的各类套餐计划和订阅选择。",
-      "confidence": 0.9,
+      "evolutionNote": "程序员群体关于性价比通信套餐的日常经验交流",
+      "summary": "探讨适合程序员群体的电信套餐与流量方案选择。",
+      "confidence": 0.85,
       "url": "https://www.v2ex.com/t/1248210",
       "title": "现在用什么套餐计划合适呀(对程序员来说",
       "stableId": "v2ex:1248210",
@@ -4237,13 +4365,13 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 80,
-      "technicalDepth": 65,
+      "ecosystemValue": 85,
+      "technicalDepth": 75,
       "trendNovelty": 85,
       "signals": [
         "终端工具迁移",
-        "命令管理优化",
-        "开发者生产力"
+        "命令行管理",
+        "独立开发"
       ],
       "tools": [
         "Warp",
@@ -4251,8 +4379,8 @@
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "体现从现代 AI 终端向高性能终端工具（如 Ghostty）迁移时的生态痛点与自研小工具补丁方案。",
-      "summary": "开发者为解决从 Warp 迁移到 Ghostty 时的历史命令保留与快速唤起问题，自研了命令管理工具。",
+      "evolutionNote": "体现从现代AI终端（Warp）向高性能原生终端（Ghostty）迁移过程中的工具链补充",
+      "summary": "开发者为配合终端迁移自研了快速唤起和管理历史命令的小工具。",
       "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248209",
       "title": "为了从越来越臃肿的 Warp 切到 Ghostty，保留在 Warp 里积累的命令，做了一个能快速唤起、自动关闭的命令管理小软件",
@@ -4263,21 +4391,22 @@
     {
       "category": "AI与开发工具",
       "ecosystemValue": 90,
-      "technicalDepth": 85,
-      "trendNovelty": 80,
+      "technicalDepth": 90,
+      "trendNovelty": 90,
       "signals": [
-        "本地大模型量化",
-        "笔记本推理优化",
-        "大模型性能调优"
+        "本地大模型",
+        "模型量化",
+        "性能调优",
+        "笔记本部署"
       ],
       "tools": [
-        "125B 模型"
+        "Local LLM"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "展示了在消费级笔记本上对超大参数量模型进行 Q4 量化与高性能调优的实测成果与源码分享。",
-      "summary": "分享在笔记本上对 125B 模型进行 Q4 量化和 xHigh256k 调优达到高吞吐的部署方案。",
-      "confidence": 0.96,
+      "evolutionNote": "展示了消费级硬件上运行超大参数量化模型的高性能部署实践与调优源码分享",
+      "summary": "分享笔记本部署 125B 模型 Q4 量化与高性能调优的完整源码和吞吐数据。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248208",
       "title": "笔记本 125B 模型 Q4 量化， xHigh256k 调优峰值 64tps。附部署和调优源码",
       "stableId": "v2ex:1248208",
@@ -4285,22 +4414,23 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "职业成长与独立开发",
-      "ecosystemValue": 65,
-      "technicalDepth": 40,
-      "trendNovelty": 60,
+      "category": "AI与开发工具",
+      "ecosystemValue": 70,
+      "technicalDepth": 50,
+      "trendNovelty": 75,
       "signals": [
-        "独立开发社群",
-        "AI 辅助建站"
+        "独立开发",
+        "社群驱动",
+        "AI编程"
       ],
       "tools": [
         "codex"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "反映社区成员参与付费或互助社群并利用 AI 编程工具快速落地网站项目的趋势。",
-      "summary": "记录加入特定社群后借助 Codex 学习并独立制作上线站点的过程。",
-      "confidence": 0.93,
+      "evolutionNote": "反映在社群氛围驱动下，非专业开发者利用 AI 快速上线独立站点的趋势",
+      "summary": "开发者通过参与社群并借助 codex 独立开发并上线了一个新站点。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248207",
       "title": "加入哥飞社群用 codex 学做了一个站点:",
       "stableId": "v2ex:1248207",
@@ -4309,23 +4439,23 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 60,
+      "ecosystemValue": 65,
       "technicalDepth": 45,
       "trendNovelty": 70,
       "signals": [
-        "AI 购物辅助",
-        "二手市场性价比分析"
+        "AI代理应用",
+        "二手平台筛选",
+        "大模型自动化"
       ],
       "tools": [
         "ChatGPT",
-        "Codex",
-        "咸鱼"
+        "codex"
       ],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "探索大语言模型在垂直电商和二手交易场景中作为代理进行信息筛选和性价比评估的可行性。",
-      "summary": "探讨是否能利用 ChatGPT 或 Codex 在二手平台上寻找高性价比的特定品牌电脑。",
-      "confidence": 0.91,
+      "evolutionNote": "探讨利用大模型辅助跨平台比价与搜寻高性价比数码硬件的场景",
+      "summary": "探讨如何利用 ChatGPT 或 codex 在二手交易平台中自动筛选高性价比电脑。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248206",
       "title": "可以让 chatgpt/codex 在咸鱼里找一个性价比更高的某品牌二手电脑吗？",
       "stableId": "v2ex:1248206",
@@ -4333,25 +4463,24 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "灰黑产与风险生态",
-      "ecosystemValue": 70,
-      "technicalDepth": 25,
-      "trendNovelty": 75,
+      "category": "资源交易与商业生态",
+      "ecosystemValue": 75,
+      "technicalDepth": 30,
+      "trendNovelty": 70,
       "signals": [
-        "API 号池聚合",
-        "低倍率转发服务",
-        "第三方服务推广"
+        "API号池转售",
+        "大模型分发",
+        "商业推广"
       ],
       "tools": [
         "ChatGPT Pro",
-        "Grok",
-        "AigateGo"
+        "Grok"
       ],
       "riskType": "gray_abuse",
       "duplicateGroup": null,
-      "evolutionNote": "展示了围绕大模型官方订阅账号进行号池共享、低倍率转发及商业推广的灰产与聚合服务生态。",
-      "summary": "第三方服务推广 ChatGPT Pro 号池共享与低倍率多模型分发聚合站点。",
-      "confidence": 0.95,
+      "evolutionNote": "反映第三方号池分发与低倍率转售商业服务的活跃推广",
+      "summary": "社区内关于 ChatGPT Pro 号池及多模型低倍率聚合转发服务的商业推广。",
+      "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248205",
       "title": "🚀 AigateGo · 实充 ChatGPT Pro 号池 0.25x｜全模型低倍率｜ Grok 0.05x 爽登｜回帖送 $2 进群送 $2",
       "stableId": "v2ex:1248205",
@@ -4360,24 +4489,24 @@
     },
     {
       "category": "AI与开发工具",
-      "ecosystemValue": 85,
+      "ecosystemValue": 80,
       "technicalDepth": 70,
       "trendNovelty": 85,
       "signals": [
-        "Vibe Coding",
-        "加密货币收款",
-        "非托管支付工具"
+        "非托管收款",
+        "加密货币支付",
+        "Vibe Coding"
       ],
       "tools": [
         "Codex",
         "USDT",
         "USDC"
       ],
-      "riskType": "dual_use",
+      "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "体现了开发者通过 AI 编程快速构建去中心化支付与收款工具的敏捷开发能力。",
-      "summary": "开发者使用 Codex 通过 Vibe Coding 模式开发了一款非托管的稳定币收款工具并发布试用。",
-      "confidence": 0.94,
+      "evolutionNote": "独立开发者利用 AI 编程工具快速实现加密货币支付网关的典型案例",
+      "summary": "开发者利用 Codex 通过 Vibe Coding 模式开发了一款非托管的加密货币收款工具。",
+      "confidence": 0.95,
       "url": "https://www.v2ex.com/t/1248204",
       "title": "用 Codex Vibe Coding 做了个非托管 USDT/USDC 收款工具，欢迎试用",
       "stableId": "v2ex:1248204",
@@ -4385,20 +4514,21 @@
       "modelUsed": "gemini-3.5-flash-lite"
     },
     {
-      "category": "社区问答与经验分享",
-      "ecosystemValue": 30,
-      "technicalDepth": 0,
+      "category": "社区治理与平台规则",
+      "ecosystemValue": 40,
+      "technicalDepth": 10,
       "trendNovelty": 20,
       "signals": [
-        "公众情绪",
-        "品牌粉丝讨论"
+        "品牌偏好",
+        "舆论现象",
+        "社区争论"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "关于科技消费品牌粉丝群体认知与现实评价差异的社区口水话题。",
-      "summary": "针对部分品牌粉丝群体在讨论中表现出的立场倾向与客观现实脱节现象的吐槽。",
-      "confidence": 0.88,
+      "evolutionNote": "技术社区内关于国产品牌粉丝群体舆论立场的日常讨论",
+      "summary": "探讨特定品牌粉丝群体在讨论中表现出的立场倾向与现实逻辑的冲突。",
+      "confidence": 0.85,
       "url": "https://www.v2ex.com/t/1248203",
       "title": "关于华粉，居然只讲立场不讲现实",
       "stableId": "v2ex:1248203",
@@ -4407,18 +4537,19 @@
     },
     {
       "category": "数字生活与消费",
-      "ecosystemValue": 25,
-      "technicalDepth": 0,
+      "ecosystemValue": 35,
+      "technicalDepth": 10,
       "trendNovelty": 10,
       "signals": [
-        "邻里纠纷",
-        "生活经验求助"
+        "邻里关系",
+        "生活烦恼",
+        "社区吐槽"
       ],
       "tools": [],
       "riskType": "normal",
       "duplicateGroup": null,
-      "evolutionNote": "日常生活中关于处理邻里矛盾和维权经验的经验交流。",
-      "summary": "在社区生活板块发帖求助如何应对和处理恶劣邻居带来的困扰。",
+      "evolutionNote": "面向生活板块的日常社会交往与冲突解决咨询",
+      "summary": "用户在社区发帖求助如何应对生活中的不良邻里行为。",
       "confidence": 0.9,
       "url": "https://www.v2ex.com/t/1248202",
       "title": "碰到恶心邻居怎么治？",
