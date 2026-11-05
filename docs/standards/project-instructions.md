@@ -25,6 +25,9 @@
 ## 项目边界
 
 - 页面在 `src/views/`，路由在 `src/router/`，跨页面纯逻辑在 `src/utils/`。
+- 路由记录集中在 `src/router/routes.js`，按博客、产品、开发工具与历史兼容分组；`src/router/index.js` 仅负责创建路由、滚动和标题钩子。新增入口或历史 URL 兼容修改对应分组，避免为短路由表继续增加文件。
+- 求职功能的页面入口只编排展示：`src/career/market.ts` 维护公开岗位解释与筛选规则，`src/career/composables/` 分别维护市场筛选、扩展配置与简历流程；公开快照组件在 `src/views/career/components/`，样式在同级 `styles/`。公开快照组件只接收公开岗位与发出跳转事件，不读取画像、凭据或扩展状态。
+- 使用 `node --test scripts/tests/*.test.mjs` 回归筛选、配置状态、路由兼容及构建摘要；测试只用合成数据和注入的扩展接口，不请求真实 AI 服务。CI 在构建前执行同一套测试。网页构建摘要自动覆盖源码模块及样式，并排除生成的标识文件。
 - 页面使用的 Markdown 内容直接放在对应页面目录：博客文章和面试归档在 `src/views/Blog/articles/`，投资协议在 `src/views/investment/`；站内静态内容在 `src/data/`，职业原始资料在 `src/data/findJobMarkDown/`；公开动态数据统一从 `@published/*` 读取；项目支持静态资源在 `public/`。
 - `dist/`、`auto-imports.d.ts` 和 `components.d.ts` 是生成或派生内容，优先修改源文件。面试知识树与项目串联稿只保留 `src/views/Blog/articles/2026/` 下的博客源文件，投资脱敏快照只保留 `data/snapshots/investment/` 下的唯一源文件。
 - Element Plus 是默认 UI 基础；新增页面先考虑现有组件和页面模式，再补少量业务样式。

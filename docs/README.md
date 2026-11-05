@@ -29,7 +29,7 @@
 
 | 当前问题 | 读取 |
 | --- | --- |
-| 项目现状或文件归属 | [项目上下文](context/project-context.md)、[文件边界](context/project-file-boundaries.md) |
+| 项目现状或文件归属 | [项目上下文](context/project-context.md)、[仓库结构与交付边界](standards/repository-structure.md) |
 | 历史仓库与公开待办 P01、P02、P04、P05 | [历史仓库收敛核对](context/legacy-repository-convergence.md) |
 | 产品价值或范围 | [产品入口](product/README.md) 与对应产品正文 |
 | Investment Review | [产品正文](product/investment-review.md)；实现细节才读[工程附录](product/reference/investment-review-engineering.md) |
@@ -44,7 +44,7 @@
 | 模型效果、回归或替换 | 本页“模型工作与持续检验”；证据边界见[真实环境验收原则](standards/trusted-verification.md) |
 | 外部项目商业研究 | [研究入口](product/research/README.md) |
 
-`archive/` 只用于追溯旧决策，不能覆盖当前代码和当前产品正文。
+已被现行正文取代的旧 PRD、分散任务板和过程记录不再留在工作区；需要追溯时查阅 Git 历史。用户原始输入保留在 `product/source/`，不能覆盖当前代码和产品正文。
 
 ## 模型工作与持续检验
 

@@ -24,7 +24,7 @@
 
 ## 需求验证与埋点监控规划（2026-09-13）
 
-**状态：产品目标与技术方案规划，未实现、未测试。用户指定由 Antigravity 负责执行和测试。** 本节是本次需求的唯一规划入口，不表示已开启采集或已证明功能价值，也不将前文讨论中的资源台账、求职管理或收益管理自动列为建设任务。
+**本节定义产品目标与事件语义。** 当前源码已包含浏览器本地观察与反馈模块（`src/utils/observation/`、`src/components/FeatureObservationModal.vue`），不再沿用历史“未实现”的状态描述；是否启用、实际覆盖和长期产品效果仍需对应环境的证据。本文不据此追加资源台账、求职管理或收益管理需求。
 
 ### 产品目标与判断边界
 
@@ -157,7 +157,7 @@ Investment Review、Contract Review 及浏览器扩展不纳入首批新增采�
 → 当前源码
 → 活动产品正文中的 Current State
 → 目标产品与工程契约
-→ source / archive 历史资料
+→ source 历史输入与 Git 历史
 ```
 
 下层事实可以否证上层规划。PRD、Mock、构建成功、HTTP 200 或页面出现都不能单独把能力升级为已实现。
@@ -168,7 +168,7 @@ Investment Review、Contract Review 及浏览器扩展不纳入首批新增采�
 - [reference/investment-review-engineering.md](reference/investment-review-engineering.md)：领域对象、公式、不变量、真实环境验收、隐私协议和历史任务映射；不维护另一份产品状态。
 - [reference/site-capability-inventory.md](reference/site-capability-inventory.md)：基于源码的站点级能力清单，不描述未来规划。
 - [source/](source/)：用户输入和历史来源，只用于追溯。
-- [archive/](archive/)：已被替代的 PRD 和文档体系，不参与当前任务解析。
+- 已被替代的 PRD、独立任务板和旧文档体系已从工作区清理，需要追溯时使用 Git 历史。
 - [research/](research/)：外部研究和比较，不自动成为产品规则。
 
 不要新增并行 roadmap、Agent 独立任务板、第二份 current-state 或 traceability。只有新资料能减少人的搜索、识别、比较或整合成本时才创建文件。

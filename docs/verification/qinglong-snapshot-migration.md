@@ -9,7 +9,7 @@
 - 本仓库 `master` 只负责页面与构建；`.github/workflows/code-deployment.yml` 恢复公开快照并发布 Pages，不重新采集来源。
 - 旧 Python/RSS 实现归档私有仓库 `research/legacy-site-collectors/`；不要恢复 `.local/generated/crawl/`、`scripts/collectors/` 或 `data-crawl.yml`。
 - 页面关键词配置在 `src/config/welfare-keywords.json`。浏览器授权扩展、站主 Issue 研究书签同步有独立用途，不随服务器采集一起删除。
-- 后端操作的唯一详细指南是私有仓库 `docs/docs/site-crawler-migration-review.md`，从其 `docs/README.md` 可进入。公共文档不复制服务器凭据、环境配置或完整会话日志。
+- 后端操作的详细指南是同级私有仓库 `homeops/docs/guides/site-crawler-migration-review.md`。公共文档不复制服务器凭据、环境配置或完整会话日志。
 
 ## 执行顺序
 

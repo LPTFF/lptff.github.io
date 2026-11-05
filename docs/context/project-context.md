@@ -30,7 +30,7 @@
 - 账号态、凭据和个人宿主配置不属于项目资料，不写入仓库。
 - 天天基金采集插件已采用接口优先的本地导出边界：持仓、单基金详情和交易记录来自真实页面成功发出的业务接口响应；接口快照递归脱敏后才进入 `fund-data.json`，页面 DOM 仅用于触发筛选和分页，不作为业务字段来源。
 - 插件自动采集使用最多 4 路单基金详情并发、当前/历史交易独立页面并发；未实际加载的历史范围或分页不视为已采集。名称以 `/request/hold` 的 `fundName` 为准，避免 single 页面名称回退覆盖持仓接口字段。
-- 维护资料与运行时文件按实际消费者隔离：`docs/` 只供维护者阅读，禁止 `src/`、Vite、npm scripts 或 CI 依赖它；边界与不可移动清单见 `docs/context/project-file-boundaries.md`。
+- 维护资料与运行时文件按实际消费者隔离：`docs/` 只供维护者阅读，禁止 `src/`、Vite、npm scripts 或 CI 依赖它；边界见[仓库结构与交付边界](../standards/repository-structure.md)。
 - `extension/` 是项目功能；`scripts/` 是构建与内容同步链路。公开站点采集与分类属于 homeops/src/site_crawlers；本站只导入 python-crawl 数据。
 
 ## Investment OS 与采集任务验收
@@ -47,7 +47,7 @@
 
 ## 已知决策与风险
 
-- Excel 导出使用 `write-excel-file`，通过 `src/utils/exportExcel.ts` 保持页面调用一致并延迟加载。
+- 旧基金页面及其 Excel 导出辅助模块已清理，历史 URL 进入博客演进归档；现行合约复盘保留 JSON 快照导出。
 - 动态公开数据只由 HomeOps 生产并发布到 `python-crawl`，主分支不保留副本；本站部署只走 GitHub Pages。
 - 研究目录中的第三方项目只提供待验证思路；采用前要确认许可证、隐私、安全、成本和退出方式。
 
