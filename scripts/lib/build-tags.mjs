@@ -14,6 +14,27 @@ function computeDigest(filePaths) {
   return hash.digest('hex').slice(0, 10);
 }
 
+// Discover source modules instead of maintaining a partial list that misses extracted files.
+export function computeWebDigest(projectRoot) {
+  const files = ['index.html', 'package.json', 'package-lock.json', 'vite.config.ts'];
+  function visit(directory) {
+    for (const entry of fs.readdirSync(path.join(projectRoot, directory), { withFileTypes: true })) {
+      const relative = `${directory}/${entry.name}`;
+      if (entry.isDirectory()) visit(relative);
+      else if (/\.(?:vue|[cm]?[jt]s|json|md|css)$/.test(entry.name) && relative !== 'src/build-info.ts') files.push(relative);
+    }
+  }
+  visit('src');
+  visit('scripts/vite');
+  const hash = crypto.createHash('sha256');
+  for (const relative of files.sort()) {
+    hash.update(relative + '\0');
+    hash.update(fs.readFileSync(path.join(projectRoot, relative), 'utf8').replace(/\r\n/g, '\n'));
+    hash.update('\0');
+  }
+  return hash.digest('hex').slice(0, 10);
+}
+
 export function computeBuildTags(projectRoot) {
   const extensionDir = path.join(projectRoot, 'extension');
   const manifestPath = path.join(extensionDir, 'manifest.json');
@@ -51,18 +72,7 @@ export function computeBuildTags(projectRoot) {
     path.join(extensionDir, 'popup/private-bookmarks-settings.css'),
   ]);
 
-  const webDigest = computeDigest([
-    path.join(projectRoot, 'src/utils/authorizedContent.ts'),
-    path.join(projectRoot, 'src/views/home/entertainment/component/AuthorizedCollection.vue'),
-    path.join(projectRoot, 'src/views/home/52pojie/index.vue'),
-    path.join(projectRoot, 'src/views/home/welfare/index.vue'),
-    path.join(projectRoot, 'src/views/home/entertainment/index.vue'),
-    path.join(projectRoot, 'vite.config.ts'),
-    path.join(projectRoot, 'src/views/home/devtools/PrivateBookmarks.vue'),
-    path.join(projectRoot, 'src/views/home/devtools/VideoDownload.vue'),
-    path.join(projectRoot, 'src/views/home/devtools/index.vue'),
-    path.join(projectRoot, 'src/router/index.js'),
-  ]);
+  const webDigest = computeWebDigest(projectRoot);
 
   return {
     extensionVersion,

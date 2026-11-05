@@ -53,6 +53,9 @@ jobs:
       - name: 检查仓库结构与非项目产物
         run: node scripts/verify-repository-hygiene.cjs
 
+      - name: 架构与业务行为回归
+        run: node --test scripts/tests/*.test.mjs
+
       - name: 依赖高危漏洞门禁
         run: npm audit --registry=https://registry.npmjs.org --audit-level=high
 

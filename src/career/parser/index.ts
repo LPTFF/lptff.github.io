@@ -1,5 +1,3 @@
-import { parseDocx } from "./docx-parser";
-import { parsePdf } from "./pdf-parser";
 import { sha256 } from "../utils/crypto";
 
 export interface ParsedResumeFile {
@@ -21,8 +19,10 @@ export async function parseResumeFile(file: File): Promise<ParsedResumeFile> {
   let text = "";
 
   if (lowerName.endsWith(".docx")) {
+    const { parseDocx } = await import("./docx-parser");
     text = await parseDocx(arrayBuffer);
   } else if (lowerName.endsWith(".pdf")) {
+    const { parsePdf } = await import("./pdf-parser");
     text = await parsePdf(arrayBuffer);
   } else if (lowerName.endsWith(".doc")) {
     throw new Error("旧版 .doc 二进制格式暂不支持，请在 Word 或 WPS 中另存为 .docx 或 .pdf 后重新上传");
