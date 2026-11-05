@@ -150,9 +150,6 @@ export default defineConfig(({ mode }) => {
             ? packagePath.split("/").slice(0, 2).join("/")
             : packagePath.split("/")[0];
 
-          // 保留导出功能的延迟加载边界，只有用户执行导出时才请求
-          if (packageName === "write-excel-file") return "xlsx-export";
-
           // echarts 按需注册体量可观且仅投资复盘路由使用，独立分包便于缓存与校验尺寸
           if (packageName === "echarts" || packageName === "zrender" || packageName === "tslib") return "echarts-vendor";
 

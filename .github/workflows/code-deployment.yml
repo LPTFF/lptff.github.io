@@ -80,18 +80,30 @@ jobs:
       - name: 审查构建产物安全白名单
         run: node scripts/verify-public-whitelist.cjs dist
 
+      - name: 检查扩展发布输入
+        id: extension_release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if ! gh release view extension-latest --json body,assets > "$RUNNER_TEMP/extension-release.json"; then
+            echo '{}' > "$RUNNER_TEMP/extension-release.json"
+          fi
+          node scripts/extension/release-policy.mjs < "$RUNNER_TEMP/extension-release.json"
+
       - name: 打包投资助手浏览器扩展
+        if: steps.extension_release.outputs.needed == 'true'
         run: |
           node scripts/extension/build-zip.js
           test -s dist-extension/lptff-investment-assistant.zip
 
       - name: 发布投资助手扩展 Release
+        if: steps.extension_release.outputs.needed == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           release_tag="extension-latest"
           release_title="LPTFF Investment Assistant (latest)"
-          release_notes="自动发布于 commit $GITHUB_SHA，GitHub Actions run $GITHUB_RUN_ID。"
+          release_notes="自动发布于 commit $(git rev-parse HEAD)，GitHub Actions run $GITHUB_RUN_ID。"
           if gh release view "$release_tag" >/dev/null 2>&1; then
             gh release upload "$release_tag" dist-extension/lptff-investment-assistant.zip --clobber
             gh release edit "$release_tag" --title "$release_title" --notes "$release_notes" --latest

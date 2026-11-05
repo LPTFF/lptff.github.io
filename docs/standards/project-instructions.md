@@ -7,9 +7,12 @@
 - `npm run serve`：先从 `origin/python-crawl` 安全恢复最新线上公开数据到 `node_modules/.cache/lptff/published-data/`，再以发布快照模式启动 Vite；优先使用 8090，端口占用时自动选择后续空闲端口，以启动输出中的实际 URL 为准。
 - `npm run build`：恢复最新线上公开数据，运行 Vue/TypeScript 类型检查，生成可追溯构建标识，再以发布快照模式执行 Vite 生产构建；Live2D 模型由 Vite 从已安装依赖提供并写入构建产物。404 页面继续由 CI 步骤生成。
 - `npm audit --registry=https://registry.npmjs.org --audit-level=high`：按执行时的官方 Registry 事实阻断高危依赖，不在文档中长期声称固定的“0 漏洞”。
+- 扩展 ZIP 复用 `fflate` 流式打包，输出完成后原子替换；同一目标的并发下载共用一次打包。`node --test scripts/tests/*.test.mjs` 同时验证 ZIP 内容与扩展发布条件。
 - 公开来源采集只在 homeops/src/site_crawlers 维护和运行；前端不再保留 Python 采集入口。
 
 本地只保留开发与构建两个入口；仓库结构、公开数据白名单和构建标识等门禁由 CI 直接调用对应脚本。
+
+发布工作流比较上次扩展 Release 对应提交与当前提交：扩展源码、打包脚本、构建标识生成器、依赖或工作流变化才重新发布扩展；仅数据、页面、文档或生成时间变化复用原下载包。Release 元数据、ZIP 或 Git 历史缺失时保守重建；网站仍执行完整构建与发布检查。
 
 ## 阻塞诊断与续接
 
