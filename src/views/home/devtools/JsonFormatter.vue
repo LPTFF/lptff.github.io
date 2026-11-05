@@ -93,6 +93,7 @@ function insertSample(): void {
 
 // 输入变化时实时校验，给出即时反馈
 watch(input, (text) => {
+  output.value = "";
   validated.value = false;
   parseError.value = null;
   if (!text.trim()) return;

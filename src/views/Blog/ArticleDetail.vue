@@ -13,7 +13,7 @@
               }}</el-tag></div>
         </header>
         <div ref="contentRef" class="markdown-body">
-          <component :is="article.component" />
+          <component :is="articleComponent" :key="article.slug" @vue:mounted="enhance" />
         </div>
         <ValueFeedbackWidget feature-id="blog" />
         <footer class="article-footer">
@@ -33,7 +33,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, defineAsyncComponent, nextTick, onBeforeUnmount, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { articles, getArticle } from "./data/articles";
 import type { TocItem } from "./data/types";
@@ -41,10 +41,10 @@ import ValueFeedbackWidget from "../../components/ValueFeedbackWidget.vue";
 import { recordFeatureView } from "../../utils/observation";
 
 const route = useRoute();
-const article = computed(() => {
-  const value = getArticle(String(route.params.slug));
-  return value ? { ...value, component: defineAsyncComponent(value.component as () => Promise<any>) } : undefined;
-});
+const article = computed(() => getArticle(String(route.params.slug)));
+const articleComponent = computed(() => article.value
+  ? defineAsyncComponent(article.value.component as () => Promise<any>)
+  : undefined);
 const previous = computed(() => { const index = articles.findIndex((item) => item.slug === article.value?.slug); return index >= 0 ? articles[index + 1] : undefined; });
 const next = computed(() => { const index = articles.findIndex((item) => item.slug === article.value?.slug); return index > 0 ? articles[index - 1] : undefined; });
 const contentRef = ref<HTMLElement>();
@@ -59,19 +59,26 @@ async function enhance() {
   observer?.disconnect();
   const used = new Set<string>();
   const items: TocItem[] = [];
-  contentRef.value.querySelectorAll("h2, h3, h4").forEach((heading) => {
-    const element = heading as HTMLElement; const text = element.textContent?.trim() || ""; const id = element.id || slugify(text, used); element.id = id; used.add(id); items.push({ id, text, level: Number(element.tagName.slice(1)) - 1 });
+  contentRef.value.querySelectorAll("h1, h2, h3, h4").forEach((heading) => {
+    const element = heading as HTMLElement; const text = element.textContent?.trim() || ""; const id = element.id || slugify(text, used); element.id = id; used.add(id); items.push({ id, text, level: Math.max(1, Number(element.tagName.slice(1)) - 1) });
   });
   toc.value = items;
   observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) activeHeading.value = (entry.target as HTMLElement).id; }), { rootMargin: "-80px 0px -65%" });
-  contentRef.value.querySelectorAll("h2, h3, h4").forEach((heading) => observer?.observe(heading));
+  contentRef.value.querySelectorAll("h1, h2, h3, h4").forEach((heading) => observer?.observe(heading));
   contentRef.value.querySelectorAll("a").forEach((link) => { if (link.hostname && link.hostname !== window.location.hostname) { link.target = "_blank"; link.rel = "noopener noreferrer"; } });
-  if (route.hash) setTimeout(() => document.querySelector(route.hash)?.scrollIntoView({ behavior: "smooth" }), 0);
+  if (route.hash) {
+    let id = route.hash.slice(1);
+    try { id = decodeURIComponent(id); } catch { /* 保留无法解码的原始锚点。 */ }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+  }
   document.title = `${article.value?.title || "博客"} · tangff`;
   void recordFeatureView("blog");
 }
-watch(() => article.value?.slug, enhance, { immediate: true });
-onMounted(enhance);
+watch(() => article.value?.slug, () => {
+  observer?.disconnect();
+  toc.value = [];
+  activeHeading.value = "";
+});
 onBeforeUnmount(() => observer?.disconnect());
 </script>
 
