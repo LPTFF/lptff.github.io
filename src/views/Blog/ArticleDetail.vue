@@ -71,9 +71,11 @@ async function enhance() {
     try { id = decodeURIComponent(id); } catch { /* 保留无法解码的原始锚点。 */ }
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
   }
-  document.title = `${article.value?.title || "博客"} · tangff`;
   void recordFeatureView("blog");
 }
+watch(() => route.fullPath, () => {
+  document.title = `${article.value?.title || "博客"} · tangff`;
+}, { immediate: true, flush: "post" });
 watch(() => article.value?.slug, () => {
   observer?.disconnect();
   toc.value = [];
