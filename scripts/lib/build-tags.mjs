@@ -49,6 +49,8 @@ export function computeBuildTags(projectRoot) {
     manifestPath,
     path.join(extensionDir, 'background.js'),
     path.join(extensionDir, 'video-capture.js'),
+    path.join(extensionDir, 'music-reader.js'),
+    path.join(extensionDir, 'content/music-reader-bridge.js'),
     path.join(extensionDir, 'video/downloader.html'),
     path.join(extensionDir, 'video/downloader.js'),
     path.join(extensionDir, 'video/preview.html'),
