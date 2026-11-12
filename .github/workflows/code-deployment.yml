@@ -57,7 +57,7 @@ jobs:
         run: node --test scripts/tests/*.test.mjs
 
       - name: 验证影音扩展受限分段读取
-        run: node --test scripts/extension/music-reader.test.mjs
+        run: node --test scripts/extension/music-reader*.test.mjs
 
       - name: 依赖高危漏洞门禁
         run: npm audit --registry=https://registry.npmjs.org --audit-level=high
