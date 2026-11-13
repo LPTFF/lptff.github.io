@@ -47,8 +47,8 @@ export default defineComponent({
         delete clickData["https://www.zhujiceping.com/"];
         clickDataChanged = true;
       }
-      const oldXiaohongshuUrl = "https://www.xiaohongshu.com/explore";
-      const newXiaohongshuUrl = "https://www.xiaohongshu.com/ai_chat";
+      const oldXiaohongshuUrl = "https://www.xiaohongshu.com/ai_chat";
+      const newXiaohongshuUrl = "https://www.xiaohongshu.com/explore";
       if (clickData[oldXiaohongshuUrl]) {
         const oldEntry = clickData[oldXiaohongshuUrl];
         const newEntry = clickData[newXiaohongshuUrl];
