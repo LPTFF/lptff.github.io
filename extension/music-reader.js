@@ -28,18 +28,19 @@
       const controller = new AbortController(); reads.set(id, controller);
       const timeout = setTimeout(() => controller.abort(), 20000), pinned = source;
       void (async () => {
-        const r = await fetch(pinned.url, { headers:{ Range:`bytes=${first}-${last}` }, credentials:'omit',
+        const r = await fetch(pinned.url, { headers:{ Range:`bytes=${first}-${last}`, 'If-Range':pinned.etag, 'Accept-Encoding':'identity' }, credentials:'omit',
           cache:'no-store', redirect:'error', referrerPolicy:'no-referrer', signal:controller.signal });
         const expected = last - first + 1;
         if (r.status !== 206 || r.headers.get('Content-Range') !== `bytes ${first}-${last}/${pinned.bytes}` ||
-          r.headers.get('ETag') !== pinned.etag || Number(r.headers.get('Content-Length')) !== expected || !r.body) {
+          r.headers.get('ETag') !== pinned.etag || ![null,'identity'].includes(r.headers.get('Content-Encoding')) ||
+          Number(r.headers.get('Content-Length')) !== expected || !r.body) {
           await r.body?.cancel(); throw Error('range_rejected');
         }
         const body = new Uint8Array(expected), reader = r.body.getReader(); let at = 0;
         try { while (true) { const value = await reader.read(); if (value.done) break;
           if (at + value.value.length > expected) throw Error('range_overflow'); body.set(value.value, at); at += value.value.length;
         } } finally { reader.releaseLock(); }
-        if (at !== expected) throw Error('range_incomplete');
+        if (at !== expected || controller.signal.aborted || closed) throw Error('range_incomplete');
         let binary = ''; for (let p = 0; p < body.length; p += 32768) binary += String.fromCharCode(...body.subarray(p, p + 32768));
         send({ id, ok:true, body:btoa(binary), first, last, bytes:pinned.bytes, etag:pinned.etag });
       })().catch(() => { controller.abort(); send({ id, ok:false }); }).finally(() => { clearTimeout(timeout); reads.delete(id); });
