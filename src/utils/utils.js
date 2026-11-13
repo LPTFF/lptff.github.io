@@ -1,11 +1,12 @@
 function isPC() {
     const ua = navigator.userAgent;
     const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
-    const isWeChat = /MicroMessenger/i.test(ua);
-    const hasMouse = window.matchMedia('(pointer: fine)').matches;
-    const isWideScreen = window.innerWidth >= 1024;
-    // 条件组合判断：非移动UA + 非微信 + 有鼠标 + 宽屏
-    return !isMobileUA && !isWeChat && hasMouse && isWideScreen;
+    const isMobileClient = navigator.userAgentData?.mobile === true;
+    // iPadOS 的桌面 UA 会伪装成 Mac，但仍支持多点触控。
+    const isIPadDesktopUA = /Macintosh|MacIntel/i.test(`${ua} ${navigator.platform || ''}`)
+        && navigator.maxTouchPoints > 1;
+    // 窗口宽度、鼠标类型和微信标识都不能单独决定设备是否为移动端。
+    return !isMobileUA && !isMobileClient && !isIPadDesktopUA;
 }
 function gotoOutPage(url) {
     // 判断是否为 PC
